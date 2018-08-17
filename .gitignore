@@ -1,0 +1,14 @@
+.gradle/
+.idea/
+.settings/
+bin/
+build/
+out/
+dist/
+node_modules/
+zk-single-kafka-single/
+
+submissioncheck.iml
+.classpath
+.project
+.DS_Store

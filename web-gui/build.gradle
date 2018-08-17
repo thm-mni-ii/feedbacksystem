@@ -1,0 +1,38 @@
+plugins {
+    id "com.moowork.node" version "1.2.0"
+}
+
+apply plugin: 'distribution'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+node {
+    version = '10.9.0'
+    npmVersion = '6.4.0'
+    download = true
+}
+
+// TODO: Define task depdendencies
+
+clean.dependsOn(npm_run_clean)
+npm_build.dependsOn npm_install
+assemble.dependsOn npm_run_build
+installDist.dependsOn npm_run_build
+
+defaultTasks "build"
+
+distributions {
+    main {
+        contents {
+            from("${projectDir}/dist/${project.name}") {
+                include '*/**'
+            }
+        }
+    }
+}

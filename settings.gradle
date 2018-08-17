@@ -1,0 +1,6 @@
+rootProject.name = 'submissioncheck'
+
+include 'ws'
+include 'java-checker'
+include 'web-gui'
+

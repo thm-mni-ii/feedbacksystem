@@ -1,0 +1,26 @@
+apply plugin: 'scala'
+apply plugin: 'application'
+
+mainClassName = 'de.thm.ii.submissioncheck.JavaChecker'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/scala']
+        }
+    }
+    test {
+        scala {
+            srcDirs = ['src/test/scala']
+        }
+    }
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.6'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}

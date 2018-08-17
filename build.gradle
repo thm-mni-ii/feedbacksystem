@@ -1,0 +1,42 @@
+apply plugin: 'idea'
+apply plugin: 'distribution'
+
+subprojects {
+    group 'de.thm.ii'
+    version '1.0-SNAPSHOT'
+}
+
+task dist(dependsOn: ['java-checker:installDist', 'ws:installDist', "web-gui:installDist"]) {
+    doLast({
+        tasks.installDist.execute();
+    })
+}
+
+distributions {
+    main {
+        baseName = project.name
+        contents {
+            project.subprojects.each { sub ->
+                switch (sub.name) {
+                    case 'web-gui':
+                        into('http') {
+                            from "${sub.buildDir}/install/${sub.name}"
+                            include '*/**'
+                        }
+                        break;
+                    case 'ws':
+                        into('') {
+                            from "${sub.buildDir}/install/"
+                            include '*/**'
+                        }
+                        break;
+                }
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.9'
+}
+
