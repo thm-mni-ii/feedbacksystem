@@ -1,0 +1,3 @@
+// java -jar myproject.jar --spring.config.name=myproject
+// --spring.config.location=classpath:/default.properties,classpath:/override.properties
+// file:./config/

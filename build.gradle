@@ -19,7 +19,7 @@ distributions {
             project.subprojects.each { sub ->
                 switch (sub.name) {
                     case 'web-gui':
-                        into('http') {
+                        into('ws/http') {
                             from "${sub.buildDir}/install/${sub.name}"
                             include '*/**'
                         }
@@ -28,6 +28,10 @@ distributions {
                         into('') {
                             from "${sub.buildDir}/install/"
                             include '*/**'
+                        }
+                        into(sub.name) {
+                            from "${sub.projectDir}"
+                            include 'Dockerfile'
                         }
                         break;
                 }
