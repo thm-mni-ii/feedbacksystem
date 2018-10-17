@@ -12,3 +12,5 @@ submissioncheck.iml
 .classpath
 .project
 .DS_Store
+
+ws/src/main/resources/static/*
