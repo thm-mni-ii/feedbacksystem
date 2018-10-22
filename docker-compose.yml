@@ -13,7 +13,6 @@ services:
     volumes:
       - ./zk-single-kafka-single/zoo1/data:/data
       - ./zk-single-kafka-single/zoo1/datalog:/datalog
-
   kafka1:
     image: confluentinc/cp-kafka:5.0.0
     hostname: kafka1
