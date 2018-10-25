@@ -1,0 +1,33 @@
+<div id="site-container">
+
+  <mat-toolbar class="toolbar-container" color="primary">
+    <h1 class="toolbar-title">Meine Kurse</h1>
+  </mat-toolbar>
+
+
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened>
+      <div class="sidenav-drawer">
+
+        <mat-button-toggle-group vertical>
+          <mat-button-toggle>
+            <mat-icon>list</mat-icon>
+            <span class="mat-body-1">Meine Kurse</span>
+          </mat-button-toggle>
+          <mat-button-toggle>
+            <mat-icon>search</mat-icon>
+            <span class="mat-body-1">Kurs Suchen</span>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+        <span id="empty-placeholder"></span>
+        <a routerLink="" (click)="logout()" class="logout-button" mat-flat-button color="warn">Logout</a>
+
+      </div>
+
+    </mat-sidenav>
+    <mat-sidenav-content class="">
+      <router-outlet name="content"></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+
+</div>
