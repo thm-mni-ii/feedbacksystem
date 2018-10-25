@@ -1,0 +1,39 @@
+#site-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+
+.toolbar-container {
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar-title {
+}
+
+mat-sidenav-container {
+  height: 100%;
+}
+
+.sidenav-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #81c784;
+}
+
+mat-button-toggle {
+  background-color: #81c784;
+}
+
+#empty-placeholder {
+  flex-grow: 1;
+}
+
+.logout-button {
+  margin: 0 8px 16px 8px;
+}
+
