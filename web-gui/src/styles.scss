@@ -1,13 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import '~@angular/material/theming';
-
-@include mat-core();
-
-$sc-primary: mat-palette($mat-green, 300, 200, 400);
-$sc-accent: mat-palette($mat-blue, 600, 500, 700);
-$sc-theme: mat-light-theme($sc-primary, $sc-accent);
-
-@include angular-material-theme($sc-theme);
+@import "theme";
 
 html, body {
   height: 100%;
