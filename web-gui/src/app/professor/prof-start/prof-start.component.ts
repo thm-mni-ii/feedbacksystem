@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {MatSnackBar} from "@angular/material";
 
 @Component({
   selector: 'app-prof-start',
@@ -7,9 +8,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ProfStartComponent implements OnInit {
 
-  constructor() { }
+  constructor(private snackbar: MatSnackBar) {
+  }
 
   ngOnInit() {
+  }
+
+
+  logout() {
+    this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 
 }
