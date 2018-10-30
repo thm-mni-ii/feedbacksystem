@@ -1,0 +1,7 @@
+diff a/web-gui/src/theme.scss b/web-gui/src/theme.scss	(rejected hunks)
+@@ -1,4 +1,4 @@
+-@import '~@angular/material/theming';
++@import "~@angular/material/_theming.scss"; 
+ 
+ @include mat-core();
+ 
