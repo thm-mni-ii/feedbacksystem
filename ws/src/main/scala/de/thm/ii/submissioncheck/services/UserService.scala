@@ -3,6 +3,7 @@ package de.thm.ii.submissioncheck.services
 import java.sql.{Connection, Statement}
 
 import de.thm.ii.submissioncheck.config.MySQLConfig
+import de.thm.ii.submissioncheck.misc.BadRequestException
 
 import collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
