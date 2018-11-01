@@ -9,13 +9,22 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.kafka.core.{DefaultKafkaProducerFactory, KafkaTemplate, ProducerFactory}
 import org.springframework.context.annotation.Bean
 
-
+/**
+  * Standard Kafka configuration for docker instance.
+  *
+  * @author Andrej Sajenko
+  */
 @Configuration
 class KafkaProducerConfig {
 
-  @Value("${spring.kafka.bootstrap-servers}") private val bootstrapAddress: String = null
+  @Value("${spring.kafka.bootstrap-servers}")
+  private val bootstrapAddress: String = null
 
-  @Bean def producerFactory: ProducerFactory[String, String] = {
+  /**
+    * @return Standard kafka producer factory for the docker instance.
+    */
+  @Bean
+  def producerFactory: ProducerFactory[String, String] = {
     val configProps = new util.HashMap[String, Object]()
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress)
     configProps.put(ProducerConfig.RETRIES_CONFIG, "0")
@@ -27,5 +36,9 @@ class KafkaProducerConfig {
     new DefaultKafkaProducerFactory(configProps)
   }
 
-  @Bean def kafkaTemplate: KafkaTemplate[String, String] = new KafkaTemplate(producerFactory)
+  /**
+    * @return Default kafka template.
+    */
+  @Bean
+  def kafkaTemplate: KafkaTemplate[String, String] = new KafkaTemplate(producerFactory)
 }

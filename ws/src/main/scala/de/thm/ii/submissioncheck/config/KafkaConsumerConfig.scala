@@ -12,14 +12,26 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 
+/**
+  * Kafka default consumer configuration for a docker instance.
+  *
+  * @author Andrej Sajenko
+  */
 @EnableKafka
 @Configuration
 class KafkaConsumerConfig {
 
-  @Value("${spring.kafka.bootstrap-servers}") private var bootstrapAddress: String = null
-  @Value("${spring.kafka.consumer.group-id}") private var groupId: String = null
+  @Value("${spring.kafka.bootstrap-servers}")
+  private var bootstrapAddress: String = null
 
-  @Bean def consumerFactory: ConsumerFactory[String, String] = {
+  @Value("${spring.kafka.consumer.group-id}")
+  private var groupId: String = null
+
+  /**
+    * @return Default kafka consumer config for a docker instance.
+    */
+  @Bean
+  def consumerFactory: ConsumerFactory[String, String] = {
     val props = new util.HashMap[String, Object]()
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress)
     props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId)
@@ -31,7 +43,11 @@ class KafkaConsumerConfig {
     new DefaultKafkaConsumerFactory(props)
   }
 
-  @Bean def kafkaListenerContainerFactory: ConcurrentKafkaListenerContainerFactory[String, String] = {
+  /**
+    * @return Default kafka consumer listener factory.
+    */
+  @Bean
+  def kafkaListenerContainerFactory: ConcurrentKafkaListenerContainerFactory[String, String] = {
     val factory = new ConcurrentKafkaListenerContainerFactory[String, String]
     factory.setConsumerFactory(consumerFactory)
     factory
