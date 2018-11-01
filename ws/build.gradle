@@ -42,11 +42,10 @@ startScripts {
 }
 
 dependencies {
+    compile project(':cas-lib')
     compile 'org.scala-lang:scala-library:2.12.6'
-    compile files('../libraries/CASClientWrapper.jar')
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
-
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

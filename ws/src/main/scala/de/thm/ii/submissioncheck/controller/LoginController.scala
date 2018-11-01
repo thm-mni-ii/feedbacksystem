@@ -20,7 +20,8 @@ class LoginController {
 
   @RequestMapping(value = Array("/login"), method = Array(RequestMethod.POST))
   def postUser(password: String, username: String) = {
-    Map("login_result" -> CasWrapper.login(username,password)).asJava
+    val cas  = new CasWrapper(username,password)
+    Map("login_result" -> cas.login()).asJava
 
 
     // TODO if user does not exists, create it based on CAS Return
