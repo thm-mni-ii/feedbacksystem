@@ -5,3 +5,11 @@ repositories {
     jcenter()
 }
 
+dependencies {
+    compile files("lib/httpclient-4.2.3.jar")
+    compile files("lib/json-simple-1.1.jar")
+    compile files("lib/org-apache-commons-logging.jar")
+    compile files("lib/org.apache.httpcomponents.httpcore_4.2.1.jar")
+    compile files("lib/org.json.jar")
+    compile files("lib/org.json.simple-0.4.jar")
+}
