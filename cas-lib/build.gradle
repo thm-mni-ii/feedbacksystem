@@ -6,10 +6,14 @@ repositories {
 }
 
 dependencies {
-    compile files("lib/httpclient-4.2.3.jar")
-    compile files("lib/json-simple-1.1.jar")
-    compile files("lib/org-apache-commons-logging.jar")
-    compile files("lib/org.apache.httpcomponents.httpcore_4.2.1.jar")
-    compile files("lib/org.json.jar")
-    compile files("lib/org.json.simple-0.4.jar")
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2.3'
+    compile 'org.json:json:20180813'
+    // https://mvnrepository.com/artifact/commons-logging/commons-logging
+    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore
+    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.3.2'
+    // https://mvnrepository.com/artifact/org.apache.clerezza.ext/org.json.simple
+    compile group: 'org.apache.clerezza.ext', name: 'org.json.simple', version: '0.4'
+
 }

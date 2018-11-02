@@ -1,9 +1,12 @@
-package casclientwrapper;
-
+package de.thm.ii.submissioncheck.cas;
 
 /**
  * Container Class for the Result of the Cas Authentication.
  * Holds Expcetions and/or the returned token and userID from a successfull or unsuccessful Cas Authentication.
+ * <p>
+ * Class is copied from https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
+ *
+ * @author Johannes Meintrup
  */
 public class CasAuthenticationResult {
     private String token;
@@ -21,6 +24,7 @@ public class CasAuthenticationResult {
 
     /**
      * Sets the token of this CasAuthenticationResult
+     *
      * @param token to be set
      */
     public void setToken(String token) {
@@ -29,6 +33,7 @@ public class CasAuthenticationResult {
 
     /**
      * Sets the userid of this CasAuthenticationResult
+     *
      * @param userId to be set
      */
     public void setUserId(String userId) {
@@ -37,6 +42,7 @@ public class CasAuthenticationResult {
 
     /**
      * Sets the Expection that occured.
+     *
      * @param exception that occurred.
      */
     public void setException(Exception exception) {
@@ -45,6 +51,7 @@ public class CasAuthenticationResult {
 
     /**
      * Gets the token value of the result.
+     *
      * @return token
      */
     public String getToken() {
@@ -53,6 +60,7 @@ public class CasAuthenticationResult {
 
     /**
      * Gets the userId of the Result
+     *
      * @return userid
      */
     public String getUserId() {
@@ -61,6 +69,7 @@ public class CasAuthenticationResult {
 
     /**
      * Gets the exception that occurred.
+     *
      * @return exception
      */
     public Exception getException() {
