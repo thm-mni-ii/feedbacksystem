@@ -1,5 +1,9 @@
 package de.thm.ii.submissioncheck
 
-object JavaChecker extends App {
-  println("Hello World")
-}
+/**
+  * Dummy object for the project.
+  *
+  * @deprecated
+  * @author Andrej Sajenko
+  */
+object JavaChecker extends App
