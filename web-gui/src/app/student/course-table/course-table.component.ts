@@ -1,6 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator, MatSort } from '@angular/material';
-import { CourseTableDataSource } from './course-table-datasource';
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {MatPaginator, MatSort} from '@angular/material';
+import {CourseTableDataSource} from './course-table-datasource';
 
 @Component({
   selector: 'app-course-table',
@@ -17,5 +17,14 @@ export class CourseTableComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource = new CourseTableDataSource(this.paginator, this.sort);
+  }
+
+  /**
+   * Get row of course that was selected
+   * @param row of course that is selected
+   */
+  getRow(row) {
+    //TODO: Implement routing to right course.
+    console.log(row);
   }
 }
