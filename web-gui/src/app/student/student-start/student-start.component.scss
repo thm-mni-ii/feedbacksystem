@@ -5,15 +5,15 @@
   width: 100%;
 }
 
-
+// Toolbar
 .toolbar-container {
   display: flex;
+  text-transform: uppercase;
   justify-content: center;
 }
 
-.toolbar-title {
-}
 
+// Container for the sidenav drawer
 mat-sidenav-container {
   height: 100%;
 }
@@ -23,17 +23,48 @@ mat-sidenav-container {
   flex-direction: column;
   height: 100%;
   background-color: #81c784;
+
+}
+
+
+// Toggle button group
+mat-button-toggle-group {
+  border: transparent;
 }
 
 mat-button-toggle {
   background-color: #81c784;
 }
 
-#empty-placeholder {
+.mat-button-toggle-checked {
+  background-color: #519657;
+}
+
+// fill for logout button
+.empty-placeholder {
   flex-grow: 1;
 }
 
 .logout-button {
   margin: 0 8px 16px 8px;
 }
+
+mat-sidenav-content {
+  padding: 5% 10% 5% 10%;
+}
+
+// Kurs header and line
+#kurs-header {
+  color: grey;
+  margin-bottom: 0;
+}
+
+.grey-line {
+  background-color: grey;
+  width: 100%;
+  height: 3px;
+  margin: 0 0 10px 0;
+}
+
+
 
