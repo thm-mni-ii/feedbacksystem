@@ -13,7 +13,6 @@ services:
     volumes:
       - ./zk-single-kafka-single/zoo1/data:/data
       - ./zk-single-kafka-single/zoo1/datalog:/datalog
-
   kafka1:
     image: confluentinc/cp-kafka:5.0.0
     hostname: kafka1
@@ -31,3 +30,14 @@ services:
       - ./zk-single-kafka-single/kafka1/data:/var/lib/kafka/data
     depends_on:
       - zoo1
+  mysql1:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: db1
+    ports:
+      - "3308:3306"
+
+      
