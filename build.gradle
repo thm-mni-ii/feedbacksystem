@@ -1,12 +1,16 @@
 apply plugin: 'idea'
 apply plugin: 'distribution'
 
-subprojects {
+ext {
+    scalaStyleConfig = "$rootDir/scalastyle_config.xml"
+}
+
+subprojects { subproject ->
     group 'de.thm.ii'
     version '1.0-SNAPSHOT'
 }
 
-task dist(dependsOn: ['java-checker:installDist', 'ws:installDist', "web-gui:installDist"]) {
+task dist(dependsOn: ['java-checker:installDist', 'ws:installDist', 'secrettoken-checker:installDist', "web-gui:installDist"]) {
     doLast({
         tasks.installDist.execute();
     })
