@@ -1,4 +1,9 @@
 package de.thm.ii.submissioncheck
+
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
+import java.util.Properties
+import java.util.Collections
 /*
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
@@ -20,12 +25,26 @@ object SecretTokenChecker extends App {
   val bashmessage1 = bashtest1.output
   */
 
-  /*
-  val shtest1 = new ShExec("./script.sh", "abc")
-  //execute script with arguments and save exit code (successful (0) or not (not 0) )
-  val exit2 = shtest1.exec()
-  val shmessage1 = shtest1.output
-  */
+  val cons = new KafkaCheckConsumer()
+  cons.runConsumer(shTest)
+
+  /**
+    * shTest is used by Kafka Example
+    * @param token String from User
+    * @return String Answer from Script
+    */
+  def shTest(token:String): String = {
+    val shtest1 = new ShExec("./script.sh", token)
+    //execute script with arguments and save exit code (successful (0) or not (not 0) )
+    val exit2 = shtest1.exec()
+    val shmessage1 = shtest1.output
+    shmessage1
+  }
+
+
+
+
+
 
   def getShTestOut(sName : String, token : String): String = {
     val shtest = new ShExec(sName, token)
