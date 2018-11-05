@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
 import org.springframework.web.bind.annotation._
-import de.thm.ii.submissioncheck.services.{ClientService, UserService}
+import de.thm.ii.submissioncheck.services.{ClientService}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
