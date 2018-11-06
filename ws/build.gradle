@@ -63,7 +63,6 @@ startScripts {
 
 dependencies {
     compile project(':cas-lib')
-
     compile 'org.scala-lang:scala-library:2.12.6'
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'

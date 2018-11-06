@@ -1,5 +1,4 @@
 package de.thm.ii.submissioncheck.services
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, ResponseStatus}
 import org.springframework.http.HttpStatus
