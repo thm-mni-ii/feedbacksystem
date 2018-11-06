@@ -63,10 +63,17 @@ startScripts {
 
 dependencies {
     compile project(':cas-lib')
-
+    compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
+    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     compile 'org.scala-lang:scala-library:2.12.6'
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+    compile group: 'org.springframework.security', name: 'spring-security-core', version: '2.0.2'
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-jwt
+    compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.0.9.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-security:2.1.0.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

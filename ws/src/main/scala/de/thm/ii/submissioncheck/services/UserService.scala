@@ -2,8 +2,13 @@ package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, ResultSet, Statement}
 import java.util
+import java.util.Date
 import de.thm.ii.submissioncheck.config.MySQLConfig
 import de.thm.ii.submissioncheck.misc.BadRequestException
+import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.security.Secrets
+import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
+import javax.xml.bind.DatatypeConverter
 import collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -24,24 +29,23 @@ class UserService {
     * @return JSON (Map) of all current users with no restrictions so far (not printing passwords)
     */
   def getUsers: util.List[util.Map[String, String]] = {
-
     val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM db1.users")
     val resultSet = prparStmt.executeQuery()
     var userList = new ListBuffer[java.util.Map[String, String]]()
 
     val resultIterator = new Iterator[ResultSet] {
-      def hasNext:Boolean = resultSet.next()
-      def next():ResultSet = resultSet
+      def hasNext: Boolean = resultSet.next()
+
+      def next(): ResultSet = resultSet
     }.toStream
 
-    for(res <- resultIterator.iterator)
-      {
-        userList += Map("userid" -> res.getString("userid"),
-          "prename" -> res.getString("prename"),
-          "surname" -> res.getString("surname"),
-          "roleid" -> res.getString("roleid"),
-          "email" -> res.getString("email")).asJava
-      }
+    for (res <- resultIterator.iterator) {
+      userList += Map("userid" -> res.getString("userid"),
+        "prename" -> res.getString("prename"),
+        "surname" -> res.getString("surname"),
+        "roleid" -> res.getString("roleid"),
+        "email" -> res.getString("email")).asJava
+    }
 
     userList.toList.asJava
   }
@@ -60,7 +64,7 @@ class UserService {
     */
   def addUser(prename: String, surname: String, password_clear: String, password_repeat: String, email: String, roleId: Int = 1): util.Map[String, Int] = {
 
-    if (prename == "" || surname == "" || password_clear == "" || password_repeat == "" || email == "" ){
+    if (prename == "" || surname == "" || password_clear == "" || password_repeat == "" || email == "") {
       throw new BadRequestException("Empty fields not allowed. Make sure to apply all post fields of: " +
         "prename, surname, username, password, password_repeat, email")
     }
@@ -84,7 +88,6 @@ class UserService {
     prparStmt.setString(3, passwordCrypt)
     prparStmt.setString(param4, email)
     prparStmt.setInt(param5, roleId)
-
     prparStmt.execute()
 
     var insertedID = -1
@@ -97,6 +100,45 @@ class UserService {
 
     Map("new_userid" -> insertedID).asJava
 
+  }
+
+  /**
+    * verfiyUserByToken reads from a given String if this is a token and if yes get information form it
+    * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
+    *
+    * @author Benjamin Manns
+    * @param jwtToken String
+    * @return User
+    */
+  def verfiyUserByToken(jwtToken: String): User = {
+    try {
+      val secrets = new Secrets()
+      var claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+      new User(claims.getSubject)
+    }
+    catch {
+      case e@(_: JwtException | _: IllegalArgumentException) =>
+        null
+    }
+  }
+
+  /**
+    * generateTokenFromUser simply uses JWT technologies
+    *
+    * @author Benjamin Manns
+    * @param user User
+    * @return token as String
+    */
+  def generateTokenFromUser(user: User): String = {
+
+    val secrets = new Secrets()
+    val jwtToken = Jwts.builder.setSubject(user.username)
+      .claim("roles", "user")
+      .setIssuedAt(new Date())
+      .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
+      .compact
+
+    jwtToken
   }
 
 }

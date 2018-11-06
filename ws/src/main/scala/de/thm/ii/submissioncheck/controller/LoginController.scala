@@ -1,8 +1,9 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util
-import java.util.Date
-import com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithm
+
+import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.services.UserService
 import javax.servlet.http.{Cookie, HttpServletResponse}
 import org.springframework.web.bind.annotation._
 import collection.JavaConverters._
@@ -15,10 +16,12 @@ import casclientwrapper.CasWrapper
   *
   * @author Benjamin Manns
   */
-
 @RestController
 @RequestMapping(path = Array("/api/v1"))
 class LoginController {
+
+  /** holds the communication with User Table and Authentication */
+  var userService = new UserService()
 
   /**
     * postUser sends loginin Data to the CAS Client to perform a login. Also a Cookie has to be
@@ -32,27 +35,19 @@ class LoginController {
   def postUser(response: HttpServletResponse, password: String, username: String): util.Map[String, Boolean] = {
     val cas  = new CasWrapper(username,password)
 
-
-    // TODO Create user from service if not exists
-    //Service code//Service code
-
-    //by https://aboullaite.me/spring-boot-token-authentication-using-jwt/
-
-
-    var a = new JwtResponse()
-
-
-
-    val jwtToken = Jwts.builder.setSubject(username).claim("roles", "user").setIssuedAt(new Date()).signWith(SignatureAlgorithm.HS256, password).compact
+    val loginResult:Boolean = cas.login()
+    var jwtToken = ""
+    if(loginResult)
+      {
+        jwtToken = userService.generateTokenFromUser(new User(username))
+      }
 
     val myCookie = new Cookie("token" , jwtToken)
-
     response.addCookie(myCookie)
 
     Map("login_result" -> cas.login()).asJava
 
     // TODO if user does not exists, create it based on CAS Return
-    // TODO load User into Session / Cookie, to
 
   }
 
