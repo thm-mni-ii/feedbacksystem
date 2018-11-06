@@ -2,9 +2,11 @@ package de.thm.ii.submissioncheck
 import scala.collection.JavaConversions._
 import java.util.{Collections, Properties}
 
+import com.fasterxml.jackson.databind.JsonSerializer
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord, KafkaConsumer}
-import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
+import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer, StringSerializer}
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.serializer.JsonDeserializer
 
 /**
   * KafkaCheckConsumer: Example from http://cloudurable.com/blog/kafka-tutorial-kafka-consumer/index.html
@@ -27,8 +29,8 @@ class KafkaCheckConsumer{
     val props: Properties = new Properties
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS)
     props.put(ConsumerConfig.GROUP_ID_CONFIG, "KafkaExampleConsumer")
-    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[LongDeserializer].getName)
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer].getName)
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[JsonDeserializer[String]].getName)
 
     val consumer = new KafkaConsumer(props)
 

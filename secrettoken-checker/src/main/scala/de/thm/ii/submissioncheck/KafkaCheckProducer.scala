@@ -4,7 +4,8 @@ import java.util.Properties
 
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord, RecordMetadata}
-import org.apache.kafka.common.serialization.{IntegerSerializer, LongDeserializer, StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.StringSerializer
+import org.springframework.kafka.support.serializer.JsonSerializer
 
 /**
   * KafkaCheckProducer
@@ -17,7 +18,7 @@ class KafkaCheckProducer {
   /**
     * instance variable producer
     */
-  val producer: KafkaProducer[Integer, String] = createProducer()
+  val producer: KafkaProducer[String, String] = createProducer()
 
   /**
     * instance variable messageIndex
@@ -28,14 +29,14 @@ class KafkaCheckProducer {
     * createProducer
     * @return a KafkaProducer
     */
-  def createProducer(): KafkaProducer[Integer, String] ={
+  def createProducer(): KafkaProducer[String, String] ={
     val props: Properties = new Properties
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS)
     props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaExampleProducer")
-    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[IntegerSerializer].getName)
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer].getName)
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer].getName)
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[JsonSerializer[String]].getName)
 
-    new KafkaProducer[Integer, String](props)
+    new KafkaProducer[String, String](props)
   }
 
   /**
@@ -45,7 +46,7 @@ class KafkaCheckProducer {
     */
   def runProducer(message: String):Any = {
 
-    val producerRecord:ProducerRecord[Integer,String] = new ProducerRecord(TOPIC,messageIndex,message)
+    val producerRecord:ProducerRecord[String,String] = new ProducerRecord(TOPIC,messageIndex.toString,message)
 
     //val metadata:RecordMetadata=
     producer.send(producerRecord)
