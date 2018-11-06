@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 /**
  * Component for searching for courses.
@@ -10,9 +10,24 @@ import { Component, OnInit } from '@angular/core';
 })
 export class StudentSearchComponent implements OnInit {
 
-  constructor() { }
+  courses: Course[] = [
+    {name: 'Datenbanksysteme', id: 'CS1010'},
+    {name: 'Programmieren interaktiver Systeme', id: 'CS1015'},
+    {name: 'Compilerbau', id: 'CS1020'},
+    {name: 'Objektorientierte Programmierung', id: 'CS1011'},
+    {name: 'Kurs X', id: 'CS1010'},
+
+  ];
+
+  constructor() {
+  }
 
   ngOnInit() {
   }
 
+}
+
+export interface Course {
+  name: String;
+  id: String;
 }
