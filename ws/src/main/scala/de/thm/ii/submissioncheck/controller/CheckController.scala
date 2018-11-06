@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 
-
 /**
   * CheckController
   *
@@ -22,10 +21,7 @@ class CheckController {
   @Autowired
   private var kafkaTemplate: KafkaTemplate[String, String] = null
 
-
   private var topicName: String = "check_request"
-
-
 
   /**
     * sendCheck protoype
@@ -49,6 +45,5 @@ class CheckController {
   def listener(msg: String): Unit = {
     logger.warn("Get: " + msg)
   }
-
 
 }
