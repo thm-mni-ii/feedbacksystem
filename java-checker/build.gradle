@@ -1,4 +1,15 @@
+buildscript {
+    repositories {
+        jcenter() // only work after gradle 1.7
+    }
+
+    dependencies {
+        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
+    }
+}
+
 apply plugin: 'scala'
+apply plugin: 'scalaStyle'
 apply plugin: 'application'
 
 mainClassName = 'de.thm.ii.submissioncheck.JavaChecker'
@@ -19,6 +30,16 @@ sourceSets {
         }
     }
 }
+
+scalaStyle {
+    configLocation = scalaStyleConfig
+    includeTestSourceDirectory = true
+    source = 'src/main/scala'
+    testSource = 'src/test/scala'
+}
+
+test.dependsOn scalaStyle
+
 
 dependencies {
     compile 'org.scala-lang:scala-library:2.12.6'
