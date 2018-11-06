@@ -9,6 +9,10 @@ import {CourseTableComponent} from './course-table/course-table.component';
 import { StudentSearchComponent } from './student-search/student-search.component';
 import { StudentCourseComponent } from './student-course/student-course.component';
 
+/**
+ * Module for everything student related.
+ * Import components for student here.
+ */
 @NgModule({
   imports: [
     CommonModule,

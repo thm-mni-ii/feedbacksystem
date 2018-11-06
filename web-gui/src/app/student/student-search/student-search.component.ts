@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
+/**
+ * Component for searching for courses.
+ */
 @Component({
   selector: 'app-student-search',
   templateUrl: './student-search.component.html',

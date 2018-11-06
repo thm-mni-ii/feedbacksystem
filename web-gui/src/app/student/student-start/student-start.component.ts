@@ -2,6 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material";
 import {Student} from "../Student";
 
+/**
+ * Component that shows the courses from a student.
+ * This is the first component that the student sees after login.
+ */
 @Component({
   selector: 'app-student-start',
   templateUrl: './student-start.component.html',

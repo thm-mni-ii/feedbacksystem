@@ -10,6 +10,9 @@ const routes: Routes = [
   {path: 'course/:id', component: StudentCourseComponent},
 ];
 
+/**
+ * Module for managing all routing in the student section
+ */
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
