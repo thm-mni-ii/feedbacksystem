@@ -1,6 +1,10 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util
+
+import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.services.UserService
+import javax.servlet.http.{Cookie, HttpServletResponse}
 import org.springframework.web.bind.annotation._
 import collection.JavaConverters._
 // Wrapper class, performs in background a CAS Login to THM, based on
@@ -16,20 +20,35 @@ import casclientwrapper.CasWrapper
 @RequestMapping(path = Array("/api/v1"))
 class LoginController {
 
+  /** holds the communication with User Table and Authentication */
+  var userService = new UserService()
+
   /**
     * postUser sends loginin Data to the CAS Client to perform a login. Also a Cookie has to be
     * created
+    * @param response HTTP Answer (contains also cookies)
     * @param password User's password
     * @param username User's username
     * @return Java Map
     */
   @RequestMapping(value = Array("/login"), method = Array(RequestMethod.POST))
-  def postUser(password: String, username: String): util.Map[String, Boolean] = {
+  def postUser(response: HttpServletResponse, password: String, username: String): util.Map[String, Boolean] = {
     val cas  = new CasWrapper(username,password)
+
+    val loginResult:Boolean = cas.login()
+    var jwtToken = ""
+    if(loginResult)
+      {
+        jwtToken = userService.generateTokenFromUser(new User(username))
+      }
+
+    val myCookie = new Cookie("token" , jwtToken)
+    response.addCookie(myCookie)
+
     Map("login_result" -> cas.login()).asJava
 
     // TODO if user does not exists, create it based on CAS Return
-    // TODO load User into Session / Cookie, to
+
   }
 
 }
