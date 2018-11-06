@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+import org.springframework.kafka.support.serializer.JsonDeserializer
 
 /**
   * Kafka default consumer configuration for a docker instance.
@@ -40,7 +41,7 @@ class KafkaConsumerConfig {
     props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "100")
     props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "15000")
     props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[JsonDeserializer[String]])
     new DefaultKafkaConsumerFactory(props)
   }
 

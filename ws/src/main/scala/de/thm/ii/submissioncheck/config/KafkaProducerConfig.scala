@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.kafka.core.{DefaultKafkaProducerFactory, KafkaTemplate, ProducerFactory}
 import org.springframework.context.annotation.Bean
+import org.springframework.kafka.support.serializer.JsonSerializer
 
 /**
   * Standard Kafka configuration for docker instance.
@@ -32,7 +33,7 @@ class KafkaProducerConfig {
     configProps.put(ProducerConfig.LINGER_MS_CONFIG, "1")
     configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432")
     configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
-    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
+    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[JsonSerializer[String]])
     new DefaultKafkaProducerFactory(configProps)
   }
 

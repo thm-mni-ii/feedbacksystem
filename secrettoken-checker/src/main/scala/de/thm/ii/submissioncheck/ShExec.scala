@@ -12,7 +12,6 @@ import scala.sys.process._
   */
 class ShExec(val scriptpathc: String, val tokenc: String) {
 
-
   /**
     * Class instance scriptpath
     */
