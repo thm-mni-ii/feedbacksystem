@@ -27,3 +27,10 @@ class BadRequestException(message:String) extends RuntimeException {
     */
   override def getMessage: String = detailMessage
 }
+
+/**
+  * UnauthorizedException
+  * @author Benjamin Manns
+  */
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+class UnauthorizedException() extends RuntimeException

@@ -2,7 +2,6 @@ package de.thm.ii.submissioncheck.config
 
 import java.util
 
-import com.fasterxml.jackson.databind.{JsonDeserializer, JsonSerializer}
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.beans.factory.annotation.Value

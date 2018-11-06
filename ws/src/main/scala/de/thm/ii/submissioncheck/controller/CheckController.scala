@@ -1,17 +1,16 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util
-
 import org.springframework.web.bind.annotation._
-
 import collection.JavaConverters._
-import de.thm.ii.submissioncheck.services.ClientService
+import de.thm.ii.submissioncheck.services.{ClientService, UserService}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.serializer.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 /**
   * CheckController
   *
@@ -28,25 +27,29 @@ class CheckController {
 
   private var topicName: String = "check_request"
 
+  private var userService = new UserService()
+
   /**
     * sendCheck protoype
     * @param data Users Input
-    * @param token JWT
+    * @param jwt_token JWT
     * @return String
     */
   @RequestMapping(value = Array("/check"), method = Array(RequestMethod.POST))
-  def sendCheck(data: String, token: String): util.Map[String, String] = {
+  def sendCheck(data: String, jwt_token: String): util.Map[String, String] = {
 
-    /*val jSerial = new JsonSerializer[String]()
-    jSerial.*/
+    val requestingUser = userService.verfiyUserByToken(jwt_token)
 
+    if(requestingUser == null)
+      {
+        throw new UnauthorizedException
+      }
 
-    val map:util.Map[String,String] = Map("userid" -> "value").asJava
-
+    val map:util.Map[String,String] = Map("userid" -> requestingUser.username,"data" ->data).asJava
     val mapper = new ObjectMapper
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)
-    println(jsonResult)
-    kafkaTemplate.send(topicName, data)
+
+    kafkaTemplate.send(topicName, jsonResult)
     kafkaTemplate.flush()
     Map("success" -> "true","fun" -> jsonResult).asJava
   }

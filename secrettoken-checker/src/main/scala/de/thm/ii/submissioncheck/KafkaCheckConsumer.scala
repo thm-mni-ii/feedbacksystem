@@ -1,12 +1,14 @@
 package de.thm.ii.submissioncheck
 import scala.collection.JavaConversions._
 import java.util.{Collections, Properties}
-
-import com.fasterxml.jackson.databind.JsonSerializer
+import collection.JavaConverters._
+import com.fasterxml.jackson.core.`type`.TypeReference
+import com.fasterxml.jackson.databind.{JsonSerializer, ObjectMapper}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord, KafkaConsumer}
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer, StringSerializer}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.serializer.JsonDeserializer
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 
 /**
   * KafkaCheckConsumer: Example from http://cloudurable.com/blog/kafka-tutorial-kafka-consumer/index.html
@@ -58,6 +60,10 @@ class KafkaCheckConsumer{
       for (record <- consumerRecords.iterator()) {
         //prrintln(s"Here's your $record")
         val callbackAnswer: String = callback(record.value())
+
+        // Hack by https://www.baeldung.com/jackson-map
+        val jsonRaw:String = record.value()
+
         //prrintln("Funny: " + callbackAnswer)
         producer.runProducer(callbackAnswer)
       }
