@@ -10,11 +10,16 @@ import org.slf4j.LoggerFactory
 // https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
 import de.thm.ii.submissioncheck.cas.CasWrapper
 
+/**
+  * Service to handle the static communication with the client.
+  *
+  * @author Andrej Sajenko
+  */
 @RestController
 @RequestMapping(path = Array("/client"))
 class ClientService {
 
-  val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Value("${message.topic.name}")
   private var topicName: String = null
@@ -22,14 +27,27 @@ class ClientService {
   @Autowired
   private var kafkaTemplate: KafkaTemplate[String, String] = null
 
+  /**
+    * Serve static main assets to the client.
+    * @return Requested static asset.
+    */
   @RequestMapping(value = Array("/{name:.*\\.js}", "/{name:.*\\.css}", "/{name:.*\\.map}", "/{name:.*\\.gz}"))
-  def serveMainAssets() = "todo"
+  def serveMainAssets(): String = "todo"
 
+  /**
+    * Serve statis assets to the client.
+    * @return Requested static asset
+    */
   @RequestMapping(value = Array("/assets/*"))
-  def serveAssets() = "todo"
+  def serveAssets(): String = "todo"
 
+  /**
+    * Dummy method to test kafka comminication.
+    * @deprecated
+    * @return Static string.
+    */
   @RequestMapping(value = Array("/**"))
-  def serveMain() = {
+  def serveMain(): String = {
     logger.warn("TopicName: " + topicName)
     kafkaTemplate.send("java", "YoHu!")
     kafkaTemplate.flush()
@@ -37,7 +55,7 @@ class ClientService {
   }
 
   @KafkaListener(topics = Array("java"))
-  def listener(msg: String): Unit = {
+  private def listener(msg: String): Unit = {
     logger.warn("Get: " + msg)
   }
 }
