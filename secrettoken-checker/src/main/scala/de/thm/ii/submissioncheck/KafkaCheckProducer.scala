@@ -14,8 +14,14 @@ class KafkaCheckProducer {
   private val TOPIC = "check_answer"
   private val BOOTSTRAP_SERVERS = "localhost:9092"
 
-  val producer:KafkaProducer[Integer, String] = createProducer()
+  /**
+    * instance variable producer
+    */
+  val producer: KafkaProducer[Integer, String] = createProducer()
 
+  /**
+    * instance variable messageIndex
+    */
   var messageIndex: Integer = 0
 
   /**

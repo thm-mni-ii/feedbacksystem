@@ -25,6 +25,9 @@ object SecretTokenChecker extends App {
   val bashmessage1 = bashtest1.output
   */
 
+  /**
+    * Instance of Check Consumer which runs in a loop and try to pull information
+    */
   val cons = new KafkaCheckConsumer()
   cons.runConsumer(shTest)
 
@@ -41,23 +44,29 @@ object SecretTokenChecker extends App {
     shmessage1
   }
 
-
-
-
-
-
+  /**
+    * getShTestOut
+    * @param sName shell script name
+    * @param token shell parameter
+    * @return Output of script
+    */
   def getShTestOut(sName : String, token : String): String = {
     val shtest = new ShExec(sName, token)
     shtest.exec()
 
-    return shtest.output
+    shtest.output
   }
 
+  /**
+    * getBashTestOut
+    * @param sName bash script name
+    * @param token bash parameter
+    * @return Output of script
+    */
   def getBashTestOut(sName : String, token : String): String = {
     val bashtest = new BashExec(sName, token)
     bashtest.exec()
-
-    return bashtest.output
+    bashtest.output
   }
 
 }

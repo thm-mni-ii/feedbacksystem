@@ -35,9 +35,10 @@ class CheckController {
   @RequestMapping(value = Array("/check"), method = Array(RequestMethod.POST))
   def sendCheck(data: String): String = {
 
-    kafkaTemplate.send(topicName, "ncjidlbwafudbuwia!")
+    kafkaTemplate.send(topicName, data)
     kafkaTemplate.flush()
-    "Check was send"
+    //Map("success" => "OK").asJava
+    "OK"
   }
 
   /**
