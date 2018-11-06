@@ -32,7 +32,7 @@ export class LoginComponent implements OnInit {
         break;
       case 'user':
         if (this.password == 'user') {
-          this.router.navigate(['/user']);
+          this.router.navigate(['/user/courses']);
         }
         break;
       default:
