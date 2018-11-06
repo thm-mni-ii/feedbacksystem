@@ -2,7 +2,6 @@ package de.thm.ii.submissioncheck
 import scala.collection.JavaConversions._
 import java.util.{Collections, Properties}
 
-
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord, KafkaConsumer}
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.springframework.kafka.annotation.KafkaListener
