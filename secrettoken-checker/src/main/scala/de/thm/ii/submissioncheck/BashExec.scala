@@ -28,14 +28,33 @@ class BashExec(val scriptpathc: String, val tokenc: String) {
   var output = ""
 
   /**
+    * Class instance exitcode
+    * The exit code of the script
+    */
+  var exitcode = 1
+
+  /**
+    * Class instance success
+    * Is set true when after execution the execution exitcode returns 0
+    */
+  var success = false
+  /**
     * exec()
     * @return exit code
     */
   def exec() : Int = {
 
-    output = Process("bash", Seq(scriptpath, token)).!!
-    val exitCode = Process("bash", Seq(scriptpath, token)).!
+    val st = Process("bash", Seq(scriptpath, token)).lineStream_!
+    output = st.mkString("\n")
 
+    val exitCode = Process("bash", Seq(scriptpath, token)).!
+    if(exitCode == 0){
+      success = true
+    }
+    else{
+      print("Exit with non-zero code: " + exitCode + "\n")
+    }
+    exitcode = exitCode
     exitCode
     //return 0
   }

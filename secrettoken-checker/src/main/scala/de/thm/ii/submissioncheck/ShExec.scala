@@ -12,30 +12,50 @@ import scala.sys.process._
   */
 class ShExec(val scriptpathc: String, val tokenc: String) {
 
+
   /**
-    * Class field scriptpath
+    * Class instance scriptpath
     */
   var scriptpath = scriptpathc
 
   /**
-    * Class field token
+    * Class instance tokenc
     */
   var token = tokenc
 
   /**
-    * Class field script output
+    * Class instance output
     */
   var output = ""
 
   /**
-    * Run the script with arguments
+    * Class instance exitcode
+    * The exit code of the script
+    */
+  var exitcode = 1
+
+  /**
+    * Class instance success
+    * Is set true when after execution the execution exitcode returns 0
+    */
+  var success = false
+  /**
+    * exec()
     * @return exit code
     */
   def exec() : Int = {
 
-    output = Process("sh", Seq( scriptpath, token)).!!
-    val exitCode = Process("sh", Seq(scriptpath, token)).!
+    val st = Process("sh", Seq(scriptpath, token)).lineStream_!
+    output = st.mkString("\n")
 
+    val exitCode = Process("sh", Seq(scriptpath, token)).!
+    if(exitCode == 0){
+      success = true
+    }
+    else{
+      print("Exit with non-zero code: " + exitCode + "\n")
+    }
+    exitcode = exitCode
     exitCode
     //return 0
   }
