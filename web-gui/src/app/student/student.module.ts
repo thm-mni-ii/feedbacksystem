@@ -8,6 +8,7 @@ import {MatSnackBar} from "@angular/material";
 import {CourseTableComponent} from './course-table/course-table.component';
 import { StudentSearchComponent } from './student-search/student-search.component';
 import { StudentCourseComponent } from './student-course/student-course.component';
+import { StudentListComponent } from './student-list/student-list.component';
 
 /**
  * Module for everything student related.
@@ -19,7 +20,7 @@ import { StudentCourseComponent } from './student-course/student-course.componen
     StudentRoutingModule,
     MaterialComponentsModule,
   ],
-  declarations: [StudentStartComponent, CourseTableComponent, StudentSearchComponent, StudentCourseComponent],
+  declarations: [StudentStartComponent, CourseTableComponent, StudentSearchComponent, StudentCourseComponent, StudentListComponent],
   providers: [MatSnackBar]
 })
 export class StudentModule {
