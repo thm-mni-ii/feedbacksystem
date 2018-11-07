@@ -8,7 +8,6 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.kafka.support.serializer.JsonSerializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 /**
@@ -23,14 +22,12 @@ class CheckController {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Autowired
-  private var kafkaTemplate: KafkaTemplate[String, String] = null
-
-  private var topicName: String = "check_request"
-
-  private var userService = new UserService()
+  private val kafkaTemplate: KafkaTemplate[String, String] = null
+  private val topicName: String = "check_request"
+  private val userService = new UserService()
 
   /**
-    * sendCheck protoype
+    * sendCheck prototype
     * @param data Users Input
     * @param jwt_token JWT
     * @return String
@@ -45,6 +42,7 @@ class CheckController {
         throw new UnauthorizedException
       }
 
+    // TODO Refactor in Class
     val map:util.Map[String,String] = Map("userid" -> requestingUser.username,"data" ->data).asJava
     val mapper = new ObjectMapper
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)

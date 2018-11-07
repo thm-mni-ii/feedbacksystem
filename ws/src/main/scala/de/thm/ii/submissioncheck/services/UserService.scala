@@ -105,6 +105,7 @@ class UserService {
   /**
     * verfiyUserByToken reads from a given String if this is a token and if yes get information form it
     * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
+    * The Token contains an `iat` - and issued at unix time which will be checked that it is not too old
     *
     * @author Benjamin Manns
     * @param jwtToken String
@@ -113,8 +114,23 @@ class UserService {
   def verfiyUserByToken(jwtToken: String): User = {
     try {
       val secrets = new Secrets()
-      var claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
-      new User(claims.getSubject)
+      val currentDate = new Date()
+      val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+      val tokenDate: Integer = claims.get("iat").asInstanceOf[Integer]
+
+      /* Useful properties:
+      claims.getSubject
+      claims.get("roles")
+       */
+
+      if((currentDate.getTime()-tokenDate*1000L) > 12*3600*1000L)
+      {
+        null
+      }
+      else{
+        new User(claims.get("usename").asInstanceOf[String])
+      }
+
     }
     catch {
       case e@(_: JwtException | _: IllegalArgumentException) =>
@@ -132,8 +148,9 @@ class UserService {
   def generateTokenFromUser(user: User): String = {
 
     val secrets = new Secrets()
-    val jwtToken = Jwts.builder.setSubject(user.username)
+    val jwtToken = Jwts.builder.setSubject("client_authentication")
       .claim("roles", "user")
+      .claim("username", user.username)
       .setIssuedAt(new Date())
       .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
       .compact
