@@ -1,0 +1,18 @@
+<mat-toolbar class="toolbar" color="primary">
+  <span>Submissionchecker</span>
+</mat-toolbar>
+
+<div class="login-container">
+  <form class="example-form">
+    <mat-form-field class="example-full-width">
+      <input [(ngModel)]="username" name="username" type="text" matInput placeholder="Username">
+    </mat-form-field>
+
+    <mat-form-field class="">
+      <input [(ngModel)]="password" name="password" type="password" matInput placeholder="Passwort">
+    </mat-form-field>
+  </form>
+  <button (click)="login()" mat-flat-button color="accent">Login</button>
+</div>
+
+
