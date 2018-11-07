@@ -1,14 +1,15 @@
 package de.thm.ii.submissioncheck
+import java.util
+
 import scala.collection.JavaConversions._
-import java.util.{Collections, Properties}
+import java.util.{Collections, NoSuchElementException, Properties}
 import collection.JavaConverters._
-import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.databind.{JsonSerializer, ObjectMapper}
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord, KafkaConsumer}
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer, StringSerializer}
-import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.serializer.JsonDeserializer
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
 
 /**
   * KafkaCheckConsumer: Example from http://cloudurable.com/blog/kafka-tutorial-kafka-consumer/index.html
@@ -41,6 +42,35 @@ class KafkaCheckConsumer{
     consumer
   }
 
+  // TODO refactor in other class
+  /**
+    * jsonStrToMap use json4s to parse a json string
+    *
+    * @author Benjamin Manns
+    * @param jsonStr a json String
+    * @return Scala Map
+    */
+  def jsonStrToMap(jsonStr: String): Map[String, Any] = {
+    implicit val formats = org.json4s.DefaultFormats
+
+    parse(jsonStr).extract[Map[String, Any]]
+  }
+
+  // TODO refactor in other class
+  /**
+    * mapToJsonStr use Object Mapper
+    *
+    * @author Benjamin Manns
+    * @param jsonMap a Scala Map
+    * @return Json String
+    */
+  def mapToJsonStr(jsonMap: Map[String, String]):String = {
+    val map:util.Map[String,String] = jsonMap.asJava
+    val mapper = new ObjectMapper
+    val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)
+    jsonResult
+  }
+
   /**
     * runConsumer
     * @param callback a method with is called on incoming data
@@ -56,21 +86,28 @@ class KafkaCheckConsumer{
     for (i <- 1 to 100) {
       Thread.sleep(millisec)
       val consumerRecords = consumer.poll(timeout)
-      //prrintln("____________RECORDS_______________________")
       for (record <- consumerRecords.iterator()) {
-        //prrintln(s"Here's your $record")
-        val callbackAnswer: String = callback(record.value())
 
-        // Hack by https://www.baeldung.com/jackson-map
+        // TODO refactor in other method
+        // Hack by https://stackoverflow.com/a/29914564/5885054
         val jsonRaw:String = record.value()
+        val jsonMap = jsonStrToMap(jsonRaw)
 
-        //prrintln("Funny: " + callbackAnswer)
-        producer.runProducer(callbackAnswer)
+        try{
+          val userid:String = jsonMap("userid").asInstanceOf[String]
+          val data:String = jsonMap("data").asInstanceOf[String]
+          val callbackAnswer: String = callback(data)
+          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"userid"->userid)))
+
+        }
+        catch{
+          case e : NoSuchElementException => {
+            producer.runProducer("Please provide valid parmeter")
+
+          }
+        }
       }
-      //prrintln("__________________________________________")
     }
-
     runConsumer(callback)
-
   }
 }

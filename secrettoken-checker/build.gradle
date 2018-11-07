@@ -50,9 +50,14 @@ test.dependsOn scalaStyle
 
 
 dependencies {
+    // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
+    compile group: 'org.json4s', name: 'json4s-jackson_2.12', version: '3.6.2'
+    // https://mvnrepository.com/artifact/org.json4s/json4s
+    compile group: 'org.json4s', name: 'json4s_2.11', version: '3.2.11'
     compile 'org.scala-lang:scala-library:2.12.6'
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
