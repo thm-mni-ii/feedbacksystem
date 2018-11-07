@@ -6,6 +6,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.{RequestMapping, RestController}
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+// Wrapper class, performs in background a CAS Login to THM, based on
+// https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
+import de.thm.ii.submissioncheck.cas.CasWrapper
 
 /**
   * Service to handle the static communication with the client.
