@@ -39,5 +39,5 @@ services:
       MYSQL_DATABASE: db1
     ports:
       - "3308:3306"
-
-      
+  bash1:
+    image: bash:4.4
