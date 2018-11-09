@@ -5,10 +5,10 @@
 # with appropriate messages
 
 name=$1
-token="$2 $3"
 
-md5name=$(echo -n ${name} | md5sum | xargs)
+token=$(echo -n $2 | tr '[:upper:]' '[:lower:]') 
 
+md5name=$(echo -n ${name} | md5sum | awk '{print $1}')
 
 if [ "$token" == "$md5name" ] 
 then
