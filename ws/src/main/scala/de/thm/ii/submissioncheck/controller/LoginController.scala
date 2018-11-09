@@ -39,7 +39,8 @@ class LoginController {
     var jwtToken = ""
     if(loginResult)
       {
-        jwtToken = userService.generateTokenFromUser(new User(username))
+        val user = userService.insertUserIfNotExists(username,1)
+        jwtToken = userService.generateTokenFromUser(user)
       }
 
     val myCookie = new Cookie("token" , jwtToken)

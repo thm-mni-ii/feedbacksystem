@@ -23,6 +23,23 @@ class UserService {
   val mysqlConnector: Connection = new MySQLConfig().getConnector
 
   /**
+    * Class holds all DB labels
+    */
+  class DBLabels{
+    /** DB Label "userid" */
+    var userid: String = "userid"
+
+    /** DB Label "username" */
+    var username: String = "username"
+
+    /** DB Label "roleid" */
+    var roleid: String = "roleid"
+  }
+
+  /** holds all unique labels */
+  val dbLabels = new DBLabels()
+
+  /**
     * getUsers is a admin function und just sends a list of all users
     *
     * @author Benjamin Manns
@@ -35,15 +52,14 @@ class UserService {
 
     val resultIterator = new Iterator[ResultSet] {
       def hasNext: Boolean = resultSet.next()
-
       def next(): ResultSet = resultSet
     }.toStream
 
     for (res <- resultIterator.iterator) {
-      userList += Map("userid" -> res.getString("userid"),
+      userList += Map(dbLabels.userid -> res.getString(dbLabels.userid),
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
-        "roleid" -> res.getString("roleid"),
+        dbLabels.roleid -> res.getString(dbLabels.roleid),
         "email" -> res.getString("email")).asJava
     }
 
@@ -62,6 +78,7 @@ class UserService {
     * @param roleId          Users's role id
     * @return Java Map
     */
+  @deprecated( "use insertUserIntoDB", "0.1" )
   def addUser(prename: String, surname: String, password_clear: String, password_repeat: String, email: String, roleId: Int = 1): util.Map[String, Int] = {
 
     if (prename == "" || surname == "" || password_clear == "" || password_repeat == "" || email == "") {
@@ -128,13 +145,63 @@ class UserService {
         null
       }
       else{
-        new User(claims.get("usename").asInstanceOf[String])
+        this.loadUserFromDB(claims.get("username").asInstanceOf[String])
       }
 
     }
     catch {
       case e@(_: JwtException | _: IllegalArgumentException) =>
         null
+    }
+  }
+
+  /**
+    * insertUserIfNotExists needs to run on every user log in.
+    * @param username a unique identification for a user
+    * @param roleid a user role, until now, only one role exists
+    * @return User
+    */
+  def insertUserIfNotExists(username: String, roleid: Integer): User ={
+    val user: User = this.loadUserFromDB(username)
+    if(user == null) {
+      // insert new User
+
+      val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO users " +
+        "(username, roleid) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
+      prparStmt.setString(1, username)
+      prparStmt.setInt(2, roleid)
+      prparStmt.execute()
+      var insertedID = -1
+      val rs = prparStmt.getGeneratedKeys
+      if (rs.next) insertedID = rs.getInt(1)
+
+      if (insertedID == -1) {
+        throw new RuntimeException("Error creating user. Please contact administrator.")
+      }
+      loadUserFromDB(username)
+    }
+    else{
+      user
+    }
+
+  }
+
+  /**
+    * loadUserFromDB by a given username. If user not exists return null
+    * @param username a unique identification for a user
+    * @return User | null
+    */
+  def loadUserFromDB(username: String):User = {
+    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM db1.users where username = ? LIMIT 1")
+    prparStmt.setString(1,username)
+    val resultSet = prparStmt.executeQuery()
+
+    if(resultSet.next())
+      {
+        new User(resultSet.getInt(dbLabels.userid), resultSet.getString(dbLabels.username))
+      }
+    else{
+      null
     }
   }
 
@@ -150,7 +217,7 @@ class UserService {
     val secrets = new Secrets()
     val jwtToken = Jwts.builder.setSubject("client_authentication")
       .claim("roles", "user")
-      .claim("username", user.username)
+      .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
       .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
       .compact
