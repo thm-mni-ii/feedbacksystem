@@ -16,7 +16,5 @@ echo correct: token and md5 hash are identical
 exit 0
 else
 echo fault: token and md5 hash are not identical
-echo $token
-echo $md5name
 exit 1
 fi
