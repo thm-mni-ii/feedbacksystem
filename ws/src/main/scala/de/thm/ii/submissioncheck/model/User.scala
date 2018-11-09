@@ -7,14 +7,17 @@ import scala.collection.JavaConverters._
   * Class User holds all data from the user table
   *
   * @author Benjamin Manns
+  * @param id local DB's userid
   * @param name User's username
   */
-class User(name:String) {
+class User(id:Int, name:String) {
 
   /** static defined class field*/
   var role = "STUDENT"
   /** public class field username*/
   var username = name
+  /** public class field id*/
+  var userid:Int = id
 
   /**
     * Return User as JavaMap. Simply answer in HTTPResonses
@@ -24,7 +27,7 @@ class User(name:String) {
     */
   def asJavaMap(): util.Map[String, String] =
   {
-    Map("username" -> this.username, "role" -> this.role).asJava
+    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role).asJava
   }
 
 }
