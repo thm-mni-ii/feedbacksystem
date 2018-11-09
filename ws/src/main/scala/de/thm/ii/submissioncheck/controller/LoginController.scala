@@ -1,15 +1,13 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util
-
-import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.UserService
 import javax.servlet.http.{Cookie, HttpServletResponse}
 import org.springframework.web.bind.annotation._
 import collection.JavaConverters._
 // Wrapper class, performs in background a CAS Login to THM, based on
 // https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
-import casclientwrapper.CasWrapper
+import de.thm.ii.submissioncheck.cas.CasWrapper
 
 /**
   * LoginController simply perfoem login request. In future it might send also a COOKIE
@@ -47,9 +45,6 @@ class LoginController {
     response.addCookie(myCookie)
 
     Map("login_result" -> cas.login()).asJava
-
-    // TODO if user does not exists, create it based on CAS Return
-
   }
 
 }
