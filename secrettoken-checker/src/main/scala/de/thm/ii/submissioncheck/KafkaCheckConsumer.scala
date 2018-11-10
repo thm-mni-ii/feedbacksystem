@@ -88,21 +88,21 @@ class KafkaCheckConsumer{
       val consumerRecords = consumer.poll(timeout)
       for (record <- consumerRecords.iterator()) {
 
-        // TODO refactor in other method
         // Hack by https://stackoverflow.com/a/29914564/5885054
         val jsonRaw:String = record.value()
         val jsonMap = jsonStrToMap(jsonRaw)
-
         try{
           val userid:String = jsonMap("userid").asInstanceOf[String]
           val data:String = jsonMap("data").asInstanceOf[String]
+          val taskid:String = jsonMap("taskid").asInstanceOf[String]
+          val submisisonid:String = jsonMap("submissionid").asInstanceOf[String]
           val callbackAnswer: String = callback(data)
-          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"userid"->userid)))
+          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"userid"->userid,"taskid" -> taskid, "submissionid" -> submisisonid)))
 
         }
         catch{
           case e : NoSuchElementException => {
-            producer.runProducer("Please provide valid parmeter")
+            producer.runProducer("Please provide valid parameter")
 
           }
         }

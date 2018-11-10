@@ -17,6 +17,7 @@ import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedExceptio
   */
 @RestController
 @RequestMapping(path = Array("/api/v1"))
+@deprecated("Please use the /task/{id}/submit","0.1")
 class CheckController {
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
@@ -50,15 +51,6 @@ class CheckController {
     kafkaTemplate.send(topicName, jsonResult)
     kafkaTemplate.flush()
     Map("success" -> "true","fun" -> jsonResult).asJava
-  }
-
-  /**
-    * Listen on "check_answer"
-    * @param msg Answer from service
-    */
-  @KafkaListener(topics = Array("check_answer"))
-  def listener(msg: String): Unit = {
-    logger.warn("Get: " + msg)
   }
 
 }
