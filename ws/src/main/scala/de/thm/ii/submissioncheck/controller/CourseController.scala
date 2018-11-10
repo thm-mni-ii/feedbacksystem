@@ -25,6 +25,10 @@ class CourseController {
   def getAllCourses(jwt_token: String): util.List[util.Map[String, String]] = {
     // TODO If admin -> all, if prof -->
     val user:User = userService.verfiyUserByToken(jwt_token)
+    if(user == null)
+      {
+        throw new UnauthorizedException
+      }
     courseService.getCoursesByUser(user)
   }
 
@@ -39,6 +43,10 @@ class CourseController {
   def createCourse(name: String, description: String, jwt_token: String): util.Map[String, String] = {
     // TODO: nothing done yet, we need a service
     val user:User = userService.verfiyUserByToken(jwt_token)
+    if(user == null)
+    {
+      throw new UnauthorizedException
+    }
     user.asJavaMap()
   }
 

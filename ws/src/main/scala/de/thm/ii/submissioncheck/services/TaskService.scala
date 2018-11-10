@@ -23,8 +23,8 @@ class TaskService {
     * Class holds all DB labels
     */
   class TaskDBLabels{
-    /** DB Label "taskid" */
-    var taskid: String = "taskid"
+    /** DB Label "task_id" */
+    var taskid: String = "task_id"
 
     /** DB Label "name" */
     var name: String = "name"
@@ -32,8 +32,8 @@ class TaskService {
     /** DB Label "description" */
     var description: String = "description"
 
-    /** DB Label "courseid" */
-    var courseid: String = "courseid"
+    /** DB Label "course_id" */
+    var courseid: String = "course_id"
   }
 
   /** holds all unique labels */
@@ -43,17 +43,17 @@ class TaskService {
     * Class holds all DB labels
     */
   class SubmissionDBLabels{
-    /** DB Label "taskid" */
-    var taskid: String = "taskid"
+    /** DB Label "task_id" */
+    var taskid: String = "task_id"
 
-    /** DB Label "submissionid" */
-    var submissionid: String = "submissionid"
+    /** DB Label "submission_id" */
+    var submissionid: String = "submission_id"
 
     /** DB Label "result" */
     var result: String = "result"
 
     /** DB Label "userid" */
-    var userid: String = "userid"
+    var userid: String = "user_id"
 
   }
 
@@ -70,7 +70,7 @@ class TaskService {
     // TODO Check authorization for this taks!!
 
     val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO submission " +
-      "(taskid, userid) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
+      "(task_id, user_id) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
 
     // TODO Check if multiple submissions are allowed
 
@@ -97,7 +97,7 @@ class TaskService {
     */
   def getTaskResults(taskid: Int, user: User): util.List[util.Map[String, String]] = {
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT * from task join submission using(taskid) where taskid = ? and userid = ?;")
+      "SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;")
     prparStmt.setInt(1, taskid)
     prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
@@ -130,7 +130,8 @@ class TaskService {
   def getTaskDetails(taskid: Integer, user: User):util.Map[String, String] = {
     // TODO check if user has this course where the task is from
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT `task`.`name`, `task`.`description`, `task`.`taskid`, `task`.`courseid` from task join courses using(courseid) where taskid = ? and userid = ?;")
+      "SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
+        "using(course_id) where task_id = ? and owner = ?;")
     prparStmt.setInt(1, taskid)
     prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
@@ -158,7 +159,7 @@ class TaskService {
     */
   def setResultOfTask(taskid: Integer, submissionid: Integer, result: String):Boolean = {
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "UPDATE submission set result = ? where taskid = ? and submissionid = ?;")
+      "UPDATE submission set result = ? where task_id = ? and submission_id = ?;")
     prparStmt.setString(1, result)
     prparStmt.setInt(2, taskid)
     prparStmt.setInt(3, submissionid)

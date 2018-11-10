@@ -22,13 +22,13 @@ class CourseService {
     */
   class CourseLabels{
     /** holds label courseid*/
-    val courseid: String = "courseid"
+    val courseid: String = "course_id"
     /** holds label name*/
     val name: String = "name"
     /** holds label description*/
     val description: String = "description"
-    /** holds label userid*/
-    val userid: String = "userid"
+    /** holds label owner*/
+    val owner: String = "owner"
   }
 
   /** holds all course-Table labels*/
@@ -40,8 +40,9 @@ class CourseService {
     * @return Java List of Maps
     */
   def getCoursesByUser(user: User): util.List[util.Map[String, String]] = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM db1.courses where userid = ?")
-
+    // TODO Check somehow if this is a course owner or a course participant
+    val prparStmt = this.mysqlConnector.prepareStatement(
+      "SELECT * FROM user_has_courses hc join course c using(course_id) where user_id = ?")
     prparStmt.setInt(1, user.userid)
     val resultSet = prparStmt.executeQuery()
     var courseList = new ListBuffer[java.util.Map[String, String]]()
@@ -56,7 +57,7 @@ class CourseService {
       courseList += Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
         courseLabels.name -> res.getString(courseLabels.name),
         courseLabels.description -> res.getString(courseLabels.description),
-        courseLabels.userid -> res.getString(courseLabels.userid)).asJava
+        courseLabels.owner -> res.getString(courseLabels.owner)).asJava
     }
     courseList.toList.asJava
   }
@@ -69,7 +70,7 @@ class CourseService {
     */
   def getCourseDetailes(courseid: String, user: User): util.Map[String, String] = {
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT * FROM db1.courses where courseid = ? and userid = ?")
+      "SELECT * FROM courses where course_id = ? and owner = ?")
     prparStmt.setString(1, courseid)
     prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
@@ -78,7 +79,7 @@ class CourseService {
         val courseMap = Map(courseLabels.courseid -> resultSet.getString(courseLabels.courseid),
           courseLabels.name -> resultSet.getString(courseLabels.name),
           courseLabels.description -> resultSet.getString(courseLabels.description),
-          courseLabels.userid -> resultSet.getString(courseLabels.userid))
+          courseLabels.owner -> resultSet.getString(courseLabels.owner))
 
         var taskList = new ListBuffer[java.util.Map[String, String]]()
 

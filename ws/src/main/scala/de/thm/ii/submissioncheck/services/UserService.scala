@@ -26,14 +26,14 @@ class UserService {
     * Class holds all DB labels
     */
   class DBLabels{
-    /** DB Label "userid" */
-    var userid: String = "userid"
+    /** DB Label "user_id" */
+    var user_id: String = "user_id"
 
     /** DB Label "username" */
     var username: String = "username"
 
-    /** DB Label "roleid" */
-    var roleid: String = "roleid"
+    /** DB Label "role_id" */
+    var role_id: String = "role_id"
   }
 
   /** holds all unique labels */
@@ -46,7 +46,7 @@ class UserService {
     * @return JSON (Map) of all current users with no restrictions so far (not printing passwords)
     */
   def getUsers: util.List[util.Map[String, String]] = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM db1.users")
+    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM user")
     val resultSet = prparStmt.executeQuery()
     var userList = new ListBuffer[java.util.Map[String, String]]()
 
@@ -56,10 +56,10 @@ class UserService {
     }.toStream
 
     for (res <- resultIterator.iterator) {
-      userList += Map(dbLabels.userid -> res.getString(dbLabels.userid),
+      userList += Map(dbLabels.user_id -> res.getString(dbLabels.user_id),
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
-        dbLabels.roleid -> res.getString(dbLabels.roleid),
+        dbLabels.role_id -> res.getString(dbLabels.role_id),
         "email" -> res.getString("email")).asJava
     }
 
@@ -75,11 +75,11 @@ class UserService {
     * @param password_clear  User's password
     * @param password_repeat User's repeated password
     * @param email           User's email address
-    * @param roleId          Users's role id
+    * @param role_id          Users's role id
     * @return Java Map
     */
   @deprecated( "use insertUserIntoDB", "0.1" )
-  def addUser(prename: String, surname: String, password_clear: String, password_repeat: String, email: String, roleId: Int = 1): util.Map[String, Int] = {
+  def addUser(prename: String, surname: String, password_clear: String, password_repeat: String, email: String, role_id: Int = 1): util.Map[String, Int] = {
 
     if (prename == "" || surname == "" || password_clear == "" || password_repeat == "" || email == "") {
       throw new BadRequestException("Empty fields not allowed. Make sure to apply all post fields of: " +
@@ -94,8 +94,8 @@ class UserService {
     val passwordCrypt = md.digest(password_clear.getBytes("UTF-8")).map("%02x".format(_)).mkString
 
     // TODO check email format
-    val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO users " +
-      "(prename, surname, password, email, roleid) VALUES (?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS)
+    val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO user " +
+      "(prename, surname, password, email, role_id) VALUES (?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS)
 
     // scala doc checker fix
     val param4: Int = 4
@@ -104,7 +104,7 @@ class UserService {
     prparStmt.setString(2, surname)
     prparStmt.setString(3, passwordCrypt)
     prparStmt.setString(param4, email)
-    prparStmt.setInt(param5, roleId)
+    prparStmt.setInt(param5, role_id)
     prparStmt.execute()
 
     var insertedID = -1
@@ -158,18 +158,18 @@ class UserService {
   /**
     * insertUserIfNotExists needs to run on every user log in.
     * @param username a unique identification for a user
-    * @param roleid a user role, until now, only one role exists
+    * @param role_id a user role, until now, only one role exists
     * @return User
     */
-  def insertUserIfNotExists(username: String, roleid: Integer): User ={
+  def insertUserIfNotExists(username: String, role_id: Integer): User ={
     val user: User = this.loadUserFromDB(username)
     if(user == null) {
       // insert new User
 
-      val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO users " +
-        "(username, roleid) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
+      val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO user " +
+        "(username, role_id) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
       prparStmt.setString(1, username)
-      prparStmt.setInt(2, roleid)
+      prparStmt.setInt(2, role_id)
       prparStmt.execute()
       var insertedID = -1
       val rs = prparStmt.getGeneratedKeys
@@ -192,13 +192,13 @@ class UserService {
     * @return User | null
     */
   def loadUserFromDB(username: String):User = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM db1.users where username = ? LIMIT 1")
+    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM user where username = ? LIMIT 1")
     prparStmt.setString(1,username)
     val resultSet = prparStmt.executeQuery()
 
     if(resultSet.next())
       {
-        new User(resultSet.getInt(dbLabels.userid), resultSet.getString(dbLabels.username))
+        new User(resultSet.getInt(dbLabels.user_id), resultSet.getString(dbLabels.username))
       }
     else{
       null

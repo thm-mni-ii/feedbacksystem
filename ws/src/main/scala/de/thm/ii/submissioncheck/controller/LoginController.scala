@@ -2,7 +2,7 @@ package de.thm.ii.submissioncheck.controller
 
 import java.util
 import de.thm.ii.submissioncheck.services.UserService
-import javax.servlet.http.{Cookie, HttpServletResponse}
+import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import org.springframework.web.bind.annotation._
 import collection.JavaConverters._
 // Wrapper class, performs in background a CAS Login to THM, based on
@@ -29,10 +29,11 @@ class LoginController {
     * @param username User's username
     * @return Java Map
     */
+  @CrossOrigin
   @RequestMapping(value = Array("/login"), method = Array(RequestMethod.POST))
-  def postUser(response: HttpServletResponse, password: String, username: String): util.Map[String, Boolean] = {
+  @ResponseBody
+  def postUser(response: HttpServletResponse, username:String, password: String ): util.Map[String, Any] = {
     val cas  = new CasWrapper(username,password)
-
     val loginResult:Boolean = cas.login()
     var jwtToken = ""
     if(loginResult)
@@ -44,7 +45,7 @@ class LoginController {
     val myCookie = new Cookie("token" , jwtToken)
     response.addCookie(myCookie)
 
-    Map("login_result" -> cas.login()).asJava
+    Map("login_result" -> cas.login(),"token" -> jwtToken).asJava
   }
 
 }
