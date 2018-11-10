@@ -10,26 +10,43 @@ import org.springframework.kafka.core.KafkaTemplate
 */
 
 /**
-  * So far only some small tests
+  * Application for running a script with username and token as parameters
   *
   * @author Vlad Sokyrskyy
   */
 object SecretTokenChecker extends App {
 
-  //private var kafkaTemplate: KafkaTemplate[String, String] = null
-
   //code for testing out
   /*
-  val bashtest1 = new BashExec("./script.sh", "abc");
+  val bashtest1 = new BashExec("script.sh", "a", "0cc175b9c0f1b6a831c399e269772661");
   val exit1 = bashtest1.exec()
   val bashmessage1 = bashtest1.output
+  print("exitcode: " + bashtest1.exitcode + "\n")
   */
+  /**
+    * Name of the md5 test script
+    */
+  val script = "script.sh"
 
   /**
     * Instance of Check Consumer which runs in a loop and try to pull information
     */
   val cons = new KafkaCheckConsumer()
-  cons.runConsumer(shTest)
+  cons.runConsumer(bashTest)
+
+  /**
+    * Method for the callback function
+    * @param name username
+    * @param token md5hash
+    * @return message and exitcode
+    */
+  def bashTest(name: String, token: String): (String, Int) = {
+    val bashtest1 = new BashExec(script, name, token)
+    val exit1 = bashtest1.exec()
+    val message1 = bashtest1.output
+
+    (message1, exit1)
+  }
 
   /**
     * shTest is used by Kafka Example
@@ -60,11 +77,12 @@ object SecretTokenChecker extends App {
   /**
     * getBashTestOut
     * @param sName bash script name
-    * @param token bash parameter
+    * @param username parameter
+    * @param token parameter
     * @return Output of script
     */
-  def getBashTestOut(sName : String, token : String): String = {
-    val bashtest = new BashExec(sName, token)
+  def getBashTestOut(sName : String, username: String, token : String): String = {
+    val bashtest = new BashExec(sName, username, token)
     bashtest.exec()
     bashtest.output
   }

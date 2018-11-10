@@ -75,7 +75,7 @@ class KafkaCheckConsumer{
     * runConsumer
     * @param callback a method with is called on incoming data
     */
-  def runConsumer(callback:(String)=>String):Unit = {
+  def runConsumer(callback:(String, String)=>(String, Int)):Unit = {
 
     val producer = new KafkaCheckProducer()
 
@@ -95,9 +95,13 @@ class KafkaCheckConsumer{
           val userid:String = jsonMap("userid").asInstanceOf[String]
           val data:String = jsonMap("data").asInstanceOf[String]
           val taskid:String = jsonMap("taskid").asInstanceOf[String]
-          val submisisonid:String = jsonMap("submissionid").asInstanceOf[String]
-          val callbackAnswer: String = callback(data)
-          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"userid"->userid,"taskid" -> taskid, "submissionid" -> submisisonid)))
+          val submissionid:String = jsonMap("submissionid").asInstanceOf[String]
+
+          val callbackVal = callback(userid, data)
+          val callbackAnswer = callbackVal._1
+          val callbackExitCode = callbackVal._2.toString // convert exitcode to string for json
+          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"exitcode"->callbackExitCode,"userid"->userid,
+            "taskid" -> taskid, "submissionid" -> submissionid)))
 
         }
         catch{
