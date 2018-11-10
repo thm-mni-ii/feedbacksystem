@@ -11,12 +11,12 @@ export class AuthService {
 
 
   login(username: string, password: string) {
-    this.http.post("/api/v1/login", {username: username, password: password}).forEach(value => console.log(value))
+    //TODO: Implement login
   }
 
 
   logout() {
-
+    //TODO: Implement logout
   }
 
 }
