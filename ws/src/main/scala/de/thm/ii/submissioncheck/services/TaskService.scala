@@ -5,6 +5,7 @@ import java.util
 
 import collection.JavaConverters._
 import de.thm.ii.submissioncheck.config.MySQLConfig
+import de.thm.ii.submissioncheck.misc.BadRequestException
 import de.thm.ii.submissioncheck.model.User
 
 import scala.collection.mutable.ListBuffer
@@ -127,14 +128,23 @@ class TaskService {
     * @return JAVA Map
     */
   def getTaskDetails(taskid: Integer, user: User):util.Map[String, String] = {
+    // TODO check if user has this course where the task is from
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT * from task where taskid = ? and userid = ?;")
+      "SELECT `task`.`name`, `task`.`description`, `task`.`taskid`, `task`.`courseid` from task join courses using(courseid) where taskid = ? and userid = ?;")
     prparStmt.setInt(1, taskid)
     prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
-      Map(taskDBLabels.courseid -> resultSet.getString(taskDBLabels.courseid),
-        taskDBLabels.taskid -> resultSet.getString(taskDBLabels.taskid),
-        taskDBLabels.name -> resultSet.getString(taskDBLabels.name)).asJava
+    if(resultSet.next())
+      {
+        Map(taskDBLabels.courseid -> resultSet.getString(taskDBLabels.courseid),
+          taskDBLabels.taskid -> resultSet.getString(taskDBLabels.taskid),
+          taskDBLabels.name -> resultSet.getString(taskDBLabels.name),
+          taskDBLabels.description -> resultSet.getString(taskDBLabels.description)).asJava
+      }
+    else{
+      throw new BadRequestException("Task '" + taskid + "' is not available.")
+    }
+
   }
 
   /**
