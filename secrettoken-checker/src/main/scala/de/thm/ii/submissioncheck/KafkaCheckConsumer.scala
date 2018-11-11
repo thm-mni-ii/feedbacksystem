@@ -75,7 +75,7 @@ class KafkaCheckConsumer{
     * runConsumer
     * @param callback a method with is called on incoming data
     */
-  def runConsumer(callback:(String)=>String):Unit = {
+  def runConsumer(callback:(String, String)=>(String, Int)):Unit = {
 
     val producer = new KafkaCheckProducer()
 
@@ -88,21 +88,25 @@ class KafkaCheckConsumer{
       val consumerRecords = consumer.poll(timeout)
       for (record <- consumerRecords.iterator()) {
 
-        // TODO refactor in other method
         // Hack by https://stackoverflow.com/a/29914564/5885054
         val jsonRaw:String = record.value()
         val jsonMap = jsonStrToMap(jsonRaw)
-
         try{
           val userid:String = jsonMap("userid").asInstanceOf[String]
           val data:String = jsonMap("data").asInstanceOf[String]
-          val callbackAnswer: String = callback(data)
-          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"userid"->userid)))
+          val taskid:String = jsonMap("taskid").asInstanceOf[String]
+          val submissionid:String = jsonMap("submissionid").asInstanceOf[String]
+
+          val callbackVal = callback(userid, data)
+          val callbackAnswer = callbackVal._1
+          val callbackExitCode = callbackVal._2.toString // convert exitcode to string for json
+          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"exitcode"->callbackExitCode,"userid"->userid,
+            "taskid" -> taskid, "submissionid" -> submissionid)))
 
         }
         catch{
           case e : NoSuchElementException => {
-            producer.runProducer("Please provide valid parmeter")
+            producer.runProducer("Please provide valid parameter")
 
           }
         }

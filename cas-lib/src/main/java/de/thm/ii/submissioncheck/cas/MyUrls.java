@@ -1,10 +1,13 @@
-package casclientwrapper;
+package de.thm.ii.submissioncheck.cas;
 
 /**
  * Class which holds and creates all URLS being used by the application.
  * Change the base urls to your own server.
+ *
+ * Class is copied from https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
+ *
+ * @author Johannes Meintrup
  */
-
 public class MyUrls {
     public static final String MOODLE_BASE_URL = "https://fk-vv.mni.thm.de/moodle/";
     public static final String CAS_BASE_URL = "https://cas.thm.de:443/cas/";

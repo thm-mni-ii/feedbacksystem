@@ -1,6 +1,7 @@
 package de.thm.ii.submissioncheck
 
 import scala.sys.process._
+import java.io.File
 
 /**
   * Class for executing Bash scripts
@@ -8,15 +9,29 @@ import scala.sys.process._
   * @author Vlad Sokyrskyy
   *
   * @param scriptpathc path of shell script
+  * @param namec username parameter
   * @param tokenc shell script parameter
   */
-class BashExec(val scriptpathc: String, val tokenc: String) {
+class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
 
   /**
     * Class instance scriptpath
     */
   var scriptpath = scriptpathc
 
+  /**
+    * Class instance file
+    */
+  var file = new File("./" + scriptpath)
+
+  /**
+    * Class instance absPath
+    */
+  var absPath = file.getAbsolutePath
+  /**
+    * Class instance namec
+    */
+  var name = namec
   /**
     * Class instance tokenc
     */
@@ -35,7 +50,7 @@ class BashExec(val scriptpathc: String, val tokenc: String) {
 
   /**
     * Class instance success
-    * Is set true when after execution the execution exitcode returns 0
+    * Is set true when after execution the exitcode becomes 0
     */
   var success = false
   /**
@@ -44,10 +59,13 @@ class BashExec(val scriptpathc: String, val tokenc: String) {
     */
   def exec() : Int = {
 
-    val st = Process("bash", Seq(scriptpath, token)).lineStream_!
+    val st = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
+      "/" + scriptpath, name, token)).lineStream_!
+
     output = st.mkString("\n")
 
-    val exitCode = Process("bash", Seq(scriptpath, token)).!
+    val exitCode = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
+      "/" + scriptpath, name, token)).!
     if(exitCode == 0){
       success = true
     }
@@ -56,7 +74,6 @@ class BashExec(val scriptpathc: String, val tokenc: String) {
     }
     exitcode = exitCode
     exitCode
-    //return 0
   }
 
 }

@@ -1,4 +1,4 @@
-package casclientwrapper;
+package de.thm.ii.submissioncheck.cas;
 
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -8,9 +8,14 @@ import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.params.BasicHttpParams;
-
 import javax.net.ssl.HostnameVerifier;
 
+/**
+ * CasWrapper uses a CasClient Login library from https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
+ * and prepare all needs to perform a CAS-login with simply calling the `login` method
+ *
+ * @author Benjamin Manns
+ */
 public class CasWrapper {
 
     private String username;
@@ -18,8 +23,7 @@ public class CasWrapper {
 
     private CasClient casclient;
 
-    public CasWrapper(String username, String password)
-    {
+    public CasWrapper(String username, String password) {
         this.password = password;
         this.username = username;
     }
@@ -29,13 +33,11 @@ public class CasWrapper {
     }
 
 
-
-    public boolean login()
-    {
+    public boolean login() {
+        final CasAuthenticationResult casAuthenticationResult = new CasAuthenticationResult();
         SchemeRegistry registry = new SchemeRegistry();
         SingleClientConnManager mgr = new SingleClientConnManager(new BasicHttpParams(), registry);
         final DefaultHttpClient httpClient = new DefaultHttpClient(mgr, new BasicHttpParams());
-
 
 
         HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
@@ -51,20 +53,12 @@ public class CasWrapper {
         casclient = new CasClient(httpClient);
 
 
-
-
-        try{
-            //System.out.println();
+        try {
             casclient.login("", username, password);
             return true;
-        }
-        catch (CasProtocolException e)
-        {
+        } catch (CasProtocolException | CasAuthenticationException e) {
             return false;
         }
-        catch (CasAuthenticationException ae)
-        {
-            return false;
-        }
+
     }
 }
