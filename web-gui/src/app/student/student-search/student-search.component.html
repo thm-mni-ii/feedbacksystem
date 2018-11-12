@@ -1,0 +1,22 @@
+<form class="search-form">
+  <mat-form-field class="example-full-width">
+    <input matInput placeholder="Kurs suchen">
+  </mat-form-field>
+</form>
+
+
+<div class="course-container">
+
+
+  <mat-card class="example-card" *ngFor="let course of courses">
+    <mat-card-header>
+      <mat-card-title>{{course.name}}</mat-card-title>
+      <mat-card-subtitle>{{course.id}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions>
+      <button mat-flat-button color="accent">Beitreten</button>
+    </mat-card-actions>
+  </mat-card>
+
+
+</div>

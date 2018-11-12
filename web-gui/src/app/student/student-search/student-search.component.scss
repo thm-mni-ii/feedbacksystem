@@ -1,0 +1,14 @@
+.search-form > * {
+  width: 100%;
+}
+
+// Container for courses
+.course-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+mat-card {
+  margin: 18px;
+}
