@@ -1,4 +1,4 @@
-# Submission Check [![Build Status](https://travis-ci.org/thm-mni-ii/submissioncheck.svg?branch=master)](https://travis-ci.org/thm-mni-ii/submissioncheck)
+# Submission Check [![Build Status](https://travis-ci.org/thm-mni-ii/submissioncheck.svg?branch=master)](https://travis-ci.org/thm-mni-ii/submissioncheck) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 As a student you have to submit a lot of tasks
 to the lecturer. And usually the only reply you
