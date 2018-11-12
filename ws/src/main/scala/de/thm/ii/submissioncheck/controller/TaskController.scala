@@ -10,6 +10,7 @@ import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{ClientService, TaskService, UserService}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
@@ -64,6 +65,7 @@ class TaskController{
     * @param jwt_token JWT
     * @return JSON
     */
+  @ResponseStatus(HttpStatus.ACCEPTED)
   @RequestMapping(value = Array("{id}/submit"), method = Array(RequestMethod.POST))
   @ResponseBody
   def submitTask(@PathVariable(LABEL_ID) taskid: Integer, data: String, jwt_token: String):util.Map[String, String] = {
