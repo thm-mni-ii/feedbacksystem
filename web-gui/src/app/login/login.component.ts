@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from "@angular/router";
+import {AuthService} from "../service/auth.service";
 
 @Component({
   selector: 'app-login',
@@ -8,7 +9,7 @@ import {Router} from "@angular/router";
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private auth: AuthService) {
   }
 
   username: string = '';
@@ -19,29 +20,7 @@ export class LoginComponent implements OnInit {
 
 
   login() {
-    switch (this.username.toLowerCase()) {
-      case 'admin':
-        if (this.password == 'admin') {
-          this.router.navigate(['/admin']);
-        }
-        break;
-      case 'prof':
-        if (this.password == 'prof') {
-          this.router.navigate(['/prof']);
-        }
-        break;
-      case 'user':
-        if (this.password == 'user') {
-          this.router.navigate(['/user/courses']);
-        }
-        break;
-      default:
-        alert("Wrong username or password\n" +
-          "admin:admin\n" +
-          "prof:prof\n" +
-          "user:user");
-    }
-
+    this.auth.login(this.username, this.password);
   }
 
 

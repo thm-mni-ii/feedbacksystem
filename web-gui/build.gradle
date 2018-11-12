@@ -13,12 +13,11 @@ repositories {
 }
 
 node {
-    version = '10.9.0'
+    version = '11.1.0'
     npmVersion = '6.4.0'
     download = true
 }
 
-// TODO: Define task depdendencies
 
 clean.dependsOn(npm_run_clean)
 npm_build.dependsOn npm_install
