@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.services
 
+import net.unicon.cas.client.configuration.EnableCasClient
 import org.springframework.web.bind.annotation.{RequestMapping, RestController}
 
 /**
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.{RequestMapping, RestController}
   * @author Andrej Sajenko
   */
 @RestController
+@EnableCasClient
 @RequestMapping(path = Array("/api/health"))
 class HealthService {
   /**

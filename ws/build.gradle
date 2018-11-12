@@ -68,5 +68,6 @@ dependencies {
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
+    compile('net.unicon.cas:cas-client-autoconfig-support:1.4.0-GA')
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

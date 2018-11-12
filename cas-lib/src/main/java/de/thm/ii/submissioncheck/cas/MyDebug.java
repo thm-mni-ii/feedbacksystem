@@ -7,6 +7,7 @@ package de.thm.ii.submissioncheck.cas;
  * Class is copied from https://github.com/thm-mni-ii/tals/tree/master/android/app/src/main/java/com/thm/mni/tals
  *
  * @author Johannes Meintrup
+ * @deprecated
  */
 public class MyDebug {
     public static final boolean DEBUG = false;

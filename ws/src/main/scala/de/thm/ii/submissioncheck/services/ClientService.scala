@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.services
 
+import net.unicon.cas.client.configuration.EnableCasClient
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
