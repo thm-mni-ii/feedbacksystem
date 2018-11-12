@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck
 
 import scala.sys.process._
-import java.io.File
+import java.io._
 
 /**
   * Class for executing Bash scripts
@@ -59,13 +59,13 @@ class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
     */
   def exec() : Int = {
 
-    val st = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
-      "/" + scriptpath, name, token)).lineStream_!
-
-    output = st.mkString("\n")
+    val stdoutStream = new ByteArrayOutputStream
 
     val exitCode = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
-      "/" + scriptpath, name, token)).!
+      "/" + scriptpath, name, token)).#>(stdoutStream).run().exitValue()
+
+    output = stdoutStream.toString
+
     if(exitCode == 0){
       success = true
     }
