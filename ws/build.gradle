@@ -74,6 +74,7 @@ dependencies {
     compile 'mysql:mysql-connector-java:8.0.13'
     compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
+    compile('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
     compile group: 'org.springframework.security', name: 'spring-security-core', version: '2.0.2'
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-jwt
