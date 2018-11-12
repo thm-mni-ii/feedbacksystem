@@ -9,6 +9,7 @@ import {LoginComponent} from './login/login.component';
 import {MaterialComponentsModule} from "./material-components/material-components.module";
 import {FormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
+import {JwtHelperService, JwtModule} from "@auth0/angular-jwt";
 
 @NgModule({
   declarations: [
@@ -22,10 +23,19 @@ import {HttpClientModule} from "@angular/common/http";
     AppRoutingModule,
     MaterialComponentsModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+      }
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {
+}
+
+export function tokenGetter() {
+  return localStorage.getItem('user');
 }
