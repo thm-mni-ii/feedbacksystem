@@ -114,7 +114,7 @@ class TaskController{
       logger.warn(answeredMap.toString())
       this.taskService.setResultOfTask(
         Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]), Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-        answeredMap("data").asInstanceOf[String])
+        answeredMap("data").asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
 
     }
     catch {

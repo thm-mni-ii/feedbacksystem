@@ -55,6 +55,9 @@ class TaskService {
     /** DB Label "userid" */
     var userid: String = "user_id"
 
+    /** DB Label "passed" */
+    var passed: String = "passed"
+
   }
 
   /** holds all unique labels */
@@ -113,6 +116,7 @@ class TaskService {
         taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
         taskDBLabels.name -> res.getString(taskDBLabels.name),
         submissionDBLabels.result -> res.getString(submissionDBLabels.result),
+        submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
         submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
         submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)).asJava
     }
@@ -155,14 +159,17 @@ class TaskService {
     * @param taskid unique identification for a task
     * @param submissionid unique identification for a submissionid
     * @param result answer coming from a checker service
+    * @param passed tiny peace of status information (i.e. exitcode)
     * @return Boolean: did update work
     */
-  def setResultOfTask(taskid: Integer, submissionid: Integer, result: String):Boolean = {
+  def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String):Boolean = {
     val prparStmt = this.mysqlConnector.prepareStatement(
-      "UPDATE submission set result = ? where task_id = ? and submission_id = ?;")
+      "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;")
     prparStmt.setString(1, result)
-    prparStmt.setInt(2, taskid)
-    prparStmt.setInt(3, submissionid)
+    prparStmt.setString(2, passed)
+    prparStmt.setInt(3, taskid)
+    val anti_magic_number_4:Int = 4
+    prparStmt.setInt(anti_magic_number_4, submissionid)
 
     prparStmt.execute()
   }
