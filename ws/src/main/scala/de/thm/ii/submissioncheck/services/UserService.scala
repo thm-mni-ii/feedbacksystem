@@ -68,59 +68,6 @@ class UserService {
   }
 
   /**
-    * addUser inserts a new User to DB
-    *
-    * @author Benjamin Manns
-    * @param prename         User's prename
-    * @param surname         User's surname
-    * @param password_clear  User's password
-    * @param password_repeat User's repeated password
-    * @param email           User's email address
-    * @param role_id          Users's role id
-    * @return Java Map
-    */
-  @deprecated( "use insertUserIntoDB", "0.1" )
-  def addUser(prename: String, surname: String, password_clear: String, password_repeat: String, email: String, role_id: Int = 1): util.Map[String, Int] = {
-
-    if (prename == "" || surname == "" || password_clear == "" || password_repeat == "" || email == "") {
-      throw new BadRequestException("Empty fields not allowed. Make sure to apply all post fields of: " +
-        "prename, surname, username, password, password_repeat, email")
-    }
-
-    if (password_clear != password_repeat) {
-      throw new BadRequestException("passwords mismatch")
-    }
-
-    val md = java.security.MessageDigest.getInstance("SHA-1")
-    val passwordCrypt = md.digest(password_clear.getBytes("UTF-8")).map("%02x".format(_)).mkString
-
-    // TODO check email format
-    val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO user " +
-      "(prename, surname, password, email, role_id) VALUES (?,?,?,?,?);", Statement.RETURN_GENERATED_KEYS)
-
-    // scala doc checker fix
-    val param4: Int = 4
-    val param5: Int = 5
-    prparStmt.setString(1, prename)
-    prparStmt.setString(2, surname)
-    prparStmt.setString(3, passwordCrypt)
-    prparStmt.setString(param4, email)
-    prparStmt.setInt(param5, role_id)
-    prparStmt.execute()
-
-    var insertedID = -1
-    val rs = prparStmt.getGeneratedKeys
-    if (rs.next) insertedID = rs.getInt(1)
-
-    if (insertedID == -1) {
-      throw new RuntimeException("Error creating user. Please contact administrator.")
-    }
-
-    Map("new_userid" -> insertedID).asJava
-
-  }
-
-  /**
     * verfiyUserByHeaderToken reads from a given User Request the Bearer Token if this is a token and if yes get information form it
     * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
     * The Token contains an `iat` - and expiration at unix time which will be checked that it is not too old

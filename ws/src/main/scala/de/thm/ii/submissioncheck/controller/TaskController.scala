@@ -2,8 +2,9 @@ package de.thm.ii.submissioncheck.controller
 
 import java.util
 import java.util.NoSuchElementException
+import com.fasterxml.jackson.databind.JsonNode
 import collection.JavaConverters._
-import de.thm.ii.submissioncheck.misc.{JsonParser, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{ClientService, TaskService, UserService}
 import javax.servlet.http.HttpServletRequest
@@ -37,6 +38,8 @@ class TaskController{
   final val LABEL_USER_ID = "userid"
   /** JSON variable submissionid ID*/
   final val LABEL_SUBMISSION_ID = "submissionid"
+  /** JSON variable submissionid ID*/
+  final val LABEL_DATA = "data"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -65,30 +68,40 @@ class TaskController{
   /**
     * Submit data for a given task
     * @param taskid unique identification for a task
-    * @param data Students solution to a given question
+    * @param jsonNode request body containing "data" parameter
     * @param request Request Header containing Headers
     * @return JSON
     */
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @RequestMapping(value = Array("{id}/submit"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("{id}/submit"), method = Array(RequestMethod.POST), consumes = Array("application/json"))
   @ResponseBody
-  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, data: String, request:HttpServletRequest ):util.Map[String, String] = {
+  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode:JsonNode, request:HttpServletRequest ):util.Map[String, String] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
 
     if(requestingUser == null)
     {
       throw new UnauthorizedException
     }
+    try {
+      val data = jsonNode.get(LABEL_DATA).asText()
 
-    val submissionId = taskService.submitTask(taskid,requestingUser)
+      val submissionId = taskService.submitTask(taskid,requestingUser,data)
 
-    val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username,"data" ->data,
-      LABEL_SUBMISSION_ID -> submissionId.toString))
-    logger.warn(jsonResult)
-    kafkaTemplate.send(topicName, jsonResult)
-    kafkaTemplate.flush()
+      val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username,LABEL_DATA->data,
+        LABEL_SUBMISSION_ID -> submissionId.toString))
+      logger.warn(jsonResult)
+      kafkaTemplate.send(topicName, jsonResult)
+      kafkaTemplate.flush()
 
-    Map("success" -> "true",LABEL_TASK_ID -> taskid.toString,LABEL_SUBMISSION_ID -> submissionId.toString).asJava
+      Map("success" -> "true",LABEL_TASK_ID -> taskid.toString,LABEL_SUBMISSION_ID -> submissionId.toString).asJava
+
+    }
+    catch{
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide a data parameter.")
+      }
+    }
+
   }
 
   /**
@@ -120,7 +133,7 @@ class TaskController{
       logger.warn(answeredMap.toString())
       this.taskService.setResultOfTask(
         Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]), Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-        answeredMap("data").asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
+        answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
 
     }
     catch {
