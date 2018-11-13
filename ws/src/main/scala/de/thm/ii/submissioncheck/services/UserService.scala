@@ -96,5 +96,4 @@ class UserService {
     Map("new_userid" -> insertedID).asJava
 
   }
-
 }
