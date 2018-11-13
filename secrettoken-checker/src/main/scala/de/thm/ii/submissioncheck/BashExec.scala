@@ -13,7 +13,6 @@ import java.io._
   * @param tokenc shell script parameter
   */
 class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
-
   /**
     * Class instance scriptpath
     */
@@ -57,8 +56,7 @@ class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
     * exec()
     * @return exit code
     */
-  def exec() : Int = {
-
+  def exec(): Int = {
     val stdoutStream = new ByteArrayOutputStream
 
     val exitCode = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
@@ -69,11 +67,10 @@ class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
     if(exitCode == 0){
       success = true
     }
-    else{
+    else {
       print("Exit with non-zero code: " + exitCode + "\n")
     }
     exitcode = exitCode
     exitCode
   }
-
 }

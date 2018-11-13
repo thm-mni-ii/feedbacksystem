@@ -19,7 +19,7 @@ class Secrets {
     * @author Benjamin Manns
     * @return Secure Key as String
     */
-  def getSuperSecretKey:String = {
+  def getSuperSecretKey: String = {
     SUPER_SECRET_KEY
   }
 }

@@ -135,4 +135,34 @@
         </parameters>
         <customMessage>No double blank lines</customMessage>
     </check>
+    <check enabled="true" class="org.scalastyle.scalariform.IfBraceChecker" level="error"/>
+    <check enabled="true" class="org.scalastyle.scalariform.EnsureSingleSpaceAfterTokenChecker" level="error">
+        <parameters>
+            <parameter name="tokens">CATCH, COLON, IF, ELSE, FOR, WHILE, TRY, FINALLY, EQUALS, OP, PLUS, STAR</parameter>
+        </parameters>
+    </check>
+    <check enabled="true" class="org.scalastyle.scalariform.EnsureSingleSpaceBeforeTokenChecker" level="error">
+        <parameters>
+            <parameter name="tokens">OP, PLUS, STAR, MINUS</parameter>
+        </parameters>
+    </check>
+    <check enabled="true" class="org.scalastyle.scalariform.DisallowSpaceBeforeTokenChecker" level="error">
+        <parameters>
+            <parameter name="tokens">COLON, COMMA, RPAREN</parameter>
+        </parameters>
+    </check>
+    <check enabled="true" class="org.scalastyle.file.RegexChecker" level="error">
+        <parameters>
+            <parameter name="regex"><![CDATA[\{\s*\n\s*\n]]></parameter>
+            <parameter name="line">false</parameter>
+        </parameters>
+        <customMessage>Blank line at start of block should be removed</customMessage>
+    </check>
+    <check enabled="true" class="org.scalastyle.file.RegexChecker" level="error">
+        <parameters>
+            <parameter name="regex">(?m)^\s*$(\r|)\n^\s*}$</parameter>
+            <parameter name="line">false</parameter>
+        </parameters>
+        <customMessage>Blank line at end of block should be removed</customMessage>
+    </check>
 </scalastyle>

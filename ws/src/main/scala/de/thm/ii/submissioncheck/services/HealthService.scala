@@ -14,6 +14,6 @@ class HealthService {
   /**
     * @return A static message: Alive of everything is okay.
     */
-  @RequestMapping(value=Array("/beat"))
+  @RequestMapping(value = Array("/beat"))
   def getBeat(): String = "Alive!"
 }

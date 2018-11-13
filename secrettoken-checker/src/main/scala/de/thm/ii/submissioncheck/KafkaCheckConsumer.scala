@@ -15,8 +15,7 @@ import org.json4s.jackson.JsonMethods._
   * KafkaCheckConsumer: Example from http://cloudurable.com/blog/kafka-tutorial-kafka-consumer/index.html
   * @author Benjamin Manns
   */
-class KafkaCheckConsumer{
-
+class KafkaCheckConsumer {
   private val BOOTSTRAP_SERVERS = "localhost:9092"
 
   private val TOPIC = "check_request"
@@ -28,7 +27,6 @@ class KafkaCheckConsumer{
     * @return kafka consumer
     */
   def createConsumer(): KafkaConsumer[Nothing, Nothing] = {
-
     val props: Properties = new Properties
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS)
     props.put(ConsumerConfig.GROUP_ID_CONFIG, "KafkaExampleConsumer")
@@ -64,8 +62,8 @@ class KafkaCheckConsumer{
     * @param jsonMap a Scala Map
     * @return Json String
     */
-  def mapToJsonStr(jsonMap: Map[String, String]):String = {
-    val map:util.Map[String,String] = jsonMap.asJava
+  def mapToJsonStr(jsonMap: Map[String, String]): String = {
+    val map: util.Map[String, String] = jsonMap.asJava
     val mapper = new ObjectMapper
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)
     jsonResult
@@ -75,39 +73,35 @@ class KafkaCheckConsumer{
     * runConsumer
     * @param callback a method with is called on incoming data
     */
-  def runConsumer(callback:(String, String)=>(String, Int)):Unit = {
-
+  def runConsumer(callback: (String, String)=>(String, Int)): Unit = {
     val producer = new KafkaCheckProducer()
-
     val consumer = createConsumer()
     var endlessLoop = true
     val millisec = 5000
     val timeout = 1000
+
     for (i <- 1 to 100) {
       Thread.sleep(millisec)
       val consumerRecords = consumer.poll(timeout)
       for (record <- consumerRecords.iterator()) {
-
         // Hack by https://stackoverflow.com/a/29914564/5885054
-        val jsonRaw:String = record.value()
+        val jsonRaw: String = record.value()
         val jsonMap = jsonStrToMap(jsonRaw)
-        try{
-          val userid:String = jsonMap("userid").asInstanceOf[String]
-          val data:String = jsonMap("data").asInstanceOf[String]
-          val taskid:String = jsonMap("taskid").asInstanceOf[String]
-          val submissionid:String = jsonMap("submissionid").asInstanceOf[String]
+        try {
+          val userid: String = jsonMap("userid").asInstanceOf[String]
+          val data: String = jsonMap("data").asInstanceOf[String]
+          val taskid: String = jsonMap("taskid").asInstanceOf[String]
+          val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
 
           val callbackVal = callback(userid, data)
           val callbackAnswer = callbackVal._1
           val callbackExitCode = callbackVal._2.toString // convert exitcode to string for json
-          producer.runProducer(mapToJsonStr(Map("data"->callbackAnswer,"exitcode"->callbackExitCode,"userid"->userid,
+          producer.runProducer(mapToJsonStr(Map("data" -> callbackAnswer, "exitcode" -> callbackExitCode, "userid" -> userid,
             "taskid" -> taskid, "submissionid" -> submissionid)))
-
         }
-        catch{
-          case e : NoSuchElementException => {
+        catch {
+          case e: NoSuchElementException => {
             producer.runProducer("Please provide valid parameter")
-
           }
         }
       }

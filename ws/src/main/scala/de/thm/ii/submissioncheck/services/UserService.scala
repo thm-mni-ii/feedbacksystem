@@ -19,7 +19,6 @@ import scala.collection.mutable.ListBuffer
   * @author Benjamin Manns
   */
 class UserService {
-
   /** mysqlConnector establish connection to our mysql 8 DB */
   val mysqlConnector: Connection = new MySQLConfig().getConnector
 
@@ -80,7 +79,7 @@ class UserService {
     * @return User
     */
   def verfiyUserByHeaderToken(request: HttpServletRequest): User = {
-    try{
+    try {
       val authHeader = request.getHeader("Authorization")
       var jwtToken = authHeader.split(" ")(1)
 
@@ -96,26 +95,20 @@ class UserService {
          */
 
         // Token is expired
-        if((tokenDate)*1000L-currentDate.getTime <= 0)
-        {
+        if ((tokenDate) * 1000L - currentDate.getTime <= 0) {
           null
-        }
-        else{
+        } else {
           this.loadUserFromDB(claims.get("username").asInstanceOf[String])
         }
-
       }
       catch {
         case e@(_: JwtException | _: IllegalArgumentException) =>
           null
       }
-
-    }
-    catch{
+    } catch {
       case e: ArrayIndexOutOfBoundsException => {
         null
       }
-
     }
   }
 
@@ -125,7 +118,7 @@ class UserService {
     * @param role_id a user role, until now, only one role exists
     * @return User
     */
-  def insertUserIfNotExists(username: String, role_id: Integer): User ={
+  def insertUserIfNotExists(username: String, role_id: Integer): User = {
     val user: User = this.loadUserFromDB(username)
     if(user == null) {
       // insert new User
@@ -143,11 +136,9 @@ class UserService {
         throw new RuntimeException("Error creating user. Please contact administrator.")
       }
       loadUserFromDB(username)
-    }
-    else{
+    } else {
       user
     }
-
   }
 
   /**
@@ -155,17 +146,15 @@ class UserService {
     * @param username a unique identification for a user
     * @return User | null
     */
-  def loadUserFromDB(username: String):User = {
+  def loadUserFromDB(username: String): User = {
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1")
     prparStmt.setString(1,username)
     val resultSet = prparStmt.executeQuery()
 
-    if(resultSet.next())
-      {
+    if (resultSet.next()) {
         new User(resultSet.getInt(dbLabels.user_id), resultSet.getString(dbLabels.username), resultSet.getString(dbLabels.role_name))
-      }
-    else{
+    } else {
       null
     }
   }
@@ -178,17 +167,15 @@ class UserService {
     * @return token as String
     */
   def generateTokenFromUser(user: User): String = {
-
     val secrets = new Secrets()
     val jwtToken = Jwts.builder.setSubject("client_authentication")
       .claim("roles", user.role)
       .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
-      .setExpiration(new Date(new Date().getTime + (1000*3600)))
+      .setExpiration(new Date(new Date().getTime + (1000 * 3600)))
       .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
       .compact
 
     jwtToken
   }
-
 }

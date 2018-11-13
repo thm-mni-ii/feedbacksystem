@@ -21,7 +21,6 @@ import org.springframework.kafka.support.serializer.JsonDeserializer
 @EnableKafka
 @Configuration
 class KafkaConsumerConfig {
-
   @Value("${spring.kafka.bootstrap-servers}")
   private var bootstrapAddress: String = null
 

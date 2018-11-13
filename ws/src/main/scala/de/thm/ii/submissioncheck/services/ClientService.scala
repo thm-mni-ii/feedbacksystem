@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory
 @RestController
 @RequestMapping(path = Array("/client"))
 class ClientService {
-
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Value("${message.topic.name}")

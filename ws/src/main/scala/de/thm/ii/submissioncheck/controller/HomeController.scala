@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.{RequestMapping, ResponseStatus}
   *
   * @author Allan Karlson
   */
-
 @Controller class HomeController {
-
   /**
     * Return home page index page.
     * @return index page.
@@ -23,7 +21,7 @@ import org.springframework.web.bind.annotation.{RequestMapping, ResponseStatus}
     * @return Rest ressource.
     */
   @RequestMapping(value = Array("/api/**"))
-  def handleRestRequests():String = throw new ResourceNotFoundException
+  def handleRestRequests(): String = throw new ResourceNotFoundException
 
   /**
     * Forward every access that is not defined to the index page.

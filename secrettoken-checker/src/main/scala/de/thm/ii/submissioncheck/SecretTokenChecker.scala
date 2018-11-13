@@ -15,7 +15,6 @@ import org.springframework.kafka.core.KafkaTemplate
   * @author Vlad Sokyrskyy
   */
 object SecretTokenChecker extends App {
-
   //code for testing out
   /*
   val bashtest1 = new BashExec("script.sh", "a", "0cc175b9c0f1b6a831c399e269772661");
@@ -53,7 +52,7 @@ object SecretTokenChecker extends App {
     * @param token String from User
     * @return String Answer from Script
     */
-  def shTest(token:String): String = {
+  def shTest(token: String): String = {
     val shtest1 = new ShExec("./script.sh", token)
     //execute script with arguments and save exit code (successful (0) or not (not 0) )
     val exit2 = shtest1.exec()
@@ -67,7 +66,7 @@ object SecretTokenChecker extends App {
     * @param token shell parameter
     * @return Output of script
     */
-  def getShTestOut(sName : String, token : String): String = {
+  def getShTestOut(sName: String, token: String): String = {
     val shtest = new ShExec(sName, token)
     shtest.exec()
 
@@ -81,10 +80,9 @@ object SecretTokenChecker extends App {
     * @param token parameter
     * @return Output of script
     */
-  def getBashTestOut(sName : String, username: String, token : String): String = {
+  def getBashTestOut(sName: String, username: String, token: String): String = {
     val bashtest = new BashExec(sName, username, token)
     bashtest.exec()
     bashtest.output
   }
-
 }

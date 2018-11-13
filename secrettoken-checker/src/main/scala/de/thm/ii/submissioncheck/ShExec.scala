@@ -11,7 +11,6 @@ import scala.sys.process._
   * @param tokenc shell script parameter
   */
 class ShExec(val scriptpathc: String, val tokenc: String) {
-
   /**
     * Class instance scriptpath
     */
@@ -42,8 +41,7 @@ class ShExec(val scriptpathc: String, val tokenc: String) {
     * exec()
     * @return exit code
     */
-  def exec() : Int = {
-
+  def exec(): Int = {
     val st = Process("sh", Seq(scriptpath, token)).lineStream_!
     output = st.mkString("\n")
 
@@ -51,7 +49,7 @@ class ShExec(val scriptpathc: String, val tokenc: String) {
     if(exitCode == 0){
       success = true
     }
-    else{
+    else {
       print("Exit with non-zero code: " + exitCode + "\n")
     }
     exitcode = exitCode

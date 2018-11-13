@@ -13,7 +13,6 @@ import org.json4s.jackson.JsonMethods._
   * @author Benjamin Manns
   */
 object JsonParser {
-
   /**
     * jsonStrToMap use json4s to parse a json string
     *
@@ -34,8 +33,8 @@ object JsonParser {
     * @param jsonMap a Scala Map
     * @return Json String
     */
-  def mapToJsonStr(jsonMap: Map[String, String]):String = {
-    val map:util.Map[String,String] = jsonMap.asJava
+  def mapToJsonStr(jsonMap: Map[String, String]): String = {
+    val map: util.Map[String, String] = jsonMap.asJava
     val mapper = new ObjectMapper
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)
     jsonResult

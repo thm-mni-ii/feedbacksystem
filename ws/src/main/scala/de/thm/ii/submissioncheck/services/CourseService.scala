@@ -36,7 +36,7 @@ class CourseService {
   val courseLabels = new CourseLabels()
 
   /** all interactions with tasks are done via a taskService*/
-  val taskService:TaskService = new TaskService
+  val taskService: TaskService = new TaskService
 
   /**
     * getCoursesByUser search courses by user object
@@ -76,7 +76,7 @@ class CourseService {
     * @param user a User object
     * @return Boolean, if a user is permitted for the course
     */
-  def isPermittedForCourse(courseid: Integer, user: User):Boolean = {
+  def isPermittedForCourse(courseid: Integer, user: User): Boolean = {
     // TODO allow admin users here!
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
@@ -88,12 +88,7 @@ class CourseService {
 
     val resultSet = prparStmt.executeQuery()
 
-    if(resultSet.next()){
-      resultSet.getInt("permitted") == 1
-    }
-    else{
-      false
-    }
+    resultSet.next() && resultSet.getInt("permitted") == 1
   }
 
   /**
@@ -102,18 +97,14 @@ class CourseService {
     * @param user a user object
     * @return Boolean
     */
-  def isSubscriberForCourse(courseid: Integer, user: User):Boolean = {
+  def isSubscriberForCourse(courseid: Integer, user: User): Boolean = {
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT ? in (select user_id from user_course where course_id = ? and typ = 'SUBSCRIBE') as subscribed")
     prparStmt.setInt(1, user.userid)
     prparStmt.setInt(2, courseid)
     val resultSet = prparStmt.executeQuery()
-    if(resultSet.next()){
-      resultSet.getInt("subscribed") == 1
-    }
-    else{
-      false
-    }
+
+    resultSet.next() && resultSet.getInt("subscribed") == 1
   }
 
   /**
@@ -125,7 +116,7 @@ class CourseService {
     * @param user a user object
     * @return JSON (contains information if grant worked or not)
     */
-  def grandUserToACourse(grandType:String, courseid: Integer, user: User): util.Map[String, Boolean] = {
+  def grandUserToACourse(grandType: String, courseid: Integer, user: User): util.Map[String, Boolean] = {
     val grandTypes = List("edit")
     if(!grandTypes.contains(grandType)){
       throw new BadRequestException("Please specify a valid grant_type.")
@@ -147,43 +138,36 @@ class CourseService {
     * @return Java Map
     */
   def getCourseDetailes(courseid: Integer, user: User): util.Map[_ <: String, _ >: io.Serializable with String] = {
-
     var advanced_informations = "course_id, name, description"
-
     val isPermitted = this.isPermittedForCourse(courseid,user)
 
-    if(isPermitted)
-      {
+    if (isPermitted) {
         advanced_informations += ", creator" // TODO add more columns
-      }
+    }
 
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT " + advanced_informations + " FROM course where course_id = ?")
     prparStmt.setInt(1, courseid)
     val resultSet = prparStmt.executeQuery()
 
-    if(resultSet.next())
-      {
-        var taskList:util.List[java.util.Map[String, String]] = null
+    if (resultSet.next()) {
+        var taskList: util.List[java.util.Map[String, String]] = null
 
-        if(isPermitted || this.isSubscriberForCourse(courseid,user))
-          {
-            taskList =  this.taskService.getTasksByCourse(courseid)
-          }
+        if(isPermitted || this.isSubscriberForCourse(courseid, user)) {
+            taskList = this.taskService.getTasksByCourse(courseid)
+        }
 
         var courseMap = Map(courseLabels.courseid -> resultSet.getString(courseLabels.courseid),
           courseLabels.name -> resultSet.getString(courseLabels.name),
           courseLabels.description -> resultSet.getString(courseLabels.description),
           "tasks" -> taskList)
 
-        if(isPermitted){
+        if (isPermitted) {
           courseMap += courseLabels.creator -> resultSet.getString(courseLabels.creator)
         }
         courseMap.asJava
-      }
-    else{
+    } else {
       Map().asJava
     }
-
   }
 }

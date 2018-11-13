@@ -22,8 +22,7 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @RequestMapping(path = Array("/api/v1/tasks"))
-class TaskController{
-
+class TaskController {
   /** holds connection to TaskService*/
   val taskService = new TaskService()
 
@@ -55,14 +54,12 @@ class TaskController{
     */
   @RequestMapping(value = Array("{id}/result"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid:Integer, request:HttpServletRequest): util.List[util.Map[String, String]] = {
-    val requestingUser:User = userService.verfiyUserByHeaderToken(request)
-    if(requestingUser == null)
-    {
+  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): util.List[util.Map[String, String]] = {
+    val requestingUser: User = userService.verfiyUserByHeaderToken(request)
+    if (requestingUser == null) {
       throw new UnauthorizedException
     }
     taskService.getTaskResults(taskid,requestingUser)
-
   }
 
   /**
@@ -75,11 +72,10 @@ class TaskController{
   @ResponseStatus(HttpStatus.ACCEPTED)
   @RequestMapping(value = Array("{id}/submit"), method = Array(RequestMethod.POST), consumes = Array("application/json"))
   @ResponseBody
-  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode:JsonNode, request:HttpServletRequest ):util.Map[String, String] = {
+  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): util.Map[String, String] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
 
-    if(requestingUser == null)
-    {
+    if (requestingUser == null) {
       throw new UnauthorizedException
     }
     try {
@@ -87,21 +83,18 @@ class TaskController{
 
       val submissionId = taskService.submitTask(taskid,requestingUser,data)
 
-      val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username,LABEL_DATA->data,
+      val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username, LABEL_DATA->data,
         LABEL_SUBMISSION_ID -> submissionId.toString))
       logger.warn(jsonResult)
       kafkaTemplate.send(topicName, jsonResult)
       kafkaTemplate.flush()
 
       Map("success" -> "true",LABEL_TASK_ID -> taskid.toString,LABEL_SUBMISSION_ID -> submissionId.toString).asJava
-
-    }
-    catch{
+    } catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide a data parameter.")
       }
     }
-
   }
 
   /**
@@ -111,11 +104,10 @@ class TaskController{
     * @return JSON
     */
   @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET))
-  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request:HttpServletRequest ): util.Map[String, String] = {
+  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): util.Map[String, String] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
 
-    if(requestingUser == null)
-    {
+    if (requestingUser == null) {
       throw new UnauthorizedException
     }
     taskService.getTaskDetails(taskid,requestingUser)
@@ -135,13 +127,10 @@ class TaskController{
         Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]), Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
         answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
 
-    }
-    catch {
+    } catch {
       case e: NoSuchElementException => {
         logger.warn("Checker Service did not provide all parameters")
-
       }
-
     }
   }
 }

@@ -29,7 +29,7 @@ class KafkaCheckProducer {
     * createProducer
     * @return a KafkaProducer
     */
-  def createProducer(): KafkaProducer[String, String] ={
+  def createProducer(): KafkaProducer[String, String] = {
     val props: Properties = new Properties
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS)
     props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaExampleProducer")
@@ -44,15 +44,13 @@ class KafkaCheckProducer {
     * @param message String of informations
     * @return producer output
     */
-  def runProducer(message: String):Any = {
-
-    val producerRecord:ProducerRecord[String,String] = new ProducerRecord(TOPIC,messageIndex.toString,message)
+  def runProducer(message: String): Any = {
+    val producerRecord: ProducerRecord[String,String] = new ProducerRecord(TOPIC, messageIndex.toString,message)
 
     //val metadata:RecordMetadata=
     producer.send(producerRecord)
     producer.flush
     //producer.close
     messageIndex += 1
-
   }
 }

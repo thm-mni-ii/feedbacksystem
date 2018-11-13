@@ -22,7 +22,7 @@ class TaskService {
   /**
     * Class holds all DB labels
     */
-  class TaskDBLabels{
+  class TaskDBLabels {
     /** DB Label "task_id" */
     var taskid: String = "task_id"
 
@@ -42,7 +42,7 @@ class TaskService {
   /**
     * Class holds all DB labels
     */
-  class SubmissionDBLabels{
+  class SubmissionDBLabels {
     /** DB Label "task_id" */
     var taskid: String = "task_id"
 
@@ -57,7 +57,6 @@ class TaskService {
 
     /** DB Label "passed" */
     var passed: String = "passed"
-
   }
 
   /** holds all unique labels */
@@ -121,9 +120,7 @@ class TaskService {
         submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
         submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)).asJava
     }
-
     taskList.toList.asJava
-
   }
 
   /**
@@ -132,7 +129,7 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer, user: User):util.Map[String, String] = {
+  def getTaskDetails(taskid: Integer, user: User): util.Map[String, String] = {
     // TODO check if user has this course where the task is from
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
@@ -140,17 +137,14 @@ class TaskService {
     prparStmt.setInt(1, taskid)
     prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
-    if(resultSet.next())
-      {
+    if (resultSet.next()) {
         Map(taskDBLabels.courseid -> resultSet.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> resultSet.getString(taskDBLabels.taskid),
           taskDBLabels.name -> resultSet.getString(taskDBLabels.name),
           taskDBLabels.description -> resultSet.getString(taskDBLabels.description)).asJava
-      }
-    else{
+    } else {
       throw new BadRequestException("Task '" + taskid + "' is not available.")
     }
-
   }
 
   /**
@@ -163,13 +157,13 @@ class TaskService {
     * @param passed tiny peace of status information (i.e. exitcode)
     * @return Boolean: did update work
     */
-  def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String):Boolean = {
+  def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String): Boolean = {
     val prparStmt = this.mysqlConnector.prepareStatement(
       "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;")
     prparStmt.setString(1, result)
     prparStmt.setString(2, passed)
     prparStmt.setInt(3, taskid)
-    val anti_magic_number_4:Int = 4
+    val anti_magic_number_4: Int = 4
     prparStmt.setInt(anti_magic_number_4, submissionid)
 
     prparStmt.execute()
@@ -184,12 +178,11 @@ class TaskService {
     val prparStmt = this.mysqlConnector.prepareStatement("select * from task where course_id = ?")
     prparStmt.setInt(1, courseid)
     val resultSet = prparStmt.executeQuery()
-
     var taskList = new ListBuffer[java.util.Map[String, String]]()
 
     val resultIterator = new Iterator[ResultSet] {
       def hasNext: Boolean = resultSet.next()
-      def next(): ResultSet = resultSet
+      def next: ResultSet = resultSet
     }.toStream
 
     for (res <- resultIterator.iterator) {
@@ -200,7 +193,5 @@ class TaskService {
     }
 
     taskList.toList.asJava
-
   }
-
 }

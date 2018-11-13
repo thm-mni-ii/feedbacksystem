@@ -6,7 +6,6 @@ import java.sql.{Connection, DriverManager, Statement}
   * MySQLConfig connects to MySQL 8 DB
   */
 class MySQLConfig {
-
   // TODO Load DB from Input
   /** MySQL 8 URL */
   val url = "jdbc:mysql://localhost:3308/submissionchecker"
@@ -36,6 +35,5 @@ class MySQLConfig {
     * getter Method for MySQL DB
     * @return MySQL 8 Connector
     */
-  def getConnector:Connection = connection
-
+  def getConnector: Connection = connection
 }
