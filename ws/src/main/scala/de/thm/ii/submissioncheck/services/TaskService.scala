@@ -66,7 +66,7 @@ class TaskService {
   /**
     * submit a Task
     * @param taskid unique identification for a task
-    * @param user requestig User
+    * @param user requesting User
     * @param data submitted data from User
     * @return Submission ID
     */
@@ -173,6 +173,10 @@ class TaskService {
     prparStmt.setInt(anti_magic_number_4, submissionid)
 
     prparStmt.execute()
+  }
+
+  def getTasksByCourse(courseid: Int):Unit = {
+    
   }
 
 }
