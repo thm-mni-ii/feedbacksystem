@@ -32,7 +32,7 @@ class LoginController {
   @CrossOrigin
   @RequestMapping(value = Array("/login"), method = Array(RequestMethod.POST))
   @ResponseBody
-  def postUser(response: HttpServletResponse, username:String, password: String ): util.Map[String, Any] = {
+  def postUser(response: HttpServletResponse, username:String, password: String ): util.Map[String, Boolean] = {
     val cas  = new CasWrapper(username,password)
     val loginResult:Boolean = cas.login()
     var jwtToken = ""
@@ -41,11 +41,8 @@ class LoginController {
         val user = userService.insertUserIfNotExists(username,1)
         jwtToken = userService.generateTokenFromUser(user)
       }
-
-    val myCookie = new Cookie("token" , jwtToken)
-    response.addCookie(myCookie)
-
-    Map("login_result" -> cas.login(),"token" -> jwtToken).asJava
+    response.addHeader("Authorization", "Bearer " + jwtToken)
+    Map("login_result" -> cas.login()).asJava
   }
 
 }

@@ -1,10 +1,13 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util
+
 import de.thm.ii.submissioncheck.misc.UnauthorizedException
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{CourseService, UserService}
+import javax.servlet.http.HttpServletRequest
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, RequestMethod, ResponseBody, RestController}
+
 import scala.collection.JavaConverters._
 
 @RestController
@@ -18,13 +21,13 @@ class CourseController {
 
   /**
     * getAllCourses is a route for all courses
-    * @param jwt_token JWT
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllCourses(jwt_token: String): util.List[util.Map[String, String]] = {
+  def getAllCourses(request:HttpServletRequest ): util.List[util.Map[String, String]] = {
     // TODO If admin -> all, if prof -->
-    val user:User = userService.verfiyUserByToken(jwt_token)
+    val user:User = userService.verfiyUserByHeaderToken(request)
     if(user == null)
       {
         throw new UnauthorizedException
@@ -36,13 +39,13 @@ class CourseController {
     * createCourse is a route to create a course
     * @param name course name
     * @param description course description
-    * @param jwt_token JWT
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.POST))
-  def createCourse(name: String, description: String, jwt_token: String): util.Map[String, String] = {
+  def createCourse(name: String, description: String, request:HttpServletRequest ): util.Map[String, String] = {
     // TODO: nothing done yet, we need a service
-    val user:User = userService.verfiyUserByToken(jwt_token)
+    val user:User = userService.verfiyUserByHeaderToken(request)
     if(user == null)
     {
       throw new UnauthorizedException
@@ -53,14 +56,14 @@ class CourseController {
   /**
     * getCourse provides course details for a specific course by given id
     * @param courseid unique course identification
-    * @param jwt_token JWT contains user information
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("/{id}"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getCourse(@PathVariable("id") courseid: String, jwt_token: String): util.Map[String, String] = {
+  def getCourse(@PathVariable("id") courseid: String, request:HttpServletRequest ): util.Map[String, String] = {
     // If admin -> all, if prof -->
-    val user:User = userService.verfiyUserByToken(jwt_token)
+    val user:User = userService.verfiyUserByHeaderToken(request)
     if(user == null)
     {
       throw new UnauthorizedException
