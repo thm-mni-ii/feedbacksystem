@@ -1,13 +1,11 @@
 package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, ResultSet}
-import java.util
-
+import java.{io, util}
 import scala.collection.JavaConverters._
 import de.thm.ii.submissioncheck.config.MySQLConfig
 import de.thm.ii.submissioncheck.misc.BadRequestException
 import de.thm.ii.submissioncheck.model.User
-
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -30,12 +28,15 @@ class CourseService {
     val name: String = "name"
     /** holds label description*/
     val description: String = "description"
-    /** holds label owner*/
-    val owner: String = "owner"
+    /** holds label creator*/
+    val creator: String = "creator"
   }
 
   /** holds all course-Table labels*/
   val courseLabels = new CourseLabels()
+
+  /** all interactions with tasks are done via a taskService*/
+  val taskService:TaskService = new TaskService
 
   /**
     * getCoursesByUser search courses by user object
@@ -62,7 +63,7 @@ class CourseService {
       courseList += Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
         courseLabels.name -> res.getString(courseLabels.name),
         courseLabels.description -> res.getString(courseLabels.description),
-        courseLabels.owner -> res.getString(courseLabels.owner)).asJava
+        courseLabels.creator -> res.getString(courseLabels.creator)).asJava
     }
     courseList.toList.asJava
   }
@@ -77,7 +78,9 @@ class CourseService {
     */
   def isPermittedForCourse(courseid: Integer, user: User):Boolean = {
     // TODO allow admin users here!
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT ? IN (SELECT creator FROM course where course_id = ? UNION SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted")
+    val prparStmt = this.mysqlConnector.prepareStatement(
+      "SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
+        "SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted")
 
     prparStmt.setInt(1, user.userid)
     prparStmt.setInt(2, courseid)
@@ -94,13 +97,14 @@ class CourseService {
   }
 
   /**
-    *
-    * @param courseid
-    * @param user
-    * @return
+    * check is a user has a subscription for a course
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return Boolean
     */
   def isSubscriberForCourse(courseid: Integer, user: User):Boolean = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT ? in (select user_id from user_course where course_id = ? and typ = 'SUBSCRIBE') as subscribed")
+    val prparStmt = this.mysqlConnector.prepareStatement(
+      "SELECT ? in (select user_id from user_course where course_id = ? and typ = 'SUBSCRIBE') as subscribed")
     prparStmt.setInt(1, user.userid)
     prparStmt.setInt(2, courseid)
     val resultSet = prparStmt.executeQuery()
@@ -113,11 +117,13 @@ class CourseService {
   }
 
   /**
-    * grant rights (spe
+    * grant rights (specified by grandType) to a user for a course
+    *
+    * @author Benjamin Manns
     * @param grandType which rights is specified here (we support just `edit` until now)
     * @param courseid unique identification for a course
     * @param user a user object
-    * @return JSON if grant worked
+    * @return JSON (contains information if grant worked or not)
     */
   def grandUserToACourse(grandType:String, courseid: Integer, user: User): util.Map[String, Boolean] = {
     val grandTypes = List("edit")
@@ -132,7 +138,6 @@ class CourseService {
     Map("success" -> (prparStmt.executeUpdate() == 1)).asJava
   }
 
-
   /**
     * getCourseDetailes gives detailed infos about one course - later also task list
     *
@@ -141,7 +146,7 @@ class CourseService {
     * @param user User object
     * @return Java Map
     */
-  def getCourseDetailes(courseid: Integer, user: User):java.util.Map[String,String] = {
+  def getCourseDetailes(courseid: Integer, user: User): util.Map[_ <: String, _ >: io.Serializable with String] = {
 
     var advanced_informations = "course_id, name, description"
 
@@ -155,40 +160,30 @@ class CourseService {
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT " + advanced_informations + " FROM course where course_id = ?")
     prparStmt.setInt(1, courseid)
-    prparStmt.setInt(2, user.userid)
     val resultSet = prparStmt.executeQuery()
 
-    var courseMap = Map[String,String]()
     if(resultSet.next())
       {
-        courseMap += (courseLabels.courseid -> resultSet.getString(courseLabels.courseid),
-          courseLabels.name -> resultSet.getString(courseLabels.name),
-          courseLabels.description -> resultSet.getString(courseLabels.description),
-          courseLabels.owner -> resultSet.getString(courseLabels.owner))
-        println(courseMap)
-
-
-        var taskList = new ListBuffer[java.util.Map[String, String]]()
-
-
+        var taskList:util.List[java.util.Map[String, String]] = null
 
         if(isPermitted || this.isSubscriberForCourse(courseid,user))
           {
-            // TODO Add Task List from Task Service
+            taskList =  this.taskService.getTasksByCourse(courseid)
           }
-        Map(courseLabels.courseid -> resultSet.getString(courseLabels.courseid),
+
+        var courseMap = Map(courseLabels.courseid -> resultSet.getString(courseLabels.courseid),
           courseLabels.name -> resultSet.getString(courseLabels.name),
           courseLabels.description -> resultSet.getString(courseLabels.description),
-          courseLabels.owner -> resultSet.getString(courseLabels.owner)).asJava
+          "tasks" -> taskList)
 
-
-
+        if(isPermitted){
+          courseMap += courseLabels.creator -> resultSet.getString(courseLabels.creator)
+        }
+        courseMap.asJava
       }
     else{
       Map().asJava
     }
-
-
 
   }
 }

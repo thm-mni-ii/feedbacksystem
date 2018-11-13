@@ -1,6 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
-import java.util
+import java.{io, util}
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
@@ -16,6 +17,8 @@ class CourseController {
   private val userService: UserService = new UserService()
 
   private val courseService: CourseService = new CourseService()
+
+  private final val application_json_value = "application/json"
 
   /**
     * getAllCourses is a route for all courses
@@ -39,7 +42,7 @@ class CourseController {
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array("application/json"))
+  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   def createCourse(request:HttpServletRequest,@RequestBody jsonNode:JsonNode): util.Map[String, String] = {
     // TODO: nothing done yet, we need a service
     try {
@@ -66,9 +69,9 @@ class CourseController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET), consumes = Array("application/json"))
+  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET), consumes = Array())
   @ResponseBody
-  def getCourse(@PathVariable("id") courseid: Integer, request:HttpServletRequest): util.Map[String, String] = {
+  def getCourse(@PathVariable("id") courseid: Integer, request:HttpServletRequest): util.Map[_ <: String, _ >: io.Serializable with String] = {
     // If admin -> all, if prof -->
     val user:User = userService.verfiyUserByHeaderToken(request)
     if(user == null)
@@ -85,7 +88,7 @@ class CourseController {
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}/grant"), method = Array(RequestMethod.POST), consumes = Array("application/json"))
+  @RequestMapping(value = Array("{id}/grant"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseBody
   def grantCourse(@PathVariable("id") courseid: Integer, request:HttpServletRequest, @RequestBody jsonNode:JsonNode): util.Map[String, Boolean] = {
     try{
