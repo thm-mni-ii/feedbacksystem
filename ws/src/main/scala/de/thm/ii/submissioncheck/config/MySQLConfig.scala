@@ -9,7 +9,7 @@ class MySQLConfig {
 
   // TODO Load DB from Input
   /** MySQL 8 URL */
-  val url = "jdbc:mysql://localhost:3308/db1"
+  val url = "jdbc:mysql://localhost:3308/submissionchecker"
 
   /** Since MySQL 8 we need another driver */
   val driver = "com.mysql.cj.jdbc.Driver"
