@@ -59,7 +59,7 @@ class TaskController {
     if (requestingUser == null) {
       throw new UnauthorizedException
     }
-    taskService.getTaskResults(taskid,requestingUser)
+    taskService.getTaskResults(taskid, requestingUser)
   }
 
   /**
@@ -81,7 +81,7 @@ class TaskController {
     try {
       val data = jsonNode.get(LABEL_DATA).asText()
 
-      val submissionId = taskService.submitTask(taskid,requestingUser,data)
+      val submissionId = taskService.submitTask(taskid, requestingUser, data)
 
       val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username, LABEL_DATA->data,
         LABEL_SUBMISSION_ID -> submissionId.toString))
@@ -89,7 +89,7 @@ class TaskController {
       kafkaTemplate.send(topicName, jsonResult)
       kafkaTemplate.flush()
 
-      Map("success" -> "true",LABEL_TASK_ID -> taskid.toString,LABEL_SUBMISSION_ID -> submissionId.toString).asJava
+      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString).asJava
     } catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide a data parameter.")
@@ -110,7 +110,7 @@ class TaskController {
     if (requestingUser == null) {
       throw new UnauthorizedException
     }
-    taskService.getTaskDetails(taskid,requestingUser)
+    taskService.getTaskDetails(taskid, requestingUser)
   }
 
   /**

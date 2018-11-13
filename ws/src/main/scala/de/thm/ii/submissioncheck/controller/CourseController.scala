@@ -93,7 +93,7 @@ class CourseController {
       if (user == null) {
         throw new UnauthorizedException
       }
-      if (!this.courseService.isPermittedForCourse(courseid,user)) {
+      if (!this.courseService.isPermittedForCourse(courseid, user)) {
         throw new UnauthorizedException
       } else {
         val userToGrant: User = userService.loadUserFromDB(username)

@@ -45,7 +45,7 @@ class KafkaCheckProducer {
     * @return producer output
     */
   def runProducer(message: String): Any = {
-    val producerRecord: ProducerRecord[String,String] = new ProducerRecord(TOPIC, messageIndex.toString,message)
+    val producerRecord: ProducerRecord[String, String] = new ProducerRecord(TOPIC, messageIndex.toString, message)
 
     //val metadata:RecordMetadata=
     producer.send(producerRecord)

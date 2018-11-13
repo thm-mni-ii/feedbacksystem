@@ -38,11 +38,11 @@ class LoginController {
       val username = jsonNode.get("username").asText()
       val password = jsonNode.get("password").asText()
 
-      val cas  = new CasWrapper(username,password)
+      val cas = new CasWrapper(username, password)
       val loginResult: Boolean = cas.login()
       var jwtToken = ""
       if(loginResult) {
-        val user = userService.insertUserIfNotExists(username,1)
+        val user = userService.insertUserIfNotExists(username, 1)
         jwtToken = userService.generateTokenFromUser(user)
       }
       response.addHeader("Authorization", "Bearer " + jwtToken)

@@ -73,7 +73,7 @@ class KafkaCheckConsumer {
     * runConsumer
     * @param callback a method with is called on incoming data
     */
-  def runConsumer(callback: (String, String)=>(String, Int)): Unit = {
+  def runConsumer(callback: (String, String) => (String, Int)): Unit = {
     val producer = new KafkaCheckProducer()
     val consumer = createConsumer()
     var endlessLoop = true

@@ -149,7 +149,7 @@ class UserService {
   def loadUserFromDB(username: String): User = {
     val prparStmt = this.mysqlConnector.prepareStatement(
       "SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1")
-    prparStmt.setString(1,username)
+    prparStmt.setString(1, username)
     val resultSet = prparStmt.executeQuery()
 
     if (resultSet.next()) {

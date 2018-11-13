@@ -139,7 +139,7 @@ class CourseService {
     */
   def getCourseDetailes(courseid: Integer, user: User): util.Map[_ <: String, _ >: io.Serializable with String] = {
     var advanced_informations = "course_id, name, description"
-    val isPermitted = this.isPermittedForCourse(courseid,user)
+    val isPermitted = this.isPermittedForCourse(courseid, user)
 
     if (isPermitted) {
         advanced_informations += ", creator" // TODO add more columns
