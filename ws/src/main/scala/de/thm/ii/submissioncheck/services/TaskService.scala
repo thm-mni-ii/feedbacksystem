@@ -67,11 +67,12 @@ class TaskService {
     * submit a Task
     * @param taskid unique identification for a task
     * @param user requestig User
+    * @param data submitted data from User
     * @return Submission ID
     */
-  def submitTask(taskid: Int, user: User): Integer = {
+  def submitTask(taskid: Int, user: User, data: String): Integer = {
     // TODO Check authorization for this taks!!
-
+    // TODO save data into DB
     val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO submission " +
       "(task_id, user_id) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
 
