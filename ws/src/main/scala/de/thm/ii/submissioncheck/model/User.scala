@@ -9,11 +9,12 @@ import scala.collection.JavaConverters._
   * @author Benjamin Manns
   * @param id local DB's userid
   * @param name User's username
+  * @param role_name User's role name
   */
-class User(id:Int, name:String) {
+class User(id:Int, name:String, role_name:String) {
 
   /** static defined class field*/
-  var role = "STUDENT"
+  var role = role_name
   /** public class field username*/
   var username = name
   /** public class field id*/
