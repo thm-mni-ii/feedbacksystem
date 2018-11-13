@@ -2,12 +2,11 @@ package de.thm.ii.submissioncheck.controller
 
 import java.util
 import java.util.NoSuchElementException
-
 import collection.JavaConverters._
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.submissioncheck.misc.{JsonParser, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{ClientService, TaskService, UserService}
+import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -48,28 +47,33 @@ class TaskController{
   /**
     * Print all results, if any,from a given task
     * @param taskid unique identification for a task
-    * @param jwt_token JWT
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("{id}/result"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid:Integer, jwt_token: String): util.List[util.Map[String, String]] = {
-    val user:User = userService.verfiyUserByToken(jwt_token)
-    taskService.getTaskResults(taskid,user)
+  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid:Integer, request:HttpServletRequest): util.List[util.Map[String, String]] = {
+    val requestingUser:User = userService.verfiyUserByHeaderToken(request)
+    if(requestingUser == null)
+    {
+      throw new UnauthorizedException
+    }
+    taskService.getTaskResults(taskid,requestingUser)
+
   }
 
   /**
     * Submit data for a given task
     * @param taskid unique identification for a task
     * @param data Students solution to a given question
-    * @param jwt_token JWT
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @ResponseStatus(HttpStatus.ACCEPTED)
   @RequestMapping(value = Array("{id}/submit"), method = Array(RequestMethod.POST))
   @ResponseBody
-  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, data: String, jwt_token: String):util.Map[String, String] = {
-    val requestingUser = userService.verfiyUserByToken(jwt_token)
+  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, data: String, request:HttpServletRequest ):util.Map[String, String] = {
+    val requestingUser = userService.verfiyUserByHeaderToken(request)
 
     if(requestingUser == null)
     {
@@ -90,12 +94,12 @@ class TaskController{
   /**
     * Print details for a given Task
     * @param taskid unique identification for a task
-    * @param jwt_token JWT
+    * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET))
-  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, jwt_token: String): util.Map[String, String] = {
-    val requestingUser = userService.verfiyUserByToken(jwt_token)
+  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request:HttpServletRequest ): util.Map[String, String] = {
+    val requestingUser = userService.verfiyUserByHeaderToken(request)
 
     if(requestingUser == null)
     {

@@ -8,6 +8,7 @@ import de.thm.ii.submissioncheck.misc.BadRequestException
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
+import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
 import collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -120,38 +121,51 @@ class UserService {
   }
 
   /**
-    * verfiyUserByToken reads from a given String if this is a token and if yes get information form it
+    * verfiyUserByHeaderToken reads from a given User Request the Bearer Token if this is a token and if yes get information form it
     * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
-    * The Token contains an `iat` - and issued at unix time which will be checked that it is not too old
+    * The Token contains an `iat` - and expiration at unix time which will be checked that it is not too old
     *
     * @author Benjamin Manns
-    * @param jwtToken String
+    * @param request a Users Request Body
     * @return User
     */
-  def verfiyUserByToken(jwtToken: String): User = {
-    try {
-      val secrets = new Secrets()
-      val currentDate = new Date()
-      val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
-      val tokenDate: Integer = claims.get("iat").asInstanceOf[Integer]
+  def verfiyUserByHeaderToken(request: HttpServletRequest): User = {
+    try{
+      val authHeader = request.getHeader("Authorization")
+      var jwtToken = authHeader.split(" ")(1)
 
-      /* Useful properties:
-      claims.getSubject
-      claims.get("roles")
-       */
+      try {
+        val secrets = new Secrets()
+        val currentDate = new Date()
+        val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+        val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
-      if((currentDate.getTime()-tokenDate*1000L) > 12*3600*1000L)
-      {
-        null
+        /* Useful properties:
+        claims.getSubject
+        claims.get("roles")
+         */
+
+        // Token is expired
+        if((tokenDate)*1000L-currentDate.getTime <= 0)
+        {
+          null
+        }
+        else{
+          this.loadUserFromDB(claims.get("username").asInstanceOf[String])
+        }
+
       }
-      else{
-        this.loadUserFromDB(claims.get("username").asInstanceOf[String])
+      catch {
+        case e@(_: JwtException | _: IllegalArgumentException) =>
+          null
       }
 
     }
-    catch {
-      case e@(_: JwtException | _: IllegalArgumentException) =>
+    catch{
+      case e: ArrayIndexOutOfBoundsException => {
         null
+      }
+
     }
   }
 
@@ -219,6 +233,7 @@ class UserService {
       .claim("roles", "user")
       .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
+      .setExpiration(new Date(new Date().getTime + (1000*3600)))
       .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
       .compact
 
