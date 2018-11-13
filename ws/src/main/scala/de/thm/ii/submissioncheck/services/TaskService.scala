@@ -175,8 +175,32 @@ class TaskService {
     prparStmt.execute()
   }
 
-  def getTasksByCourse(courseid: Int):Unit = {
-    
+  /**
+    * get a JAVA List of Task by a given course id
+    * @param courseid unique identification for a course
+    * @return JAVA List
+    */
+  def getTasksByCourse(courseid: Int): util.List[util.Map[String, String]] = {
+    val prparStmt = this.mysqlConnector.prepareStatement("select * from task where course_id = ?")
+    prparStmt.setInt(1, courseid)
+    val resultSet = prparStmt.executeQuery()
+
+    var taskList = new ListBuffer[java.util.Map[String, String]]()
+
+    val resultIterator = new Iterator[ResultSet] {
+      def hasNext: Boolean = resultSet.next()
+      def next(): ResultSet = resultSet
+    }.toStream
+
+    for (res <- resultIterator.iterator) {
+      taskList += Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
+        taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
+        taskDBLabels.name -> res.getString(taskDBLabels.name),
+        taskDBLabels.description -> res.getString(taskDBLabels.description)).asJava
+    }
+
+    taskList.toList.asJava
+
   }
 
 }
