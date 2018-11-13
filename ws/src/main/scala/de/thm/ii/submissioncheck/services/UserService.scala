@@ -35,6 +35,9 @@ class UserService {
 
     /** DB Label "role_id" */
     var role_id: String = "role_id"
+
+    /** DB Label "role_name" */
+    var role_name: String = "role_name"
   }
 
   /** holds all unique labels */
@@ -153,13 +156,14 @@ class UserService {
     * @return User | null
     */
   def loadUserFromDB(username: String):User = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM user where username = ? LIMIT 1")
+    val prparStmt = this.mysqlConnector.prepareStatement(
+      "SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1")
     prparStmt.setString(1,username)
     val resultSet = prparStmt.executeQuery()
 
     if(resultSet.next())
       {
-        new User(resultSet.getInt(dbLabels.user_id), resultSet.getString(dbLabels.username))
+        new User(resultSet.getInt(dbLabels.user_id), resultSet.getString(dbLabels.username), resultSet.getString(dbLabels.role_name))
       }
     else{
       null
@@ -177,7 +181,7 @@ class UserService {
 
     val secrets = new Secrets()
     val jwtToken = Jwts.builder.setSubject("client_authentication")
-      .claim("roles", "user")
+      .claim("roles", user.role)
       .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000*3600)))
