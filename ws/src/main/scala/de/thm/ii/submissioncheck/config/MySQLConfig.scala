@@ -1,11 +1,14 @@
 package de.thm.ii.submissioncheck.config
 
-import java.sql.{Connection, DriverManager, Statement}
+import java.sql.{Connection, DriverManager}
+
+import org.slf4j.LoggerFactory
 
 /**
   * MySQLConfig connects to MySQL 8 DB
   */
 class MySQLConfig {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   // TODO Load DB from Input
   /** MySQL 8 URL */
   val url = "jdbc:mysql://localhost:3308/submissionchecker"
@@ -28,7 +31,7 @@ class MySQLConfig {
     Class.forName(driver)
     connection = DriverManager.getConnection(url, username, password)
   } catch {
-    case e: Exception => e.printStackTrace
+    case e: Exception => logger.error("Cannot establish required SQL-connection.", e)
   }
 
   /**
