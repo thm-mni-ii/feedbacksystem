@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material";
 import {Student} from "../Student";
+import {AuthService} from "../../service/auth.service";
 
 /**
  * Component that shows the courses from a student.
@@ -16,7 +17,7 @@ export class StudentStartComponent implements OnInit {
   randomStudent: Student[];
   student: Student;
 
-  constructor(private snackbar: MatSnackBar) {
+  constructor(private snackbar: MatSnackBar, private auth: AuthService) {
   }
 
   ngOnInit() {
@@ -36,6 +37,7 @@ export class StudentStartComponent implements OnInit {
 
 
   logout() {
+    this.auth.logout();
     this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 
