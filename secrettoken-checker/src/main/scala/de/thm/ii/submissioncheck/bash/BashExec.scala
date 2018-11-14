@@ -1,23 +1,20 @@
-package de.thm.ii.submissioncheck
+package de.thm.ii.submissioncheck.bash
 
-import scala.sys.process._
 import java.io._
+import org.slf4j.LoggerFactory
+import scala.sys.process._
 
 /**
   * Class for executing Bash scripts
   *
   * @author Vlad Sokyrskyy
   *
-  * @param scriptpathc path of shell script
-  * @param namec username parameter
-  * @param tokenc shell script parameter
+  * @param scriptpath path of shell script
+  * @param name username parameter
+  * @param token shell script parameter
   */
-class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
-  /**
-    * Class instance scriptpath
-    */
-  var scriptpath = scriptpathc
-
+class BashExec(val scriptpath: String, val name: String, val token: String) {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   /**
     * Class instance file
     */
@@ -27,14 +24,6 @@ class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
     * Class instance absPath
     */
   var absPath = file.getAbsolutePath
-  /**
-    * Class instance namec
-    */
-  var name = namec
-  /**
-    * Class instance tokenc
-    */
-  var token = tokenc
 
   /**
     * Class instance output
@@ -64,11 +53,10 @@ class BashExec(val scriptpathc: String, val namec: String, val tokenc: String) {
 
     output = stdoutStream.toString
 
-    if(exitCode == 0){
+    if (exitCode == 0) {
       success = true
-    }
-    else {
-      print("Exit with non-zero code: " + exitCode + "\n")
+    } else {
+      logger.debug("Exit with non-zero code: " + exitCode)
     }
     exitcode = exitCode
     exitCode

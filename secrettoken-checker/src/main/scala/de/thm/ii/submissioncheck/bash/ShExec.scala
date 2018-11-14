@@ -1,5 +1,6 @@
-package de.thm.ii.submissioncheck
+package de.thm.ii.submissioncheck.bash
 
+import org.slf4j.LoggerFactory
 import scala.sys.process._
 
 /**
@@ -7,19 +8,11 @@ import scala.sys.process._
   *
   * @author Vlad Sokyrskyy
   *
-  * @param scriptpathc path of shell script
-  * @param tokenc shell script parameter
+  * @param scriptpath path of shell script
+  * @param token shell script parameter
   */
-class ShExec(val scriptpathc: String, val tokenc: String) {
-  /**
-    * Class instance scriptpath
-    */
-  var scriptpath = scriptpathc
-
-  /**
-    * Class instance tokenc
-    */
-  var token = tokenc
+class ShExec(val scriptpath: String, val token: String) {
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Class instance output
@@ -46,14 +39,12 @@ class ShExec(val scriptpathc: String, val tokenc: String) {
     output = st.mkString("\n")
 
     val exitCode = Process("sh", Seq(scriptpath, token)).!
-    if(exitCode == 0){
+    if (exitCode == 0) {
       success = true
-    }
-    else {
-      print("Exit with non-zero code: " + exitCode + "\n")
+    } else {
+      logger.debug("Exit with non-zero code: " + exitCode)
     }
     exitcode = exitCode
     exitCode
-    //return 0
   }
 }
