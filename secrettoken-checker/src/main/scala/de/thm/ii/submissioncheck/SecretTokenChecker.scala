@@ -1,13 +1,22 @@
 package de.thm.ii.submissioncheck
 
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
-import java.util.Properties
-import java.util.Collections
-/*
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.core.KafkaTemplate
-*/
+import akka.Done
+import akka.actor.ActorSystem
+import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
+import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.kafka.scaladsl.{Consumer, Producer}
+import akka.kafka.scaladsl.Consumer.DrainingControl
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+
+import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.util.{Failure, Success}
+import java.util.NoSuchElementException
+
+import JsonHelper._
+import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
 
 /**
   * Application for running a script with username and token as parameters
@@ -15,23 +24,66 @@ import org.springframework.kafka.core.KafkaTemplate
   * @author Vlad Sokyrskyy
   */
 object SecretTokenChecker extends App {
-  //code for testing out
-  /*
-  val bashtest1 = new BashExec("script.sh", "a", "0cc175b9c0f1b6a831c399e269772661");
-  val exit1 = bashtest1.exec()
-  val bashmessage1 = bashtest1.output
-  print("exitcode: " + bashtest1.exitcode + "\n")
-  */
+  // +++++++++++++++++++++++++++++++++++++++++++
+  //               Kafka Settings
+  // +++++++++++++++++++++++++++++++++++++++++++
+  private val CHECK_REQUEST_TOPIC = "check_request"
+  private val CHECK_ANSWER_TOPIC = "check_answer"
+
+  private implicit val system: ActorSystem = ActorSystem("akka-system")
+  private implicit val materializer: Materializer = ActorMaterializer()
+  private implicit val ec: ExecutionContextExecutor = system.dispatcher
+
+  private val logger = system.log
+
+  private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
+  private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
+
+  private val control = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onMessageReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  // Correctly handle Ctrl+C and docker container stop
+  sys.addShutdownHook({
+    control.shutdown().onComplete {
+        case Success(_) => logger.info("Exiting ...")
+        case Failure(err) => logger.warning(err.getMessage)
+      }
+  })
+
+  private def sendMessage(record: ProducerRecord[String, String]): Future[Done] = Source.single(record).runWith(Producer.plainSink(producerSettings))
+  private def sendMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
+
+  private def onMessageReceived(record: ConsumerRecord[String, String]): Unit = {
+    // Hack by https://stackoverflow.com/a/29914564/5885054
+    val jsonMap: Map[String, Any] = record.value()
+    try {
+      val userid: String = jsonMap("userid").asInstanceOf[String]
+      val data: String = jsonMap("data").asInstanceOf[String]
+      val taskid: String = jsonMap("taskid").asInstanceOf[String]
+      val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
+
+      val (output, code) = bashTest(userid, data)
+      sendMessage(Map(
+        "data" -> output,
+        "exitcode" -> code.toString,
+        "userid" -> userid,
+        "taskid" -> taskid,
+        "submissionid" -> submissionid
+      ))
+    } catch {
+      case e: NoSuchElementException => {
+        sendMessage("Please provide valid parameter")
+      }
+    }
+  }
+
   /**
     * Name of the md5 test script
     */
   val script = "script.sh"
-
-  /**
-    * Instance of Check Consumer which runs in a loop and try to pull information
-    */
-  val cons = new KafkaCheckConsumer()
-  cons.runConsumer(bashTest)
 
   /**
     * Method for the callback function

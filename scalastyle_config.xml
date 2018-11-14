@@ -67,6 +67,11 @@
             <parameter name="regex"><![CDATA[println]]></parameter>
         </parameters>
     </check>
+    <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+        <parameters>
+            <parameter name="regex"><![CDATA[\sprint\(]]></parameter>
+        </parameters>
+    </check>
     <check level="error" class="org.scalastyle.scalariform.NumberOfTypesChecker" enabled="true">
         <parameters>
             <parameter name="maxTypes"><![CDATA[30]]></parameter>
