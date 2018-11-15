@@ -48,7 +48,7 @@ class CourseService {
   def getCoursesByUser(user: User): util.List[util.Map[String, String]] = {
     // TODO Check somehow if this is a course owner or a course participant
     jdbcTemplate.query("SELECT * FROM user_has_courses hc join course c using(course_id) where user_id = ?",
-      (res, num) => {
+      (res, _) => {
         Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
           courseLabels.name -> res.getString(courseLabels.name),
           courseLabels.description -> res.getString(courseLabels.description),
@@ -68,7 +68,7 @@ class CourseService {
     // TODO allow admin users here!
     val resultSet = jdbcTemplate.query("SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
       "SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted",
-      (res, num) => res.getInt("permitted"), user.userid, courseid, courseid)
+      (res, _) => res.getInt("permitted"), user.userid, courseid, courseid)
 
     !resultSet.isEmpty && resultSet.get(0) == 1
   }
@@ -82,7 +82,7 @@ class CourseService {
   def isSubscriberForCourse(courseid: Integer, user: User): Boolean = {
     val resultSet = jdbcTemplate.query("SELECT ? in (select user_id from user_course where course_id = ? " +
       "and typ = 'SUBSCRIBE') as subscribed",
-      (res, num) => res.getInt("subscribed"), user.userid, courseid)
+      (res, _) => res.getInt("subscribed"), user.userid, courseid)
 
     !resultSet.isEmpty && resultSet.get(0) == 1
   }
@@ -132,7 +132,7 @@ class CourseService {
     }
 
     val list = jdbcTemplate.query("SELECT " + selectPart + " FROM course where course_id = ?",
-      (res, num) => {
+      (res, _) => {
         var courseMap = Map(
           courseLabels.courseid -> res.getString(courseLabels.courseid),
           courseLabels.name -> res.getString(courseLabels.name),

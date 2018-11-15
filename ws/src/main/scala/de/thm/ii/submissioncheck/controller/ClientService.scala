@@ -17,10 +17,10 @@ class ClientService {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Value("${message.topic.name}")
-  private var topicName: String = null
+  private val topicName: String = null
 
   @Autowired
-  private var kafkaTemplate: KafkaTemplate[String, String] = null
+  private val kafkaTemplate: KafkaTemplate[String, String] = null
 
   /**
     * Serve static main assets to the client.

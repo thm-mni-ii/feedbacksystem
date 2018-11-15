@@ -5,7 +5,7 @@ import java.util
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.BadRequestException
 import de.thm.ii.submissioncheck.services.UserService
-import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
+import javax.servlet.http.HttpServletResponse
 import org.springframework.web.bind.annotation._
 
 import collection.JavaConverters._
@@ -22,7 +22,7 @@ import de.thm.ii.submissioncheck.cas.CasWrapper
 @RequestMapping(path = Array("/api/v1"))
 class LoginController {
   /** holds the communication with User Table and Authentication */
-  var userService = new UserService()
+  val userService = new UserService
 
   /**
     * postUser sends loginin Data to the CAS Client to perform a login. Also a Cookie has to be
@@ -48,9 +48,7 @@ class LoginController {
       response.addHeader("Authorization", "Bearer " + jwtToken)
       Map("login_result" -> cas.login()).asJava
     } catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide all parameters.")
-      }
+      case _: NullPointerException => throw new BadRequestException("Please provide all parameters.")
     }
   }
 }

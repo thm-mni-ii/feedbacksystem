@@ -21,10 +21,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
 @Configuration
 class KafkaConsumerConfig {
   @Value("${spring.kafka.bootstrap-servers}")
-  private var bootstrapAddress: String = null
+  private val bootstrapAddress: String = null
 
   @Value("${spring.kafka.consumer.group-id}")
-  private var groupId: String = null
+  private val groupId: String = null
 
   /**
     * @return Default kafka consumer config for a docker instance.

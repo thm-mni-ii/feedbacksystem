@@ -27,16 +27,16 @@ class UserService {
     */
   class DBLabels{
     /** DB Label "user_id" */
-    var user_id: String = "user_id"
+    val user_id: String = "user_id"
 
     /** DB Label "username" */
-    var username: String = "username"
+    val username: String = "username"
 
     /** DB Label "role_id" */
-    var role_id: String = "role_id"
+    val role_id: String = "role_id"
 
     /** DB Label "role_name" */
-    var role_name: String = "role_name"
+    val role_name: String = "role_name"
   }
 
   /** holds all unique labels */
@@ -49,7 +49,7 @@ class UserService {
     * @return JSON (Map) of all current users with no restrictions so far (not printing passwords)
     */
   def getUsers: util.List[util.Map[String, String]] = {
-    jdbcTemplate.query("SELECT * FROM user", (res, rowNum) => {
+    jdbcTemplate.query("SELECT * FROM user", (res, _) => {
       Map(dbLabels.user_id -> res.getString(dbLabels.user_id),
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
@@ -85,10 +85,10 @@ class UserService {
           this.loadUserFromDB(claims.get("username").asInstanceOf[String])
         }
       } catch {
-        case e@(_: JwtException | _: IllegalArgumentException) => None
+        case _: JwtException | _: IllegalArgumentException => None
       }
     } catch {
-      case e: ArrayIndexOutOfBoundsException => None
+      case _: ArrayIndexOutOfBoundsException => None
     }
   }
 
@@ -101,7 +101,7 @@ class UserService {
   def insertUserIfNotExists(username: String, role_id: Integer): User = {
     val user: Option[User] = this.loadUserFromDB(username)
     if(user.isEmpty) {
-      val count = jdbcTemplate.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
+      jdbcTemplate.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
       loadUserFromDB(username).get
     } else {
       user.get
@@ -115,7 +115,7 @@ class UserService {
     */
   def loadUserFromDB(username: String): Option[User] = {
     val users = jdbcTemplate.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
-      (res, num) => {
+      (res, _) => {
         new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name))
       }, username)
 

@@ -46,9 +46,7 @@ class CourseController {
       val description = jsonNode.get("description").asText()
       val task_typ = jsonNode.get("task_typ").asText()
     } catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description, task_typ")
-      }
+      case _: NullPointerException => throw new BadRequestException("Please provide: name, description, task_typ")
     }
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty) {
@@ -103,9 +101,7 @@ class CourseController {
         }
       }
     } catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: username, grant_type")
-      }
+      case _: NullPointerException => throw new BadRequestException("Please provide: username, grant_type")
     }
   }
 }

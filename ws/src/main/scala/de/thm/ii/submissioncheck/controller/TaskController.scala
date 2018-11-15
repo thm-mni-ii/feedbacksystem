@@ -5,7 +5,6 @@ import java.util.NoSuchElementException
 import com.fasterxml.jackson.databind.JsonNode
 import collection.JavaConverters._
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
-import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{TaskService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
@@ -93,7 +92,7 @@ class TaskController {
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString).asJava
     } catch {
-      case e: NullPointerException => throw new BadRequestException("Please provide a data parameter.")
+      case _: NullPointerException => throw new BadRequestException("Please provide a data parameter.")
     }
   }
 
@@ -128,9 +127,7 @@ class TaskController {
         Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]), Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
         answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
     } catch {
-      case e: NoSuchElementException => {
-        logger.warn("Checker Service did not provide all parameters")
-      }
+      case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
     }
   }
 }

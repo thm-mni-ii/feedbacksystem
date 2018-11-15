@@ -1,15 +1,13 @@
 package de.thm.ii.submissioncheck.services
 
-import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
+import java.sql.{Connection, Statement}
 import java.util
 
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import collection.JavaConverters._
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementCreator}
-
-import scala.collection.mutable.ListBuffer
+import org.springframework.jdbc.core.JdbcTemplate
 
 /**
   * Enable communication with Tasks and their Results
@@ -24,16 +22,16 @@ class TaskService {
     */
   class TaskDBLabels {
     /** DB Label "task_id" */
-    var taskid: String = "task_id"
+    val taskid: String = "task_id"
 
     /** DB Label "name" */
-    var name: String = "name"
+    val name: String = "name"
 
     /** DB Label "description" */
-    var description: String = "description"
+    val description: String = "description"
 
     /** DB Label "course_id" */
-    var courseid: String = "course_id"
+    val courseid: String = "course_id"
   }
 
   /** holds all unique labels */
@@ -44,19 +42,19 @@ class TaskService {
     */
   class SubmissionDBLabels {
     /** DB Label "task_id" */
-    var taskid: String = "task_id"
+    val taskid: String = "task_id"
 
     /** DB Label "submission_id" */
-    var submissionid: String = "submission_id"
+    val submissionid: String = "submission_id"
 
     /** DB Label "result" */
-    var result: String = "result"
+    val result: String = "result"
 
     /** DB Label "userid" */
-    var userid: String = "user_id"
+    val userid: String = "user_id"
 
     /** DB Label "passed" */
-    var passed: String = "passed"
+    val passed: String = "passed"
   }
 
   /** holds all unique labels */
@@ -100,7 +98,7 @@ class TaskService {
     */
   def getTaskResults(taskid: Int, user: User): util.List[util.Map[String, String]] = {
     jdbcTemplate.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
-      (res, num) => {
+      (res, _) => {
         Map(
           taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
@@ -124,7 +122,7 @@ class TaskService {
 
     val list = jdbcTemplate.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
       "using(course_id) where task_id = ? and owner = ?;",
-      (res, num) => {
+      (res, _) => {
         Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
@@ -164,7 +162,7 @@ class TaskService {
     */
   def getTasksByCourse(courseid: Int): util.List[util.Map[String, String]] = {
     jdbcTemplate.query("select * from task where course_id = ?",
-      (res, num) => {
+      (res, _) => {
         Map(
           taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
