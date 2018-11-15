@@ -78,7 +78,7 @@ class TaskController {
       val data = jsonNode.get(LABEL_DATA).asText()
       val submissionId = taskService.submitTask(taskid, requestingUser.get, data)
 
-      val jsonResult = JsonParser(Map(
+      val jsonResult = JsonParser.mapToJsonStr(Map(
         LABEL_TASK_ID -> taskid.toString,
         LABEL_USER_ID -> requestingUser.get.username,
         LABEL_DATA->data,

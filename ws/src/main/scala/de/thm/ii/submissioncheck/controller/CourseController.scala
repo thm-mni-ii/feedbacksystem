@@ -51,7 +51,7 @@ class CourseController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    user.get
+    user.get.asMap()
   }
 
   /**

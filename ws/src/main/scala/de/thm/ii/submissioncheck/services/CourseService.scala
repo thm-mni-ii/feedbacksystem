@@ -140,7 +140,7 @@ class CourseService {
         )
 
         if (isPermitted) {
-          courseMap + courseLabels.creator -> res.getString(courseLabels.creator)
+          courseMap + (courseLabels.creator -> res.getString(courseLabels.creator))
         } else {
           courseMap
         }

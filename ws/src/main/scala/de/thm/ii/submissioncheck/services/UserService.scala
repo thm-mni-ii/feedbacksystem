@@ -65,27 +65,31 @@ class UserService {
     * @return User
     */
   def verfiyUserByHeaderToken(request: HttpServletRequest): Option[User] = {
-    try {
-      val authHeader = request.getHeader("Authorization")
-      val jwtToken = authHeader.split(" ")(1)
-
+    val authHeader = request.getHeader("Authorization")
+    if (authHeader != null) {
       try {
-        val secrets = new Secrets()
-        val currentDate = new Date()
-        val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
-        val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
+        val jwtToken = authHeader.split(" ")(1)
+        try {
+          val secrets = new Secrets()
+          val currentDate = new Date()
+          val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+          val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
-        // Token is expired
-        if (tokenDate * 1000L - currentDate.getTime <= 0) {
-          None
-        } else {
-          this.loadUserFromDB(claims.get("username").asInstanceOf[String])
+          // Token is expired
+          if (tokenDate * 1000L - currentDate.getTime <= 0) {
+            None
+          } else {
+            this.loadUserFromDB(claims.get("username").asInstanceOf[String])
+          }
+        } catch {
+          case _: JwtException | _: IllegalArgumentException => None
         }
-      } catch {
-        case _: JwtException | _: IllegalArgumentException => None
       }
-    } catch {
-      case _: ArrayIndexOutOfBoundsException => None
+      catch {
+        case _: ArrayIndexOutOfBoundsException => None
+      }
+    } else {
+      None
     }
   }
 

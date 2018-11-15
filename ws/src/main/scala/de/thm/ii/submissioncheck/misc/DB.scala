@@ -23,7 +23,7 @@ object DB {
     * @return Mapped type
     */
   @throws[DataAccessException]
-  def query[T](sql: String, rowMapper: RowMapper[T], args: AnyRef*)(implicit jdbc: JdbcTemplate): List[T] = {
+  def query[T](sql: String, rowMapper: RowMapper[T], args: Any*)(implicit jdbc: JdbcTemplate): List[T] = {
     jdbc.query(sql, rowMapper, args).asScala.toList
   }
 
@@ -49,7 +49,7 @@ object DB {
     * @return Number of updated rows.
     */
   @throws[DataAccessException]
-  def update(sql: String, args: AnyRef*)(implicit jdbc: JdbcTemplate): Int = {
+  def update(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Int = {
     jdbc.update(sql, args)
   }
 }
