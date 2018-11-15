@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
 
@@ -53,8 +53,6 @@ export class AuthService {
           this.router.navigate(['user']);
           break;
       }
-
-
       return user;
     })
   }
