@@ -7,18 +7,11 @@ import scala.collection.JavaConverters._
   * Class User holds all data from the user table
   *
   * @author Benjamin Manns
-  * @param id local DB's userid
-  * @param name User's username
-  * @param role_name User's role name
+  * @param userid local DB's userid
+  * @param username User's username
+  * @param role User's role name
   */
-class User(id: Int, name: String, role_name: String) {
-  /** static defined class field*/
-  var role = role_name
-  /** public class field username*/
-  var username = name
-  /** public class field id*/
-  var userid: Int = id
-
+class User(val userid: Int, val username: String, val role: String) {
   /**
     * Return User as JavaMap. Simply answer in HTTPResonses
     *

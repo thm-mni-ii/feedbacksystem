@@ -1,11 +1,13 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.{io, util}
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{CourseService, UserService}
 import javax.servlet.http.HttpServletRequest
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
 @RestController
@@ -13,10 +15,7 @@ import org.springframework.web.bind.annotation._
 class CourseController {
   /** Class field to perform JWT Auth*/
   private val userService: UserService = new UserService()
-
   private val courseService: CourseService = new CourseService()
-
-  private final val application_json_value = "application/json"
 
   /**
     * getAllCourses is a route for all courses
@@ -26,11 +25,11 @@ class CourseController {
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllCourses(request: HttpServletRequest): util.List[util.Map[String, String]] = {
     // TODO If admin -> all, if prof -->
-    val user: User = userService.verfiyUserByHeaderToken(request)
-    if (user == null) {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
         throw new UnauthorizedException
     }
-    courseService.getCoursesByUser(user)
+    courseService.getCoursesByUser(user.get)
   }
 
   /**
@@ -39,7 +38,7 @@ class CourseController {
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def createCourse(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): util.Map[String, String] = {
     // TODO: nothing done yet, we need a service
     try {
@@ -51,11 +50,11 @@ class CourseController {
         throw new BadRequestException("Please provide: name, description, task_typ")
       }
     }
-    val user: User = userService.verfiyUserByHeaderToken(request)
-    if(user == null) {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    user.asJavaMap()
+    user.get.asJavaMap()
   }
 
   /**
@@ -68,11 +67,11 @@ class CourseController {
   @ResponseBody
   def getCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest): util.Map[_ <: String, _ >: io.Serializable with String] = {
     // If admin -> all, if prof -->
-    val user: User = userService.verfiyUserByHeaderToken(request)
-    if(user == null) {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    courseService.getCourseDetailes(courseid, user)
+    courseService.getCourseDetails(courseid, user.get).getOrElse(new util.HashMap[String, String]())
   }
 
   /**
@@ -82,25 +81,25 @@ class CourseController {
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}/grant"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @RequestMapping(value = Array("{id}/grant"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def grantCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): util.Map[String, Boolean] = {
     try {
-      var username = jsonNode.get("username").asText()
-      var grant_type = jsonNode.get("grant_type").asText()
+      val username = jsonNode.get("username").asText()
+      val grant_type = jsonNode.get("grant_type").asText()
 
-      val user: User = userService.verfiyUserByHeaderToken(request)
-      if (user == null) {
+      val user = userService.verfiyUserByHeaderToken(request)
+      if (user.isEmpty) {
         throw new UnauthorizedException
       }
-      if (!this.courseService.isPermittedForCourse(courseid, user)) {
+      if (!this.courseService.isPermittedForCourse(courseid, user.get)) {
         throw new UnauthorizedException
       } else {
-        val userToGrant: User = userService.loadUserFromDB(username)
-        if (userToGrant == null) {
+        val userToGrant = userService.loadUserFromDB(username)
+        if (userToGrant.isEmpty) {
           throw new BadRequestException("Please provid a valid username")
         } else {
-          courseService.grandUserToACourse(grant_type, courseid, userToGrant)
+          courseService.grandUserToACourse(grant_type, courseid, userToGrant.get)
         }
       }
     } catch {

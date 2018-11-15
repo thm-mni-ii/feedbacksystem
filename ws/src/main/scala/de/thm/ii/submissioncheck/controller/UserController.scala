@@ -13,7 +13,7 @@ import de.thm.ii.submissioncheck.services.UserService
 @RequestMapping(path = Array("/api/v1"))
 class UserController {
   /** userService instance to handle DB Connection */
-  val userService: UserService = new UserService
+  val userService: UserService = new UserService()
 
   /**
     * getAllUsers is a admin function und just sends a list of all users

@@ -1,4 +1,4 @@
-package de.thm.ii.submissioncheck.services
+package de.thm.ii.submissioncheck.controller
 import de.thm.ii.submissioncheck.misc.ResourceNotFoundException
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestMapping, ResponseStatus}

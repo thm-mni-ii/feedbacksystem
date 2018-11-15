@@ -1,27 +1,27 @@
 package de.thm.ii.submissioncheck.services
 
-import java.sql.{Connection, ResultSet, Statement}
 import java.util
 import java.util.Date
-import de.thm.ii.submissioncheck.config.MySQLConfig
-import de.thm.ii.submissioncheck.misc.BadRequestException
+
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Component
 import collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 
 /**
   * UserService serves all user data in both directions using mysql
   *
   * @author Benjamin Manns
   */
+@Component
 class UserService {
-  /** mysqlConnector establish connection to our mysql 8 DB */
-  val mysqlConnector: Connection = new MySQLConfig().getConnector
-
+  @Autowired
+  private val jdbcTemplate: JdbcTemplate = null
   /**
     * Class holds all DB labels
     */
@@ -49,24 +49,13 @@ class UserService {
     * @return JSON (Map) of all current users with no restrictions so far (not printing passwords)
     */
   def getUsers: util.List[util.Map[String, String]] = {
-    val prparStmt = this.mysqlConnector.prepareStatement("SELECT * FROM user")
-    val resultSet = prparStmt.executeQuery()
-    var userList = new ListBuffer[java.util.Map[String, String]]()
-
-    val resultIterator = new Iterator[ResultSet] {
-      def hasNext: Boolean = resultSet.next()
-      def next(): ResultSet = resultSet
-    }.toStream
-
-    for (res <- resultIterator.iterator) {
-      userList += Map(dbLabels.user_id -> res.getString(dbLabels.user_id),
+    jdbcTemplate.query("SELECT * FROM user", (res, rowNum) => {
+      Map(dbLabels.user_id -> res.getString(dbLabels.user_id),
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
         dbLabels.role_id -> res.getString(dbLabels.role_id),
         "email" -> res.getString("email")).asJava
-    }
-
-    userList.toList.asJava
+    })
   }
 
   /**
@@ -78,10 +67,10 @@ class UserService {
     * @param request a Users Request Body
     * @return User
     */
-  def verfiyUserByHeaderToken(request: HttpServletRequest): User = {
+  def verfiyUserByHeaderToken(request: HttpServletRequest): Option[User] = {
     try {
       val authHeader = request.getHeader("Authorization")
-      var jwtToken = authHeader.split(" ")(1)
+      val jwtToken = authHeader.split(" ")(1)
 
       try {
         val secrets = new Secrets()
@@ -89,26 +78,17 @@ class UserService {
         val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
         val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
-        /* Useful properties:
-        claims.getSubject
-        claims.get("roles")
-         */
-
         // Token is expired
-        if ((tokenDate) * 1000L - currentDate.getTime <= 0) {
-          null
+        if (tokenDate * 1000L - currentDate.getTime <= 0) {
+          None
         } else {
           this.loadUserFromDB(claims.get("username").asInstanceOf[String])
         }
-      }
-      catch {
-        case e@(_: JwtException | _: IllegalArgumentException) =>
-          null
+      } catch {
+        case e@(_: JwtException | _: IllegalArgumentException) => None
       }
     } catch {
-      case e: ArrayIndexOutOfBoundsException => {
-        null
-      }
+      case e: ArrayIndexOutOfBoundsException => None
     }
   }
 
@@ -119,43 +99,30 @@ class UserService {
     * @return User
     */
   def insertUserIfNotExists(username: String, role_id: Integer): User = {
-    val user: User = this.loadUserFromDB(username)
-    if(user == null) {
-      // insert new User
-
-      val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO user " +
-        "(username, role_id) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
-      prparStmt.setString(1, username)
-      prparStmt.setInt(2, role_id)
-      prparStmt.execute()
-      var insertedID = -1
-      val rs = prparStmt.getGeneratedKeys
-      if (rs.next) insertedID = rs.getInt(1)
-
-      if (insertedID == -1) {
-        throw new RuntimeException("Error creating user. Please contact administrator.")
-      }
-      loadUserFromDB(username)
+    val user: Option[User] = this.loadUserFromDB(username)
+    if(user.isEmpty) {
+      val count = jdbcTemplate.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
+      loadUserFromDB(username).get
     } else {
-      user
+      user.get
     }
   }
 
   /**
-    * loadUserFromDB by a given username. If user not exists return null
+    * Load user by a given username.
     * @param username a unique identification for a user
-    * @return User | null
+    * @return The user having the given username if such one exists.
     */
-  def loadUserFromDB(username: String): User = {
-    val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1")
-    prparStmt.setString(1, username)
-    val resultSet = prparStmt.executeQuery()
+  def loadUserFromDB(username: String): Option[User] = {
+    val users = jdbcTemplate.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
+      (res, num) => {
+        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name))
+      }, username)
 
-    if (resultSet.next()) {
-        new User(resultSet.getInt(dbLabels.user_id), resultSet.getString(dbLabels.username), resultSet.getString(dbLabels.role_name))
+    if (users.isEmpty) {
+      None
     } else {
-      null
+      Some(users.get(0))
     }
   }
 
