@@ -15,6 +15,21 @@ export class AuthService {
   }
 
 
+  /**
+   * Decoded jwt token with information from user
+   */
+  private getDecodedToken(): JWTToken {
+    return this.jwtHelper.decodeToken(this.getToken());
+  }
+
+  /**
+   * Get user Token
+   */
+  private getToken() {
+    return localStorage.getItem('user');
+  }
+
+
   login(username: string, password: string) {
     return this.http.post<LoginResult>("/api/v1/login", {
       username: username,
