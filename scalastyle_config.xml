@@ -82,6 +82,16 @@
             <parameter name="regex"><![CDATA[\.printStackTrace]]></parameter>
         </parameters>
     </check>
+    <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+        <parameters>
+            <parameter name="regex"><![CDATA[util\.Map]]></parameter>
+        </parameters>
+    </check>
+    <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+        <parameters>
+            <parameter name="regex"><![CDATA[JavaConversions]]></parameter>
+        </parameters>
+    </check>
     <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
         <parameters>
             <parameter name="maximum"><![CDATA[10]]></parameter>

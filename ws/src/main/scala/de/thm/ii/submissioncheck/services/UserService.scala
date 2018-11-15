@@ -1,8 +1,6 @@
 package de.thm.ii.submissioncheck.services
 
-import java.util
 import java.util.Date
-
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
@@ -11,8 +9,7 @@ import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-import collection.JavaConverters._
-
+import de.thm.ii.submissioncheck.misc.DB
 /**
   * UserService serves all user data in both directions using mysql
   *
@@ -21,7 +18,7 @@ import collection.JavaConverters._
 @Component
 class UserService {
   @Autowired
-  private val jdbcTemplate: JdbcTemplate = null
+  private implicit val jdbc: JdbcTemplate = null
   /**
     * Class holds all DB labels
     */
@@ -48,13 +45,13 @@ class UserService {
     * @author Benjamin Manns
     * @return JSON (Map) of all current users with no restrictions so far (not printing passwords)
     */
-  def getUsers: util.List[util.Map[String, String]] = {
-    jdbcTemplate.query("SELECT * FROM user", (res, _) => {
+  def getUsers: List[Map[String, String]] = {
+    DB.query("SELECT * FROM user", (res, _) => {
       Map(dbLabels.user_id -> res.getString(dbLabels.user_id),
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
         dbLabels.role_id -> res.getString(dbLabels.role_id),
-        "email" -> res.getString("email")).asJava
+        "email" -> res.getString("email"))
     })
   }
 
@@ -101,7 +98,7 @@ class UserService {
   def insertUserIfNotExists(username: String, role_id: Integer): User = {
     val user: Option[User] = this.loadUserFromDB(username)
     if(user.isEmpty) {
-      jdbcTemplate.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
+      DB.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
       loadUserFromDB(username).get
     } else {
       user.get
@@ -114,16 +111,12 @@ class UserService {
     * @return The user having the given username if such one exists.
     */
   def loadUserFromDB(username: String): Option[User] = {
-    val users = jdbcTemplate.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
+    val users = DB.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name))
       }, username)
 
-    if (users.isEmpty) {
-      None
-    } else {
-      Some(users.get(0))
-    }
+    users.headOption
   }
 
   /**

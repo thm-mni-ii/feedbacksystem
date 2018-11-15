@@ -32,9 +32,8 @@ object JsonParser {
     * @return Json String
     */
   def mapToJsonStr(jsonMap: Map[String, String]): String = {
-    val map: util.Map[String, String] = jsonMap.asJava
     val mapper = new ObjectMapper
-    val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(map)
+    val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
     jsonResult
   }
 }

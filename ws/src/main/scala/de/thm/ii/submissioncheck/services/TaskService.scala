@@ -1,10 +1,8 @@
 package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, Statement}
-import java.util
 
-import org.springframework.jdbc.support.GeneratedKeyHolder
-import collection.JavaConverters._
+import de.thm.ii.submissioncheck.misc.DB
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -16,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate
   */
 class TaskService {
   @Autowired
-  private val jdbcTemplate: JdbcTemplate = null
+  private implicit val jdbc: JdbcTemplate = null
   /**
     * Class holds all DB labels
     */
@@ -71,16 +69,15 @@ class TaskService {
     // TODO Check authorization for this taks!!
     // TODO save data into DB
 
-    val holder = new GeneratedKeyHolder
-    val num = jdbcTemplate.update((con: Connection) => {
+    val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "\"INSERT INTO submission (task_id, user_id) VALUES (?,?);\", taskid, user.userid",
+        "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setInt(1, taskid)
       ps.setInt(2, user.userid)
       ps
-    }, holder)
+    })
     val insertedId = holder.getKey.intValue()
 
     if (num == 0) {
@@ -96,8 +93,8 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskResults(taskid: Int, user: User): util.List[util.Map[String, String]] = {
-    jdbcTemplate.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
+  def getTaskResults(taskid: Int, user: User): List[Map[String, String]] = {
+    DB.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
       (res, _) => {
         Map(
           taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
@@ -107,7 +104,7 @@ class TaskService {
           submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
           submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
           submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)
-        ).asJava
+        )
       }, taskid, user.userid)
   }
 
@@ -117,24 +114,18 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer, user: User): Option[util.Map[String, String]] = {
+  def getTaskDetails(taskid: Integer, user: User): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-
-    val list = jdbcTemplate.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
+    val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
       "using(course_id) where task_id = ? and owner = ?;",
       (res, _) => {
         Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
           taskDBLabels.description -> res.getString(taskDBLabels.description)
-        ).asJava
+        )
       }, taskid, user.userid)
-
-    if (list.isEmpty) {
-      None
-    } else {
-      Some(list.get(0))
-    }
+    list.headOption
   }
 
   /**
@@ -148,7 +139,7 @@ class TaskService {
     * @return Boolean: did update work
     */
   def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String): Boolean = {
-    val num = jdbcTemplate.update(
+    val num = DB.update(
       "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;",
       result, passed, taskid, submissionid
     )
@@ -160,15 +151,15 @@ class TaskService {
     * @param courseid unique identification for a course
     * @return JAVA List
     */
-  def getTasksByCourse(courseid: Int): util.List[util.Map[String, String]] = {
-    jdbcTemplate.query("select * from task where course_id = ?",
+  def getTasksByCourse(courseid: Int): List[Map[String, String]] = {
+    DB.query("select * from task where course_id = ?",
       (res, _) => {
         Map(
           taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
           taskDBLabels.description -> res.getString(taskDBLabels.description)
-        ).asJava
+        )
       }, courseid)
   }
 }

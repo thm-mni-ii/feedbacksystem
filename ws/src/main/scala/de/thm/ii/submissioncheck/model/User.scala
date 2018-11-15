@@ -1,8 +1,5 @@
 package de.thm.ii.submissioncheck.model
 
-import java.util
-import scala.collection.JavaConverters._
-
 /**
   * Class User holds all data from the user table
   *
@@ -13,12 +10,12 @@ import scala.collection.JavaConverters._
   */
 class User(val userid: Int, val username: String, val role: String) {
   /**
-    * Return User as JavaMap. Simply answer in HTTPResonses
+    * Return User as Map. Simply answer in HTTPResonses
     *
     * @author Benjamin Manns
-    * @return Java Map / JSON of User Data
+    * @return Map / JSON of User Data
     */
-  def asJavaMap(): util.Map[String, String] = {
-    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role).asJava
+  def asMap(): Map[String, String] = {
+    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role)
   }
 }

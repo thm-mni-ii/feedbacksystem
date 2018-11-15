@@ -1,6 +1,5 @@
 package de.thm.ii.submissioncheck.controller
 
-import java.util
 import org.springframework.web.bind.annotation._
 import de.thm.ii.submissioncheck.services.UserService
 
@@ -22,7 +21,7 @@ class UserController {
     * @return JSON of all Users
     */
   @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET))
-  def getAllUsers: util.List[util.Map[String, String]] = {
+  def getAllUsers: List[Map[String, String]] = {
     userService.getUsers
   }
 }

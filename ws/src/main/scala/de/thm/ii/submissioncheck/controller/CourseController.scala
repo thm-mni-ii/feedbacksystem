@@ -4,7 +4,6 @@ import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
-import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{CourseService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.springframework.http.MediaType
@@ -23,7 +22,7 @@ class CourseController {
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllCourses(request: HttpServletRequest): util.List[util.Map[String, String]] = {
+  def getAllCourses(request: HttpServletRequest): List[Map[String, String]] = {
     // TODO If admin -> all, if prof -->
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
@@ -39,7 +38,7 @@ class CourseController {
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def createCourse(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): util.Map[String, String] = {
+  def createCourse(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, String] = {
     // TODO: nothing done yet, we need a service
     try {
       val name = jsonNode.get("name").asText()
@@ -52,7 +51,7 @@ class CourseController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    user.get.asJavaMap()
+    user.get
   }
 
   /**
@@ -63,13 +62,13 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET), consumes = Array())
   @ResponseBody
-  def getCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest): util.Map[_ <: String, _ >: io.Serializable with String] = {
+  def getCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     // If admin -> all, if prof -->
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    courseService.getCourseDetails(courseid, user.get).getOrElse(new util.HashMap[String, String]())
+    courseService.getCourseDetails(courseid, user.get).getOrElse(Map.empty)
   }
 
   /**
@@ -81,7 +80,7 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/grant"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
-  def grantCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): util.Map[String, Boolean] = {
+  def grantCourse(@PathVariable("id") courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val username = jsonNode.get("username").asText()
       val grant_type = jsonNode.get("grant_type").asText()
