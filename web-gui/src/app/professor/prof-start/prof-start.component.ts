@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material";
+import {AuthService} from "../../service/auth.service";
 
 @Component({
   selector: 'app-prof-start',
@@ -8,7 +9,7 @@ import {MatSnackBar} from "@angular/material";
 })
 export class ProfStartComponent implements OnInit {
 
-  constructor(private snackbar: MatSnackBar) {
+  constructor(private snackbar: MatSnackBar, private auth: AuthService) {
   }
 
   ngOnInit() {
@@ -16,6 +17,7 @@ export class ProfStartComponent implements OnInit {
 
 
   logout() {
+    this.auth.logout();
     this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 

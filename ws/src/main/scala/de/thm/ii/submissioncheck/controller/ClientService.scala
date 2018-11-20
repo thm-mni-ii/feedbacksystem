@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.controller
 
+import net.unicon.cas.client.configuration.EnableCasClient
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
