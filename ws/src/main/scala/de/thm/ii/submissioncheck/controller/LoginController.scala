@@ -5,6 +5,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.springframework.web.bind.annotation._
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
   * LoginController simply perfoem login request. In future it might send also a COOKIE
@@ -15,7 +16,8 @@ import org.slf4j.LoggerFactory
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1"))
 class LoginController extends CasClientConfigurerAdapter {
-  private val userService = new UserService()
+  @Autowired
+  private val userService: UserService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
     * postUser sends loginin Data to the CAS Client to perform a login. Also a Cookie has to be
@@ -35,8 +37,10 @@ class LoginController extends CasClientConfigurerAdapter {
         response.addHeader("Authorization", "Bearer " + jwtToken)
         Map("login_result" -> true)
       } catch {
-        case e: Throwable => logger.error("Error: ", e)
+        case e: Throwable => {
+          logger.error("Error: ", e)
+          Map("login_result" -> false)
+        }
       }
-    Map("login_result" -> false)
   }
 }

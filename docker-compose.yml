@@ -38,6 +38,6 @@ services:
       MYSQL_ROOT_PASSWORD: example
       MYSQL_DATABASE: submissionchecker
     ports:
-      - "3308:3306"
+      - "3306:3306"
   bash1:
     image: bash:4.4

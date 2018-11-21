@@ -20,11 +20,10 @@ import org.springframework.web.bind.annotation._
 @RestController
 @RequestMapping(path = Array("/api/v1/tasks"))
 class TaskController {
-  /** holds connection to TaskService*/
-  val taskService = new TaskService()
-
-  /** holds connection to TaskService*/
-  val userService = new UserService()
+  @Autowired
+  private val taskService: TaskService = null
+  @Autowired
+  private val userService: UserService = null
 
   /** Path variable Label ID*/
   final val LABEL_ID = "id"

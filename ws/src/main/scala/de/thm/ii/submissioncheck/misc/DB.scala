@@ -1,8 +1,10 @@
 package de.thm.ii.submissioncheck.misc
 
+import java.sql.Connection
+
 import scala.collection.JavaConverters._
 import org.springframework.dao.DataAccessException
-import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementCreator, RowMapper, RowMapperResultSetExtractor}
+import org.springframework.jdbc.core._
 import org.springframework.jdbc.support.{GeneratedKeyHolder, KeyHolder}
 
 /**
@@ -24,7 +26,7 @@ object DB {
     */
   @throws[DataAccessException]
   def query[T](sql: String, rowMapper: RowMapper[T], args: Any*)(implicit jdbc: JdbcTemplate): List[T] = {
-    jdbc.query(sql, rowMapper, args).asScala.toList
+    jdbc.query(sql, rowMapper, args.asJava.toArray: _*).asScala.toList
   }
 
   /**
@@ -50,6 +52,25 @@ object DB {
     */
   @throws[DataAccessException]
   def update(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Int = {
-    jdbc.update(sql, args)
+    jdbc.update(sql, args.asJava.toArray: _*)
+  }
+
+  /**
+    * Execute multiple sql statements as a batch job.
+    * @param sql Multiple sql statements.
+    * @param jdbc Spring JDBC Template.
+    * @throws DataAccessException If data could not be accessed by query.
+    * @return Number of effected elements per statement.
+    */
+  @throws[DataAccessException]
+  def batchUpdate (sql: String*)(implicit jdbc: JdbcTemplate): Boolean = {
+    jdbc.execute((conn: Connection) => {
+      conn.setAutoCommit(false)
+      val stmt = conn.createStatement
+      sql.foreach(stmt.executeLargeUpdate)
+      conn.commit()
+      conn.setAutoCommit(true)
+      true
+    })
   }
 }

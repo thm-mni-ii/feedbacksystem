@@ -5,13 +5,16 @@ import java.sql.{Connection, Statement}
 import de.thm.ii.submissioncheck.misc.DB
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Component
 
 /**
   * Enable communication with Tasks and their Results
   *
   * @author Benjamin Manns
   */
+@Component
 class TaskService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null

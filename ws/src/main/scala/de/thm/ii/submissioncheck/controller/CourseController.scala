@@ -1,20 +1,24 @@
 package de.thm.ii.submissioncheck.controller
 
-import java.{io, util}
-
+import java.io
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{CourseService, UserService}
 import javax.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
+/**
+  * Controller to manage rest api calls for a course resource.
+  */
 @RestController
 @RequestMapping(path = Array("/api/v1/courses/"))
 class CourseController {
-  /** Class field to perform JWT Auth*/
-  private val userService: UserService = new UserService()
-  private val courseService: CourseService = new CourseService()
+  @Autowired
+  private val userService: UserService = null
+  @Autowired
+  private val courseService: CourseService = null
 
   /**
     * getAllCourses is a route for all courses
