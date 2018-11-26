@@ -1,0 +1,59 @@
+buildscript {
+    repositories {
+        jcenter() // only work after gradle 1.7
+    }
+
+    dependencies {
+        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.0.4.RELEASE'
+}
+
+apply plugin: 'scala'
+apply plugin: 'scalaStyle'
+apply plugin: 'application'
+
+mainClassName = 'de.thm.ii.submissioncheck.SQLChecker'
+
+jar {
+    enabled = true
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/main/scala']
+        }
+    }
+    test {
+        scala {
+            srcDirs = ['src/test/scala']
+        }
+    }
+}
+
+scalaStyle {
+    configLocation = scalaStyleConfig
+    includeTestSourceDirectory = true
+    source = 'src/main/scala'
+    testSource = 'src/test/scala'
+}
+
+test.dependsOn scalaStyle
+
+dependencies {
+    compile 'org.json4s:json4s-jackson_2.12:3.6.2'
+    compile 'org.json4s:json4s_2.11:3.2.11'
+    compile 'org.scala-lang:scala-library:2.12.6'
+    compile 'com.typesafe.akka:akka-stream-kafka_2.12:1.0-M1'
+    compile 'mysql:mysql-connector-java:8.0.13'
+    testCompile 'junit:junit:4.12'
+}
+
