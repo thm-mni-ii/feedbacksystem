@@ -21,5 +21,4 @@ object SQLChecker extends App{
   def newID(): Int = {
     dbid + 1
   }
-
 }
