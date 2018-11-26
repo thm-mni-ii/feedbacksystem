@@ -109,5 +109,4 @@ class SQLTask(val name: String, val dbid: Int, val queries: scala.Array[TaskQuer
     var res = s.execute("drop database sqlchecker" + DBID.toString)
     // unfinished
   }
-
 }
