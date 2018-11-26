@@ -1,7 +1,11 @@
 package de.thm.submissioncheck
 
 import java.sql._
+
+import akka.actor.ActorSystem
+
 import scala.sys.process._
+import akka.event.Logging
 
 /**
   * This class represents a task for an SQL assignment
@@ -16,6 +20,9 @@ import scala.sys.process._
   * @author Vlad Soykrskyy
   */
 class SQLTask(val name: String, val dbid: Int, val queries: scala.Array[TaskQuery], val dbdef: String){
+  private implicit val system: ActorSystem = ActorSystem("akka-system")
+  private val logger = system.log
+
   /**
     * Class instance taskname
     */
@@ -60,21 +67,18 @@ class SQLTask(val name: String, val dbid: Int, val queries: scala.Array[TaskQuer
     connection = DriverManager.getConnection(URL, "root", "secretpw")
   } catch {
     case ex: SQLException => {
-      print("Connection failed\n")
+      logger.error("Couldn't connect to MySQL Server!")
     }
   }
 
   if(connection != null){
-    print("Connection successful!")
+    logger.debug("Connection successful!")
   }
   else {
-    print("Failed to establish connection")
+    logger.debug("Failed to establish connection")
   }
 
   createDB()
-
-
-
   /**
     * This method runs all the taskqueries through the database
     * and sets the queryresults
