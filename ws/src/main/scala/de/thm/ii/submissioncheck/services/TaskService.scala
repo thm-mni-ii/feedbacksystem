@@ -1,10 +1,10 @@
 package de.thm.ii.submissioncheck.services
 
-import java.sql.{Connection, Statement}
+import java.sql.{Connection, SQLIntegrityConstraintViolationException, Statement}
 
-import de.thm.ii.submissioncheck.misc.DB
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -21,19 +21,6 @@ class TaskService {
   /**
     * Class holds all DB labels
     */
-  class TaskDBLabels {
-    /** DB Label "task_id" */
-    val taskid: String = "task_id"
-
-    /** DB Label "name" */
-    val name: String = "name"
-
-    /** DB Label "description" */
-    val description: String = "description"
-
-    /** DB Label "course_id" */
-    val courseid: String = "course_id"
-  }
 
   /** holds all unique labels */
   val taskDBLabels = new TaskDBLabels()
@@ -72,22 +59,30 @@ class TaskService {
     // TODO Check authorization for this taks!!
     // TODO save data into DB
 
-    val (num, holder) = DB.update((con: Connection) => {
-      val ps = con.prepareStatement(
-        "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
-        Statement.RETURN_GENERATED_KEYS
-      )
-      ps.setInt(1, taskid)
-      ps.setInt(2, user.userid)
-      ps
-    })
-    val insertedId = holder.getKey.intValue()
+    try {
+      val (num, holder) = DB.update((con: Connection) => {
+        val ps = con.prepareStatement(
+          "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
+          Statement.RETURN_GENERATED_KEYS
+        )
+        ps.setInt(1, taskid)
+        ps.setInt(2, user.userid)
+        ps
+      })
+      val insertedId = holder.getKey.intValue()
 
-    if (num == 0) {
-      throw new RuntimeException("Error creating submission. Please contact administrator.")
+      if (num == 0) {
+        throw new RuntimeException("Error creating submission. Please contact administrator.")
+      }
+
+      insertedId
     }
-
-    insertedId
+    catch {
+      // TODO use the SQLIntegrityConstraintViolationException or anything with SQL
+      case _: Exception => {
+        throw new ResourceNotFoundException
+      }
+    }
   }
 
   /**
@@ -164,5 +159,24 @@ class TaskService {
           taskDBLabels.description -> res.getString(taskDBLabels.description)
         )
       }, courseid)
+  }
+
+  /**
+    * create a task to a given course
+    * @author Benjamin Manns
+    * @param name Task name
+    * @param description Task description
+    * @param courseid Course where task is created for
+    * @param filename test file for this task
+    * @param test_type which test type is needed
+    * @return Scala Map
+    */
+  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String): Map[String, Boolean] = {
+    // TODO send bad request error
+    val availableTypes = List("FILE", "STRING")
+    if (!availableTypes.contains(test_type)) throw new BadRequestException(availableTypes + "as `test_type` is not implemented.")
+    var num = DB.update("INSERT INTO task (name, description, course_id, filename, test_type) VALUES (?,?,?,?,?)",
+      name, description, courseid, filename, test_type)
+    Map("success" -> (num == 1))
   }
 }

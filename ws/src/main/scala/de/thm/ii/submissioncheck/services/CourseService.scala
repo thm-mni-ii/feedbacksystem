@@ -1,10 +1,12 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB}
+import java.sql.{Connection, Statement}
+
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.{JdbcTemplate}
 import org.springframework.stereotype.Component
 
 /**
@@ -29,11 +31,20 @@ class CourseService {
     val description: String = "description"
     /** holds label creator*/
     val creator: String = "creator"
+    /** holds label standard_task_type*/
+    val standard_task_type: String = "standard_task_type"
   }
 
+  /** holds all unique labels */
+  val taskDBLabels = new TaskDBLabels()
   /** holds all course-Table labels*/
   val courseLabels = new CourseLabels()
+  /** holds label edit*/
+  val LABEL_EDIT = "edit"
+  /** holds label subscribe*/
+  val LABEL_SUBSCRIBE = "subscribe"
 
+  private final val LABEL_SUCCESS = "success"
   /** all interactions with tasks are done via a taskService*/
   val taskService: TaskService = new TaskService
 
@@ -42,7 +53,7 @@ class CourseService {
     *
     * @author Benjamin Manns
     * @param user a User object
-    * @return Java List of Maps
+    * @return List of Maps
     */
   def getCoursesByUser(user: User): List[Map[String, String]] = {
     // TODO Check somehow if this is a course owner or a course participant
@@ -56,6 +67,22 @@ class CourseService {
   }
 
   /**
+    * Union all courses beloning to user, no difference in edit, creation or subscription relation
+    * @author Benjamin Manns
+    * @param user a User object
+    * @return List of Maps
+    */
+  def getAllKindOfCoursesByUser(user: User): List[Map[String, String]] = {
+    DB.query("SELECT c.* FROM user_course hc JOIN course c using(course_id) where user_id = ? UNION SELECT c.* from course c where creator = ?",
+      (res, _) => {
+        Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
+          courseLabels.name -> res.getString(courseLabels.name),
+          courseLabels.description -> res.getString(courseLabels.description),
+          courseLabels.creator -> res.getString(courseLabels.creator))
+      }, user.userid, user.userid)
+  }
+
+  /**
     * Check if a given user is permitted to change course information, grand rights, add task, ...
     *
     * @author Benjamin Manns
@@ -64,12 +91,16 @@ class CourseService {
     * @return Boolean, if a user is permitted for the course
     */
   def isPermittedForCourse(courseid: Int, user: User): Boolean = {
-    // TODO allow admin users here!
-    val list = DB.query("SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
-      "SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted",
-      (res, _) => res.getInt("permitted"), user.userid, courseid, courseid)
+    if (user.role == "admin") {
+        true
+      }
+    else {
+      val list = DB.query("SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
+        "SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted",
+        (res, _) => res.getInt("permitted"), user.userid, courseid, courseid)
 
-    list.nonEmpty && list.head == 1
+      list.nonEmpty && list.head == 1
+    }
   }
 
   /**
@@ -103,8 +134,7 @@ class CourseService {
     }
     val num = DB.update("insert ignore into user_course (user_id,course_id,typ) VALUES (?,?,'EDIT')",
       user.userid, courseid)
-
-    Map("success" -> (num == 1))
+    Map(LABEL_SUCCESS-> (num == 1))
   }
 
   /**
@@ -129,7 +159,6 @@ class CourseService {
     } else {
       null
     }
-
     val list = DB.query("SELECT " + selectPart + " FROM course where course_id = ?",
       (res, _) => {
         val courseMap = Map(
@@ -147,5 +176,77 @@ class CourseService {
       }, courseid)
 
     list.headOption
+  }
+
+  /**
+    * Delete a course by its id and also all corresponding entries
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @return JSON
+    */
+  def deleteCourse(courseid: Int): Map[String, Boolean] = {
+    val success = DB.update( "delete from course where course_id = ?", courseid)
+    Map(LABEL_SUCCESS -> (success == 1))
+  }
+
+  /**
+    * Only permitted for docents / admins
+    * This method returns all submissions of all users orderd by tasks for one course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @return Java List
+    */
+  def getAllSubmissionsFromAllUsersByCourses(courseid: Int): List[Map[String, Any]] = {
+    DB.query("select * from task t join course c using(course_id)  where c.course_id = ? order by t.task_id",
+      (res, _) => {
+        Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
+          courseLabels.name -> res.getString(courseLabels.name),
+          courseLabels.description -> res.getString(courseLabels.description),
+          courseLabels.creator -> res.getString(courseLabels.creator))
+      }, courseid)
+  }
+
+  /**
+    * subscribe a user to a course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return JSON (contains information if subsciption worked or not)
+    */
+  def subscribeCourse(courseid: Integer, user: User): Map[String, Boolean] = {
+    val success = DB.update("insert ignore into user_course (user_id,course_id,typ) VALUES (?,?,'SUBSCRIBE')",
+      user.userid, courseid)
+    Map(LABEL_SUCCESS -> (success == 1))
+  }
+
+  /**
+    * create a course by user, which only can be dozent or admin (maybe hiwi?)
+    *
+    * @param user a user object
+    * @param name course name
+    * @param description course description
+    * @param standard_task_typ a standart task type
+    * @return Scala Map
+    */
+  def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String): Map[String, Number] = {
+    val (num, holder) = DB.update((con: Connection) => {
+      val ps = con.prepareStatement(
+        "insert into course (name, description, creator, standard_task_type) values (?, ?,?,?)",
+        Statement.RETURN_GENERATED_KEYS
+      )
+      ps.setString(1, name)
+      ps.setString(2, description)
+      ps.setInt(3, user.userid)
+      val m4 = 4
+      ps.setString(m4, standard_task_typ)
+      ps
+    })
+    if (num < 1) {
+      throw new RuntimeException("Error creating course. Please contact administrator.")
+    }
+    // TODO this has to be the ID
+    Map("course_id" -> holder.getKey)
   }
 }

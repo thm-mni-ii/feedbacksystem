@@ -26,12 +26,13 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
-  @RequestMapping(value = Array("/login"), method = Array(RequestMethod.GET))
+  @RequestMapping(value = Array("login"), method = Array(RequestMethod.POST))
   @ResponseBody
   def postUser(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
       try {
         val principal = request.getUserPrincipal
-        val user = userService.insertUserIfNotExists(principal.getName, 1)
+        val name = principal.getName
+        val user = userService.insertUserIfNotExists(name, 1)
         val jwtToken = userService.generateTokenFromUser(user)
 
         response.addHeader("Authorization", "Bearer " + jwtToken)
