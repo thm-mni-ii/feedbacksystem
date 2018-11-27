@@ -59,6 +59,8 @@ class TaskController {
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
   private final val LABEL_FILENAME = "filename"
+  /** JSON variable testfile_url ID*/
+  final val LABEL_TESTFILE_URL = "testfile_url"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 

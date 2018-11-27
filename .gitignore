@@ -14,5 +14,4 @@ submissioncheck.iml
 .DS_Store
 
 ws/src/main/resources/static/*
-
 ws/upload-dir/*
