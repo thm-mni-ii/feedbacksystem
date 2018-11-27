@@ -6,11 +6,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import collection.JavaConverters._
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.services.{ClientService, TaskService, UserService}
+import de.thm.ii.submissioncheck.services.{ClientService, StorageService, TaskService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import org.springframework.core.io.Resource
+import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
@@ -26,6 +27,9 @@ class TaskController {
   /** holds connection to TaskService*/
   val taskService = new TaskService()
 
+  /** hold Stoare conection */
+  val storageService = new StorageService()
+
   /** holds connection to TaskService*/
   val userService = new UserService()
 
@@ -39,6 +43,8 @@ class TaskController {
   final val LABEL_SUBMISSION_ID = "submissionid"
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
+  /** JSON variable testfile_url ID*/
+  final val LABEL_TESTFILE_URL = "testfile_url"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -84,7 +90,7 @@ class TaskController {
       val submissionId = taskService.submitTask(taskid, requestingUser, data)
 
       val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username, LABEL_DATA->data,
-        LABEL_SUBMISSION_ID -> submissionId.toString))
+        LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid)))
       logger.warn(jsonResult)
       kafkaTemplate.send(topicName, jsonResult)
       kafkaTemplate.flush()
@@ -111,6 +117,19 @@ class TaskController {
       throw new UnauthorizedException
     }
     taskService.getTaskDetails(taskid, requestingUser)
+  }
+
+  /**
+    * Serve requested files from url
+    *
+    * @param filename a valid filename
+    * @param taskid unique identification for a task
+    * @return HTTP Answer containing the whole file
+    */
+  @GetMapping(Array("{id}/files/{filename:.+}"))
+  @ResponseBody def getFile(@PathVariable(LABEL_ID) taskid: Int, @PathVariable filename: String): ResponseEntity[Resource] = {
+    val file = storageService.loadFile(filename, taskid)
+    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
   }
 
   /**
