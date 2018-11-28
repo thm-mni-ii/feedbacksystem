@@ -1,11 +1,9 @@
 package de.thm.ii.submissioncheck.services
 
-import java.sql.{Connection, SQLIntegrityConstraintViolationException, Statement}
-
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException, UnauthorizedException}
+import java.sql.{Connection, Statement}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
-import org.springframework.context.annotation.Bean
+import org.springframework.beans.factory.annotation.{Autowired}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -24,7 +22,8 @@ class TaskService {
 
   /** holds all unique labels */
   val taskDBLabels = new TaskDBLabels()
-
+  /** holds connection to storageService*/
+  val storageService = new StorageService
   /**
     * Class holds all DB labels
     */
@@ -57,17 +56,47 @@ class TaskService {
   val userDBLabels = new UserDBLabels()
 
   /**
+    * submitTaskWithFile
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param user requesting user
+    * @param filename users requesting filename
+    * @return SubmissionID
+    */
+  def submitTaskWithFile(taskid: Int, user: User, filename: String): Int = {
+    try {
+      val (num, holder) = DB.update((con: Connection) => {
+        val ps = con.prepareStatement(
+          "INSERT INTO submission (task_id, user_id, filename) VALUES (?,?,?);",
+          Statement.RETURN_GENERATED_KEYS
+        )
+        ps.setInt(1, taskid)
+        ps.setInt(2, user.userid)
+        ps.setString(3, filename)
+        ps
+      })
+
+      val insertedId = holder.getKey.intValue()
+      if (num == 0) {
+        throw new RuntimeException("Error creating submission. Please contact administrator.")
+      }
+      insertedId
+    }
+    catch {
+      // TODO use the SQLIntegrityConstraintViolationException or anything with SQL
+      case _: Exception => {
+        throw new ResourceNotFoundException
+      }
+    }
+  }
+  /**
     * submit a Task
     * @param taskid unique identification for a task
     * @param user requesting User
     * @param data submitted data from User
     * @return Submission ID
     */
-  def submitTask(taskid: Int, user: User, data: String): Integer = {
-    // TODO save data into DB
-    if (!this.hasSubscriptionForTask(taskid, user) && !this.isPermittedForTask(taskid, user)) {
-        throw new UnauthorizedException
-      }
+  def submitTaskWithData(taskid: Int, user: User, data: String): Int = {
     try {
       val (num, holder) = DB.update((con: Connection) => {
         val ps = con.prepareStatement(

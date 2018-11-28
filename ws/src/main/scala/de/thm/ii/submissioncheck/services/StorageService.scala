@@ -3,13 +3,15 @@ package de.thm.ii.submissioncheck.services
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import java.net.MalformedURLException
+
 import org.springframework.util.FileSystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.Paths
 import org.springframework.web.multipart.MultipartFile
-import java.io.IOException
+import java.io.{BufferedOutputStream, FileOutputStream, IOException}
 import java.nio.file.Files
+import de.thm.ii.submissioncheck.model.User
 
 /**
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server
@@ -32,11 +34,34 @@ class StorageService {
     * @param file a file stream
     * @param taskid the connecting task
     */
-  def store(file: MultipartFile, taskid: Int): Unit = {
+  def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
     try {
       val storeLocation = Paths.get("upload-dir/" + taskid.toString)
       Files.createDirectory(storeLocation)
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
+    }
+    catch {
+      case e: Exception =>
+        throw new RuntimeException("File could not be stored on disk")
+    }
+  }
+
+  /**
+    * store a task submission file of a user to the local syste
+    * @author Benjamin Manns
+    * @param dataBytes requetes file as byte array
+    * @param filename filename of user request
+    * @param taskid unique identification for a task
+    * @param user requested User
+    */
+  def storeTaskSubmission(dataBytes: Array[Byte], filename: String, taskid: Int, user: User): Unit = {
+    try {
+      val storeLocation = Paths.get("upload-dir/" + taskid.toString + "/users/" + user.userid.toString)
+      Files.createDirectories(storeLocation)
+      // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
+      val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
+      Stream.continually(bos.write(dataBytes))
+      bos.close() // You may end up with 0 bytes file if not calling close.
     }
     catch {
       case e: Exception =>
