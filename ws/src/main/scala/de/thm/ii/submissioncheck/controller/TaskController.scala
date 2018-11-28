@@ -45,12 +45,15 @@ class TaskController {
   final val LABEL_DATA = "data"
   /** JSON variable testfile_url ID*/
   final val LABEL_TESTFILE_URL = "testfile_url"
+  /** JSON variable course_id ID*/
+  final val LABEL_COURSEID = "course_id"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
-  private val topicName: String = "check_request"
+  private val checkTopic: String = "check_request"
+  private val newTaskTopic: String = "new_task_request"
 
   /**
     * Print all results, if any,from a given task
@@ -90,9 +93,16 @@ class TaskController {
       val submissionId = taskService.submitTask(taskid, requestingUser, data)
 
       val jsonResult = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.username, LABEL_DATA->data,
-        LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid)))
+        LABEL_SUBMISSION_ID -> submissionId.toString))
       logger.warn(jsonResult)
-      kafkaTemplate.send(topicName, jsonResult)
+      kafkaTemplate.send(checkTopic, jsonResult)
+      kafkaTemplate.flush()
+
+      // TODO move it to "createTask" and replace course id
+      val jsonMessageNewTaskTopic = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString,
+        LABEL_COURSEID -> "1",  LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid))) // LABEL_USER_ID -> requestingUser.username
+      logger.warn(jsonMessageNewTaskTopic)
+      kafkaTemplate.send(newTaskTopic, jsonResult)
       kafkaTemplate.flush()
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString).asJava
