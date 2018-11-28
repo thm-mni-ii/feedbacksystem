@@ -1,6 +1,8 @@
 package de.thm.ii.submissioncheck.controller
 
-import java.util.NoSuchElementException
+import java.io.{BufferedOutputStream, FileOutputStream}
+import java.nio.file.Files
+import java.util.{Base64, NoSuchElementException}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
@@ -77,23 +79,40 @@ class TaskController {
     if (requestingUser.isEmpty) {
       throw new UnauthorizedException
     }
-    try {
-      val data = jsonNode.get(LABEL_DATA).asText()
-      val submissionId = taskService.submitTask(taskid, requestingUser.get, data)
+    if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get) && !taskService.isPermittedForTask(taskid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+    var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString,
+      LABEL_USER_ID -> requestingUser.get.username)
 
-      val jsonResult = JsonParser.mapToJsonStr(Map(
-        LABEL_TASK_ID -> taskid.toString,
-        LABEL_USER_ID -> requestingUser.get.username,
-        LABEL_DATA->data,
-        LABEL_SUBMISSION_ID -> submissionId.toString
-      ))
+    try {
+      var submissionId: Int = -1
+      val dataNode = jsonNode.get(LABEL_DATA)
+      if (dataNode == null) {
+        val file = jsonNode.get("file").asText()
+        val filename = jsonNode.get("filename").asText()
+
+        kafkaMap += ("fileurl" -> "URL")
+
+        val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
+        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get, filename)
+        storageService.storeTaskSubmission(dataBytes, filename, taskid, requestingUser.get)
+      }
+      else {
+        val data = dataNode.asText
+        submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
+        kafkaMap += (LABEL_DATA -> data)
+      }
+
+      kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
+      val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
       kafkaTemplate.send(topicName, jsonResult)
       kafkaTemplate.flush()
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a data parameter.")
+      case _: NullPointerException => throw new BadRequestException("Please provide a data or a file and filename parameter.")
     }
   }
 
@@ -152,7 +171,7 @@ class TaskController {
   def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam("file") file: MultipartFile): ResponseEntity[String] = {
     var message: String = ""
     try {
-      storageService.store(file, taskid)
+      storageService.storeTaskTestFile(file, taskid)
       message = "You successfully uploaded " + file.getOriginalFilename + "!"
       ResponseEntity.status(HttpStatus.OK).body(message)
     } catch {
