@@ -47,6 +47,8 @@ class TaskService {
 
   /** holds all unique labels */
   val submissionDBLabels = new SubmissionDBLabels()
+  /** holds all unique labels */
+  val userDBLabels = new UserDBLabels()
 
   /**
     * submit a Task
@@ -104,6 +106,29 @@ class TaskService {
           submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)
         )
       }, taskid, user.userid)
+  }
+
+  /**
+    * get students submissions by Tasks
+    *
+    * @author Benjamin Manns
+    * @param taskid unique task identification
+    * @return Scala List
+    */
+  def getSubmissionsByTask(taskid: Int): List[Map[String, String]] = {
+    DB.query("SELECT u.*, s.* from task join submission s using(task_id) join user u using(user_id) where task_id = ?",
+      (res, _) => {
+        Map(
+          submissionDBLabels.result -> res.getString(submissionDBLabels.result),
+          submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
+          submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
+          submissionDBLabels.userid -> res.getString(submissionDBLabels.userid),
+          userDBLabels.username -> res.getString(userDBLabels.username),
+          userDBLabels.prename -> res.getString(userDBLabels.prename),
+          userDBLabels.surname -> res.getString(userDBLabels.surname),
+          userDBLabels.email -> res.getString(userDBLabels.email)
+        )
+      }, taskid)
   }
 
   /**
@@ -178,5 +203,27 @@ class TaskService {
     var num = DB.update("INSERT INTO task (name, description, course_id, filename, test_type) VALUES (?,?,?,?,?)",
       name, description, courseid, filename, test_type)
     Map("success" -> (num == 1))
+  }
+
+  /**
+    * Check if User is permitted to edit / observe Task
+    *
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param user a user object
+    * @return Boolean if user is permitted
+    */
+  def isPermittedForTask(taskid: Int, user: User): Boolean = {
+    if (user.role == "admin") {
+        true
+      }
+    else {
+      val list = DB.query("SELECT ? IN (select  c.creator from task t join course c using (course_id) where task_id = ? " +
+        "UNION SELECT user_id from user_course join task using (course_id) where task_id = ? and typ = 'EDIT') " +
+        "as permitted",
+          (res, _) => res.getInt("permitted"), user.userid, taskid, taskid)
+
+      list.nonEmpty && list.head == 1
+    }
   }
 }
