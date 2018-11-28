@@ -28,6 +28,18 @@ class CourseController {
 
   private final val PATH_LABEL_ID = "id"
 
+  private final val PATH_REST_LABEL_ID = "{id}"
+
+  private final val LABEL_DOZENT = "dozent"
+
+  private final val LABEL_ADMIN = "admin"
+
+  private final val LABEL_NAME = "name"
+
+  private final val LABEL_DESCRIPTION = "description"
+
+  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ"
+
   /**
     * getAllCourses is a route for all courses
     * @param request Request Header containing Headers
@@ -54,16 +66,33 @@ class CourseController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    val allowedRoles = List("admin", "dozent")
+    val allowedRoles = List(LABEL_ADMIN, LABEL_DOZENT)
     if (!allowedRoles.contains(user.get.role)) throw new UnauthorizedException
     try {
-      val name = jsonNode.get("name").asText()
-      val description = jsonNode.get("description").asText()
+      val name = jsonNode.get(LABEL_NAME).asText()
+      val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
       this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: name, description, standard_task_typ")
+      case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
     }
+  }
+
+  /**
+    * getAllCourse provides all courses for searching purpose
+    *
+    * @author Benjamin Manns
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET), consumes = Array())
+  @ResponseBody
+  def getAllCourse(request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    courseService.getAllCourses
   }
 
   /**
@@ -72,7 +101,7 @@ class CourseController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET), consumes = Array())
+  @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET), consumes = Array())
   @ResponseBody
   def getCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     val user = userService.verfiyUserByHeaderToken(request)
@@ -87,7 +116,7 @@ class CourseController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.DELETE), consumes = Array())
+  @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.DELETE), consumes = Array())
   @ResponseBody
   def deleteCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
     val user = userService.verfiyUserByHeaderToken(request)
@@ -100,6 +129,38 @@ class CourseController {
     courseService.deleteCourse(courseid)
   }
 
+  /**
+    * updateCourse updates course details for a specific course by given id
+    *
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @param jsonNode Request Body
+    * @return JSON
+    */
+  @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.PUT), consumes = Array())
+  @ResponseBody
+  def updateCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    val allowedRoles = List(LABEL_ADMIN, LABEL_DOZENT)
+    if (!allowedRoles.contains(user.get.role)) throw new UnauthorizedException
+    try {
+      val name = jsonNode.get(LABEL_NAME).asText()
+      val description = jsonNode.get(LABEL_DESCRIPTION).asText()
+      val standard_task_typ = jsonNode.get("standard_task_typ").asText()
+
+      if (name.length == 0 || description.length == 0 || standard_task_typ.length == 0) {
+        throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
+      }
+
+      this.courseService.updateCourseByUser(courseid, name, description, standard_task_typ)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
+    }
+  }
   /**
     * subscribe a user to a course
     *
@@ -114,10 +175,30 @@ class CourseController {
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (user.get.role == "dozent") {
+    if (user.get.role == LABEL_DOZENT) {
       throw new BadRequestException("User with role `dozent` can not subscribe a course.")
     }
     this.courseService.subscribeCourse(courseid, user.get)
+  }
+
+  /**
+    * unsubscribe a user from a course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param request contain request information
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{id}/unsubscribe"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  def unsubscribeCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (user.get.role == LABEL_DOZENT) {
+      throw new BadRequestException("User with role `dozent` can not unsubscribe a course.")
+    }
+    this.courseService.unsubscribeCourse(courseid, user.get)
   }
 
   /**
@@ -138,8 +219,8 @@ class CourseController {
       throw new BadRequestException("User with role `student` and no edit rights can not create a task.")
     }
     try {
-      var name = jsonNode.get("name").asText()
-      var description = jsonNode.get("description").asText()
+      var name = jsonNode.get(LABEL_NAME).asText()
+      var description = jsonNode.get(LABEL_DESCRIPTION).asText()
       var filename = jsonNode.get("filename").asText()
       var test_type = jsonNode.get("test_type").asText()
       this.taskService.createTask(name, description, courseid, filename, test_type)

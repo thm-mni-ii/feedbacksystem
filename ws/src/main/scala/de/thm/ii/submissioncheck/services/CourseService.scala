@@ -3,10 +3,10 @@ package de.thm.ii.submissioncheck.services
 import java.io
 import java.sql.{Connection, Statement}
 
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.{JdbcTemplate}
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
 /**
@@ -138,12 +138,25 @@ class CourseService {
   }
 
   /**
+    * getAllCourses gives few information about all courses for searchin purpose
+    * @author Benjamin Manns
+    * @return Scala List
+    */
+  def getAllCourses: List[Map[String, Any]] = {
+    DB.query("SELECT * FROM course", (res, _) => {
+      Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
+        courseLabels.name -> res.getString(courseLabels.name),
+        courseLabels.description -> res.getString(courseLabels.description))
+    })
+  }
+
+  /**
     * Gives detailed information about one course - later also task list
     *
     * @author Benjamin Manns
     * @param courseid unique course identification
     * @param user User object
-    * @return Java Map
+    * @return Scala Map
     */
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
@@ -167,7 +180,6 @@ class CourseService {
           courseLabels.description -> res.getString(courseLabels.description),
           "tasks" -> taskList
         )
-
         if (isPermitted) {
           courseMap + (courseLabels.creator -> res.getString(courseLabels.creator))
         } else {
@@ -213,7 +225,7 @@ class CourseService {
     * @author Benjamin Manns
     * @param courseid unique identification for a course
     * @param user a user object
-    * @return JSON (contains information if subsciption worked or not)
+    * @return JSON (contains information if subscription worked or not)
     */
   def subscribeCourse(courseid: Integer, user: User): Map[String, Boolean] = {
     val success = DB.update("insert ignore into user_course (user_id,course_id,typ) VALUES (?,?,'SUBSCRIBE')",
@@ -222,8 +234,23 @@ class CourseService {
   }
 
   /**
+    * unsubscribe a user from a course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return JSON (contains information if unsubscription worked or not)
+    */
+  def unsubscribeCourse(courseid: Integer, user: User): Map[String, Boolean] = {
+    val success = DB.update("delete from user_course where user_id = ? and course_id = ? and typ = 'SUBSCRIBE'",
+      user.userid, courseid)
+    Map(LABEL_SUCCESS -> (success == 1))
+  }
+
+  /**
     * create a course by user, which only can be dozent or admin (maybe hiwi?)
     *
+    * @author Benjamin Manns
     * @param user a user object
     * @param name course name
     * @param description course description
@@ -246,7 +273,27 @@ class CourseService {
     if (num < 1) {
       throw new RuntimeException("Error creating course. Please contact administrator.")
     }
-    // TODO this has to be the ID
     Map("course_id" -> holder.getKey)
+  }
+
+  /**
+    * create a course by user, which only can be dozent or admin (maybe hiwi?)
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param name course name
+    * @param description course description
+    * @param standard_task_typ a standart task type
+    * @return Scala Map
+    */
+  def updateCourseByUser(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
+    val success = DB.update("update course set name = ?, description = ?, standard_task_type = ? where course_id = ?",
+      name, description, standard_task_typ, courseid)
+    if (success == 0) {
+      throw new ResourceNotFoundException
+    }
+    else {
+      Map(LABEL_SUCCESS -> true)
+    }
   }
 }
