@@ -35,7 +35,8 @@ class CourseService {
   val courseLabels = new CourseLabels()
 
   /** all interactions with tasks are done via a taskService*/
-  val taskService: TaskService = new TaskService
+  @Autowired
+  val taskService: TaskService = null
 
   /**
     * getCoursesByUser search courses by user object
@@ -127,7 +128,7 @@ class CourseService {
     val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user)) {
       this.taskService.getTasksByCourse(courseid)
     } else {
-      null
+      List.empty
     }
 
     val list = DB.query("SELECT " + selectPart + " FROM course where course_id = ?",
