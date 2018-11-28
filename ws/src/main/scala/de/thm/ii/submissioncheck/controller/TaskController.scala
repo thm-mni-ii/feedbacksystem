@@ -1,16 +1,19 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.util.NoSuchElementException
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
-import de.thm.ii.submissioncheck.services.{TaskService, UserService}
+import de.thm.ii.submissioncheck.services.{StorageService, TaskService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import org.springframework.core.io.Resource
+import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
+import org.springframework.web.multipart.MultipartFile
 
 /**
   * TaskController implement routes for submitting task and receiving results
@@ -42,6 +45,7 @@ class TaskController {
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val topicName: String = "check_request"
 
+  private val storageService: StorageService = new StorageService
   /**
     * Print all results, if any,from a given task
     * @param taskid unique identification for a task
@@ -94,6 +98,30 @@ class TaskController {
   }
 
   /**
+    * implement REST route to get students task submission
+    *
+    * @author Benjamin Manns
+    * @param taskid unique task identification
+    * @param jsonNode request body containing "data" parameter
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET), consumes = Array("application/json"))
+  @ResponseBody
+  def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
+                        @RequestBody jsonNode: JsonNode,
+                        request: HttpServletRequest): List[Map[String, String]] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if(!this.taskService.isPermittedForTask(taskid, user.get)){
+      throw new UnauthorizedException
+    }
+    this.taskService.getSubmissionsByTask(taskid)
+  }
+
+  /**
     * Print details for a given Task
     * @param taskid unique identification for a task
     * @param request Request Header containing Headers
@@ -108,6 +136,43 @@ class TaskController {
     }
 
     taskService.getTaskDetails(taskid, requestingUser.get).getOrElse(Map.empty)
+  }
+
+  // Useful hint for Angular cooperation:
+  // https://stackoverflow.com/questions/47886695/current-request-is-not-a-multipart-requestangular-4spring-boot
+  /**
+    * serve a route to upload a file to a given taskid
+    * @author grokonez.com
+    *
+    * @param taskid unique identification for a task
+    * @param file a multipart binary file in a form data format
+    * @return HTTP Response with Status Code
+    */
+  @RequestMapping(value = Array("{id}/upload"), method = Array(RequestMethod.POST))
+  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam("file") file: MultipartFile): ResponseEntity[String] = {
+    var message: String = ""
+    try {
+      storageService.store(file, taskid)
+      message = "You successfully uploaded " + file.getOriginalFilename + "!"
+      ResponseEntity.status(HttpStatus.OK).body(message)
+    } catch {
+      case e: Exception =>
+        message = "FAIL to upload " + file.getOriginalFilename + "!"
+        ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message)
+    }
+  }
+
+  /**
+    * Serve requested files from url
+    *
+    * @param filename a valid filename
+    * @param taskid unique identification for a task
+    * @return HTTP Answer containing the whole file
+    */
+  @GetMapping(Array("{id}/files/{filename:.+}"))
+  @ResponseBody def getFile(@PathVariable(LABEL_ID) taskid: Int, @PathVariable filename: String): ResponseEntity[Resource] = {
+    val file = storageService.loadFile(filename, taskid)
+    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
   }
 
   /**
