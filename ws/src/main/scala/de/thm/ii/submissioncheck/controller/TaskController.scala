@@ -100,7 +100,7 @@ class TaskController {
 
       // TODO move it to "createTask" and replace course id
       val jsonMessageNewTaskTopic = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString,
-        LABEL_COURSEID -> "1",  LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid))) // LABEL_USER_ID -> requestingUser.username
+        LABEL_COURSEID -> "1", LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid))) // LABEL_USER_ID -> requestingUser.username
       logger.warn(jsonMessageNewTaskTopic)
       kafkaTemplate.send(newTaskTopic, jsonResult)
       kafkaTemplate.flush()
