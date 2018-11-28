@@ -2,7 +2,7 @@ package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, SQLIntegrityConstraintViolationException, Statement}
 
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import org.springframework.context.annotation.Bean
@@ -43,12 +43,6 @@ class TaskService {
 
     /** DB Label "passed" */
     val passed: String = "passed"
-
-    /** DB Label "passed" */
-    val filename: String = "filename"
-
-    /** DB Label "passed" */
-    val submission_data: String = "submission_data"
   }
 
   /** holds all unique labels */
@@ -64,19 +58,17 @@ class TaskService {
     * @return Submission ID
     */
   def submitTask(taskid: Int, user: User, data: String): Integer = {
+    // TODO Check authorization for this taks!!
     // TODO save data into DB
-    if (!this.hasSubscriptionForTask(taskid, user) && !this.isPermittedForTask(taskid, user)) {
-        throw new UnauthorizedException
-      }
+
     try {
       val (num, holder) = DB.update((con: Connection) => {
         val ps = con.prepareStatement(
-          "INSERT INTO submission (task_id, user_id, submission_data) VALUES (?,?,?);",
+          "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
           Statement.RETURN_GENERATED_KEYS
         )
         ps.setInt(1, taskid)
         ps.setInt(2, user.userid)
-        ps.setString(3, data)
         ps
       })
       val insertedId = holder.getKey.intValue()
@@ -109,8 +101,6 @@ class TaskService {
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
           submissionDBLabels.result -> res.getString(submissionDBLabels.result),
-          submissionDBLabels.filename -> res.getString(submissionDBLabels.filename),
-          submissionDBLabels.submission_data -> res.getString(submissionDBLabels.submission_data),
           submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
           submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
           submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)
@@ -213,25 +203,6 @@ class TaskService {
     var num = DB.update("INSERT INTO task (name, description, course_id, filename, test_type) VALUES (?,?,?,?,?)",
       name, description, courseid, filename, test_type)
     Map("success" -> (num == 1))
-  }
-
-  /**
-    * Check if User has a subcription for this task
-    *
-    * @author Benjamin Manns
-    * @param taskid unique taskid identification
-    * @param user a user object
-    * @return Boolean if user is permitted
-    */
-  def hasSubscriptionForTask(taskid: Int, user: User): Boolean = {
-    if (user.role == "admin") {
-      true
-    }
-    else {
-      val list = DB.query("SELECT ? IN (SELECT user_id from user_course join task using (course_id) where task_id = ? and typ = 'SUBSCRIBE') as permitted",
-        (res, _) => res.getInt("permitted"), user.userid, taskid)
-      list.nonEmpty && list.head == 1
-    }
   }
 
   /**
