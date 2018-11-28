@@ -1,15 +1,17 @@
 package de.thm.ii.submissioncheck.services
 
 import java.util.Date
+
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import de.thm.ii.submissioncheck.misc.DB
+import org.springframework.context.annotation.Configuration
 /**
   * UserService serves all user data in both directions using mysql
   *
@@ -39,6 +41,8 @@ class UserService {
   /** holds all unique labels */
   val dbLabels = new DBLabels()
 
+  @Value("${jwt.expiration.time}")
+  private val jwtExpirationTime: String = null
   /**
     * getUsers is a admin function und just sends a list of all users
     *
@@ -136,7 +140,7 @@ class UserService {
       .claim("roles", user.role)
       .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
-      .setExpiration(new Date(new Date().getTime + (1000 * 3600)))
+      .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
       .signWith(SignatureAlgorithm.HS256, secrets.getSuperSecretKey)
       .compact
 
