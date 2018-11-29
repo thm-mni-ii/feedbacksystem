@@ -36,8 +36,8 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: db1
+      MYSQL_DATABASE: submissionchecker
     ports:
-      - "3308:3306"
+      - "3306:3306"
   bash1:
     image: bash:4.4

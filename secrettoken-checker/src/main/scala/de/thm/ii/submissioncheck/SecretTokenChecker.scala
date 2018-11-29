@@ -107,7 +107,7 @@ object SecretTokenChecker extends App {
   def shTest(token: String): String = {
     val shtest1 = new ShExec("./script.sh", token)
     //execute script with arguments and save exit code (successful (0) or not (not 0) )
-    val exit2 = shtest1.exec()
+    shtest1.exec()
     val shmessage1 = shtest1.output
     shmessage1
   }
@@ -121,7 +121,6 @@ object SecretTokenChecker extends App {
   def getShTestOut(sName: String, token: String): String = {
     val shtest = new ShExec(sName, token)
     shtest.exec()
-
     shtest.output
   }
 

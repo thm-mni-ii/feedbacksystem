@@ -1,40 +1,26 @@
 package de.thm.ii.submissioncheck.services
 
-import java.sql.{Connection, ResultSet, Statement}
-import java.util
+import java.sql.{Connection, SQLIntegrityConstraintViolationException, Statement}
 
-import collection.JavaConverters._
-import de.thm.ii.submissioncheck.config.MySQLConfig
-import de.thm.ii.submissioncheck.misc.BadRequestException
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-
-import scala.collection.mutable.ListBuffer
+import org.springframework.beans.factory.annotation.{Autowired, Configurable}
+import org.springframework.context.annotation.Bean
+import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.stereotype.Component
 
 /**
   * Enable communication with Tasks and their Results
   *
   * @author Benjamin Manns
   */
+@Component
 class TaskService {
-  /** mysqlConnector establish connection to our mysql 8 DB */
-  val mysqlConnector: Connection = new MySQLConfig().getConnector
-
+  @Autowired
+  private implicit val jdbc: JdbcTemplate = null
   /**
     * Class holds all DB labels
     */
-  class TaskDBLabels {
-    /** DB Label "task_id" */
-    var taskid: String = "task_id"
-
-    /** DB Label "name" */
-    var name: String = "name"
-
-    /** DB Label "description" */
-    var description: String = "description"
-
-    /** DB Label "course_id" */
-    var courseid: String = "course_id"
-  }
 
   /** holds all unique labels */
   val taskDBLabels = new TaskDBLabels()
@@ -44,23 +30,25 @@ class TaskService {
     */
   class SubmissionDBLabels {
     /** DB Label "task_id" */
-    var taskid: String = "task_id"
+    val taskid: String = "task_id"
 
     /** DB Label "submission_id" */
-    var submissionid: String = "submission_id"
+    val submissionid: String = "submission_id"
 
     /** DB Label "result" */
-    var result: String = "result"
+    val result: String = "result"
 
     /** DB Label "userid" */
-    var userid: String = "user_id"
+    val userid: String = "user_id"
 
     /** DB Label "passed" */
-    var passed: String = "passed"
+    val passed: String = "passed"
   }
 
   /** holds all unique labels */
   val submissionDBLabels = new SubmissionDBLabels()
+  /** holds all unique labels */
+  val userDBLabels = new UserDBLabels()
 
   /**
     * submit a Task
@@ -72,24 +60,31 @@ class TaskService {
   def submitTask(taskid: Int, user: User, data: String): Integer = {
     // TODO Check authorization for this taks!!
     // TODO save data into DB
-    val prparStmt = this.mysqlConnector.prepareStatement("INSERT INTO submission " +
-      "(task_id, user_id) VALUES (?,?);", Statement.RETURN_GENERATED_KEYS)
 
-    // TODO Check if multiple submissions are allowed
+    try {
+      val (num, holder) = DB.update((con: Connection) => {
+        val ps = con.prepareStatement(
+          "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
+          Statement.RETURN_GENERATED_KEYS
+        )
+        ps.setInt(1, taskid)
+        ps.setInt(2, user.userid)
+        ps
+      })
+      val insertedId = holder.getKey.intValue()
 
-    prparStmt.setInt(1, taskid)
-    prparStmt.setInt(2, user.userid)
-    prparStmt.execute()
+      if (num == 0) {
+        throw new RuntimeException("Error creating submission. Please contact administrator.")
+      }
 
-    var insertedID = -1
-    val rs = prparStmt.getGeneratedKeys
-    if (rs.next) insertedID = rs.getInt(1)
-
-    if (insertedID == -1) {
-      throw new RuntimeException("Error creating submission. Please contact administrator.")
+      insertedId
     }
-
-    insertedID
+    catch {
+      // TODO use the SQLIntegrityConstraintViolationException or anything with SQL
+      case _: Exception => {
+        throw new ResourceNotFoundException
+      }
+    }
   }
 
   /**
@@ -98,29 +93,42 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskResults(taskid: Int, user: User): util.List[util.Map[String, String]] = {
-    val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;")
-    prparStmt.setInt(1, taskid)
-    prparStmt.setInt(2, user.userid)
-    val resultSet = prparStmt.executeQuery()
-    var taskList = new ListBuffer[java.util.Map[String, String]]()
+  def getTaskResults(taskid: Int, user: User): List[Map[String, String]] = {
+    DB.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
+      (res, _) => {
+        Map(
+          taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
+          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
+          taskDBLabels.name -> res.getString(taskDBLabels.name),
+          submissionDBLabels.result -> res.getString(submissionDBLabels.result),
+          submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
+          submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
+          submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)
+        )
+      }, taskid, user.userid)
+  }
 
-    val resultIterator = new Iterator[ResultSet] {
-      def hasNext: Boolean = resultSet.next()
-      def next(): ResultSet = resultSet
-    }.toStream
-
-    for (res <- resultIterator.iterator) {
-      taskList += Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
-        taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
-        taskDBLabels.name -> res.getString(taskDBLabels.name),
-        submissionDBLabels.result -> res.getString(submissionDBLabels.result),
-        submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
-        submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
-        submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)).asJava
-    }
-    taskList.toList.asJava
+  /**
+    * get students submissions by Tasks
+    *
+    * @author Benjamin Manns
+    * @param taskid unique task identification
+    * @return Scala List
+    */
+  def getSubmissionsByTask(taskid: Int): List[Map[String, String]] = {
+    DB.query("SELECT u.*, s.* from task join submission s using(task_id) join user u using(user_id) where task_id = ?",
+      (res, _) => {
+        Map(
+          submissionDBLabels.result -> res.getString(submissionDBLabels.result),
+          submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
+          submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
+          submissionDBLabels.userid -> res.getString(submissionDBLabels.userid),
+          userDBLabels.username -> res.getString(userDBLabels.username),
+          userDBLabels.prename -> res.getString(userDBLabels.prename),
+          userDBLabels.surname -> res.getString(userDBLabels.surname),
+          userDBLabels.email -> res.getString(userDBLabels.email)
+        )
+      }, taskid)
   }
 
   /**
@@ -129,22 +137,18 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer, user: User): util.Map[String, String] = {
+  def getTaskDetails(taskid: Integer, user: User): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-    val prparStmt = this.mysqlConnector.prepareStatement(
-      "SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
-        "using(course_id) where task_id = ? and owner = ?;")
-    prparStmt.setInt(1, taskid)
-    prparStmt.setInt(2, user.userid)
-    val resultSet = prparStmt.executeQuery()
-    if (resultSet.next()) {
-        Map(taskDBLabels.courseid -> resultSet.getString(taskDBLabels.courseid),
-          taskDBLabels.taskid -> resultSet.getString(taskDBLabels.taskid),
-          taskDBLabels.name -> resultSet.getString(taskDBLabels.name),
-          taskDBLabels.description -> resultSet.getString(taskDBLabels.description)).asJava
-    } else {
-      throw new BadRequestException("Task '" + taskid + "' is not available.")
-    }
+    val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
+      "using(course_id) where task_id = ? and owner = ?;",
+      (res, _) => {
+        Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
+          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
+          taskDBLabels.name -> res.getString(taskDBLabels.name),
+          taskDBLabels.description -> res.getString(taskDBLabels.description)
+        )
+      }, taskid, user.userid)
+    list.headOption
   }
 
   /**
@@ -158,15 +162,11 @@ class TaskService {
     * @return Boolean: did update work
     */
   def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String): Boolean = {
-    val prparStmt = this.mysqlConnector.prepareStatement(
-      "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;")
-    prparStmt.setString(1, result)
-    prparStmt.setString(2, passed)
-    prparStmt.setInt(3, taskid)
-    val anti_magic_number_4: Int = 4
-    prparStmt.setInt(anti_magic_number_4, submissionid)
-
-    prparStmt.execute()
+    val num = DB.update(
+      "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;",
+      result, passed, taskid, submissionid
+    )
+    num > 0
   }
 
   /**
@@ -174,24 +174,56 @@ class TaskService {
     * @param courseid unique identification for a course
     * @return JAVA List
     */
-  def getTasksByCourse(courseid: Int): util.List[util.Map[String, String]] = {
-    val prparStmt = this.mysqlConnector.prepareStatement("select * from task where course_id = ?")
-    prparStmt.setInt(1, courseid)
-    val resultSet = prparStmt.executeQuery()
-    var taskList = new ListBuffer[java.util.Map[String, String]]()
+  def getTasksByCourse(courseid: Int): List[Map[String, String]] = {
+    DB.query("select * from task where course_id = ?",
+      (res, _) => {
+        Map(
+          taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
+          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
+          taskDBLabels.name -> res.getString(taskDBLabels.name),
+          taskDBLabels.description -> res.getString(taskDBLabels.description)
+        )
+      }, courseid)
+  }
 
-    val resultIterator = new Iterator[ResultSet] {
-      def hasNext: Boolean = resultSet.next()
-      def next: ResultSet = resultSet
-    }.toStream
+  /**
+    * create a task to a given course
+    * @author Benjamin Manns
+    * @param name Task name
+    * @param description Task description
+    * @param courseid Course where task is created for
+    * @param filename test file for this task
+    * @param test_type which test type is needed
+    * @return Scala Map
+    */
+  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String): Map[String, Boolean] = {
+    // TODO send bad request error
+    val availableTypes = List("FILE", "STRING")
+    if (!availableTypes.contains(test_type)) throw new BadRequestException(availableTypes + "as `test_type` is not implemented.")
+    var num = DB.update("INSERT INTO task (name, description, course_id, filename, test_type) VALUES (?,?,?,?,?)",
+      name, description, courseid, filename, test_type)
+    Map("success" -> (num == 1))
+  }
 
-    for (res <- resultIterator.iterator) {
-      taskList += Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
-        taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
-        taskDBLabels.name -> res.getString(taskDBLabels.name),
-        taskDBLabels.description -> res.getString(taskDBLabels.description)).asJava
+  /**
+    * Check if User is permitted to edit / observe Task
+    *
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param user a user object
+    * @return Boolean if user is permitted
+    */
+  def isPermittedForTask(taskid: Int, user: User): Boolean = {
+    if (user.role == "admin") {
+        true
+      }
+    else {
+      val list = DB.query("SELECT ? IN (select  c.creator from task t join course c using (course_id) where task_id = ? " +
+        "UNION SELECT user_id from user_course join task using (course_id) where task_id = ? and typ = 'EDIT') " +
+        "as permitted",
+          (res, _) => res.getInt("permitted"), user.userid, taskid, taskid)
+
+      list.nonEmpty && list.head == 1
     }
-
-    taskList.toList.asJava
   }
 }

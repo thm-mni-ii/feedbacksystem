@@ -1,11 +1,11 @@
-package de.thm.ii.submissioncheck.services
+package de.thm.ii.submissioncheck.controller
 
+import net.unicon.cas.client.configuration.EnableCasClient
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation.{RequestMapping, RestController}
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 /**
   * Service to handle the static communication with the client.
@@ -18,10 +18,10 @@ class ClientService {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Value("${message.topic.name}")
-  private var topicName: String = null
+  private val topicName: String = null
 
   @Autowired
-  private var kafkaTemplate: KafkaTemplate[String, String] = null
+  private val kafkaTemplate: KafkaTemplate[String, String] = null
 
   /**
     * Serve static main assets to the client.

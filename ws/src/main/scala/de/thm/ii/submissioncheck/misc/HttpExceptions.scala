@@ -16,17 +16,7 @@ class ResourceNotFoundException extends RuntimeException
   * @author Benjamin Manns
   */
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-class BadRequestException(message: String) extends RuntimeException {
-  /** message string which is the answer of a bad 400 Request*/
-  var detailMessage: String = message
-
-  /**
-    * Overrides base class RuntimeException method
-    * @return message string
-    */
-  override def getMessage: String = detailMessage
-}
-
+class BadRequestException(message: String) extends RuntimeException(message)
 /**
   * UnauthorizedException
   * @author Benjamin Manns
