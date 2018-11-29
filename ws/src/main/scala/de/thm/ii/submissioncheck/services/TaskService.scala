@@ -265,6 +265,33 @@ class TaskService {
   }
 
   /**
+    * update Task by its Task ID
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param name Task name
+    * @param description Task description
+    * @param filename test file for this task
+    * @param test_type which test type is needed
+    * @return result if update works
+    */
+  def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String): Boolean = {
+    val num = DB.update("UPDATE task set name = ?, description = ?, test_file_name = ?, test_type = ? where task_id = ? ",
+      name, description, filename, test_type, taskid)
+    num == 1
+  }
+
+  /**
+    * delete Task by Task ID
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @return result if delete works
+    */
+  def deleteTask(taskid: Int): Map[String, Boolean] = {
+    val num = DB.update("DELETE from task where task_id = ? ", taskid)
+    Map("success" -> (num == 1))
+  }
+
+  /**
     * Check if User has a subcription for this task
     *
     * @author Benjamin Manns

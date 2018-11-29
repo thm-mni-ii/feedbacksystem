@@ -49,6 +49,7 @@ class TaskController {
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
+  private final val LABEL_FILENAME = "filename"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -99,7 +100,7 @@ class TaskController {
       val dataNode = jsonNode.get(LABEL_DATA)
       if (dataNode == null) {
         val file = jsonNode.get(LABEL_FILE).asText()
-        val filename = jsonNode.get("filename").asText()
+        val filename = jsonNode.get(LABEL_FILENAME).asText()
         val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
         submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get, filename)
         storageService.storeTaskSubmission(dataBytes, taskid, filename, submissionId)
@@ -198,7 +199,7 @@ class TaskController {
     * @return JSON
     */
   @RequestMapping(value = Array("courses/{id}/tasks"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  def createTask(@PathVariable("id") courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+  def createTask(@PathVariable(LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
@@ -209,7 +210,7 @@ class TaskController {
     try {
       val name = jsonNode.get("name").asText()
       val description = jsonNode.get("description").asText()
-      val filename = jsonNode.get("filename").asText()
+      val filename = jsonNode.get(LABEL_FILENAME).asText()
       val file = jsonNode.get(LABEL_FILE).asText()
       val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
@@ -233,6 +234,69 @@ class TaskController {
     }
   }
 
+  /**
+    * delete Task by its ID
+    * @param taskid unique identification for a task
+    * @param request contain request information
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.DELETE), consumes = Array(application_json_value))
+  def deleteTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new BadRequestException("User can not delete a task.")
+    }
+    this.taskService.deleteTask(taskid)
+  }
+
+  /**
+    * Update a task for a given course
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param request contain request information
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.PUT), consumes = Array(application_json_value))
+  def updateTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new BadRequestException("User with role `student` and no edit rights can not update a task.")
+    }
+    try {
+      val name = jsonNode.get("name").asText()
+      val description = jsonNode.get("description").asText()
+      val filename = jsonNode.get(LABEL_FILENAME).asText()
+      val file = jsonNode.get(LABEL_FILE).asText()
+      val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
+      val test_type = jsonNode.get("test_type").asText()
+      val success = this.taskService.updateTask(taskid, name, description, filename, test_type)
+
+      val jsonMsg: Map[String, String] = Map(
+        "testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+        LABEL_TASK_ID -> taskid.toString)
+
+      storageService.storeTaskTestFile(dataBytes, filename, taskid)
+
+      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
+      logger.warn(jsonStringMsg)
+      kafkaTemplate.send("update_task", jsonStringMsg)
+      kafkaTemplate.flush()
+      Map("success" -> success)
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
+      }
+    }
+  }
   /**
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns

@@ -7,10 +7,11 @@ import java.net.MalformedURLException
 import org.springframework.util.FileSystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.file.Paths
+import java.nio.file.{FileAlreadyExistsException, Files, Paths}
+
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, FileOutputStream, IOException}
-import java.nio.file.Files
+
 import de.thm.ii.submissioncheck.model.User
 
 /**
@@ -61,7 +62,12 @@ class StorageService {
   def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int): Unit = {
     try {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
-      Files.createDirectory(storeLocation)
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
       // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
       val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
       Stream.continually(bos.write(dataBytes))
@@ -84,7 +90,12 @@ class StorageService {
   def storeTaskSubmission(dataBytes: Array[Byte], taskid: Int, filename: String, submission_id: Int): Unit = {
     try {
       val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
-      Files.createDirectories(storeLocation)
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
       // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
       val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
       Stream.continually(bos.write(dataBytes))
