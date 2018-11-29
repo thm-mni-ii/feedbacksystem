@@ -20,6 +20,8 @@ class TaskService {
     * Class holds all DB labels
     */
 
+  @Autowired
+  private val tokenService: TokenService = null
   /** holds all unique labels */
   val taskDBLabels = new TaskDBLabels()
   /** holds connection to storageService*/
@@ -55,6 +57,8 @@ class TaskService {
   /** holds all unique labels */
   val userDBLabels = new UserDBLabels()
 
+  private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
+
   /**
     * submitTaskWithFile
     * @author Benjamin Manns
@@ -78,7 +82,7 @@ class TaskService {
 
       val insertedId = holder.getKey.intValue()
       if (num == 0) {
-        throw new RuntimeException("Error creating submission. Please contact administrator.")
+        throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
       }
       insertedId
     }
@@ -111,7 +115,7 @@ class TaskService {
       val insertedId = holder.getKey.intValue()
 
       if (num == 0) {
-        throw new RuntimeException("Error creating submission. Please contact administrator.")
+        throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
       }
 
       insertedId
@@ -235,13 +239,29 @@ class TaskService {
     * @param test_type which test type is needed
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String): Map[String, Boolean] = {
-    // TODO send bad request error
+  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String): Map[String, AnyVal] = {
     val availableTypes = List("FILE", "STRING")
     if (!availableTypes.contains(test_type)) throw new BadRequestException(availableTypes + "as `test_type` is not implemented.")
-    var num = DB.update("INSERT INTO task (name, description, course_id, filename, test_type) VALUES (?,?,?,?,?)",
-      name, description, courseid, filename, test_type)
-    Map("success" -> (num == 1))
+    val (num, holder) = DB.update((con: Connection) => {
+      val ps = con.prepareStatement(
+        "INSERT INTO task (name, description, course_id, test_file_name, test_type) VALUES (?,?,?,?,?)",
+        Statement.RETURN_GENERATED_KEYS
+      )
+      val magic4 = 4
+      val magic5 = 5
+      ps.setString(1, name)
+      ps.setString(2, description)
+      ps.setInt(3, courseid)
+      ps.setString(magic4, filename)
+      ps.setString(magic5, test_type)
+      ps
+    })
+
+    val insertedId = holder.getKey.intValue()
+    if (num == 0) {
+      throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
+    }
+    Map("success" -> (num == 1), "taskid" -> insertedId)
   }
 
   /**
@@ -283,5 +303,56 @@ class TaskService {
 
       list.nonEmpty && list.head == 1
     }
+  }
+  /**
+    * Gets the filename by a given Taskid
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @return just the filename
+    */
+  def getTestFileByTask(taskid: Int): String = {
+    val list = DB.query("SELECT test_file_name from task where task_id = ?",
+      (res, _) => res.getString("test_file_name"), taskid)
+    if (list.isEmpty) {
+      throw new ResourceNotFoundException
+    }
+    list.head
+  }
+
+  /**
+    * Gets the filename by a given Submissionid
+    * @param submission_id unique submission identification
+    * @return just the filename
+    */
+  def getSubmittedFileBySubmission(submission_id: Int): String = {
+    val list = DB.query("SELECT filename from submission where submission_id = ?",
+      (res, _) => res.getString("filename"), submission_id)
+    if (list.isEmpty) {
+      throw new ResourceNotFoundException
+    }
+    list.head
+  }
+
+  /**
+    * generate token validated URL to download task test file
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @return URL String
+    */
+  def getURLOfTaskTestFile(taskid: Int): String = {
+    val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
+    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+  }
+
+  /**
+    * generate token validated URL to download submitted student file
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param submissionid unique taskid identification
+    * @return URL String
+    */
+  def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
+    val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
+    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
   }
 }

@@ -9,6 +9,7 @@ import de.thm.ii.submissioncheck.services.{CourseService, TaskService, UserServi
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
 
 /**
@@ -21,8 +22,6 @@ class CourseController {
   private val userService: UserService = null
   @Autowired
   private val courseService: CourseService = null
-  @Autowired
-  private val taskService: TaskService = null
 
   private final val application_json_value = "application/json"
 
@@ -199,37 +198,6 @@ class CourseController {
       throw new BadRequestException("User with role `dozent` can not unsubscribe a course.")
     }
     this.courseService.unsubscribeCourse(courseid, user.get)
-  }
-
-  /**
-    * Create a task for a given course
-    * @author Benjamin Manns
-    * @param courseid unique identification for a course
-    * @param request contain request information
-    * @param jsonNode JSON Parameter from request
-    * @return JSON
-    */
-  @RequestMapping(value = Array("{id}/tasks"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  def createTask(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
-    if (user.isEmpty) {
-      throw new UnauthorizedException
-    }
-    if (this.courseService.isPermittedForCourse(courseid, user.get)) {
-      throw new BadRequestException("User with role `student` and no edit rights can not create a task.")
-    }
-    try {
-      var name = jsonNode.get(LABEL_NAME).asText()
-      var description = jsonNode.get(LABEL_DESCRIPTION).asText()
-      var filename = jsonNode.get("filename").asText()
-      var test_type = jsonNode.get("test_type").asText()
-      this.taskService.createTask(name, description, courseid, filename, test_type)
-    }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description, filename, test_type")
-      }
-    }
   }
 
   /**

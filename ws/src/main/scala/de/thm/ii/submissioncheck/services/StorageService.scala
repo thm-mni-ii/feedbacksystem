@@ -27,6 +27,10 @@ class StorageService {
 
   private val rootLocation = Paths.get(UPLOAD_FOLDER)
 
+  private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
+
+  private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + "/" + taskid.toString
+
   /**
     * store a MultipartFile stream into a file on disk
     *
@@ -36,13 +40,36 @@ class StorageService {
     */
   def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
     try {
-      val storeLocation = Paths.get("upload-dir/" + taskid.toString)
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
       Files.createDirectory(storeLocation)
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
     }
     catch {
       case e: Exception =>
-        throw new RuntimeException("File could not be stored on disk")
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    }
+  }
+
+  /**
+    * store an Array of Bytes into a file on disk
+    *
+    * @author Benjamin Manns
+    * @param dataBytes an array of bytes which contains a file
+    * @param filename the name of the requested file
+    * @param taskid the connecting task
+    */
+  def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int): Unit = {
+    try {
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+      Files.createDirectory(storeLocation)
+      // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
+      val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
+      Stream.continually(bos.write(dataBytes))
+      bos.close() // You may end up with 0 bytes file if not calling close.
+    }
+    catch {
+      case e: Exception =>
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
 
@@ -50,13 +77,13 @@ class StorageService {
     * store a task submission file of a user to the local syste
     * @author Benjamin Manns
     * @param dataBytes requetes file as byte array
-    * @param filename filename of user request
     * @param taskid unique identification for a task
-    * @param user requested User
+    * @param filename filename of user request
+    * @param submission_id unique identification for a submission
     */
-  def storeTaskSubmission(dataBytes: Array[Byte], filename: String, taskid: Int, user: User): Unit = {
+  def storeTaskSubmission(dataBytes: Array[Byte], taskid: Int, filename: String, submission_id: Int): Unit = {
     try {
-      val storeLocation = Paths.get("upload-dir/" + taskid.toString + "/users/" + user.userid.toString)
+      val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
       Files.createDirectories(storeLocation)
       // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
       val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
@@ -65,7 +92,7 @@ class StorageService {
     }
     catch {
       case e: Exception =>
-        throw new RuntimeException("File could not be stored on disk")
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
 
@@ -78,7 +105,26 @@ class StorageService {
     * @return File Resource
     */
   def loadFile(filename: String, taskid: Int): Resource = try {
-    val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString)
+    val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+    val file = storeLocation.resolve(filename)
+    val resource = new UrlResource(file.toUri)
+    if (resource.exists || resource.isReadable) {resource}
+    else {throw new RuntimeException("Resource does not exist.")}
+  } catch {
+    case e: MalformedURLException =>
+      throw new RuntimeException("File URL is Malformed.")
+  }
+
+  /**
+    * load the submitted file of a user
+    * @author grokonez.com + Benjamin Manns
+    * @param filename get the filename
+    * @param taskid unique identification for a task
+    * @param submission_id unique identification for a submission
+    * @return File Resource
+    */
+  def loadFileBySubmission(filename: String, taskid: Int, submission_id: Int): Resource = try {
+    val storeLocation = Paths.get("upload-dir/" + taskid.toString + "/submits/" + submission_id.toString)
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}
