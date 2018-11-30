@@ -20,13 +20,13 @@ class LoginController extends CasClientConfigurerAdapter {
   private val userService: UserService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
-    * postUser sends loginin Data to the CAS Client to perform a login. Also a Cookie has to be
+    * postUser sends login data to the CAS client to perform a login. Also a Cookie has to be
     * created
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
-  @RequestMapping(value = Array("login"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("login"))
   @ResponseBody
   def postUser(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
       try {

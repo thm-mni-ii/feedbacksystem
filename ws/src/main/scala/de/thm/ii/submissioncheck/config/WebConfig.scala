@@ -5,14 +5,14 @@ import de.thm.ii.submissioncheck.misc.ScalaObjectMapper
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
+import org.springframework.web.servlet.config.annotation._
 
 /**
   * Additional configuration for SpringBoot.
   * @author Andrej Sajenko
   */
 @Configuration
-class WebConfig extends WebMvcConfigurationSupport {
+class WebConfig extends WebMvcConfigurer {
   /**
     * Add the scala json mapper to http converters.
     * @return HTTP / JSON Mapper
@@ -32,6 +32,5 @@ class WebConfig extends WebMvcConfigurationSupport {
     */
   override def configureMessageConverters(converters: util.List[HttpMessageConverter[_]]): Unit = {
     converters.add(customJackson2HttpMessageConverter)
-    super.addDefaultHttpMessageConverters(converters)
   }
 }
