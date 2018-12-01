@@ -119,7 +119,7 @@ class UserService {
   def loadUserFromDB(username: String): Option[User] = {
     val users = DB.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
-        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name))
+        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt("role_id"))
       }, username)
 
     users.headOption
