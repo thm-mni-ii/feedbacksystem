@@ -5,6 +5,7 @@ import collection.JavaConverters._
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 /**
   *
@@ -20,7 +21,6 @@ object JsonParser {
     */
   def jsonStrToMap(jsonStr: String): Map[String, Any] = {
     implicit val formats = org.json4s.DefaultFormats
-
     parse(jsonStr).extract[Map[String, Any]]
   }
 
@@ -32,8 +32,8 @@ object JsonParser {
     * @return Json String
     */
   def mapToJsonStr(jsonMap: Map[String, String]): String = {
-    val mapper = new ObjectMapper
-    val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
+    val objectMapper = new ScalaObjectMapper
+    val jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap)
     jsonResult
   }
 }
