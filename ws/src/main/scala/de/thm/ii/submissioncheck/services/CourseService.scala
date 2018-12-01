@@ -2,8 +2,7 @@ package de.thm.ii.submissioncheck.services
 
 import java.io
 import java.sql.{Connection, Statement}
-
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate

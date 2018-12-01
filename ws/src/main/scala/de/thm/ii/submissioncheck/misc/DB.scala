@@ -1,7 +1,6 @@
 package de.thm.ii.submissioncheck.misc
 
 import java.sql.Connection
-
 import scala.collection.JavaConverters._
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._

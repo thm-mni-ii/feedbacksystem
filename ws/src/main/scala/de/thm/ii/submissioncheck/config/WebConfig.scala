@@ -21,7 +21,6 @@ class WebConfig extends WebMvcConfigurer {
   def customJackson2HttpMessageConverter: MappingJackson2HttpMessageConverter = {
     val jsonConverter = new MappingJackson2HttpMessageConverter
     val objectMapper = new ScalaObjectMapper
-    // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     jsonConverter.setObjectMapper(objectMapper)
     jsonConverter
   }

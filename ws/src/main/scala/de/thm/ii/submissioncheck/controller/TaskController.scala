@@ -3,7 +3,6 @@ package de.thm.ii.submissioncheck.controller
 import java.io.{BufferedOutputStream, FileOutputStream}
 import java.nio.file.Files
 import java.util.{Base64, NoSuchElementException}
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
 import de.thm.ii.submissioncheck.services._

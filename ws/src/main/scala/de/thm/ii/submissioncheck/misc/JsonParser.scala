@@ -1,11 +1,7 @@
 package de.thm.ii.submissioncheck.misc
 
-import java.util
-import collection.JavaConverters._
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 /**
   *

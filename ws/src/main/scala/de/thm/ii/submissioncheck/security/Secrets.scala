@@ -2,7 +2,6 @@ package de.thm.ii.submissioncheck.security
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import javax.xml.bind.DatatypeConverter
 
 /**

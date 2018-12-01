@@ -3,16 +3,11 @@ package de.thm.ii.submissioncheck.services
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import java.net.MalformedURLException
-
-import org.springframework.util.FileSystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.{FileAlreadyExistsException, Files, Paths}
-
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, FileOutputStream, IOException}
-
-import de.thm.ii.submissioncheck.model.User
 
 /**
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server

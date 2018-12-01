@@ -1,7 +1,6 @@
 package de.thm.ii.submissioncheck.config
 
 import java.util
-
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.beans.factory.annotation.Value

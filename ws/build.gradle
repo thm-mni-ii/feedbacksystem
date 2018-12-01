@@ -62,7 +62,6 @@ startScripts {
 }
 
 dependencies {
-    compile project(':cas-lib')
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     compile group: 'org.json4s', name: 'json4s-jackson_2.12', version: '3.6.2'
     // https://mvnrepository.com/artifact/org.json4s/json4s

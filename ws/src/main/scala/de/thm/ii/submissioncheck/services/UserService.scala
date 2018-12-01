@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import de.thm.ii.submissioncheck.misc.DB
-import org.springframework.context.annotation.Configuration
 /**
   * UserService serves all user data in both directions using mysql
   *
