@@ -70,20 +70,30 @@ class SQLTask(val name: String, val courseId: String, val taskId: String, val qu
   }
 
   private val s = connection.createStatement()
-  /* underscore used in naming */
+  /**
+    * underscore used in naming
+    */
   val us: String = "_"
-  /* used in naming */
+  /**
+    * used in naming
+    */
   val dropdb: String = "DROP DATABASE "
-  /* used in naming */
+  /**
+    * used in naming
+    */
   val createdb: String = "CREATE DATABASE "
 
   for (i <- 0 until qcount){
     s.execute(createdb + courseid.toString + us + taskid.toString + us + i.toString)
     s.execute("USE " + courseid.toString + us + taskid.toString + us + i.toString)
     s.execute(dbdef)
-    /* Hilfsvariable*/
+    /**
+      * local val
+      */
     val rs = s.executeQuery(taskqueries(i).query)
-    /* Hilfsvariable*/
+    /**
+      * local val
+      */
     val desc = taskqueries(i).desc
     queryresults(i) = (desc, rs)
     s.execute(dropdb + courseid.toString + us + taskid.toString + us + i.toString)
