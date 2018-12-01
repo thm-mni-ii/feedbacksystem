@@ -7,8 +7,9 @@ package de.thm.ii.submissioncheck.model
   * @param userid local DB's userid
   * @param username User's username
   * @param role User's role name
+  * @param roleid User's role id
   */
-class User(val userid: Int, val username: String, val role: String) {
+class User(val userid: Int, val username: String, val role: String, val roleid: Int) {
   /**
     * Return User as Map. Simply answer in HTTPResonses
     *
@@ -16,6 +17,6 @@ class User(val userid: Int, val username: String, val role: String) {
     * @return Map / JSON of User Data
     */
   def asMap(): Map[String, String] = {
-    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role)
+    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role, "roleid" -> this.roleid)
   }
 }
