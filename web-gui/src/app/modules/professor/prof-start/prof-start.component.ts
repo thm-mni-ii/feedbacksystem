@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material";
-import {AuthService} from "../../service/auth.service";
+import {AuthService} from "../../../service/auth.service";
 
 @Component({
   selector: 'app-prof-start',
