@@ -5,11 +5,11 @@ import java.{io, util}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.services.{CourseService, TaskService, TestsystemService, UserService}
+import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation._
+import org.springframework.web.bind.annotation.{RequestMapping, _}
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -22,13 +22,6 @@ class TestsystemController {
 
   @Autowired
   private val testsystemService: TestsystemService = null
-
-  /*@Autowired
-  private val courseService: CourseService = null
-  @Autowired
-  private val taskService: TaskService = null*/
-
-  private final val application_json_value = "application/json"
 
   private final val PATH_LABEL_ID = "id"
 
@@ -59,11 +52,13 @@ class TestsystemController {
       throw new UnauthorizedException
     }
     try {
-      val id = jsonNode.get("id").asText()
-      val name = jsonNode.get("name").asText()
-      val description = jsonNode.get("description").asText()
-      val supported_formats = jsonNode.get("supported_formats").asText()
-      testsystemService.insertTestsystem(id, name, description, supported_formats, 8000, "000.000.000.000")
+      val id = jsonNode.get(PATH_LABEL_ID).asText()
+      val name = jsonNode.get(TestsystemLabels.name).asText()
+      val description = jsonNode.get(TestsystemLabels.description).asText()
+      val supported_formats = jsonNode.get(TestsystemLabels.supported_formats).asText()
+      val machine_port: Int = if (jsonNode.get(TestsystemLabels.machine_port) != null)  jsonNode.get(TestsystemLabels.machine_port).asInt() else 0
+      val machine_ip: String = if (jsonNode.get(TestsystemLabels.machine_ip) != null)  jsonNode.get(TestsystemLabels.machine_ip).asText() else ""
+      testsystemService.insertTestsystem(id, name, description, supported_formats, machine_port, machine_ip)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: id, name, description, supported_formats")
     }
@@ -71,22 +66,25 @@ class TestsystemController {
 
   /**
     * updateTestsystem is a route to register a tasksystem
+    * @param testsystemid unique course identification
     * @param request contain request information
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("{systemid}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def updateTestsystem(@PathVariable systemid: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+  @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def updateTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
     try {
-      val name = jsonNode.get("name").isNull asText()
-      val description = jsonNode.get("description").asText()
-      val supported_formats = jsonNode.get("supported_formats").asText()
+      val name: String = if (jsonNode.get("name") != null)  jsonNode.get("name").asText() else null
+      val description: String = if (jsonNode.get("description") != null)  jsonNode.get("description").asText() else null
+      val supported_formats: String = if (jsonNode.get("supported_formats") != null)  jsonNode.get("supported_formats").asText() else null
+      val machine_port: Int = if (jsonNode.get("machine_port") != null)  jsonNode.get("machine_port").asInt() else 0
+      val machine_ip: String = if (jsonNode.get("machine_ip") != null)  jsonNode.get("machine_ip").asText() else null
       // this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
-      Map("success" -> testsystemService.updateTestsystem(systemid, name, description, supported_formats, 8000, "000.000.000.000"))
+      Map("success" -> testsystemService.updateTestsystem(testsystemid, name, description, supported_formats, machine_port, machine_ip))
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: name, description, supported_formats")
     }
@@ -94,7 +92,8 @@ class TestsystemController {
 
   /**
     * getTestsystem provides Testsystem details
-    * @param systemid unique course identification
+    * @author Benjamin Manns
+    * @param testsystemid unique course identification
     * @param request Request Header containing Headers
     * @return JSON
     */
