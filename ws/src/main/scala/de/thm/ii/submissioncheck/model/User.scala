@@ -16,7 +16,7 @@ class User(val userid: Int, val username: String, val role: String, val roleid: 
     * @author Benjamin Manns
     * @return Map / JSON of User Data
     */
-  def asMap(): Map[String, String] = {
+  def asMap(): Map[String, Any] = {
     Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role, "roleid" -> this.roleid)
   }
 }

@@ -5,7 +5,7 @@ import java.{io, util}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.services.{CourseService, TaskService, UserService}
+import de.thm.ii.submissioncheck.services.{CourseService, TaskService, TestsystemService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation._
 class TestsystemController {
   @Autowired
   private val userService: UserService = null
+
+  @Autowired
+  private val testsystemService: TestsystemService = null
 
   /*@Autowired
   private val courseService: CourseService = null
@@ -40,8 +43,7 @@ class TestsystemController {
     if (user.isEmpty || user.get.roleid > 2) {
         throw new UnauthorizedException
     }
-    // TODO Return all tasksystems
-    //
+    testsystemService.getTestsystems()
   }
 
   /**
@@ -57,13 +59,13 @@ class TestsystemController {
       throw new UnauthorizedException
     }
     try {
+      val id = jsonNode.get("id").asText()
       val name = jsonNode.get("name").asText()
       val description = jsonNode.get("description").asText()
-      val standard_task_typ = jsonNode.get("standard_task_typ").asText()
-      // this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
-      // TODO create test system
+      val supported_formats = jsonNode.get("supported_formats").asText()
+      testsystemService.insertTestsystem(id, name, description, supported_formats, 8000, "000.000.000.000")
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: name, description, standard_task_typ")
+      case _: NullPointerException => throw new BadRequestException("Please provide: id, name, description, supported_formats")
     }
   }
 
@@ -73,20 +75,20 @@ class TestsystemController {
     * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def updateTestsystem(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+  @RequestMapping(value = Array("{systemid}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def updateTestsystem(@PathVariable systemid: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
     try {
-      val name = jsonNode.get("name").asText()
+      val name = jsonNode.get("name").isNull asText()
       val description = jsonNode.get("description").asText()
-      val standard_task_typ = jsonNode.get("standard_task_typ").asText()
+      val supported_formats = jsonNode.get("supported_formats").asText()
       // this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
-      // TODO update test system
+      Map("success" -> testsystemService.updateTestsystem(systemid, name, description, supported_formats, 8000, "000.000.000.000"))
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: name, description, standard_task_typ")
+      case _: NullPointerException => throw new BadRequestException("Please provide: name, description, supported_formats")
     }
   }
 
@@ -96,15 +98,14 @@ class TestsystemController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.GET), consumes = Array())
+  @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.GET), consumes = Array())
   @ResponseBody
-  def getTestsystem(@PathVariable systemid: Int, request: HttpServletRequest) = {
+  def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, String] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
-    //courseService.getCourseDetails(courseid, user.get).getOrElse(Map.empty)
-    // TODO get system info
+    testsystemService.getTestsystem(testsystemid).getOrElse(Map.empty)
   }
   /**
     * deleteTestsystem deletes a Testsystem
@@ -114,13 +115,12 @@ class TestsystemController {
     */
   @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.DELETE), consumes = Array())
   @ResponseBody
-  def deleteTestsystem(@PathVariable(PATH_LABEL_ID) systemid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
+  def deleteTestsystem(@PathVariable(PATH_LABEL_ID) systemid: String, request: HttpServletRequest): Map[String, Boolean] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 1) { // has to be admin
       throw new UnauthorizedException
     }
 
-    // courseService.deleteCourse(courseid)
-    // TODO Delete testsystem
+    Map("success" -> testsystemService.deleteTestsystem(systemid))
   }
 }
