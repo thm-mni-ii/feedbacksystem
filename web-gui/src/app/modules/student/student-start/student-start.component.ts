@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material";
 import {Student} from "../Student";
-import {AuthService} from "../../service/auth.service";
+import {AuthService} from "../../../service/auth.service";
 
 /**
  * Component that shows the courses from a student.
