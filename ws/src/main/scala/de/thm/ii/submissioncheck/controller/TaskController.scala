@@ -1,12 +1,12 @@
 package de.thm.ii.submissioncheck.controller
 
-import java.io.{BufferedOutputStream, FileOutputStream}
-import java.nio.file.Files
 import java.util.{Base64, NoSuchElementException}
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
-import de.thm.ii.submissioncheck.services._
+import de.thm.ii.submissioncheck.services.{TestsystemService, _}
 import javax.servlet.http.HttpServletRequest
+import org.apache.kafka.common.internals.Topic
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
@@ -32,10 +32,38 @@ class TaskController {
   private val tokenService: TokenService = null
   @Autowired
   private val courseService: CourseService = null
+  @Autowired
+  private val testsystemService: TestsystemService = null
 
   private final val application_json_value = "application/json"
 
   private val topicTaskRequest: String = "new_task_request"
+
+  private final val testsystemLabel1 = "secrettokenchecker"
+
+  /**
+    * Testsystems have to be defined to compile time
+    * @author Benjamin Manns
+    */
+  @deprecated("", "Not working until now")
+  object KafkaTopicWrapper {
+    private final val systems = List[String]()
+    /**
+      * render topic values based on registered testsystems
+      * @param topic a topic name
+      * @return constant array of topics
+      */
+    def getTestsystemsTopicLabelsByTopic(topic: String): Array[String] = {
+      var topicList = List[String]()
+      for(m <- systems){
+        topicList = m :: topicList
+      }
+      topicList = topicList.map(f => f + "_" + topic)
+      topicList.toArray
+    }
+  }
+
+  //private final val kafkaTopicCheckAnswer: Array[String] = KafkaTopicWrapper.getTestsystemsTopicLabelsByTopic("check_answer")
 
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
@@ -157,11 +185,11 @@ class TaskController {
   def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, String] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
 
-    if (requestingUser.isEmpty) {
+    if (requestingUser.isEmpty || taskService.isPermittedForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
 
-    taskService.getTaskDetails(taskid, requestingUser.get).getOrElse(Map.empty)
+    taskService.getTaskDetails(taskid).getOrElse(Map.empty)
   }
 
   // Useful hint for Angular cooperation:
@@ -213,7 +241,9 @@ class TaskController {
       val file = jsonNode.get(LABEL_FILE).asText()
       val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
-      val taskInfo = this.taskService.createTask(name, description, courseid, filename, test_type)
+      // TODO until we finilaize this parameters set a default if none is given
+      val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
+      val taskInfo = this.taskService.createTask(name, description, courseid, filename, test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
       val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
         LABEL_TASK_ID -> taskid.toString)
@@ -222,7 +252,7 @@ class TaskController {
 
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
-      kafkaTemplate.send(topicTaskRequest, jsonStringMsg)
+      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
       kafkaTemplate.flush()
       taskInfo
     }
@@ -276,7 +306,10 @@ class TaskController {
       val file = jsonNode.get(LABEL_FILE).asText()
       val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
-      val success = this.taskService.updateTask(taskid, name, description, filename, test_type)
+      // TODO get from route, we have to discuss this
+      // TODO until we finilaize this parameters set a default if none is given
+      val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
+      val success = this.taskService.updateTask(taskid, name, description, filename, test_type, testsystem_id)
 
       val jsonMsg: Map[String, String] = Map(
         "testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
@@ -286,7 +319,7 @@ class TaskController {
 
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
-      kafkaTemplate.send("update_task", jsonStringMsg)
+      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + "update_task", jsonStringMsg)
       kafkaTemplate.flush()
       Map("success" -> success)
     }
@@ -335,10 +368,11 @@ class TaskController {
   /**
     * Listen on "check_answer"
     * @param msg Answer from service
+    * @param topic which topic was the one who sends the message
     */
   @KafkaListener(topics = Array("check_answer"))
-  def listener(msg: String): Unit = {
-    logger.debug("received message from topic 'check_answer': " + msg)
+  def listener(msg: String, topic: Topic): Unit = {
+    logger.debug("received message from topic '" + topic.toString + "': " + msg)
     val answeredMap = JsonParser.jsonStrToMap(msg)
     try {
       logger.warn(answeredMap.toString())

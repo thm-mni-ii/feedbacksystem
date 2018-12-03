@@ -177,20 +177,23 @@ class TaskService {
   /**
     * print detail information of a given task
     * @param taskid unique identification for a task
-    * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer, user: User): Option[Map[String, String]] = {
+  def getTaskDetails(taskid: Integer): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id` from task join course " +
-      "using(course_id) where task_id = ? and owner = ?;",
+    val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id`, task.testsystem_id from task join course " +
+      "using(course_id) where task_id = ?",
       (res, _) => {
         Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
-          taskDBLabels.description -> res.getString(taskDBLabels.description)
+          taskDBLabels.description -> res.getString(taskDBLabels.description),
+          taskDBLabels.testsystem_id -> res.getString(taskDBLabels.testsystem_id)
         )
-      }, taskid, user.userid)
+      }, taskid)
+    if(list.isEmpty) {
+      throw new ResourceNotFoundException
+    }
     list.headOption
   }
 
@@ -237,23 +240,26 @@ class TaskService {
     * @param courseid Course where task is created for
     * @param filename test file for this task
     * @param test_type which test type is needed
+    * @param testsystem_id: refered testsystem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String): Map[String, AnyVal] = {
+  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String, testsystem_id: String): Map[String, AnyVal] = {
     val availableTypes = List("FILE", "STRING")
     if (!availableTypes.contains(test_type)) throw new BadRequestException(availableTypes + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (name, description, course_id, test_file_name, test_type) VALUES (?,?,?,?,?)",
+        "INSERT INTO task (name, description, course_id, test_file_name, test_type, testsystem_id) VALUES (?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
       val magic5 = 5
+      val magic6 = 6
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
       ps.setString(magic4, filename)
       ps.setString(magic5, test_type)
+      ps.setString(magic6, testsystem_id)
       ps
     })
 
@@ -272,10 +278,11 @@ class TaskService {
     * @param description Task description
     * @param filename test file for this task
     * @param test_type which test type is needed
+    * @param testsystem_id: refered testsystem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String): Boolean = {
-    val num = DB.update("UPDATE task set name = ?, description = ?, test_file_name = ?, test_type = ? where task_id = ? ",
+  def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String, testsystem_id: String): Boolean = {
+    val num = DB.update("UPDATE task set name = ?, description = ?, test_file_name = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
       name, description, filename, test_type, taskid)
     num == 1
   }
@@ -381,5 +388,17 @@ class TaskService {
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
     val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
     "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+  }
+
+  /**
+    * Get the unique test system name
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @return the unique test system name
+    */
+  def getTestsystemTopicByTaskId(taskid: Int): String = {
+    val list = DB.query("select testsystem_id from task join testsystem using testsystem_id where task_id = ?",
+      (res, _) => res.getString(TestsystemLabels.id), taskid)
+    list.head
   }
 }
