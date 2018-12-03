@@ -1,18 +1,22 @@
 package de.thm.ii.submissioncheck.controller
 
+import scala.collection.JavaConverters._
 import java.util.{Base64, NoSuchElementException}
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{TestsystemService, _}
 import javax.servlet.http.HttpServletRequest
-import org.apache.kafka.common.internals.Topic
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.{Logger, LoggerFactory}
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.core.io.Resource
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
-import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.core.{DefaultKafkaConsumerFactory, KafkaTemplate}
+import org.springframework.kafka.listener.{KafkaMessageListenerContainer, MessageListener}
+import org.springframework.kafka.listener.config.ContainerProperties
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
@@ -41,29 +45,7 @@ class TaskController {
 
   private final val testsystemLabel1 = "secrettokenchecker"
 
-  /**
-    * Testsystems have to be defined to compile time
-    * @author Benjamin Manns
-    */
-  @deprecated("", "Not working until now")
-  object KafkaTopicWrapper {
-    private final val systems = List[String]()
-    /**
-      * render topic values based on registered testsystems
-      * @param topic a topic name
-      * @return constant array of topics
-      */
-    def getTestsystemsTopicLabelsByTopic(topic: String): Array[String] = {
-      var topicList = List[String]()
-      for(m <- systems){
-        topicList = m :: topicList
-      }
-      topicList = topicList.map(f => f + "_" + topic)
-      topicList.toArray
-    }
-  }
-
-  //private final val kafkaTopicCheckAnswer: Array[String] = KafkaTopicWrapper.getTestsystemsTopicLabelsByTopic("check_answer")
+  private var container: KafkaMessageListenerContainer[String, String] = null
 
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
@@ -85,6 +67,18 @@ class TaskController {
   private val topicName: String = "check_request"
 
   private val storageService: StorageService = new StorageService
+
+  /**
+    * After autowiring start Kafka Listener
+    * @return kafka Listener Method
+    */
+  @Bean
+  def importProcessor: SmartInitializingSingleton = {
+    () => {
+      kafkaReloadService
+    }
+  }
+
   /**
     * Print all results, if any,from a given task
     * @param taskid unique identification for a task
@@ -366,21 +360,61 @@ class TaskController {
   }
 
   /**
-    * Listen on "check_answer"
-    * @param msg Answer from service
-    * @param topic which topic was the one who sends the message
+    * reload kafka listeners that database changes can are respeceted
+    * @author Benjamin Manns
+    * based on https://stackoverflow.com/questions/41533391/how-to-create-separate-kafka-listener-for-each-topic-dynamically-in-springboot
+    * @param request contain request information
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
     */
-  @KafkaListener(topics = Array("check_answer"))
-  def listener(msg: String, topic: Topic): Unit = {
-    logger.debug("received message from topic '" + topic.toString + "': " + msg)
-    val answeredMap = JsonParser.jsonStrToMap(msg)
-    try {
-      logger.warn(answeredMap.toString())
-      this.taskService.setResultOfTask(
-        Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]), Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-        answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
-    } catch {
-      case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
+  @RequestMapping(value = Array("kafka/listener/reload"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
+  def kafkaReloadListeners(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 2) { // TODO Admin or else?
+      throw new UnauthorizedException
     }
+    this.kafkaReloadService
+  }
+
+  private def kafkaReloadService: Map[String, AnyVal] = {
+    // TODO load from properties config
+    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "localhost:9092", "group.id" -> "jcg-group")
+    val consumerConfigJava = consumerConfigScala.asJava
+    val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
+      new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
+
+    // TODO fire this method after updates on Testsystem!
+    val kafkaTopicCheckAnswer: Array[String] = testsystemService.getTestsystemsTopicLabelsByTopic("check_answer")
+    logger.warn("Registered Listener Topic: ")
+    kafkaTopicCheckAnswer.map(s => logger.warn(s))
+    val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicCheckAnswer: _*)
+    if (container != null) {
+      container.stop()
+    }
+    container = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
+
+    container.setupMessageListener(new MessageListener[Int, String]() {
+      /**
+        * onMessage process incoming kafka messages
+        * @author Benjamin Manns
+        * @param data kafka message
+        */
+      override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
+        logger.debug("received message from topic '" + data.topic + "': " + data.value())
+        // TODO switch data.topic and save for each then!!
+
+        val answeredMap = JsonParser.jsonStrToMap(data.value())
+        try {
+          logger.warn(answeredMap.toString())
+          taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
+            Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
+            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
+        } catch {
+          case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
+        }
+      }
+    })
+    container.start
+    Map("reload" -> true)
   }
 }

@@ -125,7 +125,6 @@ class TestsystemService {
     * @param topic a topic name
     * @return generated topic list where kafka can listen on
     */
-  @deprecated("0.0", "since we can use it in a different ways dont use it at all")
   def getTestsystemsTopicLabelsByTopic(topic: String): Array[String] = {
     var topicList = List[String]()
     val testsystems = this.getTestsystems()
