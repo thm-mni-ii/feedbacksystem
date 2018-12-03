@@ -119,4 +119,20 @@ class TestsystemService {
         TestsystemLabels.machine_port -> res.getString(TestsystemLabels.machine_port))
     })
   }
+
+  /**
+    * generate an array of topics for all registered testsystems
+    * @param topic a topic name
+    * @return generated topic list where kafka can listen on
+    */
+  @deprecated("0.0", "since we can use it in a different ways dont use it at all")
+  def getTestsystemsTopicLabelsByTopic(topic: String): Array[String] = {
+    var topicList = List[String]()
+    val testsystems = this.getTestsystems()
+    for(m <- testsystems){
+      topicList = m("testsystem_id") :: topicList
+    }
+    topicList = topicList.map(f => f + "_" + topic)
+    topicList.toArray
+  }
 }
