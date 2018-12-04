@@ -2,6 +2,7 @@ package de.thm.ii.submissioncheck.services
 
 import java.io
 import java.sql.{Connection, Statement}
+
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,27 +18,9 @@ import org.springframework.stereotype.Component
 class CourseService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  /**
-    * CourseLabels holds all Course-Table lables
-    * @author Benjamin Manns
-    */
-  class CourseLabels{
-    /** holds label courseid*/
-    val courseid: String = "course_id"
-    /** holds label name*/
-    val name: String = "name"
-    /** holds label description*/
-    val description: String = "description"
-    /** holds label creator*/
-    val creator: String = "creator"
-    /** holds label standard_task_type*/
-    val standard_task_type: String = "standard_task_type"
-  }
 
   /** holds all unique labels */
   val taskDBLabels = new TaskDBLabels()
-  /** holds all course-Table labels*/
-  val courseLabels = new CourseLabels()
   /** holds label edit*/
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
@@ -55,14 +38,15 @@ class CourseService {
     * @param user a User object
     * @return List of Maps
     */
+  @deprecated("0", "not working anymore")
   def getCoursesByUser(user: User): List[Map[String, String]] = {
     // TODO Check somehow if this is a course owner or a course participant
     DB.query("SELECT * FROM user_has_courses hc join course c using(course_id) where user_id = ?",
       (res, _) => {
-        Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
-          courseLabels.name -> res.getString(courseLabels.name),
-          courseLabels.description -> res.getString(courseLabels.description),
-          courseLabels.creator -> res.getString(courseLabels.creator))
+        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+          CourseDBLabels.creator -> res.getString(CourseDBLabels.creator))
       }, user.userid)
   }
 
@@ -73,18 +57,19 @@ class CourseService {
     * @return List of Maps
     */
   def getAllKindOfCoursesByUser(user: User): List[Map[String, String]] = {
-    DB.query("SELECT c.* FROM user_course hc JOIN course c using(course_id) where user_id = ? UNION SELECT c.* from course c where creator = ?",
+    DB.query("SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?",
       (res, _) => {
-        Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
-          courseLabels.name -> res.getString(courseLabels.name),
-          courseLabels.description -> res.getString(courseLabels.description),
-          courseLabels.creator -> res.getString(courseLabels.creator))
-      }, user.userid, user.userid)
+        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+          RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
+          RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id))
+      }, user.userid)
   }
 
   /**
-    * Check if a given user is permitted to change course information, grand rights, add task, ...
-    *
+    * Check if a given user is permitted to change course information, add task, grant rights are not checked here.
+    * A Tutor and Docent are permitted or courses and admins of course.
     * @author Benjamin Manns
     * @param courseid unique identification for a course
     * @param user a User object
@@ -95,12 +80,23 @@ class CourseService {
         true
       }
     else {
-      val list = DB.query("SELECT ? IN (SELECT creator FROM course where course_id = ? UNION " +
-        "SELECT user_id from user_course where course_id = ? and typ = 'EDIT') as permitted",
-        (res, _) => res.getInt("permitted"), user.userid, courseid, courseid)
-
+      val list = DB.query("select count(*) as count from user_course where course_id = ? and user_id = ? and role_id IN (4,8)",
+        (res, _) => res.getInt("count"), courseid, user.userid)
       list.nonEmpty && list.head == 1
     }
+  }
+  /**
+    * Check if a given user is a course docent
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a User object
+    * @return Boolean, if a user is permitted for the course
+    */
+  def isDocentForCourse(courseid: Int, user: User): Boolean = {
+      val list = DB.query("select count(*) as count from user_course where course_id = ? and user_id = ? and role_id = 4",
+        (res, _) => res.getInt("count"), courseid, user.userid)
+      list.nonEmpty && list.head == 1
   }
 
   /**
@@ -110,29 +106,38 @@ class CourseService {
     * @return Boolean
     */
   def isSubscriberForCourse(courseid: Int, user: User): Boolean = {
-    val list = DB.query("SELECT ? in (select user_id from user_course where course_id = ? " +
-      "and typ = 'SUBSCRIBE') as subscribed",
-      (res, _) => res.getInt("subscribed"), user.userid, courseid)
+    // If a user has any subscription, i.e. he is tutor, docent or just student, he has more view rights
+    val list = DB.query("select count(*) as c from user_course where course_id = ? and user_id = ?",
+      (res, _) => res.getInt("c"), courseid, user.userid)
 
     list.nonEmpty && list.head == 1
   }
 
   /**
-    * grant rights (specified by grandType) to a user for a course
+    * grant tutor rights to a user for a course
     *
     * @author Benjamin Manns
-    * @param grandType which rights is specified here (we support just `edit` until now)
     * @param courseid unique identification for a course
     * @param user a user object
     * @return JSON (contains information if grant worked or not)
     * @throws BadRequestException If the grant type is invalid.
     */
-  def grandUserToACourse(grandType: String, courseid: Int, user: User): Map[String, Boolean] = {
-    val grandTypes = List("edit")
-    if(!grandTypes.contains(grandType)){
-      throw new BadRequestException("Please specify a valid grant_type.")
-    }
-    val num = DB.update("insert ignore into user_course (user_id,course_id,typ) VALUES (?,?,'EDIT')",
+  def grandUserAsTutorForACourse(courseid: Int, user: User): Map[String, Boolean] = {
+    val num = DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,8) ON DUPLICATE KEY UPDATE role_id=8",
+      user.userid, courseid)
+    Map(LABEL_SUCCESS-> true)
+  }
+
+  /**
+    * deny tutor rights to a user for a course if this user was a tutor
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return JSON (contains information if grant worked or not)
+    */
+  def denyUserAsTutorForACourse(courseid: Int, user: User): Map[String, Boolean] = {
+    val num = DB.update("update user_course set role_id=16 where user_id = ? and course_id = ? and role_id = 8",
       user.userid, courseid)
     Map(LABEL_SUCCESS-> (num == 1))
   }
@@ -144,14 +149,14 @@ class CourseService {
     */
   def getAllCourses: List[Map[String, Any]] = {
     DB.query("SELECT * FROM course", (res, _) => {
-      Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
-        courseLabels.name -> res.getString(courseLabels.name),
-        courseLabels.description -> res.getString(courseLabels.description))
+      Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+        CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description))
     })
   }
 
   /**
-    * Gives detailed information about one course - later also task list
+    * Gives detailed information about one course
     *
     * @author Benjamin Manns
     * @param courseid unique course identification
@@ -175,13 +180,13 @@ class CourseService {
     val list = DB.query("SELECT " + selectPart + " FROM course where course_id = ?",
       (res, _) => {
         val courseMap = Map(
-          courseLabels.courseid -> res.getString(courseLabels.courseid),
-          courseLabels.name -> res.getString(courseLabels.name),
-          courseLabels.description -> res.getString(courseLabels.description),
+          CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           "tasks" -> taskList
         )
         if (isPermitted) {
-          courseMap + (courseLabels.creator -> res.getString(courseLabels.creator))
+          courseMap + (CourseDBLabels.creator -> res.getString(CourseDBLabels.creator))
         } else {
           courseMap
         }
@@ -202,7 +207,7 @@ class CourseService {
   }
 
   /**
-    * Only permitted for docents / admins
+    * Only permitted for docents / moderator / admins
     * This method returns all submissions of all users orderd by tasks for one course
     *
     * @author Benjamin Manns
@@ -212,10 +217,11 @@ class CourseService {
   def getAllSubmissionsFromAllUsersByCourses(courseid: Int): List[Map[String, Any]] = {
     DB.query("select * from task t join course c using(course_id)  where c.course_id = ? order by t.task_id",
       (res, _) => {
-        Map(courseLabels.courseid -> res.getString(courseLabels.courseid),
-          courseLabels.name -> res.getString(courseLabels.name),
-          courseLabels.description -> res.getString(courseLabels.description),
-          courseLabels.creator -> res.getString(courseLabels.creator))
+        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+          CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
+          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(taskDBLabels.taskid)))
       }, courseid)
   }
 
@@ -228,27 +234,27 @@ class CourseService {
     * @return JSON (contains information if subscription worked or not)
     */
   def subscribeCourse(courseid: Integer, user: User): Map[String, Boolean] = {
-    val success = DB.update("insert ignore into user_course (user_id,course_id,typ) VALUES (?,?,'SUBSCRIBE')",
+    val success = DB.update("insert ignore into user_course (user_id,course_id,role_id) VALUES (?,?,16)",
       user.userid, courseid)
     Map(LABEL_SUCCESS -> (success == 1))
   }
 
   /**
     * unsubscribe a user from a course
-    *
+    * Tutor can also unsubscribe themself from courses
     * @author Benjamin Manns
     * @param courseid unique identification for a course
     * @param user a user object
     * @return JSON (contains information if unsubscription worked or not)
     */
   def unsubscribeCourse(courseid: Integer, user: User): Map[String, Boolean] = {
-    val success = DB.update("delete from user_course where user_id = ? and course_id = ? and typ = 'SUBSCRIBE'",
+    val success = DB.update("delete from user_course where user_id = ? and course_id = ? and role_id IN (8,16)",
       user.userid, courseid)
     Map(LABEL_SUCCESS -> (success == 1))
   }
 
   /**
-    * create a course by user, which only can be dozent or admin (maybe hiwi?)
+    * create a course by user, which only can be moderator or admin (maybe hiwi?)
     *
     * @author Benjamin Manns
     * @param user a user object
@@ -256,11 +262,12 @@ class CourseService {
     * @param description course description
     * @param standard_task_typ a standart task type
     * @return Scala Map
+    * @throws RuntimeException
     */
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String): Map[String, Number] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "insert into course (name, description, creator, standard_task_type) values (?, ?,?,?)",
+        "insert into course (name, description, creator, standard_task_type) values (?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setString(1, name)
@@ -271,13 +278,13 @@ class CourseService {
       ps
     })
     if (num < 1) {
-      throw new RuntimeException("Error creating course. Please contact administrator.")
+      throw new RuntimeException("Error creating course.")
     }
     Map("course_id" -> holder.getKey)
   }
 
   /**
-    * create a course by user, which only can be dozent or admin (maybe hiwi?)
+    * create a course by user, which only can be docent or tutor and everyone above
     *
     * @author Benjamin Manns
     * @param courseid unique identification for a course
@@ -285,8 +292,9 @@ class CourseService {
     * @param description course description
     * @param standard_task_typ a standart task type
     * @return Scala Map
+    * @throws ResourceNotFoundException
     */
-  def updateCourseByUser(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
+  def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
     val success = DB.update("update course set name = ?, description = ?, standard_task_type = ? where course_id = ?",
       name, description, standard_task_typ, courseid)
     if (success == 0) {
