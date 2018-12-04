@@ -116,7 +116,7 @@ class TaskController {
     if (requestingUser.isEmpty) {
       throw new UnauthorizedException
     }
-    if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get) && !taskService.isPermittedForTask(taskid, requestingUser.get)) {
+    if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
     var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString,
@@ -184,8 +184,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{id}"), method = Array(RequestMethod.GET))
   def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, String] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
-
-    if (requestingUser.isEmpty || taskService.isPermittedForTask(taskid, requestingUser.get)) {
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
 
@@ -241,7 +240,7 @@ class TaskController {
       val file = jsonNode.get(LABEL_FILE).asText()
       val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
-      // TODO until we finilaize this parameters set a default if none is given
+      // TODO until we finalize this parameters set a default if none is given
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
       val taskInfo = this.taskService.createTask(name, description, courseid, filename, test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
@@ -276,7 +275,7 @@ class TaskController {
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (this.taskService.isPermittedForTask(taskid, user.get)) {
+    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
       throw new BadRequestException("User can not delete a task.")
     }
     this.taskService.deleteTask(taskid)
@@ -296,8 +295,8 @@ class TaskController {
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (this.taskService.isPermittedForTask(taskid, user.get)) {
-      throw new BadRequestException("User with role `student` and no edit rights can not update a task.")
+    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new BadRequestException("User has no edit rights and can not update a task.")
     }
     try {
       val name = jsonNode.get("name").asText()

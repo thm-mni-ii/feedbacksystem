@@ -3,7 +3,7 @@ package de.thm.ii.submissioncheck.services
 /**
   * Class holds all DB labels
   */
-class UserDBLabels{
+object UserDBLabels{
   /** DB Label "user_id" */
   var user_id: String = "user_id"
 
