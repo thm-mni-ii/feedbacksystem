@@ -27,11 +27,17 @@ class LoginService {
 
   /**
     * get a list of last login of each user
+    * @author Benjamin Manns
+    * @param sort: provide a sort of timestamps
     * @return Scala List of Last Login date of each existing user
+    * @throws IllegalArgumentException
     */
-  def getLastLoginList: List[Map[String, Any]] = {
+  def getLastLoginList(sort: String): List[Map[String, Any]] = {
+    if (sort != "asc" && sort != "desc") {
+      throw new IllegalArgumentException("Only `asc` or `desc` are allowed")
+    }
     DB.query("select user_id, username, role_id, prename, surname, email, max(`login_timestamp`) as last_login " +
-      "from login_log join user using(user_id) group by user_id order by last_login",
+      "from login_log join user using(user_id) group by user_id order by last_login " + sort,
       (res, _) => {
         Map("user_id" -> res.getString("user_id"),
         "username" -> res.getString("username"),

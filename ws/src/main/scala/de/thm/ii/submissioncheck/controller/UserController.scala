@@ -3,7 +3,7 @@ package de.thm.ii.submissioncheck.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import org.springframework.web.bind.annotation._
-import de.thm.ii.submissioncheck.services.{RoleDBLabels, UserService}
+import de.thm.ii.submissioncheck.services.{LoginService, RoleDBLabels, UserService}
 import org.apache.catalina.servlet4preview.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -18,6 +18,8 @@ import org.springframework.http.MediaType
 class UserController {
   @Autowired
   private val userService: UserService = null
+  @Autowired
+  private val loginService: LoginService = null
 
   private final val LABEL_USERNAME = "username"
   private final val LABEL_GRANT = "grant"
@@ -73,7 +75,7 @@ class UserController {
     * @param request contains resquest headers
     * @return JSON
     */
-  @RequestMapping(value = Array("/users/{username}"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(value = Array("users/{username}"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def deleteAUser(@PathVariable username: String, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
@@ -93,7 +95,7 @@ class UserController {
     * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("/users/grant/admin"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(value = Array("users/grant/admin"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def grantAdmin(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
@@ -118,7 +120,7 @@ class UserController {
     * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("/users/revoke"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(value = Array("users/revoke"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def revokeGlobalRoleOfUser(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
@@ -135,4 +137,27 @@ class UserController {
       case _: NullPointerException => throw new BadRequestException("Please provide a username to revoke")
     }
   }
+
+  /**
+    * revoke a users global role
+    * @author Benjamin Manns
+    * @param request contains resquest headers
+    * @param jsonNode contains request body
+    * @return JSON
+    */
+  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def getLastLoginsOfUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || user.get.roleid != 1) {
+      throw new UnauthorizedException
+    }
+    try {
+      val sort = jsonNode.get("sort").asText()
+      loginService.getLastLoginList(sort)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide a `sort` argument")
+      case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")
+    }
+  }
+
 }
