@@ -29,7 +29,7 @@ class TaskService {
   /**
     * Class holds all DB labels
     */
-  class SubmissionDBLabels {
+  object SubmissionDBLabels {
     /** DB Label "task_id" */
     val taskid: String = "task_id"
 
@@ -51,11 +51,6 @@ class TaskService {
     /** DB Label "passed" */
     val submission_data: String = "submission_data"
   }
-
-  /** holds all unique labels */
-  val submissionDBLabels = new SubmissionDBLabels()
-  /** holds all unique labels */
-  val userDBLabels = new UserDBLabels()
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
@@ -141,12 +136,12 @@ class TaskService {
           taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
           taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
           taskDBLabels.name -> res.getString(taskDBLabels.name),
-          submissionDBLabels.result -> res.getString(submissionDBLabels.result),
-          submissionDBLabels.filename -> res.getString(submissionDBLabels.filename),
-          submissionDBLabels.submission_data -> res.getString(submissionDBLabels.submission_data),
-          submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
-          submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
-          submissionDBLabels.userid -> res.getString(submissionDBLabels.userid)
+          SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
+          SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
+          SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
+          SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
+          SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
+          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid)
         )
       }, taskid, user.userid)
   }
@@ -162,14 +157,14 @@ class TaskService {
     DB.query("SELECT u.*, s.* from task join submission s using(task_id) join user u using(user_id) where task_id = ?",
       (res, _) => {
         Map(
-          submissionDBLabels.result -> res.getString(submissionDBLabels.result),
-          submissionDBLabels.passed -> res.getString(submissionDBLabels.passed),
-          submissionDBLabels.submissionid -> res.getString(submissionDBLabels.submissionid),
-          submissionDBLabels.userid -> res.getString(submissionDBLabels.userid),
-          userDBLabels.username -> res.getString(userDBLabels.username),
-          userDBLabels.prename -> res.getString(userDBLabels.prename),
-          userDBLabels.surname -> res.getString(userDBLabels.surname),
-          userDBLabels.email -> res.getString(userDBLabels.email)
+          SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
+          SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
+          SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
+          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
+          UserDBLabels.username -> res.getString(UserDBLabels.username),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.email -> res.getString(UserDBLabels.email)
         )
       }, taskid)
   }
@@ -283,7 +278,7 @@ class TaskService {
     */
   def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String, testsystem_id: String): Boolean = {
     val num = DB.update("UPDATE task set name = ?, description = ?, test_file_name = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
-      name, description, filename, test_type, taskid)
+      name, description, filename, test_type, testsystem_id, taskid)
     num == 1
   }
 
@@ -311,8 +306,8 @@ class TaskService {
       true
     }
     else {
-      val list = DB.query("SELECT ? IN (SELECT user_id from user_course join task using (course_id) where task_id = ? and typ = 'SUBSCRIBE') as permitted",
-        (res, _) => res.getInt("permitted"), user.userid, taskid)
+      val list = DB.query("SELECT count(*) as c FROM  user_course join task using (course_id) where task_id = ? and user_id = ?",
+        (res, _) => res.getInt("c"), taskid, user.userid)
       list.nonEmpty && list.head == 1
     }
   }
@@ -330,9 +325,9 @@ class TaskService {
         true
       }
     else {
-      val list = DB.query("SELECT ? IN (select  c.creator from task t join course c using (course_id) where task_id = ? " +
-        "UNION SELECT user_id from user_course join task using (course_id) where task_id = ? and typ = 'EDIT') " +
-        "as permitted",
+       val list = DB.query("SELECT ? IN (select c.creator from task t join course c using (course_id) where " +
+        "task_id = ? UNION SELECT user_id from user_course join task using (course_id) where task_id = ? " +
+        "and role_id IN (8,4) ) as permitted",
           (res, _) => res.getInt("permitted"), user.userid, taskid, taskid)
 
       list.nonEmpty && list.head == 1
@@ -397,7 +392,7 @@ class TaskService {
     * @return the unique test system name
     */
   def getTestsystemTopicByTaskId(taskid: Int): String = {
-    val list = DB.query("select testsystem_id from task join testsystem using testsystem_id where task_id = ?",
+    val list = DB.query("select testsystem_id from task join testsystem using(testsystem_id) where task_id = ?",
       (res, _) => res.getString(TestsystemLabels.id), taskid)
     list.head
   }

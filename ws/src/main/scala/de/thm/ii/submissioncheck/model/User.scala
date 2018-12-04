@@ -19,4 +19,12 @@ class User(val userid: Int, val username: String, val role: String, val roleid: 
   def asMap(): Map[String, Any] = {
     Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role, "roleid" -> this.roleid)
   }
+
+  /**
+    * Print User infomation
+    * @return user info string
+    */
+  override def toString: String = {
+    asMap().toString()
+  }
 }
