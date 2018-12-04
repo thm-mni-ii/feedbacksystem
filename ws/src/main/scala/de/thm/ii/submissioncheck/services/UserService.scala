@@ -117,7 +117,7 @@ class UserService {
     * @return The user having the given username if such one exists.
     */
   def loadUserFromDB(username: String): Option[User] = {
-    val users = DB.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
+    val users = DB.query("SELECT u.*, r.role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt("role_id"))
       }, username)

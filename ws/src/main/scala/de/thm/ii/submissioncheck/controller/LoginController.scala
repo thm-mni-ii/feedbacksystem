@@ -2,7 +2,7 @@ package de.thm.ii.submissioncheck.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.BadRequestException
-import de.thm.ii.submissioncheck.services.UserService
+import de.thm.ii.submissioncheck.services.{LoginService, UserService}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.springframework.web.bind.annotation._
@@ -22,6 +22,8 @@ class LoginController extends CasClientConfigurerAdapter {
   private final val application_json_value = "application/json"
   @Autowired
   private val userService: UserService = null
+  @Autowired
+  private val loginService: LoginService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
     * postUser sends login data to the CAS client to perform a login. Also a Cookie has to be
@@ -38,7 +40,7 @@ class LoginController extends CasClientConfigurerAdapter {
         val name = principal.getName
         val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
         val jwtToken = userService.generateTokenFromUser(user)
-
+        loginService.log(user)
         response.addHeader("Authorization", "Bearer " + jwtToken)
         Map("login_result" -> true)
       } catch {
@@ -59,10 +61,11 @@ class LoginController extends CasClientConfigurerAdapter {
     */
   @deprecated("0", "Don't use this in production")
   @RequestMapping(value = Array("login/token"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  def createTask(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
+  def createToken(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
     try {
       val name = jsonNode.get("name").asText()
       val user = this.userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
+      loginService.log(user)
       val jwtToken = this.userService.generateTokenFromUser(user)
       response.addHeader("Authorization", "Bearer " + jwtToken)
       Map("token" -> jwtToken)
