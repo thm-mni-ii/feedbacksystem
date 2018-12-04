@@ -10,5 +10,9 @@ object RoleDBLabels {
   var role_name: String = "role_name"
   /** DB Label "role_description" */
   var role_description: String = "role_description"
+  /** ROLE LABEL "MODERATOR" */
+  var MODERATOR: String = "MODERATOR"
+  /** ROLE LABEL "ADMIN" */
+  var ADMIN: String = "ADMIN"
 }
 

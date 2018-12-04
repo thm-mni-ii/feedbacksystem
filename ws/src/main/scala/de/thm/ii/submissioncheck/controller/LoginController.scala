@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1"))
 class LoginController extends CasClientConfigurerAdapter {
-  private final val LABEL_STUDENT_ROLE = 8
+  private final val LABEL_STUDENT_ROLE = 16
   private final val application_json_value = "application/json"
   @Autowired
   private val userService: UserService = null

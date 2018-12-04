@@ -240,11 +240,11 @@ class CourseController {
       }
       val userToGrant = userService.loadUserFromDB(username)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provid a valid username as a docent")
+        throw new BadRequestException("Please provide a valid username as a docent")
       }
       courseService.grandUserAsDocentForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username")
+      case _: NullPointerException => throw new BadRequestException("Please provide: username to grant docent")
     }
   }
 
@@ -288,7 +288,7 @@ class CourseController {
     try {
       val username = jsonNode.get(LABEL_USERNAME).asText()
       val user = userService.verfiyUserByHeaderToken(request)
-      if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
+      if (user.isEmpty || user.get.roleid != 2) {
         throw new UnauthorizedException
       }
       val userToGrant = userService.loadUserFromDB(username)
