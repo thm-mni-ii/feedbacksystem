@@ -207,7 +207,7 @@ class TaskService {
     * @param passed tiny peace of status information (i.e. exitcode)
     * @return Boolean: did update work
     */
-  def setResultOfTask(taskid: Integer, submissionid: Integer, result: String, passed: String): Boolean = {
+  def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String): Boolean = {
     val num = DB.update(
       "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;",
       result, passed, taskid, submissionid
