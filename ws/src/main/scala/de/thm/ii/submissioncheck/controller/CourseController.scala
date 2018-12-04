@@ -217,7 +217,7 @@ class CourseController {
       }
       courseService.grandUserAsTutorForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username")
+      case _: NullPointerException => throw new BadRequestException("Please provide: username for gran tutor")
     }
   }
 
