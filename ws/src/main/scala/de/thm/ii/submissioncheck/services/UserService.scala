@@ -151,6 +151,16 @@ class UserService {
   }
 
   /**
+    * delete a user by it's id
+    * @author Benjamin Manns
+    * @param user User object which will be deleted
+    * @return if update worked
+    */
+  def deleteUser(user: User): Boolean = {
+    1 == DB.update("DELETE FROM user where user_id = ?", user.userid)
+  }
+
+  /**
     * generateTokenFromUser simply uses JWT technologies
     *
     * @author Benjamin Manns

@@ -67,6 +67,26 @@ class UserController {
   }
 
   /**
+    * delete a user
+    * @author Benjamin Manns
+    * @param username which user has to be deleted
+    * @param request contains resquest headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/users/{username}"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def deleteAUser(@PathVariable username: String, request: HttpServletRequest): Map[String, Any] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || user.get.roleid != 1) {
+      throw new UnauthorizedException
+    }
+    val userToDelete = userService.loadUserFromDB(username)
+    if (userToDelete.isEmpty) {
+      throw new BadRequestException("Please provide a valid username which should be deleted")
+    }
+    Map("deletion" -> userService.deleteUser(userToDelete.get))
+  }
+
+  /**
     * grant a user to the global role ADMIN
     * @author Benjamin Manns
     * @param request contains resquest headers
