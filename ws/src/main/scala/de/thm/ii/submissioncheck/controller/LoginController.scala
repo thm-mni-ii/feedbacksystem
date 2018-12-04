@@ -1,5 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
+import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.submissioncheck.misc.BadRequestException
 import de.thm.ii.submissioncheck.services.UserService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1"))
 class LoginController extends CasClientConfigurerAdapter {
+  private final val LABEL_STUDENT_ROLE = 8
+  private final val application_json_value = "application/json"
   @Autowired
   private val userService: UserService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -32,7 +36,7 @@ class LoginController extends CasClientConfigurerAdapter {
       try {
         val principal = request.getUserPrincipal
         val name = principal.getName
-        val user = userService.insertUserIfNotExists(name, 1)
+        val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
         val jwtToken = userService.generateTokenFromUser(user)
 
         response.addHeader("Authorization", "Bearer " + jwtToken)
@@ -43,5 +47,30 @@ class LoginController extends CasClientConfigurerAdapter {
           Map("login_result" -> false)
         }
       }
+  }
+
+  /**
+    * Provide a REST for getting fast a token, only for testing purpose
+    * @author Benjamin Manns
+    * @param request contain request information
+    * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
+    */
+  @deprecated("0", "Don't use this in production")
+  @RequestMapping(value = Array("login/token"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  def createTask(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
+    try {
+      val name = jsonNode.get("name").asText()
+      val user = this.userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
+      val jwtToken = this.userService.generateTokenFromUser(user)
+      response.addHeader("Authorization", "Bearer " + jwtToken)
+      Map("token" -> jwtToken)
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
+      }
+    }
   }
 }
