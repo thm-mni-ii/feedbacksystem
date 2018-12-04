@@ -129,6 +129,21 @@ class CourseService {
   }
 
   /**
+    * grant docent rights to a user for a course
+    * Important: This has to be done only and only alone by a moderator
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return JSON (contains information if grant worked or not)
+    * @throws BadRequestException If the grant type is invalid.
+    */
+  def grandUserAsDocentForACourse(courseid: Int, user: User): Map[String, Boolean] = {
+    val num = DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,4) ON DUPLICATE KEY UPDATE role_id=4",
+      user.userid, courseid)
+    Map(LABEL_SUCCESS-> true)
+  }
+
+  /**
     * deny tutor rights to a user for a course if this user was a tutor
     *
     * @author Benjamin Manns
@@ -138,6 +153,20 @@ class CourseService {
     */
   def denyUserAsTutorForACourse(courseid: Int, user: User): Map[String, Boolean] = {
     val num = DB.update("update user_course set role_id=16 where user_id = ? and course_id = ? and role_id = 8",
+      user.userid, courseid)
+    Map(LABEL_SUCCESS-> (num == 1))
+  }
+
+  /**
+    * deny docent rights for a user for a course if this user was a docent
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param user a user object
+    * @return JSON (contains information if grant worked or not)
+    */
+  def denyUserAsDocentForACourse(courseid: Int, user: User): Map[String, Boolean] = {
+    val num = DB.update("delete from user_course where user_id = ? and course_id = ? and role_id = 4",
       user.userid, courseid)
     Map(LABEL_SUCCESS-> (num == 1))
   }
