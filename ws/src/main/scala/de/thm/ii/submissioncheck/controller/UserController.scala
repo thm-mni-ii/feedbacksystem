@@ -159,5 +159,4 @@ class UserController {
       case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")
     }
   }
-
 }
