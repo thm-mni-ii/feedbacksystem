@@ -198,8 +198,6 @@ class TaskController {
     taskService.getTaskDetails(taskid).getOrElse(Map.empty)
   }
 
-  // Useful hint for Angular cooperation:
-  // https://stackoverflow.com/questions/47886695/current-request-is-not-a-multipart-requestangular-4spring-boot
   /**
     * serve a route to upload a file to a given taskid
     * @author grokonez.com
