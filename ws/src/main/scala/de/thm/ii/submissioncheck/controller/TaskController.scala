@@ -144,13 +144,6 @@ class TaskController {
       kafkaTemplate.send(checkTopic, jsonResult)
       kafkaTemplate.flush()
 
-      // TODO move it to "createTask" and replace course id
-      val jsonMessageNewTaskTopic = JsonParser.mapToJsonStr(Map(LABEL_TASK_ID -> taskid.toString,
-        LABEL_COURSEID -> "1", LABEL_TESTFILE_URL -> taskService.getURLbyTask(taskid))) // LABEL_USER_ID -> requestingUser.username
-      logger.warn(jsonMessageNewTaskTopic)
-      kafkaTemplate.send(newTaskTopic, jsonResult)
-      kafkaTemplate.flush()
-
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a data or a file and filename parameter.")

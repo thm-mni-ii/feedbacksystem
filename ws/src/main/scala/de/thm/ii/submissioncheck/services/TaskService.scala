@@ -198,18 +198,6 @@ class TaskService {
   }
 
   /**
-    * get URL by a given task
-    *
-    * @author Benjamin Manns
-    * @param taskid unique identification for a task
-    * @return URL to file
-    */
-  def getURLbyTask (taskid: Int): String = {
-    // TODO load from DB
-    "localhost:8080/api/v1/tasks/" + taskid.toString + "/files/" + "bash1.sh"
-  }
-
-  /**
     * for a given Taskid and submissionid set a result text
     *
     * @author Benjamin Manns
