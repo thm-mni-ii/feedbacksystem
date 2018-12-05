@@ -20,7 +20,7 @@ export class LoginComponent implements OnInit {
 
 
   login() {
-    this.auth.login(this.username, this.password);
+    this.auth.login_fake(this.username);
   }
 
 
