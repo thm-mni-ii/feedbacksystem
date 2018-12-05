@@ -29,6 +29,31 @@ export class AuthService {
     return localStorage.getItem('user');
   }
 
+  login_fake(username: string) {
+    return this.http.post<LoginResult>("/api/v1/login", {
+      username: username
+    }, {observe: 'response'}).subscribe(user => {
+
+
+      localStorage.setItem('user', JSON.stringify(user.headers.get('Authorization')));
+
+      switch (this.getDecodedToken().roles) {
+        case 'admin':
+          this.router.navigate(['admin']);
+          break;
+        case 'dozent':
+          this.router.navigate(['prof']);
+          break;
+        case 'hiwi':
+          //TODO: Implement route for hiwi
+          break;
+        case 'student':
+          this.router.navigate(['user']);
+          break;
+      }
+      return user;
+    });
+  }
 
   login(username: string, password: string) {
     return this.http.post<LoginResult>("/api/v1/login", {
