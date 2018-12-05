@@ -46,6 +46,31 @@ INSERT INTO `course` VALUES (1,'Admin Kurse','Der Kurs gehört dem Admin',1,NULL
 UNLOCK TABLES;
 
 --
+-- Table structure for table `login_log`
+--
+
+DROP TABLE IF EXISTS `login_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `login_log` (
+  `login_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id` int(11) DEFAULT NULL,
+  KEY `login_log_user_user_id_fk` (`user_id`),
+  CONSTRAINT `login_log_user_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `login_log`
+--
+
+LOCK TABLES `login_log` WRITE;
+/*!40000 ALTER TABLE `login_log` DISABLE KEYS */;
+INSERT INTO `login_log` VALUES ('2018-12-04 16:47:18',57),('2018-12-04 16:47:27',57),('2018-12-04 16:47:57',53),('2018-12-04 16:48:11',53),('2018-12-04 16:49:00',54),('2018-12-04 16:49:03',1),('2018-12-04 16:49:06',2),('2018-12-04 16:49:09',58),('2018-12-04 16:49:12',53),('2018-12-04 16:49:12',53),('2018-12-04 16:49:13',53),('2018-12-04 16:49:17',1),('2018-12-04 21:21:31',53),('2018-12-04 22:42:40',53),('2018-12-04 22:46:54',53);
+/*!40000 ALTER TABLE `login_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `role`
 --
 
@@ -54,8 +79,8 @@ DROP TABLE IF EXISTS `role`;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `role` (
   `role_id` int(11) NOT NULL,
-  `name` varchar(30) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
-  `description` varchar(200) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `role_name` varchar(30) COLLATE utf8_bin DEFAULT NULL,
+  `role_description` varchar(200) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -66,7 +91,7 @@ CREATE TABLE `role` (
 
 LOCK TABLES `role` WRITE;
 /*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'admin',NULL),(2,'dozent',NULL),(4,'hiwi',NULL),(8,'student',NULL);
+INSERT INTO `role` VALUES (1,'admin','Can delete and grand users. Can create courses'),(2,'moderator','Can create courses'),(4,'docent','Can edit course, can create task for course, grant tutor to other course'),(8,'tutor','Can edit course, can create task for course'),(16,'student',NULL);
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -135,7 +160,7 @@ CREATE TABLE `task` (
 
 LOCK TABLES `task` WRITE;
 /*!40000 ALTER TABLE `task` DISABLE KEYS */;
-INSERT INTO `task` VALUES (3,'Aufgabe 1','1qw2qw',2,'bash1.sh',NULL,'secrettokenchecker'),(4,'Aufgbe2','USW',1,'bash.sh','FILE','secrettokenchecker'),(7,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(8,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(9,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(10,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(11,'Aufgbe11','Bitte legen Sie an und machen Sie so',1,'bash1.sh','FILE','secrettokenchecker');
+INSERT INTO `task` VALUES (3,'NAME','Anotzher desc',2,'shell.sh','FILE','secrettokenchecker'),(4,'Aufgbe2','USW',1,'bash.sh','FILE','secrettokenchecker'),(7,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(8,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(9,'Aufgbe2','vfnd hfiods  blib bial üoj',1,'bash1.sh','FILE','secrettokenchecker'),(10,'Aufgbe2','vfnd hfiods  blib bial üoj',6,'bash1.sh','FILE','secrettokenchecker');
 /*!40000 ALTER TABLE `task` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -192,7 +217,7 @@ CREATE TABLE `token` (
 
 LOCK TABLES `token` WRITE;
 /*!40000 ALTER TABLE `token` DISABLE KEYS */;
-INSERT INTO `token` VALUES ('06577cef4ecd3a81e6d3681a6fb3add5da8969d7',65,'SUBMISSION_TEST_FILE','2018-11-29 12:38:36','2018-11-29 12:33:36',0),('128a279afcd04de72ec5c2a80b58bda4cce08d9b',4,'TASK_TEST_FILE','2018-11-29 16:26:42','2018-11-29 16:21:42',1),('1a9938b3e53a764c1ad98b6d1d479b2edc74f5ec',6,'TASK_TEST_FILE','2018-11-29 13:07:28','2018-11-29 13:02:28',1),('1c98cb97c80f2f08a26f4105cd03dfdd5d859f04',67,'SUBMISSION_TEST_FILE','2018-12-03 22:15:02','2018-12-03 22:10:02',0),('204a560bc08d1d4261f5773fd8a2e2340e257e32',11,'TASK_TEST_FILE','2018-11-29 16:34:02','2018-11-29 16:29:02',0),('24957c6bd2e80d9fe84a3ed8fa229a0ab65a51de',4,'TASK_TEST_FILE','2018-11-29 16:26:24','2018-11-29 16:21:24',0),('280ec915f4f6429d6ed6878b299c088da23ebcbb',68,'SUBMISSION_TEST_FILE','2018-12-03 22:23:30','2018-12-03 22:18:30',0),('3fae976c877097920d6d78863f7b721c3cc2e0cf',4,'TASK_TEST_FILE','2018-11-29 12:51:51','2018-11-29 12:46:51',1),('44681858c4d6cff2ee0ed34e4562ff4a133bd8d4',4,'TASK_TEST_FILE','2018-11-29 16:20:57','2018-11-29 16:15:57',0),('5aaa955cbc13608cc3224b6b9f221bb28dde1516',10,'TASK_TEST_FILE','2018-11-29 16:33:49','2018-11-29 16:28:49',0),('8ad1c3c7750906a4004852a065fe6b1d1ea90397',4,'TASK_TEST_FILE','2018-11-29 16:26:14','2018-11-29 16:21:14',0),('9dbdac72c2085e3d2c4f2a12bca0c505d0277a62',8,'TASK_TEST_FILE','2018-11-29 16:33:48','2018-11-29 16:28:48',0),('aea507658661e106493734ff8e5d29b0047d594d',4,'TASK_TEST_FILE','2018-11-29 16:21:11','2018-11-29 16:16:11',0),('aed06bc5906654b75826471ba6e5317f55da64c4',5,'TASK_TEST_FILE','2018-11-29 12:53:38','2018-11-29 12:48:38',1),('bab6383462367fb66d1c80ca54dbfe66b9d6d6bf',4,'TASK_TEST_FILE','2018-11-29 16:19:44','2018-11-29 16:14:44',0),('bfa121fe100d8a21b921e2553b26c8945c0e07d3',4,'TASK_TEST_FILE','2018-11-29 16:19:26','2018-11-29 16:14:26',0),('c3702de268d6d6c5edf61da9a5e2a11f3aff4e5e',4,'TASK_TEST_FILE','2018-11-29 16:21:05','2018-11-29 16:16:05',0),('d93f3a0f0fa1cac7fab9deed311412bfc056e4c4',64,'SUBMISSION_TEST_FILE','2018-11-29 11:25:22','2018-11-29 11:20:22',1),('d9be5fd7bb857d4b078496dd978bcf66e9d87aad',-1,'SUBMISSION_TEST_FILE','2018-11-29 11:24:07','2018-11-29 11:19:07',1),('ddc39a3889f7c3b1f95fbbeacc0cfd76c5f153a6',4,'TASK_TEST_FILE','2018-11-29 16:21:52','2018-11-29 16:16:52',0),('e265b6b08373bed760e7cef68e479985be882b25',66,'SUBMISSION_TEST_FILE','2018-11-29 14:19:31','2018-11-29 14:14:31',0),('e7dc493be07030daeda04c8439fb7046ed30685a',9,'TASK_TEST_FILE','2018-11-29 16:33:48','2018-11-29 16:28:48',0),('f38de1dd17f4c1a2cc59b547dda8577189e9f54a',4,'TASK_TEST_FILE','2018-11-29 16:26:21','2018-11-29 16:21:21',0),('f9629c97afce9656ac335de5fdb5a66bbccfb0c3',7,'TASK_TEST_FILE','2018-11-29 16:33:46','2018-11-29 16:28:46',0),('huiwqfgduiegfdui',3,'TASK_TEST_FILE','2018-12-01 12:03:05','2018-11-29 07:17:39',1);
+INSERT INTO `token` VALUES ('06577cef4ecd3a81e6d3681a6fb3add5da8969d7',65,'SUBMISSION_TEST_FILE','2018-11-29 12:38:36','2018-11-29 12:33:36',0),('128a279afcd04de72ec5c2a80b58bda4cce08d9b',4,'TASK_TEST_FILE','2018-11-29 16:26:42','2018-11-29 16:21:42',1),('1a9938b3e53a764c1ad98b6d1d479b2edc74f5ec',6,'TASK_TEST_FILE','2018-11-29 13:07:28','2018-11-29 13:02:28',1),('1c98cb97c80f2f08a26f4105cd03dfdd5d859f04',67,'SUBMISSION_TEST_FILE','2018-12-03 22:15:02','2018-12-03 22:10:02',0),('204a560bc08d1d4261f5773fd8a2e2340e257e32',11,'TASK_TEST_FILE','2018-11-29 16:34:02','2018-11-29 16:29:02',0),('24957c6bd2e80d9fe84a3ed8fa229a0ab65a51de',4,'TASK_TEST_FILE','2018-11-29 16:26:24','2018-11-29 16:21:24',0),('280ec915f4f6429d6ed6878b299c088da23ebcbb',68,'SUBMISSION_TEST_FILE','2018-12-03 22:23:30','2018-12-03 22:18:30',0),('3fae976c877097920d6d78863f7b721c3cc2e0cf',4,'TASK_TEST_FILE','2018-11-29 12:51:51','2018-11-29 12:46:51',1),('44681858c4d6cff2ee0ed34e4562ff4a133bd8d4',4,'TASK_TEST_FILE','2018-11-29 16:20:57','2018-11-29 16:15:57',0),('546467653e68341823967a1c28f4693274e105ff',3,'TASK_TEST_FILE','2018-12-04 12:46:57','2018-12-04 12:41:57',0),('5aaa955cbc13608cc3224b6b9f221bb28dde1516',10,'TASK_TEST_FILE','2018-11-29 16:33:49','2018-11-29 16:28:49',0),('8ad1c3c7750906a4004852a065fe6b1d1ea90397',4,'TASK_TEST_FILE','2018-11-29 16:26:14','2018-11-29 16:21:14',0),('9dbdac72c2085e3d2c4f2a12bca0c505d0277a62',8,'TASK_TEST_FILE','2018-11-29 16:33:48','2018-11-29 16:28:48',0),('a6dfcc727edca510a281e156f399681ddd1c880f',3,'TASK_TEST_FILE','2018-12-04 12:48:33','2018-12-04 12:43:33',1),('aea507658661e106493734ff8e5d29b0047d594d',4,'TASK_TEST_FILE','2018-11-29 16:21:11','2018-11-29 16:16:11',0),('aed06bc5906654b75826471ba6e5317f55da64c4',5,'TASK_TEST_FILE','2018-11-29 12:53:38','2018-11-29 12:48:38',1),('b6eb7d21d745fb008cd2c2eb24e58042d37aee11',3,'TASK_TEST_FILE','2018-12-04 12:43:51','2018-12-04 12:38:51',0),('bab6383462367fb66d1c80ca54dbfe66b9d6d6bf',4,'TASK_TEST_FILE','2018-11-29 16:19:44','2018-11-29 16:14:44',0),('bfa121fe100d8a21b921e2553b26c8945c0e07d3',4,'TASK_TEST_FILE','2018-11-29 16:19:26','2018-11-29 16:14:26',0),('c3702de268d6d6c5edf61da9a5e2a11f3aff4e5e',4,'TASK_TEST_FILE','2018-11-29 16:21:05','2018-11-29 16:16:05',0),('d93f3a0f0fa1cac7fab9deed311412bfc056e4c4',64,'SUBMISSION_TEST_FILE','2018-11-29 11:25:22','2018-11-29 11:20:22',1),('d9be5fd7bb857d4b078496dd978bcf66e9d87aad',-1,'SUBMISSION_TEST_FILE','2018-11-29 11:24:07','2018-11-29 11:19:07',1),('ddc39a3889f7c3b1f95fbbeacc0cfd76c5f153a6',4,'TASK_TEST_FILE','2018-11-29 16:21:52','2018-11-29 16:16:52',0),('e265b6b08373bed760e7cef68e479985be882b25',66,'SUBMISSION_TEST_FILE','2018-11-29 14:19:31','2018-11-29 14:14:31',0),('e5324393e53a69901179ccbc3b9a9a97d4a92525',3,'TASK_TEST_FILE','2018-12-04 12:42:33','2018-12-04 12:37:33',0),('e7dc493be07030daeda04c8439fb7046ed30685a',9,'TASK_TEST_FILE','2018-11-29 16:33:48','2018-11-29 16:28:48',0),('f38de1dd17f4c1a2cc59b547dda8577189e9f54a',4,'TASK_TEST_FILE','2018-11-29 16:26:21','2018-11-29 16:21:21',0),('f9629c97afce9656ac335de5fdb5a66bbccfb0c3',7,'TASK_TEST_FILE','2018-11-29 16:33:46','2018-11-29 16:28:46',0),('huiwqfgduiegfdui',3,'TASK_TEST_FILE','2018-12-01 12:03:05','2018-11-29 07:17:39',1);
 /*!40000 ALTER TABLE `token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -208,12 +233,12 @@ CREATE TABLE `user` (
   `prename` varchar(100) DEFAULT NULL,
   `surname` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `role_id` int(11) DEFAULT NULL,
   `username` varchar(200) DEFAULT NULL,
+  `role_id` int(11) DEFAULT NULL COMMENT 'it is his global role_id',
   PRIMARY KEY (`user_id`),
   KEY `user_role_role_id_fk` (`role_id`),
-  CONSTRAINT `user_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `user_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -222,7 +247,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,1,'admin'),(2,'TEST','super','test',4,'hiwi'),(53,NULL,NULL,NULL,8,'bmnn57'),(54,'prof','prof',NULL,2,'prof'),(55,NULL,NULL,NULL,8,'blavl');
+INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,'admin',1),(2,'TEST','super','test','hiwi',16),(53,NULL,NULL,NULL,'bmnn57',16),(54,'prof','prof',NULL,'prof',16),(55,NULL,NULL,NULL,'moderator',2),(57,NULL,NULL,NULL,'blastudent',8),(58,NULL,NULL,NULL,'docent',8);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -236,10 +261,12 @@ DROP TABLE IF EXISTS `user_course`;
 CREATE TABLE `user_course` (
   `course_id` int(1) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `typ` enum('SUBSCRIBE','EDIT') NOT NULL DEFAULT 'SUBSCRIBE',
+  `role_id` int(11) NOT NULL,
   PRIMARY KEY (`course_id`,`user_id`),
   KEY `user_has_courses_users_user_id_fk` (`user_id`),
+  KEY `user_course_role_role_id_fk` (`role_id`),
   CONSTRAINT `user_course_course_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `user_course_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `user_has_courses_users_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -250,7 +277,7 @@ CREATE TABLE `user_course` (
 
 LOCK TABLES `user_course` WRITE;
 /*!40000 ALTER TABLE `user_course` DISABLE KEYS */;
-INSERT INTO `user_course` VALUES (1,2,'EDIT'),(1,53,'EDIT'),(2,53,'SUBSCRIBE'),(2,54,'EDIT'),(4,53,'SUBSCRIBE'),(5,53,'SUBSCRIBE'),(6,53,'SUBSCRIBE'),(7,53,'SUBSCRIBE');
+INSERT INTO `user_course` VALUES (1,2,4),(1,53,4),(2,54,4),(4,53,8),(2,53,16),(5,53,16),(7,53,16);
 /*!40000 ALTER TABLE `user_course` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -263,4 +290,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-12-04 10:20:38
+-- Dump completed on 2018-12-05  8:17:52
