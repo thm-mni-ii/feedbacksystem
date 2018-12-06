@@ -29,8 +29,13 @@ export class AuthService {
     return localStorage.getItem('user');
   }
 
+  /**
+   * Gives back a valid token for an user,
+   * for an given username.
+   * @param username that will be used for a valid session
+   */
   login_fake(username: string) {
-    return this.http.post<LoginResult>("/api/v1/login", {
+    return this.http.post<LoginResult>("/api/v1/login/token", {
       username: username
     }, {observe: 'response'}).subscribe(user => {
 
@@ -55,6 +60,15 @@ export class AuthService {
     });
   }
 
+  /**
+   * Login function to authenticate user with CAS
+   * system
+   *
+   * //TODO Implement real functionality
+   *
+   * @param username deprecated
+   * @param password deprecated
+   */
   login(username: string, password: string) {
     return this.http.post<LoginResult>("/api/v1/login", {
       username: username,
@@ -83,10 +97,19 @@ export class AuthService {
   }
 
 
+  /**
+   * Deletes token from localstorage
+   * and terminates session for user.
+   */
   logout() {
     localStorage.removeItem('user');
   }
 
+
+  /**
+   * Get username from an
+   * user that is logged in.
+   */
   getUsername() {
     return this.getDecodedToken().username;
   }
@@ -102,11 +125,17 @@ export class AuthService {
 
 }
 
+/**
+ * Used to parse Login result
+ */
 interface LoginResult {
   login_result: string;
   token: string;
 }
 
+/**
+ * Used to parse JWT token
+ */
 interface JWTToken {
   sub: string;
   roles: string;
