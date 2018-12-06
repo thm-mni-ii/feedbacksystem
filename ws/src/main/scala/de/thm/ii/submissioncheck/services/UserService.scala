@@ -54,7 +54,8 @@ class UserService {
         "prename" -> res.getString("prename"),
         "surname" -> res.getString("surname"),
         dbLabels.role_id -> res.getString(dbLabels.role_id),
-        "email" -> res.getString("email"))
+        "email" -> res.getString("email"),
+        dbLabels.username -> res.getString(dbLabels.username))
     })
   }
 
@@ -81,7 +82,7 @@ class UserService {
           if (tokenDate * 1000L - currentDate.getTime <= 0) {
             None
           } else {
-            this.loadUserFromDB(claims.get("username").asInstanceOf[String])
+            this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String])
           }
         } catch {
           case _: JwtException | _: IllegalArgumentException => None
@@ -93,6 +94,30 @@ class UserService {
     } else {
       None
     }
+  }
+
+  /**
+    * grant User to a global role
+    * @author Benjamin Manns
+    * @param user which user should be granted
+    * @param role which role should user get
+    * @return status if update worked out
+    */
+  def grantUser(user: User, role: String): Boolean = {
+    val roles = Map("ADMIN" -> 1, "MODERATOR" -> 2, "DOCENT" -> 4)
+    val roleid = roles(role)
+    val num = DB.update("UPDATE user set role_id = ? WHERE user_id = ? ", roleid, user.userid)
+    num == 1
+  }
+  /**
+    * revoke a users global role
+    * @author Benjamin Manns
+    * @param user which user should be revoked
+    * @return status if update worked out
+    */
+  def revokeUser(user: User): Boolean = {
+    val num = DB.update("UPDATE user set role_id = 16 WHERE user_id = ? ", user.userid)
+    num == 1
   }
 
   /**
@@ -117,12 +142,22 @@ class UserService {
     * @return The user having the given username if such one exists.
     */
   def loadUserFromDB(username: String): Option[User] = {
-    val users = DB.query("SELECT u.*, r.name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
+    val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt("role_id"))
       }, username)
 
     users.headOption
+  }
+
+  /**
+    * delete a user by it's id
+    * @author Benjamin Manns
+    * @param user User object which will be deleted
+    * @return if update worked
+    */
+  def deleteUser(user: User): Boolean = {
+    1 == DB.update("DELETE FROM user where user_id = ?", user.userid)
   }
 
   /**
