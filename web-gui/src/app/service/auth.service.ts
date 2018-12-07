@@ -36,7 +36,7 @@ export class AuthService {
    */
   login_fake(username: string) {
     return this.http.post<LoginResult>("/api/v1/login/token", {
-      username: username
+      name: username
     }, {observe: 'response'}).subscribe(user => {
 
 
