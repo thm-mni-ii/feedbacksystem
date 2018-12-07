@@ -3,10 +3,10 @@ import {Observable} from 'rxjs';
 import {DatabaseService} from "../../../service/database.service";
 
 export interface CourseTableItem {
-  name: string;
-  description: string;
+  course_description: string;
   role_id: string;
   role_name: string;
+  course_name: string;
   course_id: string;
 }
 
