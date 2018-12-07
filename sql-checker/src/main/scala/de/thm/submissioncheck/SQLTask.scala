@@ -64,14 +64,7 @@ class SQLTask(val name: String, val courseId: String, val taskId: String, val qu
   /**
     * Class instance connection
     */
-  var connection: Connection = _
-  try{
-    connection = DriverManager.getConnection(URL, user, password)
-  } catch {
-    case ex: SQLException => {
-      logger.error("Couldn't connect to Checker MySQL Server!")
-    }
-  }
+  var connection: Connection = DriverManager.getConnection(URL, user, password)
 
   private val s = connection.createStatement()
   /**
