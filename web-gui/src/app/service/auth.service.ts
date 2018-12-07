@@ -39,8 +39,9 @@ export class AuthService {
       name: username
     }, {observe: 'response'}).subscribe(user => {
 
+      const token = user.headers.get('Authorization').replace("Bearer", "").replace(" ", "");
 
-      localStorage.setItem('user', JSON.stringify(user.headers.get('Authorization')));
+      localStorage.setItem('user', token);
 
       switch (this.getDecodedToken().roles) {
         case 'admin':
