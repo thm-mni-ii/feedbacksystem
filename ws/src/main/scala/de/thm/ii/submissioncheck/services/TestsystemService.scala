@@ -41,7 +41,8 @@ class TestsystemService {
       Map(TestsystemLabels.id -> parsedIDString)
     }
     catch {
-      case _: Exception => throw new BadRequestException("Provided testsystem name may not be unique.")
+      case _: Exception => throw new BadRequestException("Provided testsystem id_string may not be unique" +
+        " or is too long. Please use a length of maximum 30 characters.")
     }
   }
 

@@ -149,8 +149,8 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, task.testsystem_id from task join course " +
-      "using(course_id) where task_id = ?",
+    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
+      "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
         Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
