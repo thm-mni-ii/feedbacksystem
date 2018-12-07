@@ -1,215 +1,203 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
+import {CourseTableItem} from "../modules/student/course-table/course-table-datasource";
+import {Observable} from "rxjs";
 
-
+/**
+ *  Service to communicate with db.
+ *  Get submission result or submit for a given Task.
+ *  Subscribe and unsubscribe a course. Check results
+ *  for courses and more.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class DatabaseService {
 
-  /**
-   *  Service to communicate with db.
-   *  Get submission result or submit for a given Task.
-   *  Subscribe and unsubscribe a course.
-   */
 
-  //TODO: Replace fake data with real data
   constructor(private http: HttpClient) {
   }
 
   // Courses
-  getCourses(): Course[] {
-    // return this.http.get('/api/v1/courses');
-    return [
-      {
-        courseID: 1,
-        name: "Course 1",
-        description: 'Course 1 Description'
-      },
-      {
-        courseID: 2,
-        name: "Course 2",
-        description: "Course 2 Description"
-      }
-    ];
+
+  /**
+   * Returns all courses an user subscribed to
+   */
+  getCourses(): Observable<CourseTableItem[]> {
+    return this.http.get<CourseTableItem[]>('/api/v1/courses');
   }
 
-  createCourse(name: string, description: string, standard_task_typ: number): Object {
-    // return this.http.post('/api/v1/courses', {
-    //   name: name,
-    //   description: description,
-    //   standard_task_typ: standard_task_typ
-    // });
-    return {message: "Course created"};
+  /**
+   * Create a new Course
+   * @param name of the course
+   * @param description of the course
+   * @param standard_task_typ
+   */
+  createCourse(name: string, description: string, standard_task_typ: number) {
+    return this.http.post('/api/v1/courses', {
+      name: name,
+      description: description,
+      standard_task_typ: standard_task_typ
+    });
   }
 
-  deleteCourse(id: number): Object {
-    // return this.http.delete('/api/v1/courses/' + id);
-    return {message: "Course deleted"};
+  /**
+   * Delete a course
+   * @param id of course which will be deleted
+   */
+  deleteCourse(id: number) {
+    return this.http.delete('/api/v1/courses/' + id);
   }
 
-  updateCourse(id: number, name: string, description: string, standard_task_typ: number): Object {
-    // return this.http.put('/api/v1/courses/' + id, {
-    //   name: name,
-    //   description: description,
-    //   standard_task_typ: standard_task_typ
-    // });
-    return {message: "Course with" + id + " updated"};
+  /**
+   * Update a course
+   * @param id of course which should be updated
+   * @param name of updated course
+   * @param description of updated couse
+   * @param standard_task_typ
+   */
+  updateCourse(id: number, name: string, description: string, standard_task_typ: number) {
+    return this.http.put('/api/v1/courses/' + id, {
+      name: name,
+      description: description,
+      standard_task_typ: standard_task_typ
+    });
   }
 
-  // Deprecated getCourses has information about each course
-  // getCourseDetail(id: number) {
-  //   return this.http.get('/api/v1/courses/' + id);
-  // }
-
-  getAllCourses(): Course[] {
-    // return this.http.get('/api/v1/courses/all');
-    return [
-      {
-        courseID: 1,
-        name: "Course 1",
-        description: 'Course 1 Description'
-      },
-      {
-        courseID: 2,
-        name: "Course 2",
-        description: "Course 2 Description"
-      },
-      {
-        courseID: 3,
-        name: "Course 3",
-        description: "Course 3 Description"
-      },
-      {
-        courseID: 4,
-        name: "Course 4",
-        description: "Course 4 Description"
-      },
-      {
-        courseID: 5,
-        name: "Course 5",
-        description: "Course 5 Description"
-      }
-    ];
+  /**
+   * Return all task for course
+   * with given id
+   * @param id of course to obtain task from
+   */
+  getCourseDetail(id: number) {
+    return this.http.get('/api/v1/courses/' + id);
   }
 
-  subscribeCourse(id: number): Object {
-    // return this.http.post('/api/v1/courses/' + id + '/subscribe', {});
-    return {message: "Subscribed course " + id};
+  /**
+   * Returns all courses
+   */
+  getAllCourses() {
+    return this.http.get('/api/v1/courses/all');
   }
 
-  unsubscribeCourse(id: number): Object {
-    // return this.http.post('/api/v1/courses/' + id + '/unsubscribe', {});
-    return {message: "Unsubscribed course " + id};
+  /**
+   * User subscription to course with :id
+   * @param id of course to subscribe
+   */
+  subscribeCourse(id: number) {
+    return this.http.post('/api/v1/courses/' + id + '/subscribe', {});
   }
 
-  grantUserEdit(id: number, username: string): Object {
-    // return this.http.post('/api/v1/courses/' + id + '/grant', {username: username, grant_type: 'edit'});
-    return {message: "Granted user " + username + " edit rights"};
+  /**
+   * User unsub course with :id
+   * @param id of course to unsub
+   */
+  unsubscribeCourse(id: number) {
+    return this.http.post('/api/v1/courses/' + id + '/unsubscribe', {});
   }
 
-  allUserSubmissions(id: number): Submission[] {
-    // return this.http.get('/api/v1/courses/' + id + '/submissions');
-    return [
-      {
-        submissionID: 1,
-        data: "First Submission",
-        result: 1
-      },
-      {
-        submissionID: 2,
-        data: "Second Submission",
-        result: 0
-      }
-    ]
+  /**
+   * Grant a user edit rights in course
+   * @param id of course
+   * @param username of user that should become edit rights
+   */
+  grantUserEdit(id: number, username: string) {
+    return this.http.post('/api/v1/courses/' + id + '/grant', {username: username, grant_type: 'edit'});
+  }
+
+  /**
+   * Returns all submissions an user
+   * has made in course with :id
+   * @param id of course to obtain all submissions
+   */
+  allUserSubmissions(id: number) {
+    return this.http.get('/api/v1/courses/' + id + '/submissions');
   }
 
 
   // Tasks
-  createTask(idCourse: number, name: string, description: string, filename: string, test_type: number): Object {
-    // return this.http.post('/api/v1/courses/' + idCourse + '/tasks', {
-    //   name: name,
-    //   description: description,
-    //   filename: filename,
-    //   test_type: test_type
-    // });
-    return {message: "Created task " + name + " in course " + idCourse};
+
+  /**
+   * Create a new task
+   * @param idCourse course in with task should be created
+   * @param name of task
+   * @param description of task
+   * @param filename
+   * @param test_type
+   */
+  createTask(idCourse: number, name: string, description: string, filename: string, test_type: number) {
+    return this.http.post('/api/v1/courses/' + idCourse + '/tasks', {
+      name: name,
+      description: description,
+      filename: filename,
+      test_type: test_type
+    });
   }
 
-  updateTask(idCourse: number, idTask: number, name: string, description: string, filename: string, test_type: number): Object {
-    // return this.http.put('/api/v1/courses/' + idCourse + '/tasks/' + idTask, {
-    //   name: name,
-    //   description: description,
-    //   filename: filename,
-    //   test_type: test_type
-    // });
-    return {message: "Updated task " + idTask + " in course " + idCourse};
-
+  /**
+   * Update a task
+   * @param idCourse of course
+   * @param idTask of task that will be updated
+   * @param name of updated task
+   * @param description of updated task
+   * @param filename
+   * @param test_type
+   */
+  updateTask(idCourse: number, idTask: number, name: string, description: string, filename: string, test_type: number) {
+    return this.http.put('/api/v1/courses/' + idCourse + '/tasks/' + idTask, {
+      name: name,
+      description: description,
+      filename: filename,
+      test_type: test_type
+    });
   }
 
-  deleteTask(idCourse: number, idTask: number): Object {
-    // return this.http.delete('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
-    return {message: "Deleted task " + idTask + " in course " + idCourse};
+  /**
+   * Delete task
+   * @param idCourse of course where task should be deleted
+   * @param idTask of task that should be deleted
+   */
+  deleteTask(idCourse: number, idTask: number) {
+    return this.http.delete('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
   }
 
-  getTaskDetail(idCourse: number, idTask: number): Task {
-    // return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
-    return {
-      courseID: 1,
-      taskID: 1,
-      name: "Task 1 in course 1",
-      description: "This is the description of task 1 in course 1"
-    };
+  /**
+   * Return details of task
+   * @param idCourse of course where the task is
+   * @param idTask of task from which details will be obtained
+   */
+  getTaskDetail(idCourse: number, idTask: number) {
+    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
   }
 
-
-  getTaskResult(idCourse: number, idTask: number): Object {
-    // return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/result');
-    return {message: "Task result"}
+  /**
+   * Returns task result
+   * @param idCourse of course where task is
+   * @param idTask of task
+   */
+  getTaskResult(idCourse: number, idTask: number) {
+    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/result');
   }
 
-  submitTask(idCourse: number, idTask: number, data: String): Object {
-    // return this.http.post('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submit', {data: data});
-    return {message: "Task " + idTask + " was submitted in course " + idCourse};
-  }
-
-
-  getTaskSubmissions(idCourse: number, idTask: number): Submission[] {
-    // return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
-    return [
-      {
-        submissionID: 1,
-        data: "First submission in task 1 course 1",
-        result: 1
-      },
-      {
-        submissionID: 2,
-        data: "Second submission in task 1 course 1",
-        result: 0
-      }
-    ];
+  /**
+   * User submits task
+   * @param idCourse of course where to submit
+   * @param idTask of task that will be submitted
+   * @param data that the user submits
+   */
+  submitTask(idCourse: number, idTask: number, data: String) {
+    return this.http.post('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submit', {data: data});
   }
 
 
-}
-
-
-interface Course {
-  courseID: number,
-  name: string,
-  description: string
-}
-
-interface Submission {
-  submissionID: number,
-  data: string,
-  result: number
-}
-
-interface Task {
-  courseID: number,
-  taskID: number,
-  name: string,
-  description: string
+  /**
+   * Returns all submissions an user
+   * did for a given task
+   * @param idCourse of course
+   * @param idTask of task where all submissions will be returned
+   */
+  getTaskSubmissions(idCourse: number, idTask: number) {
+    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
+  }
 
 }
