@@ -323,4 +323,20 @@ class CourseController {
     }
     this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
   }
+
+  /**
+    * get a List of all submissions and information from which course
+    * @author Benjamin Manns
+    * @param request request Request Header containing Headers for Authorization
+    * @return JSON of all submissions
+    */
+  @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
+  @ResponseBody
+  def seeAllSubmissions(request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
+  }
 }

@@ -331,4 +331,27 @@ class CourseService {
       Map(LABEL_SUCCESS -> true)
     }
   }
+
+  /**
+    * get a List of all submissions and information from which course
+    * @author Benjamin Manns
+    * @param user User who wants to see all his submissions
+    * @return a List of all Submissions ordered by submissiondate
+    */
+  def getAllSubmissionsForAllCoursesByUser(user: User): List[Map[String, Any]] = {
+    DB.query("select * from submission join task using(task_id) join course using(course_id) where user_id = ? " +
+    "order by submit_date desc", (res, _) => {
+      Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+        TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+        CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
+        SubmissionDBLabels.message ->res.getString(SubmissionDBLabels.message),
+        SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
+        SubmissionDBLabels.result_date->res.getTimestamp(SubmissionDBLabels.result_date),
+        CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
+        TaskDBLabels.taskid-> res.getInt(TaskDBLabels.taskid),
+        SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid))
+    }, user.userid)
+  }
 }
