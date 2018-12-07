@@ -193,7 +193,7 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "course_id, name, description" + (if (isPermitted) {
+    val selectPart = "course_id, course_name, course_description" + (if (isPermitted) {
       ", creator" // TODO add more columns
     } else {
       ""
@@ -294,7 +294,7 @@ class CourseService {
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String): Map[String, Number] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "insert into course (name, description, creator, standard_task_type) values (?,?,?,?)",
+        "insert into course (course_name, course_description, creator, standard_task_type) values (?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setString(1, name)
@@ -322,7 +322,7 @@ class CourseService {
     * @throws ResourceNotFoundException
     */
   def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
-    val success = DB.update("update course set name = ?, description = ?, standard_task_type = ? where course_id = ?",
+    val success = DB.update("update course set course_name = ?, course_description = ?, standard_task_type = ? where course_id = ?",
       name, description, standard_task_typ, courseid)
     if (success == 0) {
       throw new ResourceNotFoundException

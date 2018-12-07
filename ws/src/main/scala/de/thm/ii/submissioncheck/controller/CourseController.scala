@@ -122,7 +122,7 @@ class CourseController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (user.get.roleid <= 2) { // Only moderator and admin can delete a course
+    if (user.get.roleid > 2) { // Only moderator and admin can delete a course
       throw new UnauthorizedException
     }
     courseService.deleteCourse(courseid)
