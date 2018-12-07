@@ -219,12 +219,13 @@ class TaskController {
     * @return JSON
     */
   @RequestMapping(value = Array("courses/{id}/tasks"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @ResponseStatus(HttpStatus.CREATED)
   def createTask(@PathVariable(LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (this.courseService.isPermittedForCourse(courseid, user.get)) {
+    if (!this.courseService.isPermittedForCourse(courseid, user.get)) {
       throw new BadRequestException("User with role `student` and no edit rights can not create a task.")
     }
     try {
@@ -270,7 +271,7 @@ class TaskController {
       throw new UnauthorizedException
     }
     if (!this.taskService.isPermittedForTask(taskid, user.get)) {
-      throw new BadRequestException("User can not delete a task.")
+      throw new UnauthorizedException("User can not delete a task.")
     }
     this.taskService.deleteTask(taskid)
   }
@@ -290,7 +291,7 @@ class TaskController {
       throw new UnauthorizedException
     }
     if (!this.taskService.isPermittedForTask(taskid, user.get)) {
-      throw new BadRequestException("User has no edit rights and can not update a task.")
+      throw new UnauthorizedException("User has no edit rights and can not update a task.")
     }
     try {
       val name = jsonNode.get("name").asText()

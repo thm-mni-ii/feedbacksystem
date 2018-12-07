@@ -149,7 +149,7 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id`, task.testsystem_id from task join course " +
+    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, task.testsystem_id from task join course " +
       "using(course_id) where task_id = ?",
       (res, _) => {
         Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
@@ -213,10 +213,10 @@ class TaskService {
     */
   def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String, testsystem_id: String): Map[String, AnyVal] = {
     val availableTypes = List("FILE", "STRING")
-    if (!availableTypes.contains(test_type)) throw new BadRequestException(availableTypes + "as `test_type` is not implemented.")
+    if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (name, description, course_id, test_file_name, test_type, testsystem_id) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO task (task_name, task_description, course_id, test_file_name, test_type, testsystem_id) VALUES (?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
@@ -250,7 +250,7 @@ class TaskService {
     * @return result if update works
     */
   def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String, testsystem_id: String): Boolean = {
-    val num = DB.update("UPDATE task set name = ?, description = ?, test_file_name = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
+    val num = DB.update("UPDATE task set task_name = ?, task_description = ?, test_file_name = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
       name, description, filename, test_type, testsystem_id, taskid)
     num == 1
   }

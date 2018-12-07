@@ -19,7 +19,8 @@ class ResourceNotFoundException extends RuntimeException
 class BadRequestException(message: String) extends RuntimeException(message)
 /**
   * UnauthorizedException
+  * @param message A human readable String
   * @author Benjamin Manns
   */
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-class UnauthorizedException() extends RuntimeException
+class UnauthorizedException(message: String = "") extends RuntimeException(message)
