@@ -1,6 +1,7 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator, MatSort} from '@angular/material';
-import {CourseTableDataSource} from './course-table-datasource';
+import {Component, OnInit} from '@angular/core';
+import {CourseTableDataSource, CourseTableItem} from './course-table-datasource';
+import {DatabaseService} from "../../../service/database.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-course-table',
@@ -8,23 +9,27 @@ import {CourseTableDataSource} from './course-table-datasource';
   styleUrls: ['./course-table.component.scss'],
 })
 export class CourseTableComponent implements OnInit {
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
+
+
   dataSource: CourseTableDataSource;
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns = ['name', 'id'];
+  displayedColumns = ['name'];
+
+
+  constructor(private db: DatabaseService, private router: Router) {
+  }
 
   ngOnInit() {
-    this.dataSource = new CourseTableDataSource(this.paginator, this.sort);
+    this.dataSource = new CourseTableDataSource(this.db);
   }
 
   /**
    * Get row of course that was selected
+   * and navigate to course
    * @param row of course that is selected
    */
-  getRow(row) {
-    //TODO: Implement routing to right course.
-    console.log(row);
+  getRow(row: CourseTableItem) {
+    this.router.navigate(['user/course', row.course_id]).catch(reason => console.log(reason));
   }
 }
