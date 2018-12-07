@@ -347,6 +347,7 @@ class CourseService {
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),
         SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
         SubmissionDBLabels.message ->res.getString(SubmissionDBLabels.message),
+        SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
         SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
         SubmissionDBLabels.result_date->res.getTimestamp(SubmissionDBLabels.result_date),
         CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),

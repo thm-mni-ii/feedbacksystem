@@ -52,6 +52,7 @@ dependencies {
     compile 'org.json4s:json4s-jackson_2.12:3.6.2'
     compile 'org.json4s:json4s_2.11:3.2.11'
     compile 'org.scala-lang:scala-library:2.12.6'
+    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.9.7'
     compile 'com.typesafe.akka:akka-stream-kafka_2.12:1.0-M1'
     testCompile 'junit:junit:4.12'
 }
