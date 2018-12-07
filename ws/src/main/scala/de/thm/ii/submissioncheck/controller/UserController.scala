@@ -50,7 +50,7 @@ class UserController {
     * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("/users/"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(value = Array("/users/grant/moderator"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def grantModerator(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
@@ -130,7 +130,7 @@ class UserController {
       val username = jsonNode.get(LABEL_USERNAME).asText()
       val userToRevoke = userService.loadUserFromDB(username)
       if (userToRevoke.isEmpty) {
-        throw new BadRequestException("Please provide a valid username to grant moderator access to")
+        throw new BadRequestException("Please provide a valid username to revoke global role")
       }
       Map("revoke" -> userService.revokeUser(userToRevoke.get))
     } catch {

@@ -2,6 +2,8 @@ package de.thm.ii.submissioncheck
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.json4s.jackson.JsonMethods.parse
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 
 /**
   * Provides functions to transform json to map and map to json.
@@ -28,7 +30,8 @@ object JsonHelper {
     * @return Json String
     */
   implicit def mapToJsonStr(jsonMap: Map[String, String]): String = {
-    val mapper = new ObjectMapper
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
     jsonResult
   }

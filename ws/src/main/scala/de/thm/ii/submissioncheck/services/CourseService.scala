@@ -19,8 +19,6 @@ class CourseService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 
-  /** holds all unique labels */
-  val taskDBLabels = new TaskDBLabels()
   /** holds label edit*/
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
@@ -195,7 +193,7 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "course_id, name, description" + (if (isPermitted) {
+    val selectPart = "course_id, course_name, course_description" + (if (isPermitted) {
       ", creator" // TODO add more columns
     } else {
       ""
@@ -250,7 +248,7 @@ class CourseService {
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
-          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(taskDBLabels.taskid)))
+          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(TaskDBLabels.taskid)))
       }, courseid)
   }
 
@@ -296,7 +294,7 @@ class CourseService {
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String): Map[String, Number] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "insert into course (name, description, creator, standard_task_type) values (?,?,?,?)",
+        "insert into course (course_name, course_description, creator, standard_task_type) values (?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setString(1, name)
@@ -324,7 +322,7 @@ class CourseService {
     * @throws ResourceNotFoundException
     */
   def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
-    val success = DB.update("update course set name = ?, description = ?, standard_task_type = ? where course_id = ?",
+    val success = DB.update("update course set course_name = ?, course_description = ?, standard_task_type = ? where course_id = ?",
       name, description, standard_task_typ, courseid)
     if (success == 0) {
       throw new ResourceNotFoundException
@@ -332,5 +330,29 @@ class CourseService {
     else {
       Map(LABEL_SUCCESS -> true)
     }
+  }
+
+  /**
+    * get a List of all submissions and information from which course
+    * @author Benjamin Manns
+    * @param user User who wants to see all his submissions
+    * @return a List of all Submissions ordered by submissiondate
+    */
+  def getAllSubmissionsForAllCoursesByUser(user: User): List[Map[String, Any]] = {
+    DB.query("select * from submission join task using(task_id) join course using(course_id) where user_id = ? " +
+    "order by submit_date desc", (res, _) => {
+      Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+        TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+        CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
+        SubmissionDBLabels.message ->res.getString(SubmissionDBLabels.message),
+        SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
+        SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
+        SubmissionDBLabels.result_date->res.getTimestamp(SubmissionDBLabels.result_date),
+        CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
+        TaskDBLabels.taskid-> res.getInt(TaskDBLabels.taskid),
+        SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid))
+    }, user.userid)
   }
 }
