@@ -136,7 +136,7 @@ class TaskController {
       kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
-      kafkaTemplate.send(topicName, jsonResult)
+      kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
       kafkaTemplate.flush()
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString)

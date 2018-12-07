@@ -27,8 +27,8 @@ object SecretTokenChecker extends App {
   // +++++++++++++++++++++++++++++++++++++++++++
   //               Kafka Settings
   // +++++++++++++++++++++++++++++++++++++++++++
-  private val CHECK_REQUEST_TOPIC = "check_request"
-  private val CHECK_ANSWER_TOPIC = "check_answer"
+  private val CHECK_REQUEST_TOPIC = "secrettokenchecker_check_request"
+  private val CHECK_ANSWER_TOPIC = "secrettokenchecker_check_answer"
 
   private implicit val system: ActorSystem = ActorSystem("akka-system")
   private implicit val materializer: Materializer = ActorMaterializer()
@@ -66,13 +66,13 @@ object SecretTokenChecker extends App {
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
 
       val (output, code) = bashTest(userid, data)
-      sendMessage(Map(
+      sendMessage(JsonHelper.mapToJsonStr(Map(
         "data" -> output,
         "exitcode" -> code.toString,
         "userid" -> userid,
         "taskid" -> taskid,
         "submissionid" -> submissionid
-      ))
+      )))
     } catch {
       case e: NoSuchElementException => {
         sendMessage("Please provide valid parameter")
