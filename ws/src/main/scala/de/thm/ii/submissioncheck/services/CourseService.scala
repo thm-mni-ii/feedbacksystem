@@ -19,8 +19,6 @@ class CourseService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 
-  /** holds all unique labels */
-  val taskDBLabels = new TaskDBLabels()
   /** holds label edit*/
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
@@ -250,7 +248,7 @@ class CourseService {
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
-          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(taskDBLabels.taskid)))
+          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(TaskDBLabels.taskid)))
       }, courseid)
   }
 

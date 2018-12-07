@@ -22,35 +22,8 @@ class TaskService {
 
   @Autowired
   private val tokenService: TokenService = null
-  /** holds all unique labels */
-  val taskDBLabels = new TaskDBLabels()
   /** holds connection to storageService*/
   val storageService = new StorageService
-  /**
-    * Class holds all DB labels
-    */
-  object SubmissionDBLabels {
-    /** DB Label "task_id" */
-    val taskid: String = "task_id"
-
-    /** DB Label "submission_id" */
-    val submissionid: String = "submission_id"
-
-    /** DB Label "result" */
-    val result: String = "result"
-
-    /** DB Label "userid" */
-    val userid: String = "user_id"
-
-    /** DB Label "passed" */
-    val passed: String = "passed"
-
-    /** DB Label "passed" */
-    val filename: String = "filename"
-
-    /** DB Label "passed" */
-    val submission_data: String = "submission_data"
-  }
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
@@ -133,9 +106,9 @@ class TaskService {
     DB.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
       (res, _) => {
         Map(
-          taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
-          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
-          taskDBLabels.name -> res.getString(taskDBLabels.name),
+          TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
+          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
+          TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
           SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
@@ -179,11 +152,11 @@ class TaskService {
     val list = DB.query("SELECT `task`.`name`, `task`.`description`, `task`.`task_id`, `task`.`course_id`, task.testsystem_id from task join course " +
       "using(course_id) where task_id = ?",
       (res, _) => {
-        Map(taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
-          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
-          taskDBLabels.name -> res.getString(taskDBLabels.name),
-          taskDBLabels.description -> res.getString(taskDBLabels.description),
-          taskDBLabels.testsystem_id -> res.getString(taskDBLabels.testsystem_id)
+        Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
+          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
+          TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+          TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id)
         )
       }, taskid)
     if(list.isEmpty) {
@@ -204,7 +177,7 @@ class TaskService {
     */
   def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String): Boolean = {
     val num = DB.update(
-      "UPDATE submission set result = ?, passed =  ? where task_id = ? and submission_id = ?;",
+      "UPDATE submission set result = ?, passed =  ?, result_date = CURRENT_TIMESTAMP() where task_id = ? and submission_id = ?;",
       result, passed, taskid, submissionid
     )
     num > 0
@@ -219,10 +192,10 @@ class TaskService {
     DB.query("select * from task where course_id = ?",
       (res, _) => {
         Map(
-          taskDBLabels.courseid -> res.getString(taskDBLabels.courseid),
-          taskDBLabels.taskid -> res.getString(taskDBLabels.taskid),
-          taskDBLabels.name -> res.getString(taskDBLabels.name),
-          taskDBLabels.description -> res.getString(taskDBLabels.description)
+          TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
+          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
+          TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+          TaskDBLabels.description -> res.getString(TaskDBLabels.description)
         )
       }, courseid)
   }

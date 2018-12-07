@@ -29,10 +29,8 @@ object JsonHelper {
     * @return Json String
     */
   implicit def mapToJsonStr(jsonMap: Map[String, String]): String = {
-    println(jsonMap)
     val mapper = new ObjectMapper
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap.asJava)
-    println(jsonResult)
     jsonResult
   }
 }
