@@ -14,7 +14,7 @@ class TaskQuery(val desc: String, val content: String){
     /**
       * class instance description
       */
-    var descripiton: String = desc
+    var description: String = desc
 
     /**
       * class instance query
