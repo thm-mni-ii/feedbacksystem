@@ -2,6 +2,7 @@ package de.thm.submissioncheck
 
 import java.sql._
 
+import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
 import scala.util.control.Breaks._
 
@@ -22,6 +23,7 @@ import scala.util.control.Breaks._
 class SQLTask(val name: String, val courseId: String, val taskId: String, val queries: scala.Array[TaskQuery], val dbdef: String){
   private implicit val system: ActorSystem = ActorSystem("akka-system")
   private val logger = system.log
+  private val config = ConfigFactory.load()
 
   /**
     * Class instance taskname
@@ -34,7 +36,7 @@ class SQLTask(val name: String, val courseId: String, val taskId: String, val qu
   /**
     * Class instance JDBCDriver
     */
-  final var JDBCDriver: String = "com.mysql.jdbc.Driver"
+  final var JDBCDriver: String = config.getString("sql.driver")
   /**
     * Class instance definedQueries
     */
@@ -50,7 +52,9 @@ class SQLTask(val name: String, val courseId: String, val taskId: String, val qu
   /**
     * Class instance url
     */
-  final var URL: String = "jdbc:mysql://localhost" + ":" + "3309"
+  private val URL: String = config.getString("sql.connectionUri")
+  private val user: String = config.getString("sql.user")
+  private val password: String = config.getString("sql.password")
 
   /**
     * Class instance queryresults
@@ -62,7 +66,7 @@ class SQLTask(val name: String, val courseId: String, val taskId: String, val qu
     */
   var connection: Connection = _
   try{
-    connection = DriverManager.getConnection(URL, "root", "secretpw")
+    connection = DriverManager.getConnection(URL, user, password)
   } catch {
     case ex: SQLException => {
       logger.error("Couldn't connect to Checker MySQL Server!")
