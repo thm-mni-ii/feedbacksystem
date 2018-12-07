@@ -76,8 +76,8 @@ export class DatabaseService {
   /**
    * Returns all courses
    */
-  getAllCourses() {
-    return this.http.get('/api/v1/courses/all');
+  getAllCourses(): Observable<CourseTableItem[]> {
+    return this.http.get<CourseTableItem[]>('/api/v1/courses/all');
   }
 
   /**
