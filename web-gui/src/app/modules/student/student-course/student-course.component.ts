@@ -33,9 +33,9 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
 
     // Get tasks for course with :id
     this.db.getCourseDetail(this.id).subscribe(course_detail => {
+      //TODO: Fix undefined error
       this.course = course_detail;
       this.tasks = course_detail.tasks;
-      console.log(course_detail);
     });
   }
 
