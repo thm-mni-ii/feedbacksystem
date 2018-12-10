@@ -256,8 +256,7 @@ class TaskService {
     * @return result if update works
     */
   def setTaskFilename(taskid: Int, filename: String): Boolean = {
-    val num = DB.update("UPDATE task set test_file_name = ? where task_id = ? ",
-      filename,  taskid)
+    val num = DB.update("UPDATE task set test_file_name = ? where task_id = ? ", filename, taskid)
     num == 1
   }
 
