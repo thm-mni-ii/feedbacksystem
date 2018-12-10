@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {CourseTableDataSource, CourseTableItem} from './course-table-datasource';
-import {DatabaseService} from "../../../service/database.service";
+import {DatabaseService} from "../../../../service/database.service";
 import {Router} from "@angular/router";
 
 @Component({
@@ -9,7 +9,6 @@ import {Router} from "@angular/router";
   styleUrls: ['./course-table.component.scss'],
 })
 export class CourseTableComponent implements OnInit {
-
 
   dataSource: CourseTableDataSource;
 
@@ -22,6 +21,7 @@ export class CourseTableComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource = new CourseTableDataSource(this.db);
+    this.dataSource.loadCourses();
   }
 
   /**
