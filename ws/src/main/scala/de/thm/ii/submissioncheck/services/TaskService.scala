@@ -239,6 +239,19 @@ class TaskService {
   }
 
   /**
+    * Update only filename
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param filename test file for this task
+    * @return result if update works
+    */
+  def setTaskFilename(taskid: Int, filename: String): Boolean = {
+    val num = DB.update("UPDATE task set test_file_name = ? where task_id = ? ",
+      filename,  taskid)
+    num == 1
+  }
+
+  /**
     * update Task by its Task ID
     * @author Benjamin Manns
     * @param taskid unique taskid identification
