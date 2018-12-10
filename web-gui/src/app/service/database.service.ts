@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {CourseTableItem} from "../modules/student/course-table/course-table-datasource";
+import {CourseTableItem} from "../modules/student/student-list/course-table/course-table-datasource";
 import {Observable} from "rxjs";
 
 /**

@@ -12,7 +12,7 @@ import {
   MatSnackBarModule,
   MatTableModule,
   MatPaginatorModule,
-  MatSortModule, MatCardModule, MatRadioModule
+  MatSortModule, MatCardModule, MatRadioModule, MatDialogModule
 } from "@angular/material";
 
 @NgModule({
@@ -32,7 +32,8 @@ import {
     MatPaginatorModule,
     MatSortModule,
     MatCardModule,
-    MatRadioModule
+    MatRadioModule,
+    MatDialogModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -49,7 +50,8 @@ import {
     MatPaginatorModule,
     MatSortModule,
     MatCardModule,
-    MatRadioModule
+    MatRadioModule,
+    MatDialogModule
   ],
   declarations: []
 })
