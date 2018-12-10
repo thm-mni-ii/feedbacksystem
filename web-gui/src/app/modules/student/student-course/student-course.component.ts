@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {DatabaseService} from "../../../service/database.service";
+import {CourseDetail, DatabaseService, Task} from "../../../service/database.service";
 import {MatDialog} from "@angular/material";
 import {StudentCourseDialogComponent} from "./student-course-dialog/student-course-dialog.component";
 import {Subscription} from "rxjs";
@@ -22,11 +22,21 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
 
   private sub: Subscription;
   id: number;
+  course: CourseDetail;
+  tasks: Task[];
 
   ngOnInit() {
+    // Get id from URL
     this.sub = this.route.params.subscribe(params => {
       this.id = +params['id'];
-    })
+    });
+
+    // Get tasks for course with :id
+    this.db.getCourseDetail(this.id).subscribe(course_detail => {
+      this.course = course_detail;
+      this.tasks = course_detail.tasks;
+      console.log(course_detail);
+    });
   }
 
   ngOnDestroy(): void {
@@ -37,7 +47,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
    * Opens dialog for unsubscription
    */
   openDialog() {
-    const dialogRef = this.dialog.open(StudentCourseDialogComponent);
+    const dialogRef = this.dialog.open(StudentCourseDialogComponent, {data: {name: this.course.course_name}});
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {

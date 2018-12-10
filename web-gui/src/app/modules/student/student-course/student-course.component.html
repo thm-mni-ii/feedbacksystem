@@ -1,14 +1,18 @@
 <div class="task-container">
 
+  <h2>{{course.course_name}}</h2>
+  <p>{{course.course_description}}</p>
+
+
   <button mat-flat-button color="warn" (click)="openDialog()">Kurs verlassen</button>
 
 
-  <mat-card class="task">
-    <mat-card-title>Erste Aufgabe</mat-card-title>
+  <mat-card class="task" *ngFor="let task of tasks">
+    <mat-card-title>{{task.task_name}}</mat-card-title>
 
     <mat-card-content>
       <p>
-        Bitte eine Textdatei die den md5 Hash des THM Login besitzt abgeben.
+        {{task.task_description}}
       </p>
     </mat-card-content>
 
