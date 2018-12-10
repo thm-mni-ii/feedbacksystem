@@ -1,4 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {CourseTableItem} from "../course-table/course-table-datasource";
+import {DatabaseService} from "../../../service/database.service";
+import {Subscription} from "rxjs";
 
 /**
  * Component for searching for courses.
@@ -8,26 +11,35 @@ import {Component, OnInit} from '@angular/core';
   templateUrl: './student-search.component.html',
   styleUrls: ['./student-search.component.scss']
 })
-export class StudentSearchComponent implements OnInit {
+export class StudentSearchComponent implements OnInit, OnDestroy {
 
-  courses: Course[] = [
-    {name: 'Datenbanksysteme', id: 'CS1010'},
-    {name: 'Programmieren interaktiver Systeme', id: 'CS1015'},
-    {name: 'Compilerbau', id: 'CS1020'},
-    {name: 'Objektorientierte Programmierung', id: 'CS1011'},
-    {name: 'Kurs X', id: 'CS1010'},
+  allCourses: CourseTableItem[];
+  courseSubscription: Subscription;
 
-  ];
-
-  constructor() {
+  constructor(private db: DatabaseService) {
   }
 
   ngOnInit() {
+    //TODO: Change getAllCourses with Route that gives only unsubbed courses back
+    this.courseSubscription = this.db.getAllCourses().subscribe(courses => {
+      this.allCourses = courses;
+    });
   }
 
-}
+  ngOnDestroy(): void {
+    this.courseSubscription.unsubscribe();
+  }
 
-export interface Course {
-  name: String;
-  id: String;
+  subscribeToCourse(id: number) {
+    let sub = this.db.subscribeCourse(id).subscribe(
+      () => {
+      },
+      error => {
+        console.log(error)
+      },
+      () => {
+        sub.unsubscribe();
+      });
+  }
+
 }

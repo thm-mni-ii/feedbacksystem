@@ -4,10 +4,10 @@ import {DatabaseService} from "../../../service/database.service";
 
 export interface CourseTableItem {
   course_description: string;
-  role_id: string;
+  role_id: number;
   role_name: string;
   course_name: string;
-  course_id: string;
+  course_id: number;
 }
 
 
