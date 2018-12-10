@@ -28,23 +28,33 @@ class TaskService {
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
   /**
+    * After Upload a submitted File save it's name
+    * @author Benjamin Manns
+    * @param submissionid  unique identification for a submission
+    * @param filename filename from uploaded file
+    * @return boolean if update worked
+    */
+  def setSubmissionFilename(submissionid: Int, filename: String): Boolean = {
+    val num = DB.update("UPDATE submission set filename = ? where submission_id = ?;", filename, submissionid)
+    num == 0
+  }
+
+  /**
     * submitTaskWithFile
     * @author Benjamin Manns
     * @param taskid unique identification for a task
     * @param user requesting user
-    * @param filename users requesting filename
     * @return SubmissionID
     */
-  def submitTaskWithFile(taskid: Int, user: User, filename: String): Int = {
+  def submitTaskWithFile(taskid: Int, user: User): Int = {
     try {
       val (num, holder) = DB.update((con: Connection) => {
         val ps = con.prepareStatement(
-          "INSERT INTO submission (task_id, user_id, filename) VALUES (?,?,?);",
+          "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
           Statement.RETURN_GENERATED_KEYS
         )
         ps.setInt(1, taskid)
         ps.setInt(2, user.userid)
-        ps.setString(3, filename)
         ps
       })
 

@@ -35,7 +35,7 @@ class StorageService {
     * @param taskid the connecting task
     */
   def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
-    try {
+    //try {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
     try {
       Files.createDirectories(storeLocation)
@@ -44,12 +44,42 @@ class StorageService {
       case _: FileAlreadyExistsException => {}
     }
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
+    /*}
+    catch {
+      case e: Exception =>
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    }*/
+  }
+
+  /**
+    * store a file to its beloning submission
+    * @author Benjamin Manns
+    * @param file file stream from users upload
+    * @param taskid the connecting task
+    * @param submission_id the beloning submission, what has been done
+    */
+  def storeTaskSubmission(file: MultipartFile, taskid: Int, submission_id: Int): Unit = {
+    try {
+      val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+      try {
+        Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
     }
     catch {
       case e: Exception =>
         throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
+
 
   /**
     * store an Array of Bytes into a file on disk
@@ -79,6 +109,7 @@ class StorageService {
     }
   }
 
+  /*
   /**
     * store a task submission file of a user to the local syste
     * @author Benjamin Manns
@@ -105,7 +136,7 @@ class StorageService {
       case e: Exception =>
         throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
-  }
+  }*/
 
   /**
     * load a file by filename and taskid
