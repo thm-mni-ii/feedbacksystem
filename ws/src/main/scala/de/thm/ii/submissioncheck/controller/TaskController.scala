@@ -113,7 +113,6 @@ class TaskController {
     if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-    //var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
     var upload_url: String = null
     try {
       var submissionId: Int = -1
@@ -129,6 +128,7 @@ class TaskController {
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)
         kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
+        kafkaMap += ("submit_typ" -> "data")
         val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
         logger.warn(jsonResult)
         kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
@@ -169,6 +169,7 @@ class TaskController {
       var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
       kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionid))
       kafkaMap += (LABEL_SUBMISSION_ID -> submissionid.toString)
+      kafkaMap += ("submit_typ" -> "file")
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
       kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
@@ -241,25 +242,20 @@ class TaskController {
 
     var message: Boolean = false
     var filename: String = ""
-    //try {
-      storageService.storeTaskTestFile(file, taskid)
-      filename = file.getOriginalFilename
-      taskService.setTaskFilename(taskid, filename)
+    storageService.storeTaskTestFile(file, taskid)
+    filename = file.getOriginalFilename
+    taskService.setTaskFilename(taskid, filename)
 
-      val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
-        LABEL_TASK_ID -> taskid.toString)
+    val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+      LABEL_TASK_ID -> taskid.toString)
 
-      message = true
+    message = true
 
-      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-      logger.warn(jsonStringMsg)
-      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
-      kafkaTemplate.flush()
-      //ResponseEntity.status(HttpStatus.OK).body(message)
-   /* } catch {
-      case e: Exception =>
-        //ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message)
-    }*/
+    val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
+    logger.warn(jsonStringMsg)
+    kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
+    kafkaTemplate.flush()
+
     Map("upload_success" -> message, LABEL_FILENAME -> filename)
   }
 
@@ -292,21 +288,9 @@ class TaskController {
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
       var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, "NO NAME PRODUCT", test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
-
-      /*val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
-        LABEL_TASK_ID -> taskid.toString)
-
-      storageService.storeTaskTestFile(dataBytes, filename, taskid)
-
-      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-      logger.warn(jsonStringMsg)
-      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
-      kafkaTemplate.flush()*/
-      //val upload_url: Map[String, Any] = Map
       val full_url: String = "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
       taskInfo += ("upload_url" -> full_url)
       taskInfo
-
     }
     catch {
       case e: NullPointerException => {

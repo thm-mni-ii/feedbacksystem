@@ -3,9 +3,11 @@ package de.thm.ii.submissioncheck.services
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import java.net.MalformedURLException
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.file.{FileAlreadyExistsException, Files, Paths}
+import java.nio.file.{FileAlreadyExistsException, Files, Paths, StandardCopyOption}
+
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, FileOutputStream, IOException}
 
@@ -43,7 +45,7 @@ class StorageService {
     catch {
       case _: FileAlreadyExistsException => {}
     }
-      Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
+      Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
     /*}
     catch {
       case e: Exception =>
@@ -68,7 +70,7 @@ class StorageService {
         case _: FileAlreadyExistsException => {}
       }
       try {
-        Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
+        Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
       }
       catch {
         case _: FileAlreadyExistsException => {}
@@ -79,7 +81,6 @@ class StorageService {
         throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
-
 
   /**
     * store an Array of Bytes into a file on disk
@@ -108,35 +109,6 @@ class StorageService {
         throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
-
-  /*
-  /**
-    * store a task submission file of a user to the local syste
-    * @author Benjamin Manns
-    * @param dataBytes requetes file as byte array
-    * @param taskid unique identification for a task
-    * @param filename filename of user request
-    * @param submission_id unique identification for a submission
-    */
-  def storeTaskSubmission(dataBytes: Array[Byte], taskid: Int, filename: String, submission_id: Int): Unit = {
-    try {
-      val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
-      try {
-        Files.createDirectories(storeLocation)
-      }
-      catch {
-        case _: FileAlreadyExistsException => {}
-      }
-      // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
-      val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
-      Stream.continually(bos.write(dataBytes))
-      bos.close() // You may end up with 0 bytes file if not calling close.
-    }
-    catch {
-      case e: Exception =>
-        throw new RuntimeException(FILE_NOT_STORED_MSG)
-    }
-  }*/
 
   /**
     * load a file by filename and taskid
