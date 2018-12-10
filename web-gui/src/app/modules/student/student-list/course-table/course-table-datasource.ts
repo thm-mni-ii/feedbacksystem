@@ -49,7 +49,6 @@ export class CourseTableDataSource extends DataSource<CourseTableItem> {
    */
   loadCourses() {
     this.db.getCourses().subscribe(value => {
-      console.log(value);
       this.courseSubject.next(value);
     });
   }
