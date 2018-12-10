@@ -145,6 +145,8 @@ class TaskController {
     }
   }
 
+  
+
   /**
     * implement REST route to get students task submission
     *
@@ -193,21 +195,38 @@ class TaskController {
     *
     * @param taskid unique identification for a task
     * @param file a multipart binary file in a form data format
+    * @param request Request Header containing Headers
     * @return HTTP Response with Status Code
     */
-  @deprecated("0.1", "use task create")
-  @RequestMapping(value = Array("tasks/{id}/upload"), method = Array(RequestMethod.POST))
-  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) file: MultipartFile): ResponseEntity[String] = {
-    var message: String = ""
-    try {
-      storageService.storeTaskTestFile(file, taskid)
-      message = "You successfully uploaded " + file.getOriginalFilename + "!"
-      ResponseEntity.status(HttpStatus.OK).body(message)
-    } catch {
-      case e: Exception =>
-        message = "FAIL to upload " + file.getOriginalFilename + "!"
-        ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message)
+  @RequestMapping(value = Array("tasks/{id}/testfile/upload"), method = Array(RequestMethod.POST))
+  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) {
+      throw new UnauthorizedException
     }
+
+    var message: Boolean = false
+    var filename: String = ""
+    //try {
+      storageService.storeTaskTestFile(file, taskid)
+      filename = file.getOriginalFilename
+      taskService.setTaskFilename(taskid, filename)
+
+      val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+        LABEL_TASK_ID -> taskid.toString)
+
+      message = true
+
+      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
+      logger.warn(jsonStringMsg)
+      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
+      kafkaTemplate.flush()
+      //ResponseEntity.status(HttpStatus.OK).body(message)
+   /* } catch {
+      case e: Exception =>
+        //ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message)
+    }*/
+    Map("upload_success" -> message, "filename" -> filename)
   }
 
   /**
@@ -220,7 +239,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("courses/{id}/tasks"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseStatus(HttpStatus.CREATED)
-  def createTask(@PathVariable(LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+  def createTask(@PathVariable(LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
@@ -231,15 +250,16 @@ class TaskController {
     try {
       val name = jsonNode.get("name").asText()
       val description = jsonNode.get("description").asText()
-      val filename = jsonNode.get(LABEL_FILENAME).asText()
-      val file = jsonNode.get(LABEL_FILE).asText()
-      val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
+      //val filename = jsonNode.get(LABEL_FILENAME).asText()
+      //val file = jsonNode.get(LABEL_FILE).asText()
+      //val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
       // TODO until we finalize this parameters set a default if none is given
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      val taskInfo = this.taskService.createTask(name, description, courseid, filename, test_type, testsystem_id)
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, "NO NAME PRODUCT", test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
-      val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+
+      /*val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
         LABEL_TASK_ID -> taskid.toString)
 
       storageService.storeTaskTestFile(dataBytes, filename, taskid)
@@ -247,8 +267,12 @@ class TaskController {
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
       kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
-      kafkaTemplate.flush()
+      kafkaTemplate.flush()*/
+      //val upload_url: Map[String, Any] = Map
+      val full_url: String = "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
+      taskInfo += ("upload_url" -> full_url)
       taskInfo
+
     }
     catch {
       case e: NullPointerException => {
@@ -332,9 +356,7 @@ class TaskController {
     */
   @GetMapping(Array("tasks/{id}/files/testfile/{token}"))
   @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String): ResponseEntity[Resource] = {
-    if (!tokenService.tokenIsValid(token, taskid, "TASK_TEST_FILE")) {
-        throw new UnauthorizedException
-      }
+    // TODO JWT Authorization
     val filename = taskService.getTestFileByTask(taskid)
     val file = storageService.loadFile(filename, taskid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
@@ -351,9 +373,7 @@ class TaskController {
   @GetMapping(Array("tasks/{id}/files/submissions/{subid}/{token}"))
   @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
                                         @PathVariable token: String): ResponseEntity[Resource] = {
-    if (!tokenService.tokenIsValid(token, subid, "SUBMISSION_TEST_FILE")) {
-      throw new UnauthorizedException
-    }
+    // TODO JWT Authorization
     var filename = taskService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)

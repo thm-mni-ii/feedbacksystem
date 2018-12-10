@@ -37,7 +37,12 @@ class StorageService {
   def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
     try {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
-      Files.createDirectory(storeLocation)
+    try {
+      Files.createDirectories(storeLocation)
+    }
+    catch {
+      case _: FileAlreadyExistsException => {}
+    }
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename))
     }
     catch {
