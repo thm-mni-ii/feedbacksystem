@@ -69,8 +69,8 @@ export class DatabaseService {
    * with given id
    * @param id of course to obtain task from
    */
-  getCourseDetail(id: number) {
-    return this.http.get('/api/v1/courses/' + id);
+  getCourseDetail(id: number): Observable<CourseDetail> {
+    return this.http.get<CourseDetail>('/api/v1/courses/' + id);
   }
 
   /**
@@ -200,4 +200,19 @@ export class DatabaseService {
     return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
   }
 
+}
+
+
+export interface CourseDetail {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+  tasks: Task[];
+}
+
+export interface Task {
+  course_id: number;
+  task_description: string;
+  task_id: number;
+  task_name: string;
 }
