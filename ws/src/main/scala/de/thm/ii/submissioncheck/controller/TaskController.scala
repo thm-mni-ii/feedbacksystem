@@ -113,39 +113,73 @@ class TaskController {
     if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-    var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString,
-      LABEL_USER_ID -> requestingUser.get.username)
-
+    //var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
+    var upload_url: String = null
     try {
       var submissionId: Int = -1
       val dataNode = jsonNode.get(LABEL_DATA)
       if (dataNode == null) {
-        val file = jsonNode.get(LABEL_FILE).asText()
-        val filename = jsonNode.get(LABEL_FILENAME).asText()
-        val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
-        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get, filename)
-        storageService.storeTaskSubmission(dataBytes, taskid, filename, submissionId)
-        kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionId))
+        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
+        upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
       else {
+        // If submission was only data we send Kafka directly
+        var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
         val data = dataNode.asText
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)
+        kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
+        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+        logger.warn(jsonResult)
+        kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
+        kafkaTemplate.flush()
       }
 
-      kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
-      val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-      logger.warn(jsonResult)
-      kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
-      kafkaTemplate.flush()
-
-      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString)
+      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, "upload_url" -> upload_url)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a data or a file and filename parameter.")
     }
   }
 
-  
+  /**
+    * serve a route to upload a submission file to a given submissionid
+    * @author grokonez.com, Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param submissionid unique identification for a submission
+    * @param file multipart binary file in a form data format
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("tasks/{taskid}/submissions/{submissionid}/file/upload"), method = Array(RequestMethod.POST))
+  def handleSubmissionFileUpload(@PathVariable taskid: Int, @PathVariable submissionid: Int,
+                                 @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+
+    var message: Boolean = false
+    var filename: String = ""
+    try {
+      storageService.storeTaskSubmission(file, taskid, submissionid)
+
+      filename = file.getOriginalFilename
+      taskService.setSubmissionFilename(submissionid, filename)
+
+      var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
+      kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionid))
+      kafkaMap += (LABEL_SUBMISSION_ID -> submissionid.toString)
+      val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+      logger.warn(jsonResult)
+      kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
+      kafkaTemplate.flush()
+      message = true
+
+     } catch {
+       case e: Exception => {}
+     }
+    Map("submission_upload_success" -> message, LABEL_FILENAME -> filename)
+  }
 
   /**
     * implement REST route to get students task submission
@@ -226,7 +260,7 @@ class TaskController {
       case e: Exception =>
         //ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message)
     }*/
-    Map("upload_success" -> message, "filename" -> filename)
+    Map("upload_success" -> message, LABEL_FILENAME -> filename)
   }
 
   /**
