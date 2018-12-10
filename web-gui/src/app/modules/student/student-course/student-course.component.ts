@@ -1,5 +1,8 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from "@angular/router";
+import {DatabaseService} from "../../../service/database.service";
+import {MatDialog} from "@angular/material";
+import {StudentCourseDialogComponent} from "./student-course-dialog/student-course-dialog.component";
 import {Subscription} from "rxjs";
 
 /**
@@ -13,7 +16,8 @@ import {Subscription} from "rxjs";
 })
 export class StudentCourseComponent implements OnInit, OnDestroy {
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private db: DatabaseService, private dialog: MatDialog,
+              private router: Router) {
   }
 
   private sub: Subscription;
@@ -27,6 +31,36 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
+  }
+
+  /**
+   * Opens dialog for unsubscription
+   */
+  openDialog() {
+    const dialogRef = this.dialog.open(StudentCourseDialogComponent);
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.unsubscripeCourse();
+      }
+    });
+  }
+
+
+  /**
+   * Unsubscribe user from course with :id
+   */
+  unsubscripeCourse() {
+    const sub = this.db.unsubscribeCourse(this.id).subscribe(
+      () => {
+      },
+      error1 => {
+        console.log(error1)
+      },
+      () => {
+        sub.unsubscribe();
+        this.router.navigate(['user', 'courses']);
+      });
   }
 
 

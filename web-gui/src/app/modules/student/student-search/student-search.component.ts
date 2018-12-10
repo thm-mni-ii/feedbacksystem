@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {CourseTableItem} from "../course-table/course-table-datasource";
+import {CourseTableItem} from "../student-list/course-table/course-table-datasource";
 import {DatabaseService} from "../../../service/database.service";
 import {Subscription} from "rxjs";
 
