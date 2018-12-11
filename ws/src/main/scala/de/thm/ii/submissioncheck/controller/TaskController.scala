@@ -2,8 +2,9 @@ package de.thm.ii.submissioncheck.controller
 
 import scala.collection.JavaConverters._
 import java.util.{Base64, NoSuchElementException}
+
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{TestsystemService, _}
 import javax.servlet.http.HttpServletRequest
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -113,18 +114,19 @@ class TaskController {
     if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
+
+    val taskDetailsOpt = taskService.getTaskDetails(taskid)
+    if(taskDetailsOpt.isEmpty){
+      throw new ResourceNotFoundException
+    }
+    val taskDetails = taskDetailsOpt.get
     var upload_url: String = null
+    var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
     try {
       var submissionId: Int = -1
-      val dataNode = jsonNode.get(LABEL_DATA)
-      if (dataNode == null) {
-        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
-        upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
-      }
-      else {
+      if(taskDetails(TaskDBLabels.test_type) == "STRING"){
         // If submission was only data we send Kafka directly
-        var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
-        val data = dataNode.asText
+        val data = jsonNode.get(LABEL_DATA).asText
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)
         kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
@@ -133,11 +135,14 @@ class TaskController {
         logger.warn(jsonResult)
         kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
         kafkaTemplate.flush()
-      }
-
+      } else if (taskDetails(TaskDBLabels.test_type) == "FILE")
+        {
+          submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
+          upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
+        }
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, "upload_url" -> upload_url)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a data or a file and filename parameter.")
+      case _: NullPointerException => throw new BadRequestException("This test needs a: " + taskDetails(TaskDBLabels.test_type) + ". Please provide this.")
     }
   }
 
@@ -286,10 +291,10 @@ class TaskController {
       val test_type = jsonNode.get("test_type").asText()
       // TODO until we finalize this parameters set a default if none is given
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, "NO NAME PRODUCT", test_type, testsystem_id)
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
-      val full_url: String = "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
-      taskInfo += ("upload_url" -> full_url)
+
+      taskInfo += ("upload_url" -> getUploadUrlForTastTestFile(taskid))
       taskInfo
     }
     catch {
@@ -298,6 +303,11 @@ class TaskController {
       }
     }
   }
+
+  private def getUploadUrlForTastTestFile(taskid: Int): String = {
+    "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
+  }
+
 
   /**
     * delete Task by its ID
@@ -327,43 +337,32 @@ class TaskController {
     * @return JSON
     */
   @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.PUT), consumes = Array(application_json_value))
-  def updateTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+  def updateTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
+    println(taskid)
+    println(user.get)
     if (!this.taskService.isPermittedForTask(taskid, user.get)) {
       throw new UnauthorizedException("User has no edit rights and can not update a task.")
     }
-    try {
+    //try {
       val name = jsonNode.get("name").asText()
       val description = jsonNode.get("description").asText()
-      val filename = jsonNode.get(LABEL_FILENAME).asText()
-      val file = jsonNode.get(LABEL_FILE).asText()
-      val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
       val test_type = jsonNode.get("test_type").asText()
-      // TODO get from route, we have to discuss this
+
       // TODO until we finilaize this parameters set a default if none is given
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      val success = this.taskService.updateTask(taskid, name, description, filename, test_type, testsystem_id)
+      val success = this.taskService.updateTask(taskid, name, description, test_type, testsystem_id)
 
-      val jsonMsg: Map[String, String] = Map(
-        "testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
-        LABEL_TASK_ID -> taskid.toString)
-
-      storageService.storeTaskTestFile(dataBytes, filename, taskid)
-
-      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-      logger.warn(jsonStringMsg)
-      kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + "update_task", jsonStringMsg)
-      kafkaTemplate.flush()
-      Map("success" -> success)
-    }
+      Map("success" -> success, "upload_url" -> getUploadUrlForTastTestFile(taskid))
+    /*}
     catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
       }
-    }
+    }*/
   }
   /**
     * provide a GET URL to download testfiles for a task

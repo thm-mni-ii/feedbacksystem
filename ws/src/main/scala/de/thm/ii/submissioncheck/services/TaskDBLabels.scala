@@ -18,4 +18,7 @@ object TaskDBLabels{
 
   /** DB Label "testsystem_id" */
   var testsystem_id: String = "testsystem_id"
+
+  /** DB Label "test_type" */
+  var test_type = "test_type"
 }
