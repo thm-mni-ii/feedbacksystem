@@ -20,6 +20,8 @@ import de.thm.ii.submissioncheck.misc.DB
 class UserService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
+  /** holds connection to storageService*/
+  val storageService = new StorageService
   /**
     * Class holds all DB labels
     */
@@ -151,13 +153,27 @@ class UserService {
   }
 
   /**
-    * delete a user by it's id
+    * delete a user by it's id and all beloning non anonymous submissions
     * @author Benjamin Manns
     * @param user User object which will be deleted
     * @return if update worked
     */
   def deleteUser(user: User): Boolean = {
-    1 == DB.update("DELETE FROM user where user_id = ?", user.userid)
+    for (line <- getBelongingNonAnonymousSubmissions(user)){
+      storageService.deleteSubmission(line(TaskDBLabels.taskid).asInstanceOf[Int],
+        line(SubmissionDBLabels.submissionid).asInstanceOf[Int], line(SubmissionDBLabels.filename).asInstanceOf[String])
+    }
+    1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', username = 'Deleted User', email = '' where user_id = ?", user.userid)
+  }
+
+  private def getBelongingNonAnonymousSubmissions(user: User) = {
+    DB.query("select * from (select * from user_course where user_id = ?) uc join course c on uc.course_id = c.course_id " +
+      "and anonym_submission = 0 join task t on t.course_id = c.course_id left join submission s on t.task_id = s.task_id and s.user_id = ?",
+      (res, _) => {
+          Map(TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
+          SubmissionDBLabels.submissionid-> res.getInt(SubmissionDBLabels.submissionid),
+          SubmissionDBLabels.filename-> res.getString(SubmissionDBLabels.filename))
+      }, user.userid, user.userid)
   }
 
   /**
