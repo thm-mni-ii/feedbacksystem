@@ -39,7 +39,9 @@ class CourseController {
 
   private final val LABEL_DESCRIPTION = "description"
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ"
+  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, course_semester, course_modul_id, anonymous"
+
+  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ, course_semester, course_modul_id"
 
   /**
     * getAllCourses is a route for all courses
@@ -47,7 +49,7 @@ class CourseController {
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllCourses(request: HttpServletRequest): List[Map[String, String]] = {
+  def getAllCourses(request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
         throw new UnauthorizedException
@@ -71,7 +73,10 @@ class CourseController {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
-      this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
+      val course_semester = jsonNode.get("course_semester").asText()
+      val course_modul_id = jsonNode.get("course_modul_id").asText()
+      val anonymous = jsonNode.get("anonymous").asInt()
+      this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester, anonymous)
     } catch {
       case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
     }
@@ -91,7 +96,7 @@ class CourseController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    courseService.getAllCourses
+    courseService.getAllCourses(user.get)
   }
 
   /**
@@ -151,11 +156,13 @@ class CourseController {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
+      val course_semester = jsonNode.get("course_semester").asText()
+      val course_modul_id = jsonNode.get("course_modul_id").asText()
 
       if (name.length == 0 || description.length == 0 || standard_task_typ.length == 0) {
-        throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
+        throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL_UPDATE)
       }
-      this.courseService.updateCourse(courseid, name, description, standard_task_typ)
+      this.courseService.updateCourse(courseid, name, description, standard_task_typ, course_modul_id, course_semester)
     } catch {
       case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
     }

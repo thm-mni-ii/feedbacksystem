@@ -15,4 +15,8 @@ object CourseDBLabels {
   val creator: String = "creator"
   /** holds label standard_task_type*/
   val standard_task_type: String = "standard_task_type"
+  /** holds label course_modul_id*/
+  val course_modul_id: String = "course_modul_id"
+  /** holds label course_semester*/
+  val course_semester: String = "course_semester"
 }
