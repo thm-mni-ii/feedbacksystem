@@ -1,6 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import org.springframework.web.bind.annotation._
 import de.thm.ii.submissioncheck.services.{LoginService, RoleDBLabels, UserService}
@@ -89,6 +90,34 @@ class UserController {
   }
 
   /**
+    * delete a list of user
+    * @author Benjamin Manns
+    * @param request contains resquest headers
+    * @param jsonNode contains request body
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def deleteUsersBatch(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || user.get.roleid != 1) {
+      throw new UnauthorizedException
+    }
+    try {
+      val user_list = jsonNode.get("user_id_list")
+      val mapper = new ObjectMapper() with ScalaObjectMapper
+      val node: JsonNode = mapper.valueToTree(user_list)
+      val batchListElements = node.elements()
+      var success = true
+      batchListElements.forEachRemaining(_ => {
+        success = userService.deleteUser(batchListElements.next().asInt()) && success
+      })
+      Map("batch_delete"->success)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide a valid user_id_list")
+    }
+  }
+
+  /**
     * grant a user to the global role ADMIN
     * @author Benjamin Manns
     * @param request contains resquest headers
@@ -152,8 +181,13 @@ class UserController {
       throw new UnauthorizedException
     }
     try {
-      val sort = jsonNode.get("sort").asText()
-      loginService.getLastLoginList(sort)
+      if (jsonNode.get("sort") != null) {
+        loginService.getLastLoginList(jsonNode.get("sort").asText())
+      }
+      else {
+        loginService.getLastLoginList()
+      }
+
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a `sort` argument")
       case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")

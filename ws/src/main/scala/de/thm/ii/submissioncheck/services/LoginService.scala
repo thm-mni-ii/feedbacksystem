@@ -32,7 +32,7 @@ class LoginService {
     * @return Scala List of Last Login date of each existing user
     * @throws IllegalArgumentException
     */
-  def getLastLoginList(sort: String): List[Map[String, Any]] = {
+  def getLastLoginList(sort: String = "desc"): List[Map[String, Any]] = {
     if (sort != "asc" && sort != "desc") {
       throw new IllegalArgumentException("Only `asc` or `desc` are allowed")
     }
