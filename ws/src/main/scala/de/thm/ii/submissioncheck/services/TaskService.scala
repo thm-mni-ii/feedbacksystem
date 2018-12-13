@@ -124,8 +124,10 @@ class TaskService {
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
           SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
-          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid)
-        )
+          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
+          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.message -> res.getString(SubmissionDBLabels.message))
       }, taskid, user.userid)
   }
 
@@ -159,14 +161,15 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer): Option[Map[String, String]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
+    val list = DB.query("SELECT task.test_type, `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
       "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
         Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id)
+          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
+          TaskDBLabels.test_type -> res.getString(TaskDBLabels.test_type)
         )
       }, taskid)
     if(list.isEmpty) {
@@ -216,28 +219,25 @@ class TaskService {
     * @param name Task name
     * @param description Task description
     * @param courseid Course where task is created for
-    * @param filename test file for this task
     * @param test_type which test type is needed
     * @param testsystem_id: refered testsystem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, filename: String, test_type: String, testsystem_id: String): Map[String, AnyVal] = {
+  def createTask(name: String, description: String, courseid: Int, test_type: String, testsystem_id: String): Map[String, AnyVal] = {
     val availableTypes = List("FILE", "STRING")
     if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (task_name, task_description, course_id, test_file_name, test_type, testsystem_id) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO task (task_name, task_description, course_id, test_type, testsystem_id) VALUES (?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
       val magic5 = 5
-      val magic6 = 6
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
-      ps.setString(magic4, filename)
-      ps.setString(magic5, test_type)
-      ps.setString(magic6, testsystem_id)
+      ps.setString(magic4, test_type)
+      ps.setString(magic5, testsystem_id)
       ps
     })
 
@@ -266,14 +266,13 @@ class TaskService {
     * @param taskid unique taskid identification
     * @param name Task name
     * @param description Task description
-    * @param filename test file for this task
     * @param test_type which test type is needed
     * @param testsystem_id: refered testsystem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String, description: String, filename: String, test_type: String, testsystem_id: String): Boolean = {
-    val num = DB.update("UPDATE task set task_name = ?, task_description = ?, test_file_name = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
-      name, description, filename, test_type, testsystem_id, taskid)
+  def updateTask(taskid: Int, name: String, description: String, test_type: String, testsystem_id: String): Boolean = {
+    val num = DB.update("UPDATE task set task_name = ?, task_description = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
+      name, description, test_type, testsystem_id, taskid)
     num == 1
   }
 
