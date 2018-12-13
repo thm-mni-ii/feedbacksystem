@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {CourseDetail, DatabaseService, Task} from "../../../service/database.service";
 import {MatDialog} from "@angular/material";
 import {StudentCourseDialogComponent} from "./student-course-dialog/student-course-dialog.component";
-import {Subscription} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 
 /**
  * Component for showing a specific course and his tasks.
@@ -16,15 +16,14 @@ import {Subscription} from "rxjs";
 })
 export class StudentCourseComponent implements OnInit, OnDestroy {
 
-  constructor(private route: ActivatedRoute, private db: DatabaseService, private dialog: MatDialog,
+  constructor(private route: ActivatedRoute, public db: DatabaseService, private dialog: MatDialog,
               private router: Router) {
   }
 
   private sub: Subscription;
   id: number;
-  course: CourseDetail;
-  tasks: Task[];
-  files: FileList;
+  course?: CourseDetail;
+  tasks?: Task[];
 
   ngOnInit() {
     // Get id from URL
@@ -33,11 +32,12 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
     });
 
     // Get tasks for course with :id
-    this.db.getCourseDetail(this.id).subscribe(course_detail => {
-      //TODO: Fix undefined error
-      this.course = course_detail;
-      this.tasks = course_detail.tasks;
-    });
+    this.db.getCourseDetail(this.id).subscribe(
+      course_detail => {
+        this.course = course_detail;
+        this.tasks = course_detail.tasks;
+      });
+
   }
 
   ngOnDestroy(): void {

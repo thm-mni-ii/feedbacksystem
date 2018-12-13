@@ -1,7 +1,7 @@
 <div class="task-container">
 
-  <h2>{{course.course_name}}</h2>
-  <p>{{course.course_description}}</p>
+  <h2 *ngIf="course">{{course.course_name}}</h2>
+  <p *ngIf="course">{{course.course_description}}</p>
 
 
   <button mat-flat-button color="warn" (click)="openDialog()">Kurs verlassen</button>
@@ -15,6 +15,7 @@
         {{task.task_description}}
       </p>
     </mat-card-content>
+
 
     <mat-card-actions>
       <input type="file" (change)="getFile($event)">
