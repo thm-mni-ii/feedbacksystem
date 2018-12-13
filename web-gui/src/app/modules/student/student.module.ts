@@ -10,6 +10,7 @@ import {StudentSearchComponent} from './student-search/student-search.component'
 import {StudentCourseComponent} from './student-course/student-course.component';
 import {StudentListComponent} from './student-list/student-list.component';
 import {StudentCourseDialogComponent} from "./student-course/student-course-dialog/student-course-dialog.component";
+import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 
 /**
  * Module for everything student related.
@@ -27,7 +28,8 @@ import {StudentCourseDialogComponent} from "./student-course/student-course-dial
     StudentSearchComponent,
     StudentCourseComponent,
     StudentListComponent,
-    StudentCourseDialogComponent
+    StudentCourseDialogComponent,
+    StudentDashboardComponent
   ],
   entryComponents: [StudentCourseDialogComponent],
   providers: [MatSnackBar]

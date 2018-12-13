@@ -221,6 +221,10 @@ export class DatabaseService {
     return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
   }
 
+  getOverview(): Observable<DashboardInformation[]> {
+    return this.http.get<DashboardInformation[]>("/api/v1/courses/submissions");
+  }
+
 }
 
 
@@ -244,3 +248,19 @@ export interface SubmitResult {
   submissionid: number;
   upload_url: string;
 }
+
+export interface DashboardInformation {
+  course_description: string;
+  submit_date: Date;
+  result?: string;
+  task_name: string;
+  passed: number;
+  result_date?: Date;
+  course_name: string;
+  message?: string;
+  course_id: number;
+  task_id: number;
+  task_description: string;
+  submission_id: number;
+}
+
