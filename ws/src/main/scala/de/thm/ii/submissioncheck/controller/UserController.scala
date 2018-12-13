@@ -174,8 +174,10 @@ class UserController {
     * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getLastLoginsOfUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
+  @RequestMapping(value = Array("users/last_logins/before/{before}/after/{after}"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def getLastLoginsOfUsers(@PathVariable before: String, @PathVariable after: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
+    println(before)
+    println(after)
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
