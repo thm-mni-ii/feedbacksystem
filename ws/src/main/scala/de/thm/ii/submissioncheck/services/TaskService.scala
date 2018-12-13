@@ -124,8 +124,10 @@ class TaskService {
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
           SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
-          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid)
-        )
+          SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
+          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.message -> res.getString(SubmissionDBLabels.message))
       }, taskid, user.userid)
   }
 

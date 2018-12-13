@@ -60,6 +60,7 @@ class TaskController {
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
   private final val LABEL_FILENAME = "filename"
+  private final val LABEL_UPLOAD_URL = "upload_url"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -94,6 +95,31 @@ class TaskController {
       throw new UnauthorizedException
     }
     taskService.getTaskResults(taskid, requestingUser.get)
+  }
+
+  /**
+    * Print all results, if any,from a given task
+    * @param courseid unique identification for a course
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("courses/{courseid}/tasks/result"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getTaskResultAllTaskByCourse(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
+    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !courseService.isSubscriberForCourse(courseid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+    var bigTaskList: List[Map[String, Any]] = List()
+    var line = Map()
+    for(line <- taskService.getTasksByCourse(courseid))
+    {
+      var taskDetails: Map[String, Any] = taskService.getTaskDetails(line(TaskDBLabels.taskid).toInt).getOrElse(Map.empty)
+      taskDetails += ("results" -> taskService.getTaskResults(line(TaskDBLabels.taskid).toInt, requestingUser.get))
+
+      bigTaskList = taskDetails :: bigTaskList
+    }
+    bigTaskList
   }
 
   /**
@@ -140,7 +166,7 @@ class TaskController {
           submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
           upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
         }
-      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, "upload_url" -> upload_url)
+      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
     } catch {
       case _: NullPointerException => throw new BadRequestException("This test needs a: " + taskDetails(TaskDBLabels.test_type) + ". Please provide this.")
     }
@@ -294,7 +320,7 @@ class TaskController {
       var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, test_type, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
-      taskInfo += ("upload_url" -> getUploadUrlForTastTestFile(taskid))
+      taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
       taskInfo
     }
     catch {
@@ -307,7 +333,6 @@ class TaskController {
   private def getUploadUrlForTastTestFile(taskid: Int): String = {
     "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
   }
-
 
   /**
     * delete Task by its ID
@@ -342,12 +367,10 @@ class TaskController {
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    println(taskid)
-    println(user.get)
     if (!this.taskService.isPermittedForTask(taskid, user.get)) {
       throw new UnauthorizedException("User has no edit rights and can not update a task.")
     }
-    //try {
+    try {
       val name = jsonNode.get("name").asText()
       val description = jsonNode.get("description").asText()
       val test_type = jsonNode.get("test_type").asText()
@@ -356,13 +379,13 @@ class TaskController {
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
       val success = this.taskService.updateTask(taskid, name, description, test_type, testsystem_id)
 
-      Map("success" -> success, "upload_url" -> getUploadUrlForTastTestFile(taskid))
-    /*}
+      Map("success" -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
+    }
     catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
       }
-    }*/
+    }
   }
   /**
     * provide a GET URL to download testfiles for a task
