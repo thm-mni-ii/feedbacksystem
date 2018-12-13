@@ -170,29 +170,27 @@ class UserController {
   /**
     * revoke a users global role
     * @author Benjamin Manns
+    * @param before defines where login was before a special date
+    * @param after defines where login was after a special date
+    * @param sort defines asc or desc of result
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("users/last_logins/before/{before}/after/{after}"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getLastLoginsOfUsers(@PathVariable before: String, @PathVariable after: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
-    println(before)
-    println(after)
+  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET))
+  def getLastLoginsOfUsers(@RequestParam(value = "before", required = false) before: String,
+                           @RequestParam(value = "after", required = false) after: String,
+                           @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     try {
-      if (jsonNode.get("sort") != null) {
-        loginService.getLastLoginList(jsonNode.get("sort").asText())
+      loginService.getLastLoginList(before, after, sort)
+    }
+    catch {
+      case e: IllegalArgumentException => {
+        throw new BadRequestException(e.getMessage)
       }
-      else {
-        loginService.getLastLoginList()
-      }
-
-    } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a `sort` argument")
-      case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")
     }
   }
 }
