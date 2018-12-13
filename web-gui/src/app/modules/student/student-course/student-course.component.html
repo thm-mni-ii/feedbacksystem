@@ -17,8 +17,8 @@
     </mat-card-content>
 
     <mat-card-actions>
-      <input type="file">
-      <button mat-flat-button color="accent">Abgeben</button>
+      <input type="file" (change)="getFile($event)">
+      <button mat-flat-button color="accent" (click)="submitTask(task.task_id)">Abgeben</button>
     </mat-card-actions>
 
   </mat-card>

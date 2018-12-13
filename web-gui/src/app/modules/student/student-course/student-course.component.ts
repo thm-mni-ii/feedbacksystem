@@ -24,6 +24,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
   id: number;
   course: CourseDetail;
   tasks: Task[];
+  files: FileList;
 
   ngOnInit() {
     // Get id from URL
@@ -60,7 +61,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
   /**
    * Unsubscribe user from course with :id
    */
-  unsubscripeCourse() {
+  private unsubscripeCourse() {
     const sub = this.db.unsubscribeCourse(this.id).subscribe(
       () => {
       },
@@ -73,5 +74,15 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
       });
   }
 
+
+  // TODO: Use modal. Give user possibility to use Text.
+  submitTask(task_id: number) {
+    this.db.submitTask(task_id, this.files[0]);
+  }
+
+  getFile(event) {
+    console.log(event.target.files);
+    this.files = event.target.files;
+  }
 
 }
