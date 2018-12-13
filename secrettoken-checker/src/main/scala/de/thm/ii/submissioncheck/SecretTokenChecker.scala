@@ -39,6 +39,7 @@ object SecretTokenChecker extends App {
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
 
+  private val LABEL_DATA = "data"
   private val control = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
     .toMat(Sink.foreach(onMessageReceived))(Keep.both)
@@ -61,13 +62,22 @@ object SecretTokenChecker extends App {
     val jsonMap: Map[String, Any] = record.value()
     try {
       val userid: String = jsonMap("userid").asInstanceOf[String]
-      val data: String = jsonMap("data").asInstanceOf[String]
+      var data: String = ""
+      if (jsonMap("submit_typ") == "file") {
+        data = jsonMap("fileurl").asInstanceOf[String]
+      }
+      else if (jsonMap("submit_typ") == LABEL_DATA){
+        data = jsonMap(LABEL_DATA).asInstanceOf[String]
+      }
+      logger.warning(jsonMap.toString())
       val taskid: String = jsonMap("taskid").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
 
       val (output, code) = bashTest(userid, data)
+
+
       sendMessage(JsonHelper.mapToJsonStr(Map(
-        "data" -> output,
+        LABEL_DATA -> output,
         "exitcode" -> code.toString,
         "userid" -> userid,
         "taskid" -> taskid,
