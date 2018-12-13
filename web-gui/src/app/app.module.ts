@@ -9,7 +9,7 @@ import {LoginComponent} from './components/login/login.component';
 import {MaterialComponentsModule} from "./modules/material-components/material-components.module";
 import {FormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
-import {JwtHelperService, JwtModule} from "@auth0/angular-jwt";
+import {JwtModule} from "@auth0/angular-jwt";
 
 @NgModule({
   declarations: [

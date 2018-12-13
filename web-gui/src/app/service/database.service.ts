@@ -185,8 +185,8 @@ export class DatabaseService {
    * @param idTask of task that will be submitted
    * @param data that the user submits
    */
-  submitTask(idCourse: number, idTask: number, data: String) {
-    return this.http.post('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submit', {data: data});
+  submitTask(idTask: number, data: File | string) {
+    return this.http.post('/api/v1/tasks/' + idTask + '/submit', {data: data});
   }
 
 
