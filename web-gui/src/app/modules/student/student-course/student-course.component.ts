@@ -77,9 +77,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
 
   // TODO: Use modal. Give user possibility to use Text.
   submitTask(task_id: number) {
-    this.db.submitTask(task_id, this.files[0]).subscribe((a) => {
-      console.log(a);
-    });
+    this.db.submitTask(task_id, this.files[0]);
   }
 
   getFile(event) {

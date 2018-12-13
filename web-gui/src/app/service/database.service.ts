@@ -180,13 +180,34 @@ export class DatabaseService {
   }
 
   /**
-   * User submits task
-   * @param idCourse of course where to submit
+   * User submits task as file or string
    * @param idTask of task that will be submitted
    * @param data that the user submits
    */
   submitTask(idTask: number, data: File | string) {
-    return this.http.post('/api/v1/tasks/' + idTask + '/submit', {data: data});
+    if (data instanceof File) { // Data is file
+      let upload_url: string;
+      // File in form data
+      let formDataFile = new FormData();
+      formDataFile.append("file", data, data.name);
+
+      // Ask for upload route and save it in upload_url
+      this.http.post<SubmitResult>('/api/v1/tasks/' + idTask + '/submit', {}).subscribe(res => {
+        upload_url = res.upload_url;
+      }, err => {
+        console.log(err);
+      }, () => {
+
+        // Send form file to upload route
+        this.http.post(upload_url, formDataFile, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+        }).subscribe();
+      });
+    } else { // Data is string
+      this.http.post<SubmitResult>('/api/v1/tasks/' + idTask + '/submit', {data: data}).subscribe(res => {
+        return res.success;
+      });
+    }
   }
 
 
@@ -215,4 +236,11 @@ export interface Task {
   task_description: string;
   task_id: number;
   task_name: string;
+}
+
+export interface SubmitResult {
+  success: boolean;
+  taskid: number;
+  submissionid: number;
+  upload_url: string;
 }
