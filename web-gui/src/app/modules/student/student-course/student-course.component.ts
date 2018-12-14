@@ -24,6 +24,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
   id: number;
   course?: CourseDetail;
   tasks?: Task[];
+  files: FileList;
 
   ngOnInit() {
     // Get id from URL
@@ -34,6 +35,7 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
     // Get tasks for course with :id
     this.db.getCourseDetail(this.id).subscribe(
       course_detail => {
+        console.log(course_detail);
         this.course = course_detail;
         this.tasks = course_detail.tasks;
       });
