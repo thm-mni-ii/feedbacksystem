@@ -8,7 +8,10 @@
 
 
   <mat-card class="task" *ngFor="let task of tasks">
-    <mat-card-title>{{task.task_name}}</mat-card-title>
+    <mat-card-title>
+      {{task.task_name}}
+      <mat-icon *ngIf="task.results[0].passed == 1">check</mat-icon>
+    </mat-card-title>
 
     <mat-card-content>
       <p>

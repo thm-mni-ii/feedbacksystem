@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {CourseDetail, DatabaseService, Task} from "../../../service/database.service";
 import {MatDialog} from "@angular/material";
 import {StudentCourseDialogComponent} from "./student-course-dialog/student-course-dialog.component";
-import {Observable, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
 
 /**
  * Component for showing a specific course and his tasks.
@@ -35,7 +35,6 @@ export class StudentCourseComponent implements OnInit, OnDestroy {
     // Get tasks for course with :id
     this.db.getCourseDetail(this.id).subscribe(
       course_detail => {
-        console.log(course_detail);
         this.course = course_detail;
         this.tasks = course_detail.tasks;
       });
