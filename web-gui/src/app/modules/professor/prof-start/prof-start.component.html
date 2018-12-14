@@ -1,1 +1,43 @@
-<button routerLink="" mat-flat-button color="warn" (click)="logout()">Logout</button>
+<div id="site-container">
+
+  <mat-toolbar class="toolbar-container" color="primary">
+    <span class="empty-placeholder"></span>
+    <h1 class="toolbar-title">{{profUsername}}</h1>
+    <span class="empty-placeholder"></span>
+  </mat-toolbar>
+
+  <!--Sidenav on the left side always open-->
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav mode="side" opened="true">
+
+      <div class="sidenav-drawer">
+        <mat-button-toggle-group vertical>
+
+          <!--toogle button for search and list -->
+          <mat-button-toggle>
+            <mat-icon>dashboard</mat-icon>
+            <span class="mat-body-1">Dashboard</span>
+          </mat-button-toggle>
+
+          <mat-button-toggle routerLink="courses">
+            <mat-icon>list</mat-icon>
+            <span class="mat-body-1">Meine Kurse</span>
+          </mat-button-toggle>
+
+        </mat-button-toggle-group>
+        <span class="empty-placeholder"></span>
+        <button routerLink="" mat-flat-button color="warn" (click)="logout()">Logout</button>
+      </div>
+    </mat-sidenav>
+
+    <!--Content in the middle of screen-->
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+
+</div>
+
+
+
+
