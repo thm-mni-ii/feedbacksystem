@@ -234,6 +234,23 @@ export interface Task {
   task_description: string;
   task_id: number;
   task_name: string;
+  "results": Result[],
+}
+
+interface Result {
+  "submit_date": Date,
+  "result": string,
+  "submission_data": Date,
+  "task_name": string,
+  "passed": number,
+  "user_id": number,
+  "result_date"?: Date,
+  "filename"?: string,
+  "message"?: string,
+  "course_id": number,
+  "task_id": number,
+  "submission_id": number
+
 }
 
 export interface SubmitResult {
