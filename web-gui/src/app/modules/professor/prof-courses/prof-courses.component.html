@@ -1,0 +1,29 @@
+<mat-accordion class="example-headers-align">
+
+
+  <mat-expansion-panel *ngFor="let course of courses" hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{course.course_name}}
+      </mat-panel-title>
+      <mat-panel-description>
+        {{course.course_description}}
+        <mat-icon>edit</mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <mat-form-field>
+      <input matInput placeholder="Kurs Name" [(ngModel)]="courseName">
+    </mat-form-field>
+
+    <mat-form-field>
+      <input matInput placeholder="Kurs Beschreibung" [(ngModel)]="courseDescription">
+    </mat-form-field>
+
+    <mat-action-row>
+      <button mat-button color="warn">Abbrechen</button>
+      <button mat-button color="primary" (click)="updateCourse(course.course_id)">Speichern</button>
+    </mat-action-row>
+  </mat-expansion-panel>
+
+</mat-accordion>
