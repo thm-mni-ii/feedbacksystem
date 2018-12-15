@@ -75,7 +75,6 @@ object SecretTokenChecker extends App {
 
       val (output, code) = bashTest(userid, data)
 
-
       sendMessage(JsonHelper.mapToJsonStr(Map(
         LABEL_DATA -> output,
         "exitcode" -> code.toString,
