@@ -155,7 +155,7 @@ class UserService {
   /**
     * get a full list of user information
     * @param id a unique identification for a user
-    * @return
+    * @return Scala Map full user list
     */
   def getFullUserById(id: Int): Option[Map[String, Any]] = {
     val user = DB.query("SELECT u.*, r.role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",

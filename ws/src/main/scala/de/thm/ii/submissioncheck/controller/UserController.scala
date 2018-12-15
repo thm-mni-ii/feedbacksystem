@@ -50,7 +50,7 @@ class UserController {
     * @return a JSON Object of all user information
     */
   @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.GET))
-  def getAllUsers(@PathVariable userid: Int, request: HttpServletRequest) = {
+  def getAllUsers(@PathVariable userid: Int, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || (user.get.roleid != 1 && user.get.userid != userid)) {
       throw new UnauthorizedException
