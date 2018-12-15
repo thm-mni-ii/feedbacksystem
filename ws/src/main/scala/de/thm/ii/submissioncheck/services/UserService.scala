@@ -153,6 +153,26 @@ class UserService {
   }
 
   /**
+    * get a full list of user information
+    * @param id a unique identification for a user
+    * @return
+    */
+  def getFullUserById(id: Int): Option[Map[String, Any]] = {
+    val user = DB.query("SELECT u.*, r.role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
+      (res, _) => {
+        Map(UserDBLabels.email -> res.getString(UserDBLabels.email),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
+          UserDBLabels.username -> res.getString(UserDBLabels.username),
+          UserDBLabels.role_id -> res.getInt(UserDBLabels.role_id),
+          UserDBLabels.role_name -> res.getString(UserDBLabels.role_name))
+      }, id)
+
+    user.headOption
+  }
+
+  /**
     * delete a user by it's id and all beloning non anonymous submissions
     * Uses deleteUser with its it
     * @author Benjamin Manns

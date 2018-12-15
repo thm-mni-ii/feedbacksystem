@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.misc
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -29,7 +30,8 @@ object JsonParser {
     */
   def mapToJsonStr(jsonMap: Map[String, String]): String = {
     val objectMapper = new ScalaObjectMapper
-    val jsonResult = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap)
+    objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+    val jsonResult = objectMapper.writeValueAsString(jsonMap)
     jsonResult
   }
 }

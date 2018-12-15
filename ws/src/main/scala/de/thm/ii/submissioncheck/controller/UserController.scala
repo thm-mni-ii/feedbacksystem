@@ -2,7 +2,7 @@ package de.thm.ii.submissioncheck.controller
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, ResourceNotFoundException, UnauthorizedException}
 import org.springframework.web.bind.annotation._
 import de.thm.ii.submissioncheck.services.{LoginService, RoleDBLabels, UserService}
 import org.apache.catalina.servlet4preview.http.HttpServletRequest
@@ -31,17 +31,38 @@ class UserController {
     *
     * @author Benjamin Manns
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON of all Users
     * @throw throw new UnauthorizedException
     */
-  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getAllUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, String]] = {
+  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET))
+  def getAllUsers(request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     userService.getUsers
+  }
+
+  /**
+    * Admin or user itself can access his personal information
+    * @param userid unique user ide
+    * @param request http request contains all headers
+    * @return a JSON Object of all user information
+    */
+  @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.GET))
+  def getAllUsers(@PathVariable userid: Int, request: HttpServletRequest) = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || (user.get.roleid != 1 && user.get.userid != userid)) {
+      throw new UnauthorizedException
+    }
+    val map = userService.getFullUserById(userid)
+    if(map.isEmpty){
+      // TODO "The requesting userid does not exist"
+      throw new ResourceNotFoundException()
+    }
+    val userMap = map.get
+
+    userMap + ("information" -> "In addition to the master data, we have your fees for the non-anonymous course tasks you have taken.")
   }
 
   /**
