@@ -11,19 +11,44 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 
+import scala.io.Source
+import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
+import java.io.File
 import java.util.NoSuchElementException
+import java.net.{HttpURLConnection, URL}
+import java.security.cert.X509Certificate
+import javax.net.ssl._
 
 import JsonHelper._
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
 
+// Bypasses both client and server validation.
+object TrustAll extends X509TrustManager {
+  val getAcceptedIssuers = null
+
+  def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+
+  def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+}
+
+
+// Verifies all host names by simply returning true.
+object VerifiesAllHostNames extends HostnameVerifier {
+  def verify(s: String, sslSession: SSLSession) = true
+}
 /**
   * Application for running a script with username and token as parameters
   *
   * @author Vlad Sokyrskyy
   */
 object SecretTokenChecker extends App {
+  /** used in naming */
+  final val TASKID = "taskid"
+  /** used in naming */
+  final val DATA = "data"
+
   // +++++++++++++++++++++++++++++++++++++++++++
   //               Kafka Settings
   // +++++++++++++++++++++++++++++++++++++++++++
@@ -39,7 +64,6 @@ object SecretTokenChecker extends App {
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
 
-  private val LABEL_DATA = "data"
   private val control = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
     .toMat(Sink.foreach(onMessageReceived))(Keep.both)
@@ -54,29 +78,42 @@ object SecretTokenChecker extends App {
       }
   })
 
-  private def sendMessage(record: ProducerRecord[String, String]): Future[Done] = Source.single(record).runWith(Producer.plainSink(producerSettings))
+  private def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
+    akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))
   private def sendMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
+
+  // +++++++++++++++++++++++++++++++++++++++++
+  //                Network Settings
+  // +++++++++++++++++++++++++++++++++++++++++
+  
 
   private def onMessageReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
     val jsonMap: Map[String, Any] = record.value()
     try {
-      val userid: String = jsonMap("userid").asInstanceOf[String]
-      var data: String = ""
-      if (jsonMap("submit_typ") == "file") {
-        data = jsonMap("fileurl").asInstanceOf[String]
-      }
-      else if (jsonMap("submit_typ") == LABEL_DATA){
-        data = jsonMap(LABEL_DATA).asInstanceOf[String]
-      }
-      logger.warning(jsonMap.toString())
-      val taskid: String = jsonMap("taskid").asInstanceOf[String]
+      val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
+      var arguments: String = ""
+      if(submit_type.equals("file")){
+        val url: String = jsonMap("fileurl").asInstanceOf[String]
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
+        HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
+        //new URL(url) #> new File("submit.txt") !!
+        val s: String = scala.io.Source.fromURL(url).mkString
+        logger.info(s)
+        arguments = s
+      }
+      else if (submit_type.equals(DATA)){
+        arguments = jsonMap(DATA).asInstanceOf[String]
+      }
+      val userid: String = jsonMap("userid").asInstanceOf[String]
+      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
 
-      val (output, code) = bashTest(userid, data)
-
+      val (output, code) = bashTest(userid, arguments)
       sendMessage(JsonHelper.mapToJsonStr(Map(
-        LABEL_DATA -> output,
+        DATA -> output,
         "exitcode" -> code.toString,
         "userid" -> userid,
         "taskid" -> taskid,
@@ -84,7 +121,9 @@ object SecretTokenChecker extends App {
       )))
     } catch {
       case e: NoSuchElementException => {
-        sendMessage("Please provide valid parameter")
+        sendMessage(JsonHelper.mapToJsonStr(Map(
+          "Error" -> "Please provide valid parameters"
+        )))
       }
     }
   }
@@ -92,7 +131,7 @@ object SecretTokenChecker extends App {
   /**
     * Name of the md5 test script
     */
-  val script = "script.sh"
+  val script = "md5-script.sh"
 
   /**
     * Method for the callback function
@@ -144,5 +183,24 @@ object SecretTokenChecker extends App {
     val bashtest = new BashExec(sName, username, token)
     bashtest.exec()
     bashtest.output
+  }
+
+  def downloadFiletoString(urlname: String): String = {
+    var s: String = ""
+    val timeout = 5000
+    val url = new java.net.URL(urlname)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setConnectTimeout(timeout)
+    connection.setReadTimeout(timeout)
+    connection.connect()
+
+    if(connection.getResponseCode >= 400){
+      logger.error("Error when downloading file!")
+    }
+    else {
+      val src = scala.io.Source.fromURL(urlname)
+      s = src.mkString
+    }
+    s
   }
 }
