@@ -54,7 +54,7 @@ export class AuthService {
           //TODO: Implement route for hiwi
           break;
         case 'student':
-          this.router.navigate(['user']);
+          this.router.navigate(['user', 'dashboard']);
           break;
       }
       return user;

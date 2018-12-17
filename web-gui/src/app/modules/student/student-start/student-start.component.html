@@ -15,7 +15,12 @@
         <mat-button-toggle-group vertical>
 
           <!--toogle button for search and list -->
-          <mat-button-toggle checked routerLink="courses">
+          <mat-button-toggle routerLink="dashboard">
+            <mat-icon>dashboard</mat-icon>
+            <span class="mat-body-1">Dashboard</span>
+          </mat-button-toggle>
+
+          <mat-button-toggle routerLink="courses">
             <mat-icon>list</mat-icon>
             <span class="mat-body-1">Meine Kurse</span>
           </mat-button-toggle>

@@ -4,6 +4,7 @@ import {StudentStartComponent} from "./student-start/student-start.component";
 import {StudentSearchComponent} from "./student-search/student-search.component";
 import {StudentCourseComponent} from "./student-course/student-course.component";
 import {StudentListComponent} from "./student-list/student-list.component";
+import {StudentDashboardComponent} from "./student-dashboard/student-dashboard.component";
 
 const routes: Routes = [
   {
@@ -11,7 +12,7 @@ const routes: Routes = [
       {path: 'courses', component: StudentListComponent},
       {path: 'search', component: StudentSearchComponent},
       {path: 'course/:id', component: StudentCourseComponent},
-
+      {path: 'dashboard', component: StudentDashboardComponent}
     ]
   },
 
