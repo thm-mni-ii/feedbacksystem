@@ -153,27 +153,58 @@ class UserService {
   }
 
   /**
+    * get a full list of user information
+    * @param id a unique identification for a user
+    * @return Scala Map full user list
+    */
+  def getFullUserById(id: Int): Option[Map[String, Any]] = {
+    val user = DB.query("SELECT u.*, r.role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
+      (res, _) => {
+        Map(UserDBLabels.email -> res.getString(UserDBLabels.email),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
+          UserDBLabels.username -> res.getString(UserDBLabels.username),
+          UserDBLabels.role_id -> res.getInt(UserDBLabels.role_id),
+          UserDBLabels.role_name -> res.getString(UserDBLabels.role_name))
+      }, id)
+
+    user.headOption
+  }
+
+  /**
     * delete a user by it's id and all beloning non anonymous submissions
+    * Uses deleteUser with its it
     * @author Benjamin Manns
     * @param user User object which will be deleted
-    * @return if update worked
+    * @return if deletion worked
     */
   def deleteUser(user: User): Boolean = {
-    for (line <- getBelongingNonAnonymousSubmissions(user)){
+    this.deleteUser(user.userid)
+  }
+
+  /**
+    * delete a user by it's id and all beloning non anonymous submissions
+    * @author Benjamin Manns
+    * @param userid unique User ID which will be deleted
+    * @return if deletion worked
+    */
+  def deleteUser(userid: Int): Boolean = {
+    for (line <- getBelongingNonAnonymousSubmissions(userid)){
       storageService.deleteSubmission(line(TaskDBLabels.taskid).asInstanceOf[Int],
         line(SubmissionDBLabels.submissionid).asInstanceOf[Int], line(SubmissionDBLabels.filename).asInstanceOf[String])
     }
-    1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', username = 'Deleted User', email = '' where user_id = ?", user.userid)
+    1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', username = 'Deleted User', email = '' where user_id = ?", userid)
   }
 
-  private def getBelongingNonAnonymousSubmissions(user: User) = {
+  private def getBelongingNonAnonymousSubmissions(userid: Int) = {
     DB.query("select * from (select * from user_course where user_id = ?) uc join course c on uc.course_id = c.course_id " +
       "and anonym_submission = 0 join task t on t.course_id = c.course_id left join submission s on t.task_id = s.task_id and s.user_id = ?",
       (res, _) => {
           Map(TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           SubmissionDBLabels.submissionid-> res.getInt(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.filename-> res.getString(SubmissionDBLabels.filename))
-      }, user.userid, user.userid)
+      }, userid, userid)
   }
 
   /**

@@ -1,7 +1,8 @@
 package de.thm.ii.submissioncheck.controller
 
-import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import de.thm.ii.submissioncheck.misc.{BadRequestException, ResourceNotFoundException, UnauthorizedException}
 import org.springframework.web.bind.annotation._
 import de.thm.ii.submissioncheck.services.{LoginService, RoleDBLabels, UserService}
 import org.apache.catalina.servlet4preview.http.HttpServletRequest
@@ -30,17 +31,38 @@ class UserController {
     *
     * @author Benjamin Manns
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON of all Users
     * @throw throw new UnauthorizedException
     */
-  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getAllUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, String]] = {
+  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET))
+  def getAllUsers(request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     userService.getUsers
+  }
+
+  /**
+    * Admin or user itself can access his personal information
+    * @param userid unique user ide
+    * @param request http request contains all headers
+    * @return a JSON Object of all user information
+    */
+  @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.GET))
+  def getAllUsers(@PathVariable userid: Int, request: HttpServletRequest): Map[String, Any] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || (user.get.roleid != 1 && user.get.userid != userid)) {
+      throw new UnauthorizedException
+    }
+    val map = userService.getFullUserById(userid)
+    if(map.isEmpty){
+      // TODO "The requesting userid does not exist"
+      throw new ResourceNotFoundException()
+    }
+    val userMap = map.get
+
+    userMap + ("information" -> "In addition to the master data, we have your fees for the non-anonymous course tasks you have taken.")
   }
 
   /**
@@ -86,6 +108,34 @@ class UserController {
       throw new BadRequestException("Please provide a valid username which should be deleted")
     }
     Map("deletion" -> userService.deleteUser(userToDelete.get))
+  }
+
+  /**
+    * delete a list of user
+    * @author Benjamin Manns
+    * @param request contains resquest headers
+    * @param jsonNode contains request body
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def deleteUsersBatch(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty || user.get.roleid != 1) {
+      throw new UnauthorizedException
+    }
+    try {
+      val user_list = jsonNode.get("user_id_list")
+      val mapper = new ObjectMapper() with ScalaObjectMapper
+      val node: JsonNode = mapper.valueToTree(user_list)
+      val batchListElements = node.elements()
+      var success = true
+      batchListElements.forEachRemaining(_ => {
+        success = userService.deleteUser(batchListElements.next().asInt()) && success
+      })
+      Map("batch_delete"->success)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide a valid user_id_list")
+    }
   }
 
   /**
@@ -141,22 +191,27 @@ class UserController {
   /**
     * revoke a users global role
     * @author Benjamin Manns
+    * @param before defines where login was before a special date
+    * @param after defines where login was after a special date
+    * @param sort defines asc or desc of result
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getLastLoginsOfUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
+  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET))
+  def getLastLoginsOfUsers(@RequestParam(value = "before", required = false) before: String,
+                           @RequestParam(value = "after", required = false) after: String,
+                           @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     try {
-      val sort = jsonNode.get("sort").asText()
-      loginService.getLastLoginList(sort)
-    } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a `sort` argument")
-      case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")
+      loginService.getLastLoginList(before, after, sort)
+    }
+    catch {
+      case e: IllegalArgumentException => {
+        throw new BadRequestException(e.getMessage)
+      }
     }
   }
 }
