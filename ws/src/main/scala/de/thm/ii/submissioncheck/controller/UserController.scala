@@ -30,12 +30,11 @@ class UserController {
     *
     * @author Benjamin Manns
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON of all Users
     * @throw throw new UnauthorizedException
     */
-  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getAllUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, String]] = {
+  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET))
+  def getAllUsers(request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
@@ -142,18 +141,16 @@ class UserController {
     * revoke a users global role
     * @author Benjamin Manns
     * @param request contains resquest headers
-    * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def getLastLoginsOfUsers(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): List[Map[String, Any]] = {
+  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET))
+  def getLastLoginsOfUsers(request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     try {
-      val sort = jsonNode.get("sort").asText()
-      loginService.getLastLoginList(sort)
+      loginService.getLastLoginList("desc")
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a `sort` argument")
       case _: IllegalArgumentException => throw new BadRequestException("Please provide a valid sort argument: asc, desc")

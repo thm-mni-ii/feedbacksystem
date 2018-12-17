@@ -218,14 +218,12 @@ class TaskController {
     *
     * @author Benjamin Manns
     * @param taskid unique task identification
-    * @param jsonNode request body containing "data" parameter
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("tasks/{id}/submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
-                        @RequestBody jsonNode: JsonNode,
                         request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty) {
@@ -424,11 +422,10 @@ class TaskController {
     * @author Benjamin Manns
     * based on https://stackoverflow.com/questions/41533391/how-to-create-separate-kafka-listener-for-each-topic-dynamically-in-springboot
     * @param request contain request information
-    * @param jsonNode JSON Parameter from request
     * @return JSON
     */
-  @RequestMapping(value = Array("kafka/listener/reload"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
-  def kafkaReloadListeners(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+  @RequestMapping(value = Array("kafka/listener/reload"), method = Array(RequestMethod.GET))
+  def kafkaReloadListeners(request: HttpServletRequest): Map[String, AnyVal] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) { // TODO Admin or else?
       throw new UnauthorizedException
