@@ -54,15 +54,34 @@ class CourseService {
     * @param user a User object
     * @return List of Maps
     */
-  def getAllKindOfCoursesByUser(user: User): List[Map[String, String]] = {
+  def getAllKindOfCoursesByUser(user: User): List[Map[String, Any]] = {
     DB.query("SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?",
       (res, _) => {
-        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+        Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
-          RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id))
+          RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id),
+          CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+          "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)))
       }, user.userid)
+  }
+
+  /**
+    * get list of all docent beloning to one course
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @return Scala List
+    */
+  def getCourseDocent(courseid: Int): List[Map[String, String]] = {
+    DB.query("SELECT * FROM user_course uc join user using(user_id) where course_id = ? and uc.role_id = 4",
+      (res, _) => {
+        Map(UserDBLabels.user_id -> res.getString(UserDBLabels.user_id),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.email -> res.getString(UserDBLabels.email))
+      }, courseid)
   }
 
   /**
@@ -171,15 +190,21 @@ class CourseService {
 
   /**
     * getAllCourses gives few information about all courses for searchin purpose
+    * @param user a user object
     * @author Benjamin Manns
     * @return Scala List
     */
-  def getAllCourses: List[Map[String, Any]] = {
-    DB.query("SELECT * FROM course", (res, _) => {
-      Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+  def getAllCourses(user: User): List[Map[String, Any]] = {
+    DB.query("select * from course c left join (select * from user_course uc where uc.user_id = ?) u " +
+      " on c.course_id = u.course_id left JOIN role r using(role_id)", (res, _) => {
+      Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
         CourseDBLabels.name -> res.getString(CourseDBLabels.name),
-        CourseDBLabels.description -> res.getString(CourseDBLabels.description))
-    })
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+        CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+        RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
+        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)))
+    }, user.userid)
   }
 
   /**
@@ -288,20 +313,31 @@ class CourseService {
     * @param name course name
     * @param description course description
     * @param standard_task_typ a standart task type
+    * @param course_modul_id Based on Modul Descriptino its modul name
+    * @param course_semester semester where this course will be available
+    * @param anonym_submission anonym submissions, if no every task and submission will be deleted.
     * @return Scala Map
     * @throws RuntimeException
     */
-  def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String): Map[String, Number] = {
+  def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String,
+                         course_modul_id: String, course_semester: String, anonym_submission: Int = 0): Map[String, Number] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "insert into course (course_name, course_description, creator, standard_task_type) values (?,?,?,?)",
+        "insert into course (course_name, course_description, creator, standard_task_type, course_modul_id, " +
+          "course_semester, anonym_submission) values (?,?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, user.userid)
       val m4 = 4
+      val m5 = 5
+      val m6 = 6
+      val m7 = 7
       ps.setString(m4, standard_task_typ)
+      ps.setString(m5, course_modul_id)
+      ps.setString(m6, course_semester)
+      ps.setInt(m7, anonym_submission)
       ps
     })
     if (num < 1) {
@@ -318,12 +354,16 @@ class CourseService {
     * @param name course name
     * @param description course description
     * @param standard_task_typ a standart task type
+    * @param course_modul_id Based on Modul Descriptino its modul name
+    * @param course_semester semester where this course will be available
     * @return Scala Map
     * @throws ResourceNotFoundException
     */
-  def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String): Map[String, Boolean] = {
-    val success = DB.update("update course set course_name = ?, course_description = ?, standard_task_type = ? where course_id = ?",
-      name, description, standard_task_typ, courseid)
+  def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String,
+                   course_modul_id: String, course_semester: String): Map[String, Boolean] = {
+    val success = DB.update("update course set course_name = ?, course_description = ?, standard_task_type = ?, " +
+      "course_modul_id = ?, course_semester = ? where course_id = ?",
+      name, description, standard_task_typ, course_modul_id, course_semester, courseid)
     if (success == 0) {
       throw new ResourceNotFoundException
     }

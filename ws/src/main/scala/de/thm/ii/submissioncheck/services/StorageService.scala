@@ -6,7 +6,7 @@ import java.net.MalformedURLException
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.file.{FileAlreadyExistsException, Files, Paths, StandardCopyOption}
+import java.nio.file._
 
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, FileOutputStream, IOException}
@@ -30,6 +30,26 @@ class StorageService {
   private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + "/" + taskid.toString
 
   /**
+    * Delete a submission File
+    * @param taskid the task where submissions is stored
+    * @param submissionid the concerning submission from one unser
+    * @param filename the submitted file
+    */
+  def deleteSubmission(taskid: Int, submissionid: Int, filename: String): Unit = {
+    val storeLocation = this.storeLocation(taskid, submissionid)
+    var filePath = storeLocation
+    if(filename != null){
+      filePath = storeLocation.resolve(filename)
+    }
+    try{
+      Files.delete(filePath)
+    }
+    catch {
+      case _: NoSuchFileException => {}
+    }
+  }
+
+  /**
     * store a MultipartFile stream into a file on disk
     *
     * @author grokonez.com
@@ -37,7 +57,7 @@ class StorageService {
     * @param taskid the connecting task
     */
   def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
-    //try {
+    try {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
     try {
       Files.createDirectories(storeLocation)
@@ -46,11 +66,15 @@ class StorageService {
       case _: FileAlreadyExistsException => {}
     }
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
-    /*}
+    }
     catch {
       case e: Exception =>
         throw new RuntimeException(FILE_NOT_STORED_MSG)
-    }*/
+    }
+  }
+
+  private def storeLocation(taskid: Int, submission_id: Int): Path = {
+    Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
   }
 
   /**
@@ -62,7 +86,7 @@ class StorageService {
     */
   def storeTaskSubmission(file: MultipartFile, taskid: Int, submission_id: Int): Unit = {
     try {
-      val storeLocation = Paths.get(UPLOAD_FOLDER + "/" + taskid.toString + "/submits/" + submission_id.toString)
+      val storeLocation = this.storeLocation(taskid, submission_id)
       try {
         Files.createDirectories(storeLocation)
       }
