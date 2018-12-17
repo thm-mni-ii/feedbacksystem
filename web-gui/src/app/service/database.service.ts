@@ -106,8 +106,7 @@ export class DatabaseService {
   }
 
   /**
-   * Returns all submissions an user
-   * has made in course with :id
+   * docents get all results of all users of all tasks
    * @param id of course to obtain all submissions
    */
   allUserSubmissions(id: number) {
@@ -171,12 +170,11 @@ export class DatabaseService {
   }
 
   /**
-   * Returns task result
-   * @param idCourse of course where task is
-   * @param idTask of task
+   * For a given task_id :id the saved results
+   * @param idTask id of task
    */
-  getTaskResult(idCourse: number, idTask: number) {
-    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/result');
+  getTaskResult(idTask: number) {
+    return this.http.get('/api/v1/tasks/' + idTask + '/result');
   }
 
   /**
@@ -240,6 +238,23 @@ export interface Task {
   task_description: string;
   task_id: number;
   task_name: string;
+  "results": Result[],
+}
+
+interface Result {
+  "submit_date": Date,
+  "result": string,
+  "submission_data": Date,
+  "task_name": string,
+  "passed": number,
+  "user_id": number,
+  "result_date"?: Date,
+  "filename"?: string,
+  "message"?: string,
+  "course_id": number,
+  "task_id": number,
+  "submission_id": number
+
 }
 
 export interface SubmitResult {
