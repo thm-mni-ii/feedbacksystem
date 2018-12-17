@@ -337,7 +337,7 @@ class CourseController {
     * @param request request Request Header containing Headers for Authorization
     * @return JSON of all submissions
     */
-  @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
+  @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
