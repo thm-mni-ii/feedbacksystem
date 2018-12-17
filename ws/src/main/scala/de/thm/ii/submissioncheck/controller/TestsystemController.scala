@@ -99,12 +99,18 @@ class TestsystemController {
     */
   @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.GET), consumes = Array())
   @ResponseBody
-  def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, String] = {
+  def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
-    testsystemService.getTestsystem(testsystemid).getOrElse(Map.empty)
+
+    val testsystem = testsystemService.getTestsystem(testsystemid)
+    if (testsystem.isEmpty) {
+      Map.empty
+    } else {
+      testsystem.get.asMap()
+    }
   }
   /**
     * deleteTestsystem deletes a Testsystem

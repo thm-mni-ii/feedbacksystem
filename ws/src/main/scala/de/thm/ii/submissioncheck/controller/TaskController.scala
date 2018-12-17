@@ -61,6 +61,7 @@ class TaskController {
   private final val LABEL_FILE = "file"
   private final val LABEL_FILENAME = "filename"
   private final val LABEL_UPLOAD_URL = "upload_url"
+  private final val LABEL_JWT_TOKEN = "jwt_token"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -148,24 +149,27 @@ class TaskController {
     val taskDetails = taskDetailsOpt.get
     var upload_url: String = null
     var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
+    val dataNode = jsonNode.get(LABEL_DATA)
     try {
       var submissionId: Int = -1
-      if(taskDetails(TaskDBLabels.test_type) == "STRING"){
-        // If submission was only data we send Kafka directly
-        val data = jsonNode.get(LABEL_DATA).asText
-        submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
-        kafkaMap += (LABEL_DATA -> data)
-        kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
-        kafkaMap += ("submit_typ" -> "data")
-        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        logger.warn(jsonResult)
-        kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
-        kafkaTemplate.flush()
-      } else if (taskDetails(TaskDBLabels.test_type) == "FILE")
-        {
+        if(dataNode != null) {
+          val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
+          // If submission was only data we send Kafka directly
+          val data = dataNode.asText
+          submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
+          kafkaMap += (LABEL_DATA -> data)
+          kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
+          kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+          val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+          logger.warn(jsonResult)
+          kafkaTemplate.send(tasksystem_id + "_" + topicName, jsonResult)
+          kafkaTemplate.flush()
+        }
+        else {
           submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
           upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
         }
+
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
     } catch {
       case _: NullPointerException => throw new BadRequestException("This test needs a: " + taskDetails(TaskDBLabels.test_type) + ". Please provide this.")
@@ -196,14 +200,14 @@ class TaskController {
 
       filename = file.getOriginalFilename
       taskService.setSubmissionFilename(submissionid, filename)
-
+      val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
       var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
       kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionid))
       kafkaMap += (LABEL_SUBMISSION_ID -> submissionid.toString)
-      kafkaMap += ("submit_typ" -> "file")
+      kafkaMap += ("submit_typ" -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
-      kafkaTemplate.send(this.taskService.getTestsystemTopicByTaskId(taskid) + "_" + topicName, jsonResult)
+      kafkaTemplate.send(tasksystem_id + "_" + topicName, jsonResult)
       kafkaTemplate.flush()
       message = true
 
@@ -276,15 +280,16 @@ class TaskController {
     storageService.storeTaskTestFile(file, taskid)
     filename = file.getOriginalFilename
     taskService.setTaskFilename(taskid, filename)
-
+    val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
     val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
-      LABEL_TASK_ID -> taskid.toString)
+      LABEL_TASK_ID -> taskid.toString,
+      LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
 
     message = true
 
     val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
     logger.warn(jsonStringMsg)
-    kafkaTemplate.send(taskService.getTestsystemTopicByTaskId(taskid) + topicTaskRequest, jsonStringMsg)
+    kafkaTemplate.send(tasksystem_id + topicTaskRequest, jsonStringMsg)
     kafkaTemplate.flush()
 
     Map("upload_success" -> message, LABEL_FILENAME -> filename)
@@ -392,11 +397,14 @@ class TaskController {
     * @author Benjamin Manns
     * @param taskid unique taskid identification
     * @param token URL is only working withing a time range
+    * @param request contain request information
     * @return HTTP Response contain file
     */
   @GetMapping(Array("tasks/{id}/files/testfile/{token}"))
-  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String): ResponseEntity[Resource] = {
+  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String, request: HttpServletRequest):
+  ResponseEntity[Resource] = {
     // TODO JWT Authorization
+    logger.warn(testsystemService.verfiyUserByHeaderToken(request).toString)
     val filename = taskService.getTestFileByTask(taskid)
     val file = storageService.loadFile(filename, taskid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
@@ -408,12 +416,14 @@ class TaskController {
     * @param taskid unique taskid identification
     * @param subid unique subid identification
     * @param token URL is only working withing a time range
+    * @param request contain request information
     * @return HTTP Response contain file
     */
   @GetMapping(Array("tasks/{id}/files/submissions/{subid}/{token}"))
   @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
-                                        @PathVariable token: String): ResponseEntity[Resource] = {
+                                        @PathVariable token: String, request: HttpServletRequest): ResponseEntity[Resource] = {
     // TODO JWT Authorization
+    logger.warn(testsystemService.verfiyUserByHeaderToken(request).toString)
     var filename = taskService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)

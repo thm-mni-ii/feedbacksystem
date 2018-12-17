@@ -1,11 +1,14 @@
 package de.thm.ii.submissioncheck.services
-
+import java.util.Date
+import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import java.io
-import java.sql.{Connection, SQLException, Statement}
 
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.Autowired
+import de.thm.ii.submissioncheck.model.{Testsystem, User}
+import de.thm.ii.submissioncheck.security.Secrets
+import javax.servlet.http.HttpServletRequest
+import javax.xml.bind.DatatypeConverter
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -19,6 +22,8 @@ class TestsystemService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 
+  @Value("${jwt.expiration.time}")
+  private val jwtExpirationTime: String = null
   /**
     * create and insert a testsystem information
     * @author Benjamin Manns
@@ -93,14 +98,10 @@ class TestsystemService {
     * @param id_string unique identification for a testsystem
     * @return Scala Map
     */
-  def getTestsystem(id_string: String): Option[Map[String, String]] = {
+  def getTestsystem(id_string: String): Option[Testsystem] = {
     val list = DB.query("select * from testsystem  where testsystem_id = ?", (res, _) => {
-      Map(TestsystemLabels.id -> res.getString(TestsystemLabels.id),
-        TestsystemLabels.name -> res.getString(TestsystemLabels.name),
-        TestsystemLabels.description -> res.getString(TestsystemLabels.description),
-        TestsystemLabels.supported_formats -> res.getString(TestsystemLabels.supported_formats),
-        TestsystemLabels.machine_ip -> res.getString(TestsystemLabels.machine_ip),
-        TestsystemLabels.machine_port -> res.getString(TestsystemLabels.machine_port))
+      new Testsystem(res.getString(TestsystemLabels.id), res.getString(TestsystemLabels.name), res.getString(TestsystemLabels.description),
+        res.getString(TestsystemLabels.supported_formats), res.getString(TestsystemLabels.machine_port), res.getString(TestsystemLabels.machine_ip))
     }, id_string)
     list.headOption
   }
@@ -134,5 +135,60 @@ class TestsystemService {
     }
     topicList = topicList.map(f => f + "_" + topic)
     topicList.toArray
+  }
+
+  /**
+    * generate a JWT from a given testsystem
+    *
+    * @author Benjamin Manns
+    * @param id_string Testsystem Name / ID
+    * @return token as String
+    */
+  def generateTokenFromTestsystem(id_string: String): String = {
+    val jwtToken = Jwts.builder.setSubject("client_authentication")
+      .claim("token_type", "testsystem")
+      .claim("testsystem_id", id_string)
+      .setIssuedAt(new Date())
+      .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
+      .signWith(SignatureAlgorithm.HS256, Secrets.getSuperSecretKey)
+      .compact
+
+    jwtToken
+  }
+
+  /**
+    * verfiy test system request by the given Bearer Token provided in the Header request
+    * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
+    *
+    * @author Benjamin Manns
+    * @param request a Request Body
+    * @return Map of Testsystem
+    */
+  def verfiyUserByHeaderToken(request: HttpServletRequest): Option[Testsystem] = {
+    val authHeader = request.getHeader("Authorization")
+    if (authHeader != null) {
+      try {
+        val jwtToken = authHeader.split(" ")(1)
+        try {
+          val currentDate = new Date()
+          val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(Secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+          val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
+
+          // Token is expired
+          if (tokenDate * 1000L - currentDate.getTime <= 0) {
+            None
+          } else {
+            this.getTestsystem(claims.get(TestsystemLabels.id).asInstanceOf[String])
+          }
+        } catch {
+          case _: JwtException | _: IllegalArgumentException => None
+        }
+      }
+      catch {
+        case _: ArrayIndexOutOfBoundsException => None
+      }
+    } else {
+      None
+    }
   }
 }
