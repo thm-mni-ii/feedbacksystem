@@ -9,10 +9,14 @@ import {AuthService} from "../../../service/auth.service";
 })
 export class ProfStartComponent implements OnInit {
 
+
+  profUsername: string;
+
   constructor(private snackbar: MatSnackBar, private auth: AuthService) {
   }
 
   ngOnInit() {
+    this.profUsername = this.auth.getUsername();
   }
 
 

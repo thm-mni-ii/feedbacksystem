@@ -47,11 +47,14 @@ export class AuthService {
         case 'admin':
           this.router.navigate(['admin']);
           break;
-        case 'dozent':
+        case 'docent':
           this.router.navigate(['prof']);
           break;
-        case 'hiwi':
-          //TODO: Implement route for hiwi
+        case 'moderator':
+          //TODO: Implement route for moderator
+          break;
+        case 'tutor':
+          this.router.navigate(['user']);
           break;
         case 'student':
           this.router.navigate(['user', 'dashboard']);
@@ -111,7 +114,7 @@ export class AuthService {
    * Get username from an
    * user that is logged in.
    */
-  getUsername() {
+  getUsername(): string {
     return this.getDecodedToken().username;
   }
 
