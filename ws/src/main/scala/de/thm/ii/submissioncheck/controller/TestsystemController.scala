@@ -97,7 +97,7 @@ class TestsystemController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.GET), consumes = Array())
+  @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, String] = {
     val user = userService.verfiyUserByHeaderToken(request)
