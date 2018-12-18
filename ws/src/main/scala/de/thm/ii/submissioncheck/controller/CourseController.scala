@@ -89,7 +89,7 @@ class CourseController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET), consumes = Array())
+  @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getAllCourse(request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
@@ -105,7 +105,7 @@ class CourseController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET), consumes = Array())
+  @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET))
   @ResponseBody
   def getCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     val user = userService.verfiyUserByHeaderToken(request)
@@ -314,12 +314,11 @@ class CourseController {
     * @author Benjamin Manns
     * @param courseid unique course identification
     * @param request Request Header containing Headers
-    * @param jsonNode contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
+  @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode):
+  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest):
   List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
