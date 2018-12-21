@@ -403,7 +403,7 @@ class TaskController {
   @GetMapping(Array("tasks/{id}/files/testfile/{token}"))
   @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String, request: HttpServletRequest):
   ResponseEntity[Resource] = {
-    val testystem = testsystemService.verfiyUserByHeaderToken(request)
+    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
       throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
     }
@@ -424,7 +424,7 @@ class TaskController {
   @GetMapping(Array("tasks/{id}/files/submissions/{subid}/{token}"))
   @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
                                         @PathVariable token: String, request: HttpServletRequest): ResponseEntity[Resource] = {
-    val testystem = testsystemService.verfiyUserByHeaderToken(request)
+    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
       throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
     }

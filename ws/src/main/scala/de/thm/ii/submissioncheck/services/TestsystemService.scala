@@ -164,7 +164,7 @@ class TestsystemService {
     * @param request a Request Body
     * @return Map of Testsystem
     */
-  def verfiyUserByHeaderToken(request: HttpServletRequest): Option[Testsystem] = {
+  def verfiyTestsystemByHeaderToken(request: HttpServletRequest): Option[Testsystem] = {
     val authHeader = request.getHeader("Authorization")
     if (authHeader != null) {
       try {
