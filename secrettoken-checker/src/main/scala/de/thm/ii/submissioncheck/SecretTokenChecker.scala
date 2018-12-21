@@ -15,28 +15,48 @@ import scala.io.Source
 import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
-import java.io.File
+import java.io.{BufferedReader, File, InputStream, InputStreamReader}
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL}
 import java.security.cert.X509Certificate
-import javax.net.ssl._
 
+import javax.net.ssl._
 import JsonHelper._
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
 
-// Bypasses both client and server validation.
+/**
+  * Bypasses both client and server validation.
+  */
 object TrustAll extends X509TrustManager {
+  /** turn off SSL Issuer list */
   val getAcceptedIssuers = null
 
-  def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+  /**
+    * bypass client SSL Checker
+    * @param x509Certificates which certificates should be trusted
+    * @param s server / url
+    */
+  override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
 
-  def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String) = {}
+  /**
+    * bypass server SSL Checker
+    * @param x509Certificates which certificates should be trusted
+    * @param s server / url
+    */
+  override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
 }
 
-
-// Verifies all host names by simply returning true.
+/**
+  * Verifies all host names by simply returning true.
+  */
 object VerifiesAllHostNames extends HostnameVerifier {
-  def verify(s: String, sslSession: SSLSession) = true
+  /**
+    * method which verifies a SSL Session. Always return true, so no check is done. This is for development mode only
+    * @param s url
+    * @param sslSession https ssl session
+    * @return Boolean, always true
+    */
+  def verify(s: String, sslSession: SSLSession): Boolean = true
 }
 /**
   * Application for running a script with username and token as parameters
@@ -85,7 +105,6 @@ object SecretTokenChecker extends App {
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings
   // +++++++++++++++++++++++++++++++++++++++++
-  
 
   private def onMessageReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
@@ -101,8 +120,8 @@ object SecretTokenChecker extends App {
         HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
         HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
         //new URL(url) #> new File("submit.txt") !!
-        val s: String = scala.io.Source.fromURL(url).mkString
-        logger.info(s)
+        val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
+        val s: String = downloadFiletoString(url, jwt_token)
         arguments = s
       }
       else if (submit_type.equals(DATA)){
@@ -185,21 +204,31 @@ object SecretTokenChecker extends App {
     bashtest.output
   }
 
-  def downloadFiletoString(urlname: String): String = {
+  /**
+    * download a file and parse it to string
+    * @author Vlad Sokyrskyy Benjamin Manns
+    * @param urlname URL where file is located
+    * @param jwt_token Authorization token
+    * @return The string provided in the file
+    */
+  def downloadFiletoString(urlname: String, jwt_token: String): String = {
     var s: String = ""
-    val timeout = 5000
+    val timeout = 1000
     val url = new java.net.URL(urlname)
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
     connection.setConnectTimeout(timeout)
     connection.setReadTimeout(timeout)
+    connection.setRequestProperty("Connection", "close")
     connection.connect()
 
     if(connection.getResponseCode >= 400){
       logger.error("Error when downloading file!")
     }
     else {
-      val src = scala.io.Source.fromURL(urlname)
-      s = src.mkString
+      val in: InputStream = connection.getInputStream
+      val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
+      s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString
     }
     s
   }
