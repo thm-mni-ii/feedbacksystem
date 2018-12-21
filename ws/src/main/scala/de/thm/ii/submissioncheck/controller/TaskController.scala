@@ -403,8 +403,10 @@ class TaskController {
   @GetMapping(Array("tasks/{id}/files/testfile/{token}"))
   @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String, request: HttpServletRequest):
   ResponseEntity[Resource] = {
-    // TODO JWT Authorization
-    logger.warn(testsystemService.verfiyUserByHeaderToken(request).toString)
+    val testystem = testsystemService.verfiyUserByHeaderToken(request)
+    if (testystem.isEmpty) {
+      throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
+    }
     val filename = taskService.getTestFileByTask(taskid)
     val file = storageService.loadFile(filename, taskid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
@@ -422,9 +424,11 @@ class TaskController {
   @GetMapping(Array("tasks/{id}/files/submissions/{subid}/{token}"))
   @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
                                         @PathVariable token: String, request: HttpServletRequest): ResponseEntity[Resource] = {
-    // TODO JWT Authorization
-    logger.warn(testsystemService.verfiyUserByHeaderToken(request).toString)
-    var filename = taskService.getSubmittedFileBySubmission(subid)
+    val testystem = testsystemService.verfiyUserByHeaderToken(request)
+    if (testystem.isEmpty) {
+      throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
+    }
+    val filename = taskService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
   }
