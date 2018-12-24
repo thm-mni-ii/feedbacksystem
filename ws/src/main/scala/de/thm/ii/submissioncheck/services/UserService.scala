@@ -217,6 +217,7 @@ class UserService {
   def generateTokenFromUser(user: User): String = {
     val jwtToken = Jwts.builder.setSubject("client_authentication")
       .claim("roles", user.role)
+      .claim("token_type", "user")
       .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
