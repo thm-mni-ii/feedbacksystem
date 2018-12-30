@@ -1,22 +1,19 @@
+@import "~src/colors";
+
 .sidenav-container {
   height: 100%;
 }
 
 .sidenav {
-  width: 200px;
+  background: $green;
+  width: auto;
 }
 
-.sidenav .mat-toolbar {
-  background: inherit;
+mat-icon {
+  color: white;
 }
 
-.mat-toolbar.mat-primary {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+// Class for selected buttons in sidenav
+.selected {
+  background: $blue;
 }
-
-#empty-placeholder {
-  flex-grow: 1;
-}
-

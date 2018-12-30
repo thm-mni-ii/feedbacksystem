@@ -1,30 +1,31 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport="true"
-               [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-               [mode]="(isHandset$ | async) ? 'over' : 'side'"
-               [opened]="!(isHandset$ | async)">
-    <mat-toolbar>Menu</mat-toolbar>
+  <mat-sidenav class="sidenav" opened="true" mode="side">
     <mat-nav-list>
-        <a mat-list-item>Link 1</a>
-        <a mat-list-item>Link 2</a>
-        <a mat-list-item>Link 3</a>
+
+      <!-- Dashboard -->
+      <a mat-list-item matTooltip="Dashboard" matTooltipPosition="right"
+         routerLink="dashboard" routerLinkActive="selected">
+        <mat-icon>dashboard</mat-icon>
+      </a>
+
+      <!-- User management -->
+      <a mat-list-item matTooltip="User Management" matTooltipPosition="right"
+         routerLink="user-management" routerLinkActive="selected">
+        <mat-icon>supervised_user_circle</mat-icon>
+      </a>
+
+      <!-- Logout -->
+      <a mat-list-item matTooltip="Logout" matTooltipPosition="right"
+         (click)="logout()" routerLinkActive="selected">
+        <mat-icon>power_settings_new</mat-icon>
+      </a>
+
     </mat-nav-list>
   </mat-sidenav>
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()"
-        *ngIf="isHandset$ | async">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
-      <span>Admin</span>
-      <span id="empty-placeholder"></span>
-      <button routerLink="" id="logout-button" mat-raised-button color="warn" (click)="logout()">Logout</button>
-    </mat-toolbar>
+
     <!-- Add Content Here -->
-    <app-admin-dashboard></app-admin-dashboard>
+    <router-outlet></router-outlet>
+
   </mat-sidenav-content>
 </mat-sidenav-container>
