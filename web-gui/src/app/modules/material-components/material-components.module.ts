@@ -12,8 +12,16 @@ import {
   MatSnackBarModule,
   MatTableModule,
   MatPaginatorModule,
-  MatSortModule, MatCardModule, MatRadioModule, MatDialogModule, MatExpansionModule, MatRippleModule
+  MatSortModule,
+  MatCardModule,
+  MatRadioModule,
+  MatDialogModule,
+  MatExpansionModule,
+  MatRippleModule,
+  MatTabsModule,
+  MatDividerModule, MatGridListModule, MatMenuModule, MatTooltipModule
 } from "@angular/material";
+import {DragDropModule} from "@angular/cdk/drag-drop";
 
 @NgModule({
   imports: [
@@ -35,7 +43,10 @@ import {
     MatRadioModule,
     MatDialogModule,
     MatExpansionModule,
-    MatRippleModule
+    MatRippleModule,
+    MatGridListModule,
+    MatTabsModule,
+    MatTooltipModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -55,7 +66,11 @@ import {
     MatRadioModule,
     MatDialogModule,
     MatExpansionModule,
-    MatRippleModule
+    MatRippleModule,
+    MatGridListModule,
+    MatTabsModule,
+    MatMenuModule,
+    MatTooltipModule
   ],
   declarations: []
 })
