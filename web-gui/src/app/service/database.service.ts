@@ -232,11 +232,11 @@ export class DatabaseService {
   }
 
   /**
-   * (Only) Admin can delete a registered user by its username.
-   * @param username
+   * (Only) Admin can delete a registered user by its userid.
+   * @param userID
    */
-  adminDeleteUser(username: string) {
-    return this.http.delete('/api/v1/users/' + username).subscribe(msg => {
+  adminDeleteUser(userID: number) {
+    return this.http.delete('/api/v1/users/' + userID).subscribe(msg => {
       console.log('DELETE USER: ' + JSON.stringify(msg));
     });
   }

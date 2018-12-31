@@ -83,7 +83,7 @@ export class AdminUserManagementComponent implements OnInit, OnDestroy {
   }
 
   private deleteUser(user: User) {
-    this.db.adminDeleteUser(user.username);
+    this.db.adminDeleteUser(user.user_id);
   }
 
 
