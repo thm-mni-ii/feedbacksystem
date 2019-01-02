@@ -19,7 +19,7 @@ import {
   MatExpansionModule,
   MatRippleModule,
   MatTabsModule,
-  MatDividerModule, MatGridListModule, MatMenuModule, MatTooltipModule
+  MatDividerModule, MatGridListModule, MatMenuModule, MatTooltipModule, MatSelectModule
 } from "@angular/material";
 import {DragDropModule} from "@angular/cdk/drag-drop";
 
@@ -46,7 +46,8 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     MatRippleModule,
     MatGridListModule,
     MatTabsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -70,7 +71,8 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     MatGridListModule,
     MatTabsModule,
     MatMenuModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ],
   declarations: []
 })
