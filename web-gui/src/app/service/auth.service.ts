@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {JwtHelperService} from "@auth0/angular-jwt";
 import {Router} from "@angular/router";
+import {MatSnackBar} from "@angular/material";
 
 /**
  * Service that manages login and logout for an user
@@ -11,7 +12,8 @@ import {Router} from "@angular/router";
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService, private router: Router) {
+  constructor(private http: HttpClient, private jwtHelper: JwtHelperService, private router: Router,
+              private snackBar: MatSnackBar) {
   }
 
 
@@ -51,7 +53,7 @@ export class AuthService {
           this.router.navigate(['prof']);
           break;
         case 'moderator':
-          //TODO: Implement route for moderator
+          this.router.navigate(['moderator']);
           break;
         case 'tutor':
           this.router.navigate(['user']);
@@ -106,6 +108,8 @@ export class AuthService {
    * and terminates session for user.
    */
   logout() {
+    this.snackBar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
+    this.router.navigate(['']);
     localStorage.removeItem('user');
   }
 
