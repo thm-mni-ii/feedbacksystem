@@ -34,6 +34,13 @@ class TestRESTStudent(unittest.TestCase):
 
         self.stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + "_UNITTEST"
 
+    def test_getAllcourses_route(self):
+        r = requests.get(url=self.URL + "courses/all", data=json.dumps({}), verify=False,
+                         headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
+
+        self.assertEqual(type(r.json()), type([]))
+        self.assertGreaterEqual(len(r.json()), 1)
+
     def test_AllSubmissions(self):
         """
         GET /api/v1/courses/submissions
@@ -317,6 +324,15 @@ class TestRESTStudent(unittest.TestCase):
         pprint(len(get_submissions.json()))
         self.assertTrue(22 <= len(get_submissions.json()))
 
+    def test_getTaskByTaskID_route(self):
+        res = requests.get(url=self.URL + "tasks/10/submissions", data=json.dumps({}),
+                                     verify=False,
+                                     headers={'content-type': 'application/json',
+                                              'Authorization': self.docent_auth_header})
+
+        self.assertEqual(type(res.json()), type([]))
+        self.assertGreaterEqual(len(res.json()), 1)
+
     def test_student_submit_result_task(self):
         result_req_bf = requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
                                      verify=False,
@@ -422,6 +438,28 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertEqual({'success': True}, sys_del.json())
 
+    def test_admin_delete_users_batch(self):
+        name_list = ['sam','ben','jenny','dave','caleb','jane','luke']
+        for person in name_list:
+            res = requests.post(url=self.URL + "login/token", data=json.dumps({"name": person}), verify=False,
+                              headers={'content-type': 'application/json'})
+            if res.status_code != 200:
+                self.fail("Creating " + person + " failed")
+
+
+
+        all_users = requests.get(url=self.URL + "users", verify=False, headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
+        id_list = []
+        for entry in all_users.json():
+            if entry['username'] in name_list:
+                id_list.append(entry['user_id'])
+        pprint(id_list)
+
+        ## Delete using batch list
+
+        del_users = requests.delete(url=self.URL + "users", verify=False, data=json.dumps({"user_id_list": id_list}), headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
+        pprint(del_users.json())
+
     def test_admin_user_management(self):
         all_users = requests.get(url=self.URL + "users", data=json.dumps({}), verify=False,
                                   headers={'content-type': 'application/json',
@@ -495,7 +533,7 @@ class TestRESTStudent(unittest.TestCase):
 
 
     def test_user_admin_last_logins(self):
-        users = requests.get(url=self.URL + "users/last_logins", data=json.dumps({"sort":"asc"}), verify=False,
+        users = requests.get(url=self.URL + "users", verify=False,
                                        headers={'content-type': 'application/json',
                                                 'Authorization': self.admin_auth_header})
         pprint(users.json())
@@ -503,6 +541,14 @@ class TestRESTStudent(unittest.TestCase):
         self.assertEqual(type([]), type(users.json()))
         self.assertTrue(4 <= len(users.json()))
 
+        users_filter_b = requests.get(url=self.URL + "users?before=2018-12-01", verify=False, headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
+        users_filter_a = requests.get(url=self.URL + "users?after=2018-12-12", verify=False, headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
+        users_filter_ab = requests.get(url=self.URL + "users?before=2018-12-01&after=2018-12-02", verify=False, headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
+
+        # TODO: more testing, but if it work, just enough
+        pprint(len(users_filter_b.json()))
+        pprint(len(users_filter_a.json()))
+        pprint(len(users_filter_ab.json()))
 
 
 unittest.main()
