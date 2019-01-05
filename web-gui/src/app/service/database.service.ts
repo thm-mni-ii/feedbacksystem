@@ -223,6 +223,124 @@ export class DatabaseService {
     return this.http.get<DashboardInformation[]>("/api/v1/courses/submissions");
   }
 
+
+  /**
+   * (Only) Admin can get all registered users.
+   */
+  adminGetUsers(): Observable<User[]> {
+    return this.http.get<User[]>('/api/v1/users');
+  }
+
+  /**
+   * (Only) Admin can delete a registered user by its username.
+   * @param username
+   */
+  adminDeleteUser(username: string) {
+    return this.http.delete('/api/v1/users/' + username).subscribe(msg => {
+      console.log('DELETE USER: ' + JSON.stringify(msg));
+    });
+  }
+
+  /**
+   * (Only) Admin get a list of all users' last logins.
+   * Sort can be asc or desc.
+   */
+  adminGetLastLogin(): Observable<User[]> {
+    return this.http.get<User[]>('/api/v1/users/last_logins');
+  }
+
+  /**
+   * admin can grand docent rights to an user for this course
+   * @param courseID
+   * @param username
+   */
+  adminGrantRights(courseID: number, username: string) {
+    return this.http.post('/api/v1/courses/' + courseID + '/grant/docent', {username: username}).subscribe(msg => {
+      console.log('GRANT RIGHTS: ' + JSON.stringify(msg));
+    });
+  }
+
+  /**
+   * admin can revoke docent rights from an user for this course
+   * @param courseID
+   * @param username
+   */
+  adminRevokeRights(courseID: number, username: string) {
+    return this.http.post('/api/v1/courses/' + courseID + '/deny/docent', {username: username}).subscribe(msg => {
+      console.log('REVOKE RIGHTS: ' + JSON.stringify(msg));
+    });
+  }
+
+  /**
+   * Only Admin can create a testsystem. id means a unique testsystem short name.
+   * @param id
+   * @param name
+   * @param description
+   * @param supported_formats
+   * @param machine_port
+   * @param machine_ip
+   */
+  adminCreateTestsysteme(id: number, name: string, description: string, supported_formats: string,
+                         machine_port: number, machine_ip: number) {
+    return this.http.post('/api/v1/testsystems', {
+      id: id, name: name, description: description,
+      supported_formats: supported_formats, machine_port: machine_port, machine_ip: machine_ip
+    }).subscribe(msg => {
+      console.log('CREATE TESTSYSTEME: ' + JSON.stringify(msg));
+    });
+  }
+
+  /**
+   * Only Admin can update this information. At least one of the parameter is required.
+   * @param id
+   * @param name
+   * @param description
+   * @param supported_formats
+   * @param machine_port
+   * @param machine_ip
+   */
+  adminUpdateTestsysteme(id: number, name: string, description: string, supported_formats: string,
+                         machine_port: number, machine_ip: number): Observable<ReturnMessage> {
+    return this.http.put<ReturnMessage>('/api/v1/testsystems/' + id, {
+      id: id, name: name, description: description,
+      supported_formats: supported_formats, machine_port: machine_port, machine_ip: machine_ip
+    });
+  }
+
+  /**
+   * Only Admin can delete this information.
+   * @param id
+   */
+  adminDeleteTestsysteme(id: number): Observable<ReturnMessage> {
+    return this.http.delete<ReturnMessage>('/api/v1/testsystems/' + id);
+  }
+
+  /**
+   * (Only) Admin can grant a registered user as moderator.
+   */
+  adminGrantModerator(username: string): Observable<ReturnMessage> {
+    return this.http.post<ReturnMessage>('/api/v1/users/grant/moderator', {username: username});
+  }
+
+  /**
+   * (Only) Admin can grant a registered user as admin.
+   * @param username
+   */
+  adminGrantAdmin(username: string) {
+    return this.http.post('/api/v1/users/grant/admin', {username: username}).subscribe(msg => {
+      console.log('GRANT ADMIN: ' + msg);
+    });
+  }
+
+  /**
+   * (Only) Admin can revoke a global role from a user. After revoking.
+   * User has global role = 16 (student). Please provide user's username.
+   * @param username
+   */
+  adminRevokeGlobal(username: string): Observable<ReturnMessage> {
+    return this.http.post<ReturnMessage>('/api/v1/users/revoke', {username: username});
+  }
+
 }
 
 
@@ -279,3 +397,17 @@ export interface DashboardInformation {
   submission_id: number;
 }
 
+export interface User {
+  email: string;
+  username: string;
+  surname: string;
+  role_id: number;
+  user_id: number;
+  prename: string;
+  last_login?: Date;
+}
+
+export interface ReturnMessage {
+  success?: boolean;
+  revoke?: boolean;
+}

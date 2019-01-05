@@ -1,10 +1,12 @@
 import {Component} from '@angular/core';
-import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {MatSnackBar} from "@angular/material";
 import {AuthService} from "../../../service/auth.service";
+import {Router} from "@angular/router";
 
+/**
+ * Navigation panel on the left site.
+ * Admin can navigate to different pages.
+ */
 @Component({
   selector: 'app-admin-nav',
   templateUrl: './admin-nav.component.html',
@@ -12,18 +14,13 @@ import {AuthService} from "../../../service/auth.service";
 })
 export class AdminNavComponent {
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches)
-    );
-
-  constructor(private breakpointObserver: BreakpointObserver, private snackbar: MatSnackBar,
-              private auth: AuthService) {
+  constructor(private snackbar: MatSnackBar, private auth: AuthService, private router: Router) {
   }
 
 
   logout() {
     this.auth.logout();
+    this.router.navigate(['']);
     this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 
