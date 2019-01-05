@@ -6,6 +6,7 @@ import { ProfStartComponent } from './prof-start/prof-start.component';
 import {MaterialComponentsModule} from "../material-components/material-components.module";
 import { ProfCoursesComponent } from './prof-courses/prof-courses.component';
 import {FormsModule} from "@angular/forms";
+import { ProfDashboardComponent } from './prof-dashboard/prof-dashboard.component';
 
 @NgModule({
   imports: [
@@ -14,6 +15,6 @@ import {FormsModule} from "@angular/forms";
     MaterialComponentsModule,
     FormsModule
   ],
-  declarations: [ProfStartComponent, ProfCoursesComponent]
+  declarations: [ProfStartComponent, ProfCoursesComponent, ProfDashboardComponent]
 })
 export class ProfessorModule { }

@@ -15,7 +15,6 @@ import {Subscription} from "rxjs";
 export class ProfCoursesComponent implements OnInit, OnDestroy {
 
   private coursesSub: Subscription;
-  private courseupdateSub: Subscription;
   courses: CourseTableItem[];
   courseName: string;
   courseDescription: string;
@@ -32,7 +31,6 @@ export class ProfCoursesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.coursesSub.unsubscribe();
-    this.courseupdateSub.unsubscribe();
   }
 
   /**
@@ -41,7 +39,7 @@ export class ProfCoursesComponent implements OnInit, OnDestroy {
    */
   updateCourse(id: number) {
     //TODO: Select right standard task type
-    this.courseupdateSub = this.db.updateCourse(id, this.courseName, this.courseDescription, 0).subscribe(result => {
+    this.db.updateCourse(id, this.courseName, this.courseDescription, 0).subscribe(result => {
     });
   }
 
