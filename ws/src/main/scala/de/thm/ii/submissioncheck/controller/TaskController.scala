@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
 import scala.collection.JavaConverters._
-import java.util.{Base64, NoSuchElementException}
+import java.util.{Base64, NoSuchElementException, Timer, TimerTask}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException}
@@ -76,10 +76,14 @@ class TaskController {
     * @return kafka Listener Method
     */
   @Bean
-  def importProcessor: SmartInitializingSingleton = {
-    () => {
-      kafkaReloadService
-    }
+  def importProcessor: SmartInitializingSingleton = () => {
+    /** wait 30 seconds before the kafka listeners are loaded to be sure everything is connected like it should*/
+    val bean_delay = 30000
+    new Timer().schedule(new TimerTask() {
+      override def run(): Unit = {
+        kafkaReloadService
+      }
+    }, bean_delay)
   }
 
   /**
