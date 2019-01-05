@@ -389,7 +389,7 @@ class TaskController {
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
+        throw new BadRequestException("Please provide: name, description and test_type")
       }
     }
   }
