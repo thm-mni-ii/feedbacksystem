@@ -20,8 +20,6 @@ export class AdminNavComponent {
 
   logout() {
     this.auth.logout();
-    this.router.navigate(['']);
-    this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 
 }

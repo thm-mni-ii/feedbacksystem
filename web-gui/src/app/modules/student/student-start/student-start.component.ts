@@ -24,7 +24,6 @@ export class StudentStartComponent implements OnInit {
 
   logout() {
     this.auth.logout();
-    this.snackbar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
   }
 
 }

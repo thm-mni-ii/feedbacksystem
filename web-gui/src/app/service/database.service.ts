@@ -29,15 +29,22 @@ export class DatabaseService {
 
   /**
    * Create a new Course
-   * @param name of the course
-   * @param description of the course
+   * @param name
+   * @param description
    * @param standard_task_typ
+   * @param course_semester
+   * @param course_modul_id
+   * @param isPublic
    */
-  createCourse(name: string, description: string, standard_task_typ: number) {
+  createCourse(name: string, description: string, standard_task_typ: string, course_semester: string,
+               course_modul_id: string, isPublic: boolean) {
     return this.http.post('/api/v1/courses', {
       name: name,
       description: description,
-      standard_task_typ: standard_task_typ
+      standard_task_typ: standard_task_typ,
+      course_semester: course_semester,
+      course_modul_id: course_modul_id,
+      anonymous: isPublic
     });
   }
 
@@ -232,11 +239,11 @@ export class DatabaseService {
   }
 
   /**
-   * (Only) Admin can delete a registered user by its username.
-   * @param username
+   * (Only) Admin can delete a registered user by its userid.
+   * @param userID
    */
-  adminDeleteUser(username: string) {
-    return this.http.delete('/api/v1/users/' + username).subscribe(msg => {
+  adminDeleteUser(userID: number) {
+    return this.http.delete('/api/v1/users/' + userID).subscribe(msg => {
       console.log('DELETE USER: ' + JSON.stringify(msg));
     });
   }
@@ -254,10 +261,8 @@ export class DatabaseService {
    * @param courseID
    * @param username
    */
-  adminGrantRights(courseID: number, username: string) {
-    return this.http.post('/api/v1/courses/' + courseID + '/grant/docent', {username: username}).subscribe(msg => {
-      console.log('GRANT RIGHTS: ' + JSON.stringify(msg));
-    });
+  adminGrantDocentRights(courseID: number, username: string): Observable<ReturnMessage> {
+    return this.http.post<ReturnMessage>('/api/v1/courses/' + courseID + '/grant/docent', {username: username});
   }
 
   /**
