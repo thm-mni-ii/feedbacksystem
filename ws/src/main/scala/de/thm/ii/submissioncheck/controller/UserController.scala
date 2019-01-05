@@ -27,23 +27,6 @@ class UserController {
   private final val LABEL_SUCCESS = "success"
 
   /**
-    * getAllUsers is a admin function und just sends a list of all users
-    *
-    * @author Benjamin Manns
-    * @param request contains resquest headers
-    * @return JSON of all Users
-    * @throw throw new UnauthorizedException
-    */
-  @RequestMapping(value = Array("/users"), method = Array(RequestMethod.GET))
-  def getAllUsers(request: HttpServletRequest): List[Map[String, String]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid != 1) {
-      throw new UnauthorizedException
-    }
-    userService.getUsers
-  }
-
-  /**
     * Admin or user itself can access his personal information
     * @param userid unique user ide
     * @param request http request contains all headers
@@ -189,15 +172,18 @@ class UserController {
   }
 
   /**
-    * revoke a users global role
+    * getAllUsers is a admin function und just sends a list of all users,
+    * which filters user by its last login information
+    *
     * @author Benjamin Manns
     * @param before defines where login was before a special date
     * @param after defines where login was after a special date
     * @param sort defines asc or desc of result
     * @param request contains resquest headers
     * @return JSON
+    * @throws BadRequestException, UnauthorizedException
     */
-  @RequestMapping(value = Array("users/last_logins"), method = Array(RequestMethod.GET))
+  @RequestMapping(value = Array("users"), method = Array(RequestMethod.GET))
   def getLastLoginsOfUsers(@RequestParam(value = "before", required = false) before: String,
                            @RequestParam(value = "after", required = false) after: String,
                            @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
