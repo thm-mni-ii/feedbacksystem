@@ -116,8 +116,8 @@ export class DatabaseService {
    * docents get all results of all users of all tasks
    * @param id of course to obtain all submissions
    */
-  allUserSubmissions(id: number) {
-    return this.http.get('/api/v1/courses/' + id + '/submissions');
+  allUserSubmissions(id: number): Observable<ProfDashboard[]> {
+    return this.http.get<ProfDashboard[]>('/api/v1/courses/' + id + '/submissions');
   }
 
 
@@ -387,6 +387,7 @@ export interface SubmitResult {
   upload_url: string;
 }
 
+// Student
 export interface DashboardInformation {
   course_description: string;
   submit_date: Date;
@@ -415,4 +416,28 @@ export interface User {
 export interface ReturnMessage {
   success?: boolean;
   revoke?: boolean;
+}
+
+
+
+//Prof Dashboard
+
+export interface ProfDashboard {
+  course_description: string;
+  course_id: number;
+  course_name: string;
+  creator: number;
+  submissions: Submission[];
+}
+
+export interface Submission {
+  email: string;
+  passed: number;
+  prename: string;
+  surname: string;
+  result: string;
+  submission_id: number;
+  user_id: number;
+  username: string;
+
 }

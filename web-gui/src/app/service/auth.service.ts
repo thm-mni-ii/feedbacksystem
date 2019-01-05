@@ -47,10 +47,10 @@ export class AuthService {
 
       switch (this.getDecodedToken().roles) {
         case 'admin':
-          this.router.navigate(['admin/dashboard']);
+          this.router.navigate(['admin', 'dashboard']);
           break;
         case 'docent':
-          this.router.navigate(['prof']);
+          this.router.navigate(['prof', 'dashboard']);
           break;
         case 'moderator':
           this.router.navigate(['moderator']);
