@@ -232,13 +232,13 @@ class TestRESTStudent(unittest.TestCase):
         taskid = task_creation_2.json()["taskid"]
 
         task_get1 = requests.get(url=self.URL + "tasks/" + str(taskid),
-                                 data=json.dumps({}),
                                  verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.docent_auth_header})
 
         task_put1 = requests.put(url=self.URL + "tasks/" + str(taskid),
-                                 data=json.dumps({}),
+                                 data=json.dumps({"name":"Task Name Update PY", "description": "Task by Python. Yay it works",
+                                                  "test_type": "FILE"}),
                                  verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.student_auth_header})
@@ -274,7 +274,6 @@ class TestRESTStudent(unittest.TestCase):
 
         pprint(deny1.json())
         task_del1 = requests.delete(url=self.URL + "tasks/" + str(taskid),
-                                    data=json.dumps({}),
                                     verify=False,
                                     headers={'content-type': 'application/json',
                                              'Authorization': self.student_auth_header})
@@ -489,11 +488,12 @@ class TestRESTStudent(unittest.TestCase):
         for u in all_users.json():
             if u["username"] == "bmnn57":
                 print(u)
-                if u["role_id"] != '1':
+                print(u["role_id"],"bmnn57")
+                if u["role_id"] != 1:
                     self.fail("Role was not correctly changed")
             if u["username"] == "hiwi":
                 print(u)
-                if u["role_id"] != '2':
+                if u["role_id"] != 2:
                     self.fail("Role was not correctly changed")
 
         gr_moderator = requests.post(url=self.URL + "users/revoke", data=json.dumps({"username": "hiwi"}),
@@ -514,11 +514,11 @@ class TestRESTStudent(unittest.TestCase):
         for u in all_users.json():
             if u["username"] == "bmnn57":
                 print(u)
-                if u["role_id"] != '16':
+                if u["role_id"] != 16:
                     self.fail("Role was not correctly changed")
             if u["username"] == "hiwi":
                 print(u)
-                if u["role_id"] != '16' :
+                if u["role_id"] != 16 :
                     self.fail("Role was not correctly changed")
 
         r = requests.post(url=self.URL + "login/token", data=json.dumps({"name": "python_student"}), verify=False,

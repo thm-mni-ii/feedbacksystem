@@ -345,11 +345,10 @@ class TaskController {
     * delete Task by its ID
     * @param taskid unique identification for a task
     * @param request contain request information
-    * @param jsonNode JSON Parameter from request
     * @return JSON
     */
-  @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.DELETE), consumes = Array(application_json_value))
-  def deleteTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, AnyVal] = {
+  @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.DELETE))
+  def deleteTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, AnyVal] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
@@ -390,7 +389,7 @@ class TaskController {
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
+        throw new BadRequestException("Please provide: name, description and test_type")
       }
     }
   }
