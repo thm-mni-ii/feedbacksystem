@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CourseTableItem} from "../../student/student-list/course-table/course-table-datasource";
-import {CourseDetail, DatabaseService} from "../../../service/database.service";
+import {CourseDetail, DatabaseService, ReturnMessage} from "../../../service/database.service";
 import {MatDialog, MatSnackBar} from "@angular/material";
 import {NewTask, ProfNewTaskDialogComponent} from "./prof-new-task-dialog/prof-new-task-dialog.component";
 
@@ -101,10 +101,17 @@ export class ProfCoursesComponent implements OnInit, OnDestroy {
   /**
    * Lecturer deletes an existing task
    * @param idTask The unique task id
+   * @param taskName Name to display after deletion
    */
-  deleteTask(idTask: number) {
-    // TODO: Feedback to lecturer
-    this.db.deleteTask(idTask).subscribe(null, null, () => this.updateCourseData());
+  deleteTask(idTask: number, taskName: string) {
+    this.db.deleteTask(idTask).subscribe((value: ReturnMessage) => {
+      if (value.success) {
+        this.snackbar.open("Aufgabe " + taskName + " gelöscht", "OK", {duration: 3000});
+        this.updateCourseData()
+      } else {
+        this.snackbar.open("Fehler beim Löschen von Aufgabe " + taskName, "OK", {duration: 3000});
+      }
+    });
   }
 
   /**
