@@ -1,12 +1,13 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
-import { ProfessorRoutingModule } from './professor-routing.module';
-import { ProfStartComponent } from './prof-start/prof-start.component';
+import {ProfessorRoutingModule} from './professor-routing.module';
+import {ProfStartComponent} from './prof-start/prof-start.component';
 import {MaterialComponentsModule} from "../material-components/material-components.module";
-import { ProfCoursesComponent } from './prof-courses/prof-courses.component';
+import {ProfCoursesComponent} from './prof-courses/prof-courses.component';
 import {FormsModule} from "@angular/forms";
-import { ProfDashboardComponent } from './prof-dashboard/prof-dashboard.component';
+import {ProfDashboardComponent} from './prof-dashboard/prof-dashboard.component';
+import {ProfNewTaskDialogComponent} from './prof-courses/prof-new-task-dialog/prof-new-task-dialog.component';
 
 @NgModule({
   imports: [
@@ -15,6 +16,8 @@ import { ProfDashboardComponent } from './prof-dashboard/prof-dashboard.componen
     MaterialComponentsModule,
     FormsModule
   ],
-  declarations: [ProfStartComponent, ProfCoursesComponent, ProfDashboardComponent]
+  entryComponents: [ProfNewTaskDialogComponent],
+  declarations: [ProfStartComponent, ProfCoursesComponent, ProfDashboardComponent, ProfNewTaskDialogComponent, ProfNewTaskDialogComponent]
 })
-export class ProfessorModule { }
+export class ProfessorModule {
+}
