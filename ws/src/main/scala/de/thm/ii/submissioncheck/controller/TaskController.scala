@@ -291,7 +291,7 @@ class TaskController {
 
     val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
     logger.warn(jsonStringMsg)
-    kafkaTemplate.send(tasksystem_id + topicTaskRequest, jsonStringMsg)
+    kafkaTemplate.send(tasksystem_id + "_" + topicTaskRequest, jsonStringMsg)
     kafkaTemplate.flush()
 
     Map("upload_success" -> message, LABEL_FILENAME -> filename)
@@ -482,7 +482,7 @@ class TaskController {
           logger.warn(answeredMap.toString())
           taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
             Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
+            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String])
         } catch {
           case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
         }

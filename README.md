@@ -29,6 +29,12 @@ Then run the app on a docker system in background by executing
 docker-compose up -d
 ```
 
+Start Secrettoken Checker
+
+```bash
+./gradlew secrettoken-checker:run
+```
+
 ## Supervised By
 
 * Frank Kammer
