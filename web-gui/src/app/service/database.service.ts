@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {CourseTableItem} from "../modules/student/student-list/course-table/course-table-datasource";
 import {Observable} from "rxjs";
+import {MatSnackBar} from "@angular/material";
 
 /**
  *  Service to communicate with db.
@@ -15,7 +16,7 @@ import {Observable} from "rxjs";
 export class DatabaseService {
 
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
   }
 
   // Courses
@@ -57,17 +58,24 @@ export class DatabaseService {
   }
 
   /**
-   * Update a course
-   * @param id of course which should be updated
-   * @param name of updated course
-   * @param description of updated couse
-   * @param standard_task_typ
+   * Update an existing course
+   * @param id The id of course that will be updated
+   * @param name New name the updated course should have
+   * @param description New Description the updated course should have
+   * @param standard_task_typ Select standard task type for this course
+   * @param course_semester Select the semester of this course
+   * @param course_module_id Unique id the course has. Example (CS1010)
+   * @param isPublic Should the course be displayed to students or not
    */
-  updateCourse(id: number, name: string, description: string, standard_task_typ: number) {
-    return this.http.put('/api/v1/courses/' + id, {
+  updateCourse(id: number, name: string, description: string, standard_task_typ: string, course_semester: string,
+               course_module_id: string, isPublic: boolean): Observable<ReturnMessage> {
+    return this.http.put<ReturnMessage>('/api/v1/courses/' + id, {
       name: name,
       description: description,
-      standard_task_typ: standard_task_typ
+      standard_task_typ: standard_task_typ,
+      course_semester: course_semester,
+      course_modul_id: course_module_id,
+      anonymous: isPublic
     });
   }
 
@@ -124,47 +132,76 @@ export class DatabaseService {
   // Tasks
 
   /**
-   * Create a new task
-   * @param idCourse course in with task should be created
-   * @param name of task
-   * @param description of task
-   * @param filename
-   * @param test_type
+   * Lecturer creates a new Task
+   * @param idCourse The id of course where task will be added
+   * @param name This is the name of the Task
+   * @param description This is the description of the task
+   * @param file This will be the solution file from Lecturer
+   * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  createTask(idCourse: number, name: string, description: string, filename: string, test_type: number) {
-    return this.http.post('/api/v1/courses/' + idCourse + '/tasks', {
+  createTask(idCourse: number, name: string, description: string, file: File, test_type: string) {
+    // Solution file
+    let formData = new FormData();
+    formData.append('file', file, file.name);
+
+
+    this.http.post<NewTaskFileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
-      filename: filename,
       test_type: test_type
+    }).subscribe(result => {
+
+      // Result comes back with upload url for solution file
+      this.http.post(result.upload_url, formData, {
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+      }).subscribe((value: { upload_success: boolean, filename: string }) => {
+        if (value.upload_success) {
+          this.snackBar.open("Aufgabe " + name + " erstellt", "OK", {duration: 3000});
+        } else {
+          this.snackBar.open("Fehler beim upload der Lösungs Datei", "OK", {duration: 5000});
+        }
+      });
     });
   }
 
   /**
-   * Update a task
-   * @param idCourse of course
-   * @param idTask of task that will be updated
-   * @param name of updated task
-   * @param description of updated task
-   * @param filename
-   * @param test_type
+   * Lecturer updates an given Task
+   * @param idTask The unique id of task to update
+   * @param name This is the new name of the updated task
+   * @param description This is the description of updated task
+   * @param file This is the solution file of updated Task
+   * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  updateTask(idCourse: number, idTask: number, name: string, description: string, filename: string, test_type: number) {
-    return this.http.put('/api/v1/courses/' + idCourse + '/tasks/' + idTask, {
+  updateTask(idTask: number, name: string, description: string, file: File, test_type: string) {
+    let formData = new FormData().append("filename", file, file.name);
+
+    return this.http.put('/api/v1/tasks/' + idTask, {
       name: name,
       description: description,
-      filename: filename,
       test_type: test_type
+    }).subscribe((result: { success: boolean, upload_url }) => {
+      if (result.success) {
+
+        // File upload
+        this.http.put(result.upload_url, formData, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+        }).subscribe((value: { upload_success: boolean, filename: string }) => {
+          if (value.upload_success) {
+            this.snackBar.open("Aufgabe " + name + " bearbeitet", "OK", {duration: 3000});
+          } else {
+            this.snackBar.open("Fehler beim upload der Lösungs Datei", "OK", {duration: 5000});
+          }
+        });
+      }
     });
   }
 
   /**
-   * Delete task
-   * @param idCourse of course where task should be deleted
-   * @param idTask of task that should be deleted
+   * Deletes an existing task
+   * @param idTask This is an unique id every task has
    */
-  deleteTask(idCourse: number, idTask: number) {
-    return this.http.delete('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
+  deleteTask(idTask: number) {
+    return this.http.delete('/api/v1/tasks/' + idTask);
   }
 
   /**
@@ -419,7 +456,6 @@ export interface ReturnMessage {
 }
 
 
-
 //Prof Dashboard
 
 export interface ProfDashboard {
@@ -440,4 +476,10 @@ export interface Submission {
   user_id: number;
   username: string;
 
+}
+
+export interface NewTaskFileUpload {
+  success: boolean;
+  taskid: number;
+  upload_url: string;
 }
