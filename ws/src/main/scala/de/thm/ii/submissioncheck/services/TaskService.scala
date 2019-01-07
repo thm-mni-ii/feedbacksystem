@@ -26,7 +26,7 @@ class TaskService {
   val storageService = new StorageService
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
-
+  private val UPLOAD_BASE_URL = "http://localhost:8080/"
   /**
     * After Upload a submitted File save it's name
     * @author Benjamin Manns
@@ -364,7 +364,7 @@ class TaskService {
     */
   def getURLOfTaskTestFile(taskid: Int): String = {
     val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
   }
 
   /**
@@ -376,7 +376,7 @@ class TaskService {
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
     val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
   }
 
   /**
