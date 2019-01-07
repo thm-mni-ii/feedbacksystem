@@ -33,7 +33,4 @@ object SubmissionDBLabels {
 
   /** DB Label "result_date" */
   val result_date: String = "result_date"
-
-  /** DB Label "message" */
-  val message: String = "message"
 }
