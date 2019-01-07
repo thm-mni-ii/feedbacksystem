@@ -16,6 +16,7 @@ import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL}
 import java.security.cert.X509Certificate
@@ -68,6 +69,8 @@ object SecretTokenChecker extends App {
   final val TASKID = "taskid"
   /** used in naming */
   final val DATA = "data"
+  /** used in naming */
+  final val ULDIR = "upload-dir/"
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
@@ -75,7 +78,7 @@ object SecretTokenChecker extends App {
   private val SYSTEMIDTOPIC = "secrettokenchecker"
   private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_check_request"
   private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_check_answer"
-  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "-new_task_request"
+  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
 
   private implicit val system: ActorSystem = ActorSystem("akka-system")
@@ -130,6 +133,7 @@ object SecretTokenChecker extends App {
     try {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
+      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       var arguments: String = ""
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
@@ -143,8 +147,7 @@ object SecretTokenChecker extends App {
       }
       var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-      val (output, code) = bashTest(userid, arguments)
+      val (output, code) = bashTest(taskid, userid, arguments)
       if(code == 0){
         passed = 1;
       }
@@ -172,10 +175,10 @@ object SecretTokenChecker extends App {
       val url: String = jsonMap("testfile_url").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val src = scala.io.Source.fromURL(url)
-      //todo: add support for archives with serveral files
-      new File("upload-dir/" + taskid).mkdirs()
-      //url #> new File("upload-dir/" + taskid + "/testfile.sh") !!
-      val out = new java.io.FileWriter("upload-dir/" + taskid + "/testfile.sh")
+      //todo: add support for archives with serveral files"
+      new File(ULDIR + taskid).mkdirs()
+      //url #> new File(ULDIR + taskid + "/testfile.sh") !!
+      val out = new java.io.FileWriter(ULDIR + taskid + "/testfile.sh")
       out.write(src.mkString)
       out.close
     } catch {
@@ -190,15 +193,25 @@ object SecretTokenChecker extends App {
   /**
     * Name of the md5 test script
     */
-  val script = "md5-script.sh"
+  val dummyscript = "md5-script.sh"
 
   /**
     * Method for the callback function
+    * @param id of task
     * @param name username
     * @param token md5hash
     * @return message and exitcode
     */
-  def bashTest(name: String, token: String): (String, Int) = {
+  def bashTest(taskid: String, name: String, token: String): (String, Int) = {
+    val script: String = ULDIR + taskid + "/testfile.sh"
+    try{
+      val file = new File("./" + script);
+    } catch {
+      case e: FileNotFoundException => {
+        val message_err = "Error: Task doesn't contain a testfile"
+        (message_err, 126)
+      }
+    }
     val bashtest1 = new BashExec(script, name, token)
     val exit1 = bashtest1.exec()
     val message1 = bashtest1.output
