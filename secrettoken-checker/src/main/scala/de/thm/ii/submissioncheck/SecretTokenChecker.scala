@@ -15,12 +15,13 @@ import scala.io.Source
 import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
-import java.io.{BufferedReader, File, InputStream, InputStreamReader}
+import java.io.File
+import java.io.FileNotFoundException
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL}
 import java.security.cert.X509Certificate
-
 import javax.net.ssl._
+
 import JsonHelper._
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
 
@@ -68,12 +69,15 @@ object SecretTokenChecker extends App {
   final val TASKID = "taskid"
   /** used in naming */
   final val DATA = "data"
+// +++++++++++++++++++++++++++++++++++++++++++
+//               Kafka Settings
+// +++++++++++++++++++++++++++++++++++++++++++
 
-  // +++++++++++++++++++++++++++++++++++++++++++
-  //               Kafka Settings
-  // +++++++++++++++++++++++++++++++++++++++++++
-  private val CHECK_REQUEST_TOPIC = "secrettokenchecker_check_request"
-  private val CHECK_ANSWER_TOPIC = "secrettokenchecker_check_answer"
+  private val SYSTEMIDTOPIC = "secrettokenchecker"
+  private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_check_request"
+  private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_check_answer"
+  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
+  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
 
   private implicit val system: ActorSystem = ActorSystem("akka-system")
   private implicit val materializer: Materializer = ActorMaterializer()
@@ -84,15 +88,25 @@ object SecretTokenChecker extends App {
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
 
-  private val control = Consumer
+  private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onMessageReceived))(Keep.both)
+    .toMat(Sink.foreach(onSubmissionReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_task = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(TASK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onTaskReceived))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
-    control.shutdown().onComplete {
+    control_submission.shutdown().onComplete {
+        case Success(_) => logger.info("Exiting ...")
+        case Failure(err) => logger.warning(err.getMessage)
+      }
+    control_task.shutdown().onComplete {
         case Success(_) => logger.info("Exiting ...")
         case Failure(err) => logger.warning(err.getMessage)
       }
@@ -100,39 +114,44 @@ object SecretTokenChecker extends App {
 
   private def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
     akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))
-  private def sendMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
+  private def sendCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
+  private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
 
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings
   // +++++++++++++++++++++++++++++++++++++++++
+  private val sslContext = SSLContext.getInstance("SSL")
+  sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+  HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
+  HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
 
-  private def onMessageReceived(record: ConsumerRecord[String, String]): Unit = {
+  private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
     val jsonMap: Map[String, Any] = record.value()
     try {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
+      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       var arguments: String = ""
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
-        val sslContext = SSLContext.getInstance("SSL")
-        sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
-        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
-        HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
         //new URL(url) #> new File("submit.txt") !!
-        val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-        val s: String = downloadFiletoString(url, jwt_token)
+        val s: String = scala.io.Source.fromURL(url).mkString
+        logger.info(s)
         arguments = s
       }
       else if (submit_type.equals(DATA)){
         arguments = jsonMap(DATA).asInstanceOf[String]
       }
+      var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-
-      val (output, code) = bashTest(userid, arguments)
-      sendMessage(JsonHelper.mapToJsonStr(Map(
+      val (output, code) = bashTest(taskid, userid, arguments)
+      if(code == 0){
+        passed = 1;
+      }
+      sendCheckMessage(JsonHelper.mapToJsonStr(Map(
         DATA -> output,
+        "passed" -> passed.toString,
         "exitcode" -> code.toString,
         "userid" -> userid,
         "taskid" -> taskid,
@@ -140,7 +159,30 @@ object SecretTokenChecker extends App {
       )))
     } catch {
       case e: NoSuchElementException => {
-        sendMessage(JsonHelper.mapToJsonStr(Map(
+        sendCheckMessage(JsonHelper.mapToJsonStr(Map(
+          "Error" -> "Please provide valid parameters"
+        )))
+      }
+    }
+  }
+
+  private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
+    val jsonMap: Map[String, Any] = record.value()
+    try{
+      logger.info("task received");
+      val url: String = jsonMap("testfile_url").asInstanceOf[String]
+      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
+      val src = scala.io.Source.fromURL(url)
+      //todo: add support for archives with serveral files"
+      new File("upload-dir/" + taskid).mkdirs()
+      println(src);
+      //url #> new File("upload-dir/" + taskid + "/testfile.sh") !!
+      val out = new java.io.FileWriter("upload-dir/" + taskid + "/testfile.sh")
+      out.write(src.mkString)
+      out.close
+    } catch {
+      case e: NoSuchElementException => {
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           "Error" -> "Please provide valid parameters"
         )))
       }
@@ -150,7 +192,7 @@ object SecretTokenChecker extends App {
   /**
     * Name of the md5 test script
     */
-  val script = "md5-script.sh"
+  val dummyscript = "md5-script.sh"
 
   /**
     * Method for the callback function
@@ -158,7 +200,16 @@ object SecretTokenChecker extends App {
     * @param token md5hash
     * @return message and exitcode
     */
-  def bashTest(name: String, token: String): (String, Int) = {
+  def bashTest(taskid: String, name: String, token: String): (String, Int) = {
+    val script: String = "upload-dir/" + taskid + "/testfile.sh"
+    try{
+      val file = new File("./" + script);
+    } catch {
+      case e: FileNotFoundException => {
+        val message_err = "Error: Task doesn't contain a testfile"
+        (message_err, 126)
+      }
+    }
     val bashtest1 = new BashExec(script, name, token)
     val exit1 = bashtest1.exec()
     val message1 = bashtest1.output
@@ -204,31 +255,38 @@ object SecretTokenChecker extends App {
     bashtest.output
   }
 
-  /**
-    * download a file and parse it to string
-    * @author Vlad Sokyrskyy Benjamin Manns
-    * @param urlname URL where file is located
-    * @param jwt_token Authorization token
-    * @return The string provided in the file
-    */
-  def downloadFiletoString(urlname: String, jwt_token: String): String = {
-    var s: String = ""
-    val timeout = 1000
+  private def saveTaskFile(urlname: String, taskid: String): Unit = {
+    val timeout = 5000
     val url = new java.net.URL(urlname)
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
     connection.setConnectTimeout(timeout)
     connection.setReadTimeout(timeout)
-    connection.setRequestProperty("Connection", "close")
     connection.connect()
 
     if(connection.getResponseCode >= 400){
       logger.error("Error when downloading file!")
     }
     else {
-      val in: InputStream = connection.getInputStream
-      val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
-      s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString
+      //new File("upload_dir/" + taskid).mkdirs()
+      url #> new File("uld/" + taskid + "/testfile") !!
+    }
+  }
+
+  private def downloadFiletoString(urlname: String): String = {
+    var s: String = ""
+    val timeout = 5000
+    val url = new java.net.URL(urlname)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setConnectTimeout(timeout)
+    connection.setReadTimeout(timeout)
+    connection.connect()
+
+    if(connection.getResponseCode >= 400){
+      logger.error("Error when downloading file!")
+    }
+    else {
+      val src = scala.io.Source.fromURL(urlname)
+      s = src.mkString
     }
     s
   }
