@@ -1,9 +1,10 @@
 package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, Statement}
+
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.{Autowired}
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -26,7 +27,9 @@ class TaskService {
   val storageService = new StorageService
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
-  private val UPLOAD_BASE_URL = "http://localhost:8080/"
+
+  @Value("${cas.client-host-url}")
+  private val UPLOAD_BASE_URL: String = null
   /**
     * After Upload a submitted File save it's name
     * @author Benjamin Manns

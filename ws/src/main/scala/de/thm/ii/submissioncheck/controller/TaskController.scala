@@ -11,7 +11,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.SmartInitializingSingleton
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Bean
 import org.springframework.core.io.Resource
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
@@ -47,6 +47,9 @@ class TaskController {
   private final val testsystemLabel1 = "secrettokenchecker"
 
   private var container: KafkaMessageListenerContainer[String, String] = null
+
+  @Value("${cas.client-host-url}")
+  private val CLIENT_HOST_URL: String = null
 
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
@@ -171,7 +174,7 @@ class TaskController {
         }
         else {
           submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
-          upload_url = "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
+          upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
         }
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
@@ -338,7 +341,7 @@ class TaskController {
   }
 
   private def getUploadUrlForTastTestFile(taskid: Int): String = {
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
+    CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
   }
 
   /**
