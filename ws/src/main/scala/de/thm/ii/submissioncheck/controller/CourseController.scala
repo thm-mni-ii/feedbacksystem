@@ -318,8 +318,7 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest):
-  List[Map[String, Any]] = {
+  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): List[Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
@@ -327,7 +326,9 @@ class CourseController {
     if (!this.courseService.isDocentForCourse(courseid, user.get)) { // TODO can admin / moderator see this details?
       throw new UnauthorizedException
     }
-    this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
+    // old version
+    // this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
+    this.courseService.getSubmissionsMatrixByCourse(courseid)
   }
 
   /**

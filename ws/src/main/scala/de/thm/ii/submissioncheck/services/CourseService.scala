@@ -24,6 +24,7 @@ class CourseService {
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
 
+  private val LABEL_PASSED = "passed"
   private final val LABEL_SUCCESS = "success"
   /** all interactions with tasks are done via a taskService*/
   @Autowired
@@ -128,6 +129,21 @@ class CourseService {
       (res, _) => res.getInt("c"), courseid, user.userid)
 
     list.nonEmpty && list.head == 1
+  }
+
+  /**
+    * Get all subscribed students form one course
+    * @param courseid unique identification for a course
+    * @return Scala List
+    */
+  def getStudentsFromCourse(courseid: Int): List[Map[String, Any]] = {
+    val list = DB.query("select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and uc.role_id = 16",
+      (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
+        UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+        UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+        UserDBLabels.username -> res.getString(UserDBLabels.username)) }
+      , courseid)
+    list
   }
 
   /**
@@ -266,6 +282,7 @@ class CourseService {
     * @param courseid unique course identification
     * @return Java List
     */
+  @deprecated("0", "1")
   def getAllSubmissionsFromAllUsersByCourses(courseid: Int): List[Map[String, Any]] = {
     DB.query("select * from task t join course c using(course_id)  where c.course_id = ? order by t.task_id",
       (res, _) => {
@@ -275,6 +292,52 @@ class CourseService {
           CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
           "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(TaskDBLabels.taskid)))
       }, courseid)
+  }
+
+  /**
+    * Only permitted for docents / moderator / admins
+    * This method returns a submissions matrix of all users for one course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @return Scala List
+    */
+  def getSubmissionsMatrixByCourse(courseid: Int): List[Any] = {
+    val tasks = taskService.getTasksByCourse(courseid)
+    val subscribedStudents = this.getStudentsFromCourse(courseid)
+    val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString).reverse
+    var matrix: List[Any] = List()
+
+    for(u <- subscribedStudents){
+      var tasksPassedSum = 0
+      var processedTasks: List[Any] = List()
+      for((task, i) <- tasks.zipWithIndex){
+        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), u("user_id"))
+          /* processing - number of trials - passed - passed date */
+        var passed: Boolean = false
+        var passedDate: Any = ""
+        var trials = 0
+        for(submission <- userSubmissions) {
+          if (!passed && submission(LABEL_PASSED) == 1) {
+            passed = true
+            passedDate = submission("submit_date")
+          }
+          else {
+            // Also again passed trials are counted, because they are useless!
+            trials += 1
+          }
+        }
+        tasksPassedSum = tasksPassedSum + passed.compare(false)
+        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name), "trials" -> trials,
+          LABEL_PASSED -> passed, "passed_date" -> passedDate))
+
+        processedTasks = taskStudentCell :: processedTasks
+      }
+      val studentLine = Map("tasks"  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
+        UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname), LABEL_PASSED ->  tasksPassedSum)
+      matrix = studentLine :: matrix
+    }
+    matrix
   }
 
   /**

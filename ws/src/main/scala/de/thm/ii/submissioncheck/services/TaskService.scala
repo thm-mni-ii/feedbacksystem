@@ -132,6 +132,28 @@ class TaskService {
   }
 
   /**
+    * get all submissions from a user by a given task
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param userid requesting user
+    * @return Scala List of Maps
+    */
+  def getSubmissionsByTaskAndUser(taskid: String, userid: Any): List[Map[String, Any]] = {
+    DB.query("SELECT  s.* from task join submission s using(task_id) where task_id = ? and user_id = ? order by submit_date asc",
+      (res, _) => {
+        Map(SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
+          SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
+          SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
+          SubmissionDBLabels.passed -> res.getInt(SubmissionDBLabels.passed),
+          SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
+          SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
+          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.exitcode -> res.getInt(SubmissionDBLabels.exitcode))
+      }, taskid, userid)
+  }
+
+  /**
     * get students submissions by Tasks
     *
     * @author Benjamin Manns
