@@ -197,7 +197,7 @@ object SecretTokenChecker extends App {
 
   /**
     * Method for the callback function
-    * @param id of task
+    * @param taskid id of task
     * @param name username
     * @param token md5hash
     * @return message and exitcode
