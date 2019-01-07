@@ -144,6 +144,7 @@ class TaskService {
         Map(
           SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
           SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
+          SubmissionDBLabels.exitcode -> res.getString(SubmissionDBLabels.exitcode),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
           UserDBLabels.username -> res.getString(UserDBLabels.username),
@@ -185,13 +186,14 @@ class TaskService {
     * @param taskid unique identification for a task
     * @param submissionid unique identification for a submissionid
     * @param result answer coming from a checker service
-    * @param passed tiny peace of status information (i.e. exitcode)
+    * @param passed test result passed information (0 = failed, 1 = passed)
+    * @param exitcode tiny peace of status information
     * @return Boolean: did update work
     */
-  def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String): Boolean = {
+  def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String, exitcode: Int): Boolean = {
     val num = DB.update(
-      "UPDATE submission set result = ?, passed =  ?, result_date = CURRENT_TIMESTAMP() where task_id = ? and submission_id = ?;",
-      result, passed, taskid, submissionid
+      "UPDATE submission set result = ?, passed =  ?, exitcode = ?,  result_date = CURRENT_TIMESTAMP() where task_id = ? and submission_id = ?;",
+      result, passed, exitcode, taskid, submissionid
     )
     num > 0
   }

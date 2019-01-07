@@ -13,6 +13,9 @@ object SubmissionDBLabels {
   /** DB Label "result" */
   val result: String = "result"
 
+  /** DB Label "exitcode" */
+  val exitcode: String = "exitcode"
+
   /** DB Label "userid" */
   val userid: String = "user_id"
 
