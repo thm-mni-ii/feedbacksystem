@@ -21,4 +21,6 @@ object TaskDBLabels{
 
   /** DB Label "test_type" */
   var test_type = "test_type"
+  /** DB Label "deadline" */
+  var deadline = "deadline"
 }

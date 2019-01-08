@@ -222,6 +222,14 @@ class TaskService {
     num > 0
   }
 
+  private def stringOrNull(any: Any): String = {
+    if (any == null) {
+      null
+    } else {
+      any.toString
+    }
+  }
+
   /**
     * get a JAVA List of Task by a given course id
     * @param courseid unique identification for a course
@@ -234,7 +242,8 @@ class TaskService {
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
-          TaskDBLabels.description -> res.getString(TaskDBLabels.description)
+          TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline))
         )
       }, courseid)
   }

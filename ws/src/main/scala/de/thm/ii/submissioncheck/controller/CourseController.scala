@@ -366,11 +366,14 @@ class CourseController {
     */
   @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(request: HttpServletRequest): List[Map[String, Any]] = {
+  def seeAllSubmissions(request: HttpServletRequest): List[Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
+    // old version
+    // this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
+
+    this.courseService.getSubmissionsMatrixByUser(user.get.userid)
   }
 }
