@@ -136,10 +136,14 @@ class TaskService {
     * @author Benjamin Manns
     * @param taskid unique identification for a task
     * @param userid requesting user
+    * @param sort sort submissions by date (asc, desc)
     * @return Scala List of Maps
     */
-  def getSubmissionsByTaskAndUser(taskid: String, userid: Any): List[Map[String, Any]] = {
-    DB.query("SELECT  s.* from task join submission s using(task_id) where task_id = ? and user_id = ? order by submit_date asc",
+  def getSubmissionsByTaskAndUser(taskid: String, userid: Any, sort: String = "asc"): List[Map[String, Any]] = {
+    if (!List("asc", "desc").contains(sort)){
+      throw new IllegalArgumentException("sort must be a value of `asc` or `desc`")
+    }
+    DB.query("SELECT  s.* from task join submission s using(task_id) where task_id = ? and user_id = ? order by submit_date " + sort,
       (res, _) => {
         Map(SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
           SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),

@@ -328,12 +328,12 @@ class CourseService {
           }
         }
         tasksPassedSum = tasksPassedSum + passed.compare(false)
-        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name), "trials" -> trials,
-          LABEL_PASSED -> passed, "passed_date" -> passedDate))
+        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed, "passed_date" -> passedDate))
 
         processedTasks = taskStudentCell :: processedTasks
       }
-      val studentLine = Map("tasks"  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
+      val studentLine = Map("tasks"  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username), UserDBLabels.user_id -> u(UserDBLabels.user_id),
         UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname), LABEL_PASSED ->  tasksPassedSum)
       matrix = studentLine :: matrix
     }
