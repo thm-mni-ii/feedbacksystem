@@ -312,7 +312,7 @@ class TestRESTStudent(unittest.TestCase):
                                                 'Authorization': self.docent_auth_header})
 
         pprint(get_submissions.json())
-        self.assertTrue(5 <= len(get_submissions.json()))
+        self.assertTrue(1 <= len(get_submissions.json()))
 
     def test_big_user_submission_list(self):
         get_submissions = requests.get(url=self.URL + "courses/submissions", data=json.dumps({}),
@@ -322,7 +322,7 @@ class TestRESTStudent(unittest.TestCase):
 
         pprint(get_submissions.json())
         pprint(len(get_submissions.json()))
-        self.assertTrue(5 <= len(get_submissions.json()))
+        self.assertTrue(1 <= len(get_submissions.json()))
 
     def test_getTaskByTaskID_route(self):
         res = requests.get(url=self.URL + "tasks/10/submissions", data=json.dumps({}),
