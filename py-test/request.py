@@ -48,9 +48,10 @@ class TestRESTStudent(unittest.TestCase):
         """
         r = requests.get(url=self.URL + "courses/submissions", data=json.dumps({}), verify=False,
                          headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
+        pprint(r.json())
         self.assertEqual(type(r.json()), type([]))
         self.assertGreaterEqual(len(r.json()), 1)
-        # print(len(r.json()))
+
 
     def test_getCourses(self):
         """
@@ -321,7 +322,7 @@ class TestRESTStudent(unittest.TestCase):
 
         pprint(get_submissions.json())
         pprint(len(get_submissions.json()))
-        self.assertTrue(22 <= len(get_submissions.json()))
+        self.assertTrue(5 <= len(get_submissions.json()))
 
     def test_getTaskByTaskID_route(self):
         res = requests.get(url=self.URL + "tasks/10/submissions", data=json.dumps({}),
