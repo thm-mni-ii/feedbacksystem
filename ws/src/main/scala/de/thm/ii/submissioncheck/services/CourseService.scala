@@ -73,7 +73,7 @@ class CourseService {
   }
 
   /**
-    * get list of all docent beloning to one course
+    * get list of all docent belonging to one course
     * @author Benjamin Manns
     * @param courseid unique identification for a course
     * @return Scala List
@@ -87,6 +87,22 @@ class CourseService {
           UserDBLabels.email -> res.getString(UserDBLabels.email))
       }, courseid)
   }
+  /**
+    * get list of all tutor belonging to one course
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @return Scala List
+    */
+  def getCourseTutor(courseid: Int): List[Map[String, String]] = {
+    DB.query("SELECT * FROM user_course uc join user using(user_id) where course_id = ? and uc.role_id = 8",
+      (res, _) => {
+        Map(UserDBLabels.user_id -> res.getString(UserDBLabels.user_id),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.email -> res.getString(UserDBLabels.email))
+      }, courseid)
+  }
+
 
   /**
     * Check if a given user is permitted to change course information, add task, grant rights are not checked here.
