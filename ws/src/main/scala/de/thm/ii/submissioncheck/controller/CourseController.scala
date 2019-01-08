@@ -1,14 +1,18 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.nio.file.{Files, Path, Paths}
+import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, ResourceNotFoundException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.services.{CourseService, TaskDBLabels, TaskService, UserService}
+import de.thm.ii.submissioncheck.security.Secrets
+import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
+import org.springframework.core.io.UrlResource
+import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
 
@@ -24,6 +28,8 @@ class CourseController {
   private val courseService: CourseService = null
   @Autowired
   private val taskService: TaskService = null
+  /** holds connection to storageService*/
+  val storageService = new StorageService
 
   private final val application_json_value = "application/json"
 
@@ -116,6 +122,67 @@ class CourseController {
     }
     courseService.getCourseDetails(courseid, user.get).getOrElse(Map.empty)
   }
+
+  /**
+    * Generates a zip of one user submissions of one course
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param userid unique user identification
+    * @param only_last_try if enabled, we only inlcude the last submission of the user
+    * @param request Request Header containing Headers
+    * @return Zip File
+    */
+  @RequestMapping(value = Array("{courseid}/submission/users/{userid}/zip"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer, @PathVariable userid: Int,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+                                          request: HttpServletRequest): ResponseEntity[UrlResource] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.userid != userid)) {
+      throw new UnauthorizedException
+    }
+
+    val requestedUser = userService.loadUserFromDB(userid)
+    if (requestedUser.isEmpty) {
+      throw new ResourceNotFoundException
+    }
+
+    val resource = new UrlResource(Paths.get(courseService.zipOfSubmissionsOfUserFromCourse(only_last_try, courseid, requestedUser.get)).toUri)
+
+    if (resource.exists || resource.isReadable) {
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename + "\"").body(resource)
+    } else {
+      throw new RuntimeException("Zip file could not be found.")
+    }
+  }
+
+  /**
+    * Generates a zip of all user submissions  of one course
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param only_last_try if enabled, we only inlcude the last submission of the user
+    * @param request Request Header containing Headers
+    * @return Zip File
+    */
+  @RequestMapping(value = Array("{courseid}/submission/users/zip"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+                                          request: HttpServletRequest): ResponseEntity[UrlResource] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+
+    val resource = new UrlResource(Paths.get(courseService.zipOfSubmissionsOfUsersFromCourse(only_last_try, courseid)).toUri)
+
+    if (resource.exists || resource.isReadable) {
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename + "\"").body(resource)
+    } else {
+      throw new RuntimeException("Zip file could not be found.")
+    }
+  }
+
   /**
     * deleteCourse provides course details for a specific course by given id
     * @param courseid unique course identification

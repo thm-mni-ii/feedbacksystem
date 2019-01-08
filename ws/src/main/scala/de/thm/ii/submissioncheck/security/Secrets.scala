@@ -40,4 +40,14 @@ object Secrets {
     randomString += r.nextString(stringLength)
     randomString
   }
+
+  /**
+    * creates a random sha1 string based contain current time and random String
+    * @author Benjamin Manns
+    * @return a random SHA
+    */
+  def getSHAStringFromNow(): String = {
+    val md = java.security.MessageDigest.getInstance("SHA-1")
+    md.digest(getRandomStringByDateNow().getBytes("UTF-8")).map("%02x".format(_)).mkString
+  }
 }
