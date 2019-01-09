@@ -469,11 +469,11 @@ class TestRESTStudent(unittest.TestCase):
         self.assertEqual(type([]), type(all_users.json()))
         self.assertTrue(4 <= len(all_users.json()))
 
-        gr_moderator = requests.post(url=self.URL + "users/grant/moderator", data=json.dumps({"username":"hiwi"}), verify=False,
+        gr_moderator = requests.post(url=self.URL + "users/grant/2", data=json.dumps({"role":2}), verify=False,
                      headers={'content-type': 'application/json',
                               'Authorization': self.admin_auth_header})
 
-        gr_admin = requests.post(url=self.URL + "users/grant/admin", data=json.dumps({"username": "bmnn57"}),
+        gr_admin = requests.post(url=self.URL + "users/grant/53", data=json.dumps({"role": 1}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.admin_auth_header})
@@ -497,12 +497,12 @@ class TestRESTStudent(unittest.TestCase):
                 if u["role_id"] != 2:
                     self.fail("Role was not correctly changed")
 
-        gr_moderator = requests.post(url=self.URL + "users/revoke", data=json.dumps({"username": "hiwi"}),
+        gr_moderator = requests.post(url=self.URL + "users/grant/2", data=json.dumps({"role": 16}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.admin_auth_header})
 
-        gr_admin = requests.post(url=self.URL + "users/revoke", data=json.dumps({"username": "bmnn57"}),
+        gr_admin = requests.post(url=self.URL + "users/grant/53", data=json.dumps({"role": 16}),
                                  verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
