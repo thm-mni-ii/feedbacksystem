@@ -104,7 +104,6 @@ class CourseService {
       }, courseid)
   }
 
-
   /**
     * Check if a given user is permitted to change course information, add task, grant rights are not checked here.
     * A Tutor and Docent are permitted or courses and admins of course.
