@@ -173,7 +173,8 @@ export class DatabaseService {
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
   updateTask(idTask: number, name: string, description: string, file: File, test_type: string) {
-    let formData = new FormData().append("filename", file, file.name);
+    let formData = new FormData();
+    formData.append("file", file, file.name);
 
     return this.http.put('/api/v1/tasks/' + idTask, {
       name: name,
@@ -183,7 +184,7 @@ export class DatabaseService {
       if (result.success) {
 
         // File upload
-        this.http.put(result.upload_url, formData, {
+        this.http.post(result.upload_url, formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
         }).subscribe((value: { upload_success: boolean, filename: string }) => {
           if (value.upload_success) {

@@ -1,9 +1,10 @@
 package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, Statement}
+
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.{Autowired}
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -27,6 +28,8 @@ class TaskService {
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
+  @Value("${cas.client-host-url}")
+  private val UPLOAD_BASE_URL: String = null
   /**
     * After Upload a submitted File save it's name
     * @author Benjamin Manns
@@ -257,24 +260,27 @@ class TaskService {
     * @param description Task description
     * @param courseid Course where task is created for
     * @param test_type which test type is needed
+    * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, test_type: String, testsystem_id: String): Map[String, AnyVal] = {
+  def createTask(name: String, description: String, courseid: Int, test_type: String, deadline: String, testsystem_id: String): Map[String, AnyVal] = {
     val availableTypes = List("FILE", "STRING")
     if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (task_name, task_description, course_id, test_type, testsystem_id) VALUES (?,?,?,?,?)",
+        "INSERT INTO task (task_name, task_description, course_id, test_type, testsystem_id, deadline) VALUES (?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
       val magic5 = 5
+      val magic6 = 6
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
       ps.setString(magic4, test_type)
       ps.setString(magic5, testsystem_id)
+      ps.setString(magic6, deadline)
       ps
     })
 
@@ -304,13 +310,39 @@ class TaskService {
     * @param name Task name
     * @param description Task description
     * @param test_type which test type is needed
+    * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String, description: String, test_type: String, testsystem_id: String): Boolean = {
-    val num = DB.update("UPDATE task set task_name = ?, task_description = ?, test_type = ?, testsystem_id = ? where task_id = ? ",
-      name, description, test_type, testsystem_id, taskid)
-    num == 1
+  def updateTask(taskid: Int, name: String = null, description: String = null, test_type: String = null,
+                 deadline: String = null, testsystem_id: String = null): Boolean = {
+    var updates = 0
+    var successfulUpdates = 0
+    if (name != null) {
+      successfulUpdates += DB.update("UPDATE task set task_name = ? where task_id = ? ", name, taskid)
+      updates += 1
+    }
+
+    if (description != null) {
+      successfulUpdates += DB.update("UPDATE task set task_description = ?  where task_id = ? ", description, taskid)
+      updates += 1
+    }
+
+    if (test_type != null) {
+      successfulUpdates += DB.update("UPDATE task set test_type = ? where task_id = ? ", test_type, taskid)
+      updates += 1
+    }
+
+    if (testsystem_id != null) {
+      successfulUpdates += DB.update("UPDATE task set testsystem_id = ? where task_id = ? ", testsystem_id, taskid)
+      updates += 1
+    }
+
+    if (deadline != null) {
+      successfulUpdates += DB.update("UPDATE task set deadline = ? where task_id = ? ", deadline, taskid)
+      updates += 1
+    }
+    successfulUpdates == updates
   }
 
   /**
@@ -401,7 +433,7 @@ class TaskService {
     */
   def getURLOfTaskTestFile(taskid: Int): String = {
     val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
   }
 
   /**
@@ -413,7 +445,7 @@ class TaskService {
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
     val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
   }
 
   /**

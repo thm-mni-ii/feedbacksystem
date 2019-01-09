@@ -32,4 +32,15 @@ class WebConfig extends WebMvcConfigurer {
   override def configureMessageConverters(converters: util.List[HttpMessageConverter[_]]): Unit = {
     converters.add(customJackson2HttpMessageConverter)
   }
+
+  /**
+    * Add CORS Settings for every request.
+    * @param registry CorsRegistry to modify
+    */
+  override def addCorsMappings(registry: CorsRegistry): Unit = {
+    registry.addMapping("/**")
+      .exposedHeaders("Authorization")
+
+    super.addCorsMappings(registry)
+  }
 }
