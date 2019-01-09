@@ -238,7 +238,8 @@ class CourseService {
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
-        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)))
+        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+        "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
     }, user.userid)
   }
 
