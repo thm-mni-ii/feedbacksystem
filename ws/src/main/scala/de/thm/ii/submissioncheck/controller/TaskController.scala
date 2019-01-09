@@ -59,6 +59,8 @@ class TaskController {
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
+  private final val LABEL_NAME = "name"
+  private final val LABEL_DESCRIPTION = "description"
   private final val LABEL_FILENAME = "filename"
   private final val LABEL_UPLOAD_URL = "upload_url"
   private final val LABEL_JWT_TOKEN = "jwt_token"
@@ -316,15 +318,12 @@ class TaskController {
       throw new BadRequestException("User with role `student` and no edit rights can not create a task.")
     }
     try {
-      val name = jsonNode.get("name").asText()
-      val description = jsonNode.get("description").asText()
-      //val filename = jsonNode.get(LABEL_FILENAME).asText()
-      //val file = jsonNode.get(LABEL_FILE).asText()
-      //val dataBytes: Array[Byte] = Base64.getDecoder.decode(file)
+      val name = jsonNode.get(LABEL_NAME).asText()
+      val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val test_type = jsonNode.get("test_type").asText()
-      // TODO until we finalize this parameters set a default if none is given
+      val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
       val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, test_type, testsystem_id)
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, test_type, deadline, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
       taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
@@ -332,7 +331,7 @@ class TaskController {
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description, filename, test_type and a file")
+        throw new BadRequestException("Please provide: name, description and test_type. Parameter testsystem_id and deadline are optional")
       }
     }
   }
@@ -376,22 +375,15 @@ class TaskController {
     if (!this.taskService.isPermittedForTask(taskid, user.get)) {
       throw new UnauthorizedException("User has no edit rights and can not update a task.")
     }
-    try {
-      val name = jsonNode.get("name").asText()
-      val description = jsonNode.get("description").asText()
-      val test_type = jsonNode.get("test_type").asText()
 
-      // TODO until we finilaize this parameters set a default if none is given
-      val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      val success = this.taskService.updateTask(taskid, name, description, test_type, testsystem_id)
+    val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
+    val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
+    val test_type = if (jsonNode.get(TaskDBLabels.test_type) != null) jsonNode.get(TaskDBLabels.test_type).asText() else null
+    var deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
+    val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else null
+    val success = this.taskService.updateTask(taskid, name, description, test_type, deadline, testsystem_id)
 
-      Map("success" -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
-    }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description and test_type")
-      }
-    }
+    Map("success" -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
   }
   /**
     * provide a GET URL to download testfiles for a task
