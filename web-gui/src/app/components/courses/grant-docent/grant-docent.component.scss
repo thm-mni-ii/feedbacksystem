@@ -1,0 +1,14 @@
+table, .chip-list {
+  width: 100%;
+}
+
+.mat-row {
+}
+
+.mat-row:nth-child(even) {
+  background-color:lightgrey;
+}
+
+mat-chip-list {
+  margin: 12px;
+}

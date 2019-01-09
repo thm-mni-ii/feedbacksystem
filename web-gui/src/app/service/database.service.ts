@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {CourseTableItem} from "../modules/student/student-list/course-table/course-table-datasource";
+import {CourseTableItem} from "../components/student/student-list/course-table/course-table-datasource";
 import {Observable} from "rxjs";
 import {MatSnackBar} from "@angular/material";
 
@@ -280,10 +280,8 @@ export class DatabaseService {
    * (Only) Admin can delete a registered user by its userid.
    * @param userID
    */
-  adminDeleteUser(userID: number) {
-    return this.http.delete('/api/v1/users/' + userID).subscribe(msg => {
-      console.log('DELETE USER: ' + JSON.stringify(msg));
-    });
+  adminDeleteUser(userID: number): Observable<{ deletion: boolean }> {
+    return this.http.delete<{ deletion: boolean }>('/api/v1/users/' + userID);
   }
 
   /**
@@ -359,33 +357,20 @@ export class DatabaseService {
   }
 
   /**
-   * (Only) Admin can grant a registered user as moderator.
+   * Admin changes role of user
+   * @param userID The id of user
+   * @param userRole The role user gets
    */
-  adminGrantModerator(username: string): Observable<ReturnMessage> {
-    return this.http.post<ReturnMessage>('/api/v1/users/grant/moderator', {username: username});
-  }
-
-  /**
-   * (Only) Admin can grant a registered user as admin.
-   * @param username
-   */
-  adminGrantAdmin(username: string) {
-    return this.http.post('/api/v1/users/grant/admin', {username: username}).subscribe(msg => {
-      console.log('GRANT ADMIN: ' + msg);
-    });
-  }
-
-  /**
-   * (Only) Admin can revoke a global role from a user. After revoking.
-   * User has global role = 16 (student). Please provide user's username.
-   * @param username
-   */
-  adminRevokeGlobal(username: string): Observable<ReturnMessage> {
-    return this.http.post<ReturnMessage>('/api/v1/users/revoke', {username: username});
+  adminGrantRight(userID: number, userRole: number): Observable<RoleChanged> {
+    return this.http.post<RoleChanged>('/api/v1/users/grant/' + userID, {role: userRole});
   }
 
 }
 
+export interface RoleChanged {
+  grant: string;
+  success: boolean;
+}
 
 export interface CourseDetail {
   course_id: number;

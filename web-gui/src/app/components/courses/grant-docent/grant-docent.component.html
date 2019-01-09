@@ -1,0 +1,55 @@
+<div class="container">
+
+  <mat-form-field>
+    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+  </mat-form-field>
+
+
+  <table mat-table [dataSource]="dataSourceCourses" matSort>
+
+
+    <ng-container matColumnDef="course_name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Modul</th>
+      <td mat-cell *matCellDef="let course">
+        <h3>{{course.course_name}}</h3>
+
+        <mat-divider></mat-divider>
+        <h4>Dozenten</h4>
+
+        <mat-chip-list #chipList>
+          <mat-chip
+            color="accent"
+            *ngFor="let fruit of fruits"
+            [selectable]="selectable"
+            [removable]="removable"
+            (removed)="remove(fruit)">
+            {{fruit}}
+            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+          </mat-chip>
+
+          <mat-form-field *ngIf="newDocent">
+            <input type="text" matInput [formControl]="docentUsername" [matAutocomplete]="auto" placeholder="Dozent name">
+          </mat-form-field>
+
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let option of dataSourceCourses.data" [value]="option">{{option}}</mat-option>
+          </mat-autocomplete>
+
+
+          <button mat-icon-button color="accent" (click)="showDocentInput()">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </mat-chip-list>
+
+
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+  </table>
+
+
+</div>
