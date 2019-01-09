@@ -141,8 +141,8 @@ class TestRESTStudent(unittest.TestCase):
                                             'Authorization': self.student_auth_header})
 
         len_af = len(r_get_after.json())
-        pprint(len(r_get_before.json()))
-        pprint(len(r_get_after.json()))
+        #pprint(len(r_get_before.json()))
+        #pprint(len(r_get_after.json()))
 
         self.assertEqual(len_af, len_bf + 1)
 
