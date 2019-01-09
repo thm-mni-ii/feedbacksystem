@@ -11,7 +11,7 @@ print(dirname)
 class TestRESTStudent(unittest.TestCase):
     def setUp(self):
         # How many digits to match in case of floating point answers
-        self.URL = "https://localhost:8080/api/v1/"
+        self.URL = "http://localhost:8080/api/v1/"
 
         # print(r.headers)
         # self.auth_token = r.headers["Authorization"].replace("Bearer ","")

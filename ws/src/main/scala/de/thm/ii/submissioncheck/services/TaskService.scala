@@ -1,9 +1,10 @@
 package de.thm.ii.submissioncheck.services
 
 import java.sql.{Connection, Statement}
+
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
-import org.springframework.beans.factory.annotation.{Autowired}
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -27,6 +28,8 @@ class TaskService {
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
+  @Value("${cas.client-host-url}")
+  private val UPLOAD_BASE_URL: String = null
   /**
     * After Upload a submitted File save it's name
     * @author Benjamin Manns
@@ -393,7 +396,7 @@ class TaskService {
     */
   def getURLOfTaskTestFile(taskid: Int): String = {
     val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
   }
 
   /**
@@ -405,7 +408,7 @@ class TaskService {
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
     val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    "https://localhost:8080/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
   }
 
   /**
