@@ -14,5 +14,7 @@ object RoleDBLabels {
   var MODERATOR: String = "MODERATOR"
   /** ROLE LABEL "ADMIN" */
   var ADMIN: String = "ADMIN"
+  /** ROLE LABEL "ADMIN" */
+  var STUDENT: String = "STUDENT"
 }
 
