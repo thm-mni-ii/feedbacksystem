@@ -525,7 +525,18 @@ class TestRESTStudent(unittest.TestCase):
                           headers={'content-type': 'application/json'})
         pprint(r.json())
 
-        delete_users = requests.delete(url=self.URL + "users/python_student", data=json.dumps({}), verify=False,
+        all_users2 = requests.get(url=self.URL + "users", data=json.dumps({}), verify=False,
+                                 headers={'content-type': 'application/json',
+                                          'Authorization': self.admin_auth_header})
+
+        pythonUserID = -1
+        for u in all_users2.json():
+            if u["username"] == "python_student":
+                print(u)
+                pythonUserID = u["user_id"]
+                break
+
+        delete_users = requests.delete(url=self.URL + "users/"+str(pythonUserID), data=json.dumps({}), verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
         pprint(delete_users.json())
