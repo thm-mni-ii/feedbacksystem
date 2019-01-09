@@ -24,28 +24,32 @@ class CourseService {
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
 
+  private val LABEL_PASSED = "passed"
+  private val LABEL_TASKS = "tasks"
   private final val LABEL_SUCCESS = "success"
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val taskService: TaskService = null
 
   /**
-    * getCoursesByUser search courses by user object
+    * getSubscribedCoursesByUser search courses by a single user
     *
     * @author Benjamin Manns
-    * @param user a User object
+    * @param userid identifies a user
     * @return List of Maps
     */
-  @deprecated("0", "not working anymore")
-  def getCoursesByUser(user: User): List[Map[String, String]] = {
-    // TODO Check somehow if this is a course owner or a course participant
-    DB.query("SELECT * FROM user_has_courses hc join course c using(course_id) where user_id = ?",
+  def getSubscribedCoursesByUser(userid: Int): List[Map[String, String]] = {
+   // TODO filter nach Course Lifetime
+    DB.query("SELECT c.* FROM user_course hc join course c using(course_id) where user_id = ? and hc.role_id = 16",
       (res, _) => {
         Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.creator -> res.getString(CourseDBLabels.creator))
-      }, user.userid)
+            CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester)
+          // TODO course_lifetime
+        )
+      }, userid)
   }
 
   /**
@@ -128,6 +132,21 @@ class CourseService {
       (res, _) => res.getInt("c"), courseid, user.userid)
 
     list.nonEmpty && list.head == 1
+  }
+
+  /**
+    * Get all subscribed students form one course
+    * @param courseid unique identification for a course
+    * @return Scala List
+    */
+  def getStudentsFromCourse(courseid: Int): List[Map[String, Any]] = {
+    val list = DB.query("select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and uc.role_id = 16",
+      (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
+        UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+        UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+        UserDBLabels.username -> res.getString(UserDBLabels.username)) }
+      , courseid)
+    list
   }
 
   /**
@@ -235,7 +254,7 @@ class CourseService {
           CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          "tasks" -> taskList
+          LABEL_TASKS -> taskList
         )
         if (isPermitted) {
           courseMap + (CourseDBLabels.creator -> res.getString(CourseDBLabels.creator))
@@ -266,6 +285,7 @@ class CourseService {
     * @param courseid unique course identification
     * @return Java List
     */
+  @deprecated("0", "1")
   def getAllSubmissionsFromAllUsersByCourses(courseid: Int): List[Map[String, Any]] = {
     DB.query("select * from task t join course c using(course_id)  where c.course_id = ? order by t.task_id",
       (res, _) => {
@@ -275,6 +295,96 @@ class CourseService {
           CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
           "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(TaskDBLabels.taskid)))
       }, courseid)
+  }
+
+  /**
+    * Only permitted for docents / moderator / admins
+    * This method returns a submissions matrix of all users for one course
+    *
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @return Scala List
+    */
+  def getSubmissionsMatrixByCourse(courseid: Int): List[Any] = {
+    val tasks = taskService.getTasksByCourse(courseid)
+    val subscribedStudents = this.getStudentsFromCourse(courseid)
+    val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString).reverse
+    var matrix: List[Any] = List()
+
+    for(u <- subscribedStudents){
+      var tasksPassedSum = 0
+      var processedTasks: List[Any] = List()
+      for((task, i) <- tasks.zipWithIndex){
+        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), u("user_id"))
+          /* processing - number of trials - passed - passed date */
+        var passed: Boolean = false
+        var passedDate: Any = ""
+        var trials = 0
+        for(submission <- userSubmissions) {
+          if (!passed && submission(LABEL_PASSED) == 1) {
+            passed = true
+            passedDate = submission("submit_date")
+          }
+          else {
+            // Also again passed trials are counted, because they are useless!
+            trials += 1
+          }
+        }
+        tasksPassedSum = tasksPassedSum + passed.compare(false)
+        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed, "passed_date" -> passedDate))
+
+        processedTasks = taskStudentCell :: processedTasks
+      }
+      val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username), UserDBLabels.user_id -> u(UserDBLabels.user_id),
+        UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname), LABEL_PASSED ->  tasksPassedSum)
+      matrix = studentLine :: matrix
+    }
+    matrix
+  }
+
+  /**
+    * get submission matrix as student.
+    * @author Benjamin Manns
+    * @param userid unique identification for a user
+    * @return Big Scala Map
+    */
+  def getSubmissionsMatrixByUser(userid: Int): List[Any] = {
+    val courseList = this.getSubscribedCoursesByUser(userid)
+    var matrix: List[Any] = List()
+    for (course <- courseList) {
+      val courseTasks = taskService.getTasksByCourse(Integer.parseInt(course(CourseDBLabels.courseid)))
+      val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString).reverse
+
+      var processedTasks: List[Any] = List()
+      var deadlines: List[String] = List()
+      for((task, i) <- courseTasks.zipWithIndex) {
+        val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), userid)
+        // process them
+        var passed: Boolean = false
+        var passedDate: Any = ""
+        var trials = 0
+        for (submission <- submissionRawData) {
+          if (!passed && submission(LABEL_PASSED) == 1) {
+            passed = true
+            passedDate = submission("submit_date")
+          }
+          else {
+            // Also again passed trials are counted, because they are useless!
+            trials += 1
+          }
+        }
+
+        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed,
+          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
+        deadlines = task(TaskDBLabels.deadline) :: deadlines
+        processedTasks = taskStudentCell :: processedTasks
+      }
+      val courseLine = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
+      matrix = courseLine ++ course.map{ case (k, v) => k -> (v + courseLine.getOrElse(k.toString, 0))} :: matrix
+    }
+    matrix
   }
 
   /**
@@ -378,6 +488,7 @@ class CourseService {
     * @param user User who wants to see all his submissions
     * @return a List of all Submissions ordered by submissiondate
     */
+  @deprecated("0", "1")
   def getAllSubmissionsForAllCoursesByUser(user: User): List[Map[String, Any]] = {
     DB.query("select * from submission join task using(task_id) join course using(course_id) where user_id = ? " +
     "order by submit_date desc", (res, _) => {
@@ -386,7 +497,7 @@ class CourseService {
         CourseDBLabels.name -> res.getString(CourseDBLabels.name),
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),
         SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
-        SubmissionDBLabels.message ->res.getString(SubmissionDBLabels.message),
+        SubmissionDBLabels.exitcode ->res.getString(SubmissionDBLabels.exitcode),
         SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
         SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
         SubmissionDBLabels.result_date->res.getTimestamp(SubmissionDBLabels.result_date),

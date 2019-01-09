@@ -171,7 +171,7 @@ class TaskController {
           kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
           val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
           logger.warn(jsonResult)
-          kafkaTemplate.send(tasksystem_id + "_" + topicName, jsonResult)
+          kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
           kafkaTemplate.flush()
         }
         else {
@@ -184,6 +184,8 @@ class TaskController {
       case _: NullPointerException => throw new BadRequestException("This test needs a: " + taskDetails(TaskDBLabels.test_type) + ". Please provide this.")
     }
   }
+
+  private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + topicName
 
   /**
     * serve a route to upload a submission file to a given submissionid
@@ -216,7 +218,7 @@ class TaskController {
       kafkaMap += ("submit_typ" -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
-      kafkaTemplate.send(tasksystem_id + "_" + topicName, jsonResult)
+      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
       kafkaTemplate.flush()
       message = true
 
@@ -296,7 +298,7 @@ class TaskController {
 
     val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
     logger.warn(jsonStringMsg)
-    kafkaTemplate.send(tasksystem_id + topicTaskRequest, jsonStringMsg)
+    kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
     kafkaTemplate.flush()
 
     Map("upload_success" -> message, LABEL_FILENAME -> filename)
@@ -477,7 +479,8 @@ class TaskController {
           logger.warn(answeredMap.toString())
           taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
             Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("exitcode").asInstanceOf[String])
+            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
+            answeredMap("exitcode").asInstanceOf[Int])
         } catch {
           case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
         }

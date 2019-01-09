@@ -130,8 +130,34 @@ class TaskService {
           SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
           SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
           SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
-          SubmissionDBLabels.message -> res.getString(SubmissionDBLabels.message))
+          SubmissionDBLabels.exitcode -> res.getString(SubmissionDBLabels.exitcode))
       }, taskid, user.userid)
+  }
+
+  /**
+    * get all submissions from a user by a given task
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param userid requesting user
+    * @param sort sort submissions by date (asc, desc)
+    * @return Scala List of Maps
+    */
+  def getSubmissionsByTaskAndUser(taskid: String, userid: Any, sort: String = "asc"): List[Map[String, Any]] = {
+    if (!List("asc", "desc").contains(sort)){
+      throw new IllegalArgumentException("sort must be a value of `asc` or `desc`")
+    }
+    DB.query("SELECT  s.* from task join submission s using(task_id) where task_id = ? and user_id = ? order by submit_date " + sort,
+      (res, _) => {
+        Map(SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
+          SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
+          SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
+          SubmissionDBLabels.passed -> res.getInt(SubmissionDBLabels.passed),
+          SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
+          SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
+          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.exitcode -> res.getInt(SubmissionDBLabels.exitcode))
+      }, taskid, userid)
   }
 
   /**
@@ -147,6 +173,7 @@ class TaskService {
         Map(
           SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
           SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
+          SubmissionDBLabels.exitcode -> res.getString(SubmissionDBLabels.exitcode),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
           UserDBLabels.username -> res.getString(UserDBLabels.username),
@@ -188,15 +215,24 @@ class TaskService {
     * @param taskid unique identification for a task
     * @param submissionid unique identification for a submissionid
     * @param result answer coming from a checker service
-    * @param passed tiny peace of status information (i.e. exitcode)
+    * @param passed test result passed information (0 = failed, 1 = passed)
+    * @param exitcode tiny peace of status information
     * @return Boolean: did update work
     */
-  def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String): Boolean = {
+  def setResultOfTask(taskid: Int, submissionid: Int, result: String, passed: String, exitcode: Int): Boolean = {
     val num = DB.update(
-      "UPDATE submission set result = ?, passed =  ?, result_date = CURRENT_TIMESTAMP() where task_id = ? and submission_id = ?;",
-      result, passed, taskid, submissionid
+      "UPDATE submission set result = ?, passed =  ?, exitcode = ?,  result_date = CURRENT_TIMESTAMP() where task_id = ? and submission_id = ?;",
+      result, passed, exitcode, taskid, submissionid
     )
     num > 0
+  }
+
+  private def stringOrNull(any: Any): String = {
+    if (any == null) {
+      null
+    } else {
+      any.toString
+    }
   }
 
   /**
@@ -211,7 +247,8 @@ class TaskService {
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
-          TaskDBLabels.description -> res.getString(TaskDBLabels.description)
+          TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline))
         )
       }, courseid)
   }

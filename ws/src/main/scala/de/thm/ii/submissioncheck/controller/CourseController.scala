@@ -5,7 +5,7 @@ import java.{io, util}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.services.{CourseService, TaskService, UserService}
+import de.thm.ii.submissioncheck.services.{CourseService, TaskDBLabels, TaskService, UserService}
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -22,6 +22,8 @@ class CourseController {
   private val userService: UserService = null
   @Autowired
   private val courseService: CourseService = null
+  @Autowired
+  private val taskService: TaskService = null
 
   private final val application_json_value = "application/json"
 
@@ -318,16 +320,42 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest):
-  List[Map[String, Any]] = {
+  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): List[Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (!this.courseService.isDocentForCourse(courseid, user.get)) { // TODO can admin / moderator see this details?
+    if (!this.courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 2) {
       throw new UnauthorizedException
     }
-    this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
+    // old version
+    // this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
+    this.courseService.getSubmissionsMatrixByCourse(courseid)
+  }
+
+  /**
+    * get the detailed submission information of a student of a task for this one course
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param userid unique identification for a user
+    * @param taskid unique identification for a task
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{courseid}/submissions/user/{userid}/task/{taskid}"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def seeStudentTaskSubmissionsMatrixCell(@PathVariable courseid: Int, @PathVariable userid: Int, @PathVariable taskid: Int,
+                                          request: HttpServletRequest): List[Any] = {
+    // TODO courseid not needed
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (!taskService.isPermittedForTask(taskid, user.get) && user.get.roleid > 2) {
+      throw new UnauthorizedException
+    }
+
+    taskService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
   }
 
   /**
@@ -338,11 +366,14 @@ class CourseController {
     */
   @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(request: HttpServletRequest): List[Map[String, Any]] = {
+  def seeAllSubmissions(request: HttpServletRequest): List[Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
+    // old version
+    // this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
+
+    this.courseService.getSubmissionsMatrixByUser(user.get.userid)
   }
 }
