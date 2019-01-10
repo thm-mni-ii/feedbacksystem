@@ -146,8 +146,22 @@ class UserService {
   def loadUserFromDB(username: String): Option[User] = {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
-        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt("role_id"))
+        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt(UserDBLabels.role_id))
       }, username)
+
+    users.headOption
+  }
+
+  /**
+    * Load user by a given userid.
+    * @param userid a unique identification for a user
+    * @return The user having the given username if such one exists.
+    */
+  def loadUserFromDB(userid: Int): Option[User] = {
+    val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
+      (res, _) => {
+        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt(UserDBLabels.role_id))
+      }, userid)
 
     users.headOption
   }

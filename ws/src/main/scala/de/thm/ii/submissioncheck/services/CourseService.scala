@@ -1,10 +1,13 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
+import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
+import java.util.zip.{ZipEntry, ZipOutputStream}
 
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.security.Secrets
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -27,6 +30,9 @@ class CourseService {
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
   private final val LABEL_SUCCESS = "success"
+  private final val LABEL_ZIPDIR = "zip-dir"
+  private final val LABEL_UPLOADDIR = "upload-dir"
+  private final val LABEL_UNDERLINE = "_"
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val taskService: TaskService = null
@@ -264,6 +270,135 @@ class CourseService {
       }, courseid)
 
     list.headOption
+  }
+
+  private def zip(out: Path, files: Iterable[Path], replacePath: String = "") = {
+    val zip = new ZipOutputStream(Files.newOutputStream(out))
+
+    files.foreach { file =>
+      zip.putNextEntry(new ZipEntry(file.toString.replace(replacePath, "")))
+      try {
+        Files.copy(file, zip)
+      } catch {
+        case _: java.nio.file.NoSuchFileException => {}
+      }
+      zip.closeEntry()
+    }
+    zip.close()
+  }
+
+  private def implode(list: List[String], glue: String) = {
+    var back = ""
+    for ((l, index) <- list.zipWithIndex) {
+      back += l + (if (index < list.length-1) glue else "")
+    }
+    back
+  }
+
+  /**
+    * generate Zip file and return its path of all users submission of one course
+    * @author Benjamin Manns
+    * @param only_last_try if enabled, we only inlcude the last submission of the user
+    * @param courseid unique course identification
+    * @return local Path of generated Zip File
+    */
+  def zipOfSubmissionsOfUsersFromCourse(only_last_try: Boolean, courseid: Integer): String = {
+    var allPath: List[Path] = List()
+    val tmp_folder = Secrets.getSHAStringFromNow()
+    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+
+    val studentList = getStudentsFromCourse(courseid)
+
+    for (task <- taskService.getTasksByCourse(courseid)) {
+      var last_submission_date: String = null
+      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid)).resolve("submits")
+
+      for (student <- studentList) {
+        var tmpZiptaskPath: Path = null
+        var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), student(UserDBLabels.user_id), "desc")
+        if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
+        for ((submission, i) <- studentSubmissionList.zipWithIndex) {
+          if (i == 0) {
+            last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
+              LABEL_UNDERLINE).replace(" ", "")
+            tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
+              task(TaskDBLabels.taskid), last_submission_date), LABEL_UNDERLINE))
+            Files.createDirectories(tmpZiptaskPath)
+          }
+
+          // create path out of this
+          val filePath = taskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
+            .resolve(stringOrNull(submission(SubmissionDBLabels.filename)))
+          val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid) + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename))
+          allPath = goalPath :: allPath
+
+          try {
+            Files.copy(filePath, Files.newOutputStream(goalPath))
+          }
+          catch {
+            case _: java.nio.file.NoSuchFileException => {}
+          }
+        }
+      }
+    }
+    val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
+    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    finishZipPath
+  }
+
+  private def stringOrNull(any: Any): String = {
+    if (any == null) {
+      "null"
+    } else {
+      any.toString
+    }
+  }
+
+  /**
+    * generate Zip file and return its path of one users submission of one course
+    * @author Benjamin Manns
+    * @param only_last_try if enabled, we only inlcude the last submission of the user
+    * @param courseid unique course identification
+    * @param user single user submission
+    * @return local Path of generated Zip File
+    */
+  def zipOfSubmissionsOfUserFromCourse(only_last_try: Boolean, courseid: Integer, user: User): String = {
+    var allPath: List[Path] = List()
+    val tmp_folder = Secrets.getSHAStringFromNow()
+    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+
+    for (task <- taskService.getTasksByCourse(courseid)) {
+      var last_submission_date: String = null
+      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid)).resolve("submits")
+
+      var tmpZiptaskPath: Path = null
+      var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), user.userid, "desc")
+      if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
+      for((submission, i) <- studentSubmissionList.zipWithIndex) {
+        if (i == 0) {
+          last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
+            LABEL_UNDERLINE).replace(" ", "")
+          tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
+            task(TaskDBLabels.taskid), last_submission_date), LABEL_UNDERLINE))
+          Files.createDirectories(tmpZiptaskPath)
+        }
+        // create path out of this
+        val filePath = taskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
+          .resolve(stringOrNull(submission(SubmissionDBLabels.filename)))
+        val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid) + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename))
+        allPath = goalPath :: allPath
+
+        try{
+          Files.copy(filePath, Files.newOutputStream(goalPath))
+        }
+        catch {
+          case _: java.nio.file.NoSuchFileException => {}
+        }
+      }
+    }
+    val finishZipPath = "zip-dir/abgabe_" + user.username + LABEL_UNDERLINE + tmp_folder + ".zip"
+    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    finishZipPath
   }
 
   /**
