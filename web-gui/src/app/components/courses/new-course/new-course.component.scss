@@ -1,0 +1,34 @@
+.container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+mat-vertical-stepper {
+  width: 80%;
+}
+
+.step-flex {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.step-flex > mat-form-field {
+  width: 100%;
+}
+
+.button-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.button-row > button {
+  margin-right: 12px;
+  margin-top: 12px;
+}
+
+
+.select {
+  width: 20%;
+}
