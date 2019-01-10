@@ -74,18 +74,34 @@ class CourseService {
           RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)))
+          "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+          "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
       }, user.userid)
   }
 
   /**
-    * get list of all docent beloning to one course
+    * get list of all docent belonging to one course
     * @author Benjamin Manns
     * @param courseid unique identification for a course
     * @return Scala List
     */
   def getCourseDocent(courseid: Int): List[Map[String, String]] = {
     DB.query("SELECT * FROM user_course uc join user using(user_id) where course_id = ? and uc.role_id = 4",
+      (res, _) => {
+        Map(UserDBLabels.user_id -> res.getString(UserDBLabels.user_id),
+          UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+          UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+          UserDBLabels.email -> res.getString(UserDBLabels.email))
+      }, courseid)
+  }
+  /**
+    * get list of all tutor belonging to one course
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @return Scala List
+    */
+  def getCourseTutor(courseid: Int): List[Map[String, String]] = {
+    DB.query("SELECT * FROM user_course uc join user using(user_id) where course_id = ? and uc.role_id = 8",
       (res, _) => {
         Map(UserDBLabels.user_id -> res.getString(UserDBLabels.user_id),
           UserDBLabels.prename -> res.getString(UserDBLabels.prename),
@@ -228,7 +244,8 @@ class CourseService {
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
-        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)))
+        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+        "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
     }, user.userid)
   }
 
