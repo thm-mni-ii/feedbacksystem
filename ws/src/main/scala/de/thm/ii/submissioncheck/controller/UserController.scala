@@ -157,7 +157,7 @@ class UserController {
                            @RequestParam(value = "after", required = false) after: String,
                            @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid != 1) {
+    if(user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
     try {
