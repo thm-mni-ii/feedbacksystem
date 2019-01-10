@@ -47,9 +47,11 @@ class CourseController {
 
   private final val LABEL_DESCRIPTION = "description"
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, course_semester, course_modul_id, anonymous"
+  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, course_semester, " +
+    "course_modul_id, anonymous and course_end_date"
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ, course_semester, course_modul_id"
+  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ, course_semester, " +
+    "course_modul_id and course_end_date"
 
   /**
     * getAllCourses is a route for all courses
@@ -83,8 +85,13 @@ class CourseController {
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
       val course_semester = jsonNode.get("course_semester").asText()
       val course_modul_id = jsonNode.get("course_modul_id").asText()
+      val course_end_date = jsonNode.get(CourseDBLabels.course_end_date).asText()
       val anonymous = jsonNode.get("anonymous").asInt()
-      this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester, anonymous)
+      try{
+        this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester, course_end_date, anonymous)
+      } catch {
+        case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
+      }
     } catch {
       case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
     }
@@ -227,11 +234,18 @@ class CourseController {
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
       val course_semester = jsonNode.get("course_semester").asText()
       val course_modul_id = jsonNode.get("course_modul_id").asText()
+      val course_end_date = jsonNode.get(CourseDBLabels.course_end_date).asText()
+      val anonymous = jsonNode.get("anonymous").asInt()
 
       if (name.length == 0 || description.length == 0 || standard_task_typ.length == 0) {
         throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL_UPDATE)
       }
-      this.courseService.updateCourse(courseid, name, description, standard_task_typ, course_modul_id, course_semester)
+      try{
+        this.courseService.updateCourse(courseid, name, description, standard_task_typ, course_modul_id, course_semester, course_end_date)
+      } catch {
+        case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
+      }
+
     } catch {
       case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
     }

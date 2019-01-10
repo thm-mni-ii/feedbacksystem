@@ -19,4 +19,6 @@ object CourseDBLabels {
   val course_modul_id: String = "course_modul_id"
   /** holds label course_semester*/
   val course_semester: String = "course_semester"
+  /** holds label course_end_date*/
+  val course_end_date: String = "course_end_date"
 }
