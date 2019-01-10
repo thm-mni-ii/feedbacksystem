@@ -48,7 +48,7 @@ class CourseController {
   private final val LABEL_DESCRIPTION = "description"
 
   private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, course_semester, " +
-    "course_modul_id, anonymous and course_end_date"
+    "course_modul_id, personalised_submission and course_end_date"
 
   private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ, course_semester, " +
     "course_modul_id and course_end_date"
@@ -86,9 +86,10 @@ class CourseController {
       val course_semester = jsonNode.get("course_semester").asText()
       val course_modul_id = jsonNode.get("course_modul_id").asText()
       val course_end_date = jsonNode.get(CourseDBLabels.course_end_date).asText()
-      val anonymous = jsonNode.get("anonymous").asInt()
+      val personalised_submission = jsonNode.get(CourseDBLabels.personalised_submission).asInt()
       try{
-        this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester, course_end_date, anonymous)
+        this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester,
+          course_end_date, personalised_submission)
       } catch {
         case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
       }
@@ -209,6 +210,22 @@ class CourseController {
     courseService.deleteCourse(courseid)
   }
 
+  /** hack to fix scalas strange cyclomatic behaviour*/
+  private def updateCourseParser(jsonNode: JsonNode) = {
+    val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
+    val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
+    val standard_task_typ = if (jsonNode.get(CourseDBLabels.standard_task_typ) != null) jsonNode.get(CourseDBLabels.standard_task_typ).asText() else null
+    val course_semester = if (jsonNode.get(CourseDBLabels.course_semester) != null) jsonNode.get(CourseDBLabels.course_semester).asText() else null
+    val course_modul_id = if (jsonNode.get(CourseDBLabels.course_modul_id) != null) jsonNode.get(CourseDBLabels.course_modul_id).asText() else null
+    val course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
+    val personalised_submission = if (jsonNode.get(CourseDBLabels.personalised_submission) != null) {
+      jsonNode.get(CourseDBLabels.personalised_submission).asBoolean().toString
+    } else {
+      null
+    }
+    (name, description, standard_task_typ, course_semester, course_modul_id, course_end_date, personalised_submission)
+  }
+
   /**
     * updateCourse updates course details for a specific course by given id
     *
@@ -222,32 +239,23 @@ class CourseController {
   @ResponseBody
   def updateCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty) {
-      throw new UnauthorizedException
-    }
-    if(!this.courseService.isPermittedForCourse(courseid, user.get)) {
+
+    if(user.isEmpty || !this.courseService.isPermittedForCourse(courseid, user.get)) {
       throw new UnauthorizedException
     }
     try {
-      val name = jsonNode.get(LABEL_NAME).asText()
-      val description = jsonNode.get(LABEL_DESCRIPTION).asText()
-      val standard_task_typ = jsonNode.get("standard_task_typ").asText()
-      val course_semester = jsonNode.get("course_semester").asText()
-      val course_modul_id = jsonNode.get("course_modul_id").asText()
-      val course_end_date = jsonNode.get(CourseDBLabels.course_end_date).asText()
-      val anonymous = jsonNode.get("anonymous").asInt()
-
-      if (name.length == 0 || description.length == 0 || standard_task_typ.length == 0) {
-        throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL_UPDATE)
-      }
-      try{
-        this.courseService.updateCourse(courseid, name, description, standard_task_typ, course_modul_id, course_semester, course_end_date)
-      } catch {
-        case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
-      }
-
+      val parsedJsonNode = updateCourseParser(jsonNode)
+      val name = parsedJsonNode._1
+      val description = parsedJsonNode._2
+      val standard_task_typ = parsedJsonNode._3
+      val course_semester = parsedJsonNode._4
+      val course_modul_id = parsedJsonNode._5
+      val course_end_date = parsedJsonNode._6
+      val personalised_submission = parsedJsonNode._7
+      this.courseService.updateCourse(courseid, name, description, standard_task_typ, course_modul_id, course_semester,
+        course_end_date, personalised_submission)
     } catch {
-      case _: NullPointerException => throw new BadRequestException(PLEASE_PROVIDE_COURSE_LABEL)
+      case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
     }
   }
   /**
