@@ -1,0 +1,21 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+mat-form-field {
+  width: 80%;
+}
+
+table, .chip-list {
+  width: 80%;
+}
+
+.mat-row:nth-child(even) {
+  background-color:lightgrey;
+}
+
+mat-chip-list {
+  margin: 12px;
+}
