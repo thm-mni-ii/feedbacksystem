@@ -36,6 +36,7 @@ class CourseService {
     *
     * @author Benjamin Manns
     * @param userid identifies a user
+    * @param check_course_lifetime if true only list courses which have not ended yet
     * @return List of Maps
     */
   def getSubscribedCoursesByUser(userid: Int, check_course_lifetime: Boolean = false): List[Map[String, String]] = {
@@ -47,7 +48,7 @@ class CourseService {
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
             CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date)
         )
       }, userid)
   }
@@ -480,12 +481,14 @@ class CourseService {
     * @throws ResourceNotFoundException
     */
   def updateCourse(courseid: Int, name: String = null, description: String = null, standard_task_typ: String = null,
-                   course_modul_id: String = null, course_semester: String = null, course_end_date: String = null, personalised_submission: String = null): Map[String, Boolean] = {
+                   course_modul_id: String = null, course_semester: String = null, course_end_date: String = null,
+                   personalised_submission: String = null): Map[String, Boolean] = {
     var updates = 0
     var suceeds = 0
     if (name != null) suceeds += DB.update("update course set course_name = ? where course_id = ?", name, courseid); updates += 1
     if (description != null) suceeds += DB.update("update course set course_description = ? where course_id = ?", description, courseid); updates += 1
-    if (standard_task_typ != null) suceeds += DB.update("update course set standard_task_typ = ? where course_id = ?", standard_task_typ, courseid); updates += 1
+    if (standard_task_typ != null) suceeds += DB.update("update course set standard_task_typ = ? where course_id = ?",
+      standard_task_typ, courseid); updates += 1
     if (course_modul_id != null) suceeds += DB.update("update course set course_modul_id = ? where course_id = ?", course_modul_id, courseid); updates += 1
     if (course_semester != null) suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1
     if (course_end_date != null) suceeds += DB.update("update course set course_end_date = ? where course_id = ?", course_end_date, courseid); updates += 1
@@ -494,13 +497,7 @@ class CourseService {
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1
     }
-
-
-    if (suceeds == 0 && updates > 0) {
-      throw new ResourceNotFoundException
-    } else {
-      Map(LABEL_SUCCESS -> (updates == suceeds))
-    }
+    Map(LABEL_SUCCESS -> (updates == suceeds))
   }
 
   /**
