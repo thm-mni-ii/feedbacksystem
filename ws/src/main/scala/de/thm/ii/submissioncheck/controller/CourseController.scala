@@ -418,7 +418,7 @@ class CourseController {
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if (!taskService.isPermittedForTask(taskid, user.get) && user.get.roleid > 2) {
+    if (!taskService.isPermittedForTask(taskid, user.get) && user.get.roleid > 2 && user.get.userid != userid) {
       throw new UnauthorizedException
     }
 
