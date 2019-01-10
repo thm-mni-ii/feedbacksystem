@@ -33,7 +33,7 @@ class TestsystemController {
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllTestystems(request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verfiyUserByHeaderToken(request)
-    if (user.isEmpty || user.get.roleid > 2) {
+    if (user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
         throw new UnauthorizedException
     }
     testsystemService.getTestsystems()
@@ -101,7 +101,7 @@ class TestsystemController {
   @ResponseBody
   def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid > 2) {
+    if(user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
       throw new UnauthorizedException
     }
 

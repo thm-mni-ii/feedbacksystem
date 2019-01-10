@@ -208,6 +208,16 @@ class UserService {
   }
 
   /**
+    * Calculates if given user is at least for one course a docent, so he has access to see all testsystem.
+    * @param userid unique User identification
+    * @return if User is a docent or not
+    */
+  def checkIfUserAtLeastOneDocent(userid: Int): Boolean = {
+    val list = DB.query("select count(*) > 0 as docent from user_course where user_id = ? and role_id IN (4)",
+      (res, _) => res.getInt("docent"), userid)
+    list.nonEmpty && list.head == 1
+  }
+  /**
     * generateTokenFromUser simply uses JWT technologies
     *
     * @author Benjamin Manns
