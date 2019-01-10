@@ -24,7 +24,7 @@ export class AdminUserManagementComponent implements OnInit {
   dataSource = new MatTableDataSource<User>();
 
   ngOnInit() {
-    this.db.adminGetUsers().subscribe(users => {
+    this.db.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
     });
@@ -38,7 +38,7 @@ export class AdminUserManagementComponent implements OnInit {
    * @param role Selected role from admin
    */
   roleChange(username: string, userID: number, role: number) {
-    this.db.adminGrantRight(userID, role).subscribe(res => {
+    this.db.changeUserRole(userID, role).subscribe(res => {
       if (res.success) {
         this.snackBar.open(username + ' ist jetzt ' + res.grant, 'OK', {duration: 3000});
       } else {
@@ -56,7 +56,7 @@ export class AdminUserManagementComponent implements OnInit {
           this.snackBar.open(user.username + ' wurde gelöscht');
         }
 
-        return this.db.adminGetUsers();
+        return this.db.getAllUsers();
       })).subscribe(users => {
       this.dataSource.data = users;
     });

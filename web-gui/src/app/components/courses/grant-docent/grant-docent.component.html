@@ -1,42 +1,47 @@
 <div class="container">
 
-  <mat-form-field>
-    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Module filtern</mat-label>
+    <input matInput (keyup)="filterCourses($event.target.value)">
+    <mat-icon matSuffix>filter_list</mat-icon>
   </mat-form-field>
-
-
   <table mat-table [dataSource]="dataSourceCourses" matSort>
 
-
     <ng-container matColumnDef="course_name">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Modul</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        <h2>Module</h2>
+      </th>
       <td mat-cell *matCellDef="let course">
         <h3>{{course.course_name}}</h3>
 
         <mat-divider></mat-divider>
         <h4>Dozenten</h4>
 
-        <mat-chip-list #chipList>
+        <mat-chip-list>
           <mat-chip
+            *ngFor="let docent of course.course_docent"
             color="accent"
-            *ngFor="let fruit of fruits"
-            [selectable]="selectable"
-            [removable]="removable"
-            (removed)="remove(fruit)">
-            {{fruit}}
-            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            selected="true"
+            removable="true"
+            (removed)="removeDocent(course.course_id, docent.user_id)">
+            {{docent.prename}} {{docent.surname}}
+            <mat-icon matChipRemove>cancel</mat-icon>
           </mat-chip>
 
-          <mat-form-field *ngIf="newDocent">
-            <input type="text" matInput [formControl]="docentUsername" [matAutocomplete]="auto" placeholder="Dozent name">
+          <mat-form-field *ngIf="showInputForDocent && course.course_id === docentInputCourseID">
+            <input type="text" matInput [formControl]="docentFormControl" [matAutocomplete]="auto"
+                   placeholder="User auswählen" (keyup)="addDocent(course.course_id, $event.key)">
           </mat-form-field>
 
-          <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let option of dataSourceCourses.data" [value]="option">{{option}}</mat-option>
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+            <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+              {{option.surname}} {{option.prename}}
+            </mat-option>
           </mat-autocomplete>
 
 
-          <button mat-icon-button color="accent" (click)="showDocentInput()">
+          <button mat-icon-button color="accent" (click)="showDocentInput(course.course_id)">
             <mat-icon>add_circle</mat-icon>
           </button>
         </mat-chip-list>
