@@ -43,7 +43,7 @@ class CourseController {
 
   private final val LABEL_NAME = "name"
 
-  private final val LABEL_USERNAME = "username"
+  private final val LABEL_USERID = "userid"
 
   private final val LABEL_DESCRIPTION = "description"
 
@@ -304,18 +304,18 @@ class CourseController {
   @ResponseBody
   def grantTutorToCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
       if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
         throw new UnauthorizedException
       }
-      val userToGrant = userService.loadUserFromDB(username)
+      val userToGrant = userService.loadUserFromDB(userid)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provid a valid username")
+        throw new BadRequestException("Please provid a valid userid")
       }
       courseService.grandUserAsTutorForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username for gran tutor")
+      case _: NullPointerException => throw new BadRequestException("Please provide: userid to grant user as tutor")
     }
   }
 
@@ -331,18 +331,18 @@ class CourseController {
   def grantDocentToCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest,
                           @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val userid = jsonNode.get(LABEL_USERID).asInt()
       val requestingUser = userService.verfiyUserByHeaderToken(request)
       if (requestingUser.isEmpty || requestingUser.get.roleid != 2) { // Only a moderator can do this
         throw new UnauthorizedException
       }
-      val userToGrant = userService.loadUserFromDB(username)
+      val userToGrant = userService.loadUserFromDB(userid)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provide a valid username as a docent")
+        throw new BadRequestException("Please provide a valid userid as a docent")
       }
       courseService.grandUserAsDocentForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username to grant docent")
+      case _: NullPointerException => throw new BadRequestException("Please provide userid to grant docent")
     }
   }
 
@@ -357,18 +357,18 @@ class CourseController {
   @ResponseBody
   def denyTutorForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
       if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid != 4)) {
         throw new UnauthorizedException
       }
-      val userToGrant = userService.loadUserFromDB(username)
+      val userToGrant = userService.loadUserFromDB(userid)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provid a valid username which is a tutor")
+        throw new BadRequestException("Please provide a valid userid which is a tutor")
       }
       courseService.denyUserAsTutorForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username")
+      case _: NullPointerException => throw new BadRequestException("Please provide: userid")
     }
   }
 
@@ -384,18 +384,18 @@ class CourseController {
   def denyDocentForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest,
                           @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
       if (user.isEmpty || user.get.roleid != 2) {
         throw new UnauthorizedException
       }
-      val userToGrant = userService.loadUserFromDB(username)
+      val userToGrant = userService.loadUserFromDB(userid)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provide a valid username which is a docent")
+        throw new BadRequestException("Please provide a valid userid which is a docent")
       }
       courseService.denyUserAsDocentForACourse(courseid, userToGrant.get)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide: username")
+      case _: NullPointerException => throw new BadRequestException("Please provide: userid")
     }
   }
 
