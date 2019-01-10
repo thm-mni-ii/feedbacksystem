@@ -193,7 +193,7 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertEqual(task_creation_1.status_code, 400)
 
-        requests.post(url=self.URL + "courses/11/grant/docent", data=json.dumps({"username": "prof"}),
+        requests.post(url=self.URL + "courses/11/grant/docent", data=json.dumps({"userid": 54}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.moderator_auth_header})
@@ -249,7 +249,7 @@ class TestRESTStudent(unittest.TestCase):
 
         # TODO check that tutor can not give access and so on
 
-        requests.post(url=self.URL + "courses/11/grant/tutor", data=json.dumps({"username": "bmnn57"}),
+        requests.post(url=self.URL + "courses/11/grant/tutor", data=json.dumps({"userid": 53}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.docent_auth_header})
@@ -268,7 +268,7 @@ class TestRESTStudent(unittest.TestCase):
         self.assertTrue("success" in task_put2.json())
         self.assertTrue("upload_url" in task_put2.json())
 
-        deny1 = requests.post(url=self.URL + "courses/11/deny/tutor", data=json.dumps({"username": "bmnn57"}),
+        deny1 = requests.post(url=self.URL + "courses/11/deny/tutor", data=json.dumps({"userid": 53}),
                               verify=False,
                               headers={'content-type': 'application/json',
                                        'Authorization': self.docent_auth_header})
@@ -297,7 +297,7 @@ class TestRESTStudent(unittest.TestCase):
         pprint(task_get2.json())
         self.assertEqual(401, task_get2.status_code)
 
-        deny_docent = requests.post(url=self.URL + "courses/11/deny/docent", data=json.dumps({"username": "prof"}),
+        deny_docent = requests.post(url=self.URL + "courses/11/deny/docent", data=json.dumps({"userid": 54}),
                                     verify=False,
                                     headers={'content-type': 'application/json',
                                              'Authorization': self.moderator_auth_header})
