@@ -1,3 +1,37 @@
-<p>
-  search-course works!
-</p>
+<form>
+  <mat-form-field class="example-full-width" appearance="fill">
+    <mat-label>Kurs suchen</mat-label>
+    <input type="text" aria-label="Kurs suchen" matInput [formControl]="myControl"
+           [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+      <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+        {{option.course_name}} ({{option.course_modul_id}})
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</form>
+
+
+<div class="card-container">
+  <mat-card *ngFor="let course of cardCourses">
+    <mat-card-header>
+      <mat-card-title>{{course.course_name}}</mat-card-title>
+      <mat-card-subtitle>{{course.course_modul_id}}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <p id="course-description">
+        {{course.course_description}}
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button *ngIf="hasSubbed(course.course_id)" mat-flat-button color="primary"
+              (click)="goToCourse(course.course_id)">Zum Kurs
+      </button>
+      <button *ngIf="!hasSubbed(course.course_id)" mat-flat-button color="accent"
+              (click)="joinCourse(course.course_name,course.course_id)">Beitreten
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
