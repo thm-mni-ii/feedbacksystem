@@ -71,7 +71,8 @@ class TestRESTStudent(unittest.TestCase):
         """
         course_name = "Kurse " + self.stamp
         r = requests.post(url=self.URL + "courses/", data=json.dumps(
-            {"name": course_name, "description": "Created by Python with pleassure", "standard_task_typ": "FILE","course_semester":"SS19","course_modul_id":"CS1234","anonymous":True}),
+            {"name": course_name, "description": "Created by Python with pleasure", "standard_task_typ": "FILE","course_semester":"SS19","course_modul_id":"CS1234",
+             "course_end_date":datetime.datetime.today().strftime('%Y-%m-%d'), "personalised_submission":True}),
                           verify=False,
                           headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
         
@@ -94,7 +95,8 @@ class TestRESTStudent(unittest.TestCase):
         course_desc_new = str(random.random())
 
         course_req_put = requests.put(url=self.URL + "courses/" + str(cid), data=json.dumps(
-            {"name": course_name_new, "description": course_desc_new, "standard_task_typ": "TEXT","course_semester":"SS19","course_modul_id":"CS1234","anonymous":True}), verify=False,
+            {"name": course_name_new, "description": course_desc_new, "standard_task_typ": "TEXT","course_semester":"SS19","course_modul_id":"CS1234",
+             "course_end_date":datetime.datetime.today().strftime('%Y-%m-%d'),"personalised_submission":True}), verify=False,
                                       headers={'content-type': 'application/json',
                                                'Authorization': self.admin_auth_header})
         

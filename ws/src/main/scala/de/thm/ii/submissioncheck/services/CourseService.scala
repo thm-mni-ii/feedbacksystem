@@ -42,18 +42,19 @@ class CourseService {
     *
     * @author Benjamin Manns
     * @param userid identifies a user
+    * @param check_course_lifetime if true only list courses which have not ended yet
     * @return List of Maps
     */
-  def getSubscribedCoursesByUser(userid: Int): List[Map[String, String]] = {
-   // TODO filter nach Course Lifetime
-    DB.query("SELECT c.* FROM user_course hc join course c using(course_id) where user_id = ? and hc.role_id = 16",
+  def getSubscribedCoursesByUser(userid: Int, check_course_lifetime: Boolean = false): List[Map[String, String]] = {
+    val snippet = if (check_course_lifetime) "and (c.course_end_date is null or CURRENT_DATE() <= c.course_end_date)" else ""
+    DB.query("SELECT c.* FROM user_course hc join course c using(course_id) where user_id = ? and hc.role_id = 16 " + snippet,
       (res, _) => {
         Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
             CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
-          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester)
-          // TODO course_lifetime
+          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date)
         )
       }, userid)
   }
@@ -74,6 +75,8 @@ class CourseService {
           RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
           "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
           "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
       }, user.userid)
@@ -244,6 +247,8 @@ class CourseService {
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
+        CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+        CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
         "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
         "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
     }, user.userid)
@@ -260,7 +265,7 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "course_id, course_name, course_description" + (if (isPermitted) {
+    val selectPart = "course_id, course_name, course_end_date, course_description" + (if (isPermitted) {
       ", creator" // TODO add more columns
     } else {
       ""
@@ -277,6 +282,7 @@ class CourseService {
           CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
           LABEL_TASKS -> taskList
         )
         if (isPermitted) {
@@ -502,7 +508,7 @@ class CourseService {
     * @return Big Scala Map
     */
   def getSubmissionsMatrixByUser(userid: Int): List[Any] = {
-    val courseList = this.getSubscribedCoursesByUser(userid)
+    val courseList = this.getSubscribedCoursesByUser(userid, true)
     var matrix: List[Any] = List()
     for (course <- courseList) {
       val courseTasks = taskService.getTasksByCourse(Integer.parseInt(course(CourseDBLabels.courseid)))
@@ -577,16 +583,17 @@ class CourseService {
     * @param standard_task_typ a standart task type
     * @param course_modul_id Based on Modul Descriptino its modul name
     * @param course_semester semester where this course will be available
-    * @param anonym_submission anonym submissions, if no every task and submission will be deleted.
+    * @param course_end_date date when course will be unvisible because it is out of date then
+    * @param personalised_submission personalised submissions, if true every task and submission will be deleted after user deletion
     * @return Scala Map
     * @throws RuntimeException
     */
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String,
-                         course_modul_id: String, course_semester: String, anonym_submission: Int = 0): Map[String, Number] = {
+                         course_modul_id: String, course_semester: String, course_end_date: String, personalised_submission: Int = 0): Map[String, Number] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "insert into course (course_name, course_description, creator, standard_task_type, course_modul_id, " +
-          "course_semester, anonym_submission) values (?,?,?,?,?,?,?)",
+        "insert into course (course_name, course_description, creator, standard_task_typ, course_modul_id, " +
+          "course_semester, personalised_submission, course_end_date) values (?,?,?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       ps.setString(1, name)
@@ -596,10 +603,12 @@ class CourseService {
       val m5 = 5
       val m6 = 6
       val m7 = 7
+      val m8 = 8
       ps.setString(m4, standard_task_typ)
       ps.setString(m5, course_modul_id)
       ps.setString(m6, course_semester)
-      ps.setInt(m7, anonym_submission)
+      ps.setInt(m7, personalised_submission)
+      ps.setString(m8, course_end_date)
       ps
     })
     if (num < 1) {
@@ -618,20 +627,29 @@ class CourseService {
     * @param standard_task_typ a standart task type
     * @param course_modul_id Based on Modul Descriptino its modul name
     * @param course_semester semester where this course will be available
+    * @param course_end_date date when course will be unvisible because it is out of date then
+    * @param personalised_submission personalised submissions, if true every task and submission will be deleted after user deletion
     * @return Scala Map
     * @throws ResourceNotFoundException
     */
-  def updateCourse(courseid: Int, name: String, description: String, standard_task_typ: String,
-                   course_modul_id: String, course_semester: String): Map[String, Boolean] = {
-    val success = DB.update("update course set course_name = ?, course_description = ?, standard_task_type = ?, " +
-      "course_modul_id = ?, course_semester = ? where course_id = ?",
-      name, description, standard_task_typ, course_modul_id, course_semester, courseid)
-    if (success == 0) {
-      throw new ResourceNotFoundException
+  def updateCourse(courseid: Int, name: String = null, description: String = null, standard_task_typ: String = null,
+                   course_modul_id: String = null, course_semester: String = null, course_end_date: String = null,
+                   personalised_submission: String = null): Map[String, Boolean] = {
+    var updates = 0
+    var suceeds = 0
+    if (name != null) suceeds += DB.update("update course set course_name = ? where course_id = ?", name, courseid); updates += 1
+    if (description != null) suceeds += DB.update("update course set course_description = ? where course_id = ?", description, courseid); updates += 1
+    if (standard_task_typ != null) suceeds += DB.update("update course set standard_task_typ = ? where course_id = ?",
+      standard_task_typ, courseid); updates += 1
+    if (course_modul_id != null) suceeds += DB.update("update course set course_modul_id = ? where course_id = ?", course_modul_id, courseid); updates += 1
+    if (course_semester != null) suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1
+    if (course_end_date != null) suceeds += DB.update("update course set course_end_date = ? where course_id = ?", course_end_date, courseid); updates += 1
+    if (personalised_submission != null){
+      val dbBool = if (personalised_submission == "true") 1 else 0
+      suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
+      updates += 1
     }
-    else {
-      Map(LABEL_SUCCESS -> true)
-    }
+    Map(LABEL_SUCCESS -> (updates == suceeds))
   }
 
   /**
@@ -648,6 +666,7 @@ class CourseService {
         TaskDBLabels.description -> res.getString(TaskDBLabels.description),
         CourseDBLabels.name -> res.getString(CourseDBLabels.name),
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
         SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
         SubmissionDBLabels.exitcode ->res.getString(SubmissionDBLabels.exitcode),
         SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
