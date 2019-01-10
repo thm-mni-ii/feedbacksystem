@@ -52,24 +52,43 @@ class UserController {
     * grant a user to the global role MODERATOR
     * @author Benjamin Manns
     * @param request contains resquest headers
+    * @param userid unique identification for user
     * @param jsonNode contains request body
     * @return JSON
     */
-  @RequestMapping(value = Array("/users/grant/moderator"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def grantModerator(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+  @RequestMapping(value = Array("/users/grant/{userid}"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def grantModerator(request: HttpServletRequest, @PathVariable userid: Int, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      val userToGrant = userService.loadUserFromDB(username)
+      val roleid = Integer.parseInt(jsonNode.get("role").asText())
+
+      val userToGrant = userService.loadUserFromDB(userid)
       if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provide a valid username to grant moderator access to")
+        throw new BadRequestException("Please provide a valid username to grant or revoke access to")
       }
-      Map(LABEL_GRANT -> RoleDBLabels.MODERATOR, LABEL_SUCCESS -> userService.grantUser(userToGrant.get, RoleDBLabels.MODERATOR))
+      var grantRevokeSuccess: Boolean = false
+      var grantRevokeLabel: String = ""
+      if (roleid == 16){
+        grantRevokeSuccess = userService.revokeUser(userToGrant.get)
+        grantRevokeLabel = RoleDBLabels.STUDENT
+      } else if (roleid == 2){
+        grantRevokeSuccess = userService.grantUser(userToGrant.get, RoleDBLabels.MODERATOR)
+        grantRevokeLabel = RoleDBLabels.MODERATOR
+      } else if (roleid == 1){
+        grantRevokeSuccess = userService.grantUser(userToGrant.get, RoleDBLabels.ADMIN)
+        grantRevokeLabel = RoleDBLabels.ADMIN
+      } else {
+        throw new BadRequestException("Please provide a valid role to grant or revoke a user. Requested role: " + roleid + " is invalid.")
+      }
+
+      val grantRevokeField = if (userToGrant.get.roleid < roleid) "revoke" else LABEL_GRANT
+      Map(grantRevokeField -> grantRevokeLabel, LABEL_SUCCESS -> grantRevokeSuccess)
     } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a username for MODERATOR")
+      case _: NullPointerException => throw new BadRequestException("Please provide a valid field `role`.")
+      case _: NumberFormatException => throw new BadRequestException("Please provide a valid field `role`.")
     }
   }
 
@@ -118,56 +137,6 @@ class UserController {
       Map("batch_delete"->success)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a valid user_id_list")
-    }
-  }
-
-  /**
-    * grant a user to the global role ADMIN
-    * @author Benjamin Manns
-    * @param request contains resquest headers
-    * @param jsonNode contains request body
-    * @return JSON
-    */
-  @RequestMapping(value = Array("users/grant/admin"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def grantAdmin(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid != 1) {
-      throw new UnauthorizedException
-    }
-    try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      val userToGrant = userService.loadUserFromDB(username)
-      if (userToGrant.isEmpty) {
-        throw new BadRequestException("Please provide a valid username to grant admin access to")
-      }
-      Map(LABEL_GRANT -> RoleDBLabels.ADMIN, LABEL_SUCCESS -> userService.grantUser(userToGrant.get, RoleDBLabels.ADMIN))
-    } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a username for ADMIN")
-    }
-  }
-
-  /**
-    * revoke a users global role
-    * @author Benjamin Manns
-    * @param request contains resquest headers
-    * @param jsonNode contains request body
-    * @return JSON
-    */
-  @RequestMapping(value = Array("users/revoke"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def revokeGlobalRoleOfUser(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid != 1) {
-      throw new UnauthorizedException
-    }
-    try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      val userToRevoke = userService.loadUserFromDB(username)
-      if (userToRevoke.isEmpty) {
-        throw new BadRequestException("Please provide a valid username to revoke global role")
-      }
-      Map("revoke" -> userService.revokeUser(userToRevoke.get))
-    } catch {
-      case _: NullPointerException => throw new BadRequestException("Please provide a username to revoke")
     }
   }
 
