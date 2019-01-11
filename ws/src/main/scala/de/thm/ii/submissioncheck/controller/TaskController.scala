@@ -185,7 +185,7 @@ class TaskController {
     }
   }
 
-  private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + topicName
+  private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
   /**
     * serve a route to upload a submission file to a given submissionid
@@ -299,6 +299,7 @@ class TaskController {
     val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
     logger.warn(jsonStringMsg)
     kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
+    logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
     kafkaTemplate.flush()
 
     Map("upload_success" -> message, LABEL_FILENAME -> filename)
