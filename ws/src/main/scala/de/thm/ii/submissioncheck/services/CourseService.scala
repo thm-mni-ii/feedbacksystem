@@ -272,7 +272,7 @@ class CourseService {
     })
 
     val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user)) {
-      this.taskService.getTasksByCourse(courseid)
+      this.taskService.getTasksByCourse(courseid, Some(user.userid))
     } else {
       List.empty
     }
@@ -334,18 +334,18 @@ class CourseService {
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid)).resolve("submits")
+      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
 
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
-        var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), student(UserDBLabels.user_id), "desc")
+        var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
             last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
               LABEL_UNDERLINE).replace(" ", "")
             tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
-              task(TaskDBLabels.taskid), last_submission_date), LABEL_UNDERLINE))
+              task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
             Files.createDirectories(tmpZiptaskPath)
           }
 
@@ -392,17 +392,17 @@ class CourseService {
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid)).resolve("submits")
+      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
 
       var tmpZiptaskPath: Path = null
-      var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), user.userid, "desc")
+      var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
       if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
       for((submission, i) <- studentSubmissionList.zipWithIndex) {
         if (i == 0) {
           last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
             LABEL_UNDERLINE).replace(" ", "")
           tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
-            task(TaskDBLabels.taskid), last_submission_date), LABEL_UNDERLINE))
+            task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
           Files.createDirectories(tmpZiptaskPath)
         }
         // create path out of this
@@ -473,7 +473,7 @@ class CourseService {
       var tasksPassedSum = 0
       var processedTasks: List[Any] = List()
       for((task, i) <- tasks.zipWithIndex){
-        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), u("user_id"))
+        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
           /* processing - number of trials - passed - passed date */
         var passed: Boolean = false
         var passedDate: Any = ""
@@ -517,7 +517,7 @@ class CourseService {
       var processedTasks: List[Any] = List()
       var deadlines: List[String] = List()
       for((task, i) <- courseTasks.zipWithIndex) {
-        val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid), userid)
+        val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
         // process them
         var passed: Boolean = false
         var passedDate: Any = ""
@@ -536,7 +536,7 @@ class CourseService {
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed,
           "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
-        deadlines = task(TaskDBLabels.deadline) :: deadlines
+        deadlines = task(TaskDBLabels.deadline).toString :: deadlines
         processedTasks = taskStudentCell :: processedTasks
       }
       val courseLine = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)

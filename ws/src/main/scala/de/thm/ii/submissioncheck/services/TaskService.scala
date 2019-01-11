@@ -134,6 +134,14 @@ class TaskService {
       }, taskid, user.userid)
   }
 
+  private def getNullOrBoolean(boolDBString: String) = {
+    if (boolDBString == null) {
+      null
+    } else {
+      boolDBString.toInt > 0
+    }
+  }
+
   /**
     * get all submissions from a user by a given task
     * @author Benjamin Manns
@@ -151,7 +159,7 @@ class TaskService {
         Map(SubmissionDBLabels.result -> res.getString(SubmissionDBLabels.result),
           SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
-          SubmissionDBLabels.passed -> res.getInt(SubmissionDBLabels.passed),
+          SubmissionDBLabels.passed ->  getNullOrBoolean(res.getString(SubmissionDBLabels.passed)),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
           SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
@@ -187,25 +195,46 @@ class TaskService {
   /**
     * print detail information of a given task
     * @param taskid unique identification for a task
+    * @param userid unique identification for a User
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer): Option[Map[String, String]] = {
+  def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     // TODO check if user has this course where the task is from
     val list = DB.query("SELECT task.test_type, `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
       "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
-        Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
+        val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
-          TaskDBLabels.test_type -> res.getString(TaskDBLabels.test_type)
-        )
+          TaskDBLabels.test_type -> res.getString(TaskDBLabels.test_type))
+
+        if (userid.isDefined){
+          val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
+            lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
+              SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
+              SubmissionDBLabels.filename -> submissionInfos(SubmissionDBLabels.filename))
+        } else {
+          lineMap
+        }
       }, taskid)
     if(list.isEmpty) {
       throw new ResourceNotFoundException
     }
     list.headOption
+  }
+
+  private def getLastSubmissionResultInfoByTaskIDAndUser(taskid: Int, userid: Int) = {
+    val submissions = getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
+    var map: Map[String, Any] = Map(SubmissionDBLabels.result -> null, SubmissionDBLabels.passed -> null,
+      SubmissionDBLabels.filename -> null)
+    if (submissions.nonEmpty) {
+      map = Map(SubmissionDBLabels.result -> submissions.head(SubmissionDBLabels.result),
+        SubmissionDBLabels.passed -> submissions.head(SubmissionDBLabels.passed),
+        SubmissionDBLabels.filename -> submissions.head(SubmissionDBLabels.filename))
+    }
+    map
   }
 
   /**
@@ -238,18 +267,27 @@ class TaskService {
   /**
     * get a JAVA List of Task by a given course id
     * @param courseid unique identification for a course
+    * @param userid unique identification for a User
     * @return JAVA List
     */
-  def getTasksByCourse(courseid: Int): List[Map[String, String]] = {
+  def getTasksByCourse(courseid: Int, userid: Option[Int] = None): List[Map[String, Any]] = {
     DB.query("select * from task where course_id = ?",
       (res, _) => {
-        Map(
+        val lineMap = Map(
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
-          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
+          TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
           TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline))
         )
+        if (userid.isDefined){
+          val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(res.getInt(TaskDBLabels.taskid), userid.get)
+          lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
+            SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
+            SubmissionDBLabels.filename -> submissionInfos(SubmissionDBLabels.filename))
+        } else {
+          lineMap
+        }
       }, courseid)
   }
 
