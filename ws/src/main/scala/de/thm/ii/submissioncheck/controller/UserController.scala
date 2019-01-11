@@ -48,6 +48,15 @@ class UserController {
     userMap + ("information" -> "In addition to the master data, we have your fees for the non-anonymous course tasks you have taken.")
   }
 
+  @RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
+  def userAcceptPrivacy(request: HttpServletRequest) = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+
+  }
+
   /**
     * grant a user to the global role MODERATOR
     * @author Benjamin Manns

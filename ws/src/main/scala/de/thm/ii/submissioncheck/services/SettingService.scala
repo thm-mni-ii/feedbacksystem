@@ -40,4 +40,15 @@ class SettingService {
       value, key, typ, value, typ))
   }
 
+  def loadSetting(key: String): Option[Any] = {
+    val list = DB.query("SELECT * FROM setting where setting_key = ?", (res, _) => {
+      res.getString("setting_typ") match  {
+        case "BOOL" => res.getBoolean("setting_val")
+        case "TEXT" => res.getString("setting_val")
+        case whoa => res.getString("setting_val")
+      }
+    }, key)
+    list.headOption
+  }
+
 }
