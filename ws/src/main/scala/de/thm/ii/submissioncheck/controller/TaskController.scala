@@ -481,7 +481,7 @@ class TaskController {
           taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
             Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
             answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
-            answeredMap("exitcode").asInstanceOf[Int])
+            Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]))
         } catch {
           case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
         }
