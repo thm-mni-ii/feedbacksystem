@@ -1,13 +1,15 @@
 package de.thm.ii.submissioncheck.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.BadRequestException
+import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{LoginService, SettingService, UserService}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.springframework.web.bind.annotation._
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+
+
 
 /**
   * LoginController simply perfoem login request. In future it might send also a COOKIE
@@ -42,7 +44,6 @@ class LoginController extends CasClientConfigurerAdapter {
       try {
         val principal = request.getUserPrincipal
         val name = principal.getName
-
         val dbUser = userService.loadUserFromDB(name)
 
         val privacyShowSettingsEntry = settingService.loadSetting("privacy.show")
@@ -66,7 +67,24 @@ class LoginController extends CasClientConfigurerAdapter {
         }
   }
 
+  @RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
+  def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode) = {
+    try {
+      val username = jsonNode.get("username").asText()
+      // TODO Load Data from CAS
+      val user = this.userService.insertUserIfNotExists(username, LABEL_STUDENT_ROLE)
+      loginService.log(user)
+      val jwtToken = this.userService.generateTokenFromUser(user)
+      response.addHeader("Authorization", "Bearer " + jwtToken)
+      Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: username")
+      }
+    }
 
+  }
 
   /**
     * Provide a REST for getting fast a token, only for testing purpose

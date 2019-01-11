@@ -387,7 +387,7 @@ class TestRESTStudent(unittest.TestCase):
 
 
         pprint(all_subs.json())
-        self.assertTrue(5 < len(all_subs.json()))
+        self.assertTrue(2 < len(all_subs.json()))
         requests.post(url=self.URL + "courses/11/unsubscribe", data=json.dumps({}),
                       verify=False,
                       headers={'content-type': 'application/json',
