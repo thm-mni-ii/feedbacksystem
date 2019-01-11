@@ -53,6 +53,21 @@ class SettingController {
     }
   }
 
+  /** Set value if a privacy message has to be shown
+    * @author Benjamin Manns
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("privacy/show"), method = Array(RequestMethod.GET))
+  def getPrivacyShow(request: HttpServletRequest): Map[String, Boolean] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 1) {
+      throw new UnauthorizedException
+    }
+    val settingsPrivacyShow = settingService.loadSetting("privacy.show")
+    Map("show" -> (if (settingsPrivacyShow.isDefined) settingsPrivacyShow.get.asInstanceOf[Boolean] else true))
+  }
+
   /**
     * Set value of privacy / impressum text
     * @author Benjamin Manns
@@ -76,4 +91,20 @@ class SettingController {
     }
   }
 
+  /**
+    * Set privacy / impressum texts stored in settings
+    * @author Benjamin Manns
+    * @param request contain request information
+    * @param which choose which provacy test should be loaded
+    * @return JSON
+    */
+  @RequestMapping(value = Array("privacy/text"), method = Array(RequestMethod.GET))
+  def getPrivacyText(request: HttpServletRequest, @RequestParam(value = "which", required = true) which: String): Any = {
+    // Everyone can read this information
+    val allowedKeys = List("impressum_text", "privacy_text")
+    if (!allowedKeys.contains(which)) {
+      throw new BadRequestException("Please choose as parameter `which` one of: (" + allowedKeys.map(f => f + ",") + ")")
+    }
+    settingService.loadSetting("privacy." + which).getOrElse("")
+  }
 }

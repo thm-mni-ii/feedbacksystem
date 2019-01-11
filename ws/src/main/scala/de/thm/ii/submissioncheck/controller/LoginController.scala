@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation._
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 
-
-
 /**
   * LoginController simply perfoem login request. In future it might send also a COOKIE
   *
@@ -31,9 +29,11 @@ class LoginController extends CasClientConfigurerAdapter {
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val LABEL_LOGIN_RESULT = "login_result"
   private val LABEL_SHOW_PRIVACY = "show_privacy"
+  private val LABEL_AUTHORIZATION = "Authorization"
   /**
-    * postUser sends login data to the CAS client to perform a login. Also a Cookie has to be
-    * created
+    * Authentication starts here. This Webservice sends user to CAS to perform a login. CAS redirects to this point and
+    * here a answer to a connected Application (i.e. Angular) will be sent
+    * @author Benjamin Manns
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
@@ -54,8 +54,8 @@ class LoginController extends CasClientConfigurerAdapter {
         } else {
           val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
           val jwtToken = userService.generateTokenFromUser(user)
+          setBearer(response, jwtToken)
           loginService.log(user)
-          response.addHeader("Authorization", "Bearer " + jwtToken)
           Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
         }
       }
@@ -67,15 +67,26 @@ class LoginController extends CasClientConfigurerAdapter {
         }
   }
 
+  private def setBearer(response: HttpServletResponse, token: String) = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
+
+  /**
+    * If a user is not registered yet, he may has to accept the provacy message, this is done here, after accepting,
+    * he will be registered into db
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
+    */
   @RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
-  def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode) = {
+  def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val username = jsonNode.get("username").asText()
       // TODO Load Data from CAS
       val user = this.userService.insertUserIfNotExists(username, LABEL_STUDENT_ROLE)
       loginService.log(user)
       val jwtToken = this.userService.generateTokenFromUser(user)
-      response.addHeader("Authorization", "Bearer " + jwtToken)
+      setBearer(response, jwtToken)
       Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
     }
     catch {
@@ -83,7 +94,6 @@ class LoginController extends CasClientConfigurerAdapter {
         throw new BadRequestException("Please provide: username")
       }
     }
-
   }
 
   /**
@@ -102,7 +112,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val user = this.userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
       loginService.log(user)
       val jwtToken = this.userService.generateTokenFromUser(user)
-      response.addHeader("Authorization", "Bearer " + jwtToken)
+      setBearer(response, jwtToken)
       Map("token" -> jwtToken)
     }
     catch {
