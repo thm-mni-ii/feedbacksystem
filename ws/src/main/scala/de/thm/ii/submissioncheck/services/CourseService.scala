@@ -536,7 +536,7 @@ class CourseService {
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed,
           "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
-        deadlines = task(TaskDBLabels.deadline).toString :: deadlines
+        deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
         processedTasks = taskStudentCell :: processedTasks
       }
       val courseLine = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
