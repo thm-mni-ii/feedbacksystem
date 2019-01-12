@@ -21,10 +21,6 @@ import {Observable} from 'rxjs';
 import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
 import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-dashboard.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
-import {StudentSearchComponent} from './components/student/student-search/student-search.component';
-import {StudentCourseComponent} from './components/student/student-course/student-course.component';
-import {StudentListComponent} from './components/student/student-list/student-list.component';
-import {CourseTableComponent} from './components/student/student-list/course-table/course-table.component';
 import {StartComponent} from './components/start/start.component';
 import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
 import {CoursesComponent} from './components/courses/courses.component';
@@ -32,7 +28,9 @@ import {GrantDocentComponent} from './components/courses/grant-docent/grant-doce
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
 import {NewCourseComponent} from './components/courses/new-course/new-course.component';
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
-import {MatSortModule} from "@angular/material";
+import {DetailCourseComponent} from './components/courses/detail-course/detail-course.component';
+import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof-dashboard.component';
+import { ReadMoreComponent } from './components/courses/search-course/read-more/read-more.component';
 
 
 @Injectable()
@@ -54,21 +52,20 @@ export const httpInterceptorProviders = [
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
     AdminUserManagementComponent,
     AdminDashboardComponent,
-    StudentDashboardComponent,
-    StudentSearchComponent,
-    StudentCourseComponent,
-    StudentListComponent,
-    CourseTableComponent,
-    StartComponent,
     AdminCheckerComponent,
+    LoginComponent,
+    StudentDashboardComponent,
+    StartComponent,
     CoursesComponent,
     GrantDocentComponent,
     GrantTutorComponent,
     NewCourseComponent,
-    SearchCourseComponent
+    SearchCourseComponent,
+    DetailCourseComponent,
+    ProfDashboardComponent,
+    ReadMoreComponent,
   ],
   imports: [
     BrowserModule,

@@ -5,9 +5,6 @@ import {AuthGuard} from './guards/auth.guard';
 import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-dashboard.component';
 import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
-import {StudentCourseComponent} from './components/student/student-course/student-course.component';
-import {StudentSearchComponent} from './components/student/student-search/student-search.component';
-import {StudentListComponent} from './components/student/student-list/student-list.component';
 import {StartComponent} from './components/start/start.component';
 import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
 import {CoursesComponent} from './components/courses/courses.component';
@@ -15,6 +12,8 @@ import {GrantDocentComponent} from './components/courses/grant-docent/grant-doce
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
 import {NewCourseComponent} from './components/courses/new-course/new-course.component';
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
+import {DetailCourseComponent} from './components/courses/detail-course/detail-course.component';
+import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof-dashboard.component';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -26,6 +25,7 @@ const routes: Routes = [
       {path: 'courses/tutor', component: GrantTutorComponent},
       {path: 'courses/new', component: NewCourseComponent},
       {path: 'courses/search', component: SearchCourseComponent},
+      {path: 'courses/:id', component: DetailCourseComponent},
 
       // Admin
       {path: 'admin/dashboard', component: AdminDashboardComponent},
@@ -34,9 +34,9 @@ const routes: Routes = [
 
       // Student
       {path: 'student/dashboard', component: StudentDashboardComponent},
-      {path: 'student/courses', component: StudentListComponent},
-      {path: 'student/search', component: StudentSearchComponent},
-      {path: 'student/course/:id', component: StudentCourseComponent}
+
+      // Prof
+      {path: 'docent/dashboard', component: ProfDashboardComponent}
     ]
   },
 ];
