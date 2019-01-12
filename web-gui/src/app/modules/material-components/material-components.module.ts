@@ -19,7 +19,7 @@ import {
   MatSelectModule,
   MatSidenavModule,
   MatSnackBarModule,
-  MatSortModule,
+  MatSortModule, MatStepperModule,
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
@@ -52,7 +52,8 @@ import {
     MatTooltipModule,
     MatSelectModule,
     MatChipsModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatStepperModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -79,7 +80,8 @@ import {
     MatTooltipModule,
     MatSelectModule,
     MatChipsModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatStepperModule
   ],
   declarations: []
 })
