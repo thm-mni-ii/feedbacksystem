@@ -11,7 +11,7 @@ print(dirname)
 class TestRESTStudent(unittest.TestCase):
     def setUp(self):
         # How many digits to match in case of floating point answers
-        self.URL = "http://localhost:8080/api/v1/"
+        self.URL = "https://localhost:8080/api/v1/"
 
         # print(r.headers)
         # self.auth_token = r.headers["Authorization"].replace("Bearer ","")
@@ -614,8 +614,8 @@ class TestRESTStudent(unittest.TestCase):
                               'Authorization': self.admin_auth_header})
 
 
-        privacy_text = requests.get(url=self.URL + "settings/privacy/text?which=privacy_text").text
-        impressum_text = requests.get(url=self.URL + "settings/privacy/text?which=impressum_text").text
+        privacy_text = requests.get(url=self.URL + "settings/privacy/text?which=privacy_text", verify=False).text
+        impressum_text = requests.get(url=self.URL + "settings/privacy/text?which=impressum_text", verify=False).text
 
         self.assertEqual(random_bacom_text, privacy_text)
         self.assertEqual(random_bacom_text, impressum_text)
