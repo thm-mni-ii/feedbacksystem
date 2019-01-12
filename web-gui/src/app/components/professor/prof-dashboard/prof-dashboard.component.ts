@@ -1,8 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DatabaseService, ProfDashboard} from "../../../service/database.service";
-import {CourseTableItem} from "../../student/student-list/course-table/course-table-datasource";
-import {Subscription} from "rxjs";
-import {MatTabChangeEvent} from "@angular/material";
+import {CourseTableItem, DatabaseService, ProfDashboard} from '../../../service/database.service';
+import {Subscription} from 'rxjs';
+import {MatTabChangeEvent} from '@angular/material';
 
 @Component({
   selector: 'app-prof-dashboard',
@@ -22,7 +21,7 @@ export class ProfDashboardComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
-    this.profCourseSub = this.db.getCourses().subscribe(courses => {
+    this.profCourseSub = this.db.getUserCourses().subscribe(courses => {
       this.profCourses = courses;
     });
   }
@@ -37,7 +36,7 @@ export class ProfDashboardComponent implements OnInit, OnDestroy {
 
 
   private getDetails(courseID: number) {
-    this.db.allUserSubmissions(courseID).subscribe(info => {
+    this.db.getAllUserSubmissions(courseID).subscribe(info => {
       this.dashboardInfo = info[0];
     });
   }
