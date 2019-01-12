@@ -28,7 +28,7 @@ class SettingController {
   @Autowired
   private val userService: UserService = null
 
-  private val LABEL_UPADATE = "update"
+  private val LABEL_SUCCESS = "success"
 
   /**
     * Set value if a privacy message has to be shown
@@ -45,7 +45,7 @@ class SettingController {
     }
     try {
       val enable = jsonNode.get("enable").asBoolean()
-      Map(LABEL_UPADATE -> settingService.insertOrUpdateSetting("privacy.show", enable, "BOOL"))
+      Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting("privacy.show", enable, "BOOL"))
       // TODO set or insert privacy set show on or off
     } catch {
       case _: NullPointerException => throw new BadRequestException("")
@@ -84,7 +84,7 @@ class SettingController {
     try {
       val which = jsonNode.get("which").asText()
       val content = jsonNode.get("content").asText()
-      Map(LABEL_UPADATE -> settingService.insertOrUpdateSetting("privacy." + which, content, "TEXT"))
+      Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting("privacy." + which, content, "TEXT"))
     } catch {
       case _: NullPointerException => throw new BadRequestException("")
       case e: NotImplementedError => throw new BadRequestException(e.getMessage)

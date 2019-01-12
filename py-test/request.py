@@ -562,7 +562,7 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
         pprint(delete_users.json())
-        self.assertEqual(delete_users.json(),{'deletion': True})
+        self.assertEqual(delete_users.json(),{'success': True})
 
 
     def test_user_admin_last_logins(self):
