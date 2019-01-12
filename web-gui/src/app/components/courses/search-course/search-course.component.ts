@@ -1,11 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import {DatabaseService} from '../../../service/database.service';
-import {CourseTableItem} from '../../student/student-list/course-table/course-table-datasource';
+import {CourseTableItem, DatabaseService} from '../../../service/database.service';
 import {FormControl} from '@angular/forms';
 import {flatMap, map, startWith} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material';
 import {Router} from '@angular/router';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 @Component({
   selector: 'app-search-course',
@@ -14,7 +14,8 @@ import {Router} from '@angular/router';
 })
 export class SearchCourseComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private router: Router) {
+  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private router: Router,
+              private titlebar: TitlebarService) {
   }
 
   private courses: CourseTableItem[];
@@ -26,6 +27,8 @@ export class SearchCourseComponent implements OnInit {
 
 
   ngOnInit() {
+    this.titlebar.emitTitle('Kurs suchen');
+
     this.db.getAllCourses().pipe(
       flatMap(courses => {
         this.courses = courses;
