@@ -614,7 +614,6 @@ class TestRESTStudent(unittest.TestCase):
                               'Authorization': self.admin_auth_header})
 
 
-
         privacy_text = requests.get(url=self.URL + "settings/privacy/text?which=privacy_text").text
         impressum_text = requests.get(url=self.URL + "settings/privacy/text?which=impressum_text").text
 
