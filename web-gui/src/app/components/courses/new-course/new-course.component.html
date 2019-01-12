@@ -16,12 +16,12 @@
     </mat-step>
 
     <!-- Step 2-->
-    <mat-step [stepControl]="secondFG" label="Beschreibung des Kurses">
+    <mat-step [stepControl]="secondFG" label="Beschreibung des Kurses" optional>
       <form [formGroup]="secondFG" class="step-flex">
         <mat-form-field appearance="outline">
           <mat-label>Kurs beschreibung</mat-label>
           <textarea matInput matTextareaAutosize matAutosizeMinRows="1"
-                    matAutosizeMaxRows="25" formControlName="secondCtrl" required></textarea>
+                    matAutosizeMaxRows="25" formControlName="secondCtrl"></textarea>
         </mat-form-field>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
@@ -44,11 +44,11 @@
     </mat-step>
 
     <!-- Step 4-->
-    <mat-step [stepControl]="fourthFG" label="Semester auswählen">
+    <mat-step [stepControl]="fourthFG" label="Semester auswählen" optional>
       <form [formGroup]="fourthFG" class="step-flex">
         <mat-form-field appearance="outline">
           <mat-label>Semester</mat-label>
-          <input matInput placeholder="Beispiel WS18/19" formControlName="fourthCtrl" required>
+          <input matInput placeholder="Beispiel WS18/19" formControlName="fourthCtrl">
         </mat-form-field>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
@@ -58,11 +58,11 @@
     </mat-step>
 
     <!-- Step 5-->
-    <mat-step [stepControl]="fifthFG" label="Modul-id eingeben">
+    <mat-step [stepControl]="fifthFG" label="Modul-id eingeben" optional>
       <form [formGroup]="fifthFG" class="step-flex">
         <mat-form-field>
           <mat-label>Modul ID</mat-label>
-          <input matInput placeholder="Beispiel CS1010" formControlName="fifthCtrl" required>
+          <input matInput placeholder="Beispiel CS1010" formControlName="fifthCtrl">
         </mat-form-field>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
@@ -72,14 +72,14 @@
     </mat-step>
 
     <!-- Step 6-->
-    <mat-step [stepControl]="sixthFG" label="Privatisierte Informationen des Users">
-      <form [formGroup]="sixthFG" class="step-flex">
+    <mat-step label="Privatisierte Informationen des Users">
+      <form class="step-flex">
         <p>Der User
-          <mat-select class="select" placeholder="Auswahl" formControlName="sixthCtrl" required>
+          <mat-select [(value)]="newCoursePrivatUserData" class="select" placeholder="Auswahl" required>
             <mat-option value="true">kann</mat-option>
             <mat-option value="false">sollte keine</mat-option>
           </mat-select>
-          abgaben mit privaten Daten machen.
+          Abgaben mit privaten Daten machen.
         </p>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
