@@ -1,11 +1,10 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {DatabaseService, User} from '../../../service/database.service';
-import {AuthService} from '../../../service/auth.service';
+import {CourseTableItem, DatabaseService, User} from '../../../service/database.service';
 import {MatAutocomplete, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
-import {CourseTableItem} from '../../student/student-list/course-table/course-table-datasource';
 import {Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {flatMap, map, startWith} from 'rxjs/operators';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 /**
  * Adding and removing docents from courses
@@ -17,7 +16,7 @@ import {flatMap, map, startWith} from 'rxjs/operators';
 })
 export class GrantDocentComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private auth: AuthService, private snackBar: MatSnackBar) {
+  constructor(private db: DatabaseService, private titlebar: TitlebarService, private snackBar: MatSnackBar) {
   }
 
   @ViewChild(MatSort) sort: MatSort;
@@ -34,6 +33,8 @@ export class GrantDocentComponent implements OnInit {
 
 
   ngOnInit() {
+    this.titlebar.emitTitle('Dozent wählen');
+
     this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     this.db.getAllUsers().pipe(
       flatMap(users => {

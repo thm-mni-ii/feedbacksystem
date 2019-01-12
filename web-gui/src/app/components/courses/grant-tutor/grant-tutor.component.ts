@@ -1,11 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {DatabaseService, User} from '../../../service/database.service';
+import {CourseTableItem, DatabaseService, User} from '../../../service/database.service';
 import {MatAutocomplete, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
-import {CourseTableItem} from '../../student/student-list/course-table/course-table-datasource';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {flatMap, map, startWith} from 'rxjs/operators';
 import {UserService} from '../../../service/user.service';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 @Component({
   selector: 'app-grant-tutor',
@@ -14,7 +14,8 @@ import {UserService} from '../../../service/user.service';
 })
 export class GrantTutorComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private user: UserService, private snackBar: MatSnackBar) {
+  constructor(private db: DatabaseService, private user: UserService, private snackBar: MatSnackBar,
+              private titlebar: TitlebarService) {
   }
 
   @ViewChild(MatSort) sort: MatSort;
@@ -31,6 +32,8 @@ export class GrantTutorComponent implements OnInit {
 
 
   ngOnInit() {
+    this.titlebar.emitTitle('Tutor wählen');
+
     if (this.user.getUserRole() === 'admin') {
       this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     } else {
