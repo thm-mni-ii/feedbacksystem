@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 /**
  * Shows a dashboard for the Admin
@@ -10,7 +11,7 @@ import { Breakpoints, BreakpointObserver } from '@angular/cdk/layout';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
   /** Based on the screen size, switch from standard to one column per row */
   cards = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
     map(({ matches }) => {
@@ -32,5 +33,9 @@ export class AdminDashboardComponent {
     })
   );
 
-  constructor(private breakpointObserver: BreakpointObserver) {}
+  constructor(private breakpointObserver: BreakpointObserver, private titlebar: TitlebarService) {}
+
+  ngOnInit(): void {
+    this.titlebar.emitTitle('Dashboard');
+  }
 }

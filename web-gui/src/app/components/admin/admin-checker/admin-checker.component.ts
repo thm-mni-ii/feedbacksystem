@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 @Component({
   selector: 'app-admin-checker',
@@ -7,9 +8,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AdminCheckerComponent implements OnInit {
 
-  constructor() { }
+  constructor(private titlebar: TitlebarService) {
+  }
 
   ngOnInit() {
+    this.titlebar.emitTitle('Checker');
   }
 
 }

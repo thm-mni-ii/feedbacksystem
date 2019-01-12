@@ -2,6 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService, User} from '../../../service/database.service';
 import {MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
 import {flatMap} from 'rxjs/operators';
+import {TitlebarService} from '../../../service/titlebar.service';
 
 /**
  * This component is for admin managing
@@ -16,7 +17,7 @@ export class AdminUserManagementComponent implements OnInit {
 
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor(private db: DatabaseService, private snackBar: MatSnackBar) {
+  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService) {
   }
 
 
@@ -24,6 +25,8 @@ export class AdminUserManagementComponent implements OnInit {
   dataSource = new MatTableDataSource<User>();
 
   ngOnInit() {
+    this.titlebar.emitTitle('User Management');
+
     this.db.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
