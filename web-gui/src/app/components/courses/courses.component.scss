@@ -1,0 +1,30 @@
+@import "../../../colors";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+mat-grid-list {
+  width: 60%;
+}
+
+mat-grid-tile {
+  background: $cPrimary;
+  color: white;
+}
+
+mat-grid-tile:hover {
+  background: lightgrey;
+  cursor: pointer;
+}
+
+@media only screen and (max-width: 800px) {
+
+  mat-grid-list {
+    width: 80%;
+  }
+
+}

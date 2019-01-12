@@ -1,3 +1,9 @@
-<p>
-  courses works!
-</p>
+<div class="container">
+  <mat-grid-list cols="1" rowHeight="60px">
+    <mat-grid-tile *ngFor="let course of userCourses$| async"
+                   (click)="goToCourse(course.course_id)">
+      {{course.course_name}}
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
+
