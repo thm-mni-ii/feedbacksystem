@@ -1,8 +1,9 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {DatabaseService, User} from '../../../service/database.service';
+import {DatabaseService} from '../../../service/database.service';
 import {MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {User} from '../../../interfaces/HttpInterfaces';
 
 /**
  * This component is for admin managing
@@ -55,7 +56,7 @@ export class AdminUserManagementComponent implements OnInit {
     this.db.adminDeleteUser(user.user_id).pipe(
       flatMap((result) => {
 
-        if (result.deletion) {
+        if (result.success) {
           this.snackBar.open(user.username + ' wurde gelöscht');
         }
 

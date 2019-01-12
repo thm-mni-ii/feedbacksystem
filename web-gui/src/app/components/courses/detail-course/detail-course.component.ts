@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {flatMap} from 'rxjs/operators';
 import {ActivatedRoute} from '@angular/router';
-import {CourseDetail, DatabaseService, Task} from '../../../service/database.service';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {CourseTask, DetailedCourseInformation} from '../../../interfaces/HttpInterfaces';
+import {DatabaseService} from '../../../service/database.service';
 
 @Component({
   selector: 'app-detail-course',
@@ -11,8 +12,8 @@ import {TitlebarService} from '../../../service/titlebar.service';
 })
 export class DetailCourseComponent implements OnInit {
 
-  courseDetail: CourseDetail;
-  courseTasks: Task[];
+  courseDetail: DetailedCourseInformation;
+  courseTasks: CourseTask[];
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService) {
   }

@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
   }
 
   username = '';
-  users: string[] = ['test-user', 'prof', 'admin', 'moderator'];
+  users: string[] = ['admin', 'moderator', 'docent', 'tutor', 'test-user'];
 
 
   ngOnInit() {

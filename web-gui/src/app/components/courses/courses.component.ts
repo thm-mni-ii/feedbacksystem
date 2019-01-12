@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {TitlebarService} from '../../service/titlebar.service';
-import {CourseTableItem, DatabaseService} from '../../service/database.service';
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
+import {DatabaseService} from '../../service/database.service';
+import {GeneralCourseInformation} from '../../interfaces/HttpInterfaces';
 
 @Component({
   selector: 'app-courses',
@@ -14,11 +15,11 @@ export class CoursesComponent implements OnInit {
   constructor(private titlebar: TitlebarService, private db: DatabaseService, private router: Router) {
   }
 
-  userCourses$: Observable<CourseTableItem[]>;
+  userCourses$: Observable<GeneralCourseInformation[]>;
 
   ngOnInit() {
     this.titlebar.emitTitle('Meine Kurse');
-    this.userCourses$ = this.db.getUserCourses();
+    this.userCourses$ = this.db.getSubscribedCourses();
 
   }
 

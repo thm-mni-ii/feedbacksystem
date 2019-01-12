@@ -1,11 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {CourseTableItem, DatabaseService} from '../../../service/database.service';
 import {FormControl} from '@angular/forms';
 import {flatMap, map, startWith} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material';
 import {Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {DatabaseService} from '../../../service/database.service';
+import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 
 @Component({
   selector: 'app-search-course',
@@ -18,12 +19,12 @@ export class SearchCourseComponent implements OnInit {
               private titlebar: TitlebarService) {
   }
 
-  private courses: CourseTableItem[];
+  private courses: GeneralCourseInformation[];
   myControl: FormControl = new FormControl('');
-  filteredOptions: Observable<CourseTableItem[]>;
+  filteredOptions: Observable<GeneralCourseInformation[]>;
 
-  cardCourses: CourseTableItem[];
-  subCourses: CourseTableItem[];
+  cardCourses: GeneralCourseInformation[];
+  subCourses: GeneralCourseInformation[];
 
 
   ngOnInit() {
@@ -34,7 +35,7 @@ export class SearchCourseComponent implements OnInit {
         this.courses = courses;
         this.filteredOptions = this.myControl.valueChanges
           .pipe(
-            startWith<string | CourseTableItem>(''),
+            startWith<string | GeneralCourseInformation>(''),
             map(value => typeof value === 'string' ? value : value.course_name),
             map(name => name ? this._filter(name) : this.courses.slice())
           );
@@ -43,16 +44,16 @@ export class SearchCourseComponent implements OnInit {
       this.cardCourses = filteredCourses;
     });
 
-    this.db.getUserCourses().subscribe(subCourses => this.subCourses = subCourses);
+    this.db.getSubscribedCourses().subscribe(subCourses => this.subCourses = subCourses);
 
 
   }
 
-  displayFn(course?: CourseTableItem): string | undefined {
+  displayFn(course?: GeneralCourseInformation): string | undefined {
     return course ? course.course_name : undefined;
   }
 
-  private _filter(name: string): CourseTableItem[] {
+  private _filter(name: string): GeneralCourseInformation[] {
     const filterValue = name.toLowerCase();
 
     return this.courses.filter(option => {
@@ -72,7 +73,7 @@ export class SearchCourseComponent implements OnInit {
         if (msg.success) {
           this.snackBar.open('Kurs ' + coursename + ' beigetreten', 'OK', {duration: 3000});
         }
-        return this.db.getUserCourses();
+        return this.db.getSubscribedCourses();
       })
     ).subscribe(courses => {
         this.subCourses = courses;

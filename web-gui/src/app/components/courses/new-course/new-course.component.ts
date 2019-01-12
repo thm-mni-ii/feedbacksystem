@@ -4,7 +4,7 @@ import {TypesService} from '../../../service/types.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
-import {TitlebarService} from "../../../service/titlebar.service";
+import {TitlebarService} from '../../../service/titlebar.service';
 
 @Component({
   selector: 'app-new-course',

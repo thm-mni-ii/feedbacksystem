@@ -1,29 +1,17 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DashboardInformation, DatabaseService} from "../../../service/database.service";
-import {Subscription} from "rxjs";
+import {Component, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',
   styleUrls: ['./student-dashboard.component.scss']
 })
-export class StudentDashboardComponent implements OnInit, OnDestroy {
+export class StudentDashboardComponent implements OnInit {
 
-  dashInfoSub: Subscription;
-  infos: DashboardInformation[];
 
-  constructor(private db: DatabaseService) {
+  constructor() {
   }
 
   ngOnInit() {
-    this.dashInfoSub = this.db.getOverview().subscribe(dashInfos => {
-      this.infos = dashInfos;
-    });
   }
-
-  ngOnDestroy(): void {
-    this.dashInfoSub.unsubscribe();
-  }
-
 
 }

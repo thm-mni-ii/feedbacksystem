@@ -1,10 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {CourseTableItem, DatabaseService, User} from '../../../service/database.service';
-import {MatAutocomplete, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
+import {MatAutocomplete, MatSort, MatTableDataSource} from '@angular/material';
 import {Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {flatMap, map, startWith} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {GeneralCourseInformation, User} from '../../../interfaces/HttpInterfaces';
+import {DatabaseService} from '../../../service/database.service';
 
 /**
  * Adding and removing docents from courses
@@ -16,14 +17,14 @@ import {TitlebarService} from '../../../service/titlebar.service';
 })
 export class GrantDocentComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private titlebar: TitlebarService, private snackBar: MatSnackBar) {
+  constructor(private db: DatabaseService, private titlebar: TitlebarService) {
   }
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
 
-  dataSourceCourses = new MatTableDataSource<CourseTableItem>();
+  dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
   dataSourceUsers: User[];
   docentFormControl = new FormControl();
   filteredOptions: Observable<User[]>;

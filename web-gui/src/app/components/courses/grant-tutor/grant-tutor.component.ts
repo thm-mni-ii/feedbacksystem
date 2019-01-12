@@ -1,11 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {CourseTableItem, DatabaseService, User} from '../../../service/database.service';
 import {MatAutocomplete, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {flatMap, map, startWith} from 'rxjs/operators';
 import {UserService} from '../../../service/user.service';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {DatabaseService} from '../../../service/database.service';
+import {GeneralCourseInformation, User} from '../../../interfaces/HttpInterfaces';
 
 @Component({
   selector: 'app-grant-tutor',
@@ -22,7 +23,7 @@ export class GrantTutorComponent implements OnInit {
   @ViewChild('auto') matAutocomplete: MatAutocomplete;
 
 
-  dataSourceCourses = new MatTableDataSource<CourseTableItem>();
+  dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
   dataSourceUsers: User[];
   tutorFormControl = new FormControl();
   filteredOptions: Observable<User[]>;
@@ -37,7 +38,7 @@ export class GrantTutorComponent implements OnInit {
     if (this.user.getUserRole() === 'admin') {
       this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     } else {
-      this.db.getUserCourses().subscribe(courses => this.dataSourceCourses.data = courses);
+      this.db.getSubscribedCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     }
     this.db.getAllUsers().pipe(
       flatMap(users => {
@@ -124,7 +125,7 @@ export class GrantTutorComponent implements OnInit {
           if (this.user.getUserRole() === 'admin') {
             return this.db.getAllCourses();
           } else {
-            return this.db.getUserCourses();
+            return this.db.getSubscribedCourses();
           }
         }
       })
