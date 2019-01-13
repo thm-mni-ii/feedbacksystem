@@ -124,8 +124,8 @@ class TaskController {
     var line = Map()
     for(line <- taskService.getTasksByCourse(courseid))
     {
-      var taskDetails: Map[String, Any] = taskService.getTaskDetails(line(TaskDBLabels.taskid).toInt).getOrElse(Map.empty)
-      taskDetails += ("results" -> taskService.getTaskResults(line(TaskDBLabels.taskid).toInt, requestingUser.get))
+      var taskDetails: Map[String, Any] = taskService.getTaskDetails(line(TaskDBLabels.taskid).asInstanceOf[Int]).getOrElse(Map.empty)
+      taskDetails += ("results" -> taskService.getTaskResults(line(TaskDBLabels.taskid).asInstanceOf[Int], requestingUser.get))
 
       bigTaskList = taskDetails :: bigTaskList
     }
@@ -257,13 +257,12 @@ class TaskController {
     * @return JSON
     */
   @RequestMapping(value = Array("tasks/{id}"), method = Array(RequestMethod.GET))
-  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, String] = {
+  def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-
-    taskService.getTaskDetails(taskid).getOrElse(Map.empty)
+    taskService.getTaskDetails(taskid, Some(requestingUser.get.userid)).getOrElse(Map.empty)
   }
 
   // Useful hint for Angular cooperation:
@@ -385,7 +384,7 @@ class TaskController {
     val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
     val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
     val test_type = if (jsonNode.get(TaskDBLabels.test_type) != null) jsonNode.get(TaskDBLabels.test_type).asText() else null
-    var deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
+    val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
     val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else null
     val success = this.taskService.updateTask(taskid, name, description, test_type, deadline, testsystem_id)
 
