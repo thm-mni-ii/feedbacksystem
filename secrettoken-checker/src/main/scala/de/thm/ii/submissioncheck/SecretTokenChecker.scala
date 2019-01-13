@@ -15,13 +15,13 @@ import scala.io.Source
 import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
-import java.io.File
-import java.io.FileNotFoundException
+import java.io._
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL}
+import java.nio.file.{Files, Paths, StandardCopyOption}
 import java.security.cert.X509Certificate
-import javax.net.ssl._
 
+import javax.net.ssl._
 import JsonHelper._
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
 
@@ -85,6 +85,7 @@ object SecretTokenChecker extends App {
   private implicit val materializer: Materializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
 
+  private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
@@ -135,10 +136,12 @@ object SecretTokenChecker extends App {
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       var arguments: String = ""
+
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         //new URL(url) #> new File("submit.txt") !!
-        val s: String = scala.io.Source.fromURL(url).mkString
+        val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
+        val s: String = downloadFileToString(url, jwt_token)
         logger.info(s)
         arguments = s
       }
@@ -171,16 +174,24 @@ object SecretTokenChecker extends App {
   private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     try{
-      logger.info("task received");
+      logger.warning("task received")
+      val sslContext = SSLContext.getInstance("SSL")
+      sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
+      HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
+
       val url: String = jsonMap("testfile_url").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-      val src = scala.io.Source.fromURL(url)
+
+      val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
+      downloadFileToFS(url, jwt_token, taskid)
+      //val src = scala.io.Source.fromURL(url)
       //todo: add support for archives with serveral files"
-      new File(ULDIR + taskid).mkdirs()
+      //new File(ULDIR + taskid).mkdirs()
       //url #> new File(ULDIR + taskid + "/testfile.sh") !!
-      val out = new java.io.FileWriter(ULDIR + taskid + "/testfile.sh")
-      out.write(src.mkString)
-      out.close
+      /*val out = new java.io.FileWriter(ULDIR + taskid + "/testfile.sh")
+      out.write(src)
+      out.close*/
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
@@ -266,7 +277,7 @@ object SecretTokenChecker extends App {
     connection.connect()
 
     if(connection.getResponseCode >= 400){
-      logger.error("Error when downloading file!")
+      logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
       //new File("upload_dir/" + taskid).mkdirs()
@@ -274,21 +285,53 @@ object SecretTokenChecker extends App {
     }
   }
 
-  private def downloadFiletoString(urlname: String): String = {
-    var s: String = ""
-    val timeout = 5000
+  private def downloadFileToFS(urlname: String, jwt_token: String, taskid: String) = {
+    val timeout = 1000
     val url = new java.net.URL(urlname)
+
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
     connection.setConnectTimeout(timeout)
     connection.setReadTimeout(timeout)
+    connection.setRequestProperty("Connection", "close")
     connection.connect()
 
     if(connection.getResponseCode >= 400){
-      logger.error("Error when downloading file!")
+      logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
-      val src = scala.io.Source.fromURL(urlname)
-      s = src.mkString
+      new File(ULDIR + taskid).mkdirs()
+      Files.copy(connection.getInputStream, Paths.get(ULDIR + taskid + "/testfile.sh"), StandardCopyOption.REPLACE_EXISTING)
+    }
+  }
+
+  /**
+    * download a file and parse it to string
+    * @author Vlad Sokyrskyy Benjamin Manns
+    * @param urlname URL where file is located
+    * @param jwt_token Authorization token
+    * @return The string provided in the file
+    */
+  private def downloadFileToString(urlname: String, jwt_token: String): String = {
+    var s: String = ""
+    val timeout = 1000
+    val url = new java.net.URL(urlname)
+
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
+    connection.setConnectTimeout(timeout)
+    connection.setReadTimeout(timeout)
+    connection.setRequestProperty("Connection", "close")
+    connection.connect()
+
+    if(connection.getResponseCode >= 400){
+      logger.error(LABEL_ERROR_DOWNLOAD)
+    }
+    else {
+      Files.copy(connection.getInputStream, Paths.get("upload-dir/script.sh"), StandardCopyOption.REPLACE_EXISTING)
+      val in: InputStream = connection.getInputStream
+      val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
+      s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
     }
     s
   }
