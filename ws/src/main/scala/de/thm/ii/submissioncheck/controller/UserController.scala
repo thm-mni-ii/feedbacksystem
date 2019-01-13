@@ -84,8 +84,7 @@ class UserController {
         throw new BadRequestException("Please provide a valid role to grant or revoke a user. Requested role: " + roleid + " is invalid.")
       }
 
-      val grantRevokeField = if (userToGrant.get.roleid < roleid) "revoke" else LABEL_GRANT
-      Map(grantRevokeField -> grantRevokeLabel, LABEL_SUCCESS -> grantRevokeSuccess)
+      Map("grant" -> grantRevokeLabel, LABEL_SUCCESS -> grantRevokeSuccess)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a valid field `role`.")
       case _: NumberFormatException => throw new BadRequestException("Please provide a valid field `role`.")
@@ -109,7 +108,7 @@ class UserController {
     if(map.isEmpty){
       throw new ResourceNotFoundException()
     }
-    Map("deletion" -> userService.deleteUser(userid))
+    Map(LABEL_SUCCESS -> userService.deleteUser(userid))
   }
 
   /**
@@ -120,7 +119,7 @@ class UserController {
     * @return JSON
     */
   @RequestMapping(value = Array("/users"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def deleteUsersBatch(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+  def deleteUsersBatch(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     val user = userService.verfiyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
@@ -134,7 +133,7 @@ class UserController {
       batchListElements.forEachRemaining(_ => {
         success = userService.deleteUser(batchListElements.next().asInt()) && success
       })
-      Map("batch_delete"->success)
+      Map(LABEL_SUCCESS->success)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide a valid user_id_list")
     }
@@ -157,7 +156,7 @@ class UserController {
                            @RequestParam(value = "after", required = false) after: String,
                            @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verfiyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid > 2) {
+    if(user.isEmpty || user.get.roleid > 4) {
       throw new UnauthorizedException
     }
     try {

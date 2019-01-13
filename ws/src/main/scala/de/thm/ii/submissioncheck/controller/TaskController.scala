@@ -397,12 +397,11 @@ class TaskController {
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns
     * @param taskid unique taskid identification
-    * @param token URL is only working withing a time range
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/testfile/{token}"))
-  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable token: String, request: HttpServletRequest):
+  @GetMapping(Array("tasks/{id}/files/testfile"))
+  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, request: HttpServletRequest):
   ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
@@ -418,13 +417,12 @@ class TaskController {
     * @author Benjamin Manns
     * @param taskid unique taskid identification
     * @param subid unique subid identification
-    * @param token URL is only working withing a time range
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/submissions/{subid}/{token}"))
+  @GetMapping(Array("tasks/{id}/files/submissions/{subid}"))
   @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
-                                        @PathVariable token: String, request: HttpServletRequest): ResponseEntity[Resource] = {
+                                       request: HttpServletRequest): ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
       throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")

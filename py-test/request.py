@@ -10,9 +10,12 @@ print(dirname)
 
 class TestRESTStudent(unittest.TestCase):
     def setUp(self):
+        pre_r = requests.get('http://localhost:8080/') # first we try http
+        if "Bad Request" in pre_r.text:
+            self.URL = "https://localhost:8080/api/v1/"
+        else:
+            self.URL = "http://localhost:8080/api/v1/"
         # How many digits to match in case of floating point answers
-        self.URL = "http://localhost:8080/api/v1/"
-
         # print(r.headers)
         # self.auth_token = r.headers["Authorization"].replace("Bearer ","")
 
@@ -336,6 +339,22 @@ class TestRESTStudent(unittest.TestCase):
         self.assertGreaterEqual(len(res.json()), 1)
 
     def test_student_submit_result_task(self):
+        requests.post(url=self.URL + "courses/6/subscribe", data=json.dumps({}),
+                      verify=False,
+                      headers={'content-type': 'application/json',
+                               'Authorization': self.student_auth_header})
+
+        requests.post(url=self.URL + "courses/11/subscribe", data=json.dumps({}),
+                      verify=False,
+                      headers={'content-type': 'application/json',
+                               'Authorization': self.student_auth_header})
+
+        requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
+                     verify=False,
+                     headers={'content-type': 'application/json',
+                              'Authorization': self.student_auth_header})
+
+
         result_req_bf = requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
@@ -387,7 +406,7 @@ class TestRESTStudent(unittest.TestCase):
 
 
         pprint(all_subs.json())
-        self.assertTrue(5 < len(all_subs.json()))
+        self.assertTrue(2 <= len(all_subs.json()))
         requests.post(url=self.URL + "courses/11/unsubscribe", data=json.dumps({}),
                       verify=False,
                       headers={'content-type': 'application/json',
@@ -543,7 +562,7 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
         pprint(delete_users.json())
-        self.assertEqual(delete_users.json(),{'deletion': True})
+        self.assertEqual(delete_users.json(),{'success': True})
 
 
     def test_user_admin_last_logins(self):
@@ -564,5 +583,44 @@ class TestRESTStudent(unittest.TestCase):
         pprint(len(users_filter_a.json()))
         pprint(len(users_filter_ab.json()))
 
+
+    def test_settings_by_admin(self):
+
+        ## Test Privacy settings change
+        privacy_show = requests.get(url=self.URL + "settings/privacy/show", verify=False,
+                             headers={'content-type': 'application/json',
+                                      'Authorization': self.admin_auth_header})
+        pprint(privacy_show.json())
+        previous = privacy_show.json()["show"]
+
+        requests.put(url=self.URL + "settings/privacy/show", data=json.dumps({"enable": not previous}), verify=False,
+                     headers={'content-type': 'application/json',
+                              'Authorization': self.admin_auth_header})
+
+        privacy_show = requests.get(url=self.URL + "settings/privacy/show", verify=False,
+                                    headers={'content-type': 'application/json',
+                                             'Authorization': self.admin_auth_header})
+        change = privacy_show.json()["show"]
+
+        self.assertEqual(previous, not change)
+
+        ## Test Set Privacy Text
+
+        random_bacom_text = requests.get(url="https://baconipsum.com/api/?type=meat-and-filler").json()[0]
+
+        requests.put(url=self.URL + "settings/privacy/text", data=json.dumps({"which": "impressum_text", "content" : random_bacom_text}), verify=False,
+                     headers={'content-type': 'application/json',
+                              'Authorization': self.admin_auth_header})
+
+        requests.put(url=self.URL + "settings/privacy/text", data=json.dumps({"which": "privacy_text", "content" : random_bacom_text}), verify=False,
+                     headers={'content-type': 'application/json',
+                              'Authorization': self.admin_auth_header})
+
+
+        privacy_text = requests.get(url=self.URL + "settings/privacy/text?which=privacy_text", verify=False).text
+        impressum_text = requests.get(url=self.URL + "settings/privacy/text?which=impressum_text", verify=False).text
+
+        self.assertEqual(random_bacom_text, privacy_text)
+        self.assertEqual(random_bacom_text, impressum_text)
 
 unittest.main()
