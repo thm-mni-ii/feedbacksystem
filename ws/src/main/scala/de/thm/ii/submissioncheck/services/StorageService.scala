@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file._
 
 import org.springframework.web.multipart.MultipartFile
-import java.io.{BufferedOutputStream, FileOutputStream, IOException}
+import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
 
 /**
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server
@@ -78,7 +78,7 @@ class StorageService {
   }
 
   /**
-    * store a file to its beloning submission
+    * store a file to its belonging submission
     * @author Benjamin Manns
     * @param file file stream from users upload
     * @param taskid the connecting task
@@ -95,6 +95,36 @@ class StorageService {
       }
       try {
         Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+    }
+    catch {
+      case e: Exception =>
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    }
+  }
+
+  /**
+    * store a simple string submission to its belonging submission
+    * @author Benjamin Manns
+    * @param file file stream from users upload
+    * @param taskid the connecting task
+    * @param submission_id the beloning submission, what has been done
+    */
+  def storeTaskSubmission(file: String, taskid: Int, submission_id: Int): Unit = {
+    try {
+      val storeLocation = this.storeLocation(taskid, submission_id)
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+      try {
+        val is = new ByteArrayInputStream(file.getBytes)
+        Files.copy(is, storeLocation.resolve("string_submission.txt"), StandardCopyOption.REPLACE_EXISTING)
       }
       catch {
         case _: FileAlreadyExistsException => {}

@@ -173,6 +173,9 @@ class TaskController {
           logger.warn(jsonResult)
           kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
           kafkaTemplate.flush()
+
+          // Save submission as file
+          storageService.storeTaskSubmission(data, taskid, submissionId)
         }
         else {
           submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
