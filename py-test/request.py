@@ -137,7 +137,7 @@ class TestRESTStudent(unittest.TestCase):
 
         len_bf = len(r_get_before.json())
 
-        requests.post(url=self.URL + "courses/11/subscribe", data=json.dumps({}), verify=False,
+        requests.post(url=self.URL + "courses/2/subscribe", data=json.dumps({}), verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.student_auth_header})
 
@@ -153,7 +153,7 @@ class TestRESTStudent(unittest.TestCase):
 
 
 
-        detailed_info = requests.get(url=self.URL + "courses/11", data=json.dumps({}), verify=False,
+        detailed_info = requests.get(url=self.URL + "courses/2", data=json.dumps({}), verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.student_auth_header})
 
@@ -162,7 +162,7 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertTrue(len(detailed_info.json()["tasks"]) > 1)
 
-        unsubscribe = requests.post(url=self.URL + "courses/11/unsubscribe", data=json.dumps({}), verify=False,
+        unsubscribe = requests.post(url=self.URL + "courses/2/unsubscribe", data=json.dumps({}), verify=False,
                       headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
 
         pprint(unsubscribe)
@@ -174,7 +174,7 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertEqual(len(r_get_thereafter.json()), len_af - 1)
 
-        no_detailed_info = requests.get(url=self.URL + "courses/11", data=json.dumps({}), verify=False,
+        no_detailed_info = requests.get(url=self.URL + "courses/2", data=json.dumps({}), verify=False,
                                         headers={'content-type': 'application/json',
                                                  'Authorization': self.student_auth_header})
 
@@ -188,7 +188,7 @@ class TestRESTStudent(unittest.TestCase):
         Text by Task creation
         :return:
         """
-        task_creation_1 = requests.post(url=self.URL + "courses/11/tasks",
+        task_creation_1 = requests.post(url=self.URL + "courses/65/tasks",
                                         data=json.dumps({"name": "Task No " + self.stamp,
                                                          "description": "Task by Python. Yay it works",
                                                           "test_type": "BASH"}),
@@ -198,17 +198,17 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertEqual(task_creation_1.status_code, 400)
 
-        requests.post(url=self.URL + "courses/11/grant/docent", data=json.dumps({"userid": 54}),
+        requests.post(url=self.URL + "courses/65/grant/docent", data=json.dumps({"userid": 54}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.moderator_auth_header})
 
         # TODO check and test the error cases
 
-        task_creation_2 = requests.post(url=self.URL + "courses/11/tasks",
+        task_creation_2 = requests.post(url=self.URL + "courses/65/tasks",
                                         data=json.dumps({"name": "Task No " + self.stamp,
                                                          "description": "Task by Python. Yay it works",
-                                                         "test_type": "FILE"}),
+                                                         "testsystem_id": "secrettokenchecker"}),
                                         verify=False,
                                         headers={'content-type': 'application/json',
                                                  'Authorization': self.docent_auth_header})
@@ -254,7 +254,7 @@ class TestRESTStudent(unittest.TestCase):
 
         # TODO check that tutor can not give access and so on
 
-        requests.post(url=self.URL + "courses/11/grant/tutor", data=json.dumps({"userid": 53}),
+        requests.post(url=self.URL + "courses/65/grant/tutor", data=json.dumps({"userid": 53}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.docent_auth_header})
@@ -273,7 +273,7 @@ class TestRESTStudent(unittest.TestCase):
         self.assertTrue("success" in task_put2.json())
         self.assertTrue("upload_url" in task_put2.json())
 
-        deny1 = requests.post(url=self.URL + "courses/11/deny/tutor", data=json.dumps({"userid": 53}),
+        deny1 = requests.post(url=self.URL + "courses/65/deny/tutor", data=json.dumps({"userid": 53}),
                               verify=False,
                               headers={'content-type': 'application/json',
                                        'Authorization': self.docent_auth_header})
@@ -302,7 +302,7 @@ class TestRESTStudent(unittest.TestCase):
         pprint(task_get2.json())
         self.assertEqual(401, task_get2.status_code)
 
-        deny_docent = requests.post(url=self.URL + "courses/11/deny/docent", data=json.dumps({"userid": 54}),
+        deny_docent = requests.post(url=self.URL + "courses/65/deny/docent", data=json.dumps({"userid": 54}),
                                     verify=False,
                                     headers={'content-type': 'application/json',
                                              'Authorization': self.moderator_auth_header})
@@ -330,7 +330,7 @@ class TestRESTStudent(unittest.TestCase):
         self.assertTrue(1 <= len(get_submissions.json()))
 
     def test_getTaskByTaskID_route(self):
-        res = requests.get(url=self.URL + "tasks/10/submissions", data=json.dumps({}),
+        res = requests.get(url=self.URL + "tasks/9/submissions", data=json.dumps({}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.docent_auth_header})
@@ -339,23 +339,23 @@ class TestRESTStudent(unittest.TestCase):
         self.assertGreaterEqual(len(res.json()), 1)
 
     def test_student_submit_result_task(self):
-        requests.post(url=self.URL + "courses/6/subscribe", data=json.dumps({}),
+        requests.post(url=self.URL + "courses/2/subscribe", data=json.dumps({}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.student_auth_header})
 
-        requests.post(url=self.URL + "courses/11/subscribe", data=json.dumps({}),
+        requests.post(url=self.URL + "courses/2/subscribe", data=json.dumps({}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.student_auth_header})
 
-        requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
+        requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                      verify=False,
                      headers={'content-type': 'application/json',
                               'Authorization': self.student_auth_header})
 
 
-        result_req_bf = requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
+        result_req_bf = requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.student_auth_header})
@@ -364,13 +364,13 @@ class TestRESTStudent(unittest.TestCase):
 
 
 
-        submit_req = requests.post(url=self.URL + "tasks/10/submit", data=json.dumps(data),
+        submit_req = requests.post(url=self.URL + "tasks/8/submit", data=json.dumps(data),
                                    verify=False,
                                    headers={'content-type': 'application/json',
                                             'Authorization': self.student_auth_header})
         pprint(submit_req.json())
 
-        submit_req_file = requests.post(url=self.URL + "tasks/12/submit", data=json.dumps({}),
+        submit_req_file = requests.post(url=self.URL + "tasks/9/submit", data=json.dumps({}),
                                    verify=False,
                                    headers={'content-type': 'application/json',
                                             'Authorization': self.student_auth_header})
@@ -391,14 +391,14 @@ class TestRESTStudent(unittest.TestCase):
 
         self.assertEqual({'submission_upload_success': True, 'filename': 'sample.sql'}, file_upload_response.json())
 
-        result_req_af = requests.get(url=self.URL + "tasks/10/result", data=json.dumps({}),
+        result_req_af = requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.student_auth_header})
         self.assertEqual(submit_req.status_code, 202)
         self.assertTrue(len(result_req_bf.json()) + 1 == len(result_req_af.json()))
 
-        all_subs = requests.get(url=self.URL + "tasks/10/submissions", data=json.dumps({}),
+        all_subs = requests.get(url=self.URL + "tasks/8/submissions", data=json.dumps({}),
                                 verify=False,
                                 headers={'content-type': 'application/json',
                                          'Authorization': self.docent_auth_header})
@@ -407,7 +407,7 @@ class TestRESTStudent(unittest.TestCase):
 
         pprint(all_subs.json())
         self.assertTrue(2 <= len(all_subs.json()))
-        requests.post(url=self.URL + "courses/11/unsubscribe", data=json.dumps({}),
+        requests.post(url=self.URL + "courses/2/unsubscribe", data=json.dumps({}),
                       verify=False,
                       headers={'content-type': 'application/json',
                                'Authorization': self.student_auth_header})

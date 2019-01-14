@@ -1,6 +1,7 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
+import java.lang.StackWalker
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 import java.util.zip.{ZipEntry, ZipOutputStream}
@@ -371,7 +372,7 @@ class CourseService {
 
   private def stringOrNull(any: Any): String = {
     if (any == null) {
-      "null"
+      null
     } else {
       any.toString
     }
@@ -476,21 +477,16 @@ class CourseService {
         val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
           /* processing - number of trials - passed - passed date */
         var passed: Boolean = false
-        var passedDate: Any = ""
-        var trials = 0
+        var passedDate: Any = null
         for(submission <- userSubmissions) {
-          if (!passed && submission(LABEL_PASSED) == 1) {
+          if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
-          }
-          else {
-            // Also again passed trials are counted, because they are useless!
-            trials += 1
           }
         }
         tasksPassedSum = tasksPassedSum + passed.compare(false)
         val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed, "passed_date" -> passedDate))
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed, "passed_date" -> passedDate))
 
         processedTasks = taskStudentCell :: processedTasks
       }
@@ -520,27 +516,27 @@ class CourseService {
         val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
         // process them
         var passed: Boolean = false
-        var passedDate: Any = ""
-        var trials = 0
+        var passedDate: Any = null
         for (submission <- submissionRawData) {
-          if (!passed && submission(LABEL_PASSED) == 1) {
+          if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
-          }
-          else {
-            // Also again passed trials are counted, because they are useless!
-            trials += 1
           }
         }
 
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> trials, LABEL_PASSED -> passed,
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed,
           "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
         deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
         processedTasks = taskStudentCell :: processedTasks
       }
-      val courseLine = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
-      matrix = courseLine ++ course.map{ case (k, v) => k -> (v + courseLine.getOrElse(k.toString, 0))} :: matrix
+      var courseLine: Map[String, Any] = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
+
+      for(c <- course.keys){
+        courseLine = courseLine + (c -> course(c))
+      }
+
+      matrix = courseLine :: matrix
     }
     matrix
   }

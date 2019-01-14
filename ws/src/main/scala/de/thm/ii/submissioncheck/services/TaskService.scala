@@ -200,15 +200,14 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT task.test_type, `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
+    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
       "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
-          TaskDBLabels.test_type -> res.getString(TaskDBLabels.test_type))
+          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id))
 
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
@@ -297,28 +296,25 @@ class TaskService {
     * @param name Task name
     * @param description Task description
     * @param courseid Course where task is created for
-    * @param test_type which test type is needed
     * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, test_type: String, deadline: String, testsystem_id: String): Map[String, AnyVal] = {
-    val availableTypes = List("FILE", "STRING")
-    if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
+  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystem_id: String): Map[String, AnyVal] = {
+    //val availableTypes = List("FILE", "STRING")
+    //if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (task_name, task_description, course_id, test_type, testsystem_id, deadline) VALUES (?,?,?,?,?,?)",
+        "INSERT INTO task (task_name, task_description, course_id, testsystem_id, deadline) VALUES (?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
       val magic5 = 5
-      val magic6 = 6
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
-      ps.setString(magic4, test_type)
-      ps.setString(magic5, testsystem_id)
-      ps.setString(magic6, deadline)
+      ps.setString(magic4, testsystem_id)
+      ps.setString(magic5, deadline)
       ps
     })
 
@@ -347,13 +343,11 @@ class TaskService {
     * @param taskid unique taskid identification
     * @param name Task name
     * @param description Task description
-    * @param test_type which test type is needed
     * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String = null, description: String = null, test_type: String = null,
-                 deadline: String = null, testsystem_id: String = null): Boolean = {
+  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null, testsystem_id: String = null): Boolean = {
     var updates = 0
     var successfulUpdates = 0
     if (name != null) {
@@ -363,11 +357,6 @@ class TaskService {
 
     if (description != null) {
       successfulUpdates += DB.update("UPDATE task set task_description = ?  where task_id = ? ", description, taskid)
-      updates += 1
-    }
-
-    if (test_type != null) {
-      successfulUpdates += DB.update("UPDATE task set test_type = ? where task_id = ? ", test_type, taskid)
       updates += 1
     }
 

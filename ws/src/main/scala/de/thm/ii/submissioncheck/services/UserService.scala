@@ -208,7 +208,10 @@ class UserService {
       storageService.deleteSubmission(line(TaskDBLabels.taskid).asInstanceOf[Int],
         line(SubmissionDBLabels.submissionid).asInstanceOf[Int], line(SubmissionDBLabels.filename).asInstanceOf[String])
     }
-    1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', username = 'Deleted User', email = '' where user_id = ?", userid)
+    // delete also course role references
+    DB.update("delete from user_course where user_id = ?", userid)
+    1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', " +
+      "username = 'Deleted User', email = '' where user_id = ?", userid)
   }
 
   private def getBelongingPersonalisedSubmissions(userid: Int) = {

@@ -159,36 +159,31 @@ class TaskController {
     var upload_url: String = null
     var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
     val dataNode = jsonNode.get(LABEL_DATA)
-    try {
       var submissionId: Int = -1
-        if(dataNode != null) {
-          val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-          // If submission was only data we send Kafka directly
-          val data = dataNode.asText
-          submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
-          kafkaMap += (LABEL_DATA -> data)
-          kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
-          kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
-          val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-          logger.warn(jsonResult)
-          kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
-          kafkaTemplate.flush()
+      if(dataNode != null) {
+        val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
+        // If submission was only data we send Kafka directly
+        val data = dataNode.asText
+        submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
+        kafkaMap += (LABEL_DATA -> data)
+        kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
+        kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+        logger.warn(jsonResult)
+        kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+        kafkaTemplate.flush()
 
-          // Save submission as file
-          storageService.storeTaskSubmission(data, taskid, submissionId)
-        }
-        else {
-          submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
-          upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
-        }
+        // Save submission as file
+        storageService.storeTaskSubmission(data, taskid, submissionId)
+      }
+      else {
+        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
+        upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
+      }
 
       Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
-    } catch {
-      case _: NullPointerException => throw new BadRequestException("This test needs a: " + taskDetails(TaskDBLabels.test_type) + ". Please provide this.")
     }
-  }
-
-  private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
+    private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
   /**
     * serve a route to upload a submission file to a given submissionid
@@ -328,10 +323,13 @@ class TaskController {
     try {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
-      val test_type = jsonNode.get("test_type").asText()
       val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
-      val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else testsystemLabel1
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, test_type, deadline, testsystem_id)
+      val testsystem_id = jsonNode.get(TestsystemLabels.id).asText()
+      // Test if testsystem exists
+      if (testsystemService.getTestsystem(testsystem_id).isEmpty){
+        throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
+      }
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
       taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
@@ -339,7 +337,7 @@ class TaskController {
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description and test_type. Parameter testsystem_id and deadline are optional")
+        throw new BadRequestException("Please provide: name, description and testsystem_id. Deadline is optional")
       }
     }
   }
@@ -386,10 +384,13 @@ class TaskController {
 
     val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
     val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
-    val test_type = if (jsonNode.get(TaskDBLabels.test_type) != null) jsonNode.get(TaskDBLabels.test_type).asText() else null
     val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
     val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else null
-    val success = this.taskService.updateTask(taskid, name, description, test_type, deadline, testsystem_id)
+    if (testsystem_id != null && testsystemService.getTestsystem(testsystem_id).isEmpty){
+      throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
+    }
+
+    val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id)
 
     Map("success" -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
   }
