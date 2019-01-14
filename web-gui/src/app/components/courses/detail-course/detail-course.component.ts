@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {flatMap} from 'rxjs/operators';
+import {delay, flatMap, mergeMap, retry, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {CourseTask, DetailedCourseInformation} from '../../../interfaces/HttpInterfaces';
@@ -8,6 +8,7 @@ import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
 import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
+import {of, throwError, timer} from 'rxjs';
 
 @Component({
   selector: 'app-detail-course',
@@ -25,9 +26,9 @@ export class DetailCourseComponent implements OnInit {
   courseDetail: DetailedCourseInformation;
   courseTasks: CourseTask[];
   submissionData: File | string;
-  submissionText: string;
   processing: boolean;
   userRole: string;
+  submissionAsFile: boolean;
 
   // exampleTasks: CourseTask[] = [{
   //   task_id: 1,
@@ -114,8 +115,16 @@ export class DetailCourseComponent implements OnInit {
           this.processing = true;
         }
         return this.db.getTaskResult(currentTask.task_id);
-      })).subscribe(taskResult => {
-      // TODO: Retry until passed not null
+      })).pipe(
+      mergeMap(value => {
+        if (value.passed == null || typeof value.passed === undefined) {
+          return throwError('No result yet');
+        }
+        return of(value);
+      }),
+      retryWhen(errors => errors.pipe(delay(1000), take(10)))
+    ).subscribe(taskResult => {
+      this.processing = false;
       const oldTask = this.courseTasks[this.courseTasks.indexOf(currentTask)];
       console.log(oldTask);
       console.log(taskResult);
