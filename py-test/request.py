@@ -80,7 +80,8 @@ class TestRESTStudent(unittest.TestCase):
                           headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
         
         self.assertEqual(type(r.json()), type({}))
-        self.assertEqual(1, len(r.json()))
+        pprint(r.json())
+        self.assertEqual(2, len(r.json()))
         v = r.json()
         self.assertTrue("course_id" in v)
         cid = v["course_id"]
@@ -335,6 +336,7 @@ class TestRESTStudent(unittest.TestCase):
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.docent_auth_header})
 
+        pprint(res.json())
         self.assertEqual(type(res.json()), type([]))
         self.assertGreaterEqual(len(res.json()), 1)
 
