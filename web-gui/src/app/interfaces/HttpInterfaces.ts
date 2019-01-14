@@ -37,25 +37,20 @@ export interface DetailedCourseInformation {
  * Task of one course
  */
 export interface CourseTask {
-  course_id: number;
-  task_id: number;
-  task_name: string;
-  task_description: string;
-  task_type: string;
-}
-
-/**
- * Result information for one task
- */
-export interface TaskResult {
-  submit_date: Date;
+  testsystem_id: string;
+  submit_date?: Date;
   exitcode: number;
   result: string;
   submission_data: string;
-  passed: number;
+  task_name: string;
+  passed?: boolean;
+  deadline: Date;
   result_date: Date;
-  file: String;
+  file: string;
+  task_id: number;
+  task_description: string;
 }
+
 
 /**
  * Information after user logged in.
@@ -98,7 +93,6 @@ export interface RoleChanged {
   grant: string;
   success: boolean;
 }
-
 
 
 export interface User {
