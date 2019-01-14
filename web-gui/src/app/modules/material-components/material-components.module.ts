@@ -13,7 +13,7 @@ import {
   MatInputModule,
   MatListModule,
   MatMenuModule,
-  MatPaginatorModule,
+  MatPaginatorModule, MatProgressSpinnerModule,
   MatRadioModule,
   MatRippleModule,
   MatSelectModule,
@@ -53,7 +53,8 @@ import {
     MatSelectModule,
     MatChipsModule,
     MatAutocompleteModule,
-    MatStepperModule
+    MatStepperModule,
+    MatProgressSpinnerModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -81,7 +82,8 @@ import {
     MatSelectModule,
     MatChipsModule,
     MatAutocompleteModule,
-    MatStepperModule
+    MatStepperModule,
+    MatProgressSpinnerModule
   ],
   declarations: []
 })
