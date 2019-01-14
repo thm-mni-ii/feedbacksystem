@@ -200,20 +200,25 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT `task`.`task_name`, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
+    val list = DB.query("SELECT `task`.`task_name`, task.deadline, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
       "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
-          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid),
+          TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline)),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id))
 
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
-            lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
-              SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
-              SubmissionDBLabels.filename -> submissionInfos(SubmissionDBLabels.filename))
+          lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
+            SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
+            "file" -> submissionInfos(SubmissionDBLabels.filename),
+            SubmissionDBLabels.result_date -> submissionInfos(SubmissionDBLabels.result_date),
+            SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
+            SubmissionDBLabels.exitcode -> submissionInfos(SubmissionDBLabels.exitcode),
+            SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data))
         } else {
           lineMap
         }
@@ -227,11 +232,16 @@ class TaskService {
   private def getLastSubmissionResultInfoByTaskIDAndUser(taskid: Int, userid: Int) = {
     val submissions = getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
     var map: Map[String, Any] = Map(SubmissionDBLabels.result -> null, SubmissionDBLabels.passed -> null,
-      SubmissionDBLabels.filename -> null)
+      SubmissionDBLabels.filename -> null, SubmissionDBLabels.submission_data -> null, SubmissionDBLabels.result_date -> null,
+      SubmissionDBLabels.submit_date -> null, SubmissionDBLabels.exitcode -> null)
     if (submissions.nonEmpty) {
       map = Map(SubmissionDBLabels.result -> submissions.head(SubmissionDBLabels.result),
         SubmissionDBLabels.passed -> submissions.head(SubmissionDBLabels.passed),
-        SubmissionDBLabels.filename -> submissions.head(SubmissionDBLabels.filename))
+        SubmissionDBLabels.result_date -> submissions.head(SubmissionDBLabels.result_date),
+        SubmissionDBLabels.submit_date -> submissions.head(SubmissionDBLabels.submit_date),
+        SubmissionDBLabels.exitcode -> submissions.head(SubmissionDBLabels.exitcode),
+        SubmissionDBLabels.filename -> submissions.head(SubmissionDBLabels.filename),
+        SubmissionDBLabels.submission_data -> submissions.head(SubmissionDBLabels.submission_data))
     }
     map
   }
@@ -277,13 +287,18 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline))
+          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline)),
+          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id)
         )
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(res.getInt(TaskDBLabels.taskid), userid.get)
           lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
             SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
-            SubmissionDBLabels.filename -> submissionInfos(SubmissionDBLabels.filename))
+            "file" -> submissionInfos(SubmissionDBLabels.filename),
+            SubmissionDBLabels.result_date -> submissionInfos(SubmissionDBLabels.result_date),
+            SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
+            SubmissionDBLabels.exitcode -> submissionInfos(SubmissionDBLabels.exitcode),
+            SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data))
         } else {
           lineMap
         }
