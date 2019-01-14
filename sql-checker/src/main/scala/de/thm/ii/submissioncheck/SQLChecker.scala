@@ -61,7 +61,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
   *
   * @author Vlad Sokyrsky
   */
-object SQLChecker extends App{
+object SQLChecker extends App/*{
   private val t1 = new SQLTask("testfiles", "23");
   t1.saveTask()
-}
+}*/
