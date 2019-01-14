@@ -1,0 +1,17 @@
+{
+   "sections": [
+
+      {
+         "description": "OK",
+         "query":   "select * from hotel where hotel.HName like \"%City%\" and hotel.PLZ between 80000 and 84000",
+         "order": "variable"
+      },
+
+      {
+         "description": "Nur Hotels mit City am Beginn.",
+         "query": "select * from hotel where hotel.HName like \"City%\" and hotel.PLZ > 80000 and hotel.PLZ < 84000",
+         "order": "fix"
+      }
+
+   ]
+} 

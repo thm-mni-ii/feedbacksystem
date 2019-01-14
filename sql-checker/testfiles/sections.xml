@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<SECTIONS>
+    <SECTION>
+        <DESCRIPTION>OK</DESCRIPTION>
+        <QUERY>q1.sql</QUERY>
+        <ORDER>VARIABLE</ORDER>
+    </SECTION>
+    <SECTION>
+        <DESCRIPTION>Nur Hotels mit City am Beginn.</DESCRIPTION>
+        <QUERY>q2.sql</QUERY>
+        <ORDER>VARIABLE</ORDER>
+    </SECTION>
+</SECTIONS>
