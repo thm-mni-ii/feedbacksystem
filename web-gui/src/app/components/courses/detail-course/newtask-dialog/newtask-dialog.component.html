@@ -1,0 +1,30 @@
+<div matDialogTitle>Neue Aufgabe erstellen</div>
+<mat-dialog-content>
+  <form class="new-task-form" [formGroup]="taskForm">
+
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input type="text" matInput formControlName="taskName">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput type="text" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="20"
+                formControlName="taskDescription"></textarea>
+    </mat-form-field>
+
+    <!-- TODO: Change to use values from db-->
+    <mat-select placeholder="Aufgaben typ" [(value)]="taskType">
+      <mat-option value="FILE">FILE</mat-option>
+      <mat-option value="SQL">SQL</mat-option>
+      <mat-option value="JAVA">JAVA</mat-option>
+    </mat-select>
+
+    <input (change)="getFile($event.target.files[0])" type="file" placeholder="Lösung">
+  </form>
+
+  <mat-dialog-actions class="dialog-action-buttons">
+    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+    <button mat-flat-button color="accent" (click)="createTask()">Erstellen</button>
+  </mat-dialog-actions>
+</mat-dialog-content>
