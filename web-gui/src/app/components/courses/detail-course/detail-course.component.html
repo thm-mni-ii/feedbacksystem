@@ -1,3 +1,61 @@
-<p *ngFor="let task of courseTasks">
-  {{task.task_name}}
-</p>
+<div class="container">
+
+  <mat-card id="description">
+    <h4>{{courseDetail?.course_description}}</h4>
+    <button *ngIf="userRole != 'docent'" class="desc-button" mat-flat-button color="warn"
+            (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Kurs
+      verlassen
+    </button>
+    <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
+            mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
+    </button>
+  </mat-card>
+
+
+  <mat-card *ngFor="let task of courseTasks" class="task-container">
+    <div class="title">
+      <h4>{{task.task_name}}</h4>
+      <span class="filler"></span>
+      <div>{{task.result_date | date: 'medium'}}</div>
+      <ng-template #result>
+        <mat-icon id="passed" *ngIf="task.passed">done</mat-icon>
+        <mat-icon id="failed" *ngIf="!task.passed">clear</mat-icon>
+      </ng-template>
+      <mat-spinner *ngIf="processing; else result" diameter="20"></mat-spinner>
+    </div>
+    <mat-card-subtitle>
+    </mat-card-subtitle>
+    <mat-card-content>
+      <p>{{task.task_description}}</p>
+      <mat-divider></mat-divider>
+      <div class="user-input">
+
+        <!-- Submission -->
+        <div class="result">
+          <p>{{task.submission_data}}</p>
+          <span class="filler"></span>
+          <p>{{task.submit_date| date:'medium'}}</p>
+        </div>
+        <p *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
+        <mat-button-toggle-group name="fontStyle" aria-label="Font Style" #group>
+          <mat-button-toggle value="file">Datei</mat-button-toggle>
+          <mat-button-toggle value="text">Text</mat-button-toggle>
+        </mat-button-toggle-group>
+        <!-- TODO Text or file-->
+        <input type="file" (change)="getSubmissionFile($event.target.files[0])">
+
+        <mat-form-field class="user-input-text" appearance="outline">
+          <mat-label>Abgabe Text</mat-label>
+          <input matInput type="text" [(ngModel)]="submissionData">
+        </mat-form-field>
+
+      </div>
+      <mat-card-actions>
+        <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
+      </mat-card-actions>
+    </mat-card-content>
+  </mat-card>
+
+
+</div>
+
