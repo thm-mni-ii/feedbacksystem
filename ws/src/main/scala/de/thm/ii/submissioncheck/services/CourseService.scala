@@ -585,7 +585,7 @@ class CourseService {
     * @throws RuntimeException
     */
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String,
-                         course_modul_id: String, course_semester: String, course_end_date: String, personalised_submission: Int = 0): Map[String, Number] = {
+                         course_modul_id: String, course_semester: String, course_end_date: String, personalised_submission: Int = 0): Map[String, Any] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
         "insert into course (course_name, course_description, creator, standard_task_typ, course_modul_id, " +
@@ -610,7 +610,7 @@ class CourseService {
     if (num < 1) {
       throw new RuntimeException("Error creating course.")
     }
-    Map("course_id" -> holder.getKey)
+    Map("course_id" -> holder.getKey, "success" -> true)
   }
 
   /**
