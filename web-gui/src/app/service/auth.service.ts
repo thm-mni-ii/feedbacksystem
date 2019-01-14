@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {JwtHelperService} from '@auth0/angular-jwt';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {catchError, flatMap, map} from 'rxjs/operators';
 
 const TOKEN_ID = 'token';
 
@@ -45,12 +45,14 @@ export class AuthService {
    * Login function to authenticate user with CAS
    * system
    *
-   * //TODO Implement real functionality
-   *
-   * @param username deprecated
-   * @param password deprecated
    */
-  login(username: string, password: string) {
+  login() {
+    return this.http.get<HttpErrorResponse>('/api/v1/login', {observe: 'response'}).pipe(
+      catchError(err => {
+        console.log(err);
+        return of(err);
+      })
+    );
   }
 
 

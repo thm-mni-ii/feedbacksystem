@@ -27,12 +27,13 @@ export class LoginComponent implements OnInit {
    * Method that uses auth-service to login user
    */
   login() {
+    // this.auth.login().subscribe(res => {
+    //   window.open(res.url);
+    // });
+
     this.auth.login_fake(this.username).subscribe(() => {
-        this.router.navigate(['']);
-      },
-      error => {
-        console.log(error);
-      });
+      this.router.navigate(['']);
+    });
   }
 
 

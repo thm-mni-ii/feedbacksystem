@@ -2,12 +2,12 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
+  CourseTask,
   DetailedCourseInformation,
   FileUpload,
   GeneralCourseInformation,
   RoleChanged,
   Succeeded,
-  TaskResult,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
@@ -73,12 +73,10 @@ export class DatabaseService {
 
   /**
    * Return submission list for this task
-   * @param courseID The id of course task is in
-   * @param userID The id of user
    * @param taskID The id of task
    */
-  getTaskResult(courseID: number, userID: number, taskID: number): Observable<TaskResult> {
-    return this.http.get<TaskResult>('/api/v1/courses/' + courseID + '/submissions/user/' + userID + '/task/' + taskID);
+  getTaskResult(taskID: number): Observable<CourseTask> {
+    return this.http.get<CourseTask>('/api/v1/tasks/' + taskID);
   }
 
   /**
@@ -97,7 +95,6 @@ export class DatabaseService {
 
   /**
    * get all registered users.
-   * @authorized admin
    */
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>('/api/v1/users');
@@ -124,7 +121,7 @@ export class DatabaseService {
       standard_task_typ: standard_task_typ,
       course_semester: course_semester,
       course_modul_id: course_modul_id,
-      anonymous: userDataAllowed
+      personalised_submission: userDataAllowed
     });
   }
 
