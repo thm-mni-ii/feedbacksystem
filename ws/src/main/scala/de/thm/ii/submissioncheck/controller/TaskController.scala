@@ -1,5 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.net.{URLDecoder, URLEncoder}
+
 import scala.collection.JavaConverters._
 import java.util.{Base64, NoSuchElementException, Timer, TimerTask}
 
@@ -270,12 +272,13 @@ class TaskController {
     * @author grokonez.com
     *
     * @param taskid unique identification for a task
-    * @param file a multipart binary file in a form data format
+    * @param files an array of multipart binary file in a form data format
     * @param request Request Header containing Headers
     * @return HTTP Response with Status Code
     */
   @RequestMapping(value = Array("tasks/{id}/testfile/upload"), method = Array(RequestMethod.POST))
-  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) files: Array[MultipartFile],
+                       request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
@@ -283,11 +286,14 @@ class TaskController {
 
     var message: Boolean = false
     var filename: String = ""
-    storageService.storeTaskTestFile(file, taskid)
-    filename = file.getOriginalFilename
+    for((file,j) <- files.zipWithIndex){
+      filename += file.getOriginalFilename + (if (j < files.length-1) "," else "")
+      storageService.storeTaskTestFile(file, taskid)
+    }
+    println(filename)
     taskService.setTaskFilename(taskid, filename)
     val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
-    val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+    val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),
       LABEL_TASK_ID -> taskid.toString,
       LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
 
@@ -398,19 +404,25 @@ class TaskController {
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns
     * @param taskid unique taskid identification
+    * @param filename requested filename which should be a stored file
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/testfile"))
-  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, request: HttpServletRequest):
+  @GetMapping(Array("tasks/{id}/files/testfile/{filename}"))
+  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable filename: String, request: HttpServletRequest):
   ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
       throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
     }
-    val filename = taskService.getTestFileByTask(taskid)
-    val file = storageService.loadFile(filename, taskid)
-    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+    //val filename = taskService.getTestFilesByTask(taskid)
+    val parsedFilename = URLDecoder.decode(filename)
+    try {
+      val file = storageService.loadFile(parsedFilename, taskid)
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+    } catch {
+      case _: RuntimeException => throw new ResourceNotFoundException
+    }
   }
 
   /**
