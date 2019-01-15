@@ -7,12 +7,15 @@
       verlassen
     </button>
     <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
+            mat-flat-button color="accent" (click)="createTask(courseDetail)">Kurs bearbeiten
+    </button>
+    <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
             mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
     </button>
   </mat-card>
 
 
-  <mat-card *ngFor="let task of courseTasks" class="task-container">
+  <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}" #card>
     <div class="title">
       <h4>{{task.task_name}}</h4>
       <span class="filler"></span>
@@ -37,11 +40,12 @@
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>
         <p *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
-        <mat-radio-group [(ngModel)]="submissionAsFile">
+        <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
         </mat-radio-group>
-        <input *ngIf="submissionAsFile" type="file" (change)="getSubmissionFile($event.target.files[0])">
+        <input *ngIf="submissionAsFile" type="file"
+               (change)="getSubmissionFile($event.target.files[0])">
 
         <mat-form-field *ngIf="!submissionAsFile" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
@@ -50,6 +54,9 @@
 
       </div>
       <mat-card-actions>
+        <button *ngIf="userRole === 'docent'" mat-flat-button color="warn" (click)="deleteTask(task)">Löschen</button>
+        <button *ngIf="userRole === 'docent'" mat-flat-button color="accent" (click)="updateTask(task)">Bearbeiten
+        </button>
         <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
       </mat-card-actions>
     </mat-card-content>
