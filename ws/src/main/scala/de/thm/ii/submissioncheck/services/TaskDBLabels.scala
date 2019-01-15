@@ -16,6 +16,9 @@ object TaskDBLabels{
   /** DB Label "course_id" */
   var courseid: String = "course_id"
 
+  /** DB Label "course_id" */
+  var test_file_name: String = "test_file_name"
+
   /** DB Label "testsystem_id" */
   var testsystem_id: String = "testsystem_id"
 
