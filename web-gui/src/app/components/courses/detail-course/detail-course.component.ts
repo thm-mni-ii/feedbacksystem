@@ -26,11 +26,13 @@ export class DetailCourseComponent implements OnInit {
   courseDetail: DetailedCourseInformation;
   courseTasks: CourseTask[];
   submissionData: File | string;
-  processing: boolean;
   userRole: string;
-  submissionAsFile: boolean;
+  processing: { [task: number]: boolean };
+  submissionAsFile: { [task: number]: boolean };
 
   ngOnInit() {
+    this.submissionAsFile = {};
+    this.processing = {};
     this.userRole = this.user.getUserRole();
 
     this.route.params.pipe(
@@ -41,6 +43,10 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
+      course_detail.tasks.forEach(task => {
+        this.submissionAsFile[task.task_id] = false;
+        this.processing[task.task_id] = false;
+      });
       this.titlebar.emitTitle(course_detail.course_name);
     });
   }
@@ -125,7 +131,7 @@ export class DetailCourseComponent implements OnInit {
   submission(courseID: number, currentTask: CourseTask) {
     this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
       if (res.success) {
-        this.processing = true;
+        this.processing[currentTask.task_id] = true;
 
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(value => {
@@ -136,7 +142,7 @@ export class DetailCourseComponent implements OnInit {
           }),
           retryWhen(errors => errors.pipe(delay(10000), take(10)))
         ).subscribe(taskResult => {
-          this.processing = false;
+          this.processing[currentTask.task_id] = false;
           this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
         });
 
