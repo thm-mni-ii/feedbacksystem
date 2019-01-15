@@ -266,8 +266,8 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "course_id, course_name, course_end_date, course_description" + (if (isPermitted) {
-      ", creator" // TODO add more columns
+    val selectPart = "c.course_id, c.course_name, c.course_end_date, c.course_description, t.role_id" + (if (isPermitted) {
+      ", c.creator" // TODO add more columns
     } else {
       ""
     })
@@ -277,13 +277,16 @@ class CourseService {
     } else {
       List.empty
     }
-    val list = DB.query("SELECT " + selectPart + " FROM course where course_id = ?",
+
+    val list = DB.query("SELECT " + selectPart + " from course c left join (select user_id, role_id, course_id from " +
+      "user_course where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?",
       (res, _) => {
         val courseMap = Map(
           CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_end_date -> res.getString(CourseDBLabels.course_end_date),
+          RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
           LABEL_TASKS -> taskList
         )
         if (isPermitted) {
@@ -291,7 +294,7 @@ class CourseService {
         } else {
           courseMap
         }
-      }, courseid)
+      }, user.userid, courseid)
 
     list.headOption
   }
