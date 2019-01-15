@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {CourseTask, DetailedCourseInformation} from '../../../interfaces/HttpInterfaces';
+import {CourseTask, DetailedCourseInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
@@ -55,10 +55,13 @@ export class DetailCourseComponent implements OnInit {
       width: '600px',
       data: {courseID: course.course_id}
     }).afterClosed().pipe(
-      flatMap(value => {
+      flatMap((value: Succeeded) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
           return this.db.getCourseDetail(course.course_id);
+        } else {
+          this.snackbar.open('Server fehler', 'OK', {duration: 3000});
+          return;
         }
       })
     ).subscribe(course_detail => {
@@ -80,10 +83,13 @@ export class DetailCourseComponent implements OnInit {
         task: task
       }
     }).afterClosed().pipe(
-      flatMap(value => {
+      flatMap((value: Succeeded) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
           return this.db.getCourseDetail(this.courseDetail.course_id);
+        } else {
+          this.snackbar.open('Server fehler', 'OK', {duration: 3000});
+          return;
         }
       })
     ).subscribe(course_detail => {
