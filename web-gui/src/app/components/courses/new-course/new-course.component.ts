@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {TypesService} from '../../../service/types.service';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
+import {Testsystem} from '../../../interfaces/HttpInterfaces';
 
 @Component({
   selector: 'app-new-course',
@@ -13,7 +13,7 @@ import {TitlebarService} from '../../../service/titlebar.service';
 })
 export class NewCourseComponent implements OnInit, OnDestroy {
 
-  constructor(private db: DatabaseService, private types: TypesService, private _formBuilder: FormBuilder,
+  constructor(private db: DatabaseService, private _formBuilder: FormBuilder,
               private snackBar: MatSnackBar, private titlebar: TitlebarService) {
   }
 
@@ -26,23 +26,24 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   thirdFG: FormGroup;
   fourthFG: FormGroup;
   fifthFG: FormGroup;
+  sixthFG: FormGroup;
 
+  testTypes$: Observable<Testsystem[]>;
   newCourseName: string;
   newCourseDescription: string;
   newCourseType: string;
   newCourseSemester: string;
   newCourseModuleID: string;
+  newCourseDate: string;
   newCoursePrivatUserData: string;
 
-  taskTypes: string[];
 
   ngOnInit() {
+
+    this.testTypes$ = this.db.getTestsystemTypes();
     this.titlebar.emitTitle('Neuen Kurs erstellen');
     this.newCoursePrivatUserData = 'false';
 
-
-    // TODO Replace with route for types
-    this.taskTypes = this.types.getTypes();
 
     // Check if step is done
     this.firstFG = this._formBuilder.group({
@@ -59,6 +60,9 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     });
     this.fifthFG = this._formBuilder.group({
       fifthCtrl: ['']
+    });
+    this.sixthFG = this._formBuilder.group({
+      sixthCtrl: ['']
     });
 
 
@@ -86,6 +90,11 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       (inputStep5: { fifthCtrl: string }) => {
         this.newCourseModuleID = inputStep5.fifthCtrl;
       }));
+    this.subscription.add(this.sixthFG.valueChanges.subscribe(
+      (inputStep6: { sixthCtrl: string }) => {
+        this.newCourseDate = inputStep6.sixthCtrl;
+      }
+    ));
 
   }
 
@@ -110,7 +119,7 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     privateUserData = this.newCoursePrivatUserData === 'true';
 
     this.db.createCourse(this.newCourseName, this.newCourseDescription, this.newCourseType, this.newCourseSemester,
-      this.newCourseModuleID, privateUserData).subscribe(() => {
+      this.newCourseModuleID, this.newCourseDate, privateUserData).subscribe(() => {
       this.snackBar.open('Kurs ' + this.newCourseName + ' wurde erstellt', 'OK',
         {duration: 5000});
       this.stepper.reset();

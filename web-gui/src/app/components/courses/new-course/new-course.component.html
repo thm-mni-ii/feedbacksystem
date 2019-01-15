@@ -34,7 +34,7 @@
     <mat-step [stepControl]="thirdFG" label="Standart aufgabentyp auswählen">
       <form [formGroup]="thirdFG" class="step-flex">
         <mat-select class="select" placeholder="Aufgabentyp" formControlName="thirdCtrl" required>
-          <mat-option *ngFor="let type of taskTypes" value="{{type}}">{{type}}</mat-option>
+          <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
         </mat-select>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
@@ -72,6 +72,20 @@
     </mat-step>
 
     <!-- Step 6-->
+    <mat-step [stepControl]="sixthFG" label="Ende des Moduls" optional>
+      <form [formGroup]="sixthFG" class="step-flex">
+        <mat-form-field>
+          <mat-label>Modul ende</mat-label>
+          <input matInput placeholder="01.01.2019" formControlName="sixthCtrl">
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 7-->
     <mat-step label="Privatisierte Informationen des Users">
       <form class="step-flex">
         <p>Der User
