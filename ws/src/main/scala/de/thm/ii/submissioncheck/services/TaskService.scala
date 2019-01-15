@@ -476,8 +476,7 @@ class TaskService {
     * @return URL String
     */
   def getURLOfTaskTestFile(taskid: Int): String = {
-    val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/"
   }
 
   /**
@@ -488,8 +487,7 @@ class TaskService {
     * @return URL String
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
-    val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
   }
 
   /**

@@ -169,7 +169,7 @@ export class DatabaseService {
           }
 
           // Uploading the file
-          return this.http.post<Succeeded>(upload_url, formDataFile, {
+          return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formDataFile, {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
 
@@ -203,9 +203,8 @@ export class DatabaseService {
         if (result.success) {
           upload_url = result.upload_url;
         }
-
-        return this.http.post<Succeeded>(upload_url, formData, {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+        return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
         });
       })
     );
@@ -308,7 +307,7 @@ export class DatabaseService {
         }
 
         return this.http.post<Succeeded>(uploadUrl, formData, {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
         });
       }));
   }
