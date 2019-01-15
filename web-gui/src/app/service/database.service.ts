@@ -117,16 +117,18 @@ export class DatabaseService {
    * @param course_semester
    * @param course_modul_id
    * @param userDataAllowed
+   * @param course_end_date
    */
   createCourse(name: string, description: string, standard_task_typ: string, course_semester: string,
-               course_modul_id: string, userDataAllowed: boolean): Observable<Succeeded> {
+               course_modul_id: string, course_end_date: string, userDataAllowed: boolean): Observable<Succeeded> {
     return this.http.post<Succeeded>('/api/v1/courses', {
       name: name,
       description: description,
       standard_task_typ: standard_task_typ,
       course_semester: course_semester,
       course_modul_id: course_modul_id,
-      personalised_submission: userDataAllowed
+      personalised_submission: userDataAllowed,
+      course_end_date: course_end_date
     });
   }
 
@@ -194,7 +196,7 @@ export class DatabaseService {
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
-      test_type: test_type
+      testsystem_id: test_type
     }).pipe(
       flatMap(result => {
         let upload_url: string;
