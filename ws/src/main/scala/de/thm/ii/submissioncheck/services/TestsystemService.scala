@@ -127,14 +127,14 @@ class TestsystemService {
     * @param topic a topic name
     * @return generated topic list where kafka can listen on
     */
-  def getTestsystemsTopicLabelsByTopic(topic: String): Array[String] = {
+  def getTestsystemsTopicLabelsByTopic(topic: String): List[String] = {
     var topicList = List[String]()
     val testsystems = this.getTestsystems()
     for(m <- testsystems){
       topicList = m("testsystem_id") :: topicList
     }
     topicList = topicList.map(f => f + "_" + topic)
-    topicList.toArray
+    topicList
   }
 
   /**

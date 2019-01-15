@@ -29,7 +29,7 @@ object JsonHelper {
     * @param jsonMap a Scala Map
     * @return Json String
     */
-  implicit def mapToJsonStr(jsonMap: Map[String, String]): String = {
+  implicit def mapToJsonStr(jsonMap: Map[String, Any]): String = {
     val mapper = new ObjectMapper() with ScalaObjectMapper
     mapper.registerModule(DefaultScalaModule)
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)

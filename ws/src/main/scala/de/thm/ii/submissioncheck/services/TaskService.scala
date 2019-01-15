@@ -239,6 +239,21 @@ class TaskService {
   }
 
   /**
+    * Testsystems answer (ansynchron) if provided testfiles are acceptable or not, they have there individual logic.
+    * This method simply saved this answer
+    * @author Benjamin Manns
+    * @param task_id unique identification for a task
+    * @param accept if testsystem accepted or not
+    * @param error error mesage provided by testsystem
+    * @return update work
+    */
+  def setTaskTestFileAcceptedState(task_id: Int, accept: Boolean, error: String = ""): Boolean = {
+    val num = DB.update(
+      "UPDATE task set test_file_accept = ?, test_file_accept_error = ? where task_id = ?;", accept, error, task_id)
+    num > 0
+  }
+
+  /**
     * for a given Taskid and submissionid set a result text
     *
     * @author Benjamin Manns
