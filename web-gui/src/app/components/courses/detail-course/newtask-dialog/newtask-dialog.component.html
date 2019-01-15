@@ -15,9 +15,7 @@
 
     <!-- TODO: Change to use values from db-->
     <mat-select placeholder="Aufgaben typ" [(value)]="taskType">
-      <mat-option value="FILE">FILE</mat-option>
-      <mat-option value="SQL">SQL</mat-option>
-      <mat-option value="JAVA">JAVA</mat-option>
+      <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
     </mat-select>
 
     <input (change)="getFile($event.target.files[0])" type="file" placeholder="Lösung">

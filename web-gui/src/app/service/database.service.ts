@@ -7,7 +7,7 @@ import {
   FileUpload,
   GeneralCourseInformation,
   RoleChanged,
-  Succeeded,
+  Succeeded, Testsystem,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
@@ -30,6 +30,11 @@ export class DatabaseService {
 
 
   // GET REQUESTS
+
+
+  getTestsystemTypes(): Observable<Testsystem[]> {
+    return this.http.get<Testsystem[]>('/api/v1/testsystems');
+  }
 
 
   /**

@@ -1,14 +1,14 @@
 import {Component, OnInit} from '@angular/core';
-import {delay, flatMap, mergeMap, retry, retryWhen, take} from 'rxjs/operators';
+import {delay, flatMap, map, mergeMap, retry, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {CourseTask, DetailedCourseInformation} from '../../../interfaces/HttpInterfaces';
+import {CourseTask, DetailedCourseInformation, Testsystem} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
 import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
-import {of, throwError, timer} from 'rxjs';
+import {Observable, of, throwError, timer} from 'rxjs';
 
 @Component({
   selector: 'app-detail-course',
@@ -29,52 +29,6 @@ export class DetailCourseComponent implements OnInit {
   processing: boolean;
   userRole: string;
   submissionAsFile: boolean;
-
-  // exampleTasks: CourseTask[] = [{
-  //   task_id: 1,
-  //   task_name: 'Aufgabe 1',
-  //   task_description: 'Das ist die erste Aufgabe',
-  //   task_type: 'FILE',
-  //   submit_date: new Date(1508330494000),
-  //   exitcode: 0,
-  //   result: '',
-  //   submission_data: '',
-  //   passed: 0,
-  //   result_date: new Date(1508330494000),
-  //   file: 'abgabe1.txt',
-  // },
-  //   {
-  //     task_id: 3,
-  //     task_name: 'Aufgabe 2',
-  //     task_description: 'Das ist eine weitere Aufgaben beschreibung',
-  //     task_type: 'TEXT',
-  //     submit_date: new Date(1508440494000),
-  //     exitcode: 0,
-  //     result: '',
-  //     submission_data: 'dasistmeinsubmissionstring',
-  //     passed: 0,
-  //     result_date: new Date(1508550494000),
-  //     file: '',
-  //   },
-  //   {
-  //     task_id: 3,
-  //     task_name: 'Aufgabe 3',
-  //     task_description: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor' +
-  //       ' invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo' +
-  //       ' duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit' +
-  //       ' amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt' +
-  //       ' ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores' +
-  //       ' et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.',
-  //     task_type: 'FILE',
-  //     submit_date: new Date(1508774394000),
-  //     exitcode: 3,
-  //     result: 'Hier steht eine Fehlermeldung',
-  //     submission_data: '',
-  //     passed: 1,
-  //     result_date: new Date(1508399994000),
-  //     file: 'abgabe3.txt',
-  //   },
-  // ];
 
 
   ngOnInit() {
@@ -109,26 +63,29 @@ export class DetailCourseComponent implements OnInit {
 
 
   submission(courseID: number, currentTask: CourseTask) {
-    this.db.submitTask(currentTask.task_id, this.submissionData).pipe(
-      flatMap(res => {
-        if (res.success) {
-          this.processing = true;
-        }
-        return this.db.getTaskResult(currentTask.task_id);
-      })).pipe(
-      mergeMap(value => {
-        if (value.passed == null || typeof value.passed === undefined) {
-          return throwError('No result yet');
-        }
-        return of(value);
-      }),
-      retryWhen(errors => errors.pipe(delay(1000), take(10)))
-    ).subscribe(taskResult => {
-      this.processing = false;
-      const oldTask = this.courseTasks[this.courseTasks.indexOf(currentTask)];
-      console.log(oldTask);
-      console.log(taskResult);
+    this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
+      if (res.success) {
+        this.processing = true;
+
+        this.db.getTaskResult(currentTask.task_id).pipe(
+          flatMap(value => {
+            console.log(value);
+            if (value.passed == null || typeof value.passed === undefined) {
+              return throwError('No result yet');
+            }
+            return of(value);
+          }),
+          retryWhen(errors => errors.pipe(delay(10000), take(10)))
+        ).subscribe(taskResult => {
+          this.processing = false;
+          const oldTask = this.courseTasks[this.courseTasks.indexOf(currentTask)];
+          console.log(oldTask);
+          console.log(taskResult);
+        });
+
+      }
     });
+
   }
 
   exitCourse(courseName: string, courseID: number) {

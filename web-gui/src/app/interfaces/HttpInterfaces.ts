@@ -105,6 +105,13 @@ export interface User {
   last_login?: Date;
 }
 
+export interface Testsystem {
+  name: string;
+  testsystem_id: string;
+  description: string;
+  supported_formats: string;
+}
+
 export enum TextType {
   Dataprivacy = 'privacy_text',
   Impressum = 'impressum_text'
