@@ -1,0 +1,6 @@
+<h2 matDialogTitle>Kurs verlassen</h2>
+<mat-dialog-content>Kurs {{data.coursename}} wirklich verlassen ?</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-flat-button color="accent" (click)="exitCourse(false)">Abbrechen</button>
+  <button mat-flat-button color="warn" (click)="exitCourse(true)">Verlassen</button>
+</mat-dialog-actions>

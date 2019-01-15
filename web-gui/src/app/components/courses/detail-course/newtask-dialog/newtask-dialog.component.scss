@@ -1,0 +1,14 @@
+.new-task-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-action-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+mat-select {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}

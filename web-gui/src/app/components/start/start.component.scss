@@ -1,0 +1,65 @@
+@import '../../../colors';
+
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+mat-toolbar {
+  background: transparent;
+}
+
+.flex-toolbar-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+mat-sidenav {
+  background: $cPrimary;
+}
+
+.profile {
+  margin: 12px;
+}
+
+.sidenav-button {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  padding: 12px;
+  height: 24px;
+
+}
+
+.sidenav-button > p {
+  padding-left: 6px;
+}
+
+.sidenav-button:hover {
+  background: $cPrimary-light;
+}
+
+.selected {
+  background: $cPrimary-light;
+}
+
+.sidenav-group {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+}
+
+#filler {
+  flex-grow: 1;
+}
+
+#courses {
+  color: white;
+  margin-left: 8px;
+}
+
+

@@ -1,0 +1,86 @@
+<mat-sidenav-container class="container" autosize>
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+    <div class="sidenav-group">
+
+      <mat-card class="profile">
+        <mat-card-header>
+          <mat-card-title>{{username}}</mat-card-title>
+          <mat-card-subtitle>{{userRole}}</mat-card-subtitle>
+        </mat-card-header>
+      </mat-card>
+
+
+      <mat-divider></mat-divider>
+
+
+      <a *ngIf="!isModerator" class="sidenav-button" routerLink="/{{userRole}}/dashboard" routerLinkActive="selected">
+        <mat-icon>dashboard</mat-icon>
+        <p>Dashboard {{isModerator}}</p>
+      </a>
+
+      <a *ngIf="isAdmin" class="sidenav-button" routerLink="/{{userRole}}/user-management" routerLinkActive="selected">
+        <mat-icon>supervised_user_circle</mat-icon>
+        <p>User Verwaltung</p>
+      </a>
+
+      <a *ngIf="isAdmin" class="sidenav-button" routerLink="/admin/checker" routerLinkActive="selected">
+        <mat-icon>playlist_add_check</mat-icon>
+        <p>Checker</p>
+      </a>
+
+      <h3 id="courses">Kurse</h3>
+      <mat-divider></mat-divider>
+
+      <a *ngIf="isAdmin || isModerator" class="sidenav-button" routerLink="/courses/docent" routerLinkActive="selected">
+        <mat-icon>person</mat-icon>
+        <p>Dozent bestimmen</p>
+      </a>
+
+      <a *ngIf="isAdmin || isDocent" class="sidenav-button" routerLink="/courses/tutor" routerLinkActive="selected">
+        <mat-icon>person</mat-icon>
+        <p>Tutor bestimmen</p>
+      </a>
+
+      <a *ngIf="isAdmin || isModerator" class="sidenav-button" routerLink="/courses/new" routerLinkActive="selected">
+        <mat-icon>playlist_add</mat-icon>
+        <p>Neuen Kurs erstellen</p>
+      </a>
+
+      <a class="sidenav-button" routerLink="/courses/user" routerLinkActive="selected">
+        <mat-icon>list</mat-icon>
+        <p>Meine Kurse</p>
+      </a>
+
+      <a class="sidenav-button" routerLink="/courses/search" routerLinkActive="selected">
+        <mat-icon>search</mat-icon>
+        <p>Kurs suchen</p>
+      </a>
+
+
+      <span id="filler"></span>
+
+      <a id="logout-button" class="sidenav-button" (click)="logout()">
+        <mat-icon>power_settings_new</mat-icon>
+        <p>Logout</p>
+      </a>
+    </div>
+
+  </mat-sidenav>
+
+  <!-- Sidenav content-->
+  <mat-sidenav-content>
+    <mat-toolbar>
+      <button mat-icon-button>
+        <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
+      </button>
+      <div class="flex-toolbar-container">
+        <span class="mat-h1">{{title}}</span>
+      </div>
+    </mat-toolbar>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
+
+
+

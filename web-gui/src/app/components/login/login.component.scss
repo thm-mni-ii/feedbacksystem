@@ -1,25 +1,29 @@
-.toolbar {
-  display: flex;
-  margin: 0;
+@import '../../../colors';
+
+mat-toolbar {
   justify-content: center;
+  background: rgba(255,255,255,0.3);
 }
 
-
-.login-container {
+.flex-container {
+  height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  background: url("../../../assets/login-back.jpg");
+  background-size: cover;
+}
+
+.flex-card-container {
   height: 100%;
+  width: 100%;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.form {
+.radio-group {
   display: flex;
-  flex-direction: column;
-}
-
-.example-radio-group {
-  display: inline-flex;
   flex-direction: column;
 }
 
@@ -27,6 +31,6 @@
   margin: 5px;
 }
 
-button{
-  margin: 0 0 10px 16px;
+button {
+  width: 100%;
 }

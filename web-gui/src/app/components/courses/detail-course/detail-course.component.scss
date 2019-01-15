@@ -1,0 +1,66 @@
+@import "../../../../colors";
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#description {
+  width: 80%;
+  background: $cPrimary-light;
+  color: white;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.task-container {
+  width: 80%;
+  margin-top: 12px;
+}
+
+.filler {
+  flex-grow: 1;
+}
+
+#passed {
+  color: green;
+}
+
+#failed {
+  color: red;
+}
+
+.user-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+
+.user-input-text {
+  width: 100%;
+}
+
+.result {
+  display: flex;
+  width: 100%;
+}
+
+mat-card-actions {
+  margin-left: 4px;
+  display: flex;
+}
+
+mat-spinner {
+  width: 50px;
+  height: 50px;
+}
+
+.desc-button {
+  margin-right: 12px;
+}
