@@ -1,5 +1,8 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.net.{URLDecoder, URLEncoder}
+import java.nio.charset.StandardCharsets
+
 import scala.collection.JavaConverters._
 import java.util.{Base64, NoSuchElementException, Timer, TimerTask}
 
@@ -47,6 +50,7 @@ class TaskController {
   private final val testsystemLabel1 = "secrettokenchecker"
 
   private var container: KafkaMessageListenerContainer[String, String] = null
+  private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = null
 
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
@@ -87,6 +91,7 @@ class TaskController {
     new Timer().schedule(new TimerTask() {
       override def run(): Unit = {
         kafkaReloadService
+        kafkaReloadNewTaskAnswerService
       }
     }, bean_delay)
   }
@@ -270,12 +275,13 @@ class TaskController {
     * @author grokonez.com
     *
     * @param taskid unique identification for a task
-    * @param file a multipart binary file in a form data format
+    * @param files an array of multipart binary file in a form data format
     * @param request Request Header containing Headers
     * @return HTTP Response with Status Code
     */
   @RequestMapping(value = Array("tasks/{id}/testfile/upload"), method = Array(RequestMethod.POST))
-  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) files: Array[MultipartFile],
+                       request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verfiyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
@@ -283,11 +289,13 @@ class TaskController {
 
     var message: Boolean = false
     var filename: String = ""
-    storageService.storeTaskTestFile(file, taskid)
-    filename = file.getOriginalFilename
+    for((file, j) <- files.zipWithIndex){
+      filename += file.getOriginalFilename + (if (j < files.length-1) "," else "")
+      storageService.storeTaskTestFile(file, taskid)
+    }
     taskService.setTaskFilename(taskid, filename)
     val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
-    val jsonMsg: Map[String, String] = Map("testfile_url" -> this.taskService.getURLOfTaskTestFile(taskid),
+    val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),
       LABEL_TASK_ID -> taskid.toString,
       LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
 
@@ -398,19 +406,24 @@ class TaskController {
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns
     * @param taskid unique taskid identification
+    * @param filename requested filename which should be a stored file
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/testfile"))
-  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, request: HttpServletRequest):
+  @GetMapping(Array("tasks/{id}/files/testfile/{filename}"))
+  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable filename: String, request: HttpServletRequest):
   ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
       throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
     }
-    val filename = taskService.getTestFileByTask(taskid)
-    val file = storageService.loadFile(filename, taskid)
-    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+    val parsedFilename = URLDecoder.decode(filename, StandardCharsets.UTF_8.toString)
+    try {
+      val file = storageService.loadFile(parsedFilename, taskid)
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+    } catch {
+      case _: RuntimeException => throw new ResourceNotFoundException
+    }
   }
 
   /**
@@ -447,6 +460,7 @@ class TaskController {
       throw new UnauthorizedException
     }
     this.kafkaReloadService
+    this.kafkaReloadNewTaskAnswerService
   }
 
   private def kafkaReloadService: Map[String, AnyVal] = {
@@ -457,9 +471,9 @@ class TaskController {
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
 
     // TODO fire this method after updates on Testsystem!
-    val kafkaTopicCheckAnswer: Array[String] = testsystemService.getTestsystemsTopicLabelsByTopic("check_answer")
-    logger.warn("Registered Listener Topic: ")
-    kafkaTopicCheckAnswer.map(s => logger.warn(s))
+    val kafkaTopicCheckAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic("check_answer")
+
+    kafkaTopicCheckAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicCheckAnswer: _*)
     if (container != null) {
       container.stop()
@@ -489,6 +503,49 @@ class TaskController {
       }
     })
     container.start
+    Map("reload" -> true)
+  }
+
+  private def kafkaReloadNewTaskAnswerService: Map[String, AnyVal] = {
+    // TODO load from properties config
+    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "localhost:9092", "group.id" -> "jcg-group")
+    val consumerConfigJava = consumerConfigScala.asJava
+    val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
+      new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
+
+    // TODO fire this method after updates on Testsystem!
+    val kafkaTopicNewTaskAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic("new_task_answer")
+
+    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
+    val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
+    if (newTaskAnswerContainer != null) {
+      newTaskAnswerContainer.stop()
+    }
+    newTaskAnswerContainer = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
+
+    newTaskAnswerContainer.setupMessageListener(new MessageListener[Int, String]() {
+      /**
+        * onMessage process incoming kafka messages
+        * @author Benjamin Manns
+        * @param data kafka message
+        */
+      override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
+        logger.debug("received message from topic '" + data.topic + "': " + data.value())
+        // TODO switch data.topic and save for each then!!
+
+        val answeredMap = JsonParser.jsonStrToMap(data.value())
+        try {
+          logger.warn(answeredMap.toString())
+          val taskId = Integer.parseInt(answeredMap("taskid").asInstanceOf[String])
+          val accept = answeredMap("accept").asInstanceOf[Boolean]
+          val error = answeredMap("error").asInstanceOf[String]
+          taskService.setTaskTestFileAcceptedState(taskId, accept, error)
+        } catch {
+          case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
+        }
+      }
+    })
+    newTaskAnswerContainer.start
     Map("reload" -> true)
   }
 }
