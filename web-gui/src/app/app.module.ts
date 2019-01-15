@@ -87,7 +87,7 @@ export const httpInterceptorProviders = [
     })
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent],
-  // providers: [httpInterceptorProviders],
+  providers: [httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {

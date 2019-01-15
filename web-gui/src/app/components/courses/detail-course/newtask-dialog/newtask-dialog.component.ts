@@ -23,7 +23,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   newTaskName: string;
   newTaskDescription: string;
   taskType: string;
-  soutionFile: File;
+  soutionFiles: FileList;
   testTypes$: Observable<Testsystem[]>;
   isUpdate: boolean;
 
@@ -61,8 +61,8 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * or creation
    * @param file The solution file
    */
-  getFile(file: File) {
-    this.soutionFile = file;
+  getFile(file: FileList) {
+    this.soutionFiles = file;
   }
 
   /**
@@ -77,7 +77,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * Create a new task
    */
   createTask() {
-    this.db.createTask(this.data.courseID, this.newTaskName, this.newTaskDescription, this.soutionFile, this.taskType)
+    this.db.createTask(this.data.courseID, this.newTaskName, this.newTaskDescription, this.soutionFiles, this.taskType)
       .subscribe(success => this.dialogRef.close(success));
   }
 
@@ -85,7 +85,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * Update given task
    */
   updateTask() {
-    this.db.updateTask(this.data.task.task_id, this.newTaskName, this.newTaskDescription, this.soutionFile, this.taskType)
+    this.db.updateTask(this.data.task.task_id, this.newTaskName, this.newTaskDescription, this.soutionFiles, this.taskType)
       .subscribe(success => this.dialogRef.close(success));
   }
 
