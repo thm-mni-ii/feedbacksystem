@@ -223,7 +223,7 @@ class TaskController {
      } catch {
        case e: Exception => {}
      }
-    Map("submission_upload_success" -> message, LABEL_FILENAME -> filename)
+    Map("success" -> message, LABEL_FILENAME -> filename)
   }
 
   /**

@@ -391,7 +391,7 @@ class TestRESTStudent(unittest.TestCase):
                                              headers={'Content-Type': multipart_data.content_type,
                                                       'Authorization': self.student_auth_header})
 
-        self.assertEqual({'submission_upload_success': True, 'filename': 'sample.sql'}, file_upload_response.json())
+        self.assertEqual({'success': True, 'filename': 'sample.sql'}, file_upload_response.json())
 
         result_req_af = requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                                      verify=False,
