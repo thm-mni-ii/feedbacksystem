@@ -15,7 +15,7 @@
   </mat-card>
 
 
-  <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}" #card>
+  <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}">
     <div class="title">
       <h4>{{task.task_name}}</h4>
       <span class="filler"></span>
@@ -24,7 +24,7 @@
         <mat-icon id="passed" *ngIf="task.passed">done</mat-icon>
         <mat-icon id="failed" *ngIf="!task.passed">clear</mat-icon>
       </ng-template>
-      <mat-spinner *ngIf="processing; else result" diameter="20"></mat-spinner>
+      <mat-spinner *ngIf="processing[task.task_id]; else result" diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>
     </mat-card-subtitle>
@@ -35,19 +35,20 @@
 
         <!-- Submission -->
         <div class="result">
-          <p>{{task.submission_data}}</p>
+          <p *ngIf="task.submission_data">{{task.submission_data}}</p>
+          <p *ngIf="task.file">{{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>
         <p *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
-        <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile">
+        <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
         </mat-radio-group>
-        <input *ngIf="submissionAsFile" type="file"
+        <input *ngIf="submissionAsFile[task.task_id]" type="file"
                (change)="getSubmissionFile($event.target.files[0])">
 
-        <mat-form-field *ngIf="!submissionAsFile" class="user-input-text" appearance="outline">
+        <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
           <input matInput type="text" [(ngModel)]="submissionData">
         </mat-form-field>
