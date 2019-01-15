@@ -58,11 +58,8 @@ export class DetailCourseComponent implements OnInit {
       flatMap((value: Succeeded) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          return this.db.getCourseDetail(course.course_id);
-        } else {
-          this.snackbar.open('Server fehler', 'OK', {duration: 3000});
-          return;
         }
+        return this.db.getCourseDetail(course.course_id);
       })
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
@@ -86,11 +83,8 @@ export class DetailCourseComponent implements OnInit {
       flatMap((value: Succeeded) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-          return this.db.getCourseDetail(this.courseDetail.course_id);
-        } else {
-          this.snackbar.open('Server fehler', 'OK', {duration: 3000});
-          return;
         }
+        return this.db.getCourseDetail(this.courseDetail.course_id);
       })
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
@@ -106,8 +100,8 @@ export class DetailCourseComponent implements OnInit {
       flatMap(value => {
         if (value.success) {
           this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-          return this.db.getCourseDetail(this.courseDetail.course_id);
         }
+        return this.db.getCourseDetail(this.courseDetail.course_id);
       })
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
