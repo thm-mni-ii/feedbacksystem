@@ -42,6 +42,11 @@ export class AdminUserManagementComponent implements OnInit {
    * @param role Selected role from admin
    */
   roleChange(username: string, userID: number, role: number) {
+    if (Number(role) === 4 || Number(role) === 8) {
+      this.snackBar.open('Bitte über "Dozent/Tutor bestimmen" auswählen', 'OK', {duration: 5000});
+      return;
+    }
+
     this.db.changeUserRole(userID, role).subscribe(res => {
       if (res.success) {
         this.snackBar.open(username + ' ist jetzt ' + res.grant, 'OK', {duration: 3000});
