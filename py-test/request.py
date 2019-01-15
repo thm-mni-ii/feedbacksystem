@@ -231,7 +231,7 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'Content-Type': multipart_data.content_type, 'Authorization': self.docent_auth_header})
         print(file_upload_response.json())
 
-        self.assertEqual(file_upload_response.json(),{'upload_success': True, 'filename': 'sample.sql'})
+        self.assertEqual(file_upload_response.json(),{'success': True, 'filename': 'sample.sql'})
 
         self.assertEqual(len(task_creation_2.json()), 3)
         self.assertTrue("success" in task_creation_2.json())
