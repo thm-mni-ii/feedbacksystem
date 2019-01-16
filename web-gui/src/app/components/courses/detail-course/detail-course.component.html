@@ -7,7 +7,7 @@
       verlassen
     </button>
     <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
-            mat-flat-button color="accent" (click)="createTask(courseDetail)">Kurs bearbeiten
+            mat-flat-button color="accent" (click)="updateCourse()">Kurs bearbeiten
     </button>
     <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
             mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
