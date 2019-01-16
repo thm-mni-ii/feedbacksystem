@@ -1,8 +1,17 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {CourseTableItem} from "../modules/student/student-list/course-table/course-table-datasource";
-import {Observable} from "rxjs";
-import {MatSnackBar} from "@angular/material";
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {
+  CourseTask,
+  DetailedCourseInformation,
+  FileUpload,
+  GeneralCourseInformation,
+  RoleChanged,
+  Succeeded, Testsystem,
+  TextType,
+  User
+} from '../interfaces/HttpInterfaces';
+import {flatMap} from 'rxjs/operators';
 
 /**
  *  Service to communicate with db.
@@ -16,17 +25,89 @@ import {MatSnackBar} from "@angular/material";
 export class DatabaseService {
 
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) {
+  constructor(private http: HttpClient) {
   }
 
-  // Courses
+
+  // GET REQUESTS
+
+
+  getTestsystemTypes(): Observable<Testsystem[]> {
+    return this.http.get<Testsystem[]>('/api/v1/testsystems');
+  }
+
+
+  /**
+   * Get impressum or dataprivacy text
+   * @param type The type of text
+   */
+  getPrivacyOrImpressumText(type: TextType) {
+    return this.http.get('/api/v1/settings/privacy/text?which=' + type.toString());
+  }
 
   /**
    * Returns all courses an user subscribed to
    */
-  getCourses(): Observable<CourseTableItem[]> {
-    return this.http.get<CourseTableItem[]>('/api/v1/courses');
+  getSubscribedCourses(): Observable<GeneralCourseInformation[]> {
+    return this.http.get<GeneralCourseInformation[]>('/api/v1/courses');
   }
+
+  /**
+   * Returns all courses
+   */
+  getAllCourses(): Observable<GeneralCourseInformation[]> {
+    return this.http.get<GeneralCourseInformation[]>('/api/v1/courses/all');
+  }
+
+  /**
+   * Get detail of specific course
+   * @param courseID of course to obtain task from
+   */
+  getCourseDetail(courseID: number): Observable<DetailedCourseInformation> {
+    return this.http.get<DetailedCourseInformation>('/api/v1/courses/' + courseID);
+  }
+
+
+  /**
+   * Get all results of all users of all tasks
+   * @param id of course to obtain all submissions
+   */
+  getAllUserSubmissions(id: number): Observable<any> {
+    return this.http.get<any>('/api/v1/courses/' + id + '/submissions');
+  }
+
+  /**
+   * Return submission list for this task
+   * @param taskID The id of task
+   */
+  getTaskResult(taskID: number): Observable<CourseTask> {
+    return this.http.get<CourseTask>('/api/v1/tasks/' + taskID);
+  }
+
+  /**
+   * Returns all submissions an user
+   * did for a given task
+   * @param idCourse of course
+   * @param idTask of task where all submissions will be returned
+   */
+  getTaskSubmissions(idCourse: number, idTask: number) {
+    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
+  }
+
+  getOverview(): Observable<any> {
+    return this.http.get<any>('/api/v1/courses/submissions');
+  }
+
+  /**
+   * get all registered users.
+   */
+  getAllUsers(): Observable<User[]> {
+    return this.http.get<User[]>('/api/v1/users');
+  }
+
+
+  // POST REQUESTS
+
 
   /**
    * Create a new Course
@@ -35,27 +116,149 @@ export class DatabaseService {
    * @param standard_task_typ
    * @param course_semester
    * @param course_modul_id
-   * @param isPublic
+   * @param userDataAllowed
+   * @param course_end_date
    */
   createCourse(name: string, description: string, standard_task_typ: string, course_semester: string,
-               course_modul_id: string, isPublic: boolean) {
-    return this.http.post('/api/v1/courses', {
+               course_modul_id: string, course_end_date: string, userDataAllowed: boolean): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses', {
       name: name,
       description: description,
       standard_task_typ: standard_task_typ,
       course_semester: course_semester,
       course_modul_id: course_modul_id,
-      anonymous: isPublic
+      personalised_submission: userDataAllowed,
+      course_end_date: course_end_date
     });
   }
 
   /**
-   * Delete a course
-   * @param id of course which will be deleted
+   * User subscription to course with :id
+   * @param courseID of course to subscribe
    */
-  deleteCourse(id: number) {
-    return this.http.delete('/api/v1/courses/' + id);
+  subscribeCourse(courseID: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/subscribe', {});
   }
+
+  /**
+   * User unsub course with :id
+   * @param id of course to unsub
+   */
+  unsubscribeCourse(id: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + id + '/unsubscribe', {});
+  }
+
+  /**
+   * User submits task as file or string
+   * @param idTask of task that will be submitted
+   * @param data that the user submits
+   */
+  submitTask(idTask: number, data: File | string): Observable<Succeeded> {
+    if (data instanceof File) { // Data is file
+      let upload_url: string;
+
+      // File in form data
+      const formDataFile = new FormData();
+      formDataFile.append('file', data, data.name);
+
+      // Ask for upload url and upload file
+      return this.http.post<FileUpload>('/api/v1/tasks/' + idTask + '/submit', {}).pipe(
+        flatMap(response => {
+          if (response.success) {
+            upload_url = response.upload_url;
+          }
+
+          // Uploading the file
+          return this.http.post<Succeeded>(upload_url, formDataFile, {
+            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+          });
+
+        }));
+    } else { // Data is string
+      return this.http.post<Succeeded>('/api/v1/tasks/' + idTask + '/submit', {data: data});
+    }
+  }
+
+  /**
+   * Lecturer creates a new Task
+   * @param idCourse The id of course where task will be added
+   * @param name This is the name of the Task
+   * @param description This is the description of the task
+   * @param file This will be the solution file from Lecturer
+   * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
+   */
+  createTask(idCourse: number, name: string, description: string, file: File, test_type: string): Observable<Succeeded> {
+
+    // Solution file
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
+      name: name,
+      description: description,
+      testsystem_id: test_type
+    }).pipe(
+      flatMap(result => {
+        let upload_url: string;
+        if (result.success) {
+          upload_url = result.upload_url;
+        }
+
+        return this.http.post<Succeeded>(upload_url, formData, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
+        });
+      })
+    );
+  }
+
+  /**
+   * Docent adds tutor to one of his courses
+   * @param courseID The course where user will be add
+   * @param userID The id of user to add
+   */
+  addTutorToCourse(courseID: number, userID: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/grant/tutor', {userid: userID});
+  }
+
+  /**
+   * Docent removes tutor from his course
+   * @param courseID The course where user will be removed
+   * @param userID The id of user to remove
+   */
+  removeTutorFromCourse(courseID: number, userID: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/deny/tutor', {userid: userID});
+  }
+
+  /**
+   * User get docent rights to course
+   * @param courseID
+   * @param userID
+   */
+  addDocentToCourse(courseID: number, userID: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/grant/docent', {userid: userID});
+  }
+
+  /**
+   * User loses docent rights to course
+   * @param courseID
+   * @param userID
+   */
+  removeDocentFromCourse(courseID: number, userID: number): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/deny/docent', {userid: userID});
+  }
+
+  /**
+   * Admin chooses user role
+   * @param userID The id of user
+   * @param userRole The next role user will have
+   */
+  changeUserRole(userID: number, userRole: number): Observable<RoleChanged> {
+    return this.http.post<RoleChanged>('/api/v1/users/grant/' + userID, {role: userRole});
+  }
+
+
+  // PUT REQUESTS
+
 
   /**
    * Update an existing course
@@ -68,99 +271,14 @@ export class DatabaseService {
    * @param isPublic Should the course be displayed to students or not
    */
   updateCourse(id: number, name: string, description: string, standard_task_typ: string, course_semester: string,
-               course_module_id: string, isPublic: boolean): Observable<ReturnMessage> {
-    return this.http.put<ReturnMessage>('/api/v1/courses/' + id, {
+               course_module_id: string, isPublic: boolean): Observable<Succeeded> {
+    return this.http.put<Succeeded>('/api/v1/courses/' + id, {
       name: name,
       description: description,
       standard_task_typ: standard_task_typ,
       course_semester: course_semester,
       course_modul_id: course_module_id,
       anonymous: isPublic
-    });
-  }
-
-  /**
-   * Return all task for course
-   * with given id
-   * @param id of course to obtain task from
-   */
-  getCourseDetail(id: number): Observable<CourseDetail> {
-    return this.http.get<CourseDetail>('/api/v1/courses/' + id);
-  }
-
-  /**
-   * Returns all courses
-   */
-  getAllCourses(): Observable<CourseTableItem[]> {
-    return this.http.get<CourseTableItem[]>('/api/v1/courses/all');
-  }
-
-  /**
-   * User subscription to course with :id
-   * @param id of course to subscribe
-   */
-  subscribeCourse(id: number) {
-    return this.http.post('/api/v1/courses/' + id + '/subscribe', {});
-  }
-
-  /**
-   * User unsub course with :id
-   * @param id of course to unsub
-   */
-  unsubscribeCourse(id: number) {
-    return this.http.post('/api/v1/courses/' + id + '/unsubscribe', {});
-  }
-
-  /**
-   * Grant a user edit rights in course
-   * @param id of course
-   * @param username of user that should become edit rights
-   */
-  grantUserEdit(id: number, username: string) {
-    return this.http.post('/api/v1/courses/' + id + '/grant', {username: username, grant_type: 'edit'});
-  }
-
-  /**
-   * docents get all results of all users of all tasks
-   * @param id of course to obtain all submissions
-   */
-  allUserSubmissions(id: number): Observable<ProfDashboard[]> {
-    return this.http.get<ProfDashboard[]>('/api/v1/courses/' + id + '/submissions');
-  }
-
-
-  // Tasks
-
-  /**
-   * Lecturer creates a new Task
-   * @param idCourse The id of course where task will be added
-   * @param name This is the name of the Task
-   * @param description This is the description of the task
-   * @param file This will be the solution file from Lecturer
-   * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
-   */
-  createTask(idCourse: number, name: string, description: string, file: File, test_type: string) {
-    // Solution file
-    let formData = new FormData();
-    formData.append('file', file, file.name);
-
-
-    this.http.post<NewTaskFileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
-      name: name,
-      description: description,
-      test_type: test_type
-    }).subscribe(result => {
-
-      // Result comes back with upload url for solution file
-      this.http.post(result.upload_url, formData, {
-        headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
-      }).subscribe((value: { upload_success: boolean, filename: string }) => {
-        if (value.upload_success) {
-          this.snackBar.open("Aufgabe " + name + " erstellt", "OK", {duration: 3000});
-        } else {
-          this.snackBar.open("Fehler beim upload der Lösungs Datei", "OK", {duration: 5000});
-        }
-      });
     });
   }
 
@@ -172,315 +290,59 @@ export class DatabaseService {
    * @param file This is the solution file of updated Task
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  updateTask(idTask: number, name: string, description: string, file: File, test_type: string) {
-    let formData = new FormData();
-    formData.append("file", file, file.name);
+  updateTask(idTask: number, name: string, description: string, file: File, test_type: string): Observable<Succeeded> {
 
-    return this.http.put('/api/v1/tasks/' + idTask, {
+    // New solution file
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
       name: name,
       description: description,
       test_type: test_type
-    }).subscribe((result: { success: boolean, upload_url }) => {
-      if (result.success) {
+    }).pipe(
+      flatMap(res => {
+        let uploadUrl: string;
+        if (res.success) {
+          uploadUrl = res.upload_url;
+        }
 
-        // File upload
-        this.http.post(result.upload_url, formData, {
+        return this.http.post<Succeeded>(uploadUrl, formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
-        }).subscribe((value: { upload_success: boolean, filename: string }) => {
-          if (value.upload_success) {
-            this.snackBar.open("Aufgabe " + name + " bearbeitet", "OK", {duration: 3000});
-          } else {
-            this.snackBar.open("Fehler beim upload der Lösungs Datei", "OK", {duration: 5000});
-          }
         });
-      }
-    });
+      }));
+  }
+
+
+  // DELETE REQUESTS
+
+
+  /**
+   * Delete a course
+   * @param id of course which will be deleted
+   */
+  deleteCourse(id: number): Observable<Succeeded> {
+    return this.http.delete<Succeeded>('/api/v1/courses/' + id);
   }
 
   /**
    * Deletes an existing task
    * @param idTask This is an unique id every task has
    */
-  deleteTask(idTask: number) {
-    return this.http.delete('/api/v1/tasks/' + idTask);
-  }
-
-  /**
-   * Return details of task
-   * @param idCourse of course where the task is
-   * @param idTask of task from which details will be obtained
-   */
-  getTaskDetail(idCourse: number, idTask: number) {
-    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask);
-  }
-
-  /**
-   * For a given task_id :id the saved results
-   * @param idTask id of task
-   */
-  getTaskResult(idTask: number) {
-    return this.http.get('/api/v1/tasks/' + idTask + '/result');
-  }
-
-  /**
-   * User submits task as file or string
-   * @param idTask of task that will be submitted
-   * @param data that the user submits
-   */
-  submitTask(idTask: number, data: File | string) {
-    if (data instanceof File) { // Data is file
-      let upload_url: string;
-      // File in form data
-      let formDataFile = new FormData();
-      formDataFile.append("file", data, data.name);
-
-      // Ask for upload route and save it in upload_url
-      this.http.post<SubmitResult>('/api/v1/tasks/' + idTask + '/submit', {}).subscribe(res => {
-        upload_url = res.upload_url;
-      }, err => {
-        console.log(err);
-      }, () => {
-
-        // Send form file to upload route
-        this.http.post(upload_url, formDataFile, {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('user')}
-        }).subscribe();
-      });
-    } else { // Data is string
-      this.http.post<SubmitResult>('/api/v1/tasks/' + idTask + '/submit', {data: data}).subscribe(res => {
-        return res.success;
-      });
-    }
-  }
-
-
-  /**
-   * Returns all submissions an user
-   * did for a given task
-   * @param idCourse of course
-   * @param idTask of task where all submissions will be returned
-   */
-  getTaskSubmissions(idCourse: number, idTask: number) {
-    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
-  }
-
-  getOverview(): Observable<DashboardInformation[]> {
-    return this.http.get<DashboardInformation[]>("/api/v1/courses/submissions");
-  }
-
-
-  /**
-   * (Only) Admin can get all registered users.
-   */
-  adminGetUsers(): Observable<User[]> {
-    return this.http.get<User[]>('/api/v1/users');
+  deleteTask(idTask: number): Observable<Succeeded> {
+    return this.http.delete<Succeeded>('/api/v1/tasks/' + idTask);
   }
 
   /**
    * (Only) Admin can delete a registered user by its userid.
    * @param userID
    */
-  adminDeleteUser(userID: number) {
-    return this.http.delete('/api/v1/users/' + userID).subscribe(msg => {
-      console.log('DELETE USER: ' + JSON.stringify(msg));
-    });
-  }
-
-  /**
-   * (Only) Admin get a list of all users' last logins.
-   * Sort can be asc or desc.
-   */
-  adminGetLastLogin(): Observable<User[]> {
-    return this.http.get<User[]>('/api/v1/users/last_logins');
-  }
-
-  /**
-   * admin can grand docent rights to an user for this course
-   * @param courseID
-   * @param username
-   */
-  adminGrantDocentRights(courseID: number, username: string): Observable<ReturnMessage> {
-    return this.http.post<ReturnMessage>('/api/v1/courses/' + courseID + '/grant/docent', {username: username});
-  }
-
-  /**
-   * admin can revoke docent rights from an user for this course
-   * @param courseID
-   * @param username
-   */
-  adminRevokeRights(courseID: number, username: string) {
-    return this.http.post('/api/v1/courses/' + courseID + '/deny/docent', {username: username}).subscribe(msg => {
-      console.log('REVOKE RIGHTS: ' + JSON.stringify(msg));
-    });
-  }
-
-  /**
-   * Only Admin can create a testsystem. id means a unique testsystem short name.
-   * @param id
-   * @param name
-   * @param description
-   * @param supported_formats
-   * @param machine_port
-   * @param machine_ip
-   */
-  adminCreateTestsysteme(id: number, name: string, description: string, supported_formats: string,
-                         machine_port: number, machine_ip: number) {
-    return this.http.post('/api/v1/testsystems', {
-      id: id, name: name, description: description,
-      supported_formats: supported_formats, machine_port: machine_port, machine_ip: machine_ip
-    }).subscribe(msg => {
-      console.log('CREATE TESTSYSTEME: ' + JSON.stringify(msg));
-    });
-  }
-
-  /**
-   * Only Admin can update this information. At least one of the parameter is required.
-   * @param id
-   * @param name
-   * @param description
-   * @param supported_formats
-   * @param machine_port
-   * @param machine_ip
-   */
-  adminUpdateTestsysteme(id: number, name: string, description: string, supported_formats: string,
-                         machine_port: number, machine_ip: number): Observable<ReturnMessage> {
-    return this.http.put<ReturnMessage>('/api/v1/testsystems/' + id, {
-      id: id, name: name, description: description,
-      supported_formats: supported_formats, machine_port: machine_port, machine_ip: machine_ip
-    });
-  }
-
-  /**
-   * Only Admin can delete this information.
-   * @param id
-   */
-  adminDeleteTestsysteme(id: number): Observable<ReturnMessage> {
-    return this.http.delete<ReturnMessage>('/api/v1/testsystems/' + id);
-  }
-
-  /**
-   * (Only) Admin can grant a registered user as moderator.
-   */
-  adminGrantModerator(username: string): Observable<ReturnMessage> {
-    return this.http.post<ReturnMessage>('/api/v1/users/grant/moderator', {username: username});
-  }
-
-  /**
-   * (Only) Admin can grant a registered user as admin.
-   * @param username
-   */
-  adminGrantAdmin(username: string) {
-    return this.http.post('/api/v1/users/grant/admin', {username: username}).subscribe(msg => {
-      console.log('GRANT ADMIN: ' + msg);
-    });
-  }
-
-  /**
-   * (Only) Admin can revoke a global role from a user. After revoking.
-   * User has global role = 16 (student). Please provide user's username.
-   * @param username
-   */
-  adminRevokeGlobal(username: string): Observable<ReturnMessage> {
-    return this.http.post<ReturnMessage>('/api/v1/users/revoke', {username: username});
+  adminDeleteUser(userID: number): Observable<Succeeded> {
+    return this.http.delete<Succeeded>('/api/v1/users/' + userID);
   }
 
 }
 
 
-export interface CourseDetail {
-  course_id: number;
-  course_name: string;
-  course_description: string;
-  tasks: Task[];
-}
-
-export interface Task {
-  course_id: number;
-  task_description: string;
-  task_id: number;
-  task_name: string;
-  "results": Result[],
-}
-
-interface Result {
-  "submit_date": Date,
-  "result": string,
-  "submission_data": Date,
-  "task_name": string,
-  "passed": number,
-  "user_id": number,
-  "result_date"?: Date,
-  "filename"?: string,
-  "message"?: string,
-  "course_id": number,
-  "task_id": number,
-  "submission_id": number
-
-}
-
-export interface SubmitResult {
-  success: boolean;
-  taskid: number;
-  submissionid: number;
-  upload_url: string;
-}
-
-// Student
-export interface DashboardInformation {
-  course_description: string;
-  submit_date: Date;
-  result?: string;
-  task_name: string;
-  passed: number;
-  result_date?: Date;
-  course_name: string;
-  message?: string;
-  course_id: number;
-  task_id: number;
-  task_description: string;
-  submission_id: number;
-}
-
-export interface User {
-  email: string;
-  username: string;
-  surname: string;
-  role_id: number;
-  user_id: number;
-  prename: string;
-  last_login?: Date;
-}
-
-export interface ReturnMessage {
-  success?: boolean;
-  revoke?: boolean;
-}
 
 
-//Prof Dashboard
-
-export interface ProfDashboard {
-  course_description: string;
-  course_id: number;
-  course_name: string;
-  creator: number;
-  submissions: Submission[];
-}
-
-export interface Submission {
-  email: string;
-  passed: number;
-  prename: string;
-  surname: string;
-  result: string;
-  submission_id: number;
-  user_id: number;
-  username: string;
-
-}
-
-export interface NewTaskFileUpload {
-  success: boolean;
-  taskid: number;
-  upload_url: string;
-}

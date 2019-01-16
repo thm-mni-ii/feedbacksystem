@@ -6,7 +6,6 @@ import random
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import os
 dirname = os.path.dirname(os.path.abspath(__file__))+"/"
-print(dirname)
 
 class TestRESTStudent(unittest.TestCase):
     def setUp(self):
@@ -51,7 +50,6 @@ class TestRESTStudent(unittest.TestCase):
         """
         r = requests.get(url=self.URL + "courses/submissions", data=json.dumps({}), verify=False,
                          headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
-        pprint(r.json())
         self.assertEqual(type(r.json()), type([]))
         self.assertGreaterEqual(len(r.json()), 1)
 
@@ -63,7 +61,6 @@ class TestRESTStudent(unittest.TestCase):
         """
         r = requests.get(url=self.URL + "courses/", data=json.dumps({}), verify=False,
                          headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
-        pprint(r.json())
         self.assertEqual(type(r.json()), type([]))
         self.assertGreaterEqual(len(r.json()), 1)
 
@@ -90,7 +87,6 @@ class TestRESTStudent(unittest.TestCase):
                                       headers={'content-type': 'application/json',
                                                'Authorization': self.admin_auth_header})
 
-        pprint(course_req_get.json())
 
         v = course_req_get.json()
         self.assertEqual(course_name, v["course_name"])
@@ -116,7 +112,6 @@ class TestRESTStudent(unittest.TestCase):
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.admin_auth_header})
 
-        pprint(delete_req.json())
         course_req_get = requests.get(url=self.URL + "courses/" + str(cid), data=json.dumps({}), verify=False,
                                       headers={'content-type': 'application/json',
                                                'Authorization': self.admin_auth_header})
@@ -126,8 +121,6 @@ class TestRESTStudent(unittest.TestCase):
         course_req_get = requests.get(url=self.URL + "courses/all", data=json.dumps({}), verify=False,
                                       headers={'content-type': 'application/json',
                                                'Authorization': self.student_auth_header})
-        pprint(course_req_get.json())
-
         self.assertEqual(type(course_req_get.json()), type([]))
         self.assertTrue(1 < len(course_req_get.json()))
 
@@ -147,9 +140,6 @@ class TestRESTStudent(unittest.TestCase):
                                             'Authorization': self.student_auth_header})
 
         len_af = len(r_get_after.json())
-        #pprint(len(r_get_before.json()))
-        #pprint(len(r_get_after.json()))
-
         self.assertEqual(len_af, len_bf + 1)
 
 
@@ -158,15 +148,12 @@ class TestRESTStudent(unittest.TestCase):
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.student_auth_header})
 
-        pprint(detailed_info.json())
         self.assertEqual(type(detailed_info.json()["tasks"]), type([]))
 
         self.assertTrue(len(detailed_info.json()["tasks"]) > 1)
 
         unsubscribe = requests.post(url=self.URL + "courses/2/unsubscribe", data=json.dumps({}), verify=False,
                       headers={'content-type': 'application/json', 'Authorization': self.student_auth_header})
-
-        pprint(unsubscribe)
 
 
         r_get_thereafter = requests.get(url=self.URL + "courses", data=json.dumps({}), verify=False,
@@ -214,10 +201,6 @@ class TestRESTStudent(unittest.TestCase):
                                         headers={'content-type': 'application/json',
                                                  'Authorization': self.docent_auth_header})
 
-        pprint(self.docent_auth_header)
-
-        pprint(task_creation_2.json())
-
         task_file_upload_url = task_creation_2.json()["upload_url"]
 
         multipart_data = MultipartEncoder(
@@ -229,7 +212,6 @@ class TestRESTStudent(unittest.TestCase):
 
         file_upload_response = requests.post(task_file_upload_url, data=multipart_data, verify=False,
                                  headers={'Content-Type': multipart_data.content_type, 'Authorization': self.docent_auth_header})
-        print(file_upload_response.json())
 
         self.assertEqual(file_upload_response.json(),{'upload_success': True, 'filename': 'sample.sql'})
 
@@ -250,7 +232,6 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.student_auth_header})
 
-        print(task_put1.json())
         self.assertEqual(401, task_put1.status_code)
 
         # TODO check that tutor can not give access and so on
@@ -279,13 +260,11 @@ class TestRESTStudent(unittest.TestCase):
                               headers={'content-type': 'application/json',
                                        'Authorization': self.docent_auth_header})
 
-        pprint(deny1.json())
         task_del1 = requests.delete(url=self.URL + "tasks/" + str(taskid),
                                     verify=False,
                                     headers={'content-type': 'application/json',
                                              'Authorization': self.student_auth_header})
 
-        pprint(task_del1.json())
         self.assertEqual(401, task_del1.status_code)
         task_del2 = requests.delete(url=self.URL + "tasks/" + str(taskid),
                                     data=json.dumps({}),
@@ -299,16 +278,12 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.docent_auth_header})
 
-        pprint(task_get1.json())
-        pprint(task_get2.json())
         self.assertEqual(401, task_get2.status_code)
 
         deny_docent = requests.post(url=self.URL + "courses/65/deny/docent", data=json.dumps({"userid": 54}),
                                     verify=False,
                                     headers={'content-type': 'application/json',
                                              'Authorization': self.moderator_auth_header})
-
-        pprint(deny_docent.json())
 
 
     def test_submissions(self):
@@ -317,7 +292,6 @@ class TestRESTStudent(unittest.TestCase):
                                        headers={'content-type': 'application/json',
                                                 'Authorization': self.docent_auth_header})
 
-        pprint(get_submissions.json())
         self.assertTrue(1 <= len(get_submissions.json()))
 
     def test_big_user_submission_list(self):
@@ -326,8 +300,6 @@ class TestRESTStudent(unittest.TestCase):
                                        headers={'content-type': 'application/json',
                                                 'Authorization': self.student_auth_header})
 
-        pprint(get_submissions.json())
-        pprint(len(get_submissions.json()))
         self.assertTrue(1 <= len(get_submissions.json()))
 
     def test_getTaskByTaskID_route(self):
@@ -370,14 +342,12 @@ class TestRESTStudent(unittest.TestCase):
                                    verify=False,
                                    headers={'content-type': 'application/json',
                                             'Authorization': self.student_auth_header})
-        pprint(submit_req.json())
 
         submit_req_file = requests.post(url=self.URL + "tasks/9/submit", data=json.dumps({}),
                                    verify=False,
                                    headers={'content-type': 'application/json',
                                             'Authorization': self.student_auth_header})
 
-        pprint(submit_req_file.json())
         file_upload_url = submit_req_file.json()["upload_url"]
 
         multipart_data = MultipartEncoder(
@@ -405,9 +375,6 @@ class TestRESTStudent(unittest.TestCase):
                                 headers={'content-type': 'application/json',
                                          'Authorization': self.docent_auth_header})
 
-
-
-        pprint(all_subs.json())
         self.assertTrue(2 <= len(all_subs.json()))
         requests.post(url=self.URL + "courses/2/unsubscribe", data=json.dumps({}),
                       verify=False,
@@ -420,7 +387,6 @@ class TestRESTStudent(unittest.TestCase):
                                           headers={'content-type': 'application/json',
                                                    'Authorization': self.admin_auth_header})
 
-        pprint(result_all_systems.json())
         self.assertTrue(2 <= len(result_all_systems.json()))
         sysm_post = requests.post(url=self.URL + "testsystems", data=json.dumps({
             "id": "sqlchecker_" + self.stamp[9:20],
@@ -431,7 +397,6 @@ class TestRESTStudent(unittest.TestCase):
                                   verify=False,
                                   headers={'content-type': 'application/json',
                                            'Authorization': self.admin_auth_header})
-        pprint(sysm_post.json())
 
         id = sysm_post.json()["testsystem_id"]
 
@@ -450,7 +415,6 @@ class TestRESTStudent(unittest.TestCase):
                                          'Authorization': self.admin_auth_header})
 
         v = sysm_get.json()
-        pprint(v)
         self.assertEqual(v["description"], new_name)
         self.assertEqual(v["name"], new_name)
         self.assertEqual(v["supported_formats"], 'PYTHON')
@@ -476,12 +440,10 @@ class TestRESTStudent(unittest.TestCase):
         for entry in all_users.json():
             if entry['username'] in name_list:
                 id_list.append(entry['user_id'])
-        pprint(id_list)
 
         ## Delete using batch list
 
         del_users = requests.delete(url=self.URL + "users", verify=False, data=json.dumps({"user_id_list": id_list}), headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
-        pprint(del_users.json())
 
     def test_admin_user_management(self):
         all_users = requests.get(url=self.URL + "users", data=json.dumps({}), verify=False,
@@ -505,18 +467,11 @@ class TestRESTStudent(unittest.TestCase):
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
 
-        #pprint(all_users.json())
-        #pprint(gr_moderator.json())
-        #pprint(gr_admin.json())
-
         for u in all_users.json():
             if u["username"] == "bmnn57":
-                print(u)
-                print(u["role_id"],"bmnn57")
                 if u["role_id"] != 1:
                     self.fail("Role was not correctly changed")
             if u["username"] == "hiwi":
-                print(u)
                 if u["role_id"] != 2:
                     self.fail("Role was not correctly changed")
 
@@ -529,26 +484,21 @@ class TestRESTStudent(unittest.TestCase):
                                  verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
-        pprint(gr_moderator.json())
-        pprint(gr_admin.json())
+
         all_users = requests.get(url=self.URL + "users", data=json.dumps({}), verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
 
         for u in all_users.json():
             if u["username"] == "bmnn57":
-                print(u)
                 if u["role_id"] != 16:
                     self.fail("Role was not correctly changed")
             if u["username"] == "hiwi":
-                print(u)
                 if u["role_id"] != 16 :
                     self.fail("Role was not correctly changed")
 
         r = requests.post(url=self.URL + "login/token", data=json.dumps({"name": "python_student"}), verify=False,
                           headers={'content-type': 'application/json'})
-        pprint(r.json())
-
         all_users2 = requests.get(url=self.URL + "users", data=json.dumps({}), verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
@@ -556,14 +506,12 @@ class TestRESTStudent(unittest.TestCase):
         pythonUserID = -1
         for u in all_users2.json():
             if u["username"] == "python_student":
-                print(u)
                 pythonUserID = u["user_id"]
                 break
 
         delete_users = requests.delete(url=self.URL + "users/"+str(pythonUserID), data=json.dumps({}), verify=False,
                                  headers={'content-type': 'application/json',
                                           'Authorization': self.admin_auth_header})
-        pprint(delete_users.json())
         self.assertEqual(delete_users.json(),{'success': True})
 
 
@@ -571,8 +519,6 @@ class TestRESTStudent(unittest.TestCase):
         users = requests.get(url=self.URL + "users", verify=False,
                                        headers={'content-type': 'application/json',
                                                 'Authorization': self.admin_auth_header})
-        pprint(users.json())
-
         self.assertEqual(type([]), type(users.json()))
         self.assertTrue(4 <= len(users.json()))
 
@@ -581,10 +527,6 @@ class TestRESTStudent(unittest.TestCase):
         users_filter_ab = requests.get(url=self.URL + "users?before=2018-12-01&after=2018-12-02", verify=False, headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
 
         # TODO: more testing, but if it work, just enough
-        pprint(len(users_filter_b.json()))
-        pprint(len(users_filter_a.json()))
-        pprint(len(users_filter_ab.json()))
-
 
     def test_settings_by_admin(self):
 
@@ -592,7 +534,7 @@ class TestRESTStudent(unittest.TestCase):
         privacy_show = requests.get(url=self.URL + "settings/privacy/show", verify=False,
                              headers={'content-type': 'application/json',
                                       'Authorization': self.admin_auth_header})
-        pprint(privacy_show.json())
+
         previous = privacy_show.json()["show"]
 
         requests.put(url=self.URL + "settings/privacy/show", data=json.dumps({"enable": not previous}), verify=False,

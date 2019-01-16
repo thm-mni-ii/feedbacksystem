@@ -1,8 +1,10 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {JwtHelperService} from "@auth0/angular-jwt";
-import {Router} from "@angular/router";
-import {MatSnackBar} from "@angular/material";
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {JwtHelperService} from '@auth0/angular-jwt';
+import {Observable, of} from 'rxjs';
+import {catchError, flatMap, map} from 'rxjs/operators';
+
+const TOKEN_ID = 'token';
 
 /**
  * Service that manages login and logout for an user
@@ -12,23 +14,15 @@ import {MatSnackBar} from "@angular/material";
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService, private router: Router,
-              private snackBar: MatSnackBar) {
+  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {
   }
 
-
-  /**
-   * Decoded jwt token with information from user
-   */
-  private getDecodedToken(): JWTToken {
-    return this.jwtHelper.decodeToken(this.getToken());
-  }
 
   /**
    * Get user Token
    */
   private getToken() {
-    return localStorage.getItem('user');
+    return localStorage.getItem(TOKEN_ID);
   }
 
   /**
@@ -36,70 +30,29 @@ export class AuthService {
    * for an given username.
    * @param username that will be used for a valid session
    */
-  login_fake(username: string) {
-    return this.http.post<LoginResult>("/api/v1/login/token", {
+  login_fake(username: string): Observable<string> {
+    return this.http.post('/api/v1/login/token', {
       name: username
-    }, {observe: 'response'}).subscribe(user => {
-
-      const token = user.headers.get('Authorization').replace("Bearer", "").replace(" ", "");
-
-      localStorage.setItem('user', token);
-
-      switch (this.getDecodedToken().roles) {
-        case 'admin':
-          this.router.navigate(['admin', 'dashboard']);
-          break;
-        case 'docent':
-          this.router.navigate(['prof', 'dashboard']);
-          break;
-        case 'moderator':
-          this.router.navigate(['moderator']);
-          break;
-        case 'tutor':
-          this.router.navigate(['user']);
-          break;
-        case 'student':
-          this.router.navigate(['user', 'dashboard']);
-          break;
-      }
-      return user;
-    });
+    }, {observe: 'response'}).pipe(map(response => {
+      const authHeader: string = response.headers.get('Authorization');
+      const token: string = authHeader.replace('Bearer ', '');
+      localStorage.setItem(TOKEN_ID, token);
+      return token;
+    }));
   }
 
   /**
    * Login function to authenticate user with CAS
    * system
    *
-   * //TODO Implement real functionality
-   *
-   * @param username deprecated
-   * @param password deprecated
    */
-  login(username: string, password: string) {
-    return this.http.post<LoginResult>("/api/v1/login", {
-      username: username,
-      password: password
-    }, {observe: 'response'}).subscribe(user => {
-
-
-      localStorage.setItem('user', JSON.stringify(user.headers.get('Authorization')));
-
-      switch (this.getDecodedToken().roles) {
-        case 'admin':
-          this.router.navigate(['admin']);
-          break;
-        case 'dozent':
-          this.router.navigate(['prof']);
-          break;
-        case 'hiwi':
-          //TODO: Implement route for hiwi
-          break;
-        case 'student':
-          this.router.navigate(['user']);
-          break;
-      }
-      return user;
-    })
+  login() {
+    return this.http.get<HttpErrorResponse>('/api/v1/login', {observe: 'response'}).pipe(
+      catchError(err => {
+        console.log(err);
+        return of(err);
+      })
+    );
   }
 
 
@@ -108,18 +61,7 @@ export class AuthService {
    * and terminates session for user.
    */
   logout() {
-    this.snackBar.open("Du hast dich ausgeloggt", "OK", {duration: 5000});
-    this.router.navigate(['']);
-    localStorage.removeItem('user');
-  }
-
-
-  /**
-   * Get username from an
-   * user that is logged in.
-   */
-  getUsername(): string {
-    return this.getDecodedToken().username;
+    localStorage.removeItem(TOKEN_ID);
   }
 
 
@@ -133,21 +75,3 @@ export class AuthService {
 
 }
 
-/**
- * Used to parse Login result
- */
-interface LoginResult {
-  login_result: string;
-  token: string;
-}
-
-/**
- * Used to parse JWT token
- */
-interface JWTToken {
-  sub: string;
-  roles: string;
-  username: string;
-  iat: string;
-  exp: string;
-}

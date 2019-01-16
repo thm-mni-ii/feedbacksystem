@@ -1,0 +1,40 @@
+<div class="container">
+  <div class="size-container">
+    <form id="form">
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Kurs suchen</mat-label>
+        <input type="text" aria-label="Kurs suchen" matInput [formControl]="myControl"
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+          <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
+            {{option.course_name}} ({{option.course_modul_id}})
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </form>
+
+
+    <mat-card class="card" *ngFor="let course of cardCourses">
+      <mat-card-header>
+        <mat-card-title class="title">
+          {{course.course_name}}
+          <div class="filler"></div>
+          <button mat-icon-button color="primary" matTooltip="Zum Kurs" *ngIf="hasSubbed(course.course_id)"
+                  (click)="goToCourse(course.course_id)">
+            <mat-icon color="primary">forward</mat-icon>
+          </button>
+          <button mat-icon-button color="accent" matTooltip="Kurs beitreten" *ngIf="!hasSubbed(course.course_id)"
+                  (click)="joinCourse(course.course_name,course.course_id)">
+            <mat-icon color="accent">add_box</mat-icon>
+          </button>
+        </mat-card-title>
+        <mat-card-subtitle>{{course.course_modul_id}}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        <app-read-more id="course-description" [text]="course.course_description" [maxLength]="300"></app-read-more>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+

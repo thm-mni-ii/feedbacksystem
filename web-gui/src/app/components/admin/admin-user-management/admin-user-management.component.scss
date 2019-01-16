@@ -1,0 +1,17 @@
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+table {
+  width: 80%;
+}
+
+mat-form-field {
+  width: 80%;
+}
+
+.mat-row:nth-child(even) {
+  background-color: lightgrey;
+}

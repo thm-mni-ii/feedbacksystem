@@ -1,27 +1,30 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {
-  MatToolbarModule,
+  MatAutocompleteModule,
   MatButtonModule,
-  MatSidenavModule,
-  MatIconModule,
-  MatListModule,
   MatButtonToggleModule,
-  MatFormFieldModule,
-  MatInputModule,
-  MatSnackBarModule,
-  MatTableModule,
-  MatPaginatorModule,
-  MatSortModule,
-  MatCardModule,
-  MatRadioModule,
+  MatCardModule, MatChipsModule,
   MatDialogModule,
   MatExpansionModule,
+  MatFormFieldModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatPaginatorModule, MatProgressSpinnerModule,
+  MatRadioModule,
   MatRippleModule,
+  MatSelectModule,
+  MatSidenavModule,
+  MatSnackBarModule,
+  MatSortModule, MatStepperModule,
+  MatTableModule,
   MatTabsModule,
-  MatDividerModule, MatGridListModule, MatMenuModule, MatTooltipModule, MatSelectModule
-} from "@angular/material";
-import {DragDropModule} from "@angular/cdk/drag-drop";
+  MatToolbarModule,
+  MatTooltipModule
+} from '@angular/material';
 
 @NgModule({
   imports: [
@@ -47,7 +50,11 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     MatGridListModule,
     MatTabsModule,
     MatTooltipModule,
-    MatSelectModule
+    MatSelectModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+    MatStepperModule,
+    MatProgressSpinnerModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -72,7 +79,11 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
     MatTabsModule,
     MatMenuModule,
     MatTooltipModule,
-    MatSelectModule
+    MatSelectModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+    MatStepperModule,
+    MatProgressSpinnerModule
   ],
   declarations: []
 })

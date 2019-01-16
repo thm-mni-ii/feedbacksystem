@@ -1,5 +1,7 @@
 package de.thm.ii.submissioncheck.services
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.sql.{Connection, Statement}
 
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
@@ -248,6 +250,21 @@ class TaskService {
   }
 
   /**
+    * Testsystems answer (ansynchron) if provided testfiles are acceptable or not, they have there individual logic.
+    * This method simply saved this answer
+    * @author Benjamin Manns
+    * @param task_id unique identification for a task
+    * @param accept if testsystem accepted or not
+    * @param error error mesage provided by testsystem
+    * @return update work
+    */
+  def setTaskTestFileAcceptedState(task_id: Int, accept: Boolean, error: String = ""): Boolean = {
+    val num = DB.update(
+      "UPDATE task set test_file_accept = ?, test_file_accept_error = ? where task_id = ?;", accept, error, task_id)
+    num > 0
+  }
+
+  /**
     * for a given Taskid and submissionid set a result text
     *
     * @author Benjamin Manns
@@ -446,13 +463,17 @@ class TaskService {
     * @param taskid unique taskid identification
     * @return just the filename
     */
-  def getTestFileByTask(taskid: Int): String = {
+  def getTestFilesByTask(taskid: Int): List[String] = {
     val list = DB.query("SELECT test_file_name from task where task_id = ?",
       (res, _) => res.getString("test_file_name"), taskid)
     if (list.isEmpty) {
       throw new ResourceNotFoundException
     }
-    list.head
+    if (list.isEmpty){
+      List()
+    } else {
+      list.head.asInstanceOf[String].split(",").toList
+    }
   }
 
   /**
@@ -469,15 +490,21 @@ class TaskService {
     list.head
   }
 
+  private def encodeValue(value: String): String = {
+    URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+  }
+
   /**
     * generate token validated URL to download task test file
     * @author Benjamin Manns
     * @param taskid unique taskid identification
     * @return URL String
     */
-  def getURLOfTaskTestFile(taskid: Int): String = {
-    val token = this.tokenService.generateValidToken(taskid, "TASK_TEST_FILE")
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + token
+  def getURLsOfTaskTestFiles(taskid: Int): List[String] = {
+    getTestFilesByTask(taskid).map(testfile => {
+      // TODO URL ESCAPE
+      UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
+    })
   }
 
   /**
@@ -489,7 +516,7 @@ class TaskService {
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
     val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/" + token
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/"
   }
 
   /**

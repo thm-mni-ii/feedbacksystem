@@ -1,0 +1,126 @@
+<div class="container">
+  <mat-vertical-stepper linear #stepper>
+
+    <!-- Step 1-->
+    <mat-step [stepControl]="firstFG" label="Gib einen Kurs namen ein">
+      <form [formGroup]="firstFG" class="step-flex">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Kurs name</mat-label>
+          <input matInput formControlName="firstCtrl" required>
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 2-->
+    <mat-step [stepControl]="secondFG" label="Beschreibung des Kurses" optional>
+      <form [formGroup]="secondFG" class="step-flex">
+        <mat-form-field appearance="outline">
+          <mat-label>Kurs beschreibung</mat-label>
+          <textarea matInput matTextareaAutosize matAutosizeMinRows="1"
+                    matAutosizeMaxRows="25" formControlName="secondCtrl"></textarea>
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 3-->
+    <mat-step [stepControl]="thirdFG" label="Standart aufgabentyp auswählen">
+      <form [formGroup]="thirdFG" class="step-flex">
+        <mat-select class="select" placeholder="Aufgabentyp" formControlName="thirdCtrl" required>
+          <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
+        </mat-select>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 4-->
+    <mat-step [stepControl]="fourthFG" label="Semester auswählen" optional>
+      <form [formGroup]="fourthFG" class="step-flex">
+        <mat-form-field appearance="outline">
+          <mat-label>Semester</mat-label>
+          <input matInput placeholder="Beispiel WS18/19" formControlName="fourthCtrl">
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 5-->
+    <mat-step [stepControl]="fifthFG" label="Modul-id eingeben" optional>
+      <form [formGroup]="fifthFG" class="step-flex">
+        <mat-form-field>
+          <mat-label>Modul ID</mat-label>
+          <input matInput placeholder="Beispiel CS1010" formControlName="fifthCtrl">
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 6-->
+    <mat-step [stepControl]="sixthFG" label="Ende des Moduls" optional>
+      <form [formGroup]="sixthFG" class="step-flex">
+        <mat-form-field>
+          <mat-label>Modul ende</mat-label>
+          <input matInput placeholder="01.01.2019" formControlName="sixthCtrl">
+        </mat-form-field>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- Step 7-->
+    <mat-step label="Privatisierte Informationen des Users">
+      <form class="step-flex">
+        <p>Der User
+          <mat-select [(value)]="newCoursePrivatUserData" class="select" placeholder="Auswahl" required>
+            <mat-option value="true">kann</mat-option>
+            <mat-option value="false">sollte keine</mat-option>
+          </mat-select>
+          Abgaben mit privaten Daten machen.
+        </p>
+        <div class="button-row">
+          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
+          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
+        </div>
+      </form>
+    </mat-step>
+
+    <mat-step label="Fertig">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>{{newCourseName}}</mat-card-title>
+          <mat-card-subtitle>{{newCourseModuleID}} {{newCourseSemester}}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>
+            {{newCourseDescription}}
+          </p>
+          <p>Abgabe mit user Daten: {{newCoursePrivatUserData}}</p>
+          <p>Standart aufgaben Typ:  {{newCourseType}}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-flat-button color="accent" (click)="createCourse()">Kurs erstellen</button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-step>
+
+
+  </mat-vertical-stepper>
+</div>
