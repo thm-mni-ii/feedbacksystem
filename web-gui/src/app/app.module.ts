@@ -33,6 +33,7 @@ import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof
 import {ReadMoreComponent} from './components/courses/search-course/read-more/read-more.component';
 import {NewtaskDialogComponent} from './components/courses/detail-course/newtask-dialog/newtask-dialog.component';
 import {ExitCourseComponent} from './components/courses/detail-course/exit-course/exit-course.component';
+import { UpdateCourseDialogComponent } from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
 
 
 @Injectable()
@@ -70,6 +71,7 @@ export const httpInterceptorProviders = [
     ReadMoreComponent,
     NewtaskDialogComponent,
     ExitCourseComponent,
+    UpdateCourseDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -86,7 +88,7 @@ export const httpInterceptorProviders = [
       }
     })
   ],
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent],
+  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent],
   providers: [httpInterceptorProviders],
   bootstrap: [AppComponent]
 })

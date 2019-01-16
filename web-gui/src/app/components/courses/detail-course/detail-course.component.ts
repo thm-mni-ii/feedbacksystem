@@ -9,6 +9,7 @@ import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component'
 import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
 import {of, throwError} from 'rxjs';
+import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 
 @Component({
   selector: 'app-detail-course',
@@ -172,6 +173,16 @@ export class DetailCourseComponent implements OnInit {
         this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
         this.router.navigate(['courses', 'user']);
       }
+    });
+  }
+
+  updateCourse() {
+    this.dialog.open(UpdateCourseDialogComponent, {
+      height: '400px',
+      width: '600px',
+      data: {data: this.courseDetail}
+    }).afterClosed().subscribe((value: Succeeded) => {
+      console.log(value);
     });
   }
 

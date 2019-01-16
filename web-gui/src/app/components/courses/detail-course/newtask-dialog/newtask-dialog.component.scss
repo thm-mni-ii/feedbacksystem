@@ -3,6 +3,10 @@
   flex-direction: column;
 }
 
+mat-dialog-content {
+  height: 100%;
+}
+
 .dialog-action-buttons {
   display: flex;
   justify-content: space-between;
