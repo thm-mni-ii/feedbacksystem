@@ -43,7 +43,7 @@ class TaskController {
   @Autowired
   private val testsystemService: TestsystemService = null
 
-  @Value("${spring.datasource.url}")
+  @Value("${spring.kafka.bootstrap-servers}")
   private val kafkaURL: String = null
   private final val application_json_value = "application/json"
 

@@ -23,11 +23,10 @@ jdk:
 
 script:
   - docker-compose down
-  - docker-compose up -d
   - ./gradlew check dist
+  - docker-compose up -d --build
   - ./gradlew ws:run --stacktrace &
   - sleep 30 && python3 py-test/request.py
-
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

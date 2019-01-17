@@ -52,7 +52,7 @@ services:
     ports:
       - "3309:3306"
   ws:
-    #build: ws
+    build: ws
     #container_name: ws
     image: ws
     depends_on:
