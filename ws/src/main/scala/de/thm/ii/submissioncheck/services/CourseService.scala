@@ -269,7 +269,7 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "c.course_id, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
+    val selectPart = "c.course_id, c.standard_task_typ, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
       "c.course_semester, c.personalised_submission, t.role_id, t.role_name" + (if (isPermitted) {
       ", c.creator" // TODO add more columns
     } else {
@@ -292,6 +292,7 @@ class CourseService {
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
+          CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
           LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
           LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
           RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
