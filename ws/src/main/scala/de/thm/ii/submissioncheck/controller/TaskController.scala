@@ -465,7 +465,7 @@ class TaskController {
 
   private def kafkaReloadService: Map[String, AnyVal] = {
     // TODO load from properties config
-    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "localhost:9092", "group.id" -> "jcg-group")
+    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "kafka1:9092", "group.id" -> "jcg-group")
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
