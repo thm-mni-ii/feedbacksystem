@@ -51,11 +51,5 @@ class Application {
   * @author Andrej Sajenko
   */
 object Application extends App {
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  logger.info("VALUE CHECK")
-  @Value("${spring.datasource.url}")
-  private val topic = ""
-  logger.info("topic")
-  logger.info(topic)
   SpringApplication.run(classOf[Application])
 }
