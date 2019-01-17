@@ -49,4 +49,19 @@ services:
       MYSQL_ROOT_PASSWORD: secretpw
     ports:
       - "3309:3306"
-     
+  ws:
+    #build: ws
+    #container_name: ws
+    image: ws
+    depends_on:
+      - mysql1
+      - kafka1
+      - zoo1
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./ws/upload-dir:/upload-dir
+
+  bashtest:
+    image: ubuntu:latest
+    entrypoint: /bin/bash
