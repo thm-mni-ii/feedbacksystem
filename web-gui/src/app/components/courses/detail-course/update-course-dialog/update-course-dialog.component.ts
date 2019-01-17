@@ -29,8 +29,13 @@ export class UpdateCourseDialogComponent implements OnInit {
   ngOnInit() {
     this.courseDetails = this.data.data;
     this.testsystems$ = this.db.getTestsystemTypes();
+
     this.name = this.courseDetails.course_name;
     this.description = this.courseDetails.course_description;
+    this.standardTaskType = this.courseDetails.standard_task_typ;
+    this.semester = this.courseDetails.course_semester;
+    this.course_module_id = this.courseDetails.course_module_id;
+    this.userDataAllowed = this.courseDetails.personalised_submission;
   }
 
 

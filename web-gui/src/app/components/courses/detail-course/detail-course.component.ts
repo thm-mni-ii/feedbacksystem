@@ -34,7 +34,6 @@ export class DetailCourseComponent implements OnInit {
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
-    this.userRole = this.user.getUserRole();
 
     this.route.params.pipe(
       flatMap(params => {
@@ -44,6 +43,7 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
+      this.userRole = course_detail.role_name;
       course_detail.tasks.forEach(task => {
         this.submissionAsFile[task.task_id] = false;
         this.processing[task.task_id] = false;

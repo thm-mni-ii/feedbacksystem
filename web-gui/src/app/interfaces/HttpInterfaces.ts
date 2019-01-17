@@ -29,8 +29,17 @@ export interface DetailedCourseInformation {
   course_id: number;
   course_name: string;
   course_description: string;
+  role_name: string;
+  role_id: number;
   creator: number;
   tasks: CourseTask[];
+  standard_task_typ: string;
+  course_module_id: string;
+  course_semester: string;
+  personalised_submission: boolean;
+  course_end_date: string;
+  course_docent: GeneralCourseDocent[];
+  course_tutor: GeneralCourseDocent[];
 }
 
 /**
