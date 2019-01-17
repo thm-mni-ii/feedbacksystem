@@ -1,0 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.action-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
