@@ -1,12 +1,14 @@
 package de.thm.ii.submissioncheck
 
 import java.io.{File, FileInputStream}
+import java.nio.file.Paths
+
 import de.thm.ii.submissioncheck.misc.DB
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.SpringApplication
-import org.springframework.jdbc.core.{JdbcTemplate}
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.util.ResourceUtils
@@ -23,7 +25,11 @@ class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
+  //private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
+  private val initSQLPath = Paths.get("/usr/local/ws/init.sql").toString
+  private val initSQLFile: File = new File(initSQLPath)
+  logger.info("SQL ABS PATH: ")
+  logger.info(initSQLPath)
 
   /**
     * Initialize the database schema if none exists.
@@ -45,5 +51,11 @@ class Application {
   * @author Andrej Sajenko
   */
 object Application extends App {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+  logger.info("VALUE CHECK")
+  @Value("${spring.datasource.url}")
+  private val topic = ""
+  logger.info("topic")
+  logger.info(topic)
   SpringApplication.run(classOf[Application])
 }
