@@ -23,6 +23,7 @@
 
   <mat-dialog-actions class="dialog-action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button mat-flat-button color="accent" (click)="createTask()">Erstellen</button>
+    <button *ngIf="!isUpdate" mat-flat-button color="accent" (click)="createTask()">Erstellen</button>
+    <button *ngIf="isUpdate" mat-flat-button color="accent" (click)="updateTask()">Update</button>
   </mat-dialog-actions>
 </mat-dialog-content>
