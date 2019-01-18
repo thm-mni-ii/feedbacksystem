@@ -26,7 +26,7 @@ script:
   - ./gradlew check dist
   - ./gradlew dist
   # Hack to debug docker and run python
-  - (docker-compose up --build) & (sleep 60 && python3 py-test/request.py)
+  - (docker-compose up --build) & (sleep 120 && python3 py-test/request.py)
   #- ./gradlew ws:run --stacktrace &
 
 before_cache:
