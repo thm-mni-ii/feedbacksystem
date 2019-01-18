@@ -515,8 +515,7 @@ class TaskService {
     * @return URL String
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
-    val token = this.tokenService.generateValidToken(submissionid, "SUBMISSION_TEST_FILE")
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString + "/"
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
   }
 
   /**

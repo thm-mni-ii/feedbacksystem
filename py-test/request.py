@@ -214,7 +214,7 @@ class TestRESTStudent(unittest.TestCase):
         file_upload_response = requests.post(task_file_upload_url, data=multipart_data, verify=False,
                                  headers={'Content-Type': multipart_data.content_type, 'Authorization': self.docent_auth_header})
 
-        self.assertEqual(file_upload_response.json(),{'upload_success': True, 'filename': 'sample.sql'})
+        self.assertEqual(file_upload_response.json(),{'success': True, 'filename': 'sample.sql'})
 
         self.assertEqual(len(task_creation_2.json()), 3)
         self.assertTrue("success" in task_creation_2.json())
@@ -362,7 +362,7 @@ class TestRESTStudent(unittest.TestCase):
                                              headers={'Content-Type': multipart_data.content_type,
                                                       'Authorization': self.student_auth_header})
 
-        self.assertEqual({'submission_upload_success': True, 'filename': 'sample.sql'}, file_upload_response.json())
+        self.assertEqual({'success': True, 'filename': 'sample.sql'}, file_upload_response.json())
 
         result_req_af = requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                                      verify=False,

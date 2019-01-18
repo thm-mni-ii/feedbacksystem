@@ -64,6 +64,15 @@ services:
     volumes:
       - ./ws/upload-dir:/upload-dir
 
-  bashtest:
-    image: ubuntu:latest
-    entrypoint: /bin/bash
+  secrettokenchecker:
+    build: secrettoken-checker
+    #container_name: ws
+    image: secrettokenchecker
+    depends_on:
+      - mysql1
+      - kafka1
+      - zoo1
+
+#  bashtest:
+#    image: ubuntu:latest
+#    entrypoint: /bin/bash
