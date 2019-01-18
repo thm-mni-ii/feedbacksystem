@@ -17,7 +17,8 @@ import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io._
 import java.util.NoSuchElementException
-import java.net.{HttpURLConnection, URL}
+import java.net.{HttpURLConnection, URL, URLDecoder}
+import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths, StandardCopyOption}
 import java.security.cert.X509Certificate
 
@@ -87,6 +88,9 @@ object SecretTokenChecker extends App {
 
   private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
+  private val LABEL_TASKID = "taskid"
+  private val LABEL_ACCEPT = "accept"
+  private val LABEL_ERROR = "error"
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
@@ -159,7 +163,7 @@ object SecretTokenChecker extends App {
         "passed" -> passed.toString,
         "exitcode" -> code.toString,
         "userid" -> userid,
-        "taskid" -> taskid,
+        LABEL_TASKID -> taskid,
         "submissionid" -> submissionid
       )))
     } catch {
@@ -168,6 +172,29 @@ object SecretTokenChecker extends App {
           "Error" -> "Please provide valid parameters"
         )))
       }
+    }
+  }
+
+  /**
+    * Delets a dir recursively deleting anything inside it.
+    * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
+    * @param dir The dir to delete
+    * @return true if the dir was successfully deleted
+    */
+  private def deleteDirectory(dir: File): Boolean = {
+    if (!dir.exists() || !dir.isDirectory()) {
+      false
+    } else {
+      val files = dir.list()
+      for (file <- files) {
+        val f = new File(dir, file)
+        if (f.isDirectory()) {
+          deleteDirectory(f)
+        } else {
+          f.delete()
+        }
+      }
+      dir.delete()
     }
   }
 
@@ -180,27 +207,31 @@ object SecretTokenChecker extends App {
       HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
       HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
 
-      val url: String = jsonMap("testfile_url").asInstanceOf[String]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
+      // Here we send multiple files!!
+      val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
 
+      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-      downloadFileToFS(url, jwt_token, taskid)
-      //val src = scala.io.Source.fromURL(url)
-      //todo: add support for archives with serveral files"
-      //new File(ULDIR + taskid).mkdirs()
-      //url #> new File(ULDIR + taskid + "/testfile.sh") !!
-      /*val out = new java.io.FileWriter(ULDIR + taskid + "/testfile.sh")
-      out.write(src)
-      out.close*/
+      if (urls.length != 1) {
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Please provide exact one testfile", LABEL_TASKID -> taskid)))
+      } else {
+        deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
+
+        downloadFilesToFS(urls, jwt_token, taskid)
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+      }
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          "Error" -> "Please provide valid parameters"
+          "error" -> "Please provide valid parameters",
+          "accept" -> false,
+          LABEL_TASKID -> ""
         )))
       }
     }
   }
 
+  private val message_err = "Error: Task doesn't contain a testfile"
   /**
     * Name of the md5 test script
     */
@@ -214,20 +245,22 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, token: String): (String, Int) = {
-    val script: String = ULDIR + taskid + "/testfile.sh"
-    try{
-      val file = new File("./" + script);
-    } catch {
-      case e: FileNotFoundException => {
-        val message_err = "Error: Task doesn't contain a testfile"
-        (message_err, 126)
-      }
-    }
-    val bashtest1 = new BashExec(script, name, token)
-    val exit1 = bashtest1.exec()
-    val message1 = bashtest1.output
+    // make a list
+    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles()
 
-    (message1, exit1)
+    val filesListHead = filesList.headOption
+
+    if (filesListHead.isEmpty) {
+      (message_err, 126)
+    } else {
+      val script: String = filesListHead.get.getAbsolutePath
+      //val file = filesListHead.get
+      val bashtest1 = new BashExec(script, name, token)
+      val exit1 = bashtest1.exec()
+      val message1 = bashtest1.output
+
+      (message1, exit1)
+    }
   }
 
   /**
@@ -268,6 +301,7 @@ object SecretTokenChecker extends App {
     bashtest.output
   }
 
+  @deprecated("", "")
   private def saveTaskFile(urlname: String, taskid: String): Unit = {
     val timeout = 5000
     val url = new java.net.URL(urlname)
@@ -285,23 +319,27 @@ object SecretTokenChecker extends App {
     }
   }
 
-  private def downloadFileToFS(urlname: String, jwt_token: String, taskid: String) = {
+  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String) = {
     val timeout = 1000
-    val url = new java.net.URL(urlname)
+    for(urlname <- urlnames){
+      val url = new java.net.URL(urlname)
+      val urlParts = urlname.split("/")
+      // syntax of testfile url allows us to get filename
+      val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
+      val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+      connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
+      connection.setConnectTimeout(timeout)
+      connection.setReadTimeout(timeout)
+      connection.setRequestProperty("Connection", "close")
+      connection.connect()
 
-    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
-    connection.setConnectTimeout(timeout)
-    connection.setReadTimeout(timeout)
-    connection.setRequestProperty("Connection", "close")
-    connection.connect()
-
-    if(connection.getResponseCode >= 400){
-      logger.error(LABEL_ERROR_DOWNLOAD)
-    }
-    else {
-      new File(ULDIR + taskid).mkdirs()
-      Files.copy(connection.getInputStream, Paths.get(ULDIR + taskid + "/testfile.sh"), StandardCopyOption.REPLACE_EXISTING)
+      if(connection.getResponseCode >= 400){
+        logger.error(LABEL_ERROR_DOWNLOAD)
+      }
+      else {
+        new File(Paths.get(ULDIR).resolve(taskid).toString).mkdirs()
+        Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
+      }
     }
   }
 

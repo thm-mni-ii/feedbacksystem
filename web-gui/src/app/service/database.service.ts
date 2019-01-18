@@ -166,13 +166,17 @@ export class DatabaseService {
         flatMap(response => {
           if (response.success) {
             upload_url = response.upload_url;
+
+            // Uploading the file
+            return this.http.post<Succeeded>(upload_url, formDataFile, {
+              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+            });
           }
 
           // Uploading the file
           return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formDataFile, {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
-
         }));
     } else { // Data is string
       return this.http.post<Succeeded>('/api/v1/tasks/' + idTask + '/submit', {data: data});
@@ -184,15 +188,16 @@ export class DatabaseService {
    * @param idCourse The id of course where task will be added
    * @param name This is the name of the Task
    * @param description This is the description of the task
-   * @param file This will be the solution file from Lecturer
+   * @param files This will be the solution files from Lecturer
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  createTask(idCourse: number, name: string, description: string, file: File, test_type: string): Observable<Succeeded> {
+  createTask(idCourse: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
 
     // Solution file
     const formData = new FormData();
-    formData.append('file', file, file.name);
-
+    for (let _i = 0; _i < files.length; _i++) {
+      formData.append('file', files.item(_i), files.item(_i).name);
+    }
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
@@ -202,6 +207,9 @@ export class DatabaseService {
         let upload_url: string;
         if (result.success) {
           upload_url = result.upload_url;
+          return this.http.post<Succeeded>(upload_url, formData, {
+            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+          });
         }
         return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
@@ -286,14 +294,16 @@ export class DatabaseService {
    * @param idTask The unique id of task to update
    * @param name This is the new name of the updated task
    * @param description This is the description of updated task
-   * @param file This is the solution file of updated Task
+   * @param files This is the solution files of updated Task
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  updateTask(idTask: number, name: string, description: string, file: File, test_type: string): Observable<Succeeded> {
+  updateTask(idTask: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
 
     // New solution file
     const formData = new FormData();
-    formData.append('file', file, file.name);
+    for (let _i = 0; _i < files.length; _i++) {
+      formData.append('file', files.item(_i), files.item(_i).name);
+    }
 
     return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
       name: name,
@@ -304,8 +314,10 @@ export class DatabaseService {
         let uploadUrl: string;
         if (res.success) {
           uploadUrl = res.upload_url;
+          return this.http.post<Succeeded>(uploadUrl, formData, {
+            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+          });
         }
-
         return this.http.post<Succeeded>(uploadUrl, formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
         });

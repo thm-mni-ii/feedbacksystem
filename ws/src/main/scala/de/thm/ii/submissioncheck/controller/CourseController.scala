@@ -306,7 +306,7 @@ class CourseController {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
-      if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
+      if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 1)) {
         throw new UnauthorizedException
       }
       val userToGrant = userService.loadUserFromDB(userid)
@@ -333,7 +333,7 @@ class CourseController {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
       val requestingUser = userService.verfiyUserByHeaderToken(request)
-      if (requestingUser.isEmpty || requestingUser.get.roleid != 2) { // Only a moderator can do this
+      if (requestingUser.isEmpty || requestingUser.get.roleid > 2) { // Only moderator and admin can do this
         throw new UnauthorizedException
       }
       val userToGrant = userService.loadUserFromDB(userid)
@@ -359,7 +359,7 @@ class CourseController {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
-      if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid != 4)) {
+      if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 4)) {
         throw new UnauthorizedException
       }
       val userToGrant = userService.loadUserFromDB(userid)
@@ -386,7 +386,7 @@ class CourseController {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
       val user = userService.verfiyUserByHeaderToken(request)
-      if (user.isEmpty || user.get.roleid != 2) {
+      if (user.isEmpty || user.get.roleid > 2) {
         throw new UnauthorizedException
       }
       val userToGrant = userService.loadUserFromDB(userid)
