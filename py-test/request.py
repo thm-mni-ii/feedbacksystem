@@ -14,6 +14,7 @@ class TestRESTStudent(unittest.TestCase):
             self.URL = "https://localhost:8080/api/v1/"
         else:
             self.URL = "http://localhost:8080/api/v1/"
+        pprint(self.URL)
         # How many digits to match in case of floating point answers
         # print(r.headers)
         # self.auth_token = r.headers["Authorization"].replace("Bearer ","")
