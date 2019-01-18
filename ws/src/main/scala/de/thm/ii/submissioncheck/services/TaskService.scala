@@ -500,11 +500,8 @@ class TaskService {
     * @param taskid unique taskid identification
     * @return URL String
     */
-  def getURLsOfTaskTestFiles(taskid: Int): List[String] = {
-    getTestFilesByTask(taskid).map(testfile => {
-      // TODO URL ESCAPE
-      UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
-    })
+  def getURLOfTaskTestFile(taskid: Int): String = {
+    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/"
   }
 
   /**

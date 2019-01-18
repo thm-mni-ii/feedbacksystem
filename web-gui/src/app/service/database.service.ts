@@ -172,6 +172,7 @@ export class DatabaseService {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
             });
           }
+
           // Uploading the file
           return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formDataFile, {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
@@ -210,7 +211,7 @@ export class DatabaseService {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
         }
-        console.log(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""))
+
         return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
         });
