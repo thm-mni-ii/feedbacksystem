@@ -387,7 +387,7 @@ class TestRESTStudent(unittest.TestCase):
                                           headers={'content-type': 'application/json',
                                                    'Authorization': self.admin_auth_header})
 
-        self.assertTrue(3 <= len(result_all_systems.json()))
+        self.assertTrue(2 <= len(result_all_systems.json()))
         sysm_post = requests.post(url=self.URL + "testsystems", data=json.dumps({
             "id": "sqlchecker_" + self.stamp[9:20],
             "name": "SQL Checker",

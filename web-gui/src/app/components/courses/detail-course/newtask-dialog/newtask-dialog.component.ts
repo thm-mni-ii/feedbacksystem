@@ -89,5 +89,13 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       .subscribe(success => this.dialogRef.close(success));
   }
 
+  /**
+   * Update given task
+   */
+  updateTask() {
+    this.db.updateTask(this.data.task.task_id, this.newTaskName, this.newTaskDescription, this.soutionFile, this.taskType)
+      .subscribe(success => this.dialogRef.close(success));
+  }
+
 
 }
