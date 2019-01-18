@@ -203,6 +203,7 @@ export class DatabaseService {
         if (result.success) {
           upload_url = result.upload_url;
         }
+        console.log(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""))
         return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
           headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
         });

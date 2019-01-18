@@ -63,6 +63,7 @@ services:
       - "8080:8080"
     volumes:
       - ./ws/upload-dir:/upload-dir
+      - ./ws/zip-dir:/zip-dir
 
   secrettokenchecker:
     build: secrettoken-checker
@@ -72,6 +73,8 @@ services:
       - mysql1
       - kafka1
       - zoo1
+    volumes:
+    - ./secrettoken-checker/upload-dir:/upload-dir
 
 #  bashtest:
 #    image: ubuntu:latest
