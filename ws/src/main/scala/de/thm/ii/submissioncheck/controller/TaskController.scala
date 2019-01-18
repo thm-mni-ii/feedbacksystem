@@ -37,8 +37,6 @@ class TaskController {
   @Autowired
   private val userService: UserService = null
   @Autowired
-  private val tokenService: TokenService = null
-  @Autowired
   private val courseService: CourseService = null
   @Autowired
   private val testsystemService: TestsystemService = null
@@ -46,9 +44,7 @@ class TaskController {
   private final val application_json_value = "application/json"
 
   private val topicTaskRequest: String = "new_task_request"
-
-  private final val testsystemLabel1 = "secrettokenchecker"
-
+  private val LABEL_SUCCESS = "success"
   private var container: KafkaMessageListenerContainer[String, String] = null
   private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = null
 
@@ -186,7 +182,7 @@ class TaskController {
         upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
 
-      Map("success" -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
+      Map(LABEL_SUCCESS -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
     }
     private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
@@ -228,7 +224,7 @@ class TaskController {
      } catch {
        case e: Exception => {}
      }
-    Map("submission_upload_success" -> message, LABEL_FILENAME -> filename)
+    Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
   }
 
   /**
@@ -307,7 +303,7 @@ class TaskController {
     logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
     kafkaTemplate.flush()
 
-    Map("upload_success" -> message, LABEL_FILENAME -> filename)
+    Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
   }
 
   /**
@@ -400,7 +396,7 @@ class TaskController {
 
     val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id)
 
-    Map("success" -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
+    Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
   }
   /**
     * provide a GET URL to download testfiles for a task

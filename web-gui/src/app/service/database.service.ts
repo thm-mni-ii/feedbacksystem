@@ -173,7 +173,10 @@ export class DatabaseService {
             });
           }
 
-
+          // Uploading the file
+          return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formDataFile, {
+            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+          });
         }));
     } else { // Data is string
       return this.http.post<Succeeded>('/api/v1/tasks/' + idTask + '/submit', {data: data});
@@ -208,6 +211,9 @@ export class DatabaseService {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
         }
+        return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+        });
       })
     );
   }
@@ -312,6 +318,9 @@ export class DatabaseService {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
         }
+        return this.http.post<Succeeded>(uploadUrl, formData, {
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+        });
       }));
   }
 
