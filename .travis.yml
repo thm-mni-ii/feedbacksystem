@@ -25,9 +25,9 @@ script:
   - docker-compose down
   - ./gradlew check dist
   - ./gradlew dist
-  - docker-compose up --build
+  # Hack to debug docker and run python
+  - (docker-compose up -d --build) & (sleep 30 && python3 py-test/request.py)
   #- ./gradlew ws:run --stacktrace &
-  - sleep 60 && python3 py-test/request.py
 
 before_cache:
 - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
