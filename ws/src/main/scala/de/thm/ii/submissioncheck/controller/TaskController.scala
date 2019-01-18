@@ -41,6 +41,8 @@ class TaskController {
   @Autowired
   private val testsystemService: TestsystemService = null
 
+  @Value("${spring.kafka.bootstrap-servers}")
+  private val kafkaURL: String = null
   private final val application_json_value = "application/json"
 
   private val topicTaskRequest: String = "new_task_request"
@@ -460,8 +462,7 @@ class TaskController {
   }
 
   private def kafkaReloadService: Map[String, AnyVal] = {
-    // TODO load from properties config
-    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "localhost:9092", "group.id" -> "jcg-group")
+    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
@@ -503,8 +504,7 @@ class TaskController {
   }
 
   private def kafkaReloadNewTaskAnswerService: Map[String, AnyVal] = {
-    // TODO load from properties config
-    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> "localhost:9092", "group.id" -> "jcg-group")
+    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
