@@ -24,6 +24,7 @@ jdk:
 script:
   - docker-compose down
   - ./gradlew check dist
+  - ./gradlew dist
   - docker-compose up -d --build
   - ./gradlew ws:run --stacktrace &
   - sleep 30 && python3 py-test/request.py
