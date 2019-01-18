@@ -52,15 +52,14 @@
 }
 
 mat-card-actions {
-  margin-left: 4px;
   display: flex;
-}
-
-mat-spinner {
-  width: 50px;
-  height: 50px;
+  justify-content: space-around;
 }
 
 .desc-button {
   margin-right: 12px;
+}
+
+mat-radio-button {
+  margin: 12px;
 }
