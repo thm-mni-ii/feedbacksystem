@@ -33,14 +33,15 @@ import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof
 import {ReadMoreComponent} from './components/courses/search-course/read-more/read-more.component';
 import {NewtaskDialogComponent} from './components/courses/detail-course/newtask-dialog/newtask-dialog.component';
 import {ExitCourseComponent} from './components/courses/detail-course/exit-course/exit-course.component';
-import { UpdateCourseDialogComponent } from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
+import {UpdateCourseDialogComponent} from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
+import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: 'http://localhost:8080' + req.url
+      url: 'https://localhost:8080' + req.url
     });
 
     return next.handle(clonedRequest);
@@ -72,6 +73,7 @@ export const httpInterceptorProviders = [
     NewtaskDialogComponent,
     ExitCourseComponent,
     UpdateCourseDialogComponent,
+    DataprivacyDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -88,10 +90,8 @@ export const httpInterceptorProviders = [
       }
     })
   ],
-
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent],
+  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent],
   providers: [httpInterceptorProviders],
-
   bootstrap: [AppComponent]
 })
 export class AppModule {
