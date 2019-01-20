@@ -4,7 +4,7 @@ import {
   MatAutocompleteModule,
   MatButtonModule,
   MatButtonToggleModule,
-  MatCardModule, MatChipsModule,
+  MatCardModule, MatCheckboxModule, MatChipsModule,
   MatDialogModule,
   MatExpansionModule,
   MatFormFieldModule,
@@ -23,7 +23,7 @@ import {
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
-  MatTooltipModule
+  MatTooltipModule,
 } from '@angular/material';
 
 @NgModule({
@@ -54,7 +54,8 @@ import {
     MatChipsModule,
     MatAutocompleteModule,
     MatStepperModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCheckboxModule
   ],
   exports: [CommonModule,
     MatToolbarModule,
@@ -83,7 +84,8 @@ import {
     MatChipsModule,
     MatAutocompleteModule,
     MatStepperModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCheckboxModule
   ],
   declarations: []
 })

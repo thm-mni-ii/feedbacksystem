@@ -2,8 +2,9 @@ import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {flatMap, map} from 'rxjs/operators';
-import {MatDialog, MatSnackBar} from '@angular/material';
+import {MatDialog} from '@angular/material';
 import {DataprivacyDialogComponent} from '../dataprivacy-dialog/dataprivacy-dialog.component';
+import {Succeeded} from '../../interfaces/HttpInterfaces';
 
 /**
  * Manages the login page for Submissionchecker
@@ -36,7 +37,16 @@ export class LoginComponent implements OnInit {
           return this.auth.login(this.username, this.password);
         } else {
           //  Show dataprivacy
-          return this.dialog.open(DataprivacyDialogComponent).afterClosed();
+          this.dialog.open(DataprivacyDialogComponent, {
+            data: {
+              username: this.username,
+              password: this.password
+            }
+          }).afterClosed().subscribe((val: Succeeded) => {
+            if (val.success) {
+              return this.auth.login(this.username, this.password);
+            }
+          });
         }
       })
     ).pipe(map(response => {
