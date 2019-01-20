@@ -1,5 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
+import {AuthService} from '../../service/auth.service';
 
 @Component({
   selector: 'app-dataprivacy-dialog',
@@ -9,7 +10,7 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 export class DataprivacyDialogComponent implements OnInit {
 
   constructor(public dialogRef: MatDialogRef<DataprivacyDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: any,
-              private snackBar: MatSnackBar) {
+              private snackBar: MatSnackBar, private auth: AuthService) {
   }
 
   privacyChecked: boolean;
@@ -20,7 +21,9 @@ export class DataprivacyDialogComponent implements OnInit {
 
   login() {
     if (this.privacyChecked) {
-      this.dialogRef.close({success: true});
+      this.auth.login(this.data.username, this.data.password).subscribe(success => {
+        this.dialogRef.close(success);
+      });
     } else {
       this.snackBar.open('Datenschutzerklärung akzeptieren', 'OK');
     }

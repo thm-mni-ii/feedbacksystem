@@ -37,19 +37,16 @@ export class LoginComponent implements OnInit {
           return this.auth.login(this.username, this.password);
         } else {
           //  Show dataprivacy
-          this.dialog.open(DataprivacyDialogComponent, {
+          return this.dialog.open(DataprivacyDialogComponent, {
             data: {
               username: this.username,
               password: this.password
             }
-          }).afterClosed().subscribe((val: Succeeded) => {
-            if (val.success) {
-              return this.auth.login(this.username, this.password);
-            }
-          });
+          }).afterClosed();
         }
       })
     ).pipe(map(response => {
+      console.log(response);
       const authHeader: string = response.headers.get('Authorization');
       const token: string = authHeader.replace('Bearer ', '');
       localStorage.setItem('token', token);
