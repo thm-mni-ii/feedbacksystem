@@ -10,6 +10,9 @@ import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
 import {of, throwError} from 'rxjs';
 
+import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
+
+
 @Component({
   selector: 'app-detail-course',
   templateUrl: './detail-course.component.html',
@@ -33,7 +36,7 @@ export class DetailCourseComponent implements OnInit {
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
-    this.userRole = this.user.getUserRole();
+
 
     this.route.params.pipe(
       flatMap(params => {
@@ -43,6 +46,9 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
+
+      this.userRole = course_detail.role_name;
+
       course_detail.tasks.forEach(task => {
         this.submissionAsFile[task.task_id] = false;
         this.processing[task.task_id] = false;
@@ -70,9 +76,8 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
     });
-
-
   }
+  
 
   /**
    * Docent updates task
@@ -175,5 +180,15 @@ export class DetailCourseComponent implements OnInit {
     });
   }
 
+
+  updateCourse() {
+    this.dialog.open(UpdateCourseDialogComponent, {
+      height: '400px',
+      width: '600px',
+      data: {data: this.courseDetail}
+    }).afterClosed().subscribe((value: Succeeded) => {
+      console.log(value);
+    });
+  }
 
 }

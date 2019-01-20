@@ -172,11 +172,6 @@ export class DatabaseService {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
             });
           }
-
-          // Uploading the file
-          return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formDataFile, {
-            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-          });
         }));
     } else { // Data is string
       return this.http.post<Succeeded>('/api/v1/tasks/' + idTask + '/submit', {data: data});
@@ -211,10 +206,6 @@ export class DatabaseService {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
         }
-
-        return this.http.post<Succeeded>(upload_url.replace(/https?:\/\/localhost(:\d+)?/,""), formData, {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-        });
       })
     );
   }
@@ -276,17 +267,17 @@ export class DatabaseService {
    * @param standard_task_typ Select standard task type for this course
    * @param course_semester Select the semester of this course
    * @param course_module_id Unique id the course has. Example (CS1010)
-   * @param isPublic Should the course be displayed to students or not
+   * @param userDataAllowed Should the course be displayed to students or not
    */
   updateCourse(id: number, name: string, description: string, standard_task_typ: string, course_semester: string,
-               course_module_id: string, isPublic: boolean): Observable<Succeeded> {
+               course_module_id: string, userDataAllowed: boolean): Observable<Succeeded> {
     return this.http.put<Succeeded>('/api/v1/courses/' + id, {
       name: name,
       description: description,
       standard_task_typ: standard_task_typ,
       course_semester: course_semester,
       course_modul_id: course_module_id,
-      anonymous: isPublic
+      personalised_submission: userDataAllowed
     });
   }
 
@@ -319,9 +310,6 @@ export class DatabaseService {
             headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
           });
         }
-        return this.http.post<Succeeded>(uploadUrl, formData, {
-          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-        });
       }));
   }
 
