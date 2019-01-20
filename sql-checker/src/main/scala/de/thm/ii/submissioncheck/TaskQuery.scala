@@ -11,7 +11,7 @@ package de.thm.ii.submissioncheck
  * @param ord order fix or variable
  * @author Vlad Sokyrskyy
  */
-class TaskQuery(val desc: String, val content: String, val ord: String){
+class TaskQuery2(val desc: String, val content: String, val ord: String){
     /**
       * class instance description
       */
