@@ -1,0 +1,13 @@
+.dialog-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.action-buttons {
+  display: flex;
+  margin: 12px;
+}
+
+.action-buttons > button {
+  margin: 8px;
+}

@@ -34,3 +34,8 @@ mat-toolbar {
 button {
   width: 100%;
 }
+
+.login-inputs {
+  display: flex;
+  flex-direction: column;
+}

@@ -1,8 +1,9 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {Inject, Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {JwtHelperService} from '@auth0/angular-jwt';
-import {Observable, of} from 'rxjs';
-import {catchError, flatMap, map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
+import {DOCUMENT} from '@angular/common';
+import {Succeeded} from '../interfaces/HttpInterfaces';
 
 const TOKEN_ID = 'token';
 
@@ -14,7 +15,8 @@ const TOKEN_ID = 'token';
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {
+  constructor(private http: HttpClient, private jwtHelper: JwtHelperService,
+              @Inject(DOCUMENT) private document: Document) {
   }
 
 
@@ -26,33 +28,23 @@ export class AuthService {
   }
 
   /**
-   * Gives back a valid token for an user,
-   * for an given username.
-   * @param username that will be used for a valid session
-   */
-  login_fake(username: string): Observable<string> {
-    return this.http.post('/api/v1/login/token', {
-      name: username
-    }, {observe: 'response'}).pipe(map(response => {
-      const authHeader: string = response.headers.get('Authorization');
-      const token: string = authHeader.replace('Bearer ', '');
-      localStorage.setItem(TOKEN_ID, token);
-      return token;
-    }));
-  }
-
-  /**
-   * Login function to authenticate user with CAS
+   * Login function to authenticate user with LDAP
    * system
    *
    */
-  login() {
-    return this.http.get<HttpErrorResponse>('/api/v1/login', {observe: 'response'}).pipe(
-      catchError(err => {
-        console.log(err);
-        return of(err);
-      })
-    );
+  login(username: string, password: string): Observable<HttpResponse<Succeeded>> {
+    return this.http.post<Succeeded>('/api/v1/login', {username: username, password: password},
+      {observe: 'response'});
+  }
+
+
+  /**
+   * Check if user accepted data privacy
+   * if not show it to him
+   * @param username
+   */
+  loginPrivacyCheck(username: string): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/login/privacy/check', {username: username});
   }
 
 
