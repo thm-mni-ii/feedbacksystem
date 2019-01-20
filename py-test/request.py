@@ -14,6 +14,7 @@ class TestRESTStudent(unittest.TestCase):
             self.URL = "https://localhost:8080/api/v1/"
         else:
             self.URL = "http://localhost:8080/api/v1/"
+        pprint(self.URL)
         # How many digits to match in case of floating point answers
         # print(r.headers)
         # self.auth_token = r.headers["Authorization"].replace("Bearer ","")
@@ -77,7 +78,7 @@ class TestRESTStudent(unittest.TestCase):
                           headers={'content-type': 'application/json', 'Authorization': self.admin_auth_header})
         
         self.assertEqual(type(r.json()), type({}))
-        pprint(r.json())
+
         self.assertEqual(2, len(r.json()))
         v = r.json()
         self.assertTrue("course_id" in v)
@@ -213,7 +214,7 @@ class TestRESTStudent(unittest.TestCase):
         file_upload_response = requests.post(task_file_upload_url, data=multipart_data, verify=False,
                                  headers={'Content-Type': multipart_data.content_type, 'Authorization': self.docent_auth_header})
 
-        self.assertEqual(file_upload_response.json(),{'upload_success': True, 'filename': 'sample.sql'})
+        self.assertEqual(file_upload_response.json(),{'success': True, 'filename': 'sample.sql'})
 
         self.assertEqual(len(task_creation_2.json()), 3)
         self.assertTrue("success" in task_creation_2.json())
@@ -308,7 +309,7 @@ class TestRESTStudent(unittest.TestCase):
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.docent_auth_header})
 
-        pprint(res.json())
+
         self.assertEqual(type(res.json()), type([]))
         self.assertGreaterEqual(len(res.json()), 1)
 
@@ -361,7 +362,7 @@ class TestRESTStudent(unittest.TestCase):
                                              headers={'Content-Type': multipart_data.content_type,
                                                       'Authorization': self.student_auth_header})
 
-        self.assertEqual({'submission_upload_success': True, 'filename': 'sample.sql'}, file_upload_response.json())
+        self.assertEqual({'success': True, 'filename': 'sample.sql'}, file_upload_response.json())
 
         result_req_af = requests.get(url=self.URL + "tasks/8/result", data=json.dumps({}),
                                      verify=False,

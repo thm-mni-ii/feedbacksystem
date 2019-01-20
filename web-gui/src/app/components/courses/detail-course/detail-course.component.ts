@@ -9,7 +9,9 @@ import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component'
 import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
 import {of, throwError} from 'rxjs';
+
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
+
 
 @Component({
   selector: 'app-detail-course',
@@ -35,6 +37,7 @@ export class DetailCourseComponent implements OnInit {
     this.submissionAsFile = {};
     this.processing = {};
 
+
     this.route.params.pipe(
       flatMap(params => {
         const id = +params['id'];
@@ -43,7 +46,9 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
+
       this.userRole = course_detail.role_name;
+
       course_detail.tasks.forEach(task => {
         this.submissionAsFile[task.task_id] = false;
         this.processing[task.task_id] = false;
@@ -71,9 +76,8 @@ export class DetailCourseComponent implements OnInit {
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
     });
-
-
   }
+  
 
   /**
    * Docent updates task
@@ -176,6 +180,7 @@ export class DetailCourseComponent implements OnInit {
     });
   }
 
+
   updateCourse() {
     this.dialog.open(UpdateCourseDialogComponent, {
       height: '400px',
@@ -185,6 +190,5 @@ export class DetailCourseComponent implements OnInit {
       console.log(value);
     });
   }
-
 
 }

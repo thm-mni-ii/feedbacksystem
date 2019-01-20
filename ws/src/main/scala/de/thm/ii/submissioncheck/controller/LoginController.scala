@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
   * @author Benjamin Manns
   */
 @RestController
-@EnableCasClient
+//@EnableCasClient
 @RequestMapping(path = Array("/api/v1"))
 class LoginController extends CasClientConfigurerAdapter {
   private final val LABEL_STUDENT_ROLE = 16
@@ -30,44 +30,64 @@ class LoginController extends CasClientConfigurerAdapter {
   private val LABEL_LOGIN_RESULT = "login_result"
   private val LABEL_SHOW_PRIVACY = "show_privacy"
   private val LABEL_AUTHORIZATION = "Authorization"
+  private val LABEL_SUCCESS = "success"
+  private val LABEL_USERNAME = "username"
   /**
-    * Authentication starts here. This Webservice sends user to CAS to perform a login. CAS redirects to this point and
+    * Authentication starts here. Until now without CAS, should be then with LDAP
+    *
+    *
+    * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
     * here a answer to a connected Application (i.e. Angular) will be sent
     * @author Benjamin Manns
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode Request Body of User login
     * @return Java Map
     */
-  @RequestMapping(value = Array("login"))
-  @ResponseBody
-  def postUser(request: HttpServletRequest, response: HttpServletResponse): Map[String, Any] = {
-      try {
-        val principal = request.getUserPrincipal
-        val name = principal.getName
-        val dbUser = userService.loadUserFromDB(name)
+  @RequestMapping(value = Array("login"), method = Array(RequestMethod.POST))
+  def userLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    try {
+      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val password = jsonNode.get("password").asText()
 
-        val privacyShowSettingsEntry = settingService.loadSetting("privacy.show")
-        val show = if (privacyShowSettingsEntry.isDefined) privacyShowSettingsEntry.get.asInstanceOf[Boolean] else true
+      // TODO perform login with LDAP
+      val user = userService.loadUserFromDB(username)
+      val login: Boolean = user.isDefined
 
-        if(dbUser.isEmpty && show) {
-          Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> true, "resend_data" -> Map("username" -> name))
-        } else {
-          val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
-          val jwtToken = userService.generateTokenFromUser(user)
-          setBearer(response, jwtToken)
-          loginService.log(user)
-          Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
-        }
+      val jwtToken: String = if (login) this.userService.generateTokenFromUser(user.get) else null
+
+      setBearer(response, jwtToken)
+      Map(LABEL_SUCCESS -> login)
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: username and password")
       }
-      catch {
-          case e: Throwable => {
-            logger.error("Error: ", e)
-            Map(LABEL_LOGIN_RESULT -> false, LABEL_SHOW_PRIVACY -> true)
-          }
-        }
+    }
   }
 
   private def setBearer(response: HttpServletResponse, token: String) = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
+
+  /**
+    * check if user has to accept privacy first
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode Request Body contains json
+    * @return simple answer if user need to accept privacy policy
+    */
+  @RequestMapping(value = Array("login/privacy/check"), method = Array(RequestMethod.POST))
+  def checkUsersPrivacyAcceptance(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    try {
+      val username = jsonNode.get(LABEL_USERNAME).asText()
+      Map(LABEL_SUCCESS -> userService.loadUserFromDB(username).isDefined)
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: username")
+      }
+    }
+  }
 
   /**
     * If a user is not registered yet, he may has to accept the provacy message, this is done here, after accepting,
@@ -78,10 +98,10 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode JSON Parameter from request
     * @return JSON
     */
-  @RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
+  /*@RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
   def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get("username").asText()
+      val username = jsonNode.get(LABEL_USERNAME).asText()
       // TODO Load Data from CAS
       val user = this.userService.insertUserIfNotExists(username, LABEL_STUDENT_ROLE)
       loginService.log(user)
@@ -94,7 +114,7 @@ class LoginController extends CasClientConfigurerAdapter {
         throw new BadRequestException("Please provide: username")
       }
     }
-  }
+  }*/
 
   /**
     * Provide a REST for getting fast a token, only for testing purpose

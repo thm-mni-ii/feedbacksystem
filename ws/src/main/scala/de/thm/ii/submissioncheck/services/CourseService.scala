@@ -34,6 +34,9 @@ class CourseService {
   private final val LABEL_ZIPDIR = "zip-dir"
   private final val LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_UNDERLINE = "_"
+  private final val LABEL_COURSE_TUTOR = "course_tutor"
+  private final val LABEL_COURSE_DOCENT = "course_docent"
+
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val taskService: TaskService = null
@@ -78,8 +81,8 @@ class CourseService {
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
           CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
-          "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
-          "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
+          LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
       }, user.userid)
   }
 
@@ -249,9 +252,9 @@ class CourseService {
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
         CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
-        CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
-        "course_docent" -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
-        "course_tutor" -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
+        CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
+        LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+        LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
     }, user.userid)
   }
 
@@ -266,8 +269,9 @@ class CourseService {
   def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
-    val selectPart = "course_id, course_name, course_end_date, course_description" + (if (isPermitted) {
-      ", creator" // TODO add more columns
+    val selectPart = "c.course_id, c.standard_task_typ, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
+      "c.course_semester, c.personalised_submission, t.role_id, t.role_name" + (if (isPermitted) {
+      ", c.creator" // TODO add more columns
     } else {
       ""
     })
@@ -277,21 +281,30 @@ class CourseService {
     } else {
       List.empty
     }
-    val list = DB.query("SELECT " + selectPart + " FROM course where course_id = ?",
+    val list = DB.query("SELECT " + selectPart + " from course c left join (select user_id, role_id, role_name, course_id from " +
+      "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?",
       (res, _) => {
         val courseMap = Map(
-          CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+          CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_end_date -> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+          CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
+          CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
+          LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
+          RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
+          RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
           LABEL_TASKS -> taskList
         )
         if (isPermitted) {
-          courseMap + (CourseDBLabels.creator -> res.getString(CourseDBLabels.creator))
+          courseMap + (CourseDBLabels.creator -> res.getInt(CourseDBLabels.creator))
         } else {
           courseMap
         }
-      }, courseid)
+      }, user.userid, courseid)
 
     list.headOption
   }

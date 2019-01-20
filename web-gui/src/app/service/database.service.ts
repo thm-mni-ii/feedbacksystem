@@ -172,8 +172,6 @@ export class DatabaseService {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
             });
           }
-
-
         }));
     } else { // Data is string
       return this.http.post<Succeeded>('/api/v1/tasks/' + idTask + '/submit', {data: data});
@@ -344,7 +342,3 @@ export class DatabaseService {
   }
 
 }
-
-
-
-

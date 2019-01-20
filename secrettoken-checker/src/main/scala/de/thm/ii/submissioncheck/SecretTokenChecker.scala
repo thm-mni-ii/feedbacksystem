@@ -89,6 +89,8 @@ object SecretTokenChecker extends App {
   private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
   private val LABEL_TASKID = "taskid"
+  private val LABEL_ACCEPT = "accept"
+  private val LABEL_ERROR = "error"
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
@@ -173,6 +175,29 @@ object SecretTokenChecker extends App {
     }
   }
 
+  /**
+    * Delets a dir recursively deleting anything inside it.
+    * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
+    * @param dir The dir to delete
+    * @return true if the dir was successfully deleted
+    */
+  private def deleteDirectory(dir: File): Boolean = {
+    if (!dir.exists() || !dir.isDirectory()) {
+      false
+    } else {
+      val files = dir.list()
+      for (file <- files) {
+        val f = new File(dir, file)
+        if (f.isDirectory()) {
+          deleteDirectory(f)
+        } else {
+          f.delete()
+        }
+      }
+      dir.delete()
+    }
+  }
+
   private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     try{
@@ -187,15 +212,14 @@ object SecretTokenChecker extends App {
 
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-      downloadFilesToFS(urls, jwt_token, taskid)
-      sendTaskMessage(JsonHelper.mapToJsonStr(Map("accept" -> true, "error" -> "", LABEL_TASKID -> taskid)))
-      // if download failed:
-      // sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-      //          "error" -> "Your testfile has some errors: ",
-      //          "accept" -> false,
-      //          LABEL_TASKID -> taskid
-      //        )))
+      if (urls.length != 1) {
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Please provide exact one testfile", LABEL_TASKID -> taskid)))
+      } else {
+        deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
 
+        downloadFilesToFS(urls, jwt_token, taskid)
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+      }
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
@@ -207,6 +231,7 @@ object SecretTokenChecker extends App {
     }
   }
 
+  private val message_err = "Error: Task doesn't contain a testfile"
   /**
     * Name of the md5 test script
     */
@@ -220,20 +245,22 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, token: String): (String, Int) = {
-    val script: String = ULDIR + taskid + "/testfile.sh"
-    try{
-      val file = new File("./" + script)
-    } catch {
-      case e: FileNotFoundException => {
-        val message_err = "Error: Task doesn't contain a testfile"
-        (message_err, 126)
-      }
-    }
-    val bashtest1 = new BashExec(script, name, token)
-    val exit1 = bashtest1.exec()
-    val message1 = bashtest1.output
+    // make a list
+    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles()
 
-    (message1, exit1)
+    val filesListHead = filesList.headOption
+
+    if (filesListHead.isEmpty) {
+      (message_err, 126)
+    } else {
+      val script: String = filesListHead.get.getAbsolutePath
+      //val file = filesListHead.get
+      val bashtest1 = new BashExec(script, name, token)
+      val exit1 = bashtest1.exec()
+      val message1 = bashtest1.output
+
+      (message1, exit1)
+    }
   }
 
   /**
@@ -310,7 +337,7 @@ object SecretTokenChecker extends App {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
-        new File(ULDIR + taskid).mkdirs()
+        new File(Paths.get(ULDIR).resolve(taskid).toString).mkdirs()
         Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
     }
