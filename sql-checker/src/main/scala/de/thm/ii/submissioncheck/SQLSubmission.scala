@@ -1,4 +1,4 @@
-package de.thm.submissioncheck
+package de.thm.ii.submissioncheck
 
 /**
   * A submission for a sql task

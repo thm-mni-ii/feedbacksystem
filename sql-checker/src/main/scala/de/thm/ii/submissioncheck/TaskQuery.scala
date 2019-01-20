@@ -1,4 +1,4 @@
-package de.thm.submissioncheck
+package de.thm.ii.submissioncheck
 
 /**
  *
@@ -8,9 +8,10 @@ package de.thm.submissioncheck
  *
  * @param desc description of Query (mistakes or 'ok')
  * @param content string of the sql query
+ * @param ord order fix or variable
  * @author Vlad Sokyrskyy
  */
-class TaskQuery(val desc: String, val content: String){
+class TaskQuery2(val desc: String, val content: String, val ord: String){
     /**
       * class instance description
       */
@@ -20,4 +21,9 @@ class TaskQuery(val desc: String, val content: String){
       * class instance query
       */
     var query: String = content
+
+    /**
+      * class instance order
+      */
+    var order: String = ord
 }
