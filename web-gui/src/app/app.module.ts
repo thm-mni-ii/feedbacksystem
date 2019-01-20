@@ -35,6 +35,7 @@ import {NewtaskDialogComponent} from './components/courses/detail-course/newtask
 import {ExitCourseComponent} from './components/courses/detail-course/exit-course/exit-course.component';
 import {UpdateCourseDialogComponent} from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
+import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 
 
 @Injectable()
@@ -74,6 +75,7 @@ export const httpInterceptorProviders = [
     ExitCourseComponent,
     UpdateCourseDialogComponent,
     DataprivacyDialogComponent,
+    ImpressumDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -90,7 +92,8 @@ export const httpInterceptorProviders = [
       }
     })
   ],
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent],
+  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
+    ImpressumDialogComponent],
   providers: [httpInterceptorProviders],
   bootstrap: [AppComponent]
 })

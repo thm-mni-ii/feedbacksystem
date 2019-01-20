@@ -14,8 +14,10 @@ export class DataprivacyDialogComponent implements OnInit {
   }
 
   privacyChecked: boolean;
+  onlyForShow: boolean;
 
   ngOnInit() {
+    this.onlyForShow = this.data.onlyForShow;
   }
 
 
