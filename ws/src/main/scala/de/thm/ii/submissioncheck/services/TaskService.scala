@@ -505,7 +505,7 @@ class TaskService {
   private def encodeValue(value: String): String = {
     URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
   }
-  
+
   /**
     * generate token validated URL to download submitted student file
     * @author Benjamin Manns
