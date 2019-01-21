@@ -1,6 +1,6 @@
 package de.thm.ii.submissioncheck
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, FileNotFoundException}
 import java.nio.file.Paths
 
 import de.thm.ii.submissioncheck.misc.DB
@@ -27,9 +27,18 @@ class Application {
   private implicit val jdbc: JdbcTemplate = null
   //private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
   private val initSQLPath = Paths.get("/usr/local/ws/init.sql").toString
-  private val initSQLFile: File = new File(initSQLPath)
+
+  private var initSQLFile: File = null
+  try {
+    initSQLFile = new File(initSQLPath)
+  } catch {
+    case _: java.io.FileNotFoundException => {
+      initSQLFile = ResourceUtils.getFile("classpath:init.sql")
+    }
+  }
+
   logger.info("SQL ABS PATH: ")
-  logger.info(initSQLPath)
+  logger.info(initSQLFile.getAbsolutePath)
 
   /**
     * Initialize the database schema if none exists.

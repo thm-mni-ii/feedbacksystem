@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, LDAPConnector, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{LoginService, SettingService, UserService}
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -34,12 +34,61 @@ class LoginController extends CasClientConfigurerAdapter {
   private val LABEL_AUTHORIZATION = "Authorization"
   private val LABEL_SUCCESS = "success"
   private val LABEL_USERNAME = "username"
+
   /**
-    * Authentication starts here. Until now without CAS, should be then with LDAP
+    * Authentication starts here. here we using CAS
     *
     *
     * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
     * here a answer to a connected Application (i.e. Angular) will be sent
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @return Java Map
+    */
+  @RequestMapping(value = Array("login"), method = Array(RequestMethod.GET))
+  def userLogin(request: HttpServletRequest, response: HttpServletResponse): Any = {
+    try {
+      val principal = request.getUserPrincipal
+      var name: String = null
+      if (principal == null) {
+        name = "bmnn57"
+        println(name)
+      } else {
+        name = principal.getName
+      }
+
+      var existingUser = userService.loadUserFromDB(name)
+      if (existingUser.isEmpty) {
+        // Load more Infos from LDAP
+        val entry = LDAPConnector.loadLDAPInfosByUID(name)
+        userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
+          entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
+        existingUser = userService.loadUserFromDB(name)
+      }
+      val jwtToken = userService.generateTokenFromUser(existingUser.get)
+      setBearer(response, jwtToken)
+      val co = new Cookie("jwt", jwtToken)
+      co.setPath("/")
+      co.setHttpOnly(false)
+      response.addCookie(co)
+      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
+      response.setHeader("Location", CLIENT_HOST_URL)
+      "jwt"
+    }
+    catch {
+      case e: Throwable => {
+        logger.error("Error: ", e)
+        response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
+        response.setHeader("Location", CLIENT_HOST_URL)
+        "error"
+      }
+    }
+  }
+
+  /**
+    * Authentication starts here. We can load data directly from LDAP. Until now this is not possible
+    *
     * @author Benjamin Manns
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
@@ -68,40 +117,6 @@ class LoginController extends CasClientConfigurerAdapter {
     }
   }
 
-  /**
-    * Authentication starts here. here we using CAS
-    *
-    *
-    * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
-    * here a answer to a connected Application (i.e. Angular) will be sent
-    * @author Benjamin Manns
-    * @param request Http request gives access to the http request information.
-    * @param response HTTP Answer (contains also cookies)
-    * @return Java Map
-    */
-  @RequestMapping(value = Array("login"), method = Array(RequestMethod.GET))
-  def userLogin(request: HttpServletRequest, response: HttpServletResponse): Any = {
-    try {
-      val principal = request.getUserPrincipal
-      val name = principal.getName
-      val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
-      val jwtToken = userService.generateTokenFromUser(user)
-      setBearer(response, jwtToken)
-      val co = new Cookie("jwt_token", jwtToken)
-      co.setPath("/")
-      co.setHttpOnly(false)
-      response.addCookie(co)
-      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-      response.setHeader("Location", CLIENT_HOST_URL)
-      "jwt"
-    }
-    catch {
-      case e: Throwable => {
-        logger.error("Error: ", e)
-      }
-    }
-  }
-
   private def setBearer(response: HttpServletResponse, token: String) = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
 
   /**
@@ -113,7 +128,7 @@ class LoginController extends CasClientConfigurerAdapter {
     */
   @RequestMapping(value = Array("login/check"), method = Array(RequestMethod.POST))
   def checkIfUsersIsLogedIn(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     Map(LABEL_SUCCESS -> user.isDefined)
   }
 
@@ -139,33 +154,6 @@ class LoginController extends CasClientConfigurerAdapter {
   }
 
   /**
-    * If a user is not registered yet, he may has to accept the provacy message, this is done here, after accepting,
-    * he will be registered into db
-    * @author Benjamin Manns
-    * @param request Http request gives access to the http request information.
-    * @param response HTTP Answer (contains also cookies)
-    * @param jsonNode JSON Parameter from request
-    * @return JSON
-    */
-  /*@RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
-  def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      // TODO Load Data from CAS
-      val user = this.userService.insertUserIfNotExists(username, LABEL_STUDENT_ROLE)
-      loginService.log(user)
-      val jwtToken = this.userService.generateTokenFromUser(user)
-      setBearer(response, jwtToken)
-      Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
-    }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: username")
-      }
-    }
-  }*/
-
-  /**
     * Provide a REST for getting fast a token, only for testing purpose
     * @author Benjamin Manns
     * @param request contain request information
@@ -178,9 +166,9 @@ class LoginController extends CasClientConfigurerAdapter {
   def createToken(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
     try {
       val name = jsonNode.get("name").asText()
-      val user = this.userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
-      loginService.log(user)
-      val jwtToken = this.userService.generateTokenFromUser(user)
+      val user = this.userService.loadUserFromDB(name)
+      loginService.log(user.get)
+      val jwtToken = this.userService.generateTokenFromUser(user.get)
       setBearer(response, jwtToken)
       Map("token" -> jwtToken)
     }

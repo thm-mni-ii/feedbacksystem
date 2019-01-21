@@ -60,7 +60,7 @@ class CourseController {
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllCourses(request: HttpServletRequest): List[Map[String, Any]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
         throw new UnauthorizedException
     }
@@ -75,7 +75,7 @@ class CourseController {
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def createCourse(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 2) { // only ADMIN or MODERATOR can create a course
       throw new UnauthorizedException
     }
@@ -108,7 +108,7 @@ class CourseController {
   @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getAllCourse(request: HttpServletRequest): List[Map[String, Any]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -124,7 +124,7 @@ class CourseController {
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET))
   @ResponseBody
   def getCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -145,7 +145,7 @@ class CourseController {
   def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer, @PathVariable userid: Int,
                                           @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.userid != userid)) {
       throw new UnauthorizedException
     }
@@ -177,7 +177,7 @@ class CourseController {
   def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer,
                                           @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
       throw new UnauthorizedException
     }
@@ -200,7 +200,7 @@ class CourseController {
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.DELETE), consumes = Array())
   @ResponseBody
   def deleteCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -238,7 +238,7 @@ class CourseController {
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.PUT), consumes = Array())
   @ResponseBody
   def updateCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
 
     if(user.isEmpty || !this.courseService.isPermittedForCourse(courseid, user.get)) {
       throw new UnauthorizedException
@@ -268,7 +268,7 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/subscribe"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   def subscribeCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -286,7 +286,7 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/unsubscribe"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   def unsubscribeCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -305,7 +305,7 @@ class CourseController {
   def grantTutorToCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
-      val user = userService.verfiyUserByHeaderToken(request)
+      val user = userService.verifyUserByHeaderToken(request)
       if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 1)) {
         throw new UnauthorizedException
       }
@@ -332,7 +332,7 @@ class CourseController {
                           @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
-      val requestingUser = userService.verfiyUserByHeaderToken(request)
+      val requestingUser = userService.verifyUserByHeaderToken(request)
       if (requestingUser.isEmpty || requestingUser.get.roleid > 2) { // Only moderator and admin can do this
         throw new UnauthorizedException
       }
@@ -358,7 +358,7 @@ class CourseController {
   def denyTutorForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
-      val user = userService.verfiyUserByHeaderToken(request)
+      val user = userService.verifyUserByHeaderToken(request)
       if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 4)) {
         throw new UnauthorizedException
       }
@@ -385,7 +385,7 @@ class CourseController {
                           @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val userid = jsonNode.get(LABEL_USERID).asInt()
-      val user = userService.verfiyUserByHeaderToken(request)
+      val user = userService.verifyUserByHeaderToken(request)
       if (user.isEmpty || user.get.roleid > 2) {
         throw new UnauthorizedException
       }
@@ -410,7 +410,7 @@ class CourseController {
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): List[Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -436,7 +436,7 @@ class CourseController {
   def seeStudentTaskSubmissionsMatrixCell(@PathVariable courseid: Int, @PathVariable userid: Int, @PathVariable taskid: Int,
                                           request: HttpServletRequest): List[Any] = {
     // TODO courseid not needed
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -456,7 +456,7 @@ class CourseController {
   @RequestMapping(value = Array("submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(request: HttpServletRequest): List[Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }

@@ -103,7 +103,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{id}/result"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getTaskResultByTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): List[Map[String, String]] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty) {
       throw new UnauthorizedException
     }
@@ -119,7 +119,7 @@ class TaskController {
   @RequestMapping(value = Array("courses/{courseid}/tasks/result"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getTaskResultAllTaskByCourse(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !courseService.isSubscriberForCourse(courseid, requestingUser.get)) {
       throw new UnauthorizedException
     }
@@ -146,7 +146,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{id}/submit"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseBody
   def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, String] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty) {
       throw new UnauthorizedException
     }
@@ -200,7 +200,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{taskid}/submissions/{submissionid}/file/upload"), method = Array(RequestMethod.POST))
   def handleSubmissionFileUpload(@PathVariable taskid: Int, @PathVariable submissionid: Int,
                                  @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
@@ -241,7 +241,7 @@ class TaskController {
   @ResponseBody
   def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
                         request: HttpServletRequest): List[Map[String, String]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -259,7 +259,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("tasks/{id}"), method = Array(RequestMethod.GET))
   def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
@@ -280,7 +280,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{id}/testfile/upload"), method = Array(RequestMethod.POST))
   def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) files: Array[MultipartFile],
                        request: HttpServletRequest): Map[String, Any] = {
-    val requestingUser = userService.verfiyUserByHeaderToken(request)
+    val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
@@ -319,7 +319,7 @@ class TaskController {
   @RequestMapping(value = Array("courses/{id}/tasks"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseStatus(HttpStatus.CREATED)
   def createTask(@PathVariable(LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -360,7 +360,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.DELETE))
   def deleteTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, AnyVal] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -380,7 +380,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("/tasks/{id}"), method = Array(RequestMethod.PUT), consumes = Array(application_json_value))
   def updateTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
       throw new UnauthorizedException
     }
@@ -453,7 +453,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("kafka/listener/reload"), method = Array(RequestMethod.GET))
   def kafkaReloadListeners(request: HttpServletRequest): Map[String, AnyVal] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) { // TODO Admin or else?
       throw new UnauthorizedException
     }
