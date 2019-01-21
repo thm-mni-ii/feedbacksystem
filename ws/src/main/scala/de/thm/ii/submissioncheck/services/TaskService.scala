@@ -477,6 +477,18 @@ class TaskService {
   }
 
   /**
+    * generate token validated URL to download task test file
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @return URL String
+    */
+  def getURLsOfTaskTestFiles(taskid: Int): List[String] = {
+    getTestFilesByTask(taskid).map(testfile => {
+      UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
+    })
+  }
+
+  /**
     * Gets the filename by a given Submissionid
     * @param submission_id unique submission identification
     * @return just the filename
@@ -493,17 +505,7 @@ class TaskService {
   private def encodeValue(value: String): String = {
     URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
   }
-
-  /**
-    * generate token validated URL to download task test file
-    * @author Benjamin Manns
-    * @param taskid unique taskid identification
-    * @return URL String
-    */
-  def getURLOfTaskTestFile(taskid: Int): String = {
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/"
-  }
-
+  
   /**
     * generate token validated URL to download submitted student file
     * @author Benjamin Manns
