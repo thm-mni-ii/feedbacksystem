@@ -98,23 +98,6 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode JSON Parameter from request
     * @return JSON
     */
-  /*@RequestMapping(value = Array("users/accept/privacy"), method = Array(RequestMethod.POST))
-  def userAcceptPrivacy(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      // TODO Load Data from CAS
-      val user = this.userService.insertUserIfNotExists(username, LABEL_STUDENT_ROLE)
-      loginService.log(user)
-      val jwtToken = this.userService.generateTokenFromUser(user)
-      setBearer(response, jwtToken)
-      Map(LABEL_LOGIN_RESULT -> true, LABEL_SHOW_PRIVACY -> false)
-    }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: username")
-      }
-    }
-  }*/
 
   /**
     * Provide a REST for getting fast a token, only for testing purpose
