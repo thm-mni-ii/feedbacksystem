@@ -24,9 +24,9 @@ class LoginController extends CasClientConfigurerAdapter {
   private val userService: UserService = null
   @Autowired
   private val settingService: SettingService = null
-  @Autowired
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
+  @Autowired
   private val loginService: LoginService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val LABEL_LOGIN_RESULT = "login_result"
