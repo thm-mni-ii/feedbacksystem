@@ -3,11 +3,11 @@ package de.thm.ii.submissioncheck.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{LoginService, SettingService, UserService}
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.springframework.web.bind.annotation._
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 
 /**
   * LoginController simply perfoem login request. In future it might send also a COOKIE
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
   * @author Benjamin Manns
   */
 @RestController
-//@EnableCasClient
+@EnableCasClient
 @RequestMapping(path = Array("/api/v1"))
 class LoginController extends CasClientConfigurerAdapter {
   private final val LABEL_STUDENT_ROLE = 16
@@ -25,6 +25,8 @@ class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private val settingService: SettingService = null
   @Autowired
+  @Value("${cas.client-host-url}")
+  private val CLIENT_HOST_URL: String = null
   private val loginService: LoginService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
   private val LABEL_LOGIN_RESULT = "login_result"
@@ -44,8 +46,8 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode Request Body of User login
     * @return Java Map
     */
-  @RequestMapping(value = Array("login"), method = Array(RequestMethod.POST))
-  def userLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+  @RequestMapping(value = Array("login/ldap"), method = Array(RequestMethod.POST))
+  def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val username = jsonNode.get(LABEL_USERNAME).asText()
       val password = jsonNode.get("password").asText()
@@ -66,7 +68,54 @@ class LoginController extends CasClientConfigurerAdapter {
     }
   }
 
+  /**
+    * Authentication starts here. here we using CAS
+    *
+    *
+    * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
+    * here a answer to a connected Application (i.e. Angular) will be sent
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @return Java Map
+    */
+  @RequestMapping(value = Array("login"), method = Array(RequestMethod.GET))
+  def userLogin(request: HttpServletRequest, response: HttpServletResponse): Any = {
+    try {
+      val principal = request.getUserPrincipal
+      val name = principal.getName
+      val user = userService.insertUserIfNotExists(name, LABEL_STUDENT_ROLE)
+      val jwtToken = userService.generateTokenFromUser(user)
+      setBearer(response, jwtToken)
+      val co = new Cookie("jwt_token", jwtToken)
+      co.setPath("/")
+      co.setHttpOnly(false)
+      response.addCookie(co)
+      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
+      response.setHeader("Location", CLIENT_HOST_URL)
+      "jwt"
+    }
+    catch {
+      case e: Throwable => {
+        logger.error("Error: ", e)
+      }
+    }
+  }
+
   private def setBearer(response: HttpServletResponse, token: String) = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
+
+  /**
+    * Give information if user is already successful loged in
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @return JSON if user is loged in
+    */
+  @RequestMapping(value = Array("login/check"), method = Array(RequestMethod.POST))
+  def checkIfUsersIsLogedIn(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
+    val user = userService.verfiyUserByHeaderToken(request)
+    Map(LABEL_SUCCESS -> user.isDefined)
+  }
 
   /**
     * check if user has to accept privacy first
