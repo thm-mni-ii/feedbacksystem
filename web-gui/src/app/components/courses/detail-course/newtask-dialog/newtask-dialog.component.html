@@ -19,7 +19,7 @@
       <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
     </mat-select>
 
-    <input (change)="getFile($event.target.files)" type="file" placeholder="Lösung" multiple>
+    <input (change)="getFiles($event.target.files)" type="file" placeholder="Lösung" multiple>
   </form>
 
   <mat-dialog-actions class="dialog-action-buttons">
