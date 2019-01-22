@@ -1,4 +1,6 @@
-<div matDialogTitle>Neue Aufgabe erstellen</div>
+<div matDialogTitle *ngIf="!isUpdate">Neue Aufgabe erstellen</div>
+<div matDialogTitle *ngIf="isUpdate">Aufgabe bearbeiten</div>
+
 <mat-dialog-content>
   <form class="new-task-form" [formGroup]="taskForm">
 
