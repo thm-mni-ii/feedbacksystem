@@ -108,8 +108,11 @@ export class GrantTutorComponent implements OnInit {
 
       this.db.addTutorToCourse(courseID, selectedUser.user_id).pipe(
         flatMap(res => {
-          console.log(res);
-          return this.db.getAllCourses();
+          if (this.user.getUserRole() === 1) {
+            return this.db.getAllCourses();
+          } else {
+            return this.db.getSubscribedCourses();
+          }
         })
       ).subscribe(courses => this.dataSourceCourses.data = courses);
     }
