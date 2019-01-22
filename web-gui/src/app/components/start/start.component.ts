@@ -22,7 +22,7 @@ export class StartComponent implements OnInit, OnDestroy {
   private sub: Subscription;
 
   title: string;
-  userRole: string;
+  userRole: number;
   isAdmin: boolean;
   isDocent: boolean;
   isModerator: boolean;
@@ -31,29 +31,33 @@ export class StartComponent implements OnInit, OnDestroy {
 
   opened: boolean;
   username: string;
+  prename: string;
+  surname: string;
+  email: string;
 
   ngOnInit() {
+
     this.username = this.user.getUsername();
     this.userRole = this.user.getUserRole();
+    this.prename = this.user.getPrename();
+    this.surname = this.user.getSurname();
+    this.email = this.user.getEmail();
 
     switch (this.userRole) {
-      case 'admin':
+      case 1:
         this.isAdmin = true;
         // this.router.navigate(['admin', 'dashboard']);
         break;
-      case 'moderator':
+      case 2:
         this.isModerator = true;
         break;
-      case 'docent':
-        this.router.navigate(['docent', 'dashboard']);
+      case 4:
         this.isDocent = true;
         break;
-      case 'tutor':
-        this.router.navigate(['student', 'dashboard']);
+      case 8:
         this.isTutor = true;
         break;
-      case 'student':
-        this.router.navigate(['student', 'dashboard']);
+      case 16:
         this.isStudent = true;
         break;
     }
