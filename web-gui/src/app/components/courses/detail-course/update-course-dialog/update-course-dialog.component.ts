@@ -29,6 +29,7 @@ export class UpdateCourseDialogComponent implements OnInit {
   ngOnInit() {
     this.courseDetails = this.data.data;
     this.testsystems$ = this.db.getTestsystemTypes();
+    console.log(this.courseDetails);
 
     this.name = this.courseDetails.course_name;
     this.description = this.courseDetails.course_description;
@@ -44,7 +45,7 @@ export class UpdateCourseDialogComponent implements OnInit {
   }
 
   udpateCourse() {
-    this.db.updateCourse(this.data.course_id, this.name, this.description, this.standardTaskType, this.semester,
+    this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
       this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
   }
 

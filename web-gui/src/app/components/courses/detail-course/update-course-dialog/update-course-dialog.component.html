@@ -16,7 +16,7 @@
       <mat-label>Standart aufgaben typ</mat-label>
       <mat-select [(value)]="standardTaskType">
         <mat-option *ngFor="let testsystem of testsystems$ | async"
-                    [value]="standardTaskType">{{testsystem.name}}</mat-option>
+                    [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
       </mat-select>
     </mat-form-field>
 
