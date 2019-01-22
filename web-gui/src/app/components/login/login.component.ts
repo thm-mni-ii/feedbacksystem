@@ -1,10 +1,11 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {flatMap, map} from 'rxjs/operators';
 import {MatDialog} from '@angular/material';
 import {DataprivacyDialogComponent} from '../dataprivacy-dialog/dataprivacy-dialog.component';
-import {Succeeded} from '../../interfaces/HttpInterfaces';
+import {DOCUMENT} from '@angular/common';
+import {CookieService} from 'ngx-cookie-service';
 
 /**
  * Manages the login page for Submissionchecker
@@ -16,13 +17,19 @@ import {Succeeded} from '../../interfaces/HttpInterfaces';
 })
 export class LoginComponent implements OnInit {
 
-  constructor(private router: Router, private auth: AuthService, private dialog: MatDialog) {
+  constructor(private router: Router, private auth: AuthService, private dialog: MatDialog,
+              @Inject(DOCUMENT) private document: Document, private cookie: CookieService) {
   }
 
   username: string;
   password: string;
 
   ngOnInit() {
+    const cookie = this.cookie.get('jwt');
+    if (cookie) {
+      localStorage.setItem('token', cookie);
+      this.router.navigate(['']);
+    }
 
   }
 
@@ -54,5 +61,8 @@ export class LoginComponent implements OnInit {
     })).subscribe();
   }
 
+  loginCAS() {
+    this.document.location.href = 'https://cas.thm.de/cas/login?service=https://localhost:8080/api/v1/login';
+  }
 
 }
