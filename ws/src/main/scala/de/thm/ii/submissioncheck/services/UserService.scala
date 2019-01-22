@@ -150,7 +150,7 @@ class UserService {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-          res.getString(UserDBLabels.surname),res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
       }, username)
 
     users.headOption
@@ -165,7 +165,7 @@ class UserService {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-          res.getString(UserDBLabels.surname),res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
       }, userid)
 
     users.headOption
