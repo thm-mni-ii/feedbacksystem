@@ -52,8 +52,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val principal = request.getUserPrincipal
       var name: String = null
       if (principal == null) {
-        name = "bmnn57"
-        println(name)
+        logger.warn("HELP WE GOT NO ANSWER FOM CAS")
       } else {
         name = principal.getName
       }
@@ -166,9 +165,9 @@ class LoginController extends CasClientConfigurerAdapter {
   def createToken(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
     try {
       val name = jsonNode.get("name").asText()
-      val user = this.userService.loadUserFromDB(name)
-      loginService.log(user.get)
-      val jwtToken = this.userService.generateTokenFromUser(user.get)
+      val user = this.userService.insertUserIfNotExists(name, "fakemail", "prename", "surname", LABEL_STUDENT_ROLE)
+      loginService.log(user)
+      val jwtToken = this.userService.generateTokenFromUser(user)
       setBearer(response, jwtToken)
       Map("token" -> jwtToken)
     }

@@ -134,6 +134,7 @@ object SecretTokenChecker extends App {
 
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
+    logger.info("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
@@ -209,7 +210,6 @@ object SecretTokenChecker extends App {
 
       // Here we send multiple files!!
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
-
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
       if (urls.length != 1) {
@@ -366,7 +366,6 @@ object SecretTokenChecker extends App {
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
-      Files.copy(connection.getInputStream, Paths.get("upload-dir/script.sh"), StandardCopyOption.REPLACE_EXISTING)
       val in: InputStream = connection.getInputStream
       val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
       s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")

@@ -42,7 +42,7 @@ import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: 'https://localhost:8080' + req.url
+      url: (req.url.search("localhost") >= 0) ? req.url : 'https://localhost:8080' + req.url
     });
 
     return next.handle(clonedRequest);
