@@ -61,7 +61,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * or creation
    * @param file The solution file
    */
-  getFile(file: FileList) {
+  getFiles(file: FileList) {
     this.soutionFiles = file;
   }
 
