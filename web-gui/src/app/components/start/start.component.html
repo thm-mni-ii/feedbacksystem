@@ -13,12 +13,12 @@
       <mat-divider></mat-divider>
 
 
-      <a *ngIf="!isModerator" class="sidenav-button" routerLink="/{{userRole}}/dashboard" routerLinkActive="selected">
+      <a *ngIf="!isModerator" class="sidenav-button" routerLink="/{{userRoleString}}/dashboard" routerLinkActive="selected">
         <mat-icon>dashboard</mat-icon>
         <p>Dashboard {{isModerator}}</p>
       </a>
 
-      <a *ngIf="isAdmin" class="sidenav-button" routerLink="/{{userRole}}/user-management" routerLinkActive="selected">
+      <a *ngIf="isAdmin" class="sidenav-button" routerLink="/admin/user-management" routerLinkActive="selected">
         <mat-icon>supervised_user_circle</mat-icon>
         <p>User Verwaltung</p>
       </a>

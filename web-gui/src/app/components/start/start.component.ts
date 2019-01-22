@@ -23,6 +23,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   title: string;
   userRole: number;
+  userRoleString: string;
   isAdmin: boolean;
   isDocent: boolean;
   isModerator: boolean;
@@ -46,19 +47,22 @@ export class StartComponent implements OnInit, OnDestroy {
     switch (this.userRole) {
       case 1:
         this.isAdmin = true;
-        // this.router.navigate(['admin', 'dashboard']);
+        this.userRoleString = 'admin';
         break;
       case 2:
         this.isModerator = true;
         break;
       case 4:
         this.isDocent = true;
+        this.userRoleString = 'docent';
         break;
       case 8:
         this.isTutor = true;
+        this.userRoleString = 'student';
         break;
       case 16:
         this.isStudent = true;
+        this.userRoleString = 'student';
         break;
     }
 
