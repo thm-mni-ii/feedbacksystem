@@ -84,7 +84,6 @@ class UserService {
           if (tokenDate * 1000L - currentDate.getTime <= 0) {
             None
           } else {
-            println(this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String]).toString)
             this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String])
           }
         } catch {
