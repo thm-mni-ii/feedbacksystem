@@ -11,3 +11,18 @@
 .action-buttons > button {
   margin: 8px;
 }
+
+.content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+#markInput {
+  flex-grow: 1;
+}
+
+#markOutput {
+  flex-grow: 1;
+}
