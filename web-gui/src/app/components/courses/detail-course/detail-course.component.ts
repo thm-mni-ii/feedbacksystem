@@ -28,7 +28,7 @@ export class DetailCourseComponent implements OnInit {
 
   courseDetail: DetailedCourseInformation;
   courseTasks: CourseTask[];
-  submissionData: File | string;
+  submissionData: { [task: number]: File | string };
   userRole: string;
   processing: { [task: number]: boolean };
   submissionAsFile: { [task: number]: boolean };
@@ -36,6 +36,7 @@ export class DetailCourseComponent implements OnInit {
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
+    this.submissionData = {};
 
 
     this.route.params.pipe(
@@ -122,9 +123,10 @@ export class DetailCourseComponent implements OnInit {
   /**
    * Get file user wants to submit
    * @param file The file user submits
+   * @param currentTask The current task to get file from
    */
-  getSubmissionFile(file: File) {
-    this.submissionData = file;
+  getSubmissionFile(file: File, currentTask: CourseTask) {
+    this.submissionData[currentTask.task_id] = file;
   }
 
 
@@ -134,7 +136,7 @@ export class DetailCourseComponent implements OnInit {
    * @param currentTask The current task for submission
    */
   submission(courseID: number, currentTask: CourseTask) {
-    this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
+    this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
       if (res.success) {
         this.processing[currentTask.task_id] = true;
 
