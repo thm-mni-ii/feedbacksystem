@@ -7,7 +7,8 @@ import {
   FileUpload,
   GeneralCourseInformation,
   RoleChanged,
-  Succeeded, Testsystem,
+  Succeeded,
+  Testsystem,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
@@ -41,8 +42,8 @@ export class DatabaseService {
    * Get impressum or dataprivacy text
    * @param type The type of text
    */
-  getPrivacyOrImpressumText(type: TextType) {
-    return this.http.get('/api/v1/settings/privacy/text?which=' + type.toString());
+  getPrivacyOrImpressumText(type: TextType): Observable<string> {
+    return this.http.get<string>('/api/v1/settings/privacy/text?which=' + type.toString());
   }
 
   /**
@@ -311,6 +312,10 @@ export class DatabaseService {
           });
         }
       }));
+  }
+
+  updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
+    return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
   }
 
 

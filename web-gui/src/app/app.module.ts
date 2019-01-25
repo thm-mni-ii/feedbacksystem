@@ -37,6 +37,7 @@ import {UpdateCourseDialogComponent} from './components/courses/detail-course/up
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
+import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 
 
 @Injectable()
@@ -87,6 +88,7 @@ export const httpInterceptorProviders = [
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    MarkdownModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
@@ -95,7 +97,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent],
-  providers: [httpInterceptorProviders, CookieService],
+  providers: [httpInterceptorProviders, CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule {

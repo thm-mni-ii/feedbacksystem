@@ -77,7 +77,7 @@ export class DetailCourseComponent implements OnInit {
       this.courseTasks = course_detail.tasks;
     });
   }
-  
+
 
   /**
    * Docent updates task
