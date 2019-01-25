@@ -42,8 +42,8 @@ export class DatabaseService {
    * Get impressum or dataprivacy text
    * @param type The type of text
    */
-  getPrivacyOrImpressumText(type: TextType): Observable<string> {
-    return this.http.get<string>('/api/v1/settings/privacy/text?which=' + type.toString());
+  getPrivacyOrImpressumText(type: TextType): Observable<{markdown: string}> {
+    return this.http.get<{markdown: string}>('/api/v1/settings/privacy/text?which=' + type.toString());
   }
 
   /**

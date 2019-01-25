@@ -24,11 +24,13 @@ export class DataprivacyDialogComponent implements OnInit {
 
   ngOnInit() {
     this.dialogRef.updateSize('600px', '400px');
-    if (this.user.getUserRole() === 1) {
-      this.isAdmin = true;
+    if (this.auth.isAuthenticated()) {
+      if (this.user.getUserRole() === 1) {
+        this.isAdmin = true;
+      }
     }
     this.db.getPrivacyOrImpressumText(TextType.Dataprivacy).subscribe(data => {
-      this.markdown = data;
+      this.markdown = data.markdown;
     });
     this.onlyForShow = this.data.onlyForShow;
   }
