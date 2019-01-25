@@ -58,6 +58,36 @@ export class DetailCourseComponent implements OnInit {
     });
   }
 
+
+  private submitTask(currentTask: CourseTask) {
+    this.processing[currentTask.task_id] = true;
+    this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
+      if (res.success) {
+        let saySomeCnt = 1;
+        this.db.getTaskResult(currentTask.task_id).pipe(
+          flatMap(taskResult => {
+            if (taskResult.passed == null || typeof taskResult.passed === undefined) {
+              if (saySomeCnt++ === 6) {
+                taskResult.result_date = new Date(Date.now());
+                taskResult.result = 'Ergebnis konnte nach 1 Minute nicht geholt werden. Schaue später noch einmal vorbei';
+                return of(taskResult);
+              }
+              return throwError('No result yet');
+            }
+            return of(taskResult);
+          }),
+          retryWhen(errors => errors.pipe(
+            delay(1),
+            take(6)))
+        ).subscribe(taskResult => {
+          this.processing[currentTask.task_id] = false;
+          this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
+        });
+
+      }
+    });
+  }
+
   /**
    * Creates a new task in course with dialog
    * @param course The course data for dialog
@@ -108,16 +138,20 @@ export class DetailCourseComponent implements OnInit {
    * @param task
    */
   deleteTask(task: CourseTask) {
-    this.db.deleteTask(task.task_id).pipe(
-      flatMap(value => {
-        if (value.success) {
-          this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-        }
-        return this.db.getCourseDetail(this.courseDetail.course_id);
-      })
-    ).subscribe(course_detail => {
-      this.courseTasks = course_detail.tasks;
+    this.snackbar.open(task.task_name + ' löschen ?', 'JA', {duration: 5000}).onAction().subscribe(() => {
+
+      this.db.deleteTask(task.task_id).pipe(
+        flatMap(value => {
+          if (value.success) {
+            this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
+          }
+          return this.db.getCourseDetail(this.courseDetail.course_id);
+        })
+      ).subscribe(course_detail => {
+        this.courseTasks = course_detail.tasks;
+      });
     });
+
   }
 
   /**
@@ -136,26 +170,22 @@ export class DetailCourseComponent implements OnInit {
    * @param currentTask The current task for submission
    */
   submission(courseID: number, currentTask: CourseTask) {
-    this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
-      if (res.success) {
-        this.processing[currentTask.task_id] = true;
+    if (this.submissionData[currentTask.task_id] == null) {
+      this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + currentTask.task_name + ' abgegeben', 'Ups!');
+      return;
+    }
 
-        this.db.getTaskResult(currentTask.task_id).pipe(
-          flatMap(value => {
-            if (value.passed == null || typeof value.passed === undefined) {
-              return throwError('No result yet');
-            }
-            return of(value);
-          }),
-          retryWhen(errors => errors.pipe(delay(10000), take(10)))
-        ).subscribe(taskResult => {
-          this.processing[currentTask.task_id] = false;
-          this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
+    // if user submits but there is a pending submission
+    if (currentTask.submit_date && !currentTask.result_date) {
+      this.snackbar.open('Für Aufgabe "' + currentTask.task_name +
+        '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
+        .onAction()
+        .subscribe(() => {
+          this.submitTask(currentTask);
         });
-
-      }
-    });
-
+    } else if (!currentTask.submit_date) {
+      this.submitTask(currentTask);
+    }
   }
 
   /**

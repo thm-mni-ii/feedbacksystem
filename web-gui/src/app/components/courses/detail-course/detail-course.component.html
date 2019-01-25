@@ -16,17 +16,20 @@
     </button>
   </mat-card>
 
-
+<!-- task list-->
   <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}">
     <div class="title">
       <h4>{{task.task_name}}</h4>
       <span class="filler"></span>
       <div>{{task.result_date | date: 'medium'}}</div>
-      <ng-template #result>
-        <mat-icon id="passed" *ngIf="task.passed">done</mat-icon>
-        <mat-icon id="failed" *ngIf="!task.passed">clear</mat-icon>
+      <ng-template #result id="result">
+        <mat-icon id="passed" *ngIf="task.passed && task.result_date">check_box</mat-icon>
+        <mat-icon id="failed" *ngIf="!task.passed && task.result_date">clear</mat-icon>
+        <mat-icon id="not-done" *ngIf="!task.result_date">check_box_outline_blank
+        </mat-icon>
       </ng-template>
-      <mat-spinner *ngIf="processing[task.task_id]; else result" diameter="20"></mat-spinner>
+      <mat-spinner *ngIf="processing[task.task_id] || (task.submit_date && !task.result_date); else result"
+                   diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>
     </mat-card-subtitle>
@@ -41,8 +44,9 @@
           <p *ngIf="task.file">{{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
+
         </div>
-        <p *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
+        <p id="task-result-text" *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
@@ -56,6 +60,8 @@
         </mat-form-field>
 
       </div>
+
+      <!-- Action buttons -->
       <mat-card-actions>
         <button *ngIf="userRole === 'docent'" mat-flat-button color="warn" (click)="deleteTask(task)">Löschen</button>
         <button *ngIf="userRole === 'docent'" mat-flat-button color="accent" (click)="updateTask(task)">Bearbeiten
