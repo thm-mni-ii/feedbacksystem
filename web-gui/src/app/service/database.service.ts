@@ -42,8 +42,8 @@ export class DatabaseService {
    * Get impressum or dataprivacy text
    * @param type The type of text
    */
-  getPrivacyOrImpressumText(type: TextType): Observable<{markdown: string}> {
-    return this.http.get<{markdown: string}>('/api/v1/settings/privacy/text?which=' + type.toString());
+  getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
+    return this.http.get<{ markdown: string }>('/api/v1/settings/privacy/text?which=' + type.toString());
   }
 
   /**
@@ -290,28 +290,36 @@ export class DatabaseService {
    * @param files This is the solution files of updated Task
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
    */
-  updateTask(idTask: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
+  updateTask(idTask: number, name: string, description: string, files: FileList | null, test_type: string): Observable<Succeeded> {
 
-    // New solution file
-    const formData = new FormData();
-    for (let _i = 0; _i < files.length; _i++) {
-      formData.append('file', files.item(_i), files.item(_i).name);
+    if (files) {
+      // New solution file
+      const formData = new FormData();
+      for (let _i = 0; _i < files.length; _i++) {
+        formData.append('file', files.item(_i), files.item(_i).name);
+      }
+
+      return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
+        name: name,
+        description: description,
+        test_type: test_type
+      }).pipe(
+        flatMap(res => {
+          let uploadUrl: string;
+          if (res.success) {
+            uploadUrl = res.upload_url;
+            return this.http.post<Succeeded>(uploadUrl, formData, {
+              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+            });
+          }
+        }));
+    } else {
+      return this.http.put<Succeeded>('/api/v1/tasks/' + idTask, {
+        name: name,
+        description: description,
+        test_type: test_type
+      });
     }
-
-    return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
-      name: name,
-      description: description,
-      test_type: test_type
-    }).pipe(
-      flatMap(res => {
-        let uploadUrl: string;
-        if (res.success) {
-          uploadUrl = res.upload_url;
-          return this.http.post<Succeeded>(uploadUrl, formData, {
-            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-          });
-        }
-      }));
   }
 
   updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
