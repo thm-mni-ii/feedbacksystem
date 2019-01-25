@@ -48,11 +48,11 @@
           <mat-radio-button [value]="false">Text</mat-radio-button>
         </mat-radio-group>
         <input *ngIf="submissionAsFile[task.task_id]" type="file"
-               (change)="getSubmissionFile($event.target.files[0])">
+               (change)="getSubmissionFile($event.target.files[0], task)">
 
         <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
-          <input matInput type="text" [(ngModel)]="submissionData">
+          <input matInput type="text" [(ngModel)]="submissionData[task.task_id]">
         </mat-form-field>
 
       </div>
