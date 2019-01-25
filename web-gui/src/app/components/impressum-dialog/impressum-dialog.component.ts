@@ -3,6 +3,7 @@ import {MatDialogRef, MatSnackBar} from '@angular/material';
 import {DatabaseService} from '../../service/database.service';
 import {TextType} from '../../interfaces/HttpInterfaces';
 import {UserService} from '../../service/user.service';
+import {AuthService} from '../../service/auth.service';
 
 @Component({
   selector: 'app-impressum-dialog',
@@ -12,7 +13,7 @@ import {UserService} from '../../service/user.service';
 export class ImpressumDialogComponent implements OnInit {
 
   constructor(private dialogRef: MatDialogRef<ImpressumDialogComponent>, private db: DatabaseService,
-              private snackBar: MatSnackBar, private user: UserService) {
+              private snackBar: MatSnackBar, private user: UserService, private auth: AuthService) {
   }
 
   markdown: string;
@@ -20,12 +21,14 @@ export class ImpressumDialogComponent implements OnInit {
 
   ngOnInit() {
     this.dialogRef.updateSize('600px', '400px');
-    if (this.user.getUserRole() === 1) {
-      this.isAdmin = true;
+    if (this.auth.isAuthenticated()) {
+      if (this.user.getUserRole() === 1) {
+        this.isAdmin = true;
+      }
     }
 
     this.db.getPrivacyOrImpressumText(TextType.Impressum).subscribe(data => {
-      this.markdown = data;
+      this.markdown = data.markdown;
     });
   }
 
