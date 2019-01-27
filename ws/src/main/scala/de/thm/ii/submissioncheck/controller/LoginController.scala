@@ -42,12 +42,13 @@ class LoginController extends CasClientConfigurerAdapter {
     * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
     * here a answer to a connected Application (i.e. Angular) will be sent
     * @author Benjamin Manns
+    * @param route requested route by user, has to be forwarded to the Angular App
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
   @RequestMapping(value = Array("login"), method = Array(RequestMethod.GET))
-  def userLogin(request: HttpServletRequest, response: HttpServletResponse): Any = {
+  def userLogin(@RequestParam(value = "route", required = false) route: String, request: HttpServletRequest, response: HttpServletResponse): Any = {
     try {
       val principal = request.getUserPrincipal
       var name: String = null
@@ -67,19 +68,23 @@ class LoginController extends CasClientConfigurerAdapter {
       }
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
+
+      val cookieMaxAge = 60*5
       val co = new Cookie("jwt", jwtToken)
       co.setPath("/")
       co.setHttpOnly(false)
+      co.setMaxAge(cookieMaxAge)
+      logger.info("route = " + route)
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-      response.setHeader("Location", CLIENT_HOST_URL)
+      response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
       "jwt"
     }
     catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-        response.setHeader("Location", CLIENT_HOST_URL + "/login")
+        response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
         "error"
       }
     }
