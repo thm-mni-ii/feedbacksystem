@@ -62,7 +62,9 @@ export class LoginComponent implements OnInit {
   }
 
   loginCAS() {
-    this.document.location.href = 'https://cas.thm.de/cas/login?service=https://localhost:8080/api/v1/login';
+    let getUrl = window.location;
+    let baseUrl = getUrl .protocol + "//" + getUrl.host ;
+    this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login';
   }
 
 }
