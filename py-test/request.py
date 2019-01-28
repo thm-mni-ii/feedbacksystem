@@ -565,7 +565,9 @@ class TestRESTStudent(unittest.TestCase):
         privacy_text = requests.get(url=self.URL + "settings/privacy/text?which=privacy_text", verify=False).text
         impressum_text = requests.get(url=self.URL + "settings/privacy/text?which=impressum_text", verify=False).text
 
-        self.assertEqual(random_bacom_text, privacy_text)
-        self.assertEqual(random_bacom_text, impressum_text)
+        json_org = {"markdown":random_bacom_text}
+
+        self.assertEqual(json_org, json.loads(privacy_text))
+        self.assertEqual(json_org, json.loads(impressum_text))
 
 unittest.main()

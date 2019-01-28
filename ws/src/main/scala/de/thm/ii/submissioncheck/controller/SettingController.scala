@@ -99,12 +99,12 @@ class SettingController {
     * @return JSON
     */
   @RequestMapping(value = Array("privacy/text"), method = Array(RequestMethod.GET))
-  def getPrivacyText(request: HttpServletRequest, @RequestParam(value = "which", required = true) which: String): Any = {
+  def getPrivacyText(request: HttpServletRequest, @RequestParam(value = "which", required = true) which: String): Map[String, Any] = {
     // Everyone can read this information
     val allowedKeys = List("impressum_text", "privacy_text")
     if (!allowedKeys.contains(which)) {
       throw new BadRequestException("Please choose as parameter `which` one of: (" + allowedKeys.map(f => f + ",") + ")")
     }
-    settingService.loadSetting("privacy." + which).getOrElse("")
+    Map("markdown" -> settingService.loadSetting("privacy." + which).getOrElse(""))
   }
 }

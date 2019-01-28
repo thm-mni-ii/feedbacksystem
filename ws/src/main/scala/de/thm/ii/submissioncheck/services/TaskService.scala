@@ -117,7 +117,7 @@ class TaskService {
     * @param user requesting user
     * @return JAVA Map
     */
-  def getTaskResults(taskid: Int, user: User): List[Map[String, String]] = {
+  def getTaskResults(taskid: Int, user: User): List[Map[String, Any]] = {
     DB.query("SELECT * from task join submission using(task_id) where task_id = ? and user_id = ?;",
       (res, _) => {
         Map(
@@ -130,8 +130,8 @@ class TaskService {
           SubmissionDBLabels.passed -> res.getString(SubmissionDBLabels.passed),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
-          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
-          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.result_date -> res.getTimestamp(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
           SubmissionDBLabels.exitcode -> res.getString(SubmissionDBLabels.exitcode))
       }, taskid, user.userid)
   }
@@ -164,8 +164,8 @@ class TaskService {
           SubmissionDBLabels.passed ->  getNullOrBoolean(res.getString(SubmissionDBLabels.passed)),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
-          SubmissionDBLabels.result_date -> res.getString(SubmissionDBLabels.result_date),
-          SubmissionDBLabels.submit_date -> res.getString(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.result_date -> res.getTimestamp(SubmissionDBLabels.result_date),
+          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
           SubmissionDBLabels.exitcode -> res.getInt(SubmissionDBLabels.exitcode))
       }, taskid, userid)
   }
@@ -209,7 +209,7 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline)),
+          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
           TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name))
 
@@ -305,7 +305,7 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> stringOrNull(res.getTimestamp(TaskDBLabels.deadline)),
+          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
           TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name)
         )
@@ -503,7 +503,7 @@ class TaskService {
   }
 
   private def encodeValue(value: String): String = {
-    URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+    URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
   }
 
   /**

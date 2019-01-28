@@ -48,16 +48,16 @@ class CourseService {
     * @param check_course_lifetime if true only list courses which have not ended yet
     * @return List of Maps
     */
-  def getSubscribedCoursesByUser(userid: Int, check_course_lifetime: Boolean = false): List[Map[String, String]] = {
+  def getSubscribedCoursesByUser(userid: Int, check_course_lifetime: Boolean = false): List[Map[String, Any]] = {
     val snippet = if (check_course_lifetime) "and (c.course_end_date is null or CURRENT_DATE() <= c.course_end_date)" else ""
     DB.query("SELECT c.* FROM user_course hc join course c using(course_id) where user_id = ? and hc.role_id = 16 " + snippet,
       (res, _) => {
-        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
+        Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
             CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date)
+          CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date)
         )
       }, userid)
   }
@@ -75,10 +75,10 @@ class CourseService {
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
-          RoleDBLabels.role_id  -> res.getString(RoleDBLabels.role_id),
+          RoleDBLabels.role_id  -> res.getInt(RoleDBLabels.role_id),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
           CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
           LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
           LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
@@ -250,7 +250,7 @@ class CourseService {
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
-        CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
+        CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
         CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
         LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
         LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
@@ -287,7 +287,7 @@ class CourseService {
           CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.course_end_date -> res.getString(CourseDBLabels.course_end_date),
+          CourseDBLabels.course_end_date -> res.getTimestamp(CourseDBLabels.course_end_date),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
@@ -519,7 +519,7 @@ class CourseService {
     val courseList = this.getSubscribedCoursesByUser(userid, true)
     var matrix: List[Any] = List()
     for (course <- courseList) {
-      val courseTasks = taskService.getTasksByCourse(Integer.parseInt(course(CourseDBLabels.courseid)))
+      val courseTasks = taskService.getTasksByCourse(course(CourseDBLabels.courseid).asInstanceOf[Int])
       val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString).reverse
 
       var processedTasks: List[Any] = List()
