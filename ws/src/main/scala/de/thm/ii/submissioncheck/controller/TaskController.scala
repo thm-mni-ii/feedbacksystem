@@ -102,7 +102,7 @@ class TaskController {
     */
   @RequestMapping(value = Array("tasks/{id}/result"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): List[Map[String, String]] = {
+  def getTaskResultByTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): List[Map[String, Any]] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty) {
       throw new UnauthorizedException
