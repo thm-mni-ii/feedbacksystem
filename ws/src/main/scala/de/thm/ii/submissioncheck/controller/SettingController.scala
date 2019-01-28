@@ -39,7 +39,7 @@ class SettingController {
     */
   @RequestMapping(value = Array("privacy/show"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updatePrivacyShow(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 1) {
         throw new UnauthorizedException
     }
@@ -60,7 +60,7 @@ class SettingController {
     */
   @RequestMapping(value = Array("privacy/show"), method = Array(RequestMethod.GET))
   def getPrivacyShow(request: HttpServletRequest): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 1) {
       throw new UnauthorizedException
     }
@@ -77,7 +77,7 @@ class SettingController {
     */
   @RequestMapping(value = Array("privacy/text"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updatePrivacyText(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 1) { // only ADMIN or MODERATOR can create a course
       throw new UnauthorizedException
     }

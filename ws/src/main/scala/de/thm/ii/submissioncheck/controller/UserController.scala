@@ -34,7 +34,7 @@ class UserController {
     */
   @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.GET))
   def getAllUsers(@PathVariable userid: Int, request: HttpServletRequest): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || (user.get.roleid != 1 && user.get.userid != userid)) {
       throw new UnauthorizedException
     }
@@ -58,7 +58,7 @@ class UserController {
     */
   @RequestMapping(value = Array("/users/grant/{userid}"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def grantModerator(request: HttpServletRequest, @PathVariable userid: Int, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
@@ -100,7 +100,7 @@ class UserController {
     */
   @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def deleteAUser(@PathVariable userid: Int, request: HttpServletRequest): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
@@ -120,7 +120,7 @@ class UserController {
     */
   @RequestMapping(value = Array("/users"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def deleteUsersBatch(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
       throw new UnauthorizedException
     }
@@ -155,7 +155,7 @@ class UserController {
   def getLastLoginsOfUsers(@RequestParam(value = "before", required = false) before: String,
                            @RequestParam(value = "after", required = false) after: String,
                            @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 4) {
       throw new UnauthorizedException
     }

@@ -18,7 +18,7 @@ class BashExec(val scriptpath: String, val name: String, val token: String) {
   /**
     * Class instance file
     */
-  var file = new File("./" + scriptpath)
+  var file = new File(scriptpath)
 
   /**
     * Class instance absPath
@@ -47,9 +47,9 @@ class BashExec(val scriptpath: String, val name: String, val token: String) {
     */
   def exec(): Int = {
     val stdoutStream = new ByteArrayOutputStream
-
-    val exitCode = Process("docker", Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
-      "/" + scriptpath, name, token)).#>(stdoutStream).run().exitValue()
+    val seq = Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "bash:4.4", "bash",
+      "/" + scriptpath, name, token)
+    val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
 
     output = stdoutStream.toString
 

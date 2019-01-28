@@ -1,15 +1,20 @@
 package de.thm.ii.submissioncheck.model
 
+import de.thm.ii.submissioncheck.services.UserDBLabels
+
 /**
   * Class User holds all data from the user table
   *
   * @author Benjamin Manns
   * @param userid local DB's userid
   * @param username User's username
+  * @param prename User's prename
+  * @param surname User's surname
+  * @param email User's email
   * @param role User's role name
   * @param roleid User's role id
   */
-class User(val userid: Int, val username: String, val role: String, val roleid: Int) {
+class User(val userid: Int, val username: String, val prename: String, val surname: String, val email: String, val role: String, val roleid: Int) {
   /**
     * Return User as Map. Simply answer in HTTPResonses
     *
@@ -17,7 +22,8 @@ class User(val userid: Int, val username: String, val role: String, val roleid: 
     * @return Map / JSON of User Data
     */
   def asMap(): Map[String, Any] = {
-    Map("userid" -> this.userid.toString, "username" -> this.username, "role" -> this.role, "roleid" -> this.roleid)
+    Map(UserDBLabels.user_id -> this.userid, UserDBLabels.username -> this.username, "role" -> this.role,
+      UserDBLabels.role_id -> this.roleid, UserDBLabels.prename -> this.prename, UserDBLabels.surname -> this.surname, UserDBLabels.email -> email)
   }
 
   /**

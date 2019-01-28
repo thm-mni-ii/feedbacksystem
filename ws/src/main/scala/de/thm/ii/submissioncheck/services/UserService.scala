@@ -70,7 +70,7 @@ class UserService {
     * @param request a Users Request Body
     * @return User
     */
-  def verfiyUserByHeaderToken(request: HttpServletRequest): Option[User] = {
+  def verifyUserByHeaderToken(request: HttpServletRequest): Option[User] = {
     val authHeader = request.getHeader("Authorization")
     if (authHeader != null) {
       try {
@@ -125,13 +125,16 @@ class UserService {
   /**
     * insertUserIfNotExists needs to run on every user log in.
     * @param username a unique identification for a user
+    * @param mail LDAP Mail Information from user
+    * @param prename user / student official prename
+    * @param surname user / student official surname
     * @param role_id a user role, until now, only one role exists
     * @return User
     */
-  def insertUserIfNotExists(username: String, role_id: Integer): User = {
+  def insertUserIfNotExists(username: String, mail: String, prename: String, surname: String, role_id: Integer): User = {
     val user: Option[User] = this.loadUserFromDB(username)
     if(user.isEmpty) {
-      DB.update("INSERT INTO user (username, role_id) VALUES (?,?);", username, role_id)
+      DB.update("INSERT INTO user (username, email, prename, surname, role_id) VALUES (?,?,?,?,?);", username, mail, prename, surname, role_id)
       loadUserFromDB(username).get
     } else {
       user.get
@@ -146,7 +149,8 @@ class UserService {
   def loadUserFromDB(username: String): Option[User] = {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
-        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt(UserDBLabels.role_id))
+        new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
       }, username)
 
     users.headOption
@@ -160,7 +164,8 @@ class UserService {
   def loadUserFromDB(userid: Int): Option[User] = {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
       (res, _) => {
-        new User(res.getInt(dbLabels.user_id), res.getString(dbLabels.username), res.getString(dbLabels.role_name), res.getInt(UserDBLabels.role_id))
+        new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
       }, userid)
 
     users.headOption
@@ -243,9 +248,14 @@ class UserService {
     */
   def generateTokenFromUser(user: User): String = {
     val jwtToken = Jwts.builder.setSubject("client_authentication")
-      .claim("roles", user.role)
+      .claim(UserDBLabels.user_id, user.userid)
+      .claim(UserDBLabels.username, user.username)
+      .claim(UserDBLabels.prename, user.prename)
+      .claim(UserDBLabels.surname, user.surname)
+      .claim(UserDBLabels.role_id, user.roleid)
+      .claim(UserDBLabels.role_name, user.role)
+      .claim(UserDBLabels.email, user.email)
       .claim("token_type", "user")
-      .claim(dbLabels.username, user.username)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
       .signWith(SignatureAlgorithm.HS256, Secrets.getSuperSecretKey)

@@ -1,7 +1,6 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
-import java.lang.StackWalker
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 import java.util.zip.{ZipEntry, ZipOutputStream}

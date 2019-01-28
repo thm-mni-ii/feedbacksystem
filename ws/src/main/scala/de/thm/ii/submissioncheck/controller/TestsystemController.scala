@@ -32,7 +32,7 @@ class TestsystemController {
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllTestystems(request: HttpServletRequest): List[Map[String, String]] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
         throw new UnauthorizedException
     }
@@ -47,7 +47,7 @@ class TestsystemController {
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def createTestsystem(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
@@ -73,7 +73,7 @@ class TestsystemController {
     */
   @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updateTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
@@ -100,7 +100,7 @@ class TestsystemController {
   @RequestMapping(value = Array("{testsystemid}"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, Any] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
       throw new UnauthorizedException
     }
@@ -121,7 +121,7 @@ class TestsystemController {
   @RequestMapping(value = Array("{id}"), method = Array(RequestMethod.DELETE), consumes = Array())
   @ResponseBody
   def deleteTestsystem(@PathVariable(PATH_LABEL_ID) systemid: String, request: HttpServletRequest): Map[String, Boolean] = {
-    val user = userService.verfiyUserByHeaderToken(request)
+    val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid > 1) { // has to be admin
       throw new UnauthorizedException
     }
