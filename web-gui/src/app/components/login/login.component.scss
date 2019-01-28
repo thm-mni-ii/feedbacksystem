@@ -2,7 +2,7 @@
 
 mat-toolbar {
   justify-content: center;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .flex-container {
@@ -38,4 +38,21 @@ button {
 .login-inputs {
   display: flex;
   flex-direction: column;
+}
+
+.login-buttons {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#cas-login {
+  margin-top: 12px;
+  align-self: center;
+  color: blue;
+  text-decoration: underline;
+}
+
+#cas-login:hover {
+  cursor: pointer;
 }

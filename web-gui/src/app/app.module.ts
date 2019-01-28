@@ -36,6 +36,7 @@ import {ExitCourseComponent} from './components/courses/detail-course/exit-cours
 import {UpdateCourseDialogComponent} from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
+import {CookieService} from 'ngx-cookie-service';
 
 
 @Injectable()
@@ -94,7 +95,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent],
-  providers: [httpInterceptorProviders],
+  providers: [httpInterceptorProviders, CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

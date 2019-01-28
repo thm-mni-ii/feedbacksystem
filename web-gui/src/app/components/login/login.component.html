@@ -14,8 +14,9 @@
           <input [(ngModel)]="password" name="password" type="password" matInput placeholder="Passwort">
         </mat-form-field>
       </mat-card-content>
-      <mat-card-actions>
+      <mat-card-actions class="login-buttons">
         <button (click)="login()" mat-flat-button color="accent">Login</button>
+        <a id="cas-login" (click)="loginCAS()">Weiter mit CAS</a>
       </mat-card-actions>
     </mat-card>
   </div>
