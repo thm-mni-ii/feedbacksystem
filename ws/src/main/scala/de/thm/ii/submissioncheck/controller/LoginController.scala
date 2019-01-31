@@ -41,9 +41,10 @@ class LoginController extends CasClientConfigurerAdapter {
     *
     * This Webservice sends user to CAS to perform a login. CAS redirects to this point and
     * here a answer to a connected Application (i.e. Angular) will be sent
+    *
     * @author Benjamin Manns
-    * @param route requested route by user, has to be forwarded to the Angular App
-    * @param request Http request gives access to the http request information.
+    * @param route    requested route by user, has to be forwarded to the Angular App
+    * @param request  Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
@@ -69,7 +70,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
 
-      val cookieMaxAge = 60*5
+      val cookieMaxAge = 60 * 5
       val co = new Cookie("jwt", jwtToken)
       co.setPath("/")
       co.setHttpOnly(false)
@@ -94,7 +95,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * Authentication starts here. We can load data directly from LDAP. Until now this is not possible
     *
     * @author Benjamin Manns
-    * @param request Http request gives access to the http request information.
+    * @param request  Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     * @return Java Map
@@ -102,22 +103,26 @@ class LoginController extends CasClientConfigurerAdapter {
   @RequestMapping(value = Array("login/ldap"), method = Array(RequestMethod.POST))
   def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      val password = jsonNode.get("password").asText()
+    val username = jsonNode.get(LABEL_USERNAME).asText()
+    val password = jsonNode.get("password").asText()
 
-      // TODO perform login with LDAP
+    val ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)
+    val login: Boolean = ldapUser.isDefined
+    if (!login) {
+      Map(LABEL_SUCCESS -> login)
+    } else {
+      userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
+        ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
+
       val user = userService.loadUserFromDB(username)
-      val login: Boolean = user.isDefined
-
       val jwtToken: String = if (login) this.userService.generateTokenFromUser(user.get) else null
-
       setBearer(response, jwtToken)
       Map(LABEL_SUCCESS -> login)
     }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: username and password")
-      }
+  } catch {
+        case e: NullPointerException => {
+          throw new BadRequestException("Please provide: username and password")
+        }
     }
   }
 
