@@ -35,6 +35,12 @@ class LoginController extends CasClientConfigurerAdapter {
   private val LABEL_SUCCESS = "success"
   private val LABEL_USERNAME = "username"
 
+  @Value("${ldap.url}")
+  private implicit val LDAP_URL: String = null
+
+  @Value("${ldap.basedn}")
+  private implicit val LDAP_BASE_DN: String = null
+
   /**
     * Authentication starts here. here we using CAS
     *
@@ -43,8 +49,8 @@ class LoginController extends CasClientConfigurerAdapter {
     * here a answer to a connected Application (i.e. Angular) will be sent
     *
     * @author Benjamin Manns
-    * @param route    requested route by user, has to be forwarded to the Angular App
-    * @param request  Http request gives access to the http request information.
+    * @param route requested route by user, has to be forwarded to the Angular App
+    * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
@@ -62,7 +68,7 @@ class LoginController extends CasClientConfigurerAdapter {
       var existingUser = userService.loadUserFromDB(name)
       if (existingUser.isEmpty) {
         // Load more Infos from LDAP
-        val entry = LDAPConnector.loadLDAPInfosByUID(name)
+        val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
         userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
           entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
         existingUser = userService.loadUserFromDB(name)
@@ -95,7 +101,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * Authentication starts here. We can load data directly from LDAP. Until now this is not possible
     *
     * @author Benjamin Manns
-    * @param request  Http request gives access to the http request information.
+    * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     * @return Java Map
@@ -106,7 +112,7 @@ class LoginController extends CasClientConfigurerAdapter {
     val username = jsonNode.get(LABEL_USERNAME).asText()
     val password = jsonNode.get("password").asText()
 
-    val ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)
+    val ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
     val login: Boolean = ldapUser.isDefined
     if (!login) {
       Map(LABEL_SUCCESS -> login)
