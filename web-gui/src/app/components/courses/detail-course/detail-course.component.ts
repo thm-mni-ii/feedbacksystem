@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewChecked, Component, Inject, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
@@ -11,6 +11,7 @@ import {ExitCourseComponent} from './exit-course/exit-course.component';
 import {of, throwError} from 'rxjs';
 
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
+import {DOCUMENT} from '@angular/common';
 
 
 @Component({
@@ -18,12 +19,12 @@ import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-
   templateUrl: './detail-course.component.html',
   styleUrls: ['./detail-course.component.scss']
 })
-export class DetailCourseComponent implements OnInit {
+export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar,
-              private router: Router) {
+              private router: Router, @Inject(DOCUMENT) document) {
   }
 
   courseDetail: DetailedCourseInformation;
@@ -39,6 +40,7 @@ export class DetailCourseComponent implements OnInit {
     this.submissionData = {};
 
 
+    // Get course id from url and receive data
     this.route.params.pipe(
       flatMap(params => {
         const id = +params['id'];
@@ -58,6 +60,16 @@ export class DetailCourseComponent implements OnInit {
     });
   }
 
+
+  ngAfterViewChecked() {
+    // If url fragment with task id is given, scroll to that task
+    this.route.fragment.subscribe(taskIDScroll => {
+      const elem = document.getElementById(taskIDScroll);
+      if (elem) {
+        elem.scrollIntoView();
+      }
+    });
+  }
 
   private submitTask(currentTask: CourseTask) {
     this.processing[currentTask.task_id] = true;

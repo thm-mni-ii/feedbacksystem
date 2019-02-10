@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
-  CourseTask,
+  CourseTask, DashboardStudent,
   DetailedCourseInformation,
   FileUpload,
   GeneralCourseInformation,
@@ -71,10 +71,10 @@ export class DatabaseService {
 
   /**
    * Get all results of all users of all tasks
-   * @param id of course to obtain all submissions
+   * @param courseID of course to obtain all submissions
    */
-  getAllUserSubmissions(id: number): Observable<any> {
-    return this.http.get<any>('/api/v1/courses/' + id + '/submissions');
+  getAllUserSubmissions(courseID: number): Observable<any> {
+    return this.http.get<any>('/api/v1/courses/' + courseID + '/submissions');
   }
 
   /**
@@ -95,8 +95,8 @@ export class DatabaseService {
     return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
   }
 
-  getOverview(): Observable<any> {
-    return this.http.get<any>('/api/v1/courses/submissions');
+  getOverview(): Observable<DashboardStudent[]> {
+    return this.http.get<DashboardStudent[]>('/api/v1/courses/submissions');
   }
 
   /**
