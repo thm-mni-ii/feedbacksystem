@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.13, for macos10.14 (x86_64)
 --
--- Host: localhost    Database: submissionchecker
+-- Host: mysql1    Database: submissionchecker
 -- ------------------------------------------------------
--- Server version	8.0.13
+-- Server version	8.0.15
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -265,6 +265,7 @@ CREATE TABLE `user` (
   `prename` varchar(100) DEFAULT NULL,
   `surname` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `username` varchar(200) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL COMMENT 'it is his global role_id',
   PRIMARY KEY (`user_id`),
@@ -279,7 +280,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,'admin',1),(2,'TEST','super','test','hiwi',16),(53,NULL,NULL,NULL,'bmnn57',16),(54,'Mr','Prof',NULL,'prof',4),(55,'mr','Mod',NULL,'moderator',2),(57,NULL,NULL,'war 57','blastudent',8),(58,NULL,NULL,NULL,'docent',8),(60,'MX','MUST','max','max-studen',16),(76,NULL,NULL,NULL,'test-user',16);
+INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,NULL,'admin',1),(2,'TEST','super','test',NULL,'hiwi',16),(53,NULL,NULL,NULL,NULL,'bmnn57',16),(54,'Mr','Prof',NULL,NULL,'prof',4),(55,'mr','Mod',NULL,NULL,'moderator',2),(57,NULL,NULL,'war 57',NULL,'blastudent',8),(58,NULL,NULL,NULL,NULL,'docent',8),(60,'MX','MUST','max',NULL,'max-studen',16),(76,NULL,NULL,NULL,NULL,'test-user',16);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -322,4 +323,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-01-15 12:58:53
+-- Dump completed on 2019-02-08 16:19:01

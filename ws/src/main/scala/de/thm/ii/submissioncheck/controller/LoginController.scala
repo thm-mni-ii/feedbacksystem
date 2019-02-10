@@ -115,7 +115,11 @@ class LoginController extends CasClientConfigurerAdapter {
     val ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
     val login: Boolean = ldapUser.isDefined
     if (!login) {
-      Map(LABEL_SUCCESS -> login)
+      // If LDAP Fails, we try to load from guest account
+      val guestUser = userService.guestLogin(username, password)
+      val jwtToken: String = if (guestUser.isDefined) this.userService.generateTokenFromUser(guestUser.get) else null
+      setBearer(response, jwtToken)
+      Map(LABEL_SUCCESS -> guestUser.isDefined)
     } else {
       userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
         ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
