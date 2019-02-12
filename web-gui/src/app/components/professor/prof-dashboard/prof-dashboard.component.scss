@@ -9,11 +9,21 @@
   align-items: center;
 }
 
-.center-box {
-  background-color: $cPrimary-light;
-  border-radius: 3px;
+.filter-input {
+  width: 100%;
 }
 
+input {
+  padding: 12px;
+}
+
+.center-box {
+  width: 80%;
+  background-color: $cPrimary-light;
+  border-radius: 3px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
 
 .student-row {
   padding-top: 4px;
@@ -23,7 +33,6 @@
   align-items: center;
   border-bottom: 1px solid grey;
 }
-
 
 .name-container {
   color: white;

@@ -4,13 +4,15 @@
 
     <div class="container">
 
-      <mat-form-field appearance="outline">
-        <mat-label>Filter</mat-label>
-        <input matInput [formControl]="filter">
-      </mat-form-field>
 
       <div class="center-box">
-        <div *ngFor="let student of matrix$| async" class="student-row">
+        <mat-form-field appearance="fill"  class="filter-input">
+          <mat-label>Filter</mat-label>
+          <input matInput [formControl]="filter">
+        </mat-form-field>
+
+
+        <div *ngFor="let student of filteredMatrix$ | async" class="student-row">
 
           <!-- Name -->
           <div class="name-container">
@@ -28,7 +30,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
