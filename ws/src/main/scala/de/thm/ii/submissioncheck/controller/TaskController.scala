@@ -267,6 +267,21 @@ class TaskController {
     taskService.getTaskDetails(taskid, Some(requestingUser.get.userid)).getOrElse(Map.empty)
   }
 
+  /**
+    * Print infos for a given Task
+    * @param taskid unique identification for a task
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("tasks/{id}/info"), method = Array(RequestMethod.GET))
+  def getTaskInfos(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+    taskService.getTaskDetails(taskid, None).getOrElse(Map.empty)
+  }
+
   // Useful hint for Angular cooperation:
   // https://stackoverflow.com/questions/47886695/current-request-is-not-a-multipart-requestangular-4spring-boot
   /**

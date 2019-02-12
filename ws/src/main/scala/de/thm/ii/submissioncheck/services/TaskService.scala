@@ -202,7 +202,8 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT task.test_file_name, `task`.`task_name`, task.deadline, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
+    val list = DB.query("SELECT task.test_file_name,  task.test_file_accept, task.test_file_accept_error, " +
+      "`task`.`task_name`, task.deadline, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
       "task.testsystem_id from task join course using(course_id) where task_id = ?",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
@@ -211,7 +212,9 @@ class TaskService {
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
           TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
-          TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name))
+          TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name),
+          TaskDBLabels.test_file_accept ->  getNullOrBoolean(res.getString(TaskDBLabels.test_file_accept)),
+          TaskDBLabels.test_file_accept_error -> res.getString(TaskDBLabels.test_file_accept_error))
 
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
