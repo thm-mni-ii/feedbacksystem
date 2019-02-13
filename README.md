@@ -35,6 +35,16 @@ Start Secrettoken Checker
 ./gradlew secrettoken-checker:run
 ```
 
+Build Code to deploy in Docker
+
+```bash
+cd web-gui && ng build
+cd .. && ./gradlew dist
+docker-compose up --build --force-recreate
+docker login
+bash docker-push.sh
+```
+
 ## Supervised By
 
 * Frank Kammer

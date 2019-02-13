@@ -3,7 +3,7 @@ package de.thm.ii.submissioncheck.services
 /**
   * Class holds all DB labels
   */
-object TaskDBLabels{
+object TaskDBLabels {
   /** DB Label "task_id" */
   var taskid: String = "task_id"
 
@@ -24,5 +24,11 @@ object TaskDBLabels{
 
   /** DB Label "deadline" */
   var deadline = "deadline"
+
+  /** DB Label test_file_accept */
+  var test_file_accept = "test_file_accept"
+
+  /** DB Label test_file_accept_erorr */
+  var test_file_accept_error = "test_file_accept_error"
 }
 
