@@ -38,7 +38,8 @@ export class GrantTutorComponent implements OnInit {
     if (this.user.getUserRole() === 1) {
       this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     } else {
-      this.db.getSubscribedCourses().subscribe(courses => this.dataSourceCourses.data = courses);
+      this.db.getSubscribedCourses().subscribe(courses =>
+        this.dataSourceCourses.data = courses.filter(course => course.role_id === 4));
     }
     this.db.getAllUsers().pipe(
       flatMap(users => {
