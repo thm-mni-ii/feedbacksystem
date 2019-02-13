@@ -135,3 +135,13 @@ export interface DashboardStudent {
   course_id: string;
   course_semester: string;
 }
+
+export interface DashboardProf {
+  passed: number;
+  username: string;
+  prename: string;
+  surname: string;
+  tasks: Object[];
+  user_id: number;
+
+}
