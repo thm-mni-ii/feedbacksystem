@@ -63,8 +63,8 @@
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="userRole === 'docent'" mat-flat-button color="warn" (click)="deleteTask(task)">Löschen</button>
-        <button *ngIf="userRole === 'docent'" mat-flat-button color="accent" (click)="updateTask(task)">Bearbeiten
+        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn" (click)="deleteTask(task)">Löschen</button>
+        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent" (click)="updateTask(task)">Bearbeiten
         </button>
         <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
       </mat-card-actions>
