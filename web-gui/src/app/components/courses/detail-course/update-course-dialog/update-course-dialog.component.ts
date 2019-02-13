@@ -29,7 +29,6 @@ export class UpdateCourseDialogComponent implements OnInit {
   ngOnInit() {
     this.courseDetails = this.data.data;
     this.testsystems$ = this.db.getTestsystemTypes();
-    console.log(this.courseDetails);
 
     this.name = this.courseDetails.course_name;
     this.description = this.courseDetails.course_description;
