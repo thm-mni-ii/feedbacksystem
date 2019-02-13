@@ -17,7 +17,7 @@
                matTooltip="
                {{task[key].task_name}}
                Versuche: {{task[key].trials}}
-               Deadline: {{task[key].deadline}}"
+               Deadline: {{task[key].deadline | date:'medium'}}"
                (click)="goToTask(entry.course_id, task[key].task_id)">
             {{key}}
           </div>
