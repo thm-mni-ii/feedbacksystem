@@ -17,6 +17,7 @@ import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof
 import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
+import {IsDocentGuard} from './guards/is-docent.guard';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -24,9 +25,9 @@ const routes: Routes = [
     path: '', component: StartComponent, canActivate: [AuthGuard], children: [
 
       {path: 'courses/user', component: CoursesComponent},
-      {path: 'courses/docent', component: GrantDocentComponent, canActivate: [AdminGuard, ModeratorGuard]},
-      {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [AdminGuard, DocentGuard]},
-      {path: 'courses/new', component: NewCourseComponent, canActivate: [AdminGuard, ModeratorGuard]},
+      {path: 'courses/docent', component: GrantDocentComponent, canActivate: [ModeratorGuard]},
+      {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [DocentGuard]},
+      {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/:id', component: DetailCourseComponent},
 
@@ -39,7 +40,7 @@ const routes: Routes = [
       {path: 'student/dashboard', component: StudentDashboardComponent},
 
       // Prof
-      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [DocentGuard]}
+      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]}
     ]
   },
 ];

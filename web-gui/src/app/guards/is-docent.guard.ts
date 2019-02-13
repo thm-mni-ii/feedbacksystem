@@ -5,14 +5,11 @@ import {UserService} from '../service/user.service';
 @Injectable({
   providedIn: 'root'
 })
-export class ModeratorGuard implements CanActivate {
-
+export class IsDocentGuard implements CanActivate {
   constructor(private user: UserService) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    return this.user.getUserRole() === 2 || this.user.getUserRole() === 1;
+    return this.user.getUserRole() === 4;
   }
-
-
 }
