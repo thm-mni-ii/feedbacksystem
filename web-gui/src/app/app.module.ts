@@ -38,6 +38,7 @@ import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/datapr
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
 import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 
 
 @Injectable()
@@ -89,6 +90,8 @@ export const httpInterceptorProviders = [
     HttpClientModule,
     ReactiveFormsModule,
     MarkdownModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,

@@ -186,8 +186,10 @@ export class DatabaseService {
    * @param description This is the description of the task
    * @param files This will be the solution files from Lecturer
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
+   * @param deadline The deadline when this tasks ends
    */
-  createTask(idCourse: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
+  createTask(idCourse: number, name: string, description: string,
+             files: FileList, test_type: string, deadline: Date): Observable<Succeeded> {
 
     // Solution file
     const formData = new FormData();
@@ -197,7 +199,8 @@ export class DatabaseService {
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
-      testsystem_id: test_type
+      testsystem_id: test_type,
+      deadline: deadline
     }).pipe(
       flatMap(result => {
         let upload_url: string;
@@ -289,8 +292,10 @@ export class DatabaseService {
    * @param description This is the description of updated task
    * @param files This is the solution files of updated Task
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
+   * @param deadline The deadline when this task ends
    */
-  updateTask(idTask: number, name: string, description: string, files: FileList | null, test_type: string): Observable<Succeeded> {
+  updateTask(idTask: number, name: string,
+             description: string, files: FileList | null, test_type: string, deadline: Date): Observable<Succeeded> {
 
     if (files) {
       // New solution file
@@ -302,7 +307,8 @@ export class DatabaseService {
       return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
         name: name,
         description: description,
-        test_type: test_type
+        test_type: test_type,
+        deadline: deadline
       }).pipe(
         flatMap(res => {
           let uploadUrl: string;

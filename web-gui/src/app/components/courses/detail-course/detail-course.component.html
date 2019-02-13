@@ -16,7 +16,7 @@
     </button>
   </mat-card>
 
-<!-- task list-->
+  <!-- task list-->
   <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}">
     <div class="title">
       <h4>{{task.task_name}}</h4>
@@ -34,6 +34,7 @@
     <mat-card-subtitle>
     </mat-card-subtitle>
     <mat-card-content>
+      <h5>{{task.deadline | date:'medium'}}</h5>
       <p>{{task.task_description}}</p>
       <mat-divider></mat-divider>
       <div class="user-input">
@@ -63,8 +64,11 @@
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn" (click)="deleteTask(task)">Löschen</button>
-        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent" (click)="updateTask(task)">Bearbeiten
+        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
+                (click)="deleteTask(task)">Löschen
+        </button>
+        <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
+                (click)="updateTask(task)">Bearbeiten
         </button>
         <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
       </mat-card-actions>
