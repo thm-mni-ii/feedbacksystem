@@ -63,7 +63,7 @@ export class LoginComponent implements OnInit {
 
   loginCAS() {
     const getUrl = window.location;
-    const baseUrl = getUrl .protocol + '//' + getUrl.host ;
+    const baseUrl = getUrl.protocol + '//' + getUrl.host;
     this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login';
   }
 

@@ -44,7 +44,7 @@ import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search("localhost") >= 0) ? req.url : 'https://localhost:8080' + req.url
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080' + req.url
     });
 
     return next.handle(clonedRequest);
@@ -97,7 +97,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent],
-  providers: [httpInterceptorProviders, CookieService, MarkdownService, MarkedOptions],
+  providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule {
