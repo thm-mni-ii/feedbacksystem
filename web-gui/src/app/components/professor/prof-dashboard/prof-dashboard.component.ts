@@ -45,7 +45,7 @@ export class ProfDashboardComponent implements OnInit {
 
     this.tb.emitTitle('Dashboard');
     this.db.getSubscribedCourses().subscribe(courses => {
-      this.courses = courses;
+      this.courses = courses.filter(course => course.role_id === 4);
     });
   }
 
