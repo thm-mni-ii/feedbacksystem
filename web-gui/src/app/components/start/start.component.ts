@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {TitlebarService} from '../../service/titlebar.service';
 import {Subscription} from 'rxjs';
+import {CookieService} from 'ngx-cookie-service';
 
 /**
  * Root component shows sidenav and titlebar
@@ -16,7 +17,7 @@ import {Subscription} from 'rxjs';
 export class StartComponent implements OnInit, OnDestroy {
 
   constructor(private user: UserService, private router: Router, private auth: AuthService,
-              private titlebar: TitlebarService) {
+              private titlebar: TitlebarService, private cookie: CookieService) {
   }
 
   private sub: Subscription;
@@ -71,6 +72,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   logout() {
     this.auth.logout();
+    this.cookie.delete('jwt');
     this.router.navigate(['login']);
   }
 
