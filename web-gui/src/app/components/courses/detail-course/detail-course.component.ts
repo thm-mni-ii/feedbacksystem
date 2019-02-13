@@ -33,6 +33,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   userRole: string;
   processing: { [task: number]: boolean };
   submissionAsFile: { [task: number]: boolean };
+  courseID: number;
 
   ngOnInit() {
     this.submissionAsFile = {};
@@ -43,8 +44,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     // Get course id from url and receive data
     this.route.params.pipe(
       flatMap(params => {
-        const id = +params['id'];
-        return this.db.getCourseDetail(id);
+        this.courseID = +params['id'];
+        return this.db.getCourseDetail(this.courseID);
       })
     ).subscribe(course_detail => {
       this.courseDetail = course_detail;
@@ -75,22 +76,16 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.processing[currentTask.task_id] = true;
     this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
       if (res.success) {
-        let saySomeCnt = 1;
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
             if (taskResult.passed == null || typeof taskResult.passed === undefined) {
-              if (saySomeCnt++ === 6) {
-                taskResult.result_date = new Date(Date.now());
-                taskResult.result = 'Ergebnis konnte nach 1 Minute nicht geholt werden. Schaue später noch einmal vorbei';
-                return of(taskResult);
-              }
               return throwError('No result yet');
             }
             return of(taskResult);
           }),
           retryWhen(errors => errors.pipe(
-            delay(1),
-            take(6)))
+            delay(5000),
+            take(120)))
         ).subscribe(taskResult => {
           this.processing[currentTask.task_id] = false;
           this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
@@ -231,7 +226,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       width: '600px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
-      console.log(value);
+      if (value.success) {
+        this.db.getCourseDetail(this.courseID).subscribe(courses => {
+          this.courseDetail = courses;
+        });
+      }
     });
   }
 
