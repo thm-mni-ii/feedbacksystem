@@ -63,9 +63,9 @@ export class DataprivacyDialogComponent implements OnInit {
   saveDataPrivacy() {
     this.db.updatePrivacyOrImpressum(TextType.Dataprivacy, this.markdown).subscribe(success => {
       if (success.success) {
-        this.snackBar.open('Datenschutz aktualiesiert', 'OK');
+        this.snackBar.open('Datenschutz aktualisiert', 'OK');
       } else {
-        this.snackBar.open('Es ist ein Fehler aufgetrete', 'OK');
+        this.snackBar.open('Es ist ein Fehler aufgetreten', 'OK');
       }
     });
   }
