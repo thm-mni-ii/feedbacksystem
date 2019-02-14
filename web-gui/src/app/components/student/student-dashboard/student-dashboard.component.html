@@ -1,3 +1,30 @@
-<p>
-  Dashboard student works!
-</p>
+<div class="container">
+  <div class="center-box">
+
+    <ul class="list-courses">
+      <li *ngFor="let entry of dashboard" class="course">
+
+        <!-- Course name-->
+        <h3 class="course-name">
+          {{entry.course_name}}
+        </h3>
+
+        <!-- Tasks a1, a2...-->
+        <div *ngFor="let task of entry.tasks">
+          <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
+               matTooltipPosition="above"
+               matTooltipClass="custom-tooltip"
+               matTooltip="
+               {{task[key].task_name}}
+               Versuche: {{task[key].trials}}
+               Deadline: {{task[key].deadline | date:'medium'}}"
+               (click)="goToTask(entry.course_id, task[key].task_id)">
+            {{key}}
+          </div>
+        </div>
+
+
+      </li>
+    </ul>
+  </div>
+</div>

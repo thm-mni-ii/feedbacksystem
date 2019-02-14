@@ -14,6 +14,10 @@ import {NewCourseComponent} from './components/courses/new-course/new-course.com
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
 import {DetailCourseComponent} from './components/courses/detail-course/detail-course.component';
 import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof-dashboard.component';
+import {ModeratorGuard} from './guards/moderator.guard';
+import {DocentGuard} from './guards/docent.guard';
+import {AdminGuard} from './guards/admin.guard';
+import {IsDocentGuard} from './guards/is-docent.guard';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -21,22 +25,22 @@ const routes: Routes = [
     path: '', component: StartComponent, canActivate: [AuthGuard], children: [
 
       {path: 'courses/user', component: CoursesComponent},
-      {path: 'courses/docent', component: GrantDocentComponent},
-      {path: 'courses/tutor', component: GrantTutorComponent},
-      {path: 'courses/new', component: NewCourseComponent},
+      {path: 'courses/docent', component: GrantDocentComponent, canActivate: [ModeratorGuard]},
+      {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [DocentGuard]},
+      {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/:id', component: DetailCourseComponent},
 
       // Admin
-      {path: 'admin/dashboard', component: AdminDashboardComponent},
-      {path: 'admin/user-management', component: AdminUserManagementComponent},
-      {path: 'admin/checker', component: AdminCheckerComponent},
+      {path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard]},
+      {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
+      {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
 
       // Student
       {path: 'student/dashboard', component: StudentDashboardComponent},
 
       // Prof
-      {path: 'docent/dashboard', component: ProfDashboardComponent}
+      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]}
     ]
   },
 ];

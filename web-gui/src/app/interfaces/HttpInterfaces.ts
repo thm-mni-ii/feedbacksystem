@@ -125,3 +125,23 @@ export enum TextType {
   Dataprivacy = 'privacy_text',
   Impressum = 'impressum_text'
 }
+
+export interface DashboardStudent {
+  course_description: string;
+  course_name: string;
+  tasks: Object[];
+  course_modul_id: string;
+  deadlines: string[];
+  course_id: string;
+  course_semester: string;
+}
+
+export interface DashboardProf {
+  passed: number;
+  username: string;
+  prename: string;
+  surname: string;
+  tasks: Object[];
+  user_id: number;
+
+}

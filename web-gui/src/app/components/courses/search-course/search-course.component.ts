@@ -57,8 +57,14 @@ export class SearchCourseComponent implements OnInit {
     const filterValue = name.toLowerCase();
 
     return this.courses.filter(option => {
-      return option.course_name.toLowerCase().indexOf(filterValue) === 0 ||
-        option.course_modul_id.toLowerCase().indexOf(filterValue) === 0;
+      if (option.course_modul_id) {
+        // Filter for course and module id
+        return option.course_name.toLowerCase().indexOf(filterValue) === 0 ||
+          option.course_modul_id.toLowerCase().indexOf(filterValue) === 0;
+      } else {
+        // filter only for course name
+        return option.course_name.toLowerCase().indexOf(filterValue) === 0;
+      }
     });
   }
 

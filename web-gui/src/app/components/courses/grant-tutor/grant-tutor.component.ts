@@ -35,10 +35,11 @@ export class GrantTutorComponent implements OnInit {
   ngOnInit() {
     this.titlebar.emitTitle('Tutor wählen');
 
-    if (this.user.getUserRole() === 'admin') {
+    if (this.user.getUserRole() === 1) {
       this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     } else {
-      this.db.getSubscribedCourses().subscribe(courses => this.dataSourceCourses.data = courses);
+      this.db.getSubscribedCourses().subscribe(courses =>
+        this.dataSourceCourses.data = courses.filter(course => course.role_id === 4));
     }
     this.db.getAllUsers().pipe(
       flatMap(users => {
@@ -59,11 +60,13 @@ export class GrantTutorComponent implements OnInit {
   }
 
   private _filterTutorInput(value: string): User[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value.toLowerCase().replace(' ', '');
 
     return this.dataSourceUsers.filter(option => {
-      return option.prename.concat(' ').toLowerCase().indexOf(filterValue) === 0
-        || option.surname.concat(' ').toLowerCase().indexOf(filterValue) === 0;
+      return option.prename.toLowerCase().indexOf(filterValue) === 0
+        || option.surname.toLowerCase().indexOf(filterValue) === 0
+        || option.surname.toLowerCase().concat(option.prename.toLowerCase()).indexOf(filterValue) === 0
+        || option.prename.toLowerCase().concat(option.surname.toLowerCase()).indexOf(filterValue) === 0;
     });
   }
 
@@ -106,8 +109,11 @@ export class GrantTutorComponent implements OnInit {
 
       this.db.addTutorToCourse(courseID, selectedUser.user_id).pipe(
         flatMap(res => {
-          console.log(res);
-          return this.db.getAllCourses();
+          if (this.user.getUserRole() === 1) {
+            return this.db.getAllCourses();
+          } else {
+            return this.db.getSubscribedCourses();
+          }
         })
       ).subscribe(courses => this.dataSourceCourses.data = courses);
     }
@@ -122,7 +128,7 @@ export class GrantTutorComponent implements OnInit {
     this.db.removeTutorFromCourse(courseID, userID).pipe(
       flatMap(res => {
         if (res.success) {
-          if (this.user.getUserRole() === 'admin') {
+          if (this.user.getUserRole() === 1) {
             return this.db.getAllCourses();
           } else {
             return this.db.getSubscribedCourses();

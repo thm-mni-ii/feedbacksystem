@@ -1,0 +1,62 @@
+@import "../../../../colors";
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-box {
+  width: 50%;
+  height: auto;
+  background-color: $cPrimary;
+  border-radius: 6px;
+}
+
+.course {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+}
+
+.course-name {
+  display: block;
+  width: 20%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin: 0;
+  padding: 12px;
+  color: white;
+}
+
+.task {
+  border: 1px solid black;
+  border-radius: 2px;
+  padding: 8px;
+  margin: 4px;
+}
+
+.task:hover {
+  cursor: pointer;
+  background-color: $cSecondary;
+}
+
+div.true {
+  background-color: green;
+}
+
+div.false {
+  background-color: red;
+}
+
+::ng-deep .custom-tooltip {
+  color: black !important;
+  background-color: white !important;
+  white-space: pre-line !important;
+}

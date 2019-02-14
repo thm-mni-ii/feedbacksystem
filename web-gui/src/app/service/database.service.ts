@@ -2,12 +2,13 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
-  CourseTask,
+  CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation,
   FileUpload,
   GeneralCourseInformation,
   RoleChanged,
-  Succeeded, Testsystem,
+  Succeeded,
+  Testsystem,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
@@ -41,8 +42,8 @@ export class DatabaseService {
    * Get impressum or dataprivacy text
    * @param type The type of text
    */
-  getPrivacyOrImpressumText(type: TextType) {
-    return this.http.get('/api/v1/settings/privacy/text?which=' + type.toString());
+  getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
+    return this.http.get<{ markdown: string }>('/api/v1/settings/privacy/text?which=' + type.toString());
   }
 
   /**
@@ -70,10 +71,10 @@ export class DatabaseService {
 
   /**
    * Get all results of all users of all tasks
-   * @param id of course to obtain all submissions
+   * @param courseID of course to obtain all submissions
    */
-  getAllUserSubmissions(id: number): Observable<any> {
-    return this.http.get<any>('/api/v1/courses/' + id + '/submissions');
+  getAllUserSubmissions(courseID: number): Observable<DashboardProf[]> {
+    return this.http.get<DashboardProf[]>('/api/v1/courses/' + courseID + '/submissions');
   }
 
   /**
@@ -94,8 +95,8 @@ export class DatabaseService {
     return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
   }
 
-  getOverview(): Observable<any> {
-    return this.http.get<any>('/api/v1/courses/submissions');
+  getOverview(): Observable<DashboardStudent[]> {
+    return this.http.get<DashboardStudent[]>('/api/v1/courses/submissions');
   }
 
   /**
@@ -185,8 +186,10 @@ export class DatabaseService {
    * @param description This is the description of the task
    * @param files This will be the solution files from Lecturer
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
+   * @param deadline The deadline when this tasks ends
    */
-  createTask(idCourse: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
+  createTask(idCourse: number, name: string, description: string,
+             files: FileList, test_type: string, deadline: Date): Observable<Succeeded> {
 
     // Solution file
     const formData = new FormData();
@@ -196,7 +199,8 @@ export class DatabaseService {
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
-      testsystem_id: test_type
+      testsystem_id: test_type,
+      deadline: deadline
     }).pipe(
       flatMap(result => {
         let upload_url: string;
@@ -288,29 +292,44 @@ export class DatabaseService {
    * @param description This is the description of updated task
    * @param files This is the solution files of updated Task
    * @param test_type This is the type of this Task. Example (SQL, JAVA, etc...)
+   * @param deadline The deadline when this task ends
    */
-  updateTask(idTask: number, name: string, description: string, files: FileList, test_type: string): Observable<Succeeded> {
+  updateTask(idTask: number, name: string,
+             description: string, files: FileList | null, test_type: string, deadline: Date): Observable<Succeeded> {
 
-    // New solution file
-    const formData = new FormData();
-    for (let _i = 0; _i < files.length; _i++) {
-      formData.append('file', files.item(_i), files.item(_i).name);
+    if (files) {
+      // New solution file
+      const formData = new FormData();
+      for (let _i = 0; _i < files.length; _i++) {
+        formData.append('file', files.item(_i), files.item(_i).name);
+      }
+
+      return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
+        name: name,
+        description: description,
+        test_type: test_type,
+        deadline: deadline
+      }).pipe(
+        flatMap(res => {
+          let uploadUrl: string;
+          if (res.success) {
+            uploadUrl = res.upload_url;
+            return this.http.post<Succeeded>(uploadUrl, formData, {
+              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+            });
+          }
+        }));
+    } else {
+      return this.http.put<Succeeded>('/api/v1/tasks/' + idTask, {
+        name: name,
+        description: description,
+        test_type: test_type
+      });
     }
+  }
 
-    return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
-      name: name,
-      description: description,
-      test_type: test_type
-    }).pipe(
-      flatMap(res => {
-        let uploadUrl: string;
-        if (res.success) {
-          uploadUrl = res.upload_url;
-          return this.http.post<Succeeded>(uploadUrl, formData, {
-            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-          });
-        }
-      }));
+  updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
+    return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
   }
 
 

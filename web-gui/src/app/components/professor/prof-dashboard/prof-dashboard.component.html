@@ -1,3 +1,38 @@
-<p>
-  Dashboard prof works!
-</p>
+<mat-tab-group (selectedTabChange)="tabChanged($event)">
+  <mat-tab *ngFor="let course of courses" label="{{course.course_name}}" class="tab">
+
+
+    <div class="container">
+
+
+      <div class="center-box">
+        <mat-form-field appearance="fill"  class="filter-input">
+          <mat-label>Filter</mat-label>
+          <input matInput [formControl]="filter">
+        </mat-form-field>
+
+
+        <div *ngFor="let student of filteredMatrix$ | async" class="student-row">
+
+          <!-- Name -->
+          <div class="name-container">
+            <mat-icon *ngIf="student.passed === 1" class="student-passed" color="#00ffff">done</mat-icon>
+            <mat-icon *ngIf="student.passed === 0" class="student-failed" color="#ff0000">clear</mat-icon>
+            <h3 class="name">{{student.surname}} {{student.prename}}</h3>
+          </div>
+
+          <!-- Tasks-->
+          <div class="task-container">
+            <div *ngFor="let task of student.tasks" class="task-row">
+              <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
+                   matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
+                {{task[key].trials}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </mat-tab>
+</mat-tab-group>

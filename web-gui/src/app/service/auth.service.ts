@@ -33,7 +33,7 @@ export class AuthService {
    *
    */
   login(username: string, password: string): Observable<HttpResponse<Succeeded>> {
-    return this.http.post<Succeeded>('/api/v1/login/ldap', {username: username, password: password},
+    return this.http.post<Succeeded>('/api/v1/login', {username: username, password: password},
       {observe: 'response'});
   }
 

@@ -1,24 +1,33 @@
-<div matDialogTitle>Neue Aufgabe erstellen</div>
+<div matDialogTitle *ngIf="!isUpdate">Neue Aufgabe erstellen</div>
+<div matDialogTitle *ngIf="isUpdate">Aufgabe bearbeiten</div>
+
 <mat-dialog-content>
   <form class="new-task-form" [formGroup]="taskForm">
 
+    <!-- Task name -->
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input type="text" matInput formControlName="taskName">
     </mat-form-field>
 
+    <!-- Task Description -->
     <mat-form-field>
       <mat-label>Beschreibung</mat-label>
       <textarea matInput type="text" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="20"
                 formControlName="taskDescription"></textarea>
     </mat-form-field>
 
+    <!-- Task type-->
     <mat-select placeholder="Aufgaben typ" [(value)]="taskType">
       <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
     </mat-select>
 
-    <input (change)="getFile($event.target.files)" type="file" placeholder="Lösung" multiple>
+    <input (change)="getFiles($event.target.files)" type="file" placeholder="Lösung" multiple>
   </form>
+
+  <!-- Deadline picker-->
+  <owl-date-time-inline class="deadline-picker" [(ngModel)]="deadline"></owl-date-time-inline>
+
 
   <mat-dialog-actions class="dialog-action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>

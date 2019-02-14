@@ -28,8 +28,20 @@ export class UserService {
     return this.getDecodedToken().username;
   }
 
-  getUserRole(): string {
-    return this.getDecodedToken().roles;
+  getUserRole(): number {
+    return this.getDecodedToken().role_id;
+  }
+
+  getPrename(): string {
+    return this.getDecodedToken().prename;
+  }
+
+  getSurname(): string {
+    return this.getDecodedToken().surname;
+  }
+
+  getEmail(): string {
+    return this.getDecodedToken().email;
   }
 
 
@@ -40,9 +52,14 @@ export class UserService {
  * Used to parse JWT token
  */
 export interface JWTToken {
-  sub: string;
-  roles: string;
-  username: string;
-  iat: string;
-  exp: string;
+  readonly sub: string;
+  readonly user_id: number;
+  readonly username: string;
+  readonly prename: string;
+  readonly surname: string;
+  readonly role_id: number;
+  readonly email: string;
+  readonly token_type: string;
+  readonly iat: number;
+  readonly exp: number;
 }

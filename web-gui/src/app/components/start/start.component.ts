@@ -4,6 +4,7 @@ import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {TitlebarService} from '../../service/titlebar.service';
 import {Subscription} from 'rxjs';
+import {CookieService} from 'ngx-cookie-service';
 
 /**
  * Root component shows sidenav and titlebar
@@ -16,13 +17,14 @@ import {Subscription} from 'rxjs';
 export class StartComponent implements OnInit, OnDestroy {
 
   constructor(private user: UserService, private router: Router, private auth: AuthService,
-              private titlebar: TitlebarService) {
+              private titlebar: TitlebarService, private cookie: CookieService) {
   }
 
   private sub: Subscription;
 
   title: string;
-  userRole: string;
+  userRole: number;
+  userRoleString: string;
   isAdmin: boolean;
   isDocent: boolean;
   isModerator: boolean;
@@ -31,30 +33,37 @@ export class StartComponent implements OnInit, OnDestroy {
 
   opened: boolean;
   username: string;
+  prename: string;
+  surname: string;
+  email: string;
 
   ngOnInit() {
+
     this.username = this.user.getUsername();
     this.userRole = this.user.getUserRole();
+    this.prename = this.user.getPrename();
+    this.surname = this.user.getSurname();
+    this.email = this.user.getEmail();
 
     switch (this.userRole) {
-      case 'admin':
+      case 1:
         this.isAdmin = true;
-        // this.router.navigate(['admin', 'dashboard']);
+        this.userRoleString = 'admin';
         break;
-      case 'moderator':
+      case 2:
         this.isModerator = true;
         break;
-      case 'docent':
-        this.router.navigate(['docent', 'dashboard']);
+      case 4:
         this.isDocent = true;
+        this.userRoleString = 'docent';
         break;
-      case 'tutor':
-        this.router.navigate(['student', 'dashboard']);
+      case 8:
         this.isTutor = true;
+        this.userRoleString = 'student';
         break;
-      case 'student':
-        this.router.navigate(['student', 'dashboard']);
+      case 16:
         this.isStudent = true;
+        this.userRoleString = 'student';
         break;
     }
 
@@ -63,6 +72,7 @@ export class StartComponent implements OnInit, OnDestroy {
 
   logout() {
     this.auth.logout();
+    this.cookie.delete('jwt');
     this.router.navigate(['login']);
   }
 

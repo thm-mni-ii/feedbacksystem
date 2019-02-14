@@ -56,11 +56,13 @@ export class GrantDocentComponent implements OnInit {
   }
 
   private _filterDocentInput(value: string): User[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value.toLowerCase().replace(' ', '');
 
     return this.dataSourceUsers.filter(option => {
-      return option.prename.concat(' ').toLowerCase().indexOf(filterValue) === 0
-        || option.surname.concat(' ').toLowerCase().indexOf(filterValue) === 0;
+      return option.prename.toLowerCase().indexOf(filterValue) === 0
+        || option.surname.toLowerCase().indexOf(filterValue) === 0
+        || option.surname.toLowerCase().concat(option.prename.toLowerCase()).indexOf(filterValue) === 0
+        || option.prename.toLowerCase().concat(option.surname.toLowerCase()).indexOf(filterValue) === 0;
     });
   }
 

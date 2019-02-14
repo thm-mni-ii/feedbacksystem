@@ -44,7 +44,7 @@ export class UpdateCourseDialogComponent implements OnInit {
   }
 
   udpateCourse() {
-    this.db.updateCourse(this.data.course_id, this.name, this.description, this.standardTaskType, this.semester,
+    this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
       this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
   }
 

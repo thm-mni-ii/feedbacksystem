@@ -37,13 +37,15 @@ import {UpdateCourseDialogComponent} from './components/courses/detail-course/up
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
+import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
 
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search("localhost") >= 0) ? req.url : 'https://localhost:8080' + req.url
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080' + req.url
     });
 
     return next.handle(clonedRequest);
@@ -87,6 +89,9 @@ export const httpInterceptorProviders = [
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    MarkdownModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
@@ -95,7 +100,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent],
-  providers: [httpInterceptorProviders, CookieService],
+  providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -9,25 +9,25 @@
     <mat-form-field>
       <mat-label>Beschreibung</mat-label>
       <textarea matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
-                [(ngModel)]="description"></textarea>
+                [(ngModel)]="description" placeholder="(Optional)"></textarea>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Standart aufgaben typ</mat-label>
       <mat-select [(value)]="standardTaskType">
         <mat-option *ngFor="let testsystem of testsystems$ | async"
-                    [value]="standardTaskType">{{testsystem.name}}</mat-option>
+                    [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Semester</mat-label>
-      <input matInput placeholder="WS18/19" [(ngModel)]="semester">
+      <input matInput placeholder="WS18/19 (Optional)" [(ngModel)]="semester">
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Modul-ID</mat-label>
-      <input matInput placeholder="CSxxxx" [(ngModel)]="course_module_id">
+      <input matInput placeholder="CSxxxx (Optional)" [(ngModel)]="course_module_id">
     </mat-form-field>
 
     <mat-form-field>
