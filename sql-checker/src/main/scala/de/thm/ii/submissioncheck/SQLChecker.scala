@@ -219,34 +219,34 @@ object SQLChecker extends App {
         logger.warning("checking for SQLException")
         val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
         logger.warning("checked SQLException")
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> "true", LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
       }
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           LABEL_ERROR -> "Please provide valid parameters",
-          LABEL_ACCEPT -> false,
+          LABEL_ACCEPT -> "false",
           LABEL_TASKID -> taskid
         )))
       }
       case ex: SQLTimeoutException => {
         logger.warning("SQLTimeoutException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> false,
+          LABEL_ACCEPT -> "false",
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: SQLException => {
         logger.warning("SQLException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> false,
+          LABEL_ACCEPT -> "false",
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: FileNotFoundException => {
         logger.warning("FileNotFoundException when creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> false,
+          LABEL_ACCEPT -> "false",
           LABEL_ERROR ->  "Your filenames were incorrect",
           LABEL_TASKID -> taskid)))
       }
