@@ -49,6 +49,35 @@ class UserController {
   }
 
   /**
+    * Create a guest user / login / account
+    * @author Benjamin Manns
+    * @param request http request contains all headers
+    * @param jsonNode http request contains all headers
+    * @return Map if user could be created
+    */
+  @RequestMapping(value = Array("users"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def createGuestUser(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if(user.isEmpty || user.get.roleid != 1) {
+      throw new UnauthorizedException
+    }
+
+    try {
+      val roleid = jsonNode.get("role_id").asInt()
+      val prename = jsonNode.get("prename").asText()
+      val surname = jsonNode.get("surname").asText()
+      val password = jsonNode.get("password").asText()
+      val email = jsonNode.get("email").asText()
+      val username = jsonNode.get("username").asText()
+
+      Map(LABEL_SUCCESS -> userService.createGuestAccount(prename, surname, roleid, username, password, email))
+
+    } catch {
+    case _: NullPointerException => throw new BadRequestException("Please provide: prename, surname, password, role_id, email and username")
+    }
+  }
+
+  /**
     * grant a user to the global role MODERATOR
     * @author Benjamin Manns
     * @param request contains resquest headers
@@ -106,9 +135,10 @@ class UserController {
     }
     val map = userService.getFullUserById(userid)
     if(map.isEmpty){
-      throw new ResourceNotFoundException()
+      Map(LABEL_SUCCESS -> false)
+    } else {
+      Map(LABEL_SUCCESS -> userService.deleteUser(userid))
     }
-    Map(LABEL_SUCCESS -> userService.deleteUser(userid))
   }
 
   /**
