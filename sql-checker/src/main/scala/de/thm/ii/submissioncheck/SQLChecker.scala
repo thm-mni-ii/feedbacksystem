@@ -225,28 +225,28 @@ object SQLChecker extends App {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           LABEL_ERROR -> "Please provide valid parameters",
-          LABEL_ACCEPT -> "false",
+          LABEL_ACCEPT -> LABEL_FALSE,
           LABEL_TASKID -> taskid
         )))
       }
       case ex: SQLTimeoutException => {
         logger.warning("SQLTimeoutException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> "false",
+          LABEL_ACCEPT -> LABEL_FALSE,
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: SQLException => {
         logger.warning("SQLException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> "false",
+          LABEL_ACCEPT -> LABEL_FALSE,
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: FileNotFoundException => {
         logger.warning("FileNotFoundException when creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> "false",
+          LABEL_ACCEPT -> LABEL_FALSE,
           LABEL_ERROR ->  "Your filenames were incorrect",
           LABEL_TASKID -> taskid)))
       }
