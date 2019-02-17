@@ -29,8 +29,6 @@ class SQLTask(val filepath: String, val taskId: String){
   private val config = ConfigFactory.load()
 
   private implicit val formats = DefaultFormats
-
-  private val file = new File("./" + filepath)
   /**
     * Class instance taskname
     */
@@ -48,6 +46,7 @@ class SQLTask(val filepath: String, val taskId: String){
 
   private var connection: Connection = DriverManager.getConnection(URL, user, password)
   private val s = connection.createStatement()
+  private val timeoutsec = 10
   /**
     * used in queries
     */
@@ -56,6 +55,10 @@ class SQLTask(val filepath: String, val taskId: String){
     * underscore used in naming
     */
   val us: String = "_"
+  /**
+    * used in naming
+    */
+  val dbliteral: String = "db"
   /**
     * used in naming
     */
@@ -68,6 +71,13 @@ class SQLTask(val filepath: String, val taskId: String){
   private case class TaskQuery(desc: String, res: ResultSet, order: String)
 
   /****** CONSTRUCTOR ******/
+  logger.warning("sqltask-constructor")
+  //problem here
+  private val filesection = new java.io.File(filepath + "/sections.json")
+  private val filedb = new java.io.File(filepath + "/db.sql")
+  if (!filesection.exists || !filedb.exists){
+    throw new FileNotFoundException
+  }
 
   private val jsonstring = scala.io.Source.fromFile(filepath + "/sections.json").mkString
   private val content = parse(jsonstring).extract[Map[String, Any]]
@@ -83,16 +93,15 @@ class SQLTask(val filepath: String, val taskId: String){
     val querystring: String = taskqueries(i)("query")
     /** desc */
     val desc = taskqueries(i)("description")
+    qstatements(i).setQueryTimeout(timeoutsec)
     /** rs */
     val rs = qstatements(i).executeQuery(querystring)
     /** ord */
     val ord = taskqueries(i)("order")
-    if(ord.equals("Variable")){
-      //put lines in order
-      //nvm not here
-    }
     queryres(i) = new TaskQuery(desc, rs, ord)
   }
+  deleteDatabase("little_test")
+  logger.warning("sqltask-constructor ended")
 
   private def createDatabase(name: String): Unit = {
     val dbdef = scala.io.Source.fromFile(filepath + "/db.sql").mkString.split(';')
@@ -107,6 +116,12 @@ class SQLTask(val filepath: String, val taskId: String){
     //dbdef.foreach(stmt.executeLargeUpdate)
     connection.commit()
     connection.setAutoCommit(true)
+  }
+
+  private def deleteDatabase(name: String): Unit = {
+    connection.setAutoCommit(false)
+    val stmt = connection.createStatement()
+    stmt.execute(dropdb + "IF EXISTS " + taskid.toString + us + name + sc)
   }
 
   /*
@@ -150,42 +165,107 @@ class SQLTask(val filepath: String, val taskId: String){
     * @param userid userid
     * @return tuple with message and boolean
     */
-  def runSubmission(userq: String, userid: String): (String, Boolean) = {
-    val ustatement = connection.createStatement
-    val ustatement_ordered = connection.createStatement
-    val dbname = userid + us + "db"
-    val username = userid + us + taskid
+  def runSubmissionold(userq: String, userid: String): (String, Boolean) = {
+    var msg = "Your Query didn't produce the correct result"
+    var success = false; var identified = false; var foundindex = -1
+    val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
+    val ustatement_ordered = connection.createStatement; ustatement_ordered.setQueryTimeout(timeoutsec)
+    val dbname = userid + us + dbliteral; val username = userid + us + taskid
     createDatabase(dbname)
-    //s.execute("CREATE USER '" + username + "'@localhost' IDENTIFIED BY 'password'" + sc)
-    //s.execute("GRANT ALL PRIVILEGES ON " + dbname + ".* TO '" + username + "@'localhost'" + sc)
-    val userres = ustatement.executeQuery(userq)
-    //val userres_ordered = ustatement_ordered.executeQuery(userq + " ORDER BY 1 ASC")
-    val rsmd = userres.getMetaData()
-    val col = rsmd.getColumnCount()
-    userres.last()
-    val rows = userres.getRow
-    userres.beforeFirst()
-    var identified = false
-    var foundindex = -1
-
-    for (i <- 0 until queryc){
-      queryres(i).res.beforeFirst()
+    try{
+      val userres = ustatement.executeQuery(userq) // check sqlexception
+      val rsmd = userres.getMetaData()
+      val col = rsmd.getColumnCount()
+      userres.last()
+      val rows = userres.getRow
       userres.beforeFirst()
-      breakable {for (j <- 1 until (rows + 1)) {
-          if (userres.next() && queryres(i).res.next()){
-            if (!compareRow(userres, i)) {
-                break()
+      val userarr = arrayfromRS(userres)
+      val userarr_ordered = orderArray(userarr)
+      breakable{
+        for (i <- 0 until queryc){
+          queryres(i).res.beforeFirst()
+          var queryarr = arrayfromRS(queryres(i).res)
+          var userarray = userarr
+          if( (queryarr.length == userarray.length) && (queryarr(0).length == userarray(0).length)){
+            if (queryres(i).order.equalsIgnoreCase("variable")){
+              queryarr = orderArray(queryarr);
+              userarray = userarr_ordered;
             }
-            if (queryres(i).res.isLast && userres.isLast){
+            if (compareArray(queryarr, userarray)){
               identified = true
               foundindex = i
+              break()
             }
           }
-      }}
+        }
+      }
+    } catch {
+      case ex: SQLTimeoutException => {
+        msg = "Die Query hat zu lange gedauert: " + ex.getMessage
+      }
+      case ex: SQLException => {
+        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[1-9][0-9]*_db", dbliteral) //todo: filter out database name...
+      }
     }
     s.execute(dropdb + taskid + us + dbname)
+    if(identified){
+      msg = queryres(foundindex).desc
+      if(msg.equals("OK")){
+        success = true
+      }
+    }
+    (msg, success)
+  }
+
+  /**
+    * Compares the resultset from usersubmission to the saved result sets and sets a result
+    * @param userq srting of the user query
+    * @param userid userid
+    * @return tuple with message and boolean
+    */
+  def runSubmission(userq: String, userid: String): (String, Boolean) = {
     var msg = "Your Query didn't produce the correct result"
-    var success = false
+    var success = false; var identified = false; var foundindex = -1
+    val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
+    val ustatement_ordered = connection.createStatement; ustatement_ordered.setQueryTimeout(timeoutsec)
+    val dbname = userid + us + dbliteral; val username = userid + us + taskid
+    createDatabase(dbname)
+    try{
+      val userres = ustatement.executeQuery(userq)
+      val rsmd = userres.getMetaData()
+      val col = rsmd.getColumnCount()
+      userres.last()
+      val rows = userres.getRow
+      userres.beforeFirst()
+      val userarr = arrayfromRS(userres)
+      val userarr_ordered = orderArray(userarr)
+      breakable{
+        for (i <- 0 until queryc){
+          queryres(i).res.beforeFirst()
+          var queryarr = arrayfromRS(queryres(i).res)
+          var userarray = userarr
+          if( (queryarr.length == userarray.length) && (queryarr(0).length == userarray(0).length)){
+            if (queryres(i).order.equalsIgnoreCase("variable")){
+              queryarr = orderArray(queryarr);
+              userarray = userarr_ordered;
+            }
+            if (compareArray(queryarr, userarray)){
+              identified = true
+              foundindex = i
+              break()
+            }
+          }
+        }
+      }
+    } catch {
+      case ex: SQLTimeoutException => {
+        msg = "Die Query hat zu lange gedauert: " + ex.getMessage
+      }
+      case ex: SQLException => {
+        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[1-9][0-9]*_db", dbliteral) //todo: filter out database name...
+      }
+    }
+    s.execute(dropdb + taskid + us + dbname)
     if(identified){
       msg = queryres(foundindex).desc
       if(msg.equals("OK")){
@@ -206,5 +286,49 @@ class SQLTask(val filepath: String, val taskId: String){
       }
     }
     true
+  }
+
+  private def arrayfromRS(rs: ResultSet): scala.Array[scala.Array[String]] = {
+    val rsmd = rs.getMetaData()
+    val cols = rsmd.getColumnCount()
+    rs.last()
+    val rows = rs.getRow
+    rs.beforeFirst()
+    var table = scala.Array.ofDim[String](rows, cols)
+    /*
+    val table: Array[Array[String]] = (new Array[Array[String]](rows): Array[Array[String]])
+    for (i <- 0 until rows) table(i) = new Array[String](cols)
+    */
+    for (j <- 0 until (rows)) {
+      rs.next()
+      for(k <- 0 until (cols)){
+        val str = rs.getString(k + 1)
+        table(j)(k) = str
+      }
+    }
+    rs.beforeFirst()
+    table
+  }
+
+  private def compareArray(a1: scala.Array[scala.Array[String]], a2: scala.Array[scala.Array[String]]): Boolean = {
+    var res = true
+    breakable{
+      for (i <- 0 until a1.length){
+        for (j <- 0 until a1(0).length){
+          if ( !((a1(i)(j)).equals(a2(i)(j)))){
+            res = false
+            break()
+          }
+        }
+      }
+    }
+    res
+  }
+
+  private def sortbyField(arr1: scala.Array[String], arr2: scala.Array[String]) = {
+    arr1.mkString > arr2.mkString
+  }
+  private def orderArray(array: scala.Array[scala.Array[String]]): scala.Array[scala.Array[String]] = {
+    array.sortWith(sortbyField)
   }
 }

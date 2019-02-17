@@ -22,6 +22,7 @@ import java.nio.file.{Files, Paths, StandardCopyOption}
 import java.security.cert.X509Certificate
 import javax.net.ssl._
 import java.sql.SQLException
+import java.sql.SQLTimeoutException
 
 import JsonHelper._
 
@@ -71,13 +72,7 @@ object SQLChecker extends App {
   final val DATA = "data"
   /** used in naming */
   final val ULDIR = "upload-dir/"
-  /*
-  private val t1 = new SQLTask("testfiles", "23");
-  t1.saveTask()
-  //private val (msg0, res0) = t1.runSubmission("select * from mitarbeiter", "vowk21")
-  //private val (msg1, res1) = t1.runSubmission("select * from hotel where hotel.HName like \"%City%\" and hotel.PLZ between 80000 and 84000", "kdod24")
-  private val (msg2, res2) = t1.runSubmission("select * from hotel", "vowk23")
-  */
+
   private val SYSTEMIDTOPIC = "sqlchecker"
   private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_check_request"
   private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_check_answer"
@@ -95,6 +90,35 @@ object SQLChecker extends App {
   private val LABEL_ERROR = "error"
   private val LABEL_FALSE = "false"
 
+    /* testing variable order ...*/
+  /*
+  private val t1 = new SQLTask(ULDIR + "180", "180")
+  private val (msg, res) =
+    t1.runSubmission(
+      "select * from hotel where hotel.HName like \"%City%\" and hotel.PLZ between 80000 and 84000 order by PLZ asc",
+      "12")
+  logger.warning(msg)
+  private val (msg2, res2) =
+    t1.runSubmission(
+      "select * from hotel where hotel.HName like \"%City%\" and hotel.PLZ between 80000 and 84000 order by PLZ desc",
+      "1298")
+  logger.warning(msg2)
+  private val (msg1, res1) =
+    t1.runSubmission(
+      "select * from abteilung order by ANr desc",
+      "124")
+  logger.warning(msg1)
+  /*testing sqlexception*/
+  private val (msg0, res0) =
+    t1.runSubmission(
+      "select * from abteilun",
+      "10")
+  logger.warning(msg0)
+
+  /* testing query timeout ...*/
+  private val (msg3, res3) = t1.runSubmissionn("select benchmark(1000000000, md5(10))", "timeoutuser")
+  logger.warning(msg3)
+ */
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
 
@@ -138,6 +162,7 @@ object SQLChecker extends App {
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     try {
+      logger.warning("submission received")
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
@@ -147,13 +172,12 @@ object SQLChecker extends App {
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
         val s: String = downloadFileToString(url, jwt_token)
-        logger.warning("submissionfile received:\n" + s)
+        logger.warning("file: " + s)
         userquery = s
       }
       else if (submit_type.equals(DATA)){
         userquery = jsonMap(DATA).asInstanceOf[String]
       }
-      //do more stuff here !.. (run the damn submission)
       val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
       var passed: Int = 0
       val (msg, success) = task.runSubmission(userquery, userid)
@@ -163,6 +187,7 @@ object SQLChecker extends App {
       sendCheckMessage(JsonHelper.mapToJsonStr(Map(
         DATA -> msg,
         "passed" -> passed.toString,
+        "exitcode" -> "0",
         "userid" -> userid,
         LABEL_TASKID -> taskid,
         "submissionid" -> submissionid
@@ -177,25 +202,23 @@ object SQLChecker extends App {
   }
 
     private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
-    val jsonMap: Map[String, Any] = record.value()
+      val jsonMap: Map[String, Any] = record.value(); val taskid: String = jsonMap(TASKID).asInstanceOf[String]
     try{
       logger.warning(SYSTEMIDTOPIC + "-task received");
-      val sslContext = SSLContext.getInstance("SSL")
-      sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
-      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
-      HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
-
+      val sslContext = SSLContext.getInstance("SSL"); sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
+      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory); HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
       if (urls.length != 2) {
+        logger.warning("Wrong amount of files")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> LABEL_FALSE, LABEL_ERROR -> "Please provide exact two testfiles", LABEL_TASKID -> taskid)))
       }
       else {
         deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
         downloadFilesToFS(urls, jwt_token, taskid)
-        //checking for sqlexception
+        logger.warning("checking for SQLException")
         val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
+        logger.warning("checked SQLException")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> "true", LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
       }
     } catch {
@@ -203,14 +226,29 @@ object SQLChecker extends App {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           LABEL_ERROR -> "Please provide valid parameters",
           LABEL_ACCEPT -> LABEL_FALSE,
-          LABEL_TASKID -> ""
+          LABEL_TASKID -> taskid
         )))
       }
-      case ex: SQLException => {
+      case ex: SQLTimeoutException => {
+        logger.warning("SQLTimeoutException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           LABEL_ACCEPT -> LABEL_FALSE,
           LABEL_ERROR ->  ex.getMessage,
-          LABEL_TASKID -> "")))
+          LABEL_TASKID -> taskid)))
+      }
+      case ex: SQLException => {
+        logger.warning("SQLException while creating task")
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(
+          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ERROR ->  ex.getMessage,
+          LABEL_TASKID -> taskid)))
+      }
+      case ex: FileNotFoundException => {
+        logger.warning("FileNotFoundException when creating task")
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(
+          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ERROR ->  "Your filenames were incorrect",
+          LABEL_TASKID -> taskid)))
       }
     }
   }
