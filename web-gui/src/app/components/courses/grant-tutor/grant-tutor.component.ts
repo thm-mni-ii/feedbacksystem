@@ -115,7 +115,7 @@ export class GrantTutorComponent implements OnInit {
             return this.db.getSubscribedCourses();
           }
         })
-      ).subscribe(courses => this.dataSourceCourses.data = courses);
+      ).subscribe(courses => this.dataSourceCourses.data = courses.filter(course => course.role_id === 4));
     }
   }
 
@@ -136,7 +136,7 @@ export class GrantTutorComponent implements OnInit {
         }
       })
     ).subscribe(courses => {
-      this.dataSourceCourses.data = courses;
+      this.dataSourceCourses.data = courses.filter(course => course.role_id === 4);
     });
 
   }
