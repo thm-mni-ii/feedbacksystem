@@ -31,7 +31,7 @@
     </mat-step>
 
     <!-- Step 3-->
-    <mat-step [stepControl]="thirdFG" label="Standart aufgabentyp auswählen">
+    <mat-step [stepControl]="thirdFG" label="Standart Aufgabentyp auswählen">
       <form [formGroup]="thirdFG" class="step-flex">
         <mat-select class="select" placeholder="Aufgabentyp" formControlName="thirdCtrl" required>
           <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
