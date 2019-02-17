@@ -55,9 +55,15 @@
   width: 100%;
 }
 
-#task-result-text {
+#task-result-text.true {
+  color: green;
+}
+
+#task-result-text.false {
   color: red;
 }
+
+
 
 mat-card-actions {
   display: flex;
