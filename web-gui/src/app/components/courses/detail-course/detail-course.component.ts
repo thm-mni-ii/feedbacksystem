@@ -103,8 +103,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   createTask(course: DetailedCourseInformation) {
     this.dialog.open(NewtaskDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: 'auto',
+      width: 'auto',
       data: {courseID: course.course_id}
     }).afterClosed().pipe(
       flatMap((value: Succeeded) => {
@@ -125,8 +125,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   updateTask(task: CourseTask) {
     this.dialog.open(NewtaskDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: 'auto',
+      width: 'auto',
       data: {
         task: task
       }
@@ -228,8 +228,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   updateCourse() {
     this.dialog.open(UpdateCourseDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: '600px',
+      width: '800px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
       if (value.success) {
