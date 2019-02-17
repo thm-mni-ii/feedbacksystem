@@ -8,7 +8,7 @@ import {Succeeded} from '../interfaces/HttpInterfaces';
 const TOKEN_ID = 'token';
 
 /**
- * Service that manages login and logout for an user
+ * Service that manages login and logout of user
  */
 @Injectable({
   providedIn: 'root'
@@ -33,15 +33,14 @@ export class AuthService {
    *
    */
   login(username: string, password: string): Observable<HttpResponse<Succeeded>> {
-    return this.http.post<Succeeded>('/api/v1/login', {username: username, password: password},
+    return this.http.post<Succeeded>('/api/v1/login/ldap', {username: username, password: password},
       {observe: 'response'});
   }
 
 
   /**
    * Check if user accepted data privacy
-   * if not show it to him
-   * @param username
+   * @param username The user to check for
    */
   loginPrivacyCheck(username: string): Observable<Succeeded> {
     return this.http.post<Succeeded>('/api/v1/login/privacy/check', {username: username});

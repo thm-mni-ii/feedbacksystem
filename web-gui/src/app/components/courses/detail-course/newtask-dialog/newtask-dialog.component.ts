@@ -5,6 +5,10 @@ import {DatabaseService} from '../../../../service/database.service';
 import {Observable, Subscription} from 'rxjs';
 import {Testsystem} from '../../../../interfaces/HttpInterfaces';
 
+/**
+ * Dialog to create a new task or update
+ * one
+ */
 @Component({
   selector: 'app-newtask-dialog',
   templateUrl: './newtask-dialog.component.html',
@@ -59,8 +63,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Load solution file for update
-   * or creation
+   * Load solution file
    * @param file The solution file
    */
   getFiles(file: FileList) {
@@ -68,7 +71,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Close dialog withoud updating
+   * Close dialog without updating
    * or creating task
    */
   closeDialog() {
@@ -77,6 +80,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
   /**
    * Create a new task
+   * and close dialog
    */
   createTask() {
     this.db.createTask(this.data.courseID, this.newTaskName,
@@ -86,6 +90,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
   /**
    * Update given task
+   * and close dialog
    */
   updateTask() {
     this.db.updateTask(this.data.task.task_id, this.newTaskName,

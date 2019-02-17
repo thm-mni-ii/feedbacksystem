@@ -5,6 +5,9 @@ import {Router} from '@angular/router';
 import {DatabaseService} from '../../service/database.service';
 import {GeneralCourseInformation} from '../../interfaces/HttpInterfaces';
 
+/**
+ * Show all courses user subscribed
+ */
 @Component({
   selector: 'app-courses',
   templateUrl: './courses.component.html',
@@ -23,7 +26,10 @@ export class CoursesComponent implements OnInit {
 
   }
 
-
+  /**
+   * Show course in detail
+   * @param courseID The course to see in detail
+   */
   goToCourse(courseID: number) {
     this.router.navigate(['courses', courseID]);
   }

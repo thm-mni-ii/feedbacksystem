@@ -7,6 +7,9 @@ import {MatTabChangeEvent} from '@angular/material';
 import {map, startWith} from 'rxjs/operators';
 import {FormControl} from '@angular/forms';
 
+/**
+ * Matrix for every course docent has
+ */
 @Component({
   selector: 'app-prof-dashboard',
   templateUrl: './prof-dashboard.component.html',
@@ -51,7 +54,7 @@ export class ProfDashboardComponent implements OnInit {
 
 
   /**
-   * Load matrix for the right course. Every tab represents a course
+   * Load matrix for the right tab. Every tab represents a course
    * @param event The event when tab changes
    */
   tabChanged(event: MatTabChangeEvent) {
@@ -61,7 +64,7 @@ export class ProfDashboardComponent implements OnInit {
 
     this.db.getAllUserSubmissions(course.course_id).subscribe(students => {
       this.matrix = students;
-      // update filter to show values in filtered Matrix
+      // update filter to show values in filtered Matrix (Bug hack)
       this.filter.setValue(' ');
       this.filter.setValue('');
     });

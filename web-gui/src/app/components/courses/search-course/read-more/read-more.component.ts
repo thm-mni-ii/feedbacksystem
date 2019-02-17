@@ -1,5 +1,8 @@
 import {Component, Input, OnChanges} from '@angular/core';
 
+/**
+ * Show read more when to much text is given
+ */
 @Component({
   selector: 'app-read-more',
   templateUrl: './read-more.component.html',
@@ -18,11 +21,18 @@ export class ReadMoreComponent implements OnChanges {
 
   }
 
+  /**
+   * Toggles the text
+   */
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
     this.determineView();
   }
 
+  /**
+   * Show only text for given length and '...' at the end
+   * or show full text
+   */
   determineView() {
     if (!this.text || this.text.length <= this.maxLength) {
       this.currentText = this.text;

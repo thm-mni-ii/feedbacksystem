@@ -13,7 +13,9 @@ import {of, throwError} from 'rxjs';
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 import {DOCUMENT} from '@angular/common';
 
-
+/**
+ * Shows a course in detail
+ */
 @Component({
   selector: 'app-detail-course',
   templateUrl: './detail-course.component.html',
@@ -96,7 +98,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   /**
-   * Creates a new task in course with dialog
+   * Opens dialog for creation of new task
    * @param course The course data for dialog
    */
   createTask(course: DetailedCourseInformation) {
@@ -118,8 +120,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
 
   /**
-   * Docent updates task
-   * @param task
+   * Opens dialog to update task
+   * @param task The task to update
    */
   updateTask(task: CourseTask) {
     this.dialog.open(NewtaskDialogComponent, {
@@ -141,8 +143,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   /**
-   * Docent deletes task
-   * @param task
+   * Opens snackbar and asks
+   * if docent/tutor really wants to delete
+   * this task
+   * @param task The task that will be deleted
    */
   deleteTask(task: CourseTask) {
     this.snackbar.open(task.task_name + ' löschen ?', 'JA', {duration: 5000}).onAction().subscribe(() => {
@@ -219,7 +223,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
-
+  /**
+   * Opens dialog to update course information
+   */
   updateCourse() {
     this.dialog.open(UpdateCourseDialogComponent, {
       height: '400px',

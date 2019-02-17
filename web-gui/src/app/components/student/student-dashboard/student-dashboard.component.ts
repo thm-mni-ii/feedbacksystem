@@ -4,6 +4,9 @@ import {DashboardStudent} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {Router} from '@angular/router';
 
+/**
+ * Student matrix for his subscribed courses
+ */
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',

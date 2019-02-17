@@ -35,7 +35,8 @@ export class LoginComponent implements OnInit {
 
 
   /**
-   * Method that uses auth-service to login user
+   * Login user with ldap. Show data privacy dialog
+   * when user logs in for first time
    */
   login() {
     this.auth.loginPrivacyCheck(this.username).pipe(
@@ -61,6 +62,9 @@ export class LoginComponent implements OnInit {
     })).subscribe();
   }
 
+  /**
+   * Redirect to cas login
+   */
   loginCAS() {
     const getUrl = window.location;
     const baseUrl = getUrl.protocol + '//' + getUrl.host;

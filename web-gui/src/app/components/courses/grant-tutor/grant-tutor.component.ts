@@ -8,6 +8,9 @@ import {TitlebarService} from '../../../service/titlebar.service';
 import {DatabaseService} from '../../../service/database.service';
 import {GeneralCourseInformation, User} from '../../../interfaces/HttpInterfaces';
 
+/**
+ * Adding or removing tutor from course
+ */
 @Component({
   selector: 'app-grant-tutor',
   templateUrl: './grant-tutor.component.html',
@@ -79,9 +82,8 @@ export class GrantTutorComponent implements OnInit {
   }
 
   /**
-   * Save course id and shows for that specific
-   * course tutor input
-   * @param courseID
+   * Show only for course with right id the input
+   * @param courseID The course input should be shown
    */
   showTutorInput(courseID: number) {
     this.tutorInputCourseID = courseID;
@@ -99,7 +101,7 @@ export class GrantTutorComponent implements OnInit {
   /**
    * Add tutor to course
    * @param courseID Course, the tutor will be added
-   * @param key Keyboard press key
+   * @param key Keyboard press key 'ENTER'
    */
   addTutor(courseID: number, key: string) {
     if (key === 'Enter') {
