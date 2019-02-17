@@ -29,9 +29,10 @@ class SettingService {
     if (!allowedKeys.contains(key)) {
       throw new NotImplementedError("Your key: `" + key + "` is not implemented yet")
     }
-    List(0, 1).contains(DB.update("INSERT into setting (setting_val, setting_key, setting_typ) VALUES (?, ?, ?) " +
+    val num = DB.update("INSERT into setting (setting_val, setting_key, setting_typ) VALUES (?, ?, ?) " +
       " ON DUPLICATE KEY UPDATE setting_val = ?, setting_typ = ?",
-      value, key, typ, value, typ))
+      value, key, typ, value, typ)
+    List(0, 1).contains(num)
   }
 
   /**

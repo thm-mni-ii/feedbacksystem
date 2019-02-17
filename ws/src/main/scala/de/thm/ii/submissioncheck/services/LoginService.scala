@@ -35,15 +35,18 @@ class LoginService {
     * @throws IllegalArgumentException
     */
   def getLastLoginList(before: String, after: String, sort: String = "desc"): List[Map[String, Any]] = {
+    var listAll = true
     var before_std = DateParser.dateParser("9999-12-31")
     var after_std = "0000-00-00"
     if (before != null) {
+      listAll = false
       before_std = DateParser.dateParser(before)
       if (before_std == null) {
         throw new IllegalArgumentException("The given `before` date is invalid.")
       }
     }
     if (after != null) {
+      listAll = false
       val after_std_date = DateParser.dateParser(after)
       if (after_std_date == null) {
         throw new IllegalArgumentException("The given `after` date is invalid.")
@@ -59,7 +62,9 @@ class LoginService {
     }
     DB.query("select * from (select user_id, username, role_id, prename, surname, email, max(`login_timestamp`) " +
       "as last_login from login_log join user using(user_id) group by user_id) sub where last_login <= ? and " +
-      "last_login >= ? " + sort_subquery,
+      "last_login >= ? " + (if (listAll) { " UNION\nselect user_id, username, role_id, prename, surname, email, " +
+      "NULL as login_timestamp from user where user_id NOT IN (SELECT DISTINCT user_id from login_log) "} else {" "})
+      + sort_subquery,
       (res, _) => {
         Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
           UserDBLabels.username -> res.getString(UserDBLabels.username),
