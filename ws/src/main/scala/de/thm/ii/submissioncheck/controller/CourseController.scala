@@ -47,11 +47,11 @@ class CourseController {
 
   private final val LABEL_DESCRIPTION = "description"
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, course_semester, " +
-    "course_modul_id, personalised_submission and course_end_date"
+  private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, " +
+    " personalised_submission. The parameter course_semester, course_modul_id and course_end_date are optional"
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ, course_semester, " +
-    "course_modul_id and course_end_date"
+  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ." +
+  "The parameter course_semester, course_modul_id and course_end_date are optional"
 
   /**
     * getAllCourses is a route for all courses
@@ -83,9 +83,9 @@ class CourseController {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
-      val course_semester = jsonNode.get("course_semester").asText()
-      val course_modul_id = jsonNode.get("course_modul_id").asText()
-      val course_end_date = jsonNode.get(CourseDBLabels.course_end_date).asText()
+      val course_semester = if (jsonNode.get("course_semester") != null) jsonNode.get("course_semester").asText() else null
+      val course_modul_id = if (jsonNode.get("course_modul_id") != null) jsonNode.get("course_modul_id").asText() else null
+      val course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
       val personalised_submission = jsonNode.get(CourseDBLabels.personalised_submission).asInt()
       try{
         this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester,

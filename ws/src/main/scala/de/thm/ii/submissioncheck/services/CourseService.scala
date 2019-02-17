@@ -477,7 +477,7 @@ class CourseService {
     * @return Scala List
     */
   def getSubmissionsMatrixByCourse(courseid: Int): List[Any] = {
-    val tasks = taskService.getTasksByCourse(courseid)
+    val tasks = taskService.getTasksByCourse(courseid).reverse
     val subscribedStudents = this.getStudentsFromCourse(courseid)
     val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString).reverse
     var matrix: List[Any] = List()

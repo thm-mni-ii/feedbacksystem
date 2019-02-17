@@ -16,5 +16,7 @@ object RoleDBLabels {
   var ADMIN: String = "ADMIN"
   /** ROLE LABEL "ADMIN" */
   var STUDENT: String = "STUDENT"
+  /** ROLE ID "DOCENT" */
+  val DOCENT_ROLE_ID = 4
 }
 

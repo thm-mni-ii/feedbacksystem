@@ -79,6 +79,25 @@ class UserService {
   }
 
   /**
+    * Create a guest login / account / user
+    * @author Benjamin Manns
+    * @param prename users prename
+    * @param surname users surname / family name
+    * @param role_id users role_id
+    * @param username users username
+    * @param password users password
+    * @param email users email
+    * @return success of update
+    */
+  def createGuestAccount(prename: String, surname: String, role_id: Int, username: String, password: String, email: String): Boolean = {
+    val md = java.security.MessageDigest.getInstance("SHA-1")
+    val passwordHash = md.digest(password.getBytes("UTF-8")).map("%02x".format(_)).mkString
+
+    1 == DB.update("INSERT INTO user (username, email, prename, surname, role_id, password) VALUES (?,?,?,?,?,?);",
+      username, email, prename, surname, role_id, passwordHash)
+  }
+
+  /**
     * verfiyUserByHeaderToken reads from a given User Request the Bearer Token if this is a token and if yes get information form it
     * idea based on https://aboullaite.me/spring-boot-token-authentication-using-jwt/
     * The Token contains an `iat` - and expiration at unix time which will be checked that it is not too old
@@ -264,13 +283,21 @@ class UserService {
     * @return token as String
     */
   def generateTokenFromUser(user: User): String = {
+    var role_id = user.roleid
+    var role_name = user.role
+
+    // sometimes a user is a temporaly docent, he will also have more access rights!
+    if (role_id > RoleDBLabels.DOCENT_ROLE_ID && checkIfUserAtLeastOneDocent(user.userid)) {
+      role_id = RoleDBLabels.DOCENT_ROLE_ID
+      role_name = "docent"
+    }
     val jwtToken = Jwts.builder.setSubject("client_authentication")
       .claim(UserDBLabels.user_id, user.userid)
       .claim(UserDBLabels.username, user.username)
       .claim(UserDBLabels.prename, user.prename)
       .claim(UserDBLabels.surname, user.surname)
-      .claim(UserDBLabels.role_id, user.roleid)
-      .claim(UserDBLabels.role_name, user.role)
+      .claim(UserDBLabels.role_id, role_id)
+      .claim(UserDBLabels.role_name, role_name)
       .claim(UserDBLabels.email, user.email)
       .claim("token_type", "user")
       .setIssuedAt(new Date())

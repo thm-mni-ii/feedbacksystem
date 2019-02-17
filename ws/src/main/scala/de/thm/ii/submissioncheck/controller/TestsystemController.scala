@@ -33,7 +33,7 @@ class TestsystemController {
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllTestystems(request: HttpServletRequest): List[Map[String, String]] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
+    if (user.isEmpty) {
         throw new UnauthorizedException
     }
     testsystemService.getTestsystems()
