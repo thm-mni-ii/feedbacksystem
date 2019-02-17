@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="center-box" *ngIf="dashboard">
+  <div class="center-box" *ngIf="dashboard?.length > 0">
 
     <ul class="list-courses">
       <li *ngFor="let entry of dashboard" class="course">
