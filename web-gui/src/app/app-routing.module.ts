@@ -45,6 +45,9 @@ const routes: Routes = [
   },
 ];
 
+/**
+ * Routing of angular app
+ */
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {enableTracing: false})

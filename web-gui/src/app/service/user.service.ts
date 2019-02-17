@@ -28,18 +28,30 @@ export class UserService {
     return this.getDecodedToken().username;
   }
 
+  /**
+   * Returns user role [1,2,4,8,16] = [Admin,Moderator,Docent,Tutor,Student]
+   */
   getUserRole(): number {
     return this.getDecodedToken().role_id;
   }
 
+  /**
+   * Prename of user
+   */
   getPrename(): string {
     return this.getDecodedToken().prename;
   }
 
+  /**
+   * Surname of user
+   */
   getSurname(): string {
     return this.getDecodedToken().surname;
   }
 
+  /**
+   * Email of user
+   */
   getEmail(): string {
     return this.getDecodedToken().email;
   }

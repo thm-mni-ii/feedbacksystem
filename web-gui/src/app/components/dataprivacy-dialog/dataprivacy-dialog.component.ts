@@ -5,6 +5,9 @@ import {DatabaseService} from '../../service/database.service';
 import {TextType} from '../../interfaces/HttpInterfaces';
 import {UserService} from '../../service/user.service';
 
+/**
+ * Data privacy dialog of submissionchecker
+ */
 @Component({
   selector: 'app-dataprivacy-dialog',
   templateUrl: './dataprivacy-dialog.component.html',
@@ -37,7 +40,7 @@ export class DataprivacyDialogComponent implements OnInit {
 
 
   /**
-   * Login from dialog after user agreed dataprivacy
+   * Login from dialog after user agreed data privacy
    */
   login() {
     if (this.privacyChecked) {
@@ -58,7 +61,7 @@ export class DataprivacyDialogComponent implements OnInit {
   }
 
   /**
-   * Save markdown text in database
+   * Save markdown text admin wrote in database
    */
   saveDataPrivacy() {
     this.db.updatePrivacyOrImpressum(TextType.Dataprivacy, this.markdown).subscribe(success => {

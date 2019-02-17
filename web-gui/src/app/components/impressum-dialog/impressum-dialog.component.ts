@@ -5,6 +5,9 @@ import {TextType} from '../../interfaces/HttpInterfaces';
 import {UserService} from '../../service/user.service';
 import {AuthService} from '../../service/auth.service';
 
+/**
+ * The impressum dialog
+ */
 @Component({
   selector: 'app-impressum-dialog',
   templateUrl: './impressum-dialog.component.html',

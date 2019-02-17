@@ -4,6 +4,9 @@ import {Observable} from 'rxjs';
 import {DetailedCourseInformation, Testsystem} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
 
+/**
+ * Updates course information in dialog
+ */
 @Component({
   selector: 'app-update-course-dialog',
   templateUrl: './update-course-dialog.component.html',
@@ -39,10 +42,16 @@ export class UpdateCourseDialogComponent implements OnInit {
   }
 
 
+  /**
+   * Close dialog without update
+   */
   closeDialog() {
     this.dialogRef.close({success: false});
   }
 
+  /**
+   * Update course information and close dialog
+   */
   udpateCourse() {
     this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
       this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));

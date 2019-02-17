@@ -328,6 +328,11 @@ export class DatabaseService {
     }
   }
 
+  /**
+   * Admin updated impressum or data privacy
+   * @param type What should be updated
+   * @param text The updated Text
+   */
   updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
     return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
   }

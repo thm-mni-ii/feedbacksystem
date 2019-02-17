@@ -26,6 +26,9 @@ import {
   MatTooltipModule,
 } from '@angular/material';
 
+/**
+ * Module to manage material components
+ */
 @NgModule({
   imports: [
     CommonModule,

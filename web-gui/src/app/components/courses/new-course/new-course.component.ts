@@ -6,6 +6,9 @@ import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {Testsystem} from '../../../interfaces/HttpInterfaces';
 
+/**
+ * Create a new course
+ */
 @Component({
   selector: 'app-new-course',
   templateUrl: './new-course.component.html',
@@ -102,6 +105,9 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  /**
+   * Get data from form groups and create new course
+   */
   createCourse() {
     if (!this.newCourseDescription) {
       this.newCourseDescription = '';

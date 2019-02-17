@@ -8,6 +8,9 @@ import {TitlebarService} from '../../../service/titlebar.service';
 import {DatabaseService} from '../../../service/database.service';
 import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 
+/**
+ * Show all courses user can join
+ */
 @Component({
   selector: 'app-search-course',
   templateUrl: './search-course.component.html',
@@ -49,6 +52,10 @@ export class SearchCourseComponent implements OnInit {
 
   }
 
+  /**
+   * Show name of course in autocomplete input
+   * @param course Course to show only name from
+   */
   displayFn(course?: GeneralCourseInformation): string | undefined {
     return course ? course.course_name : undefined;
   }

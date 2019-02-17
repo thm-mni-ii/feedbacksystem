@@ -75,9 +75,8 @@ export class GrantDocentComponent implements OnInit {
   }
 
   /**
-   * Save course id and shows for that specific
-   * course docent input
-   * @param courseID
+   * Show input only for course with the right id
+   * @param courseID The course input should be shown
    */
   showDocentInput(courseID: number) {
     this.docentInputCourseID = courseID;
@@ -95,7 +94,7 @@ export class GrantDocentComponent implements OnInit {
   /**
    * Add docent to course
    * @param courseID Course the docent will be added
-   * @param key Keyboard press key
+   * @param key Keyboard press key 'ENTER'
    */
   addDocent(courseID: number, key: string) {
     if (key === 'Enter') {

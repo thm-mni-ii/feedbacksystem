@@ -70,6 +70,9 @@ export class StartComponent implements OnInit, OnDestroy {
     this.sub = this.titlebar.getTitle().subscribe(title => this.title = title);
   }
 
+  /**
+   * Deletes cookie and jwt after that user gets logged out
+   */
   logout() {
     this.auth.logout();
     this.cookie.delete('jwt');

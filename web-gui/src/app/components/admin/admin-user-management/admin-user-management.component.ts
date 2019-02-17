@@ -57,6 +57,10 @@ export class AdminUserManagementComponent implements OnInit {
   }
 
 
+  /**
+   * User gets deleted
+   * @param user The user to delete
+   */
   deleteUser(user: User) {
     this.db.adminDeleteUser(user.user_id).pipe(
       flatMap((result) => {

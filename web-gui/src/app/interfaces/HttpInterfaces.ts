@@ -1,4 +1,10 @@
 /**
+ * Interfaces used when data comes from db
+ */
+
+
+
+/**
  * General information of course.
  * Used to show for list of Courses
  */
@@ -103,7 +109,9 @@ export interface RoleChanged {
   success: boolean;
 }
 
-
+/**
+ * User information
+ */
 export interface User {
   email: string;
   username: string;
@@ -126,6 +134,9 @@ export enum TextType {
   Impressum = 'impressum_text'
 }
 
+/**
+ * Used to show matrix for student
+ */
 export interface DashboardStudent {
   course_description: string;
   course_name: string;
@@ -136,6 +147,9 @@ export interface DashboardStudent {
   course_semester: string;
 }
 
+/**
+ * Used to show matrix for docent
+ */
 export interface DashboardProf {
   passed: number;
   username: string;

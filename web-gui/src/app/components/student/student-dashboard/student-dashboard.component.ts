@@ -2,8 +2,11 @@ import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
 import {DashboardStudent} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {Router} from "@angular/router";
+import {Router} from '@angular/router';
 
+/**
+ * Student matrix for his subscribed courses
+ */
 @Component({
   selector: 'app-student-dashboard',
   templateUrl: './student-dashboard.component.html',
@@ -16,7 +19,7 @@ export class StudentDashboardComponent implements OnInit {
               private router: Router) {
   }
 
-  dashboard: DashboardStudent[];
+  dashboard?: DashboardStudent[];
   keys = Object.keys;
 
 
