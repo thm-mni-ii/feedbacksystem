@@ -77,9 +77,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   private submitTask(currentTask: CourseTask) {
     this.processing[currentTask.task_id] = true;
     this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
+      this.submissionData[currentTask.task_id] = '';
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
+            this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
             if (taskResult.passed == null || typeof taskResult.passed === undefined) {
               return throwError('No result yet');
             }
@@ -194,7 +196,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         .subscribe(() => {
           this.submitTask(currentTask);
         });
-    } else if (!currentTask.submit_date) {
+    } else {
       this.submitTask(currentTask);
     }
   }
