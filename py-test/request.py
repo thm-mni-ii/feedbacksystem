@@ -340,7 +340,7 @@ class TestRESTStudent(unittest.TestCase):
 
         # set time to make submit possible
         requests.put(url=self.URL + "tasks/8", data=json.dumps({
-                            "deadline":(datetime.datetime.now()+datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+                            "deadline":(datetime.datetime.now()+datetime.timedelta(hours=10)).strftime("%Y-%m-%d %H:%M:%S")
                             }),
                                    verify=False,
                                    headers={'content-type': 'application/json',
