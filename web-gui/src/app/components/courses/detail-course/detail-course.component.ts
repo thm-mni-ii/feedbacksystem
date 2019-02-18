@@ -31,16 +31,23 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
   courseDetail: DetailedCourseInformation;
   courseTasks: CourseTask[];
-  submissionData: { [task: number]: File | string };
   userRole: string;
+  submissionData: { [task: number]: File | string };
   processing: { [task: number]: boolean };
   submissionAsFile: { [task: number]: boolean };
+  deadlineTask: { [task: number]: boolean };
   courseID: number;
+
+
+  private reachedDeadline(now: Date, deadline: Date): boolean {
+    return now.getMilliseconds() > deadline.getMilliseconds();
+  }
 
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
     this.submissionData = {};
+    this.deadlineTask = {};
 
 
     // Get course id from url and receive data
@@ -61,6 +68,18 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       });
       this.titlebar.emitTitle(course_detail.course_name);
     });
+
+    // Check if task reached deadline
+    setInterval(() => {
+      if (this.courseTasks) {
+        this.courseTasks.forEach(task => {
+            if (task.deadline) {
+              this.deadlineTask[task.task_id] = this.reachedDeadline(new Date(), new Date(task.deadline));
+            }
+          }
+        );
+      }
+    }, 1000);
   }
 
 

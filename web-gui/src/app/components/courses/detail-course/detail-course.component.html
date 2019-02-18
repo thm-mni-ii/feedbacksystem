@@ -70,7 +70,7 @@
         <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
                 (click)="updateTask(task)">Bearbeiten
         </button>
-        <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
+        <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>
