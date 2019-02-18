@@ -338,6 +338,14 @@ class TestRESTStudent(unittest.TestCase):
         data = {"data": "2f2d45032dbe9c1b5e9cab6f6059df1d"}
 
 
+        # set time to make submit possible
+        requests.put(url=self.URL + "tasks/8", data=json.dumps({
+                            "deadline":(datetime.datetime.now()+datetime.timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+                            }),
+                                   verify=False,
+                                   headers={'content-type': 'application/json',
+                                            'Authorization': self.admin_auth_header})
+
 
         submit_req = requests.post(url=self.URL + "tasks/8/submit", data=json.dumps(data),
                                    verify=False,
@@ -368,6 +376,8 @@ class TestRESTStudent(unittest.TestCase):
                                      verify=False,
                                      headers={'content-type': 'application/json',
                                               'Authorization': self.student_auth_header})
+
+        print(submit_req.json())
         self.assertEqual(submit_req.status_code, 202)
         self.assertTrue(len(result_req_bf.json()) + 1 == len(result_req_af.json()))
 
