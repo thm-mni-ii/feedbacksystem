@@ -3,15 +3,18 @@ package de.thm.ii.submissioncheck.controller
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets
 
+import org.joda.time.format.DateTimeFormat
+
 import scala.collection.JavaConverters._
-import java.util.{Base64, NoSuchElementException, Timer, TimerTask}
+import java.util.{Base64, Date, NoSuchElementException, Timer, TimerTask}
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, _}
 import de.thm.ii.submissioncheck.services.{TestsystemService, _}
 import javax.servlet.http.HttpServletRequest
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -145,15 +148,11 @@ class TaskController {
   @ResponseStatus(HttpStatus.ACCEPTED)
   @RequestMapping(value = Array("tasks/{id}/submit"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseBody
-  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, String] = {
+  def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
-    if (requestingUser.isEmpty) {
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-    if (!taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
-      throw new UnauthorizedException
-    }
-
     val taskDetailsOpt = taskService.getTaskDetails(taskid)
     if(taskDetailsOpt.isEmpty){
       throw new ResourceNotFoundException
@@ -165,8 +164,20 @@ class TaskController {
       var submissionId: Int = -1
       if(dataNode != null) {
         val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-        // If submission was only data we send Kafka directly
 
+        // Check submission, if to late, return error, if no time set, it is unlimited
+        if(taskDetails(TaskDBLabels.deadline) != null){
+          val taskDeadline = taskDetails(TaskDBLabels.deadline).toString
+          val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S")
+          val dt: DateTime = formatter.parseDateTime(taskDeadline)
+          val currTimestamp = new Date().getTime
+          // Calculate overdue time
+          val diff = (dt.getMillis) - currTimestamp
+          if (diff < 0){
+            throw new BadRequestException("Deadline for task " + taskid.toString + " is overdue since " + (diff/1000*(-1)).toString + " seconds.")
+          }
+        }
+        // If submission was only data we send Kafka directly
         val data = dataNode.asText
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)
@@ -186,7 +197,7 @@ class TaskController {
         upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
 
-      Map(LABEL_SUCCESS -> "true", LABEL_TASK_ID -> taskid.toString, LABEL_SUBMISSION_ID -> submissionId.toString, LABEL_UPLOAD_URL -> upload_url)
+      Map(LABEL_SUCCESS -> true, LABEL_TASK_ID -> taskid, LABEL_SUBMISSION_ID -> submissionId, LABEL_UPLOAD_URL -> upload_url)
     }
     private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
