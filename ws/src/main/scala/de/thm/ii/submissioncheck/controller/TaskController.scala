@@ -166,6 +166,7 @@ class TaskController {
       if(dataNode != null) {
         val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
         // If submission was only data we send Kafka directly
+
         val data = dataNode.asText
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)

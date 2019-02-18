@@ -186,9 +186,14 @@ class UserController {
                            @RequestParam(value = "after", required = false) after: String,
                            @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid > 4) {
+    if(user.isEmpty) {
       throw new UnauthorizedException
     }
+
+    if (!userService.checkIfUserAtLeastOneDocent(user.get.userid) && user.get.roleid > 4){
+      throw new UnauthorizedException
+    }
+
     try {
       loginService.getLastLoginList(before, after, sort)
     }
