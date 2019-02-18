@@ -25,7 +25,16 @@ export class AdminUserManagementComponent implements OnInit {
   columns = ['surname', 'prename', 'email', 'username', 'last_login', 'role_id', 'action'];
   dataSource = new MatTableDataSource<User>();
 
+  // Guest Account
+  gPrename: string;
+  gSurname: string;
+  gPassword: string;
+  gUsername: string;
+  gEmail: string;
+  gRole: number;
+
   ngOnInit() {
+    this.gRole = 16;
     this.titlebar.emitTitle('User Management');
 
     this.db.getAllUsers().subscribe(users => {
@@ -83,6 +92,29 @@ export class AdminUserManagementComponent implements OnInit {
    */
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  createGuestAccount() {
+    if (!this.gUsername || !this.gPassword || !this.gRole || !this.gPrename || !this.gSurname || !this.gEmail) {
+      this.snackBar.open('Bitte alle Felder ausfüllen', 'OK');
+      return;
+    }
+
+    this.db.createGuestUser(this.gUsername, this.gPassword, this.gRole, this.gPrename, this.gSurname, this.gEmail).pipe(
+      flatMap(success => {
+        if (success.success) {
+          this.snackBar.open('Gast ' + this.gUsername + ' erstellt', null, {duration: 5000});
+          return this.db.getAllUsers();
+        }
+      })).subscribe(users => {
+      this.dataSource.data = users;
+      this.gPrename = '';
+      this.gSurname = '';
+      this.gEmail = '';
+      this.gPassword = '';
+      this.gRole = null;
+      this.gUsername = '';
+    });
   }
 
 
