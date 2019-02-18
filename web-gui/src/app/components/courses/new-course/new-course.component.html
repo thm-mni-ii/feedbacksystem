@@ -2,12 +2,12 @@
   <mat-vertical-stepper linear #stepper>
 
     <!-- Step 1-->
-    <mat-step [stepControl]="firstFG" label="Gib einen Kurs namen ein">
-      <form [formGroup]="firstFG" class="step-flex">
+    <mat-step [stepControl]="courseNameFG" label="Gib einen Kurs namen ein">
+      <form [formGroup]="courseNameFG" class="step-flex">
 
         <mat-form-field appearance="outline">
           <mat-label>Kurs name</mat-label>
-          <input matInput formControlName="firstCtrl" required>
+          <input matInput formControlName="firstCtrl" required pattern="\S[\w ]+">
         </mat-form-field>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperNext>Weiter</button>
@@ -16,8 +16,8 @@
     </mat-step>
 
     <!-- Step 2-->
-    <mat-step [stepControl]="secondFG" label="Beschreibung des Kurses" optional>
-      <form [formGroup]="secondFG" class="step-flex">
+    <mat-step [stepControl]="courseDescriptionFG" label="Beschreibung des Kurses" optional>
+      <form [formGroup]="courseDescriptionFG" class="step-flex">
         <mat-form-field appearance="outline">
           <mat-label>Kurs beschreibung</mat-label>
           <textarea matInput matTextareaAutosize matAutosizeMinRows="1"
@@ -31,8 +31,8 @@
     </mat-step>
 
     <!-- Step 3-->
-    <mat-step [stepControl]="thirdFG" label="Standart Aufgabentyp auswählen">
-      <form [formGroup]="thirdFG" class="step-flex">
+    <mat-step [stepControl]="courseTaskTypeFG" label="Standart Aufgabentyp auswählen">
+      <form [formGroup]="courseTaskTypeFG" class="step-flex">
         <mat-select class="select" placeholder="Aufgabentyp" formControlName="thirdCtrl" required>
           <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
         </mat-select>
@@ -44,8 +44,8 @@
     </mat-step>
 
     <!-- Step 4-->
-    <mat-step [stepControl]="fourthFG" label="Semester auswählen" optional>
-      <form [formGroup]="fourthFG" class="step-flex">
+    <mat-step [stepControl]="courseSemesterFG" label="Semester auswählen" optional>
+      <form [formGroup]="courseSemesterFG" class="step-flex">
         <mat-form-field appearance="outline">
           <mat-label>Semester</mat-label>
           <input matInput placeholder="Beispiel WS18/19" formControlName="fourthCtrl">
@@ -58,8 +58,8 @@
     </mat-step>
 
     <!-- Step 5-->
-    <mat-step [stepControl]="fifthFG" label="Modul-id eingeben" optional>
-      <form [formGroup]="fifthFG" class="step-flex">
+    <mat-step [stepControl]="courseModuleIDFG" label="Modul-id eingeben" optional>
+      <form [formGroup]="courseModuleIDFG" class="step-flex">
         <mat-form-field>
           <mat-label>Modul ID</mat-label>
           <input matInput placeholder="Beispiel CS1010" formControlName="fifthCtrl">
@@ -72,8 +72,8 @@
     </mat-step>
 
     <!-- Step 6-->
-    <mat-step [stepControl]="sixthFG" label="Ende des Moduls" optional>
-      <form [formGroup]="sixthFG" class="step-flex">
+    <mat-step [stepControl]="courseEndFG" label="Ende des Moduls" optional>
+      <form [formGroup]="courseEndFG" class="step-flex">
         <mat-form-field>
           <mat-label>Modul ende</mat-label>
           <input matInput placeholder="01.01.2019" formControlName="sixthCtrl">

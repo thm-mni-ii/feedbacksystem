@@ -22,14 +22,20 @@ export class NewCourseComponent implements OnInit, OnDestroy {
 
   @ViewChild('stepper') stepper: MatStepper;
 
+  SEMESTER_PATTERN = '^((WS)[0-9]{2,2}\\/[0-9]{2,2})|^(SS[0-9]{2,2})';
+  YEAR_PATTERN = '^(?:(?:31(\\/|-|\\.)(?:0?[13578]|1[02]))\\1|(?:(?:29|30)(\\/|-|\\.)(?:0?[13-9]|1[0-2])\\2))' +
+    '(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$|^(?:29(\\/|-|\\.)0?2\\3(?:(?:(?:1[6-9]|[2-9]\\d)?(?:0[48]|[2468][048]|[13579][26])' +
+    '|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\\d|2[0-8])(\\/|-|\\.)(?:(?:0?[1-9])' +
+    '|(?:1[0-2]))\\4(?:(?:1[6-9]|[2-9]\\d)?\\d{2})$';
+
   subscription: Subscription = new Subscription();
 
-  firstFG: FormGroup;
-  secondFG: FormGroup;
-  thirdFG: FormGroup;
-  fourthFG: FormGroup;
-  fifthFG: FormGroup;
-  sixthFG: FormGroup;
+  courseNameFG: FormGroup;
+  courseDescriptionFG: FormGroup;
+  courseTaskTypeFG: FormGroup;
+  courseSemesterFG: FormGroup;
+  courseModuleIDFG: FormGroup;
+  courseEndFG: FormGroup;
 
   testTypes$: Observable<Testsystem[]>;
   newCourseName: string;
@@ -49,51 +55,54 @@ export class NewCourseComponent implements OnInit, OnDestroy {
 
 
     // Check if step is done
-    this.firstFG = this._formBuilder.group({
+    this.courseNameFG = this._formBuilder.group({
       firstCtrl: ['', Validators.required]
     });
-    this.secondFG = this._formBuilder.group({
+    this.courseDescriptionFG = this._formBuilder.group({
       secondCtrl: ['']
     });
-    this.thirdFG = this._formBuilder.group({
+    this.courseTaskTypeFG = this._formBuilder.group({
       thirdCtrl: ['', Validators.required]
     });
-    this.fourthFG = this._formBuilder.group({
-      fourthCtrl: ['']
+    this.courseSemesterFG = this._formBuilder.group({
+      fourthCtrl: ['', Validators.pattern(this.SEMESTER_PATTERN)]
     });
-    this.fifthFG = this._formBuilder.group({
+    this.courseModuleIDFG = this._formBuilder.group({
       fifthCtrl: ['']
     });
-    this.sixthFG = this._formBuilder.group({
-      sixthCtrl: ['']
+    this.courseEndFG = this._formBuilder.group({
+      sixthCtrl: ['', Validators.pattern(this.YEAR_PATTERN)]
     });
 
 
-    this.subscription.add(this.firstFG.valueChanges.subscribe(
+    this.subscription.add(this.courseNameFG.valueChanges.subscribe(
       (inputStep1: { firstCtrl: string }) => {
+        if (inputStep1.firstCtrl.match(' ')) {
+          inputStep1.firstCtrl = '';
+        }
         this.newCourseName = inputStep1.firstCtrl;
       }));
 
-    this.subscription.add(this.secondFG.valueChanges.subscribe(
+    this.subscription.add(this.courseDescriptionFG.valueChanges.subscribe(
       (inputStep2: { secondCtrl: string }) => {
         this.newCourseDescription = inputStep2.secondCtrl;
       }));
 
-    this.subscription.add(this.thirdFG.valueChanges.subscribe(
+    this.subscription.add(this.courseTaskTypeFG.valueChanges.subscribe(
       (inputStep3: { thirdCtrl: string }) => {
         this.newCourseType = inputStep3.thirdCtrl;
       }));
 
-    this.subscription.add(this.fourthFG.valueChanges.subscribe(
+    this.subscription.add(this.courseSemesterFG.valueChanges.subscribe(
       (inputStep4: { fourthCtrl: string }) => {
         this.newCourseSemester = inputStep4.fourthCtrl;
       }));
 
-    this.subscription.add(this.fifthFG.valueChanges.subscribe(
+    this.subscription.add(this.courseModuleIDFG.valueChanges.subscribe(
       (inputStep5: { fifthCtrl: string }) => {
         this.newCourseModuleID = inputStep5.fifthCtrl;
       }));
-    this.subscription.add(this.sixthFG.valueChanges.subscribe(
+    this.subscription.add(this.courseEndFG.valueChanges.subscribe(
       (inputStep6: { sixthCtrl: string }) => {
         this.newCourseDate = inputStep6.sixthCtrl;
       }
@@ -117,8 +126,12 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       this.newCourseModuleID = '';
     }
 
-    if (!this.newCourseSemester) {
+    if (!this.newCourseSemester || this.newCourseSemester.match(this.SEMESTER_PATTERN)) {
       this.newCourseSemester = '';
+    }
+
+    if (!this.newCourseDate || this.newCourseDate.match(this.YEAR_PATTERN)) {
+      this.newCourseDate = '';
     }
 
     let privateUserData: boolean;
