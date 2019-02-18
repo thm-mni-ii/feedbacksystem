@@ -490,15 +490,27 @@ class CourseService {
           /* processing - number of trials - passed - passed date */
         var passed: Boolean = false
         var passedDate: Any = null
+        var passed_string: String = null
+        var coll_result_date: Any = null
         for(submission <- userSubmissions) {
+          if (coll_result_date == null) {
+            coll_result_date = submission("result_date")
+          }
           if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
           }
         }
+        
+        if (!passed && coll_result_date == null) {
+          passed_string = null
+        } else {
+          passed_string = passed.toString
+        }
+
         tasksPassedSum = tasksPassedSum + passed.compare(false)
         val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed, "passed_date" -> passedDate))
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string, "passed_date" -> passedDate))
 
         processedTasks = taskStudentCell :: processedTasks
       }
@@ -527,17 +539,31 @@ class CourseService {
       for((task, i) <- courseTasks.zipWithIndex) {
         val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
         // process them
-        var passed: Boolean = false
+        var passed_string: String = null
         var passedDate: Any = null
-        for (submission <- submissionRawData) {
-          if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
-            passed = true
-            passedDate = submission("submit_date")
+        var coll_result_date: Any = null
+        if (submissionRawData.length == 0) {
+          passed_string = null
+        } else {
+          var passed: Boolean = false
+          for (submission <- submissionRawData) {
+            if (coll_result_date == null) {
+              coll_result_date = submission("result_date")
+            }
+            if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
+              passed = true
+              passedDate = submission("submit_date")
+            }
+          }
+          if (!passed && coll_result_date == null) {
+            passed_string = null
+          } else {
+            passed_string = passed.toString
           }
         }
 
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed,
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed_string,
           "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
         deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
         processedTasks = taskStudentCell :: processedTasks
@@ -660,6 +686,14 @@ class CourseService {
     Map(LABEL_SUCCESS -> (updates == suceeds))
   }
 
+  private def getNullOrBoolean(boolDBString: String) = {
+    if (boolDBString == null) {
+      null
+    } else {
+      boolDBString.toInt > 0
+    }
+  }
+
   /**
     * get a List of all submissions and information from which course
     * @author Benjamin Manns
@@ -675,7 +709,7 @@ class CourseService {
         CourseDBLabels.name -> res.getString(CourseDBLabels.name),
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),
         CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
-        SubmissionDBLabels.passed->res.getInt(SubmissionDBLabels.passed),
+        SubmissionDBLabels.passed->getNullOrBoolean(res.getString(SubmissionDBLabels.passed)),
         SubmissionDBLabels.exitcode ->res.getString(SubmissionDBLabels.exitcode),
         SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
         SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
