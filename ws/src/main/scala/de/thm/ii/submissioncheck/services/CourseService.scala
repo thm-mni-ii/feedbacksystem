@@ -501,7 +501,7 @@ class CourseService {
             passedDate = submission("submit_date")
           }
         }
-        
+
         if (!passed && coll_result_date == null) {
           passed_string = null
         } else {
