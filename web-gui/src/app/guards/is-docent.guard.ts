@@ -13,6 +13,7 @@ export class IsDocentGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    localStorage.setItem('route', state.url);
     return this.user.getUserRole() === 4;
   }
 }

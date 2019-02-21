@@ -18,7 +18,7 @@ object DateParser {
       "MMM dd, uuuu",
       "dd MMMM uuuu",
       "dd MMM uuuu",
-      "dd-MM-uuuu")
+      "dd-MM-uuuu", "dd.MM.yyyy")
     val trimmedText = text.trim
     var date: LocalDate = null
     for (pattern <- patterns) {

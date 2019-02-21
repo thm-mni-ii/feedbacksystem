@@ -2,7 +2,11 @@
 
   <mat-card id="description">
     <h4>{{courseDetail?.course_description}}</h4>
-    <button *ngIf="userRole != 'docent'" class="desc-button" mat-flat-button color="warn"
+    <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
+            (click)="subscribeCourse()">Kurs
+      beitreten
+    </button>
+    <button *ngIf="userRole != 'docent' && courseDetail.role_id" class="desc-button" mat-flat-button color="warn"
             (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Kurs
       verlassen
     </button>
@@ -47,7 +51,7 @@
           <p>{{task.submit_date| date:'medium'}}</p>
 
         </div>
-        <p id="task-result-text" *ngIf="task.result">Ergebnis: {{task.result}}</p>
+        <p id="task-result-text" class="{{task.passed}}" *ngIf="task.result">Ergebnis: {{task.result}}</p>
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
@@ -71,7 +75,9 @@
         <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
                 (click)="updateTask(task)">Bearbeiten
         </button>
-        <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
+        <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent"
+                (click)="submission(courseDetail.course_id, task)">Abgeben
+        </button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

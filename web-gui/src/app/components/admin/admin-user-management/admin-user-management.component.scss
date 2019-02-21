@@ -15,3 +15,13 @@ mat-form-field {
 .mat-row:nth-child(even) {
   background-color: lightgrey;
 }
+
+.e-panel {
+  width: 80%;
+  margin-bottom: 12px;
+}
+
+.guest-account {
+  display: flex;
+  flex-direction: column;
+}
