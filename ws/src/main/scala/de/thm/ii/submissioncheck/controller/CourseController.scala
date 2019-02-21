@@ -1,11 +1,12 @@
 package de.thm.ii.submissioncheck.controller
 
 import java.nio.file.{Files, Path, Paths}
+import java.time.format.DateTimeFormatter
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, ResourceNotFoundException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DateParser, ResourceNotFoundException, UnauthorizedException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import de.thm.ii.submissioncheck.services._
@@ -85,9 +86,19 @@ class CourseController {
       val standard_task_typ = jsonNode.get("standard_task_typ").asText()
       val course_semester = if (jsonNode.get("course_semester") != null) jsonNode.get("course_semester").asText() else null
       val course_modul_id = if (jsonNode.get("course_modul_id") != null) jsonNode.get("course_modul_id").asText() else null
-      val course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
+      var course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
+      if (course_end_date == "") {
+        course_end_date = null
+      }
       val personalised_submission = jsonNode.get(CourseDBLabels.personalised_submission).asInt()
-      try{
+      try {
+        if (course_end_date != null){
+          val dateParsed = DateParser.dateParser(course_end_date)
+          if (dateParsed != null) {
+            course_end_date = dateParsed.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+          }
+        }
+
         this.courseService.createCourseByUser(user.get, name, description, standard_task_typ, course_modul_id, course_semester,
           course_end_date, personalised_submission)
       } catch {
@@ -217,7 +228,10 @@ class CourseController {
     val standard_task_typ = if (jsonNode.get(CourseDBLabels.standard_task_typ) != null) jsonNode.get(CourseDBLabels.standard_task_typ).asText() else null
     val course_semester = if (jsonNode.get(CourseDBLabels.course_semester) != null) jsonNode.get(CourseDBLabels.course_semester).asText() else null
     val course_modul_id = if (jsonNode.get(CourseDBLabels.course_modul_id) != null) jsonNode.get(CourseDBLabels.course_modul_id).asText() else null
-    val course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
+    var course_end_date = if (jsonNode.get(CourseDBLabels.course_end_date) != null) jsonNode.get(CourseDBLabels.course_end_date).asText() else null
+    if (course_end_date == "") {
+      course_end_date = null
+    }
     val personalised_submission = if (jsonNode.get(CourseDBLabels.personalised_submission) != null) {
       jsonNode.get(CourseDBLabels.personalised_submission).asBoolean().toString
     } else {
