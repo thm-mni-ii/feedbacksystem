@@ -1,10 +1,13 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.net.UnknownHostException
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc.{BadRequestException, LDAPConnector, UnauthorizedException}
 import de.thm.ii.submissioncheck.services.{LoginService, SettingService, UserService}
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
+import org.ldaptive.LdapEntry
 import org.springframework.web.bind.annotation._
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -76,7 +79,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
 
-      val cookieMaxAge = 60 * 5
+      val cookieMaxAge = 30
       val co = new Cookie("jwt", jwtToken)
       co.setPath("/")
       co.setHttpOnly(false)
@@ -111,8 +114,14 @@ class LoginController extends CasClientConfigurerAdapter {
     try {
     val username = jsonNode.get(LABEL_USERNAME).asText()
     val password = jsonNode.get("password").asText()
+    var ldapUser: Option[LdapEntry] = None
 
-    val ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
+    try {
+      ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
+    } catch {
+      case _: Exception => ldapUser = None
+    }
+
     val login: Boolean = ldapUser.isDefined
     if (!login) {
       // If LDAP Fails, we try to load from guest account

@@ -528,7 +528,7 @@ class CourseService {
     * @return Big Scala Map
     */
   def getSubmissionsMatrixByUser(userid: Int): List[Any] = {
-    val courseList = this.getSubscribedCoursesByUser(userid, true)
+    var courseList = this.getSubscribedCoursesByUser(userid, true)
     var matrix: List[Any] = List()
     for (course <- courseList) {
       val courseTasks = taskService.getTasksByCourse(course(CourseDBLabels.courseid).asInstanceOf[Int])

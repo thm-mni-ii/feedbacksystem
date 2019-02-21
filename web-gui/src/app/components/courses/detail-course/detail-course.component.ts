@@ -90,7 +90,15 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
             take(120)))
         ).subscribe(taskResult => {
           this.processing[currentTask.task_id] = false;
-          this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
+
+          let index = -1
+          for(let k in this.courseTasks){
+            if(this.courseTasks[k].task_id == currentTask.task_id){
+              index = parseInt(k); // stupid TS, it is an int, always will be
+              break;
+            }
+          }
+          this.courseTasks[index] = taskResult;
         });
 
       }
