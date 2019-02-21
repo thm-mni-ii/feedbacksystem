@@ -200,7 +200,7 @@ export class DatabaseService {
       name: name,
       description: description,
       testsystem_id: test_type,
-      deadline: deadline
+      deadline: this.formatDate(deadline)
     }).pipe(
       flatMap(result => {
         let upload_url: string;
@@ -307,6 +307,17 @@ export class DatabaseService {
   }
 
   /**
+   * Returns a sql compatible timestamp string based on a given date
+   * @param date
+   */
+  private formatDate(date: Date): string{
+    let curr_date = date.getDate();
+    let curr_month = date.getMonth() + 1; //Months are zero based
+    let curr_year = date.getFullYear();
+    return curr_year + '-' + curr_month + '-' + curr_date + " " + date.toLocaleTimeString()
+  }
+
+  /**
    * Lecturer updates an given Task
    * @param idTask The unique id of task to update
    * @param name This is the new name of the updated task
@@ -329,7 +340,7 @@ export class DatabaseService {
         name: name,
         description: description,
         test_type: test_type,
-        deadline: deadline
+        deadline: this.formatDate(deadline)
       }).pipe(
         flatMap(res => {
           let uploadUrl: string;

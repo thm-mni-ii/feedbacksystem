@@ -127,7 +127,7 @@ class UserController {
     * @param request contains resquest headers
     * @return JSON
     */
-  @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.DELETE), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @RequestMapping(value = Array("users/{userid}"), method = Array(RequestMethod.DELETE))
   def deleteAUser(@PathVariable userid: Int, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty || user.get.roleid != 1) {
