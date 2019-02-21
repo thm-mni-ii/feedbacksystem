@@ -117,8 +117,12 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       this.newCourseModuleID = '';
     }
 
-    if (!this.newCourseSemester) {
+    if (!this.newCourseSemester || !this.newCourseSemester.match(this.SEMESTER_PATTERN)) {
       this.newCourseSemester = '';
+    }
+
+    if (!this.newCourseDate || !this.newCourseDate.match(this.YEAR_PATTERN)) {
+      this.newCourseDate = '';
     }
 
     let privateUserData: boolean;

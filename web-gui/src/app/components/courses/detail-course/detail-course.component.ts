@@ -37,6 +37,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   submissionAsFile: { [task: number]: boolean };
   courseID: number;
 
+
+  private reachedDeadline(now: Date, deadline: Date): boolean {
+    return now > deadline;
+  }
+
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};

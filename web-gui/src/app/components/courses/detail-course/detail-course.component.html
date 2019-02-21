@@ -41,13 +41,14 @@
 
         <!-- Submission -->
         <div class="result">
-          <p *ngIf="task.submission_data">{{task.submission_data}}</p>
-          <p *ngIf="task.file">{{task.file}}</p>
+          <p *ngIf="task.submission_data">Abgabe: {{task.submission_data}}</p>
+          <p *ngIf="task.file">Dateiname: {{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
 
         </div>
-        <p id="task-result-text" *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
+        <p id="task-result-text" *ngIf="task.result">Ergebnis: {{task.result}}</p>
+        <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
