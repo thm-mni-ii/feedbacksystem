@@ -44,6 +44,7 @@ export class StartComponent implements OnInit, OnDestroy {
     this.prename = this.user.getPrename();
     this.surname = this.user.getSurname();
     this.email = this.user.getEmail();
+    this.opened = true;
 
     switch (this.userRole) {
       case 1:

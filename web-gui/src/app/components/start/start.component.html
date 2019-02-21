@@ -2,15 +2,9 @@
   <mat-sidenav #sidenav mode="side" [(opened)]="opened">
     <div class="sidenav-group">
 
-      <mat-card class="profile">
-        <mat-card-header>
-          <mat-card-title>{{prename}} {{surname}}</mat-card-title>
-          <mat-card-subtitle>{{email}}</mat-card-subtitle>
-        </mat-card-header>
-      </mat-card>
-
-
-      <mat-divider></mat-divider>
+      <div class="logo">
+        <h1>Feedbacksystem <i class="material-icons">feedback</i></h1>
+      </div>
 
 
       <a *ngIf="!isModerator" class="sidenav-button" routerLink="/{{userRoleString}}/dashboard" routerLinkActive="selected">

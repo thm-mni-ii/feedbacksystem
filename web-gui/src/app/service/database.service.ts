@@ -259,6 +259,27 @@ export class DatabaseService {
     return this.http.post<RoleChanged>('/api/v1/users/grant/' + userID, {role: userRole});
   }
 
+  /**
+   * Admin can create guest account
+   * @param username The username of guest account
+   * @param password Password guest account uses
+   * @param roleID The role user gets
+   * @param prename Prename of user
+   * @param surname Surname of user
+   * @param email Email of user
+   */
+  createGuestUser(username: string, password: string, roleID: number,
+                  prename: string, surname: string, email: string): Observable<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/users', {
+      role_id: roleID,
+      prename: prename,
+      surname: surname,
+      password: password,
+      email: email,
+      username: username
+    });
+  }
+
 
   // PUT REQUESTS
 

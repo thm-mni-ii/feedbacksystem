@@ -47,7 +47,7 @@
           <p>{{task.submit_date| date:'medium'}}</p>
 
         </div>
-        <p id="task-result-text" *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
+        <p id="task-result-text"  class="{{task.passed}}" *ngIf="task.result">{{task.result}} {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
@@ -70,7 +70,7 @@
         <button *ngIf="userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
                 (click)="updateTask(task)">Bearbeiten
         </button>
-        <button mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
+        <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent" (click)="submission(courseDetail.course_id, task)">Abgeben</button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

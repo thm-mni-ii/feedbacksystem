@@ -31,16 +31,23 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
   courseDetail: DetailedCourseInformation;
   courseTasks: CourseTask[];
-  submissionData: { [task: number]: File | string };
   userRole: string;
+  submissionData: { [task: number]: File | string };
   processing: { [task: number]: boolean };
   submissionAsFile: { [task: number]: boolean };
+  deadlineTask: { [task: number]: boolean };
   courseID: number;
+
+
+  private reachedDeadline(now: Date, deadline: Date): boolean {
+    return now.getMilliseconds() > deadline.getMilliseconds();
+  }
 
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
     this.submissionData = {};
+    this.deadlineTask = {};
 
 
     // Get course id from url and receive data
@@ -61,6 +68,18 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       });
       this.titlebar.emitTitle(course_detail.course_name);
     });
+
+    // Check if task reached deadline
+    setInterval(() => {
+      if (this.courseTasks) {
+        this.courseTasks.forEach(task => {
+            if (task.deadline) {
+              this.deadlineTask[task.task_id] = this.reachedDeadline(new Date(), new Date(task.deadline));
+            }
+          }
+        );
+      }
+    }, 1000);
   }
 
 
@@ -77,9 +96,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   private submitTask(currentTask: CourseTask) {
     this.processing[currentTask.task_id] = true;
     this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
+      this.submissionData[currentTask.task_id] = '';
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
+            this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
             if (taskResult.passed == null || typeof taskResult.passed === undefined) {
               return throwError('No result yet');
             }
@@ -111,8 +132,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   createTask(course: DetailedCourseInformation) {
     this.dialog.open(NewtaskDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: 'auto',
+      width: 'auto',
       data: {courseID: course.course_id}
     }).afterClosed().pipe(
       flatMap((value: Succeeded) => {
@@ -133,8 +154,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   updateTask(task: CourseTask) {
     this.dialog.open(NewtaskDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: 'auto',
+      width: 'auto',
       data: {
         task: task
       }
@@ -202,7 +223,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         .subscribe(() => {
           this.submitTask(currentTask);
         });
-    } else if (!currentTask.submit_date) {
+    } else {
       this.submitTask(currentTask);
     }
   }
@@ -236,8 +257,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    */
   updateCourse() {
     this.dialog.open(UpdateCourseDialogComponent, {
-      height: '400px',
-      width: '600px',
+      height: '600px',
+      width: '800px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
       if (value.success) {

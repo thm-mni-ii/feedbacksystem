@@ -19,8 +19,16 @@ mat-sidenav {
   background: $cPrimary;
 }
 
-.profile {
-  margin: 12px;
+
+.logo {
+  vertical-align: center;
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-bottom: solid 1px white;
 }
 
 .sidenav-button {
