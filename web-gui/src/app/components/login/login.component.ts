@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {flatMap, map} from 'rxjs/operators';
-import {MatDialog} from '@angular/material';
+import {MatDialog, MatSnackBar} from '@angular/material';
 import {DataprivacyDialogComponent} from '../dataprivacy-dialog/dataprivacy-dialog.component';
 import {DOCUMENT} from '@angular/common';
 import {CookieService} from 'ngx-cookie-service';
@@ -18,7 +18,8 @@ import {CookieService} from 'ngx-cookie-service';
 export class LoginComponent implements OnInit {
 
   constructor(private router: Router, private auth: AuthService, private dialog: MatDialog,
-              @Inject(DOCUMENT) private document: Document, private cookie: CookieService) {
+              @Inject(DOCUMENT) private document: Document, private cookie: CookieService,
+              private snackbar: MatSnackBar) {
   }
 
   username: string;
@@ -54,11 +55,14 @@ export class LoginComponent implements OnInit {
         }
       })
     ).pipe(map(response => {
-      console.log(response);
-      const authHeader: string = response.headers.get('Authorization');
-      const token: string = authHeader.replace('Bearer ', '');
-      localStorage.setItem('token', token);
-      this.router.navigate(['']);
+      if (response.body.success) {
+        const authHeader: string = response.headers.get('Authorization');
+        const token: string = authHeader.replace('Bearer ', '');
+        localStorage.setItem('token', token);
+        this.router.navigate(['']);
+      } else {
+        this.snackbar.open('Username oder Passwort falsch', 'OK');
+      }
     })).subscribe();
   }
 
