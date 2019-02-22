@@ -479,7 +479,7 @@ class CourseService {
   def getSubmissionsMatrixByCourse(courseid: Int): List[Any] = {
     val tasks = taskService.getTasksByCourse(courseid).reverse
     val subscribedStudents = this.getStudentsFromCourse(courseid)
-    val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString).reverse
+    val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString)
     var matrix: List[Any] = List()
 
     for(u <- subscribedStudents){
@@ -514,8 +514,11 @@ class CourseService {
 
         processedTasks = taskStudentCell :: processedTasks
       }
-      val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username), UserDBLabels.user_id -> u(UserDBLabels.user_id),
-        UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname), LABEL_PASSED ->  tasksPassedSum)
+      val passed_glob = (processedTasks.length == tasksPassedSum)
+      val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
+        UserDBLabels.user_id -> u(UserDBLabels.user_id),
+        UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname),
+        LABEL_PASSED -> (if (passed_glob) 1 else 0))
       matrix = studentLine :: matrix
     }
     matrix
@@ -532,7 +535,7 @@ class CourseService {
     var matrix: List[Any] = List()
     for (course <- courseList) {
       val courseTasks = taskService.getTasksByCourse(course(CourseDBLabels.courseid).asInstanceOf[Int])
-      val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString).reverse
+      val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString)
 
       var processedTasks: List[Any] = List()
       var deadlines: List[String] = List()

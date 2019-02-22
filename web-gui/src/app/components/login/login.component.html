@@ -6,7 +6,7 @@
       <mat-card-header>
         <mat-card-title>Login</mat-card-title>
       </mat-card-header>
-      <mat-card-content class="login-inputs">
+      <mat-card-content (keyup.enter)="login()" class="login-inputs">
         <mat-form-field>
           <input [(ngModel)]="username" name="username" type="text" matInput placeholder="Username">
         </mat-form-field>

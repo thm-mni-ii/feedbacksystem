@@ -40,7 +40,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
 
   private reachedDeadline(now: Date, deadline: Date): boolean {
-    return now.getMilliseconds() > deadline.getMilliseconds();
+    return now > deadline;
   }
 
   ngOnInit() {

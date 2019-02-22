@@ -126,11 +126,11 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       this.newCourseModuleID = '';
     }
 
-    if (!this.newCourseSemester || this.newCourseSemester.match(this.SEMESTER_PATTERN)) {
+    if (!this.newCourseSemester || !this.newCourseSemester.match(this.SEMESTER_PATTERN)) {
       this.newCourseSemester = '';
     }
 
-    if (!this.newCourseDate || this.newCourseDate.match(this.YEAR_PATTERN)) {
+    if (!this.newCourseDate || !this.newCourseDate.match(this.YEAR_PATTERN)) {
       this.newCourseDate = '';
     }
 
