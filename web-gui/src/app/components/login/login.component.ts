@@ -28,7 +28,13 @@ export class LoginComponent implements OnInit {
     const cookie = this.cookie.get('jwt');
     if (cookie) {
       localStorage.setItem('token', cookie);
-      this.router.navigate(['']);
+      const extraRoute = localStorage.getItem('route');
+      if (extraRoute) {
+        this.router.navigateByUrl('' + extraRoute);
+        localStorage.removeItem('route');
+      } else {
+        this.router.navigate(['']);
+      }
     }
 
   }

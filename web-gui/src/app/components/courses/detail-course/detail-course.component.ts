@@ -269,4 +269,21 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  /**
+   * If user gets course directly from link
+   */
+  subscribeCourse() {
+    this.db.subscribeCourse(this.courseID).pipe(
+      flatMap(success => {
+        if (success.success) {
+          this.snackbar.open('Kurs ' + this.courseDetail.course_name + ' beigetreten', 'OK', {duration: 3000});
+          return this.db.getCourseDetail(this.courseID);
+        }
+      })
+    ).subscribe(courseDetail => {
+      this.courseDetail = courseDetail;
+      this.courseTasks = courseDetail.tasks;
+    });
+  }
+
 }
