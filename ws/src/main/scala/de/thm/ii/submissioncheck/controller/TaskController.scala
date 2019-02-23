@@ -50,8 +50,8 @@ class TaskController {
 
   private val topicTaskRequest: String = "new_task_request"
   private val LABEL_SUCCESS = "success"
-  private var container: KafkaMessageListenerContainer[String, String] = null
-  private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = null
+  private var container: KafkaMessageListenerContainer[String, String] = _
+  private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = _
 
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
@@ -172,7 +172,7 @@ class TaskController {
           val dt: DateTime = formatter.parseDateTime(taskDeadline)
           val currTimestamp = new Date().getTime
           // Calculate overdue time
-          val diff = (dt.getMillis) - currTimestamp
+          val diff = dt.getMillis - currTimestamp
           if (diff < 0){
             throw new BadRequestException("Deadline for task " + taskid.toString + " is overdue since " + (diff/1000*(-1)).toString + " seconds.")
           }
@@ -237,7 +237,7 @@ class TaskController {
       message = true
 
      } catch {
-       case e: Exception => {}
+       case e: Exception => // TODO: Why swallow the exception?
      }
     Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
   }
@@ -360,7 +360,7 @@ class TaskController {
       val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
       val testsystem_id = jsonNode.get(TestsystemLabels.id).asText()
       // Test if testsystem exists
-      if (testsystemService.getTestsystem(testsystem_id).isEmpty){
+      if (testsystemService.getTestsystem(testsystem_id).isEmpty) {
         throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
       }
       var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id)
@@ -370,9 +370,8 @@ class TaskController {
       taskInfo
     }
     catch {
-      case e: NullPointerException => {
+      case e: NullPointerException =>
         throw new BadRequestException("Please provide: name, description and testsystem_id. Deadline is optional")
-      }
     }
   }
 

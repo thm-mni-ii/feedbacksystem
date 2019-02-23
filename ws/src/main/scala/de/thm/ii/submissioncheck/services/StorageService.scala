@@ -38,14 +38,13 @@ class StorageService {
   def deleteSubmission(taskid: Int, submissionid: Int, filename: String): Unit = {
     val storeLocation = this.storeLocation(taskid, submissionid)
     var filePath = storeLocation
-    if(filename != null){
+    if (filename != null) {
       filePath = storeLocation.resolve(filename)
     }
-    try{
+    try {
       Files.delete(filePath)
-    }
-    catch {
-      case _: NoSuchFileException => {}
+    } catch {
+      case _: NoSuchFileException =>
     }
   }
 
@@ -61,15 +60,12 @@ class StorageService {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
     try {
       Files.createDirectories(storeLocation)
-    }
-    catch {
-      case _: FileAlreadyExistsException => {}
+    } catch {
+      case _: FileAlreadyExistsException =>
     }
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
-    }
-    catch {
-      case e: Exception =>
-        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    } catch {
+      case e: Exception => throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
 
@@ -89,18 +85,15 @@ class StorageService {
       val storeLocation = this.storeLocation(taskid, submission_id)
       try {
         Files.createDirectories(storeLocation)
-      }
-      catch {
-        case _: FileAlreadyExistsException => {}
+      } catch {
+        case _: FileAlreadyExistsException =>
       }
       try {
         Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
+      } catch {
+        case _: FileAlreadyExistsException =>
       }
-      catch {
-        case _: FileAlreadyExistsException => {}
-      }
-    }
-    catch {
+    } catch {
       case e: Exception =>
         throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
@@ -118,21 +111,17 @@ class StorageService {
       val storeLocation = this.storeLocation(taskid, submission_id)
       try {
         Files.createDirectories(storeLocation)
-      }
-      catch {
-        case _: FileAlreadyExistsException => {}
+      } catch {
+        case _: FileAlreadyExistsException =>
       }
       try {
         val is = new ByteArrayInputStream(file.getBytes)
         Files.copy(is, storeLocation.resolve("string_submission.txt"), StandardCopyOption.REPLACE_EXISTING)
+      } catch {
+        case _: FileAlreadyExistsException =>
       }
-      catch {
-        case _: FileAlreadyExistsException => {}
-      }
-    }
-    catch {
-      case e: Exception =>
-        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    } catch {
+      case e: Exception => throw new RuntimeException(FILE_NOT_STORED_MSG)
     }
   }
 
@@ -149,9 +138,8 @@ class StorageService {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid))
       try {
         Files.createDirectories(storeLocation)
-      }
-      catch {
-        case _: FileAlreadyExistsException => {}
+      } catch {
+        case _: FileAlreadyExistsException => // TODO: Why swallow the exception?
       }
       // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
       val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))

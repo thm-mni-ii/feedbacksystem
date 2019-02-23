@@ -28,13 +28,12 @@ class Application {
   //private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
   private val initSQLPath = Paths.get("/usr/local/ws/init.sql").toString
 
-  private var initSQLFile: File = null
+  private var initSQLFile: File = _
   try {
     initSQLFile = new File(initSQLPath)
   } catch {
-    case _: java.io.FileNotFoundException => {
+    case _: java.io.FileNotFoundException =>
       initSQLFile = ResourceUtils.getFile("classpath:init.sql")
-    }
   }
 
   logger.info("SQL ABS PATH: ")

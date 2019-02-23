@@ -55,9 +55,7 @@ object LDAPConnector {
         new InitialDirContext(props)
         loginSuccess = true
       } catch {
-        case _: Exception => {
-          loginSuccess = false
-        }
+        case _: Exception => loginSuccess = false
       }
       if (!loginSuccess) {
         None

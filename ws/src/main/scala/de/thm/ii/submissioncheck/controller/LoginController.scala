@@ -89,8 +89,7 @@ class LoginController extends CasClientConfigurerAdapter {
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
       "jwt"
-    }
-    catch {
+    } catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
@@ -112,40 +111,40 @@ class LoginController extends CasClientConfigurerAdapter {
   @RequestMapping(value = Array("login/ldap"), method = Array(RequestMethod.POST))
   def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-    val username = jsonNode.get(LABEL_USERNAME).asText()
-    val password = jsonNode.get("password").asText()
-    var ldapUser: Option[LdapEntry] = None
+      val username = jsonNode.get(LABEL_USERNAME).asText()
+      val password = jsonNode.get("password").asText()
+      var ldapUser: Option[LdapEntry] = None
 
-    try {
-      ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
+      try {
+        ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
+      } catch {
+        case _: Exception => ldapUser = None
+      }
+
+      val login: Boolean = ldapUser.isDefined
+      if (!login) {
+        // If LDAP Fails, we try to load from guest account
+        val guestUser = userService.guestLogin(username, password)
+        val jwtToken: String = if (guestUser.isDefined) this.userService.generateTokenFromUser(guestUser.get) else null
+        setBearer(response, jwtToken)
+        Map(LABEL_SUCCESS -> guestUser.isDefined)
+      } else {
+        userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
+          ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
+
+        val user = userService.loadUserFromDB(username)
+        val jwtToken: String = if (login) this.userService.generateTokenFromUser(user.get) else null
+        setBearer(response, jwtToken)
+        Map(LABEL_SUCCESS -> login)
+      }
     } catch {
-      case _: Exception => ldapUser = None
-    }
-
-    val login: Boolean = ldapUser.isDefined
-    if (!login) {
-      // If LDAP Fails, we try to load from guest account
-      val guestUser = userService.guestLogin(username, password)
-      val jwtToken: String = if (guestUser.isDefined) this.userService.generateTokenFromUser(guestUser.get) else null
-      setBearer(response, jwtToken)
-      Map(LABEL_SUCCESS -> guestUser.isDefined)
-    } else {
-      userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
-        ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
-
-      val user = userService.loadUserFromDB(username)
-      val jwtToken: String = if (login) this.userService.generateTokenFromUser(user.get) else null
-      setBearer(response, jwtToken)
-      Map(LABEL_SUCCESS -> login)
-    }
-  } catch {
-        case e: NullPointerException => {
-          throw new BadRequestException("Please provide: username and password")
-        }
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: username and password")
+      }
     }
   }
 
-  private def setBearer(response: HttpServletResponse, token: String) = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
+  private def setBearer(response: HttpServletResponse, token: String): Unit = response.addHeader(LABEL_AUTHORIZATION, "Bearer " + token)
 
   /**
     * Give information if user is already successful loged in
@@ -199,8 +198,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val jwtToken = this.userService.generateTokenFromUser(user)
       setBearer(response, jwtToken)
       Map("token" -> jwtToken)
-    }
-    catch {
+    } catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide: name")
       }

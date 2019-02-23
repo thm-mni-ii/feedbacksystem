@@ -308,7 +308,7 @@ class CourseService {
     list.headOption
   }
 
-  private def zip(out: Path, files: Iterable[Path], replacePath: String = "") = {
+  private def zip(out: Path, files: Iterable[Path], replacePath: String = ""): Unit = {
     val zip = new ZipOutputStream(Files.newOutputStream(out))
 
     files.foreach { file =>
@@ -316,7 +316,7 @@ class CourseService {
       try {
         Files.copy(file, zip)
       } catch {
-        case _: java.nio.file.NoSuchFileException => {}
+        case _: java.nio.file.NoSuchFileException =>
       }
       zip.closeEntry()
     }
@@ -352,7 +352,9 @@ class CourseService {
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
         var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
-        if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
+        if (only_last_try) {
+          studentSubmissionList = studentSubmissionList.headOption.toList
+        }
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
             last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
@@ -370,9 +372,8 @@ class CourseService {
 
           try {
             Files.copy(filePath, Files.newOutputStream(goalPath))
-          }
-          catch {
-            case _: java.nio.file.NoSuchFileException => {}
+          } catch {
+            case _: java.nio.file.NoSuchFileException =>
           }
         }
       }
@@ -409,7 +410,9 @@ class CourseService {
 
       var tmpZiptaskPath: Path = null
       var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
-      if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
+      if (only_last_try) {
+        studentSubmissionList = studentSubmissionList.headOption.toList
+      }
       for((submission, i) <- studentSubmissionList.zipWithIndex) {
         if (i == 0) {
           last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
@@ -424,11 +427,10 @@ class CourseService {
         val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid) + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename))
         allPath = goalPath :: allPath
 
-        try{
+        try {
           Files.copy(filePath, Files.newOutputStream(goalPath))
-        }
-        catch {
-          case _: java.nio.file.NoSuchFileException => {}
+        } catch {
+          case _: java.nio.file.NoSuchFileException =>
         }
       }
     }
@@ -514,7 +516,7 @@ class CourseService {
 
         processedTasks = taskStudentCell :: processedTasks
       }
-      val passed_glob = (processedTasks.length == tasksPassedSum)
+      val passed_glob = processedTasks.length == tasksPassedSum
       val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
         UserDBLabels.user_id -> u(UserDBLabels.user_id),
         UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname),
@@ -545,7 +547,7 @@ class CourseService {
         var passed_string: String = null
         var passedDate: Any = null
         var coll_result_date: Any = null
-        if (submissionRawData.length == 0) {
+        if (submissionRawData.isEmpty) {
           passed_string = null
         } else {
           var passed: Boolean = false

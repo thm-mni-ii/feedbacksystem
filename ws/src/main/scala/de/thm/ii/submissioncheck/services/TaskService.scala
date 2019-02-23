@@ -64,16 +64,12 @@ class TaskService {
       })
 
       val insertedId = holder.getKey.intValue()
-      if (num == 0) {
-        throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
-      }
+      if (num == 0) throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
       insertedId
     }
     catch {
       // TODO use the SQLIntegrityConstraintViolationException or anything with SQL
-      case _: Exception => {
-        throw new ResourceNotFoundException
-      }
+      case _: Exception => throw new ResourceNotFoundException
     }
   }
   /**
@@ -97,17 +93,11 @@ class TaskService {
       })
       val insertedId = holder.getKey.intValue()
 
-      if (num == 0) {
-        throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
-      }
-
+      if (num == 0) throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
       insertedId
-    }
-    catch {
+    } catch {
       // TODO use the SQLIntegrityConstraintViolationException or anything with SQL
-      case _: Exception => {
-        throw new ResourceNotFoundException
-      }
+      case _: Exception => throw new ResourceNotFoundException
     }
   }
 
