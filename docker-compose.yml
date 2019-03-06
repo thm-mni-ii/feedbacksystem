@@ -2,45 +2,34 @@ version: '2.1'
 
 services:
   zoo1:
-    image: zookeeper:3.4.9
+    image: 'bitnami/zookeeper:latest'
     hostname: zoo1
-    ports:
-      - "2181:2181"
     environment:
-        ZOO_MY_ID: 1
-        ZOO_PORT: 2181
-        ZOO_SERVERS: server.1=zoo1:2888:3888
+        - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
-      - ./zk-single-kafka-single/zoo1/data:/data
-      - ./zk-single-kafka-single/zoo1/datalog:/datalog
+      - ./docker-config/zoo1:/bitnami/zookeeper
+
   kafka1:
-    image: confluentinc/cp-kafka:5.0.0
-    hostname: kafka1
-    ports:
-      - "9092:9092"
+    image: 'bitnami/kafka:latest'
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka1
-      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zoo1:2181"
-      KAFKA_BROKER_ID: 1
-      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - ./zk-single-kafka-single/kafka1/data:/var/lib/kafka/data
-      - /var/run/docker.sock:/var/run/docker.sock
+    - KAFKA_ZOOKEEPER_CONNECT=zoo1:2181
+    - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
-      - zoo1
+    - zoo1
+    volumes:
+      - ./docker-config/kafka1:/bitnami/kafka
+      #- /var/run/docker.sock:/var/run/docker.sock
+
   mysql1:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: example
+      MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
       MYSQL_DATABASE: submissionchecker
-    ports:
-      - "3306:3306"
+    volumes:
+      - ./docker-config/mysql1:/var/lib/mysql
+
   bash1:
     image: bash:4.4
   mysql2:
@@ -48,9 +37,10 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: secretpw
-    ports:
-      - "3309:3306"
+      MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    volumes:
+      - ./docker-config/mysql2:/var/lib/mysql
+
   ws:
     build: ws
     #container_name: ws
@@ -60,10 +50,11 @@ services:
       - kafka1
       - zoo1
     ports:
-      - "8080:8080"
+      - "443:8080"
     volumes:
       - ./ws/upload-dir:/upload-dir
       - ./ws/zip-dir:/zip-dir
+      - ./docker-config/ws/application.properties:/usr/local/appconfig/application.properties
 
   secrettokenchecker:
     build: secrettoken-checker
@@ -74,8 +65,19 @@ services:
       - kafka1
       - zoo1
     volumes:
-    - ./secrettoken-checker/upload-dir:/upload-dir
+      - ./docker-config/secrettoken/application.conf:/usr/local/appconfig/application.config
+      - /var/run/:/var/run/
+      - /var/run/docker.sock:/var/run/docker.sock
+    #- ./secrettoken-checker/upload-dir:/upload-dir
 
-#  bashtest:
-#    image: ubuntu:latest
-#    entrypoint: /bin/bash
+  sqlchecker:
+    #image: bees4ever/sqlchecker
+    build: sql-checker
+    depends_on:
+    - mysql2
+    - kafka1
+    - zoo1
+    - ws
+    volumes:
+    #- ./sql-checker/upload-dir:/upload-dir
+    - ./docker-config/sqlchecker/application.conf:/usr/local/appconfig/application.config
