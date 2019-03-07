@@ -36,6 +36,8 @@ If the application is running you can login as Admin using:
 *username: `admin`* and 
 *password: ``AWObcEyYi6SZaYKU9daTgKt``*.
 
+After login ourself with this credentials you can create a new admin and delete the default one.
+
 
 
 ## Useful hints setting up a development environment for Feedbacksystem 
@@ -60,6 +62,16 @@ bash docker-push.sh
 
 ``ng serve --ssl --ssl-key ../docker-config/certs/localhost.key  --ssl-cert ../docker-config/certs/localhost.crt``
 
+#### Run kafka and mysql local
+
+Edit your ``/etc/hosts`` file and add foloowing lines:
+
+````bash
+127.0.0.1 kafka1
+127.0.0.1 mysql1
+127.0.0.1 mysql2 
+````
+
 
 ## Testsystems and Testfiles
 
@@ -72,8 +84,8 @@ The following section will show some examples.
 ````sh
 #!/bin/bash
 
-submission=$1  # Provides the CAS ID of submiting user
-casname=$2     # Provides the submitted text (even if it was a file, it will be currently converted to a string) 
+casname=$1  # Provides the CAS ID of submiting user
+submission_file=$2     # Provides the submitted file path (even if it was a text, it will be converted to a file) 
 
 # You can use $casname to generate a user specific token
 
@@ -81,16 +93,16 @@ casname=$2     # Provides the submitted text (even if it was a file, it will be 
 # The Secrettoken-Checker interprets exitcodes. Exitcode 0 means all tests passed, everything except 0 means test failed 
 # Following lines show a sample logic
 
+content=$(cat $submission_file)
 
-if [ "submission" == "some-token-which-should-be-solved" ] 
+if [ "$content" == "some-token-which-should-be-solved" ] 
 then
-echo correct: token and md5 hash are identical
+echo "Hi "$casname", your submission is correct!"
 exit 0  # Here the script indicates a passed
 else
-echo fault: token and md5 hash are not identical
+echo "Hi "$casname", your submission is incorrect!"
 exit 1  # Here the script indicates a failed
 fi 
-
 ````
 
 

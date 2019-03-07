@@ -268,12 +268,12 @@ CREATE TABLE `user` (
   `password` varchar(255) DEFAULT NULL,
   `username` varchar(200) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL COMMENT 'it is his global role_id',
+  `privacy_checked` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`user_id`),
   KEY `user_role_role_id_fk` (`role_id`),
   CONSTRAINT `user_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=407 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=413 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
 --
 -- Dumping data for table `user`
 --

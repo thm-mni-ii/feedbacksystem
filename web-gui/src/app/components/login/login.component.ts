@@ -41,35 +41,50 @@ export class LoginComponent implements OnInit {
   }
 
 
+  private jwtParser(response){
+    const authHeader: string = response.headers.get('Authorization');
+    const token: string = authHeader.replace('Bearer ', '');
+    localStorage.setItem('token', token);
+
+
+    const extraRoute = localStorage.getItem('route');
+    if (extraRoute) {
+      localStorage.removeItem('route');
+      this.router.navigateByUrl(extraRoute);
+    } else {
+      this.router.navigate(['']);
+    }
+
+  }
+
   /**
    * Login user with ldap. Show data privacy dialog
    * when user logs in for first time
    */
   login() {
-    this.auth.loginPrivacyCheck(this.username).pipe(
-      flatMap(success => {
-        if (success.success) {
-          return this.auth.login(this.username, this.password);
-        } else {
-          //  Show dataprivacy
-          return this.dialog.open(DataprivacyDialogComponent, {
-            data: {
-              username: this.username,
-              password: this.password
-            }
-          }).afterClosed();
-        }
-      })
-    ).pipe(map(response => {
-      if (response.body.success) {
-        const authHeader: string = response.headers.get('Authorization');
-        const token: string = authHeader.replace('Bearer ', '');
-        localStorage.setItem('token', token);
-        this.router.navigate(['']);
-      } else {
+    this.auth.login(this.username, this.password).subscribe(response => {
+      if(response.body.success){
+
+        this.auth.loginPrivacyCheck(this.username).subscribe(success => {
+
+          if(!success.success){
+            this.dialog.open(DataprivacyDialogComponent).afterClosed().subscribe((key) => {
+              if(key){
+                this.auth.acceptPrivacyForUser(this.username)
+                this.jwtParser(response)
+              }
+            })
+
+          } else {
+            this.jwtParser(response)
+          }
+        })
+      }
+      else {
         this.snackbar.open('Username oder Passwort falsch', 'OK');
       }
-    })).subscribe();
+
+    })
   }
 
   /**

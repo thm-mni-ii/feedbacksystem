@@ -13,8 +13,10 @@ import de.thm.ii.submissioncheck.services.UserDBLabels
   * @param email User's email
   * @param role User's role name
   * @param roleid User's role id
+  * @param privacy_checked did user accept the policy
   */
-class User(val userid: Int, val username: String, val prename: String, val surname: String, val email: String, val role: String, val roleid: Int) {
+class User(val userid: Int, val username: String, val prename: String, val surname: String, val email: String, val role: String,
+           val roleid: Int, val privacy_checked: Boolean = false) {
   /**
     * Return User as Map. Simply answer in HTTPResonses
     *
@@ -23,7 +25,8 @@ class User(val userid: Int, val username: String, val prename: String, val surna
     */
   def asMap(): Map[String, Any] = {
     Map(UserDBLabels.user_id -> this.userid, UserDBLabels.username -> this.username, "role" -> this.role,
-      UserDBLabels.role_id -> this.roleid, UserDBLabels.prename -> this.prename, UserDBLabels.surname -> this.surname, UserDBLabels.email -> email)
+      UserDBLabels.role_id -> this.roleid, UserDBLabels.prename -> this.prename, UserDBLabels.surname -> this.surname, UserDBLabels.email -> email,
+      UserDBLabels.privacy_checked -> this.privacy_checked)
   }
 
   /**
