@@ -204,7 +204,7 @@ class SQLTask(val filepath: String, val taskId: String){
         msg = "Die Query hat zu lange gedauert: " + ex.getMessage
       }
       case ex: SQLException => {
-        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[1-9][0-9]*_db", dbliteral) //todo: filter out database name...
+        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")
       }
     }
     s.execute(dropdb + taskid + us + dbname)
@@ -259,10 +259,10 @@ class SQLTask(val filepath: String, val taskId: String){
       }
     } catch {
       case ex: SQLTimeoutException => {
-        msg = "Die Query hat zu lange gedauert: " + ex.getMessage
+        msg = "Das Query hat zu lange gedauert: " + ex.getMessage
       }
       case ex: SQLException => {
-        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[1-9][0-9]*_db", dbliteral) //todo: filter out database name...
+        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")
       }
     }
     s.execute(dropdb + taskid + us + dbname)
