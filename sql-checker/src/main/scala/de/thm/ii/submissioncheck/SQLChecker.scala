@@ -88,7 +88,6 @@ object SQLChecker extends App {
   private val LABEL_TASKID = "taskid"
   private val LABEL_ACCEPT = "accept"
   private val LABEL_ERROR = "error"
-  private val LABEL_FALSE = "false"
 
     /* testing variable order ...*/
   /*
@@ -204,14 +203,14 @@ object SQLChecker extends App {
     private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
       val jsonMap: Map[String, Any] = record.value(); val taskid: String = jsonMap(TASKID).asInstanceOf[String]
     try{
-      logger.warning(SYSTEMIDTOPIC + "-task received");
+      logger.warning(SYSTEMIDTOPIC + "-task received")
       val sslContext = SSLContext.getInstance("SSL"); sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
       HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory); HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
       if (urls.length != 2) {
         logger.warning("Wrong amount of files")
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> LABEL_FALSE, LABEL_ERROR -> "Please provide exact two testfiles", LABEL_TASKID -> taskid)))
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Please provide exact two testfiles", LABEL_TASKID -> taskid)))
       }
       else {
         deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
@@ -219,39 +218,41 @@ object SQLChecker extends App {
         logger.warning("checking for SQLException")
         val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
         logger.warning("checked SQLException")
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> "true", LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
       }
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
           LABEL_ERROR -> "Please provide valid parameters",
-          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ACCEPT -> false,
           LABEL_TASKID -> taskid
         )))
       }
       case ex: SQLTimeoutException => {
         logger.warning("SQLTimeoutException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ACCEPT -> false,
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: SQLException => {
         logger.warning("SQLException while creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ACCEPT -> false,
           LABEL_ERROR ->  ex.getMessage,
           LABEL_TASKID -> taskid)))
       }
       case ex: FileNotFoundException => {
         logger.warning("FileNotFoundException when creating task")
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ACCEPT -> LABEL_FALSE,
+          LABEL_ACCEPT -> false,
           LABEL_ERROR ->  "Your filenames were incorrect",
           LABEL_TASKID -> taskid)))
       }
     }
   }
+
+  private def downloadSubmissionToFS(urlnames: List[String], jwt_token: String, taskid: String, submissionid: String): Unit = {}
 
   private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String) = {
     val timeout = 1000
@@ -269,6 +270,7 @@ object SQLChecker extends App {
 
       if(connection.getResponseCode >= 400){
         logger.error(LABEL_ERROR_DOWNLOAD)
+        logger.error("Response Code was: " + connection.getResponseCode.toString)
       }
       else {
         new File(Paths.get(ULDIR).resolve(taskid).toString).mkdirs()
@@ -300,7 +302,6 @@ object SQLChecker extends App {
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
-      Files.copy(connection.getInputStream, Paths.get("upload-dir/script.sh"), StandardCopyOption.REPLACE_EXISTING)
       val in: InputStream = connection.getInputStream
       val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
       s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")

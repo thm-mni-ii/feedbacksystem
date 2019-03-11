@@ -64,12 +64,13 @@ bash docker-push.sh
 
 #### Run kafka and mysql local
 
-Edit your ``/etc/hosts`` file and add foloowing lines:
+Edit your ``/etc/hosts`` file and add following lines:
 
 ````bash
 127.0.0.1 kafka1
 127.0.0.1 mysql1
 127.0.0.1 mysql2 
+127.0.0.1 ws
 ````
 
 
