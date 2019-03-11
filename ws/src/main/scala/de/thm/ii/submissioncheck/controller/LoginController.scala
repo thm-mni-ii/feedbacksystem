@@ -87,14 +87,15 @@ class LoginController extends CasClientConfigurerAdapter {
       logger.info("route = " + route)
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-      response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
+      //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
+      response.setHeader("Location", CLIENT_HOST_URL + "/login")
       "jwt"
     }
     catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-        response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
+        response.setHeader("Location", CLIENT_HOST_URL + "/login")
         "error"
       }
     }
@@ -152,12 +153,34 @@ class LoginController extends CasClientConfigurerAdapter {
     * @author Benjamin Manns
     * @param request Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
-    * @return JSON if user is loged in
+    * @return JSON if user is logged in
     */
   @RequestMapping(value = Array("login/check"), method = Array(RequestMethod.POST))
   def checkIfUsersIsLogedIn(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
     val user = userService.verifyUserByHeaderToken(request)
     Map(LABEL_SUCCESS -> user.isDefined)
+  }
+
+  /**
+    * User can accept the privacy policy
+    * @author Benjamin Manns
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode Request Body contains json
+    * @return JSON if update worked out
+    * @return
+    */
+  @RequestMapping(value = Array("login/privacy/accept"), method = Array(RequestMethod.POST))
+  def privacyAcceptanceOfUser(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    try {
+      val username = jsonNode.get(LABEL_USERNAME).asText()
+      Map(LABEL_SUCCESS -> userService.acceptPrivacyForUser(username))
+    }
+    catch {
+      case e: NullPointerException => {
+        throw new BadRequestException("Please provide: username")
+      }
+    }
   }
 
   /**
@@ -171,38 +194,24 @@ class LoginController extends CasClientConfigurerAdapter {
   @RequestMapping(value = Array("login/privacy/check"), method = Array(RequestMethod.POST))
   def checkUsersPrivacyAcceptance(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
-      val username = jsonNode.get(LABEL_USERNAME).asText()
-      Map(LABEL_SUCCESS -> userService.loadUserFromDB(username).isDefined)
+      val settingsPrivacyShow = settingService.loadSetting("privacy.show")
+      val show = (if (settingsPrivacyShow.isDefined) settingsPrivacyShow.get.asInstanceOf[Boolean] else true)
+
+      if (!show) {
+        Map(LABEL_SUCCESS -> true)
+      } else {
+        val username = jsonNode.get(LABEL_USERNAME).asText()
+        val user = userService.loadUserFromDB(username)
+        if(user.isEmpty) {
+          Map(LABEL_SUCCESS -> false)
+        } else {
+          Map(LABEL_SUCCESS -> user.get.privacy_checked)
+        }
+      }
     }
     catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide: username")
-      }
-    }
-  }
-
-  /**
-    * Provide a REST for getting fast a token, only for testing purpose
-    * @author Benjamin Manns
-    * @param request contain request information
-    * @param response HTTP Answer (contains also cookies)
-    * @param jsonNode JSON Parameter from request
-    * @return JSON
-    */
-  @deprecated("0", "Don't use this in production")
-  @RequestMapping(value = Array("login/token"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  def createToken(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, String] = {
-    try {
-      val name = jsonNode.get("name").asText()
-      val user = this.userService.insertUserIfNotExists(name, "fakemail", "prename", "surname", LABEL_STUDENT_ROLE)
-      loginService.log(user)
-      val jwtToken = this.userService.generateTokenFromUser(user)
-      setBearer(response, jwtToken)
-      Map("token" -> jwtToken)
-    }
-    catch {
-      case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name")
       }
     }
   }

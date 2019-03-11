@@ -19,7 +19,7 @@ import java.io._
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL, URLDecoder}
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Paths, StandardCopyOption}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 import java.security.cert.X509Certificate
 
 import javax.net.ssl._
@@ -72,6 +72,12 @@ object SecretTokenChecker extends App {
   final val DATA = "data"
   /** used in naming */
   final val ULDIR = "upload-dir/"
+
+  private val LABEL_AUTHORIZATION = "Authorization"
+  private val LABEL_BEARER = "Bearer: "
+  private val LABEL_CONNECTION = "Connection"
+  private val LABEL_CLOSE = "close"
+
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
@@ -140,24 +146,25 @@ object SecretTokenChecker extends App {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-      var arguments: String = ""
+      var submittedFilePath: String = ""
 
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         //new URL(url) #> new File("submit.txt") !!
         val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-        val s: String = downloadFileToString(url, jwt_token)
-        logger.info(s)
-        arguments = s
+
+        submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
+        logger.info(submittedFilePath)
       }
       else if (submit_type.equals(DATA)){
-        arguments = jsonMap(DATA).asInstanceOf[String]
+        submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
       }
       var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
-      val (output, code) = bashTest(taskid, userid, arguments)
+
+      val (output, code) = bashTest(taskid, userid, submittedFilePath)
       if(code == 0){
-        passed = 1;
+        passed = 1
       }
       sendCheckMessage(JsonHelper.mapToJsonStr(Map(
         DATA -> output,
@@ -241,21 +248,20 @@ object SecretTokenChecker extends App {
     * Method for the callback function
     * @param taskid id of task
     * @param name username
-    * @param token md5hash
+    * @param filePath md5hash
     * @return message and exitcode
     */
-  def bashTest(taskid: String, name: String, token: String): (String, Int) = {
+  def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
     // make a list
-    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles()
+    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles().filter(_.isFile)
 
     val filesListHead = filesList.headOption
-
     if (filesListHead.isEmpty) {
       (message_err, 126)
     } else {
       val script: String = filesListHead.get.getAbsolutePath
       //val file = filesListHead.get
-      val bashtest1 = new BashExec(script, name, token)
+      val bashtest1 = new BashExec(script, name, filePath)
       val exit1 = bashtest1.exec()
       val message1 = bashtest1.output
 
@@ -288,35 +294,32 @@ object SecretTokenChecker extends App {
     shtest.output
   }
 
-  /**
-    * getBashTestOut
-    * @param sName bash script name
-    * @param username parameter
-    * @param token parameter
-    * @return Output of script
-    */
-  def getBashTestOut(sName: String, username: String, token: String): String = {
-    val bashtest = new BashExec(sName, username, token)
-    bashtest.exec()
-    bashtest.output
+  private def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
+    new File(Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toString).mkdirs()
+    val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve(submissionid)
+    Files.write(path, content.getBytes(StandardCharsets.UTF_8))
+    path
   }
 
-  @deprecated("", "")
-  private def saveTaskFile(urlname: String, taskid: String): Unit = {
-    val timeout = 5000
-    val url = new java.net.URL(urlname)
+  private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
+    val timeout = 1000
+    val url = new java.net.URL(link)
+    val filename = submissionid
+
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
     connection.setConnectTimeout(timeout)
     connection.setReadTimeout(timeout)
+    connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
     connection.connect()
-
     if(connection.getResponseCode >= 400){
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
-      //new File("upload_dir/" + taskid).mkdirs()
-      url #> new File("uld/" + taskid + "/testfile") !!
+      new File(Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toString).mkdirs()
+      Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
     }
+    Paths.get(ULDIR).resolve(taskid).resolve(filename).resolve(filename)
   }
 
   private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String) = {
@@ -327,10 +330,10 @@ object SecretTokenChecker extends App {
       // syntax of testfile url allows us to get filename
       val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-      connection.setRequestProperty("Authorization", "Bearer: " + jwt_token)
+      connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
       connection.setConnectTimeout(timeout)
       connection.setReadTimeout(timeout)
-      connection.setRequestProperty("Connection", "close")
+      connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
       connection.connect()
 
       if(connection.getResponseCode >= 400){

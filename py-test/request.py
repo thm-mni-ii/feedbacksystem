@@ -11,7 +11,7 @@ class TestRESTStudent(unittest.TestCase):
     def setUp(self):
         pre_r = requests.get('http://localhost:8080/') # first we try http
         if "Bad Request" in pre_r.text:
-            self.URL = "https://localhost:8080/api/v1/"
+            self.URL = "https://localhost/api/v1/"
         else:
             self.URL = "http://localhost:8080/api/v1/"
         pprint(self.URL)

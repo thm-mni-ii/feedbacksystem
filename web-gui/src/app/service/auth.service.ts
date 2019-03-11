@@ -4,7 +4,7 @@ import {JwtHelperService} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
 import {DOCUMENT} from '@angular/common';
 import {Succeeded} from '../interfaces/HttpInterfaces';
-
+import {CookieService} from 'ngx-cookie-service';
 const TOKEN_ID = 'token';
 
 /**
@@ -16,7 +16,7 @@ const TOKEN_ID = 'token';
 export class AuthService {
 
   constructor(private http: HttpClient, private jwtHelper: JwtHelperService,
-              @Inject(DOCUMENT) private document: Document) {
+              @Inject(DOCUMENT) private document: Document, private cookie: CookieService) {
   }
 
 
@@ -37,6 +37,17 @@ export class AuthService {
       {observe: 'response'});
   }
 
+  acceptPrivacyForUser(username: string){
+    return new Promise((resolve) => {
+      this.http.post('/api/v1/login/privacy/accept', {username: username}).toPromise()
+        .then( (success: Succeeded) => {
+            resolve(success.success)
+        }).catch(() => {
+        resolve(false)
+      })
+    })
+
+  }
 
   /**
    * Check if user accepted data privacy
@@ -53,6 +64,7 @@ export class AuthService {
    */
   logout() {
     localStorage.removeItem(TOKEN_ID);
+    this.cookie.delete('jwt');
   }
 
 

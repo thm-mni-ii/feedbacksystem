@@ -487,7 +487,7 @@ class TaskService {
     */
   def getURLsOfTaskTestFiles(taskid: Int): List[String] = {
     getTestFilesByTask(taskid).map(testfile => {
-      UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
+      UPLOAD_BASE_URL + "/api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
     })
   }
 
@@ -517,7 +517,7 @@ class TaskService {
     * @return URL String
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
-    UPLOAD_BASE_URL + "api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
+    UPLOAD_BASE_URL + "/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
   }
 
   /**

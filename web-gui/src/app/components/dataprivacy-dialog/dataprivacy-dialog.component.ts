@@ -44,9 +44,7 @@ export class DataprivacyDialogComponent implements OnInit {
    */
   login() {
     if (this.privacyChecked) {
-      this.auth.login(this.data.username, this.data.password).subscribe(success => {
-        this.dialogRef.close(success);
-      });
+      this.dialogRef.close(true);
     } else {
       this.snackBar.open('Datenschutzerklärung akzeptieren', 'OK');
     }

@@ -186,10 +186,21 @@ class UserService {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
+          res.getBoolean(UserDBLabels.privacy_checked))
       }, username)
 
     users.headOption
+  }
+
+  /**
+    * User can accept the privacy policy
+    * @author Benjamin Manns
+    * @param username accepting user
+    * @return if update worked out
+    */
+  def acceptPrivacyForUser(username: String): Boolean = {
+    1 == DB.update("Update user set privacy_checked = 1 where username = ?", username)
   }
 
   /**
@@ -201,7 +212,8 @@ class UserService {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where user_id = ? LIMIT 1",
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
+          res.getBoolean(UserDBLabels.privacy_checked))
       }, userid)
 
     users.headOption

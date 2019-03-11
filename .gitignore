@@ -18,3 +18,5 @@ ws/src/main/resources/static/*
 ws/upload-dir/*
 
 secrettoken-checker/upload-dir/*
+
+docker-config

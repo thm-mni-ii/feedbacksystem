@@ -5,24 +5,27 @@ package de.thm.ii.submissioncheck.services
   */
 object UserDBLabels{
   /** DB Label "user_id" */
-  var user_id: String = "user_id"
+  val user_id: String = "user_id"
 
   /** DB Label "username" */
-  var username: String = "username"
+  val username: String = "username"
 
   /** DB Label "role_id" */
-  var role_id: String = "role_id"
+  val role_id: String = "role_id"
 
   /** DB Label "role_name" */
-  var role_name: String = "role_name"
+  val role_name: String = "role_name"
 
   /** DB Label "prename" */
-  var prename: String = "prename"
+  val prename: String = "prename"
 
   /** DB Label "surname" */
-  var surname: String = "surname"
+  val surname: String = "surname"
 
   /** DB Label "email" */
-  var email: String = "email"
+  val email: String = "email"
+
+  /** DB Label "privacy_checked" */
+  val privacy_checked: String = "privacy_checked"
 }
 
