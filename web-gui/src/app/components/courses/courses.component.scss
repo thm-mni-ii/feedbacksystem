@@ -21,6 +21,18 @@ mat-grid-tile:hover {
   cursor: pointer;
 }
 
+.courses_view_deletion{
+  background: $red;
+  color: white;
+}
+
+.courses_view_deletion:hover {
+  background: $red-light;
+  cursor: pointer;
+}
+
+
+
 @media only screen and (max-width: 800px) {
 
   mat-grid-list {

@@ -39,6 +39,7 @@ import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-
 import {CookieService} from 'ngx-cookie-service';
 import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
+import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
 
 
 @Injectable()
@@ -80,7 +81,8 @@ export const httpInterceptorProviders = [
     ExitCourseComponent,
     UpdateCourseDialogComponent,
     DataprivacyDialogComponent,
-    ImpressumDialogComponent
+    ImpressumDialogComponent,
+    DeleteCourseModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -101,7 +103,7 @@ export const httpInterceptorProviders = [
     })
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
-    ImpressumDialogComponent],
+    ImpressumDialogComponent, DeleteCourseModalComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })

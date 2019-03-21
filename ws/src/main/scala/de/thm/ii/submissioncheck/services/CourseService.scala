@@ -69,8 +69,13 @@ class CourseService {
     * @return List of Maps
     */
   def getAllKindOfCoursesByUser(user: User): List[Map[String, Any]] = {
-    DB.query("SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?",
-      (res, _) => {
+    val sql = if (user.roleid == 1) {
+      "SELECT *, ? as requesting_user  FROM course c join role r on r.role_id = 1"
+    } else {
+      "SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?"
+    }
+
+    DB.query(sql, (res, _) => {
         Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
@@ -275,13 +280,20 @@ class CourseService {
       ""
     })
 
-    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user)) {
+    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1) {
       this.taskService.getTasksByCourse(courseid, Some(user.userid))
     } else {
       List.empty
     }
-    val list = DB.query("SELECT " + selectPart + " from course c left join (select user_id, role_id, role_name, course_id from " +
-      "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?",
+
+    val sql = if (user.roleid == 1) {
+      "SELECT *, ? as requested_user from course c join role r on r.role_id = 1 where c.course_id = ?"
+    } else {
+      "SELECT " + selectPart + " from course c left join (select user_id, role_id, role_name, course_id from " +
+        "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?"
+    }
+
+    val list = DB.query(sql,
       (res, _) => {
         val courseMap = Map(
           CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
@@ -323,6 +335,12 @@ class CourseService {
     zip.close()
   }
 
+  /**
+    * I have to apologize that I somehow think in the php way. Therefor I need this implode method
+    * @param list contains items which will be glued by a given string
+    * @param glue is somehow the opposite from a split delimeter
+    * @return items glued together as a string
+    */
   private def implode(list: List[String], glue: String) = {
     var back = ""
     for ((l, index) <- list.zipWithIndex) {

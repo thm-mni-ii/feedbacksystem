@@ -29,7 +29,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
-  courseDetail: DetailedCourseInformation;
+  courseDetail: DetailedCourseInformation = <DetailedCourseInformation>{};
   courseTasks: CourseTask[];
   userRole: string;
   submissionData: { [task: number]: File | string };

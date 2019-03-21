@@ -1,9 +1,15 @@
 <div class="container">
-  <mat-grid-list cols="1" rowHeight="60px">
-    <mat-grid-tile *ngFor="let course of userCourses$| async"
+  <mat-grid-list cols="12" rowHeight="60px">
+    <span *ngFor="let course of userCourses$| async">
+    <mat-grid-tile colspan="{{(course.role_id <= 4) ? '11' : '12'}}"
                    (click)="goToCourse(course.course_id)">
       {{course.course_name}}
     </mat-grid-tile>
+
+    <mat-grid-tile (click)="deleteCourse(course.course_name, course.course_id)" class="courses_view_deletion" *ngIf="course.role_id <= 4" colspan='1'>
+      <img src="assets/baseline-delete-24px.svg" />
+    </mat-grid-tile>
+</span>
   </mat-grid-list>
 </div>
 
