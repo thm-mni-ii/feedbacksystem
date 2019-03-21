@@ -264,6 +264,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       if (value.success) {
         this.db.getCourseDetail(this.courseID).subscribe(courses => {
           this.courseDetail = courses;
+          this.titlebar.emitTitle(this.courseDetail.course_name);
         });
       }
     });
