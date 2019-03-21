@@ -241,6 +241,23 @@ class CourseService {
   }
 
   /**
+    * set a visibility flag for a course. There are currently only HIDDEN and VISIBLE
+    *
+    * @author Benjamin Manns
+    * @param courseid unique identification for a course
+    * @param typ which type of visible should be set
+    * @return Map of success case
+    */
+  def setVisibilityForCourse(courseid: Int, typ: String): Map[String, Boolean] = {
+    if (!List("HIDDEN", "VISIBLE").contains(typ)) {
+      Map(LABEL_SUCCESS -> false)
+    } else {
+      val num = DB.update("update course set course_visibility = ? where course_id = ?", typ, courseid)
+      Map(LABEL_SUCCESS-> (num == 1))
+    }
+  }
+
+  /**
     * getAllCourses gives few information about all courses for searchin purpose
     * @param user a user object
     * @author Benjamin Manns

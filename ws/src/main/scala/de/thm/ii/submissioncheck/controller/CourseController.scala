@@ -437,6 +437,30 @@ class CourseController {
   }
 
   /**
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return Success JSON
+    */
+  @RequestMapping(value = Array("{id}/visibility"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
+  def setVisibilityForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest,
+                          @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    try {
+      val visibilityType = jsonNode.get("typ").asText()
+      val user = userService.verifyUserByHeaderToken(request)
+
+      if (user.isEmpty || (user.get.roleid > 2 && !courseService.isPermittedForCourse(courseid, user.get))) {
+        throw new UnauthorizedException
+      }
+      courseService.setVisibilityForCourse(courseid, visibilityType)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide: typ")
+    }
+  }
+
+  /**
     * get the detailed submission information of a student of a task for this one course
     * @author Benjamin Manns
     * @param courseid unique course identification
