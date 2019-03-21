@@ -3,7 +3,7 @@
   <mat-card id="description">
     <h4>{{courseDetail?.course_description}}</h4>
 
-    <span *ngIf="userRole != 'admin'">
+    <span *ngIf="userRole != 'admin' && userRole != 'moderator'">
       <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
               (click)="subscribeCourse()">Kurs
         beitreten
@@ -13,12 +13,12 @@
         verlassen
       </button>
     </span>
-    <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
+    <button class="desc-button" *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
 
             mat-flat-button color="accent" (click)="updateCourse()">Kurs bearbeiten
 
     </button>
-    <button class="desc-button" *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
+    <button class="desc-button" *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
             mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
     </button>
   </mat-card>
@@ -72,10 +72,10 @@
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
+        <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
                 (click)="deleteTask(task)">Löschen
         </button>
-        <button *ngIf="userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
+        <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
                 (click)="updateTask(task)">Bearbeiten
         </button>
         <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent"

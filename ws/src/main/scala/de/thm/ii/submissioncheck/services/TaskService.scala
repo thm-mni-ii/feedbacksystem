@@ -429,7 +429,7 @@ class TaskService {
     * @return Boolean if user is permitted
     */
   def hasSubscriptionForTask(taskid: Int, user: User): Boolean = {
-    if (user.role == "admin") {
+    if (user.role == "admin" || user.roleid == 2) {
       true
     }
     else {
@@ -448,7 +448,7 @@ class TaskService {
     * @return Boolean if user is permitted
     */
   def isPermittedForTask(taskid: Int, user: User): Boolean = {
-    if (user.role == "admin") {
+    if (user.role == "admin" || user.roleid == 2) {
         true
       }
     else {

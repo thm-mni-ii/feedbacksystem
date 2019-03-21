@@ -69,8 +69,8 @@ class CourseService {
     * @return List of Maps
     */
   def getAllKindOfCoursesByUser(user: User): List[Map[String, Any]] = {
-    val sql = if (user.roleid == 1) {
-      "SELECT *, ? as requesting_user  FROM course c join role r on r.role_id = 1"
+    val sql = if (user.roleid <= 2) {
+      "SELECT *, ? as requesting_user  FROM course c join role r on r.role_id = " + user.roleid
     } else {
       "SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?"
     }
@@ -130,7 +130,7 @@ class CourseService {
     * @return Boolean, if a user is permitted for the course
     */
   def isPermittedForCourse(courseid: Int, user: User): Boolean = {
-    if (user.role == "admin") {
+    if (user.role == "admin" || user.roleid == 2) {
         true
       }
     else {
@@ -280,14 +280,14 @@ class CourseService {
       ""
     })
 
-    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1) {
+    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1 || user.roleid == 2) {
       this.taskService.getTasksByCourse(courseid, Some(user.userid))
     } else {
       List.empty
     }
 
-    val sql = if (user.roleid == 1) {
-      "SELECT *, ? as requested_user from course c join role r on r.role_id = 1 where c.course_id = ?"
+    val sql = if (user.roleid <= 2) {
+      "SELECT *, ? as requested_user from course c join role r on r.role_id = " + user.roleid + " where c.course_id = ?"
     } else {
       "SELECT " + selectPart + " from course c left join (select user_id, role_id, role_name, course_id from " +
         "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?"
