@@ -77,6 +77,7 @@ export class StartComponent implements OnInit, OnDestroy {
   logout() {
     this.auth.logout();
     this.cookie.delete('jwt');
+    localStorage.removeItem('token');
     this.router.navigate(['login']);
   }
 

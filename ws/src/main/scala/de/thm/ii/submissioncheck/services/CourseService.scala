@@ -66,14 +66,21 @@ class CourseService {
     * Union all courses beloning to user, no difference in edit, creation or subscription relation
     * @author Benjamin Manns
     * @param user a User object
+    * @param hiddenCourses show also hidden courses
     * @return List of Maps
     */
-  def getAllKindOfCoursesByUser(user: User): List[Map[String, Any]] = {
-    val sql = if (user.roleid <= 2) {
-      "SELECT *, ? as requesting_user  FROM course c join role r on r.role_id = " + user.roleid
+  def getAllKindOfCoursesByUser(user: User, hiddenCourses: Boolean): List[Map[String, Any]] = {
+    val hiddenCoursesSQL = if (!hiddenCourses) {
+      " c.course_visibility = 'VISIBLE'"
     } else {
-      "SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ?"
+      " 1 = 1 "
     }
+
+    val sql = (if (user.roleid <= 2) {
+      "SELECT *, ? as requesting_user  FROM course c join role r on r.role_id = " + user.roleid + " where "
+    } else {
+      "SELECT c.*, r.* FROM user_course hc JOIN course c using(course_id) join role r  using(role_id) where user_id = ? AND "
+    }) + hiddenCoursesSQL
 
     DB.query(sql, (res, _) => {
         Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
@@ -260,12 +267,19 @@ class CourseService {
   /**
     * getAllCourses gives few information about all courses for searchin purpose
     * @param user a user object
+    * @param hiddenCourses returns also hidden courses if set true
     * @author Benjamin Manns
     * @return Scala List
     */
-  def getAllCourses(user: User): List[Map[String, Any]] = {
+  def getAllCourses(user: User, hiddenCourses: Boolean): List[Map[String, Any]] = {
+    val hiddenCoursesSQL = if (!hiddenCourses) {
+      " c.course_visibility = 'VISIBLE'"
+    } else {
+      " 1 = 1 "
+    }
+
     DB.query("select * from course c left join (select * from user_course uc where uc.user_id = ?) u " +
-      " on c.course_id = u.course_id left JOIN role r using(role_id)", (res, _) => {
+      " on c.course_id = u.course_id left JOIN role r using(role_id) WHERE " + hiddenCoursesSQL, (res, _) => {
       Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
         CourseDBLabels.name -> res.getString(CourseDBLabels.name),
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),

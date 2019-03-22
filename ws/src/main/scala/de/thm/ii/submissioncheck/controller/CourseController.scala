@@ -56,16 +56,18 @@ class CourseController {
 
   /**
     * getAllCourses is a route for all courses
+    * @param hiddenCourses returns also hidden courses if set true
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllCourses(request: HttpServletRequest): List[Map[String, Any]] = {
+  def getAllCourses(@RequestParam(value = "hiddenCourses", required = false) hiddenCourses: Boolean,
+                     request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
         throw new UnauthorizedException
     }
-    courseService.getAllKindOfCoursesByUser(user.get)
+    courseService.getAllKindOfCoursesByUser(user.get, hiddenCourses)
   }
 
   /**
@@ -113,17 +115,19 @@ class CourseController {
     * getAllCourse provides all courses for searching purpose
     *
     * @author Benjamin Manns
+    * @param hiddenCourses returns also hidden courses if set true
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getAllCourse(request: HttpServletRequest): List[Map[String, Any]] = {
+  def getAllCourse(@RequestParam(value = "hiddenCourses", required = false) hiddenCourses: Boolean,
+                   request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    courseService.getAllCourses(user.get)
+    courseService.getAllCourses(user.get, hiddenCourses)
   }
 
   /**

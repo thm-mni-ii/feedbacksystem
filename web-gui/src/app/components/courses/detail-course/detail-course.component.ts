@@ -38,6 +38,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   deadlineTask: { [task: number]: boolean };
   courseID: number;
 
+  hasScrolledToTask: boolean = false;
+
 
   private reachedDeadline(now: Date, deadline: Date): boolean {
     return now > deadline;
@@ -87,8 +89,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     // If url fragment with task id is given, scroll to that task
     this.route.fragment.subscribe(taskIDScroll => {
       const elem = document.getElementById(taskIDScroll);
-      if (elem) {
+      if (elem && !this.hasScrolledToTask) {
         elem.scrollIntoView();
+        this.hasScrolledToTask = true;
       }
     });
   }
@@ -238,13 +241,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       data: {coursename: courseName}
     }).afterClosed().pipe(
       flatMap(value => {
-        console.log(value);
         if (value.exit) {
           return this.db.unsubscribeCourse(courseID);
         }
       })
     ).subscribe(res => {
-      console.log(res);
       if (res.success) {
         this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
         this.router.navigate(['courses', 'user']);

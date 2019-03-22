@@ -9,8 +9,9 @@
 }
 
 .center-box {
-  width: 50%;
+  width: 99%;
   height: auto;
+  overflow: scroll;
   background-color: $cPrimary;
   border-radius: 6px;
 }
@@ -26,7 +27,7 @@
 
 .course-name {
   display: block;
-  width: 20%;
+  //width: 20%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;

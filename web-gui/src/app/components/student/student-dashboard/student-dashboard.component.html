@@ -2,15 +2,15 @@
   <div class="center-box" *ngIf="dashboard?.length > 0">
 
     <ul class="list-courses">
-      <li *ngFor="let entry of dashboard" class="course">
 
+      <div *ngFor="let entry of dashboard">
         <!-- Course name-->
         <h3 class="course-name">
           {{entry.course_name}}
         </h3>
-
+      <li  class="course">
         <!-- Tasks a1, a2...-->
-        <div *ngFor="let task of entry.tasks">
+        <div *ngFor="let task of entry.tasks" >
           <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
                matTooltipPosition="above"
                matTooltipClass="custom-tooltip"
@@ -25,6 +25,7 @@
 
 
       </li>
+      </div>
     </ul>
   </div>
 </div>
