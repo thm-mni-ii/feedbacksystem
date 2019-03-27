@@ -40,6 +40,7 @@ import {CookieService} from 'ngx-cookie-service';
 import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
+import { GrandTutorSnippComponent } from './components/courses/grand-tutor-snipp/grand-tutor-snipp.component';
 
 
 @Injectable()
@@ -83,6 +84,7 @@ export const httpInterceptorProviders = [
     DataprivacyDialogComponent,
     ImpressumDialogComponent,
     DeleteCourseModalComponent,
+    GrandTutorSnippComponent,
   ],
   imports: [
     BrowserModule,

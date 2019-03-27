@@ -6,8 +6,8 @@
       {{course.course_name}}
     </mat-grid-tile>
 
-    <mat-grid-tile (click)="deleteCourse(course.course_name, course.course_id)" class="courses_view_deletion" *ngIf="course.role_id <= 4" colspan='1'>
-      <img src="assets/baseline-delete-24px.svg" />
+    <mat-grid-tile (click)="deleteCourse(course.course_name, course.course_id)" *ngIf="course.role_id <= 4" colspan='1'>
+      <mat-icon style="color: red;">delete</mat-icon>
     </mat-grid-tile>
 </span>
   </mat-grid-list>

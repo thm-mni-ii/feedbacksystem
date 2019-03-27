@@ -15,6 +15,9 @@
       <td mat-cell *matCellDef="let course">
         <h3>{{course.course_name}}</h3>
 
+
+        <app-grand-tutor-snipp (loadAllCourses)="loadAllCoursesTutor($event)"  [course]="course"></app-grand-tutor-snipp>
+
         <mat-divider></mat-divider>
         <h4>Dozenten</h4>
 
@@ -41,7 +44,7 @@
           </mat-autocomplete>
 
 
-          <button mat-icon-button color="accent" (click)="showDocentInput(course.course_id)">
+          <button mat-icon-button color="accent"  (click)="showDocentInput(course.course_id)">
             <mat-icon>add_circle</mat-icon>
           </button>
         </mat-chip-list>

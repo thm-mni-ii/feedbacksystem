@@ -12,6 +12,7 @@ import {of, throwError} from 'rxjs';
 
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 import {DOCUMENT} from '@angular/common';
+import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
 
 /**
  * Shows a course in detail
@@ -84,6 +85,37 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     }, 1000);
   }
 
+
+  public deleteCourse(courseDetail: DetailedCourseInformation){
+    this.dialog.open(DeleteCourseModalComponent, {
+      data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        console.log(value);
+        if (value.exit) {
+          return this.db.deleteCourse(courseDetail.course_id)
+        }
+      })
+    )
+      .toPromise()
+      .then( (value: Succeeded) => {
+        if(value.success){
+          this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
+        } else {
+          this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.', 'OK', {duration: 5000});
+        }
+      })
+      .catch(() => {
+        this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung', 'OK', {duration: 5000});
+      })
+      .then(() => {
+        this.router.navigate(['courses'])
+      })
+  }
+
+  public isAuthorized(){
+    return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
+  }
 
   ngAfterViewChecked() {
     // If url fragment with task id is given, scroll to that task

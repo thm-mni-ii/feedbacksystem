@@ -1,26 +1,42 @@
 <div class="container">
 
   <mat-card id="description">
-    <h4>{{courseDetail?.course_description}}</h4>
 
-    <span *ngIf="userRole != 'admin' && userRole != 'moderator'">
-      <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
-              (click)="subscribeCourse()">Kurs
-        beitreten
+
+      <h4>{{courseDetail?.course_description}}</h4>
+
+    <mat-grid-list cols="20" rowHeight="100px">
+
+
+      <mat-grid-tile *ngIf="userRole != 'admin' && userRole != 'moderator'"  colspan="9">
+        <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
+                (click)="subscribeCourse()">Kurs
+          beitreten
+        </button>
+        <button *ngIf="userRole != 'docent' && courseDetail.role_id" class="desc-button" mat-flat-button color="warn"
+                (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Kurs
+          verlassen
+        </button>
+
+      </mat-grid-tile>
+
+
+      <mat-grid-tile colspan="{{(userRole != 'admin' && userRole != 'moderator') ? 9 : 18}}">
+      <button class="desc-button" *ngIf="isAuthorized()"
+              mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
       </button>
-      <button *ngIf="userRole != 'docent' && courseDetail.role_id" class="desc-button" mat-flat-button color="warn"
-              (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Kurs
-        verlassen
-      </button>
-    </span>
-    <button class="desc-button" *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
+      </mat-grid-tile>
 
-            mat-flat-button color="accent" (click)="updateCourse()">Kurs bearbeiten
 
-    </button>
-    <button class="desc-button" *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'"
-            mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
-    </button>
+      <mat-grid-tile colspan="1">
+        <mat-icon *ngIf="isAuthorized()" (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
+      </mat-grid-tile>
+
+      <mat-grid-tile colspan="1">
+        <mat-icon *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
+      </mat-grid-tile>
+
+    </mat-grid-list>
   </mat-card>
 
   <!-- task list-->

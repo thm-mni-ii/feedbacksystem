@@ -35,7 +35,6 @@ export class DataprivacyDialogComponent implements OnInit {
     this.db.getPrivacyOrImpressumText(TextType.Dataprivacy).subscribe(data => {
       this.markdown = data.markdown;
     });
-    this.onlyForShow = this.data.onlyForShow;
   }
 
 
@@ -44,7 +43,7 @@ export class DataprivacyDialogComponent implements OnInit {
    */
   login() {
     if (this.privacyChecked) {
-      this.dialogRef.close(true);
+      this.dialogRef.close({success: true});
     } else {
       this.snackBar.open('Datenschutzerklärung akzeptieren', 'OK');
     }
