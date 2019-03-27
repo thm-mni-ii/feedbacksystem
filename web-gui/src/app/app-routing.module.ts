@@ -32,7 +32,7 @@ const routes: Routes = [
       {path: 'courses/:id', component: DetailCourseComponent},
 
       // Admin
-      {path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [AdminGuard]},
+      {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
       {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
       {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
 

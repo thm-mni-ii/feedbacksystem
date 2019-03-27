@@ -41,6 +41,7 @@ import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
 import { GrandTutorSnippComponent } from './components/courses/grand-tutor-snipp/grand-tutor-snipp.component';
+import { DeleteTaskModalComponent } from './components/courses/modals/delete-task-modal/delete-task-modal.component';
 
 
 @Injectable()
@@ -85,6 +86,7 @@ export const httpInterceptorProviders = [
     ImpressumDialogComponent,
     DeleteCourseModalComponent,
     GrandTutorSnippComponent,
+    DeleteTaskModalComponent,
   ],
   imports: [
     BrowserModule,

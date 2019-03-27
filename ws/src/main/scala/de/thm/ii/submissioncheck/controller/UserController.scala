@@ -177,6 +177,7 @@ class UserController {
     * @param before defines where login was before a special date
     * @param after defines where login was after a special date
     * @param sort defines asc or desc of result
+    * @param showDeleted filter user on deleted status
     * @param request contains resquest headers
     * @return JSON
     * @throws BadRequestException, UnauthorizedException
@@ -184,7 +185,9 @@ class UserController {
   @RequestMapping(value = Array("users"), method = Array(RequestMethod.GET))
   def getLastLoginsOfUsers(@RequestParam(value = "before", required = false) before: String,
                            @RequestParam(value = "after", required = false) after: String,
-                           @RequestParam(value = "sort", required = false) sort: String, request: HttpServletRequest): List[Map[String, Any]] = {
+                           @RequestParam(value = "sort", required = false) sort: String,
+                           @RequestParam(value = "showDeleted", required = false) showDeleted: Boolean = false,
+                           request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
@@ -195,7 +198,7 @@ class UserController {
     }
 
     try {
-      loginService.getLastLoginList(before, after, sort)
+      loginService.getLastLoginList(before, after, sort, showDeleted)
     }
     catch {
       case e: IllegalArgumentException => {

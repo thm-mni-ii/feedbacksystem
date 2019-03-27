@@ -13,6 +13,7 @@ import {of, throwError} from 'rxjs';
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 import {DOCUMENT} from '@angular/common';
 import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
+import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
 
 /**
  * Shows a course in detail
@@ -83,6 +84,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         );
       }
     }, 1000);
+  }
+
+  private loadCourseDetailsTasks(){
+    this.db.getCourseDetail(this.courseID).toPromise()
+      .then(course_detail => {
+          this.courseTasks = course_detail.tasks;
+      })
   }
 
 
@@ -213,20 +221,26 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    * @param task The task that will be deleted
    */
   deleteTask(task: CourseTask) {
-    this.snackbar.open(task.task_name + ' löschen ?', 'JA', {duration: 5000}).onAction().subscribe(() => {
-
-      this.db.deleteTask(task.task_id).pipe(
-        flatMap(value => {
-          if (value.success) {
-            this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-          }
-          return this.db.getCourseDetail(this.courseDetail.course_id);
-        })
-      ).subscribe(course_detail => {
-        this.courseTasks = course_detail.tasks;
-      });
-    });
-
+    this.dialog.open(DeleteTaskModalComponent, {
+      data: {taskname: task.task_name}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.deleteTask(task.task_id)
+        }
+      })
+    ).toPromise()
+      .then( (value: Succeeded) => {
+        if(value.success){
+          this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
+          this.loadCourseDetailsTasks()
+        } else {
+          this.snackbar.open('Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
+        }
+      })
+      .catch((e) => {
+        this.snackbar.open('Es gab ein Datenbankfehler, Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
+      })
   }
 
   /**
