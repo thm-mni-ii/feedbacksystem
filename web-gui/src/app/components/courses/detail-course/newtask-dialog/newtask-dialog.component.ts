@@ -1,5 +1,5 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DatabaseService} from '../../../../service/database.service';
 import {Observable, Subscription} from 'rxjs';
@@ -34,7 +34,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
 
   constructor(public dialogRef: MatDialogRef<NewtaskDialogComponent>, private db: DatabaseService,
-              @Inject(MAT_DIALOG_DATA) public data: any) {
+              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) {
   }
 
   ngOnInit() {
@@ -83,9 +83,21 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * and close dialog
    */
   createTask() {
-    this.db.createTask(this.data.courseID, this.newTaskName,
-      this.newTaskDescription, this.soutionFiles, this.taskType, this.deadline)
-      .subscribe(success => this.dialogRef.close(success));
+    if(typeof this.newTaskName == 'undefined'){
+      this.snackBar.open('Bitte einen Namen für die neue Aufgabe angeben');
+    } else if(typeof this.newTaskDescription == 'undefined'){
+      this.snackBar.open('Bitte eine Beschreibung für die neue Aufgabe angeben');
+    } else if(typeof this.taskType == 'undefined') {
+      this.snackBar.open('Bitte ein Testsystem auswählen');
+    } else if(typeof this.soutionFiles == 'undefined'){
+      this.snackBar.open('Bitte Dateien auswählen');
+    } else if(typeof this.deadline == 'undefined') {
+        this.snackBar.open('Bitte eine Deadline festlegen')
+    } else {
+      this.db.createTask(this.data.courseID, this.newTaskName,
+        this.newTaskDescription, this.soutionFiles, this.taskType, this.deadline)
+        .subscribe(success => this.dialogRef.close(success));
+    }
   }
 
   /**

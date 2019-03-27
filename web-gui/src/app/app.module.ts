@@ -109,7 +109,7 @@ export const httpInterceptorProviders = [
     })
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
-    ImpressumDialogComponent, DeleteCourseModalComponent],
+    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })
