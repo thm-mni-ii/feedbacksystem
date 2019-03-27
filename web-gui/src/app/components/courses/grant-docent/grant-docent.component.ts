@@ -108,7 +108,6 @@ export class GrantDocentComponent implements OnInit {
 
       this.db.addDocentToCourse(courseID, selectedUser.user_id).pipe(
         flatMap(res => {
-          console.log(res);
           return this.db.getAllCourses();
         })
       ).subscribe(courses => this.dataSourceCourses.data = courses);

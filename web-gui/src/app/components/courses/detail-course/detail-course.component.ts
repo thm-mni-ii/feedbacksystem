@@ -99,7 +99,6 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
     }).afterClosed().pipe(
       flatMap(value => {
-        console.log(value);
         if (value.exit) {
           return this.db.deleteCourse(courseDetail.course_id)
         }

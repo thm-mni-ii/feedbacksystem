@@ -46,7 +46,6 @@ export class CoursesComponent implements OnInit {
       data: {coursename: courseName, courseID: courseID}
     }).afterClosed().pipe(
       flatMap(value => {
-        console.log(value);
         if (value.exit) {
           return this.db.deleteCourse(courseID)
         }

@@ -49,7 +49,6 @@ export class ProfDashboardComponent implements OnInit {
 
     this.tb.emitTitle('Dashboard');
     this.db.getSubscribedCourses().subscribe(courses => {
-      console.log("yoyoy",courses)
       if(this.userService.getUserRole() === 4) {
         this.courses = courses.filter(course => course.role_id === 4);
       } else { //implicit does it means it is an admin, maybe also explizit allow moderators
