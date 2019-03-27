@@ -5,10 +5,10 @@
 
       <h4>{{courseDetail?.course_description}}</h4>
 
-    <mat-grid-list cols="20" rowHeight="100px">
+    <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="100px">
 
 
-      <mat-grid-tile *ngIf="userRole != 'admin' && userRole != 'moderator'"  colspan="9">
+      <mat-grid-tile *ngIf="userRole != 'admin' && userRole != 'moderator'" >
         <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
                 (click)="subscribeCourse()">Kurs
           beitreten
@@ -20,20 +20,20 @@
 
       </mat-grid-tile>
 
-
-      <mat-grid-tile colspan="{{(userRole != 'admin' && userRole != 'moderator') ? 9 : 18}}">
-      <button class="desc-button" *ngIf="isAuthorized()"
+      <!--colspan="{{(userRole != 'admin' && userRole != 'moderator') ? 9 : 18}}"-->
+      <mat-grid-tile *ngIf="isAuthorized()">
+      <button class="desc-button"
               mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
       </button>
       </mat-grid-tile>
 
 
-      <mat-grid-tile colspan="1">
-        <mat-icon *ngIf="isAuthorized()" (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
+      <mat-grid-tile *ngIf="isAuthorized()" >
+        <mat-icon (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
       </mat-grid-tile>
 
-      <mat-grid-tile colspan="1">
-        <mat-icon *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
+      <mat-grid-tile *ngIf="isAuthorized()" >
+        <mat-icon (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
       </mat-grid-tile>
 
     </mat-grid-list>

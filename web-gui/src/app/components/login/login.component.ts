@@ -50,7 +50,15 @@ export class LoginComponent implements OnInit {
     const extraRoute = localStorage.getItem('route');
     if (extraRoute) {
       localStorage.removeItem('route');
-      this.router.navigateByUrl(extraRoute);
+      this.router.navigateByUrl(extraRoute)
+        .then((success) => {
+          if(!success){
+            this.router.navigateByUrl('/')
+          }
+        })
+        .catch((error) => {
+          console.log("Error beim Einloggen, Debugging: ", error)
+        })
     } else {
       this.router.navigate(['']);
     }

@@ -26,7 +26,7 @@ export class DataprivacyDialogComponent implements OnInit {
   isAdmin: boolean;
 
   ngOnInit() {
-    this.dialogRef.updateSize('600px', '400px');
+    //this.dialogRef.updateSize('600px', '400px');
     if (this.auth.isAuthenticated()) {
       if (this.user.getUserRole() === 1) {
         this.isAdmin = true;

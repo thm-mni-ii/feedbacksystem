@@ -39,6 +39,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   submissionAsFile: { [task: number]: boolean };
   deadlineTask: { [task: number]: boolean };
   courseID: number;
+  breakpoint: number;
 
   hasScrolledToTask: boolean = false;
 
@@ -84,6 +85,15 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         );
       }
     }, 1000);
+
+
+    this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
+
+
+  }
+
+  onResize(event) {
+    this.breakpoint = (event.target.innerWidth <= 400) ? 1 : 3;
   }
 
   private loadCourseDetailsTasks(){

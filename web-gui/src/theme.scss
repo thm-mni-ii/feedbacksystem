@@ -1,4 +1,9 @@
-@import "~@angular/material/_theming.scss"; 
+@import "~@angular/material/_theming.scss";
+
+@import '~@angular/material/theming';
+.mat-checkbox-layout {
+  white-space: normal !important;
+}
 
 @include mat-core();
 
