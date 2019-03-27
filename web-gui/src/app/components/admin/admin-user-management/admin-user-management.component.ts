@@ -1,9 +1,10 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
+import {MatDialog, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {User} from '../../../interfaces/HttpInterfaces';
+import {DeleteUserModalComponent} from "../../modals/delete-user-modal/delete-user-modal.component";
 
 /**
  * This component is for admin managing
@@ -18,7 +19,8 @@ export class AdminUserManagementComponent implements OnInit {
 
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService) {
+  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
+              private dialog: MatDialog) {
   }
 
 
@@ -36,7 +38,10 @@ export class AdminUserManagementComponent implements OnInit {
   ngOnInit() {
     this.gRole = 16;
     this.titlebar.emitTitle('User Management');
+    this.loadAllUsers();
+  }
 
+  private loadAllUsers(){
     this.db.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
@@ -71,17 +76,23 @@ export class AdminUserManagementComponent implements OnInit {
    * @param user The user to delete
    */
   deleteUser(user: User) {
-    this.db.adminDeleteUser(user.user_id).pipe(
-      flatMap((result) => {
-
+      this.dialog.open(DeleteUserModalComponent, {
+      data: user
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.adminDeleteUser(user.user_id)
+        } else {
+          return null
+        }
+      })
+    ).toPromise().
+        then((result) => {
         if (result.success) {
           this.snackBar.open(user.username + ' wurde gelöscht');
+          this.loadAllUsers();
         }
-
-        return this.db.getAllUsers();
-      })).subscribe(users => {
-      this.dataSource.data = users;
-    });
+      }).catch(e => {})
 
   }
 
