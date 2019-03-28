@@ -18,11 +18,20 @@
     </mat-form-field>
 
     <!-- Task type-->
-    <mat-select placeholder="Aufgaben typ" [(value)]="taskType">
+    <mat-select (valueChange)="loadFileUploadFields($event)" placeholder="Aufgaben typ" [(value)]="taskType">
       <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
     </mat-select>
 
-    <input (change)="getFiles($event.target.files)" type="file" placeholder="Lösung" multiple>
+
+    <div *ngFor="let testfile of testSystemFiles">
+      {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">(ist erforderlich)</span>
+
+      <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename)" type="file" placeholder="Lösung" >
+      <!--<span (click)="removeFilesFromList(testfile.filename)">X</span>-->
+    </div>
+
+
+
   </form>
 
   <!-- Deadline picker-->

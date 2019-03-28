@@ -16,4 +16,6 @@ object TestsystemLabels {
   val machine_port = "machine_port"
   /** provide machine_ip label **/
   val machine_ip = "machine_ip"
+  /** provide testfiles label **/
+  val testfiles = "testfiles"
 }

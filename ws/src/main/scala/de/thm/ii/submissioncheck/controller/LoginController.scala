@@ -117,7 +117,7 @@ class LoginController extends CasClientConfigurerAdapter {
     val password = jsonNode.get("password").asText()
     var ldapUser: Option[LdapEntry] = None
 
-    try {
+    /*try {
       ldapUser = LDAPConnector.loginLDAPUserByUIDAndPassword(username, password)(LDAP_URL, LDAP_BASE_DN)
     } catch {
       case _: Exception => ldapUser = None
@@ -133,12 +133,12 @@ class LoginController extends CasClientConfigurerAdapter {
     } else {
       userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
         ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
-
+      */
       val user = userService.loadUserFromDB(username)
-      val jwtToken: String = if (login) this.userService.generateTokenFromUser(user.get) else null
+      val jwtToken: String = this.userService.generateTokenFromUser(user.get)
       setBearer(response, jwtToken)
-      Map(LABEL_SUCCESS -> login)
-    }
+      Map(LABEL_SUCCESS -> true)
+
   } catch {
         case e: NullPointerException => {
           throw new BadRequestException("Please provide: username and password")

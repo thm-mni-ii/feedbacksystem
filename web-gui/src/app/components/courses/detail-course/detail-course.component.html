@@ -81,7 +81,7 @@
 
         <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
-          <input matInput type="text" [(ngModel)]="submissionData[task.task_id]">
+          <input (keyup.enter)="submission(courseDetail.course_id, task)" matInput type="text" [(ngModel)]="submissionData[task.task_id]">
         </mat-form-field>
 
       </div>

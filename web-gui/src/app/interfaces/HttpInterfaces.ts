@@ -133,6 +133,12 @@ export interface Testsystem {
   testsystem_id: string;
   description: string;
   supported_formats: string;
+  testfiles: TestsystemTestfile[]
+}
+
+export interface TestsystemTestfile {
+  required: boolean;
+  filename: string;
 }
 
 export enum TextType {

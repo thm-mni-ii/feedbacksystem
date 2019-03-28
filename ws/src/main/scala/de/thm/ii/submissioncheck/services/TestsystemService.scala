@@ -1,8 +1,10 @@
 package de.thm.ii.submissioncheck.services
 import java.util.Date
+
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import java.io
 
+import de.thm.ii.submissioncheck.TestsystemTestfileLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.{Testsystem, User}
 import de.thm.ii.submissioncheck.security.Secrets
@@ -101,11 +103,30 @@ class TestsystemService {
   def getTestsystem(id_string: String): Option[Testsystem] = {
     val list = DB.query("select * from testsystem  where testsystem_id = ?", (res, _) => {
       new Testsystem(res.getString(TestsystemLabels.id), res.getString(TestsystemLabels.name), res.getString(TestsystemLabels.description),
-        res.getString(TestsystemLabels.supported_formats), res.getString(TestsystemLabels.machine_port), res.getString(TestsystemLabels.machine_ip))
+        res.getString(TestsystemLabels.supported_formats), res.getString(TestsystemLabels.machine_port), res.getString(TestsystemLabels.machine_ip),
+        loadTestfilesByTestsystem(res.getString(TestsystemLabels.id)))
     }, id_string)
     list.headOption
   }
 
+  /**
+    * load specification which files a testsystem needs
+    * @author Benjamin Manns
+    * @param id_string unique identification for a testsystem
+    * @return Scala Map of Testfiles Specifications
+    */
+  def loadTestfilesByTestsystem(id_string: String): List[Map[String, Any]] = {
+    val list = DB.query("select * from testsystem_testfile where testsystem_id = ?", (res, _) => {
+      Map(TestsystemTestfileLabels.id -> res.getString(TestsystemTestfileLabels.id),
+        TestsystemTestfileLabels.filename -> res.getString(TestsystemTestfileLabels.filename),
+        TestsystemTestfileLabels.required -> res.getBoolean(TestsystemTestfileLabels.required))
+    }, id_string)
+    if (list.isEmpty) {
+      List.empty
+    } else {
+      list
+    }
+  }
   /**
     * get all testsystems
     * @author Benjamin Manns

@@ -184,7 +184,7 @@ object SecretTokenChecker extends App {
   }
 
   /**
-    * Delets a dir recursively deleting anything inside it.
+    * Deletes a dir recursively deleting anything inside it.
     * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
     * @param dir The dir to delete
     * @return true if the dir was successfully deleted
@@ -219,11 +219,11 @@ object SecretTokenChecker extends App {
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-      if (urls.length != 1) {
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Please provide exact one testfile", LABEL_TASKID -> taskid)))
+      if (urls.length != 1 && urls.length != 2) {
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+          "Please provide one or two files (testfile and scriptfile)", LABEL_TASKID -> taskid)))
       } else {
-        deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
-
+        //deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
         downloadFilesToFS(urls, jwt_token, taskid)
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
       }
@@ -253,20 +253,24 @@ object SecretTokenChecker extends App {
     */
   def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
     // make a list
-    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles().filter(_.isFile)
 
-    val filesListHead = filesList.headOption
+
+
+
+    //val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles().filter(_.isFile)
+
+    /*val filesListHead = filesList.headOption
     if (filesListHead.isEmpty) {
       (message_err, 126)
-    } else {
-      val script: String = filesListHead.get.getAbsolutePath
+    } else {*/
+      //val script: String = filesListHead.get.getAbsolutePath
       //val file = filesListHead.get
-      val bashtest1 = new BashExec(script, name, filePath)
+      val bashtest1 = new BashExec(taskid, name, filePath)
       val exit1 = bashtest1.exec()
       val message1 = bashtest1.output
 
       (message1, exit1)
-    }
+    //}
   }
 
   /**
