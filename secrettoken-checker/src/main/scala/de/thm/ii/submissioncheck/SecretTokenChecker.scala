@@ -224,8 +224,18 @@ object SecretTokenChecker extends App {
           "Please provide one or two files (testfile and scriptfile)", LABEL_TASKID -> taskid)))
       } else {
         //deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
-        downloadFilesToFS(urls, jwt_token, taskid)
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        val sendedFileNames = downloadFilesToFS(urls, jwt_token, taskid)
+
+        // validation if sent files are useful
+        if (sendedFileNames.length == 1 && !sendedFileNames.contains("scriptfile")) {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Provided file should call 'scriptfile'", LABEL_TASKID -> taskid)))
+        }
+        else if (sendedFileNames.length == 2 && (!sendedFileNames.contains("scriptfile") || !sendedFileNames.contains("testfile"))) {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+            "Provided files should call 'scriptfile' and 'testfile'", LABEL_TASKID -> taskid)))
+        } else {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        }
       }
     } catch {
       case e: NoSuchElementException => {
@@ -312,13 +322,15 @@ object SecretTokenChecker extends App {
     Paths.get(ULDIR).resolve(taskid).resolve(filename).resolve(filename)
   }
 
-  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String) = {
+  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
+    var downloadFileNames: List[String] = List()
     val timeout = 1000
     for(urlname <- urlnames){
       val url = new java.net.URL(urlname)
       val urlParts = urlname.split("/")
       // syntax of testfile url allows us to get filename
       val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
+      downloadFileNames = downloadFileNames ++ List(filename)
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]
       connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
       connection.setConnectTimeout(timeout)
@@ -334,6 +346,7 @@ object SecretTokenChecker extends App {
         Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
     }
+    downloadFileNames
   }
 
   /**

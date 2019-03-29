@@ -108,7 +108,6 @@ class TestsystemController {
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    println(testsystemid)
     val testsystem = testsystemService.getTestsystem(testsystemid)
     if (testsystem.isEmpty) {
       Map.empty
