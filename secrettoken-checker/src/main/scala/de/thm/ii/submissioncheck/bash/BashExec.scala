@@ -60,7 +60,6 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
     val seq = Seq("run", "--rm", __option_v, absPath + ":/" + absPath, __option_v, testfilePath + ":/" + testfilePath,
       __option_v, submittedFilePath + ":" + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, "bash:4.4", "bash",
       "/" + absPath, name, submittedFilePath)
-    print(seq)
     val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
 
     output = stdoutStream.toString

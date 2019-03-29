@@ -132,7 +132,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
     else {
       if(!this.checkAllNeededFilesAreSet()){
-        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + this.testSystemFiles.join(','))
+        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + this.testSystemFiles.map(v => v.filename).join(', '))
       } else {
         this.db.createTask(this.data.courseID, this.newTaskName,
           this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)

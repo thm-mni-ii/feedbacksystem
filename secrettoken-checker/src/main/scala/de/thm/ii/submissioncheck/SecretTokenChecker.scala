@@ -252,25 +252,11 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-    // make a list
-
-
-
-
-    //val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles().filter(_.isFile)
-
-    /*val filesListHead = filesList.headOption
-    if (filesListHead.isEmpty) {
-      (message_err, 126)
-    } else {*/
-      //val script: String = filesListHead.get.getAbsolutePath
-      //val file = filesListHead.get
       val bashtest1 = new BashExec(taskid, name, filePath)
       val exit1 = bashtest1.exec()
       val message1 = bashtest1.output
 
       (message1, exit1)
-    //}
   }
 
   /**
