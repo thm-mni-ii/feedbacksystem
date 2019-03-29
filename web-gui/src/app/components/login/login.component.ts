@@ -50,7 +50,15 @@ export class LoginComponent implements OnInit {
     const extraRoute = localStorage.getItem('route');
     if (extraRoute) {
       localStorage.removeItem('route');
-      this.router.navigateByUrl(extraRoute);
+      this.router.navigateByUrl(extraRoute)
+        .then((success) => {
+          if(!success){
+            this.router.navigateByUrl('/')
+          }
+        })
+        .catch((error) => {
+          console.log("Error beim Einloggen, Debugging: ", error)
+        })
     } else {
       this.router.navigate(['']);
     }
@@ -62,16 +70,19 @@ export class LoginComponent implements OnInit {
    * when user logs in for first time
    */
   login() {
-    this.auth.login(this.username, this.password).subscribe(response => {
+    this.auth.login(this.username, this.password).toPromise().then(response => {
       if(response.body.success){
 
         this.auth.loginPrivacyCheck(this.username).subscribe(success => {
-
           if(!success.success){
             this.dialog.open(DataprivacyDialogComponent).afterClosed().subscribe((key) => {
-              if(key){
-                this.auth.acceptPrivacyForUser(this.username)
-                this.jwtParser(response)
+              if(key.success){
+                this.auth.acceptPrivacyForUser(this.username).then((f) => {
+                  this.jwtParser(response)
+                }).catch((e) => {
+                  this.snackbar.open('Leider gab es ein Problem beim Anmelden.', 'OK');
+                })
+
               }
             })
 
@@ -84,6 +95,8 @@ export class LoginComponent implements OnInit {
         this.snackbar.open('Username oder Passwort falsch', 'OK');
       }
 
+    }).catch((e) => {
+      this.snackbar.open('Bitte Username und Passwort eingeben', 'OK');
     })
   }
 

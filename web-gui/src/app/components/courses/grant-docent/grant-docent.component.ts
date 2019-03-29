@@ -32,11 +32,15 @@ export class GrantDocentComponent implements OnInit {
   showInputForDocent: boolean;
   docentInputCourseID: number;
 
+  public loadAllCoursesTutor(){
+    this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
+  }
+
 
   ngOnInit() {
     this.titlebar.emitTitle('Dozent wählen');
+    this.loadAllCoursesTutor();
 
-    this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
     this.db.getAllUsers().pipe(
       flatMap(users => {
         this.dataSourceUsers = users;
@@ -104,7 +108,6 @@ export class GrantDocentComponent implements OnInit {
 
       this.db.addDocentToCourse(courseID, selectedUser.user_id).pipe(
         flatMap(res => {
-          console.log(res);
           return this.db.getAllCourses();
         })
       ).subscribe(courses => this.dataSourceCourses.data = courses);

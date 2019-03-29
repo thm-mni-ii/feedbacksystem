@@ -4,8 +4,8 @@
 
     <div class="container">
 
+      <mat-card class="card">
 
-      <div class="center-box">
         <mat-form-field appearance="fill"  class="filter-input">
           <mat-label>Filter</mat-label>
           <input matInput [formControl]="filter">
@@ -30,8 +30,36 @@
               </div>
             </div>
           </div>
+
         </div>
-      </div>
+
+        <!--<mat-grid-list cols="20">
+
+          <mat-grid-tile colspan="5">
+            <div class="name-container" *ngFor="let student of filteredMatrix$ | async">
+              <mat-icon *ngIf="student.passed === 1" class="student-passed" color="#00ffff">done</mat-icon>
+              <mat-icon *ngIf="student.passed === 0" class="student-failed" color="#ff0000">clear</mat-icon>
+              <h3 class="name">{{student.surname}} {{student.prename}}</h3>
+            </div>
+          </mat-grid-tile>
+
+
+          <mat-grid-tile colspan="15">
+            <div class="task-container" *ngFor="let student of filteredMatrix$ | async">
+              <div *ngFor="let task of student.tasks" class="task-row">
+                <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
+                     matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
+                  {{task[key].trials}}
+                </div>
+              </div>
+            </div>
+
+
+          </mat-grid-tile>
+        </mat-grid-list>-->
+
+
+      </mat-card>
     </div>
 
   </mat-tab>

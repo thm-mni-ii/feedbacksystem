@@ -32,11 +32,12 @@ CREATE TABLE `course` (
   `course_semester` varchar(255) DEFAULT NULL,
   `course_end_date` date DEFAULT NULL,
   `personalised_submission` tinyint(1) DEFAULT '0',
+  `course_visibility` enum('HIDDEN','VISIBLE') DEFAULT 'VISIBLE',
   PRIMARY KEY (`course_id`),
   UNIQUE KEY `courses_courseid_uindex` (`course_id`),
   KEY `courses_users_userid_fk` (`creator`),
   CONSTRAINT `courses_users_userid_fk` FOREIGN KEY (`creator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 

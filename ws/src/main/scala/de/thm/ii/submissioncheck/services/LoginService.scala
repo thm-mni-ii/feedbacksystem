@@ -31,10 +31,13 @@ class LoginService {
     * @param before: limit login log before a given date
     * @param after: limit login log after a given date
     * @param sort: provide a sort of timestamps
+    * @param showDeleted filter user on deleted status
     * @return Scala List of Last Login date of each existing user
     * @throws IllegalArgumentException
     */
-  def getLastLoginList(before: String, after: String, sort: String = "desc"): List[Map[String, Any]] = {
+  def getLastLoginList(before: String, after: String, sort: String = "desc", showDeleted: Boolean): List[Map[String, Any]] = {
+    val deletedUserSubQuery = if (showDeleted) "" else " AND status = 1"
+
     var listAll = true
     var before_std = DateParser.dateParser("9999-12-31")
     var after_std = "0000-00-00"
@@ -63,7 +66,7 @@ class LoginService {
     DB.query("select * from (select user_id, username, role_id, prename, surname, email, max(`login_timestamp`) " +
       "as last_login from login_log join user using(user_id) group by user_id) sub where last_login <= ? and " +
       "last_login >= ? " + (if (listAll) { " UNION\nselect user_id, username, role_id, prename, surname, email, " +
-      "NULL as login_timestamp from user where user_id NOT IN (SELECT DISTINCT user_id from login_log) "} else {" "})
+      "NULL as login_timestamp from user where user_id NOT IN (SELECT DISTINCT user_id from login_log) " + deletedUserSubQuery} else {" "})
       + sort_subquery,
       (res, _) => {
         Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),

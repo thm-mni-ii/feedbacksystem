@@ -4,7 +4,8 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {Testsystem} from '../../../interfaces/HttpInterfaces';
+import {NewCourse, Testsystem} from '../../../interfaces/HttpInterfaces';
+import {Router} from "@angular/router";
 
 /**
  * Create a new course
@@ -17,7 +18,7 @@ import {Testsystem} from '../../../interfaces/HttpInterfaces';
 export class NewCourseComponent implements OnInit, OnDestroy {
 
   constructor(private db: DatabaseService, private _formBuilder: FormBuilder,
-              private snackBar: MatSnackBar, private titlebar: TitlebarService) {
+              private snackBar: MatSnackBar, private titlebar: TitlebarService, private router: Router) {
   }
 
   @ViewChild('stepper') stepper: MatStepper;
@@ -77,10 +78,12 @@ export class NewCourseComponent implements OnInit, OnDestroy {
 
     this.subscription.add(this.courseNameFG.valueChanges.subscribe(
       (inputStep1: { firstCtrl: string }) => {
-        if (inputStep1.firstCtrl.match(' ')) {
-          inputStep1.firstCtrl = '';
+        if(inputStep1.firstCtrl){
+          if (inputStep1.firstCtrl.match('^ $')) {
+            inputStep1.firstCtrl = '';
+          }
+          this.newCourseName = inputStep1.firstCtrl;
         }
-        this.newCourseName = inputStep1.firstCtrl;
       }));
 
     this.subscription.add(this.courseDescriptionFG.valueChanges.subscribe(
@@ -138,10 +141,11 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     privateUserData = this.newCoursePrivatUserData === 'true';
 
     this.db.createCourse(this.newCourseName, this.newCourseDescription, this.newCourseType, this.newCourseSemester,
-      this.newCourseModuleID, this.newCourseDate, privateUserData).subscribe(() => {
+      this.newCourseModuleID, this.newCourseDate, privateUserData).subscribe((data: NewCourse) => {
       this.snackBar.open('Kurs ' + this.newCourseName + ' wurde erstellt', 'OK',
         {duration: 5000});
       this.stepper.reset();
+      setTimeout(this.router.navigate(['courses', data.course_id]),100)
     });
   }
 

@@ -2,15 +2,15 @@
 
 .container {
   width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .center-box {
-  width: 50%;
+  width: 99%;
   height: auto;
+  overflow: scroll;
   background-color: $cPrimary;
   border-radius: 6px;
 }
@@ -26,13 +26,13 @@
 
 .course-name {
   display: block;
-  width: 20%;
+  //width: 20%;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   margin: 0;
   padding: 12px;
-  color: white;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .task {

@@ -42,9 +42,7 @@
         <mat-select [(value)]="gRole" placeholder="Rolle">
           <mat-option value="1">Admin</mat-option>
           <mat-option value="2">Moderator</mat-option>
-          <mat-option value="4">Dozent</mat-option>
-          <mat-option value="8">Tutor</mat-option>
-          <mat-option value="16">Student</mat-option>
+          <mat-option value="16">User</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -94,9 +92,7 @@
         <mat-select value="{{user.role_id}}" (selectionChange)="roleChange(user.username, user.user_id, $event.value)">
           <mat-option value="1">Admin</mat-option>
           <mat-option value="2">Moderator</mat-option>
-          <mat-option value="4">Dozent</mat-option>
-          <mat-option value="8">Tutor</mat-option>
-          <mat-option value="16">Student</mat-option>
+          <mat-option value="16">User</mat-option>
         </mat-select>
       </td>
     </ng-container>

@@ -48,6 +48,12 @@ export interface DetailedCourseInformation {
   course_tutor: GeneralCourseDocent[];
 }
 
+
+export interface NewCourse{
+  course_id: number;
+  success: boolean;
+}
+
 /**
  * Task of one course
  */

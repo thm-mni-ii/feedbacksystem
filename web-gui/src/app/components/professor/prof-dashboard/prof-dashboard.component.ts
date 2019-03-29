@@ -6,6 +6,7 @@ import {TitlebarService} from '../../../service/titlebar.service';
 import {MatTabChangeEvent} from '@angular/material';
 import {map, startWith} from 'rxjs/operators';
 import {FormControl} from '@angular/forms';
+import {UserService} from "../../../service/user.service";
 
 /**
  * Matrix for every course docent has
@@ -17,7 +18,7 @@ import {FormControl} from '@angular/forms';
 })
 export class ProfDashboardComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private tb: TitlebarService) {
+  constructor(private db: DatabaseService, private tb: TitlebarService, private userService: UserService) {
   }
 
   courses: GeneralCourseInformation[];
@@ -48,7 +49,12 @@ export class ProfDashboardComponent implements OnInit {
 
     this.tb.emitTitle('Dashboard');
     this.db.getSubscribedCourses().subscribe(courses => {
-      this.courses = courses.filter(course => course.role_id === 4);
+      if(this.userService.getUserRole() === 4) {
+        this.courses = courses.filter(course => course.role_id === 4);
+      } else { //implicit does it means it is an admin, maybe also explizit allow moderators
+        this.courses = courses;
+      }
+
     });
   }
 

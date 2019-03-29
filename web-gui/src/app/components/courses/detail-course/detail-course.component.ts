@@ -12,6 +12,8 @@ import {of, throwError} from 'rxjs';
 
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 import {DOCUMENT} from '@angular/common';
+import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
+import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
 
 /**
  * Shows a course in detail
@@ -29,7 +31,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
-  courseDetail: DetailedCourseInformation;
+  courseDetail: DetailedCourseInformation = <DetailedCourseInformation>{};
   courseTasks: CourseTask[];
   userRole: string;
   submissionData: { [task: number]: File | string };
@@ -37,6 +39,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   submissionAsFile: { [task: number]: boolean };
   deadlineTask: { [task: number]: boolean };
   courseID: number;
+  breakpoint: number;
+
+  hasScrolledToTask: boolean = false;
 
 
   private reachedDeadline(now: Date, deadline: Date): boolean {
@@ -80,15 +85,62 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         );
       }
     }, 1000);
+
+
+    this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
+
+
   }
 
+  onResize(event) {
+    this.breakpoint = (event.target.innerWidth <= 400) ? 1 : 3;
+  }
+
+  private loadCourseDetailsTasks(){
+    this.db.getCourseDetail(this.courseID).toPromise()
+      .then(course_detail => {
+          this.courseTasks = course_detail.tasks;
+      })
+  }
+
+
+  public deleteCourse(courseDetail: DetailedCourseInformation){
+    this.dialog.open(DeleteCourseModalComponent, {
+      data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.deleteCourse(courseDetail.course_id)
+        }
+      })
+    )
+      .toPromise()
+      .then( (value: Succeeded) => {
+        if(value.success){
+          this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
+        } else {
+          this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.', 'OK', {duration: 5000});
+        }
+      })
+      .catch(() => {
+        this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung', 'OK', {duration: 5000});
+      })
+      .then(() => {
+        this.router.navigate(['courses'])
+      })
+  }
+
+  public isAuthorized(){
+    return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
+  }
 
   ngAfterViewChecked() {
     // If url fragment with task id is given, scroll to that task
     this.route.fragment.subscribe(taskIDScroll => {
       const elem = document.getElementById(taskIDScroll);
-      if (elem) {
+      if (elem && !this.hasScrolledToTask) {
         elem.scrollIntoView();
+        this.hasScrolledToTask = true;
       }
     });
   }
@@ -178,20 +230,26 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    * @param task The task that will be deleted
    */
   deleteTask(task: CourseTask) {
-    this.snackbar.open(task.task_name + ' löschen ?', 'JA', {duration: 5000}).onAction().subscribe(() => {
-
-      this.db.deleteTask(task.task_id).pipe(
-        flatMap(value => {
-          if (value.success) {
-            this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-          }
-          return this.db.getCourseDetail(this.courseDetail.course_id);
-        })
-      ).subscribe(course_detail => {
-        this.courseTasks = course_detail.tasks;
-      });
-    });
-
+    this.dialog.open(DeleteTaskModalComponent, {
+      data: {taskname: task.task_name}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.deleteTask(task.task_id)
+        }
+      })
+    ).toPromise()
+      .then( (value: Succeeded) => {
+        if(value.success){
+          this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
+          this.loadCourseDetailsTasks()
+        } else {
+          this.snackbar.open('Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
+        }
+      })
+      .catch((e) => {
+        this.snackbar.open('Es gab ein Datenbankfehler, Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
+      })
   }
 
   /**
@@ -238,13 +296,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       data: {coursename: courseName}
     }).afterClosed().pipe(
       flatMap(value => {
-        console.log(value);
         if (value.exit) {
           return this.db.unsubscribeCourse(courseID);
         }
       })
     ).subscribe(res => {
-      console.log(res);
       if (res.success) {
         this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
         this.router.navigate(['courses', 'user']);
@@ -264,6 +320,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       if (value.success) {
         this.db.getCourseDetail(this.courseID).subscribe(courses => {
           this.courseDetail = courses;
+          this.titlebar.emitTitle(this.courseDetail.course_name);
         });
       }
     });

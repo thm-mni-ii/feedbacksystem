@@ -56,16 +56,18 @@ class CourseController {
 
   /**
     * getAllCourses is a route for all courses
+    * @param hiddenCourses returns also hidden courses if set true
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllCourses(request: HttpServletRequest): List[Map[String, Any]] = {
+  def getAllCourses(@RequestParam(value = "hiddenCourses", required = false) hiddenCourses: Boolean,
+                     request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
         throw new UnauthorizedException
     }
-    courseService.getAllKindOfCoursesByUser(user.get)
+    courseService.getAllKindOfCoursesByUser(user.get, hiddenCourses)
   }
 
   /**
@@ -113,17 +115,19 @@ class CourseController {
     * getAllCourse provides all courses for searching purpose
     *
     * @author Benjamin Manns
+    * @param hiddenCourses returns also hidden courses if set true
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getAllCourse(request: HttpServletRequest): List[Map[String, Any]] = {
+  def getAllCourse(@RequestParam(value = "hiddenCourses", required = false) hiddenCourses: Boolean,
+                   request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
     }
-    courseService.getAllCourses(user.get)
+    courseService.getAllCourses(user.get, hiddenCourses)
   }
 
   /**
@@ -434,6 +438,30 @@ class CourseController {
     // old version
     // this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
     this.courseService.getSubmissionsMatrixByCourse(courseid)
+  }
+
+  /**
+    * @author Benjamin Manns
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return Success JSON
+    */
+  @RequestMapping(value = Array("{id}/visibility"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
+  def setVisibilityForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest,
+                          @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    try {
+      val visibilityType = jsonNode.get("typ").asText()
+      val user = userService.verifyUserByHeaderToken(request)
+
+      if (user.isEmpty || (user.get.roleid > 2 && !courseService.isPermittedForCourse(courseid, user.get))) {
+        throw new UnauthorizedException
+      }
+      courseService.setVisibilityForCourse(courseid, visibilityType)
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide: typ")
+    }
   }
 
   /**

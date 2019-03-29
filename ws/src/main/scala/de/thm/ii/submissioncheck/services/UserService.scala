@@ -264,7 +264,7 @@ class UserService {
     // delete also course role references
     DB.update("delete from user_course where user_id = ?", userid)
     1 == DB.update("Update user set prename = 'Deleted User', surname = 'Deleted User', " +
-      "username = 'Deleted User', email = '' where user_id = ?", userid)
+      "username = 'Deleted User', email = '', status = -1 where user_id = ?", userid)
   }
 
   private def getBelongingPersonalisedSubmissions(userid: Int) = {
