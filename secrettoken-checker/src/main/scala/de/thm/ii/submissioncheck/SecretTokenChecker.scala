@@ -184,7 +184,7 @@ object SecretTokenChecker extends App {
   }
 
   /**
-    * Delets a dir recursively deleting anything inside it.
+    * Deletes a dir recursively deleting anything inside it.
     * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
     * @param dir The dir to delete
     * @return true if the dir was successfully deleted
@@ -219,13 +219,23 @@ object SecretTokenChecker extends App {
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
-      if (urls.length != 1) {
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Please provide exact one testfile", LABEL_TASKID -> taskid)))
+      if (urls.length != 1 && urls.length != 2) {
+        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+          "Please provide one or two files (testfile and scriptfile)", LABEL_TASKID -> taskid)))
       } else {
-        deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
+        //deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
+        val sendedFileNames = downloadFilesToFS(urls, jwt_token, taskid)
 
-        downloadFilesToFS(urls, jwt_token, taskid)
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        // validation if sent files are useful
+        if (sendedFileNames.length == 1 && !sendedFileNames.contains("scriptfile")) {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Provided file should call 'scriptfile'", LABEL_TASKID -> taskid)))
+        }
+        else if (sendedFileNames.length == 2 && (!sendedFileNames.contains("scriptfile") || !sendedFileNames.contains("testfile"))) {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+            "Provided files should call 'scriptfile' and 'testfile'", LABEL_TASKID -> taskid)))
+        } else {
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        }
       }
     } catch {
       case e: NoSuchElementException => {
@@ -252,21 +262,11 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-    // make a list
-    val filesList = new File(Paths.get(ULDIR).resolve(taskid).toString).listFiles().filter(_.isFile)
-
-    val filesListHead = filesList.headOption
-    if (filesListHead.isEmpty) {
-      (message_err, 126)
-    } else {
-      val script: String = filesListHead.get.getAbsolutePath
-      //val file = filesListHead.get
-      val bashtest1 = new BashExec(script, name, filePath)
+      val bashtest1 = new BashExec(taskid, name, filePath)
       val exit1 = bashtest1.exec()
       val message1 = bashtest1.output
 
       (message1, exit1)
-    }
   }
 
   /**
@@ -322,13 +322,15 @@ object SecretTokenChecker extends App {
     Paths.get(ULDIR).resolve(taskid).resolve(filename).resolve(filename)
   }
 
-  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String) = {
+  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
+    var downloadFileNames: List[String] = List()
     val timeout = 1000
     for(urlname <- urlnames){
       val url = new java.net.URL(urlname)
       val urlParts = urlname.split("/")
       // syntax of testfile url allows us to get filename
       val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
+      downloadFileNames = downloadFileNames ++ List(filename)
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]
       connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
       connection.setConnectTimeout(timeout)
@@ -344,6 +346,7 @@ object SecretTokenChecker extends App {
         Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
     }
+    downloadFileNames
   }
 
   /**

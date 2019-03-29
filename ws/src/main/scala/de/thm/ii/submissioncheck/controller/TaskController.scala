@@ -316,24 +316,30 @@ class TaskController {
     var message: Boolean = false
     var filename: String = ""
     for((file, j) <- files.zipWithIndex){
+      // TODO check if all required files are uploaded
       filename += file.getOriginalFilename + (if (j < files.length-1) "," else "")
       storageService.storeTaskTestFile(file, taskid)
     }
     taskService.setTaskFilename(taskid, filename)
-    val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
-    val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),
-      LABEL_TASK_ID -> taskid.toString,
-      LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+    try {
+      val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
+      val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),
+        LABEL_TASK_ID -> taskid.toString,
+        LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
 
-    message = true
+      message = true
 
-    val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-    logger.warn(jsonStringMsg)
-    kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
-    logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
-    kafkaTemplate.flush()
+      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
+      logger.warn(jsonStringMsg)
+      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
+      logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
+      kafkaTemplate.flush()
 
-    Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
+      Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
+
+    } catch {
+      case _: NoSuchElementException => throw new ResourceNotFoundException()
+    }
   }
 
   /**

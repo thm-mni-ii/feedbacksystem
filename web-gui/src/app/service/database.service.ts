@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, empty, of} from 'rxjs';
 import {
   CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation,
@@ -9,6 +9,7 @@ import {
   RoleChanged,
   Succeeded,
   Testsystem,
+  TestsystemTestfile,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
@@ -35,6 +36,11 @@ export class DatabaseService {
 
   getTestsystemTypes(): Observable<Testsystem[]> {
     return this.http.get<Testsystem[]>('/api/v1/testsystems');
+  }
+
+
+  getTestsystemDetails(testsystem_id: string):  Promise<Testsystem> {
+    return this.http.get<Testsystem>('/api/v1/testsystems/' + testsystem_id).toPromise();
   }
 
 
@@ -189,13 +195,16 @@ export class DatabaseService {
    * @param deadline The deadline when this tasks ends
    */
   createTask(idCourse: number, name: string, description: string,
-             files: FileList, test_type: string, deadline: Date): Observable<Succeeded> {
+             files: {}, test_type: string, deadline: Date): Observable<Succeeded> {
 
     // Solution file
     const formData = new FormData();
-    for (let _i = 0; _i < files.length; _i++) {
-      formData.append('file', files.item(_i), files.item(_i).name);
+
+    for(let j in files)
+    {
+      formData.append("file", files[j].item(0), j);
     }
+
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
@@ -327,13 +336,13 @@ export class DatabaseService {
    * @param deadline The deadline when this task ends
    */
   updateTask(idTask: number, name: string,
-             description: string, files: FileList | null, test_type: string, deadline: Date): Observable<Succeeded> {
+             description: string, files: {}, test_type: string, deadline: Date): Observable<Succeeded> {
 
     if (files) {
       // New solution file
       const formData = new FormData();
-      for (let _i = 0; _i < files.length; _i++) {
-        formData.append('file', files.item(_i), files.item(_i).name);
+      for(let j in files) {
+        formData.append("file", files[j].item(0), j);
       }
 
       return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
@@ -344,11 +353,13 @@ export class DatabaseService {
       }).pipe(
         flatMap(res => {
           let uploadUrl: string;
-          if (res.success) {
+          if (res.success && Object.keys(files).length > 0) {
             uploadUrl = res.upload_url;
             return this.http.post<Succeeded>(uploadUrl, formData, {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
             });
+          } else {
+            return of({success: true})
           }
         }));
     } else {

@@ -101,10 +101,13 @@ class TestsystemController {
   @ResponseBody
   def getTestsystem(@PathVariable testsystemid: String, request: HttpServletRequest): Map[String, Any] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if(user.isEmpty || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))) {
+
+    // TODO maybe dont allow for all then use this lines
+    // TODO || (user.get.roleid > 2 && !userService.checkIfUserAtLeastOneDocent(user.get.userid))
+
+    if(user.isEmpty) {
       throw new UnauthorizedException
     }
-
     val testsystem = testsystemService.getTestsystem(testsystemid)
     if (testsystem.isEmpty) {
       Map.empty

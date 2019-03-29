@@ -179,9 +179,31 @@ INSERT INTO `testsystem` VALUES ('secrettokenchecker','Secretoken Checker','Sect
 /*!40000 ALTER TABLE `testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
+DROP TABLE IF EXISTS `testsystem_testfile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `testsystem_testfile` (
+  `testsystem_id` varchar(30) DEFAULT NULL,
+  `filename` varchar(500) DEFAULT NULL,
+  `required` tinyint(1) DEFAULT '1',
+  KEY `testsystem_testfile_testsystem_testsystem_id_fk` (`testsystem_id`),
+  CONSTRAINT `testsystem_testfile_testsystem_testsystem_id_fk` FOREIGN KEY (`testsystem_id`) REFERENCES `testsystem` (`testsystem_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 --
--- Table structure for table `user`
+-- Dumping data for table `testsystem_testfile`
 --
+
+LOCK TABLES `testsystem_testfile` WRITE;
+/*!40000 ALTER TABLE `testsystem_testfile` DISABLE KEYS */;
+INSERT INTO `testsystem_testfile` VALUES ('secrettokenchecker','scriptfile',1),('secrettokenchecker','testfile',0),('sqlchecker', 'sections.json', 1),('sqlchecker', 'db.sql', 1);
+/*!40000 ALTER TABLE `testsystem_testfile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+
 
 --
 -- Table structure for table `user`

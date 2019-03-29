@@ -91,10 +91,20 @@ submission_file=$2     # Provides the submitted file path (even if it was a text
 # You can use $casname to generate a user specific token
 
 # Everything written to the stdout will be caught and returned to the student.
-# The Secrettoken-Checker interprets exitcodes. Exitcode 0 means all tests passed, everything except 0 means test failed 
-# Following lines show a sample logic
+# The Secrettoken-Checker interprets exitcodes. Exitcode 0 means all tests passed, everything except 0 means test failed. 
+# If one provides an aditional testfile it's path can be accessed using the variable TESTFILE_PATH, otherwise the variable is empty
+# Following lines show a sample logic:
+
 
 content=$(cat $submission_file)
+
+if [ -n "$TESTFILE_PATH" ] # check if the variabe is set to access the path of the testfile
+	then
+	echo "Variable set"
+	cat $TESTFILE_PATH     # use the content of the testfile
+else
+	echo "Variable NOT set" # do something else
+fi
 
 if [ "$content" == "some-token-which-should-be-solved" ] 
 then
@@ -105,8 +115,6 @@ echo "Hi "$casname", your submission is incorrect!"
 exit 1  # Here the script indicates a failed
 fi 
 ````
-
-
 
 
 ## Supervised By

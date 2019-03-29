@@ -1,8 +1,9 @@
 package de.thm.ii.submissioncheck.bash
 
 import java.io._
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
+import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
 import org.slf4j.LoggerFactory
 
 import scala.sys.process._
@@ -12,21 +13,12 @@ import scala.sys.process._
   *
   * @author Vlad Sokyrskyy
   *
-  * @param scriptpath path of shell script
+  * @param taskid of submitted task
   * @param name username parameter
   * @param submittedFilePath users submission saved as file
   */
-class BashExec(val scriptpath: String, val name: String, val submittedFilePath: String) {
+class BashExec(val taskid: String, val name: String, val submittedFilePath: String) {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  /**
-    * Class instance file
-    */
-  var file = new File(scriptpath)
-
-  /**
-    * Class instance absPath
-    */
-  var absPath = file.getAbsolutePath
 
   /**
     * Class instance output
@@ -44,14 +36,30 @@ class BashExec(val scriptpath: String, val name: String, val submittedFilePath: 
     * Is set true when after execution the exitcode becomes 0
     */
   var success = false
+
+  private val __option_v = "-v"
+
   /**
     * exec()
     * @return exit code
     */
   def exec(): Int = {
+    /*var file = new File(scriptpath)
+    var absPath = file.getAbsolutePath
+    val testfile = new File(Paths.get(ULDIR).resolve(taskid).resolve("scriptfile").toString)*/
+    val baseFilePath = Paths.get(ULDIR).resolve(taskid)
+
+    val absPath = new File(baseFilePath.resolve("scriptfile").toString).getAbsolutePath
+
+    val testfileFile = new File(baseFilePath.resolve("testfile").toString)
+    val testfilePath = testfileFile.getAbsolutePath
+
+    val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { testfilePath } else ""
+
     val stdoutStream = new ByteArrayOutputStream
-    val seq = Seq("run", "--rm", "-v", absPath + ":/" + scriptpath, "-v", submittedFilePath + ":" + submittedFilePath, "bash:4.4", "bash",
-      "/" + scriptpath, name, submittedFilePath)
+    val seq = Seq("run", "--rm", __option_v, absPath + ":/" + absPath, __option_v, testfilePath + ":/" + testfilePath,
+      __option_v, submittedFilePath + ":" + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, "bash:4.4", "bash",
+      "/" + absPath, name, submittedFilePath)
     val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
 
     output = stdoutStream.toString
