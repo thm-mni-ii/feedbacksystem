@@ -94,6 +94,28 @@ export interface Succeeded {
 }
 
 /**
+ * For new task we get lots of information about testsystem and details
+ */
+export interface NewTaskInformation {
+  course_id: string;
+  deadline: Date;
+  exitcode: number;
+  file: string;
+  passed: boolean;
+  result: string;
+  result_date: Date;
+  submission_data: string;
+  submit_date: Date;
+  task_description: string;
+  task_id: number;
+  task_name: string;
+  test_file_accept: boolean;
+  test_file_accept_error: string;
+  test_file_name: string;
+  testsystem_id: string;
+}
+
+/**
  * After creating/submitting or updating a task,
  * response sends an upload url
  * to which the solution file should be uploaded.

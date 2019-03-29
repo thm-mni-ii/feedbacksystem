@@ -2,7 +2,7 @@ import {AfterViewChecked, Component, Inject, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {CourseTask, DetailedCourseInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
+import {CourseTask, DetailedCourseInformation, NewTaskInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
@@ -14,6 +14,7 @@ import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-
 import {DOCUMENT} from '@angular/common';
 import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
 import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
+import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 
 /**
  * Shows a course in detail
@@ -188,9 +189,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       width: 'auto',
       data: {courseID: course.course_id}
     }).afterClosed().pipe(
-      flatMap((value: Succeeded) => {
+      flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
+          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid)
         }
         return this.db.getCourseDetail(course.course_id);
       })
@@ -199,6 +201,23 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+
+
+  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+    setTimeout(() => {
+      this.db.getTaskResult(taskid).toPromise()
+        .then((data: NewTaskInformation) => {
+          console.log(data)
+          if(data.test_file_accept !== null) {
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
+          } else {
+            this.waitAndDisplayTestsystemAcceptanceMessage(taskid)
+          }
+        })
+        .catch()
+    },2000)
+
+  }
 
   /**
    * Opens dialog to update task

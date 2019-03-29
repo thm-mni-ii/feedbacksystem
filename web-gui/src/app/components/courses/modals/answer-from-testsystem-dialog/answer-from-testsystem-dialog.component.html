@@ -1,0 +1,7 @@
+<h2 matDialogTitle>Anwort vom Testsystem</h2>
+<mat-dialog-content>Das Testsystem akzeptiert Ihre Testdaten: <b>{{data.test_file_accept}}</b>
+{{data.test_file_accept_error}}
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-flat-button color="warn" (click)="close(true)">Schließen</button>
+</mat-dialog-actions>

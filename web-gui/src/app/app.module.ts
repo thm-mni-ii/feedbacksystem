@@ -43,6 +43,7 @@ import { DeleteCourseModalComponent } from './components/courses/modals/delete-c
 import { GrandTutorSnippComponent } from './components/courses/grand-tutor-snipp/grand-tutor-snipp.component';
 import { DeleteTaskModalComponent } from './components/courses/modals/delete-task-modal/delete-task-modal.component';
 import { DeleteUserModalComponent } from './components/modals/delete-user-modal/delete-user-modal.component';
+import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
 
 
 @Injectable()
@@ -89,6 +90,7 @@ export const httpInterceptorProviders = [
     GrandTutorSnippComponent,
     DeleteTaskModalComponent,
     DeleteUserModalComponent,
+    AnswerFromTestsystemDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -110,7 +112,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent],
-  providers: [CookieService, MarkdownService, MarkedOptions],
+  providers: [CookieService, MarkdownService, MarkedOptions, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {
