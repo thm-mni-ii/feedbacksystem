@@ -375,6 +375,17 @@ class TaskService {
   }
 
   /**
+    * Reset testsystem file status if controller get new testfiles
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @return result if update works
+    */
+  def resetTaskTestStatus(taskid: Int): Boolean = {
+    val num = DB.update("update task set test_file_accept_error = null, test_file_accept = null where task_id = ?", taskid)
+    num == 1
+  }
+
+  /**
     * update Task by its Task ID
     * @author Benjamin Manns
     * @param taskid unique taskid identification

@@ -97,6 +97,9 @@
         <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent"
                 (click)="submission(courseDetail.course_id, task)">Abgeben
         </button>
+        <button  *ngIf="isAuthorized()" mat-flat-button color="accent"
+                (click)="displayTestsystemFeedback(task)">Status Testsystem
+        </button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

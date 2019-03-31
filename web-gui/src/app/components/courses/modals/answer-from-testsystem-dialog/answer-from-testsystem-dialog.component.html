@@ -1,6 +1,10 @@
 <h2 matDialogTitle>Anwort vom Testsystem</h2>
-<mat-dialog-content>Das Testsystem akzeptiert Ihre Testdaten: <b>{{data.test_file_accept}}</b>
-{{data.test_file_accept_error}}
+<mat-dialog-content>
+  Das Testsystem <span class="success" *ngIf="data.test_file_accept">akzeptiert</span><span class="error" *ngIf="!data.test_file_accept">akzeptiert nicht</span> Ihre Testdaten.<br>
+  <p *ngIf="!data.test_file_accept">
+    Diese Fehlermeldung hat das Testsystem gemeldet: <b>{{data.test_file_accept_error}}</b>
+  </p>
+
 </mat-dialog-content>
 <mat-dialog-actions>
   <button mat-flat-button color="warn" (click)="close(true)">Schließen</button>

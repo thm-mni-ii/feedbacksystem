@@ -68,17 +68,11 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   loadFileUploadFields(taksTypeValue){
     this.db.getTestsystemDetails(taksTypeValue)
       .then((testsystem: Testsystem) => {
-        console.log(testsystem)
-        console.log(testsystem.testfiles)
         this.testSystemFiles = testsystem.testfiles
-
-
         testsystem.testfiles.forEach(testfile => {
-          console.warn(testfile)
         })
       })
       .catch((e) => {
-        console.log(e)
         this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden")
       })
   }
@@ -93,7 +87,6 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    */
   addFilesToList(file: FileList, filename: string) {
     this.testFilesSubmissionList[filename] = file
-    console.log(this.testFilesSubmissionList)
     this.soutionFiles = file;
   }
 

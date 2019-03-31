@@ -207,7 +207,6 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     setTimeout(() => {
       this.db.getTaskResult(taskid).toPromise()
         .then((data: NewTaskInformation) => {
-          console.log(data)
           if(data.test_file_accept !== null) {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
           } else {
@@ -216,7 +215,16 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         })
         .catch()
     },2000)
+  }
 
+  displayTestsystemFeedback(task){
+    this.db.getTaskResult(task.task_id).toPromise()
+      .then((data: NewTaskInformation) => {
+        console.log(data)
+        this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
+      }).catch(() => {
+
+    })
   }
 
   /**
@@ -231,9 +239,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         task: task
       }
     }).afterClosed().pipe(
-      flatMap((value: Succeeded) => {
+      flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
+          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
         }
         return this.db.getCourseDetail(this.courseDetail.course_id);
       })
