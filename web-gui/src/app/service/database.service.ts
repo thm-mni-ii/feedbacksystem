@@ -363,11 +363,17 @@ export class DatabaseService {
           let uploadUrl: string;
           if (res.success && Object.keys(files).length > 0) {
             uploadUrl = res.upload_url;
+
             return this.http.post<Succeeded>(uploadUrl, formData, {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-            });
+            }).pipe(flatMap(
+              res => {
+                return of({success: res.success, fileupload: true})
+              }
+            ))
+
           } else {
-            return of({success: true})
+            return of({success: true, fileupload: false})
           }
         }));
     } else {

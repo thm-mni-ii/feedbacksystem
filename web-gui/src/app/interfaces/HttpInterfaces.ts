@@ -93,6 +93,15 @@ export interface Succeeded {
   success: boolean;
 }
 
+
+/**
+ * Gives back if Update Task succeeded
+ */
+export interface SucceededUpdateTask extends Succeeded{
+  fileupload: boolean;
+  success: boolean;
+}
+
 /**
  * For new task we get lots of information about testsystem and details
  */
@@ -113,6 +122,7 @@ export interface NewTaskInformation {
   test_file_accept_error: string;
   test_file_name: string;
   testsystem_id: string;
+  no_reaction: boolean;
 }
 
 /**

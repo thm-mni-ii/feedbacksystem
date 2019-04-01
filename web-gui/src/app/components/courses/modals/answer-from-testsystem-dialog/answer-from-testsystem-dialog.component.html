@@ -1,5 +1,11 @@
 <h2 matDialogTitle>Anwort vom Testsystem</h2>
-<mat-dialog-content>
+
+<mat-dialog-content *ngIf="!!data.no_reaction">
+  Das Testsystem <span class="error">reagiert leider nicht</span>.<br>
+  Bite wenden Sie sich an Ihren Dozenten bzw Admin.
+</mat-dialog-content>
+
+<mat-dialog-content *ngIf="!data.no_reaction">
   Das Testsystem <span class="success" *ngIf="data.test_file_accept">akzeptiert</span><span class="error" *ngIf="!data.test_file_accept">akzeptiert nicht</span> Ihre Testdaten.<br>
   <p *ngIf="!data.test_file_accept">
     Diese Fehlermeldung hat das Testsystem gemeldet: <b>{{data.test_file_accept_error}}</b>

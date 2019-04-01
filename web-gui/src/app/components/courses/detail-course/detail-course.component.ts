@@ -2,7 +2,13 @@ import {AfterViewChecked, Component, Inject, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {CourseTask, DetailedCourseInformation, NewTaskInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
+import {
+  CourseTask,
+  DetailedCourseInformation,
+  NewTaskInformation,
+  Succeeded,
+  SucceededUpdateTask
+} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
@@ -205,22 +211,33 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
     setTimeout(() => {
-      this.db.getTaskResult(taskid).toPromise()
-        .then((data: NewTaskInformation) => {
-          if(data.test_file_accept !== null) {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
+      this.db.getTaskResult(taskid).pipe(
+        flatMap((taskResult: NewTaskInformation) => {
+          if (taskResult.test_file_accept !== null) {
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
+            return of({success: true})
           } else {
-            this.waitAndDisplayTestsystemAcceptanceMessage(taskid)
+            return throwError('No result yet');
+          }
+        }),
+        retryWhen(errors => errors.pipe(
+          delay(5000),
+          take(50)))
+      ).toPromise()
+        .then(d => {
+          if (typeof d == 'undefined') {
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
           }
         })
-        .catch()
-    },2000)
+        .catch((e) => {
+
+        })
+    }, 2000)
   }
 
   displayTestsystemFeedback(task){
     this.db.getTaskResult(task.task_id).toPromise()
       .then((data: NewTaskInformation) => {
-        console.log(data)
         this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
       }).catch(() => {
 
@@ -239,10 +256,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         task: task
       }
     }).afterClosed().pipe(
-      flatMap((value) => {
+      flatMap((value: SucceededUpdateTask) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
+          if(value.fileupload) {
+            this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
+          }
         }
         return this.db.getCourseDetail(this.courseDetail.course_id);
       })
