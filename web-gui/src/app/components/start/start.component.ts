@@ -36,6 +36,7 @@ export class StartComponent implements OnInit, OnDestroy {
   prename: string;
   surname: string;
   email: string;
+  innerWidth:number;
 
   ngOnInit() {
 
@@ -69,6 +70,7 @@ export class StartComponent implements OnInit, OnDestroy {
     }
 
     this.sub = this.titlebar.getTitle().subscribe(title => this.title = title);
+    this.innerWidth = window.innerWidth;
   }
 
   /**
@@ -79,6 +81,18 @@ export class StartComponent implements OnInit, OnDestroy {
     this.cookie.delete('jwt');
     localStorage.removeItem('token');
     this.router.navigate(['login']);
+  }
+
+  get showSidebarMenu() {
+    return this.innerWidth <= 400;
+  }
+
+  /**
+   * Listen to onResize and update sidebar visibility settings
+   * @param event
+   */
+  onResize(event){
+    this.innerWidth = event.target.innerWidth
   }
 
   ngOnDestroy(): void {
