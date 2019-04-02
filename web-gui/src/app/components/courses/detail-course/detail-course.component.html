@@ -7,7 +7,9 @@
     <button mat-flat-button color="primary" color="warn" *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" matTooltip="Kurs löschen"><mat-icon>delete</mat-icon></button>
   </div>
   <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
-    <h4>{{courseDetail?.course_description}}</h4>
+     <h4>
+      <markdown [data]="courseDetail?.course_description"></markdown>
+    </h4>
   </mat-card>
   <!-- task list-->
   <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}">
@@ -28,7 +30,7 @@
     </mat-card-subtitle>
     <mat-card-content>
       <h5>{{task.deadline | date:'medium'}}</h5>
-      <p>{{task.task_description}}</p>
+      <markdown id="markOutput" [data]="task.task_description"></markdown>
       <mat-divider></mat-divider>
       <div class="user-input">
 

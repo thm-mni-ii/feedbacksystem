@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
@@ -46,9 +46,10 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   newCourseModuleID: string;
   newCourseDate: string;
   newCoursePrivatUserData: string;
-
+  markdown: string;
 
   ngOnInit() {
+    this.markdown = ""
 
     this.testTypes$ = this.db.getTestsystemTypes();
     this.titlebar.emitTitle('Neuen Kurs erstellen');
@@ -59,9 +60,9 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     this.courseNameFG = this._formBuilder.group({
       firstCtrl: ['', Validators.required]
     });
-    this.courseDescriptionFG = this._formBuilder.group({
+    /*this.courseDescriptionFG = this._formBuilder.group({
       secondCtrl: ['']
-    });
+    });*/
     this.courseTaskTypeFG = this._formBuilder.group({
       thirdCtrl: ['', Validators.required]
     });
@@ -86,10 +87,12 @@ export class NewCourseComponent implements OnInit, OnDestroy {
         }
       }));
 
-    this.subscription.add(this.courseDescriptionFG.valueChanges.subscribe(
+    /*this.subscription.add(this.courseDescriptionFG.valueChanges.subscribe(
       (inputStep2: { secondCtrl: string }) => {
         this.newCourseDescription = inputStep2.secondCtrl;
-      }));
+        console.log(this.markdown)
+        this.markdown = inputStep2.secondCtrl;
+      }));*/
 
     this.subscription.add(this.courseTaskTypeFG.valueChanges.subscribe(
       (inputStep3: { thirdCtrl: string }) => {
@@ -140,7 +143,7 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     let privateUserData: boolean;
     privateUserData = this.newCoursePrivatUserData === 'true';
 
-    this.db.createCourse(this.newCourseName, this.newCourseDescription, this.newCourseType, this.newCourseSemester,
+    this.db.createCourse(this.newCourseName, this.markdown, this.newCourseType, this.newCourseSemester,
       this.newCourseModuleID, this.newCourseDate, privateUserData).subscribe((data: NewCourse) => {
       this.snackBar.open('Kurs ' + this.newCourseName + ' wurde erstellt', 'OK',
         {duration: 5000});
