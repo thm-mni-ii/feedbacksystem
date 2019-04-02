@@ -16,21 +16,16 @@
     </mat-step>
 
     <!-- Step 2-->
-    <mat-step [stepControl]="courseDescriptionFG" label="Beschreibung des Kurses" optional>
-      <form class="step-flex">
-        <mat-form-field appearance="outline">
+    <mat-step [stepControl]="courseDescriptionFG" label="Beschreibung des Kurses" >
+      <form [formGroup]="courseDescriptionFG" class="step-flex">
+      <mat-form-field appearance="outline">
           <mat-label>Kurs beschreibung</mat-label>
           <textarea matInput matTextareaAutosize matAutosizeMinRows="1"
-                    matAutosizeMaxRows="25" [(ngModel)]="markdown" [ngModelOptions]="{standalone: true}"></textarea>
-
-          <hr>
-          <markdown id="markOutput" [data]="markdown"></markdown>
+                    matAutosizeMaxRows="25"
+                    formControlName="secondCtrl"></textarea>
         </mat-form-field>
-
-
-
-
-
+        <i>Vorschau:</i>
+        <markdown data="{{newCourseDescription}}"></markdown>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
           <button mat-flat-button color="accent" matStepperNext>Weiter</button>
