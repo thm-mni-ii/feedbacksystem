@@ -32,7 +32,7 @@
         <p>Administration</p>
         <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/new" routerLinkActive="selected">
           <mat-icon>playlist_add</mat-icon>
-          <p>Neuen Kurs erstellen</p>
+          <p>Kurs erstellen</p>
         </a>
 
         <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/docent" routerLinkActive="selected">
@@ -47,7 +47,7 @@
 
         <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
           <mat-icon>supervised_user_circle</mat-icon>
-          <p>User Verwaltung</p>
+          <p>Benutzer</p>
         </a>
       </mat-nav-list>
       <mat-divider></mat-divider>
