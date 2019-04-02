@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GrandTutorSnippComponent } from './grand-tutor-snipp.component';
+import { GrantTutorSnippComponent } from './grant-tutor-snipp.component';
 
 describe('GrandTutorSnippComponent', () => {
-  let component: GrandTutorSnippComponent;
-  let fixture: ComponentFixture<GrandTutorSnippComponent>;
+  let component: GrantTutorSnippComponent;
+  let fixture: ComponentFixture<GrantTutorSnippComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GrandTutorSnippComponent ]
+      declarations: [ GrantTutorSnippComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GrandTutorSnippComponent);
+    fixture = TestBed.createComponent(GrantTutorSnippComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

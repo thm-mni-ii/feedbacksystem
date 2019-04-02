@@ -1,6 +1,4 @@
 <div class="container">
-
-
   <mat-form-field appearance="outline">
     <mat-label>Module filtern</mat-label>
     <input matInput (keyup)="filterCourses($event.target.value)">
@@ -14,18 +12,10 @@
       </th>
       <td mat-cell *matCellDef="let course">
         <h3>{{course.course_name}}</h3>
-
-       <app-grand-tutor-snipp (loadAllCourses)="loadAllCoursesTutor($event)" [course]="course"></app-grand-tutor-snipp>
-
-
+       <app-grant-tutor-snipp (loadAllCourses)="loadAllCoursesTutor($event)" [course]="course"></app-grant-tutor-snipp>
       </td>
     </ng-container>
-
-
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
-
   </table>
-
-
 </div>

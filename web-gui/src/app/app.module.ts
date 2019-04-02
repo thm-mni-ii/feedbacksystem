@@ -40,11 +40,11 @@ import {CookieService} from 'ngx-cookie-service';
 import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
-import { GrandTutorSnippComponent } from './components/courses/grand-tutor-snipp/grand-tutor-snipp.component';
+import { GrantTutorSnippComponent } from './components/courses/grant-tutor-snipp/grant-tutor-snipp.component';
+import { GrantDocentSnippComponent } from './components/courses/grant-docent-snipp/grant-docent-snipp.component';
 import { DeleteTaskModalComponent } from './components/courses/modals/delete-task-modal/delete-task-modal.component';
 import { DeleteUserModalComponent } from './components/modals/delete-user-modal/delete-user-modal.component';
 import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
-
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -87,7 +87,8 @@ export const httpInterceptorProviders = [
     DataprivacyDialogComponent,
     ImpressumDialogComponent,
     DeleteCourseModalComponent,
-    GrandTutorSnippComponent,
+    GrantTutorSnippComponent,
+    GrantDocentSnippComponent,
     DeleteTaskModalComponent,
     DeleteUserModalComponent,
     AnswerFromTestsystemDialogComponent,

@@ -1,6 +1,3 @@
-<mat-divider></mat-divider>
-<h4>Tutoren</h4>
-
 <mat-chip-list>
   <mat-chip
     *ngFor="let tutor of course.course_tutor"
@@ -22,7 +19,6 @@
       {{option.surname}} {{option.prename}}
     </mat-option>
   </mat-autocomplete>
-
 
   <button mat-icon-button color="accent" (click)="showTutorInput(course.course_id)">
     <mat-icon>add_circle</mat-icon>

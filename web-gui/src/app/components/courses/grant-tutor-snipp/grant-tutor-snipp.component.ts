@@ -2,20 +2,17 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angula
 import {FormControl} from "@angular/forms";
 import {DatabaseService} from "../../../service/database.service";
 import {UserService} from "../../../service/user.service";
-import {MatSnackBar, MatSort, MatTableDataSource} from "@angular/material";
-import {TitlebarService} from "../../../service/titlebar.service";
+import {MatSnackBar, MatSort} from "@angular/material";
 import {flatMap, map, startWith} from "rxjs/operators";
-import {GeneralCourseInformation, User} from "../../../interfaces/HttpInterfaces";
+import {User} from "../../../interfaces/HttpInterfaces";
 import {Observable} from "rxjs";
 
 @Component({
-  selector: 'app-grand-tutor-snipp',
-  templateUrl: './grand-tutor-snipp.component.html',
-  styleUrls: ['./grand-tutor-snipp.component.scss']
+  selector: 'app-grant-tutor-snipp',
+  templateUrl: './grant-tutor-snipp.component.html',
+  styleUrls: ['./grant-tutor-snipp.component.scss']
 })
-export class GrandTutorSnippComponent implements OnInit {
-
-
+export class GrantTutorSnippComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input() course;
   @Output() loadAllCourses: EventEmitter<void>;
@@ -29,13 +26,11 @@ export class GrandTutorSnippComponent implements OnInit {
   showInputForTutor: boolean;
   tutorInputCourseID: number;
 
-
   constructor(private db: DatabaseService, private user: UserService, private snackBar: MatSnackBar) {
     this.loadAllCourses = new EventEmitter<void>()
   }
 
   ngOnInit() {
-
     this.db.getAllUsers().pipe(
       flatMap(users => {
         this.dataSourceUsers = users;
@@ -48,7 +43,6 @@ export class GrandTutorSnippComponent implements OnInit {
         return this.filteredOptions;
       })
     ).subscribe();
-
   }
 
   private _filterTutorInput(value: string): User[] {
@@ -61,7 +55,6 @@ export class GrandTutorSnippComponent implements OnInit {
         || option.prename.toLowerCase().concat(option.surname.toLowerCase()).indexOf(filterValue) === 0;
     });
   }
-
 
   /**
    * Add tutor to course
@@ -107,5 +100,4 @@ export class GrandTutorSnippComponent implements OnInit {
   displayFn(user?: User): string | undefined {
     return user ? user.prename + ' ' + user.surname : undefined;
   }
-
 }
