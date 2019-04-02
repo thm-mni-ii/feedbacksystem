@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck
 
 import java.io.{File, FileInputStream, FileNotFoundException}
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 
 import de.thm.ii.submissioncheck.misc.DB
 import org.slf4j.LoggerFactory
@@ -26,14 +26,19 @@ class Application {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
   //private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
-  private val initSQLPath = Paths.get("/usr/local/ws/init.sql").toString
+  private val initSQLPath = Paths.get("/usr/local/ws/init.sql")
 
   private var initSQLFile: File = null
   try {
-    initSQLFile = new File(initSQLPath)
+    initSQLFile = if (Files.isRegularFile(initSQLPath)) {
+      new File(initSQLPath.toString)
+    } else {
+      ResourceUtils.getFile("classpath:init.sql")
+    }
   } catch {
     case _: java.io.FileNotFoundException => {
-      initSQLFile = ResourceUtils.getFile("classpath:init.sql")
+      logger.error("Initialization sql-file not found")
+      System.exit(1)
     }
   }
 
