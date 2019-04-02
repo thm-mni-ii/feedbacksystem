@@ -5,7 +5,7 @@
 
       <h4>{{courseDetail?.course_description}}</h4>
 
-    <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" rowHeight="100px">
+    <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" (window:ready)="onResize($event)" rowHeight="100px">
 
 
       <mat-grid-tile *ngIf="userRole != 'admin' && userRole != 'moderator'" >
@@ -26,17 +26,13 @@
               mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
       </button>
       </mat-grid-tile>
-
-
-      <mat-grid-tile *ngIf="isAuthorized()" >
-        <mat-icon (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
-      </mat-grid-tile>
-
-      <mat-grid-tile *ngIf="isAuthorized()" >
-        <mat-icon (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
-      </mat-grid-tile>
-
     </mat-grid-list>
+    <div *ngIf="isAuthorized()" style="position: relative;">
+      <div style="position: absolute;right: 23px;top: -60px;">
+        <mat-icon (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
+        <mat-icon (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
+      </div>
+    </div>
   </mat-card>
 
   <!-- task list-->
@@ -96,6 +92,9 @@
         </button>
         <button [disabled]="deadlineTask[task.task_id]" mat-flat-button color="accent"
                 (click)="submission(courseDetail.course_id, task)">Abgeben
+        </button>
+        <button  *ngIf="isAuthorized()" mat-flat-button color="accent"
+                (click)="displayTestsystemFeedback(task)">Status
         </button>
       </mat-card-actions>
     </mat-card-content>

@@ -321,6 +321,7 @@ class TaskController {
       storageService.storeTaskTestFile(file, taskid)
     }
     taskService.setTaskFilename(taskid, filename)
+    taskService.resetTaskTestStatus(taskid)
     try {
       val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
       val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),

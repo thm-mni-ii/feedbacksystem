@@ -195,7 +195,7 @@ export class DatabaseService {
    * @param deadline The deadline when this tasks ends
    */
   createTask(idCourse: number, name: string, description: string,
-             files: {}, test_type: string, deadline: Date): Observable<Succeeded> {
+             files: {}, test_type: string, deadline: Date){
 
     // Solution file
     const formData = new FormData();
@@ -215,9 +215,17 @@ export class DatabaseService {
         let upload_url: string;
         if (result.success) {
           upload_url = result.upload_url;
-          return this.http.post<Succeeded>(upload_url, formData, {
-            headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-          });
+
+          return new Promise((resolve, reject) => {
+            this.http.post<Succeeded>(upload_url, formData, {
+              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+            }).toPromise()
+              .then((success) => {
+                resolve(result)
+              }).catch((e) => {
+                reject(e)
+            })
+          })
         }
       })
     );
@@ -355,11 +363,17 @@ export class DatabaseService {
           let uploadUrl: string;
           if (res.success && Object.keys(files).length > 0) {
             uploadUrl = res.upload_url;
+
             return this.http.post<Succeeded>(uploadUrl, formData, {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-            });
+            }).pipe(flatMap(
+              res => {
+                return of({success: res.success, fileupload: true})
+              }
+            ))
+
           } else {
-            return of({success: true})
+            return of({success: true, fileupload: false})
           }
         }));
     } else {

@@ -2,7 +2,13 @@ import {AfterViewChecked, Component, Inject, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {CourseTask, DetailedCourseInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
+import {
+  CourseTask,
+  DetailedCourseInformation,
+  NewTaskInformation,
+  Succeeded,
+  SucceededUpdateTask
+} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
@@ -14,6 +20,7 @@ import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-
 import {DOCUMENT} from '@angular/common';
 import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
 import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
+import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 
 /**
  * Shows a course in detail
@@ -188,9 +195,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       width: 'auto',
       data: {courseID: course.course_id}
     }).afterClosed().pipe(
-      flatMap((value: Succeeded) => {
+      flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
+          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid)
         }
         return this.db.getCourseDetail(course.course_id);
       })
@@ -199,6 +207,42 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+
+
+  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+    setTimeout(() => {
+      this.db.getTaskResult(taskid).pipe(
+        flatMap((taskResult: NewTaskInformation) => {
+          if (taskResult.test_file_accept !== null) {
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
+            return of({success: true})
+          } else {
+            return throwError('No result yet');
+          }
+        }),
+        retryWhen(errors => errors.pipe(
+          delay(5000),
+          take(50)))
+      ).toPromise()
+        .then(d => {
+          if (typeof d == 'undefined') {
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
+          }
+        })
+        .catch((e) => {
+
+        })
+    }, 2000)
+  }
+
+  displayTestsystemFeedback(task){
+    this.db.getTaskResult(task.task_id).toPromise()
+      .then((data: NewTaskInformation) => {
+        this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
+      }).catch(() => {
+
+    })
+  }
 
   /**
    * Opens dialog to update task
@@ -212,9 +256,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         task: task
       }
     }).afterClosed().pipe(
-      flatMap((value: Succeeded) => {
+      flatMap((value: SucceededUpdateTask) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
+          if(value.fileupload) {
+            this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
+          }
         }
         return this.db.getCourseDetail(this.courseDetail.course_id);
       })

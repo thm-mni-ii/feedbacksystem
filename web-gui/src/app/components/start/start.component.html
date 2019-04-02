@@ -1,9 +1,13 @@
 <mat-sidenav-container class="container" autosize>
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened">
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
     <div class="sidenav-group">
 
       <div class="logo">
-        <h1>Feedbacksystem <i class="material-icons">feedback</i></h1>
+        <h1>Feedbacksystem <i class="material-icons">feedback</i>
+          <button mat-icon-button *ngIf="showSidebarMenu">
+            <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
+          </button>
+        </h1>
       </div>
 
 
