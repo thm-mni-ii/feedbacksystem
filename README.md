@@ -1,4 +1,4 @@
-# Submission Check [![Build Status](https://travis-ci.org/thm-mni-ii/submissioncheck.svg?branch=master)](https://travis-ci.org/thm-mni-ii/submissioncheck) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# Submission Check [![Build Status](https://travis-ci.org/thm-mni-ii/feedbacksystem.svg?branch=master)](https://travis-ci.org/thm-mni-ii/feedbacksystem) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 As a student you have to submit a lot of tasks
 for your lectures. And usually the only reply you
@@ -36,7 +36,7 @@ If the application is running you can login as Admin using:
 *username: `admin`* and 
 *password: ``AWObcEyYi6SZaYKU9daTgKt``*.
 
-After login ourself with this credentials you can create a new admin and delete the default one.
+After login yourself with this credentials you can create a new admin and delete the default one.
 
 
 
