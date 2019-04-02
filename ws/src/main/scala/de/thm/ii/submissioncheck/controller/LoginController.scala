@@ -135,6 +135,9 @@ class LoginController extends CasClientConfigurerAdapter {
         ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
       */
       val user = userService.loadUserFromDB(username)
+      if (user.isEmpty) {
+        throw new UnauthorizedException("Username or password does not match.")
+      }
       val jwtToken: String = this.userService.generateTokenFromUser(user.get)
       setBearer(response, jwtToken)
       Map(LABEL_SUCCESS -> true)
