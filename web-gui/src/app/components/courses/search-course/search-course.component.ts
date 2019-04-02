@@ -26,9 +26,8 @@ export class SearchCourseComponent implements OnInit {
   myControl: FormControl = new FormControl('');
   filteredOptions: Observable<GeneralCourseInformation[]>;
 
-  cardCourses: GeneralCourseInformation[];
-  subCourses: GeneralCourseInformation[];
-
+  cardCourses: GeneralCourseInformation[] = [];
+  subCourses: GeneralCourseInformation[] = [];
 
   ngOnInit() {
     this.titlebar.emitTitle('Kurs suchen');
@@ -48,8 +47,6 @@ export class SearchCourseComponent implements OnInit {
     });
 
     this.db.getSubscribedCourses().subscribe(subCourses => this.subCourses = subCourses);
-
-
   }
 
   /**
@@ -94,7 +91,6 @@ export class SearchCourseComponent implements OnInit {
     );
   }
 
-
   /**
    * Navigates to subbed course
    * @param courseID The course to go to
@@ -115,6 +111,4 @@ export class SearchCourseComponent implements OnInit {
     });
     return isSub;
   }
-
-
 }
