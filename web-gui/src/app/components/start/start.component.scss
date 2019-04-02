@@ -6,7 +6,12 @@
 }
 
 mat-toolbar {
-  background: transparent;
+  background-color: $cPrimary;
+  color: #fff;
+  margin-bottom: 10px;
+  span {
+    margin-bottom: 0;
+  }
 }
 
 .flex-toolbar-container {
@@ -15,43 +20,49 @@ mat-toolbar {
   justify-content: center;
 }
 
-mat-sidenav {
-  background: $cPrimary;
-}
-
-
 .logo {
   vertical-align: center;
-  color: white;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 11px;
-  text-align: center;
   padding-left: 8px;
   padding-right: 8px;
-  border-bottom: solid 1px white;
+  border-bottom: solid 1px $cPrimary;
+  h1 {
+    height: 36px;
+    color: $cPrimary;
+    font-size: 20px;
+    text-align: center;
+    font-weight: 300;
+    font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+  }
 }
 
-.sidenav-button {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  text-decoration: none;
-  color: white;
-  padding: 12px;
-  height: 24px;
-
-}
-
-.sidenav-button > p {
-  padding-left: 6px;
-}
-
-.sidenav-button:hover {
-  background: $cPrimary-light;
+.mat-nav-list {
+  .mat-icon {
+    margin-right: 16px;
+  }
+  p {
+    font-family: RobotoDraft, Roboto, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    height: auto;
+    letter-spacing: 0.14px;
+    line-height: 10.5px;
+    text-rendering: optimizeLegibility;
+    width: auto;
+    color: rgba(0,0,0,0.54);
+    margin-left: 16px;
+  }
+  a {
+    color: #333333;
+    text-rendering: optimizeLegibility;
+    font-family: RobotoDraft, Roboto, 'Helvetica Neue', sans-serif;
+  }
+  .logout-icon {
+    color:darkred;
+  }
 }
 
 .selected {
-  background: $cPrimary-light;
+  background: lightgray;
 }
 
 .sidenav-group {
@@ -61,13 +72,10 @@ mat-sidenav {
 
 }
 
-#filler {
+.filler {
   flex-grow: 1;
 }
 
-#courses {
-  color: white;
+.nav-title {
   margin-left: 8px;
 }
-
-
