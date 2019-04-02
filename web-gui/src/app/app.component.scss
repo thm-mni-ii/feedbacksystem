@@ -1,3 +1,4 @@
+@import "../colors.scss";
 footer {
   padding: 12px;
   background: black;
@@ -6,6 +7,10 @@ footer {
 footer > a {
   color: white;
   margin: 12px;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 300;
+  font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
 }
 
 a:hover {
