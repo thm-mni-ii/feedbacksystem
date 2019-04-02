@@ -15,8 +15,8 @@
         </mat-form-field>
       </mat-card-content>
       <mat-card-actions class="login-buttons">
-        <button (click)="login()" mat-flat-button color="accent">Login</button>
-        <a id="cas-login" (click)="loginCAS()">Weiter mit CAS</a>
+        <button (click)="login()" mat-flat-button color="accent">Local - Login</button>
+        <button class="cas" (click)="loginCAS()" mat-flat-button color="accent">CAS - Login</button>
       </mat-card-actions>
     </mat-card>
   </div>
