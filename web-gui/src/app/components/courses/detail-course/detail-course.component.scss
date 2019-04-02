@@ -7,6 +7,33 @@
   align-items: center;
 }
 
+.actions {
+  display: flex;
+  height: 40px;
+  border-bottom: solid 1px darkgray;
+  width: 100%;
+  padding-left: 10px;
+  margin-bottom: 10px;
+  .mat-flat-button {
+    line-height: 30px;
+    margin: 0 2.5px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .mat-icon {
+      height: 25px;
+    }
+  }
+  span {
+    height: 24px;
+    margin-top: 2px;
+  }
+  .mat-icon {
+    cursor: pointer;
+  }
+}
+
 #description {
   width: 80%;
   min-width: 180px;
@@ -63,8 +90,6 @@
 #task-result-text.false {
   color: red;
 }
-
-
 
 mat-card-actions {
   display: flex;

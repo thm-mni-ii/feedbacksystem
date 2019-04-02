@@ -1,40 +1,14 @@
 <div class="container">
-
-  <mat-card id="description">
-
-
-      <h4>{{courseDetail?.course_description}}</h4>
-
-    <mat-grid-list [cols]="breakpoint" (window:resize)="onResize($event)" (window:ready)="onResize($event)" rowHeight="100px">
-
-
-      <mat-grid-tile *ngIf="userRole != 'admin' && userRole != 'moderator'" >
-        <button *ngIf="!courseDetail?.role_id" class="desc-button" mat-flat-button color="accent"
-                (click)="subscribeCourse()">Kurs
-          beitreten
-        </button>
-        <button *ngIf="userRole != 'docent' && courseDetail.role_id" class="desc-button" mat-flat-button color="warn"
-                (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Kurs
-          verlassen
-        </button>
-
-      </mat-grid-tile>
-
-      <!--colspan="{{(userRole != 'admin' && userRole != 'moderator') ? 9 : 18}}"-->
-      <mat-grid-tile *ngIf="isAuthorized()">
-      <button class="desc-button"
-              mat-flat-button color="accent" (click)="createTask(courseDetail)">Aufgabe erstellen
-      </button>
-      </mat-grid-tile>
-    </mat-grid-list>
-    <div *ngIf="isAuthorized()" style="position: relative;">
-      <div style="position: absolute;right: 23px;top: -60px;">
-        <mat-icon (click)="updateCourse()" style=" cursor: pointer;">edit</mat-icon>
-        <mat-icon (click)="deleteCourse(courseDetail)" style="color: red; cursor: pointer;">delete</mat-icon>
-      </div>
-    </div>
+  <div class="actions">
+    <button mat-flat-button color="primary" *ngIf=" (userRole != 'admin' && userRole != 'moderator') && !courseDetail?.role_id"  (click)="subscribeCourse()">Einschreiben</button>
+    <button mat-flat-button color="primary"color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask(courseDetail)" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
+    <button mat-flat-button color="primary" color="warn" *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" matTooltip="Kurs löschen"><mat-icon>delete</mat-icon></button>
+  </div>
+  <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
+    <h4>{{courseDetail?.course_description}}</h4>
   </mat-card>
-
   <!-- task list-->
   <mat-card *ngFor="let task of courseTasks" class="task-container" id="{{task.task_id}}">
     <div class="title">
@@ -64,8 +38,8 @@
           <p *ngIf="task.file">Dateiname: {{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
-
         </div>
+
         <p id="task-result-text" class="{{task.passed}}" *ngIf="task.result">Ergebnis: {{task.result}}</p>
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
@@ -74,12 +48,10 @@
         </mat-radio-group>
         <input *ngIf="submissionAsFile[task.task_id]" type="file"
                (change)="getSubmissionFile($event.target.files[0], task)">
-
         <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
           <input (keyup.enter)="submission(courseDetail.course_id, task)" matInput type="text" [(ngModel)]="submissionData[task.task_id]">
         </mat-form-field>
-
       </div>
 
       <!-- Action buttons -->
@@ -99,7 +71,4 @@
       </mat-card-actions>
     </mat-card-content>
   </mat-card>
-
-
 </div>
-
