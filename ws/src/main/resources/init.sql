@@ -221,6 +221,7 @@ CREATE TABLE `user` (
   `username` varchar(200) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL COMMENT 'it is his global role_id',
   `privacy_checked` tinyint(1) DEFAULT '0',
+  `status` int(11) DEFAULT '1',
   PRIMARY KEY (`user_id`),
   KEY `user_role_role_id_fk` (`role_id`),
   CONSTRAINT `user_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -233,7 +234,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,'2c8e25270865a74e374db1ad6e7005b406f23cb6','admin',1, 1);
+INSERT INTO `user` VALUES (1,'Admin','Admin',NULL,'2c8e25270865a74e374db1ad6e7005b406f23cb6','admin',1, 0, 1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
