@@ -10,8 +10,6 @@ mat-toolbar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: url("../../../assets/login-back.jpg");
-  background-size: cover;
 }
 
 .flex-card-container {
@@ -20,6 +18,8 @@ mat-toolbar {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: url("../../../assets/login-back.jpg");
+  background-size: cover;
 }
 
 .radio-group {
@@ -47,6 +47,31 @@ button {
   .cas {
     margin-top: 5px;
     background-color: green;
+  }
+}
+.login_title {
+  justify-content: center;
+}
+.header {
+  background-color: $cPrimary;
+  width: 100%;
+  display: block;
+  text-align: center;
+  h1, h2 {
+    font-weight: 300;
+    color: #fff;
+    font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+  }
+  h1 {
+    padding-top: 10px;
+    font-size: 56px;
+    line-height: 56px;
+    margin: 15px 5px;
+  }
+  h2 {
+    font-size: 18px;
+    line-height: 28px;
+    margin: 15px 0 25px;
   }
 }
 

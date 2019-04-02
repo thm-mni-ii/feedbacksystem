@@ -1,7 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
-import {flatMap, map} from 'rxjs/operators';
 import {MatDialog, MatSnackBar} from '@angular/material';
 import {DataprivacyDialogComponent} from '../dataprivacy-dialog/dataprivacy-dialog.component';
 import {DOCUMENT} from '@angular/common';
@@ -37,15 +36,12 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['']);
       }
     }
-
   }
-
 
   private jwtParser(response){
     const authHeader: string = response.headers.get('Authorization');
     const token: string = authHeader.replace('Bearer ', '');
     localStorage.setItem('token', token);
-
 
     const extraRoute = localStorage.getItem('route');
     if (extraRoute) {
@@ -96,7 +92,7 @@ export class LoginComponent implements OnInit {
       }
 
     }).catch((e) => {
-      this.snackbar.open('Bitte Username und Passwort eingeben', 'OK');
+      this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK');
     })
   }
 
@@ -108,5 +104,4 @@ export class LoginComponent implements OnInit {
     const baseUrl = getUrl.protocol + '//' + getUrl.host;
     this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login';
   }
-
 }
