@@ -37,10 +37,11 @@
 
         <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/docent" routerLinkActive="selected">
           <mat-icon>person</mat-icon>
-          <p>Dozent bestimmen</p>
+          <p>Dozenten / Tutoren</p>
         </a>
 
-        <a mat-list-item *ngIf="isAdmin || isDocent" routerLink="/courses/tutor" routerLinkActive="selected">
+        <a mat-list-item *ngIf="false && (isAdmin || isDocent)" routerLink="/courses/tutor" routerLinkActive="selected">
+          <!-- Deprecated -->
           <mat-icon>person</mat-icon>
           <p>Tutor bestimmen</p>
         </a>
