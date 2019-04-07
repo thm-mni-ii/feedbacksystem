@@ -7,10 +7,14 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Beschreibung</mat-label>
-      <textarea matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
-                [(ngModel)]="description" placeholder="(Optional)"></textarea>
+        <mat-label>Beschreibung</mat-label>
+        <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
+                  [(ngModel)]="description" placeholder="(Optional)"></textarea>
     </mat-form-field>
+
+    <i>Vorschau:</i>
+    <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
+
 
     <mat-form-field>
       <mat-label>Standart aufgaben typ</mat-label>

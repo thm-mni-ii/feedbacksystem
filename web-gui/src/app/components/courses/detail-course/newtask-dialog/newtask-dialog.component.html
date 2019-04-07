@@ -17,6 +17,10 @@
                 formControlName="taskDescription"></textarea>
     </mat-form-field>
 
+    <i>Vorschau:</i>
+    <markdown ngPreserveWhitespaces [data]="newTaskDescription"></markdown>
+
+
     <!-- Task type-->
     <mat-select (valueChange)="loadFileUploadFields($event)" placeholder="Aufgaben typ" [(value)]="taskType" *ngIf="!isUpdate" >
       <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
