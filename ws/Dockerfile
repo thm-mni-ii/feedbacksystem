@@ -3,7 +3,7 @@ MAINTAINER Andrej Sajenko <Andrej.Sajenko@mni.thm.de>
 
 ADD build/install/ws /usr/local/ws
 ADD src/main/resources/init.sql /usr/local/ws
-
+VOLUME /usr/local/appconfig/markdown
 VOLUME /upload-dir
 VOLUME /zip-dir
 EXPOSE 8080

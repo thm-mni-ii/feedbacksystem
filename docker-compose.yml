@@ -64,7 +64,8 @@ services:
     volumes:
     - ./ws/upload-dir:/upload-dir
     - ./ws/zip-dir:/zip-dir
-    - ./docker-config/ws/application.properties:/usr/local/appconfig/application.properties
+    - ./docker-config/ws/application.properties_dev:/usr/local/appconfig/application.properties
+    - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
   secrettokenchecker:
     build: secrettoken-checker
     #container_name: ws
@@ -75,12 +76,12 @@ services:
     - zoo1
     - ws
     environment:
-      HOST_UPLOAD_DIR: /Users/allankarlson/Documents/03_PRIVAT/Privat_UNI/Uni_THM/THM_KURSE/Kurse_SEM3/SWT-P/git/submissioncheck/secrettoken-checker/upload-dir
+      HOST_UPLOAD_DIR: "${PWD}/secrettoken-checker/upload-dir"
     volumes:
     - /var/run/:/var/run/
     - /var/run/docker.sock:/var/run/docker.sock
     - ./secrettoken-checker/upload-dir:/upload-dir
-    - ./docker-config/secrettoken/application.conf:/usr/local/appconfig/application.config
+    - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
   sqlchecker:
     #image: bees4ever/sqlchecker
     build: sql-checker
@@ -91,4 +92,4 @@ services:
     - ws
     volumes:
     - ./sql-checker/upload-dir:/upload-dir
-    - ./docker-config/sqlchecker/application.conf:/usr/local/appconfig/application.config
+    - ./docker-config/sqlchecker/application_dev.conf:/usr/local/appconfig/application.config
