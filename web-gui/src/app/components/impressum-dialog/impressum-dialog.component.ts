@@ -47,7 +47,7 @@ export class ImpressumDialogComponent implements OnInit {
   /**
    * Admin saves new impressum text
    */
-  saveImpressum() {
+  /*saveImpressum() {
     this.db.updatePrivacyOrImpressum(TextType.Impressum, this.markdown).subscribe(success => {
       if (success.success) {
         this.snackBar.open('Impressum aktualisiert', 'OK');
@@ -55,6 +55,6 @@ export class ImpressumDialogComponent implements OnInit {
         this.snackBar.open('Es ist ein Fehler aufgetreten', 'OK');
       }
     });
-  }
+  }*/
 
 }
