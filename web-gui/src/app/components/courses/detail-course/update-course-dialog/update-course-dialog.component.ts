@@ -57,4 +57,11 @@ export class UpdateCourseDialogComponent implements OnInit {
       this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
   }
 
+  loadDocentTutorForCourse(){
+    this.db.getCourseDetail(this.courseDetails.course_id).subscribe((value: DetailedCourseInformation) => {
+      this.courseDetails.course_docent = value.course_docent
+      this.courseDetails.course_tutor = value.course_tutor
+    })
+  }
+
 }
