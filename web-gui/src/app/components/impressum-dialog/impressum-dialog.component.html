@@ -1,14 +1,8 @@
 <mat-dialog-content class="container">
   <div class="content">
-    <mat-form-field *ngIf="isAdmin">
-    <textarea id="markInput" matInput [(ngModel)]="markdown" matTextareaAutosize matAutosizeMinRows="1"
-              matAutosizeMaxRows="25" placeholder="Markdown"></textarea>
-    </mat-form-field>
     <markdown id="markOutput" [data]="markdown"></markdown>
   </div>
 </mat-dialog-content>
 <mat-dialog-actions>
   <button mat-flat-button color="accent" (click)="close()">Schließen</button>
-  <button *ngIf="isAdmin" mat-flat-button color="accent" (click)="saveImpressum()">Speichern</button>
-
 </mat-dialog-actions>

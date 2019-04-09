@@ -15,6 +15,7 @@ import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
+import scala.io.Source
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -89,6 +90,24 @@ class SettingController {
       case _: NullPointerException => throw new BadRequestException("")
       case e: NotImplementedError => throw new BadRequestException(e.getMessage)
     }
+  }
+
+  /**
+    * load the markdown files from file system and display it
+    * @param file_name markdown file name
+    * @param request contain request information
+    * @return markdown file content
+    */
+  @RequestMapping(value = Array("markdown/{file_name}"), method = Array(RequestMethod.GET))
+  def getMarkdownImpressum(@PathVariable file_name: String, request: HttpServletRequest): Map[String, String] = {
+    val basePath = "/usr/local/appconfig/markdown/"
+
+    val filePath = basePath + (file_name match {
+      case "impressum" => "impressum.md"
+      case "privacy_text" => "privacy_text.md"
+      case whoa: Any => ""
+    })
+    Map("markdown" -> Source.fromFile(filePath).mkString)
   }
 
   /**

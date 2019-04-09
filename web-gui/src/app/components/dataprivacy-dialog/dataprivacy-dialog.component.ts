@@ -26,6 +26,7 @@ export class DataprivacyDialogComponent implements OnInit {
   isAdmin: boolean;
 
   ngOnInit() {
+    this.onlyForShow = this.data.onlyForShow
     //this.dialogRef.updateSize('600px', '400px');
     if (this.auth.isAuthenticated()) {
       if (this.user.getUserRole() === 1) {
@@ -56,18 +57,4 @@ export class DataprivacyDialogComponent implements OnInit {
   abort() {
     this.dialogRef.close({success: false});
   }
-
-  /**
-   * Save markdown text admin wrote in database
-   */
-  saveDataPrivacy() {
-    this.db.updatePrivacyOrImpressum(TextType.Dataprivacy, this.markdown).subscribe(success => {
-      if (success.success) {
-        this.snackBar.open('Datenschutz aktualisiert', 'OK');
-      } else {
-        this.snackBar.open('Es ist ein Fehler aufgetreten', 'OK');
-      }
-    });
-  }
-
 }

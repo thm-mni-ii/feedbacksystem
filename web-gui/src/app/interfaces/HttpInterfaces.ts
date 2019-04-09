@@ -175,7 +175,7 @@ export interface TestsystemTestfile {
 
 export enum TextType {
   Dataprivacy = 'privacy_text',
-  Impressum = 'impressum_text'
+  Impressum = 'impressum'
 }
 
 /**

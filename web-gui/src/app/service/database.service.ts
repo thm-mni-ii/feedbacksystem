@@ -49,7 +49,7 @@ export class DatabaseService {
    * @param type The type of text
    */
   getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
-    return this.http.get<{ markdown: string }>('/api/v1/settings/privacy/text?which=' + type.toString());
+    return this.http.get<{ markdown: string }>('/api/v1/settings/markdown/' + type.toString());
   }
 
   /**
@@ -385,14 +385,14 @@ export class DatabaseService {
     }
   }
 
-  /**
-   * Admin updated impressum or data privacy
-   * @param type What should be updated
-   * @param text The updated Text
-   */
-  updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
-    return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
-  }
+  ///**
+  // * Admin updated impressum or data privacy
+  //* @param type What should be updated
+  //* @param text The updated Text
+  //*/
+  //updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
+  //  return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
+  //}
 
 
   // DELETE REQUESTS
