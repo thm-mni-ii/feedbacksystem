@@ -25,9 +25,8 @@ export class UpdateCourseDialogComponent implements OnInit {
   standardTaskType: string;
   semester: string;
   course_module_id: string;
-  userDataAllowed: boolean;
+  userDataAllowed: string = "false";
   courseDetails: DetailedCourseInformation;
-
 
   ngOnInit() {
     this.courseDetails = this.data.data;
@@ -38,9 +37,8 @@ export class UpdateCourseDialogComponent implements OnInit {
     this.standardTaskType = this.courseDetails.standard_task_typ;
     this.semester = this.courseDetails.course_semester;
     this.course_module_id = this.courseDetails.course_module_id;
-    this.userDataAllowed = this.courseDetails.personalised_submission;
+    this.userDataAllowed = this.courseDetails.personalised_submission.toString();
   }
-
 
   /**
    * Close dialog without update
@@ -54,7 +52,7 @@ export class UpdateCourseDialogComponent implements OnInit {
    */
   udpateCourse() {
     this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
-      this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
+      this.course_module_id, this.userDataAllowed === "true").subscribe(success => this.dialogRef.close(success));
   }
 
   loadDocentTutorForCourse(){
@@ -63,5 +61,4 @@ export class UpdateCourseDialogComponent implements OnInit {
       this.courseDetails.course_tutor = value.course_tutor
     })
   }
-
 }

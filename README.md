@@ -40,38 +40,106 @@ After login yourself with this credentials you can create a new admin and delete
 
 
 
-## Useful hints setting up a development environment for Feedbacksystem 
+## Production
 
-#### Start Secrettoken Checker
 
-```bash
-./gradlew secrettoken-checker:run
+```yaml
+ 
+ version: '2'         # We still wants to keep compatible with an older docker-compose version (which Rancher 1.6 uses)
+ 
+ services:
+   zoo1:
+     image: 'bitnami/zookeeper:latest'
+     hostname: zoo1   # We currently use only one zookeeper
+     environment:
+     # This is an somehow unsecure setting, because no password and user is needed, but we use this in a virtual network.
+     - ALLOW_ANONYMOUS_LOGIN=yes   
+     volumes:
+     - ./docker-config/zoo1:/bitnami/zookeeper  # Zookeeper working dir is mounted to keep all data after restart
+                        
+   kafka1:
+     image: 'bitnami/kafka:latest'
+     hostname: kafka1     # hostname how one can connect to kafka
+     environment:
+     # These are also settings, which allow to communicate plan text with kafka. This is no problem either, because we use this in a virtual network.
+     - KAFKA_ZOOKEEPER_CONNECT=zoo1:2181
+     - ALLOW_PLAINTEXT_LISTENER=yes
+     - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+     - KAFKA_LISTENERS=PLAINTEXT://:9092
+     - KAFKA_ADVERTISED_HOST_NAME=kafka1    
+     - KAFKA_ADVERTISED_PORT=9092
+     depends_on:
+     - zoo1   # needs a running zookeeper
+     volumes:
+     - ./docker-config/kafka1:/bitnami/kafka  # Kafka working dir is mounted to keep all data after restart
+ 
+   mysql1:
+     image: mysql:8.0
+     command: --default-authentication-plugin=mysql_native_password
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O # Database Password
+       MYSQL_DATABASE: submissionchecker            # Database User
+     volumes:
+     - ./docker-config/mysql1:/var/lib/mysql        # Keep DB after reload
+   bash1:
+     image: bash:4.4
+   mysql2:
+     image: mysql:8.0
+     command: --default-authentication-plugin=mysql_native_password
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel # Database Password
+     volumes:
+     - ./docker-config/mysql2:/var/lib/mysql        # Keep DB after reload
+   ws:
+     image: bees4ever/ws:v0.0.11
+     depends_on:
+     - mysql1
+     - kafka1
+     - zoo1
+     ports:
+     - "443:8080"
+     volumes:
+     - ./ws/upload-dir:/upload-dir                  # Mount the webservice intern upload dir of all tasks and submissions
+     - ./ws/zip-dir:/zip-dir                        # Mount the temporary folder for generating zip files
+     # Specify a application property file for the webservice. It contains all settings concerning CAS, LDAP, Kafka connection, etc 
+     - ./docker-config/ws/application.properties:/usr/local/appconfig/application.properties
+     # Mount the markdown files, which are visible on the website
+     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
+   secrettokenchecker:
+     image: bees4ever/secrettokenchecker:v0.0.11
+     depends_on:
+     - mysql1
+     - kafka1
+     - zoo1
+     - ws
+     environment:
+      # NOTE: This environment variable needs an valid path
+      # Please specify the full root path of the secret token upload dir 
+       HOST_UPLOAD_DIR: /path/to/secrettoken/upload-dir  
+     volumes:
+     # We need to access the host docker system from inside a docker image
+     # Therefore we need to mount this two folder of the host system inside this docker image 
+     - /var/run/:/var/run/   
+     - /var/run/docker.sock:/var/run/docker.sock
+     # Once again we need to configure the upload dir of the secrettoken   
+     - ./secrettoken-checker/upload-dir:/upload-dir
+     # Specify the secrettoken applications configuration    
+     - ./docker-config/secrettoken/application.conf:/usr/local/appconfig/application.config
+   sqlchecker:
+     image: bees4ever/sqlchecker:v0.0.11
+     depends_on:
+     - mysql2
+     - kafka1
+     - zoo1
+     - ws
+     volumes:
+     - ./sql-checker/upload-dir:/upload-dir  # specify the SQL Checker's upload dir 
+     # Specify the sql applications configuration
+     - ./docker-config/sqlchecker/application.conf:/usr/local/appconfig/application.config 
 ```
 
-#### Build Code to deploy in Docker
-
-```bash
-cd web-gui && ng build
-cd .. && ./gradlew dist
-docker-compose up --build --force-recreate
-docker login
-bash docker-push.sh
-```
-
-#### Angular local development with SSL
-
-``ng serve --ssl --ssl-key ../docker-config/certs/localhost.key  --ssl-cert ../docker-config/certs/localhost.crt``
-
-#### Run kafka and mysql local
-
-Edit your ``/etc/hosts`` file and add following lines:
-
-````bash
-127.0.0.1 kafka1
-127.0.0.1 mysql1
-127.0.0.1 mysql2 
-127.0.0.1 ws
-````
 
 
 ## Testsystems and Testfiles
