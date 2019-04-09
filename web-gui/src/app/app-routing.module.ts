@@ -18,6 +18,7 @@ import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
 import {IsDocentGuard} from './guards/is-docent.guard';
+import {NotFound404Component} from "./components/not-found404/not-found404.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -40,9 +41,13 @@ const routes: Routes = [
       {path: 'student/dashboard', component: StudentDashboardComponent},
 
       // Prof
-      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]}
+      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]},
+
+      //General Sites
+      {path: '404', component: NotFound404Component}
     ]
   },
+  { path: '**', redirectTo: '404' }
 ];
 
 /**

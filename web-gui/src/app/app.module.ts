@@ -45,6 +45,7 @@ import { GrantDocentSnippComponent } from './components/courses/grant-docent-sni
 import { DeleteTaskModalComponent } from './components/courses/modals/delete-task-modal/delete-task-modal.component';
 import { DeleteUserModalComponent } from './components/modals/delete-user-modal/delete-user-modal.component';
 import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
+import { NotFound404Component } from './components/not-found404/not-found404.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -92,6 +93,7 @@ export const httpInterceptorProviders = [
     DeleteTaskModalComponent,
     DeleteUserModalComponent,
     AnswerFromTestsystemDialogComponent,
+    NotFound404Component,
   ],
   imports: [
     BrowserModule,
