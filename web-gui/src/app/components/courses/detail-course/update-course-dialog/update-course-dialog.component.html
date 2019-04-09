@@ -1,6 +1,6 @@
 <div class="container">
   <div matDialogTitle>Kurs bearbeiten</div>
-  <mat-dialog-content style="max-height: 100%;">
+  <mat-dialog-content style="max-height: 100%; overflow: hidden;">
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput [(ngModel)]="name">
@@ -41,6 +41,15 @@
         <mat-option value="false">Nein</mat-option>
       </mat-select>
     </mat-form-field>
+
+    <div class="choose_docent_tutor_area">
+      <mat-label>Dozenten auswählen</mat-label>
+      <app-grant-docent-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true" (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-docent-snipp>
+
+      <mat-label>Tutor auswählen</mat-label>
+      <app-grant-tutor-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true" (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-tutor-snipp>
+    </div>
+
   </mat-dialog-content>
   <mat-action-list class="action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>

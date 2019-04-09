@@ -12,7 +12,7 @@
       </th>
       <td mat-cell *matCellDef="let course">
         <h3>{{course.course_name}}</h3>
-       <app-grant-tutor-snipp (loadAllCourses)="loadAllCoursesTutor($event)" [course]="course"></app-grant-tutor-snipp>
+       <app-grant-tutor-snipp (loadAllCourses)="loadAllCoursesTutor($event)" [liveUpdate]="true" [course]="course"></app-grant-tutor-snipp>
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="columns"></tr>

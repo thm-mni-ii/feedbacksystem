@@ -4,7 +4,7 @@ import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {NewCourse, Testsystem} from '../../../interfaces/HttpInterfaces';
+import {NewCourse, Testsystem, User} from '../../../interfaces/HttpInterfaces';
 import {Router} from "@angular/router";
 
 /**
@@ -47,7 +47,12 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   newCourseDate: string;
   newCoursePrivatUserData: string;
 
+  docent_list: User[];
+  tutor_list: User[];
+
   ngOnInit() {
+    this.docent_list = []
+    this.tutor_list = []
 
     this.testTypes$ = this.db.getTestsystemTypes();
     this.titlebar.emitTitle('Neuen Kurs erstellen');
@@ -144,7 +149,20 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       this.snackBar.open('Kurs ' + this.newCourseName + ' wurde erstellt', 'OK',
         {duration: 5000});
       this.stepper.reset();
-      setTimeout(this.router.navigate(['courses', data.course_id]),100)
+
+      let updateDocentTutorList = []
+      this.tutor_list.forEach(u => {
+        updateDocentTutorList.push(this.db.addTutorToCourse(data.course_id, u.user_id).toPromise())
+      })
+
+      this.docent_list.forEach(u => {
+        updateDocentTutorList.push(this.db.addDocentToCourse(data.course_id, u.user_id).toPromise())
+      })
+
+      console.log(this.docent_list,this.tutor_list, updateDocentTutorList)
+      Promise.all(updateDocentTutorList).then(() => {
+        setTimeout(this.router.navigate(['courses', data.course_id]),100)
+      })
     });
   }
 

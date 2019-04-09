@@ -15,8 +15,9 @@ import {Observable} from "rxjs";
 export class GrantTutorSnippComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input() course;
+  @Input() liveUpdate:boolean;
   @Output() loadAllCourses: EventEmitter<void>;
-  //@Input() dataSourceCourses;
+  @Input() tutor_list: User[];
 
   tutorFormControl = new FormControl();
   filteredOptions: Observable<User[]>;
@@ -67,9 +68,14 @@ export class GrantTutorSnippComponent implements OnInit {
       this.tutorFormControl.setValue('');
       this.showInputForTutor = false;
 
-      this.db.addTutorToCourse(courseID, selectedUser.user_id).subscribe(res => {
-        this.loadAllCourses.emit();
-      })
+      if(this.liveUpdate){
+        this.db.addTutorToCourse(courseID, selectedUser.user_id).subscribe(res => {
+          this.loadAllCourses.emit();
+        })
+      } else {
+        this.tutor_list.push(selectedUser)
+      }
+
     }
   }
 
@@ -79,9 +85,26 @@ export class GrantTutorSnippComponent implements OnInit {
    * @param userID The tutor id
    */
   removeTutor(courseID: number, userID: number) {
-    this.db.removeTutorFromCourse(courseID, userID).subscribe(courses => {
-      this.loadAllCourses.emit();
-    });
+    if(this.liveUpdate) {
+      this.db.removeTutorFromCourse(courseID, userID).subscribe(courses => {
+        this.loadAllCourses.emit();
+      });
+    } else {
+      let hiddenUser = this.tutor_list.filter((u: User) => {
+        return u.user_id == userID
+      })
+      console.log("here",hiddenUser )
+      let i = this.tutor_list.indexOf(hiddenUser[0])
+      this.tutor_list.splice(i,1)
+    }
+  }
+
+  get correctCourseTutor(){
+    if(this.liveUpdate) {
+      return this.course.course_tutor
+    } else {
+      return this.tutor_list
+    }
   }
 
   /**

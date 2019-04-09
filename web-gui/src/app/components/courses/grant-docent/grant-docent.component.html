@@ -12,11 +12,11 @@
       <td mat-cell *matCellDef="let course">
         <h3>{{course.course_name}}</h3>
         <mat-divider></mat-divider>
-        <h4>Tutoren</h4>
-        <app-grant-tutor-snipp (loadAllCourses)="loadAllCourses($event)"  [course]="course"></app-grant-tutor-snipp>
-        <mat-divider></mat-divider>
         <h4>Dozenten</h4>
-        <app-grant-docent-snipp (loadAllCourses)="loadAllCourses($event)"  [course]="course"></app-grant-docent-snipp>
+        <app-grant-docent-snipp (loadAllCourses)="loadAllCourses($event)" [liveUpdate]="true"  [course]="course"></app-grant-docent-snipp>
+        <mat-divider></mat-divider>
+        <h4>Tutoren</h4>
+        <app-grant-tutor-snipp (loadAllCourses)="loadAllCourses($event)" [liveUpdate]="true" [course]="course"></app-grant-tutor-snipp>
       </td>
     </ng-container>
 
