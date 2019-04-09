@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar, MatStepper} from '@angular/material';
 import {TitlebarService} from '../../../service/titlebar.service';
@@ -46,7 +46,6 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   newCourseModuleID: string;
   newCourseDate: string;
   newCoursePrivatUserData: string;
-
 
   ngOnInit() {
 

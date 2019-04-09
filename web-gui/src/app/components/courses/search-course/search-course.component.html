@@ -31,8 +31,8 @@
         <mat-card-subtitle>{{course.course_modul_id}}</mat-card-subtitle>
       </mat-card-header>
       <mat-divider></mat-divider>
-      <mat-card-content>
-        <app-read-more id="course-description" [text]="course.course_description" [maxLength]="300"></app-read-more>
+      <mat-card-content class="course-description">
+          <markdown [data]="course.course_description"></markdown>
       </mat-card-content>
     </mat-card>
   </div>

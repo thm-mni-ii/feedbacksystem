@@ -1,16 +1,20 @@
 <div class="container">
   <div matDialogTitle>Kurs bearbeiten</div>
-  <mat-dialog-content>
+  <mat-dialog-content style="max-height: 100%;">
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput [(ngModel)]="name">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Beschreibung</mat-label>
-      <textarea matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
-                [(ngModel)]="description" placeholder="(Optional)"></textarea>
+        <mat-label>Beschreibung</mat-label>
+        <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
+                  [(ngModel)]="description" placeholder="(Optional)"></textarea>
     </mat-form-field>
+
+    <i>Vorschau:</i>
+    <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
+
 
     <mat-form-field>
       <mat-label>Standart aufgaben typ</mat-label>

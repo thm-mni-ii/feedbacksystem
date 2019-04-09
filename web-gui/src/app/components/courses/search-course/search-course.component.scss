@@ -38,3 +38,8 @@ mat-card-header {
 .filler {
   flex-grow: 1;
 }
+
+.course-description{
+  max-height: 120px;
+  overflow: hidden;
+}
