@@ -69,6 +69,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         return this.db.getCourseDetail(this.courseID);
       })
     ).subscribe(course_detail => {
+
+      if(Object.keys(course_detail).length == 0) {
+        this.router.navigate(['404'])
+      }
+
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
 
@@ -79,7 +84,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         this.processing[task.task_id] = false;
       });
       this.titlebar.emitTitle(course_detail.course_name);
-    });
+    }, error => this.router.navigate(['404']))
 
     // Check if task reached deadline
     setInterval(() => {
