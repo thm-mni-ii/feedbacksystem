@@ -22,6 +22,8 @@ repositories {
     mavenCentral()
 }
 
+run.doFirst { environment 'CONFDIR', "${projectDir}" }
+
 sourceSets {
     main {
         scala {

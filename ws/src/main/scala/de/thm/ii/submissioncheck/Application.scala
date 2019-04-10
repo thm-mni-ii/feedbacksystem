@@ -1,31 +1,33 @@
 package de.thm.ii.submissioncheck
 
-import java.io.{File, FileInputStream, FileNotFoundException}
+import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Paths}
 
 import de.thm.ii.submissioncheck.misc.DB
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.beans.factory.annotation.{Autowired}
+import org.springframework.boot.autoconfigure.{SpringBootApplication}
 import org.springframework.boot.SpringApplication
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.annotation.{PropertySource}
 import org.springframework.context.event.EventListener
 import org.springframework.util.ResourceUtils
 
 import scala.io.{Codec, Source}
 
 /**
-  * Class dummy for sprint boot.
+  * Class dummy for spring boot.
   *
   * @author Andrej Sajenko
   */
 @SpringBootApplication
+@PropertySource(value = Array("file:${confdir}/ws/application_dev.properties", "file:/usr/local/appconfig/application.properties"),
+  ignoreResourceNotFound = true)
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  //private val initSQLFile: File = ResourceUtils.getFile("classpath:init.sql")
   private val initSQLPath = Paths.get("/usr/local/ws/init.sql")
 
   private var initSQLFile: File = null

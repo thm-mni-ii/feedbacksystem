@@ -2,13 +2,14 @@ package de.thm.ii.submissioncheck
 
 import java.sql._
 import java.io._
+import java.nio.file.{Files, Paths}
 
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
+
 import scala.util.control.Breaks._
 import scala.collection.mutable.ListBuffer
 import scala.xml.XML
-
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -24,10 +25,12 @@ import org.json4s.jackson.JsonMethods._
   * @author Vlad Soykrskyy
   */
 class SQLTask(val filepath: String, val taskId: String){
-  private implicit val system: ActorSystem = ActorSystem("akka-system")
-  private val logger = system.log
-  private val config = ConfigFactory.load()
+  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
+  private val config = ConfigFactory.load(appConfig)
 
+  private implicit val system: ActorSystem = ActorSystem("akka-system", config)
+
+  private val logger = system.log
   private implicit val formats = DefaultFormats
   /**
     * Class instance taskname
@@ -47,6 +50,20 @@ class SQLTask(val filepath: String, val taskId: String){
   private var connection: Connection = DriverManager.getConnection(URL, user, password)
   private val s = connection.createStatement()
   private val timeoutsec = 10
+
+  private def loadFactoryConfigPath() = {
+    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/sqlchecker/application_dev.conf"
+    val prod_config_file_path = "/usr/local/appconfig/application.config"
+
+    var config_factory_path = ""
+    if (Files.exists(Paths.get(prod_config_file_path))) {
+      config_factory_path = prod_config_file_path
+    } else {
+      config_factory_path = dev_config_file_path
+    }
+    config_factory_path
+  }
+
   /**
     * used in queries
     */
@@ -86,7 +103,6 @@ class SQLTask(val filepath: String, val taskId: String){
   //private val qstatements = new scala.Array[Statement](queryc)
   private val qstatements = scala.Array.fill[Statement](queryc)(connection.createStatement)
   private val queryres = new scala.Array[TaskQuery](queryc)
-
   createDatabase("little_test")
   for((tq, i) <- taskqueries.zipWithIndex){
     /** querystring */

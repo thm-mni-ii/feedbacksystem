@@ -44,7 +44,8 @@ services:
     volumes:
     - ./docker-config/mysql2:/var/lib/mysql
   ws:
-    image: bees4ever/ws:v0.0.11
+    #image: bees4ever/ws:v0.0.11
+    build: ws
     depends_on:
     - mysql1
     - kafka1
@@ -57,7 +58,8 @@ services:
     - ./docker-config/ws/application_prod.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
   secrettokenchecker:
-    image: bees4ever/secrettokenchecker:v0.0.11
+    #image: bees4ever/secrettokenchecker:v0.0.11
+    build: secrettoken-checker
     depends_on:
     - mysql1
     - kafka1
@@ -71,7 +73,8 @@ services:
     - ./secrettoken-checker/upload-dir:/upload-dir
     - ./docker-config/secrettoken/application_prod.conf:/usr/local/appconfig/application.config
   sqlchecker:
-    image: bees4ever/sqlchecker:v0.0.11
+    #image: bees4ever/sqlchecker:v0.0.11
+    build: sql-checker
     depends_on:
     - mysql2
     - kafka1

@@ -16,6 +16,7 @@ import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io._
+import java.lang.module.Configuration
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL, URLDecoder}
 import java.nio.charset.StandardCharsets
@@ -24,7 +25,9 @@ import java.security.cert.X509Certificate
 
 import javax.net.ssl._
 import JsonHelper._
+import com.typesafe.config.{Config, ConfigFactory}
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
+import jdk.internal.module.IllegalAccessLogger.Mode
 
 /**
   * Bypasses both client and server validation.
@@ -60,6 +63,7 @@ object VerifiesAllHostNames extends HostnameVerifier {
     */
   def verify(s: String, sslSession: SSLSession): Boolean = true
 }
+
 /**
   * Application for running a script with username and token as parameters
   *
@@ -70,14 +74,11 @@ object SecretTokenChecker extends App {
   final val TASKID = "taskid"
   /** used in naming */
   final val DATA = "data"
-  /** used in naming */
-  final val ULDIR = "upload-dir/"
 
   private val LABEL_AUTHORIZATION = "Authorization"
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
-
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
@@ -88,9 +89,16 @@ object SecretTokenChecker extends App {
   private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
 
-  private implicit val system: ActorSystem = ActorSystem("akka-system")
+  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
+  private val config = ConfigFactory.load(appConfig)
+  private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
+
+  private val compile_production: Boolean = config.getBoolean("compiletype.production")
+
+  /** used in naming */
+  final val ULDIR = (if (compile_production) "/" else "") + "upload-dir/"
 
   private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
@@ -138,16 +146,28 @@ object SecretTokenChecker extends App {
   HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
   HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
 
+  private def loadFactoryConfigPath() = {
+    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/secrettoken/application_dev.conf"
+    val prod_config_file_path = "/usr/local/appconfig/application.config"
+
+    var config_factory_path = ""
+    if (Files.exists(Paths.get(prod_config_file_path))) {
+      config_factory_path = prod_config_file_path
+    } else {
+      config_factory_path = dev_config_file_path
+    }
+    config_factory_path
+  }
+
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
-    logger.info("Submission Received")
+    logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
       var submittedFilePath: String = ""
-
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         //new URL(url) #> new File("submit.txt") !!
@@ -262,7 +282,7 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-      val bashtest1 = new BashExec(taskid, name, filePath)
+      val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
       val exit1 = bashtest1.exec()
       val message1 = bashtest1.output
 

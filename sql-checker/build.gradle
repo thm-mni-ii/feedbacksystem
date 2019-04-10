@@ -18,6 +18,10 @@ jar {
     enabled = true
 }
 
+
+run.doFirst { environment 'CONFDIR', "${projectDir}" }
+
+
 repositories {
     mavenCentral()
 }

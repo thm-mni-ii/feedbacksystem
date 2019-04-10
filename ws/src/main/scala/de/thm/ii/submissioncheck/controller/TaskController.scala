@@ -56,6 +56,9 @@ class TaskController {
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
 
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
+
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
   /** JSON variable taskid ID*/
@@ -79,7 +82,7 @@ class TaskController {
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val topicName: String = "check_request"
 
-  private val storageService: StorageService = new StorageService
+  private val storageService: StorageService = new StorageService(compile_production)
 
   /**
     * After autowiring start Kafka Listener

@@ -20,8 +20,11 @@ import de.thm.ii.submissioncheck.misc.DB
 class UserService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
+
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
   /** holds connection to storageService*/
-  val storageService = new StorageService
+  val storageService = new StorageService(compile_production)
   /**
     * Class holds all DB labels
     */

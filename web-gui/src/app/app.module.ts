@@ -51,7 +51,7 @@ import { NotFound404Component } from './components/not-found404/not-found404.com
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080' + req.url
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);

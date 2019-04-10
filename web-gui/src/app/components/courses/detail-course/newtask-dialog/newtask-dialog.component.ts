@@ -151,8 +151,9 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * and close dialog
    */
   updateTask() {
-      this.db.updateTask(this.data.task.task_id, this.newTaskName,
-        this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)
+      let formatedDeadline = this.deadline.toLocaleDateString() + " " + this.deadline.toLocaleTimeString()
+    this.db.updateTask(this.data.task.task_id, this.newTaskName,
+      this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)
         .subscribe(success => this.dialogRef.close(success));
   }
 

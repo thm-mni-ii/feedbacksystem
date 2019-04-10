@@ -43,5 +43,4 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
-    all_branches: true
-  #  branch: master_docker_images
+    branch: master
