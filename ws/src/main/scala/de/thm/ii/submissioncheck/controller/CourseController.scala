@@ -29,8 +29,6 @@ class CourseController {
   private val courseService: CourseService = null
   @Autowired
   private val taskService: TaskService = null
-  /** holds connection to storageService*/
-  val storageService = new StorageService
 
   private final val application_json_value = "application/json"
 

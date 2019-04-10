@@ -15,19 +15,22 @@ import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IO
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server
   * and integrate own task logic
   *
+  * @param compile_production different upload direction
   * @author grokonez.com
   */
-class StorageService {
+class StorageService(compile_production: Boolean) {
   /** StorageService logger*/
   val log: Logger = LoggerFactory.getLogger(this.getClass.getName)
+
+  private val __slash = "/"
   /** upload folder name */
-  final val UPLOAD_FOLDER: String = "upload-dir"
+  final val UPLOAD_FOLDER: String = (if (compile_production) __slash else "") + "upload-dir/"
 
   private val rootLocation = Paths.get(UPLOAD_FOLDER)
 
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
 
-  private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + "/" + taskid.toString
+  private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + __slash + taskid.toString
 
   /**
     * Delete a submission File
@@ -192,7 +195,7 @@ class StorageService {
     * @return File Resource
     */
   def loadFileBySubmission(filename: String, taskid: Int, submission_id: Int): Resource = try {
-    val storeLocation = Paths.get("upload-dir/" + taskid.toString + "/submits/" + submission_id.toString)
+    val storeLocation = Paths.get(UPLOAD_FOLDER + taskid.toString + "/submits/" + submission_id.toString)
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}

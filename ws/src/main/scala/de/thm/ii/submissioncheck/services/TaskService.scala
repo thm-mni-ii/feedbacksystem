@@ -25,13 +25,26 @@ class TaskService {
 
   @Autowired
   private val tokenService: TokenService = null
-  /** holds connection to storageService*/
-  val storageService = new StorageService
 
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
 
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
+
   @Value("${cas.client-host-url}")
-  private val UPLOAD_BASE_URL: String = null
+  private var UPLOAD_BASE_URL: String = null
+
+  /** holds connection to storageService*/
+  val storageService = new StorageService(compile_production)
+
+  private def getUploadBaseURL() = {
+    if (compile_production) {
+      "https://ws:8080/"
+    } else {
+      UPLOAD_BASE_URL
+    }
+  }
+
   /**
     * After Upload a submitted File save it's name
     * @author Benjamin Manns
@@ -498,7 +511,7 @@ class TaskService {
     */
   def getURLsOfTaskTestFiles(taskid: Int): List[String] = {
     getTestFilesByTask(taskid).map(testfile => {
-      UPLOAD_BASE_URL + "/api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
+      getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/files/testfile/" + encodeValue(testfile)
     })
   }
 
@@ -528,7 +541,7 @@ class TaskService {
     * @return URL String
     */
   def getURLOfSubmittedTestFile(taskid: Int, submissionid: Int): String = {
-    UPLOAD_BASE_URL + "/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
+    getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
   }
 
   /**

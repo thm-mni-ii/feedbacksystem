@@ -323,6 +323,7 @@ export class DatabaseService {
     });
   }
 
+
   /**
    * Returns a sql compatible timestamp string based on a given date
    * @param date
@@ -352,7 +353,6 @@ export class DatabaseService {
       for(let j in files) {
         formData.append("file", files[j].item(0), j);
       }
-
       return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
         name: name,
         description: description,
@@ -380,7 +380,8 @@ export class DatabaseService {
       return this.http.put<Succeeded>('/api/v1/tasks/' + idTask, {
         name: name,
         description: description,
-        test_type: test_type
+        test_type: test_type,
+        deadline: this.formatDate(deadline)
       });
     }
   }

@@ -53,8 +53,6 @@ services:
     - 3309:3306
   ws:
     build: ws
-    #container_name: ws
-    image: ws
     depends_on:
     - mysql1
     - kafka1
@@ -64,12 +62,10 @@ services:
     volumes:
     - ./ws/upload-dir:/upload-dir
     - ./ws/zip-dir:/zip-dir
-    - ./docker-config/ws/application.properties_dev:/usr/local/appconfig/application.properties
+    - ./docker-config/ws/application_dev.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
   secrettokenchecker:
     build: secrettoken-checker
-    #container_name: ws
-    image: secrettokenchecker
     depends_on:
     - mysql1
     - kafka1
@@ -83,7 +79,6 @@ services:
     - ./secrettoken-checker/upload-dir:/upload-dir
     - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
   sqlchecker:
-    #image: bees4ever/sqlchecker
     build: sql-checker
     depends_on:
     - mysql2

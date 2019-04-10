@@ -28,6 +28,17 @@ bootJar {
     classifier = 'boot'
 }
 
+bootRun {
+    def confidir = new File(".").absolutePath + "/docker-config/"
+    print("CONFDIR: " + confidir)
+    jvmArgs =
+            [
+                    "-Dconfdir=" + confidir
+            ]
+    
+}
+
+
 repositories {
     jcenter()
     mavenCentral()
