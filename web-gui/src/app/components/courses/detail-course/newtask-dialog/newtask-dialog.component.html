@@ -7,30 +7,31 @@
     <!-- Task name -->
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input type="text" matInput formControlName="taskName">
+      <input type="text" matInput formControlName="taskName" required>
     </mat-form-field>
 
     <!-- Task Description -->
     <mat-form-field>
       <mat-label>Beschreibung</mat-label>
       <textarea matInput type="text" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                formControlName="taskDescription"></textarea>
+                formControlName="taskDescription" required></textarea>
     </mat-form-field>
 
     <i>Vorschau:</i>
     <markdown ngPreserveWhitespaces [data]="newTaskDescription"></markdown>
+    <mat-divider style="margin: 14px 0;"></mat-divider>
 
 
     <!-- Task type-->
-    <mat-select (valueChange)="loadFileUploadFields($event)" placeholder="Aufgaben typ" [(value)]="taskType" *ngIf="!isUpdate" >
-      <mat-option *ngFor="let type of testTypes$ | async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
+    <mat-select (valueChange)="loadFileUploadFields($event)" placeholder="Aufgaben typ" [(value)]="taskType" *ngIf="!isUpdate" required>
+      <mat-option *ngFor="let type of testTypes" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
     </mat-select>
 
 
     <div *ngFor="let testfile of testSystemFiles">
-      {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">(ist erforderlich)</span>
+      {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">*</span>
 
-      <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename)" type="file" placeholder="Lösung" >
+      <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename)" type="file" placeholder="Lösung" [required]="testfile.required">
       <!--<span (click)="removeFilesFromList(testfile.filename)">X</span>-->
     </div>
 
@@ -39,6 +40,11 @@
   </form>
 
   <!-- Deadline picker-->
+  <br>
+  <mat-divider></mat-divider>
+  <br>
+  <mat-label>Abgabe Deadline</mat-label>
+  <br>
   <owl-date-time-inline class="deadline-picker" [(ngModel)]="deadline"></owl-date-time-inline>
 
 

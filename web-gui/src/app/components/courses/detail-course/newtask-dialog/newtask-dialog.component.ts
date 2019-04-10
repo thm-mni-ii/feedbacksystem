@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DatabaseService} from '../../../../service/database.service';
 import {Observable, Subscription} from 'rxjs';
-import {Testsystem, TestsystemTestfile} from '../../../../interfaces/HttpInterfaces';
+import {DetailedCourseInformation, Testsystem, TestsystemTestfile} from '../../../../interfaces/HttpInterfaces';
 
 /**
  * Dialog to create a new task or update
@@ -29,7 +29,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   taskType: string;
   soutionFiles: FileList;
   testFilesSubmissionList = {};
-  testTypes$: Observable<Testsystem[]>;
+  testTypes: Testsystem[];
   isUpdate: boolean;
   deadline?: Date;
   testSystemFiles: TestsystemTestfile[];
@@ -40,7 +40,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.testTypes$ = this.db.getTestsystemTypes();
+    this.loadAndPreselectTestsystemTypes()
 
     if (this.data.task) {
       this.isUpdate = true;
@@ -48,6 +48,8 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       this.taskForm.controls['taskDescription'].setValue(this.data.task.task_description);
       this.deadline = new Date(this.data.task.deadline);
       this.taskType = this.data.task.testsystem_id;
+      this.newTaskDescription = this.data.task.task_description
+
     }
 
 
@@ -65,15 +67,25 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
   }
 
-  loadFileUploadFields(taksTypeValue){
-    this.db.getTestsystemDetails(taksTypeValue)
+  loadAndPreselectTestsystemTypes() {
+    this.db.getTestsystemTypes().subscribe(data => {
+      this.testTypes = data
+      if(this.data.courseID) {
+        this.db.getCourseDetail(this.data.courseID).subscribe((value: DetailedCourseInformation) => {
+          this.taskType = value.standard_task_typ
+          this.loadFileUploadFields(this.taskType)
+        })
+      }
+    })
+  }
+
+  loadFileUploadFields(taskTypeValue){
+    this.db.getTestsystemDetails(taskTypeValue)
       .then((testsystem: Testsystem) => {
         this.testSystemFiles = testsystem.testfiles
-        testsystem.testfiles.forEach(testfile => {
-        })
       })
       .catch((e) => {
-        this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden")
+        this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
       })
   }
 
@@ -108,24 +120,24 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    */
   createTask() {
     if(typeof this.newTaskName == 'undefined'){
-      this.snackBar.open('Bitte einen Namen für die neue Aufgabe angeben');
+      this.snackBar.open('Bitte einen Namen für die neue Aufgabe angeben', 'OK', {duration: 3000});
     }
 
     else if(typeof this.newTaskDescription == 'undefined'){
-      this.snackBar.open('Bitte eine Beschreibung für die neue Aufgabe angeben');
+      this.snackBar.open('Bitte eine Beschreibung für die neue Aufgabe angeben', 'OK', {duration: 3000});
     }
 
     else if(typeof this.taskType == 'undefined') {
-      this.snackBar.open('Bitte ein Testsystem auswählen');
+      this.snackBar.open('Bitte ein Testsystem auswählen', 'OK', {duration: 3000});
     }
 
     else if(typeof this.deadline == 'undefined') {
-        this.snackBar.open('Bitte eine Deadline festlegen')
+        this.snackBar.open('Bitte eine Deadline festlegen', 'OK', {duration: 3000});
     }
 
     else {
       if(!this.checkAllNeededFilesAreSet()){
-        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + this.testSystemFiles.map(v => v.filename).join(', '))
+        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + this.testSystemFiles.filter(v => v.required).map(v => v.filename).join(', '), 'OK', {duration: 3000});
       } else {
         this.db.createTask(this.data.courseID, this.newTaskName,
           this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)
