@@ -88,11 +88,11 @@ export class LoginComponent implements OnInit {
         })
       }
       else {
-        this.snackbar.open('Username oder Passwort falsch', 'OK');
+        this.snackbar.open('Username oder Passwort falsch', 'OK', {duration: 3000});
       }
 
     }).catch((e) => {
-      this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK');
+      this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK', {duration: 3000});
     })
   }
 

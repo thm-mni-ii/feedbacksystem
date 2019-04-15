@@ -32,12 +32,16 @@ class TaskService {
   private val compile_production: Boolean = true
 
   @Value("${cas.client-host-url}")
-  private var UPLOAD_BASE_URL: String = null
+  private val UPLOAD_BASE_URL: String = null
 
   /** holds connection to storageService*/
   val storageService = new StorageService(compile_production)
 
-  private def getUploadBaseURL() = {
+  /**
+   * Load base upload URL
+   * @return string based on configuration the correct upload base URL
+   */
+  def getUploadBaseURL(): String = {
     if (compile_production) {
       "https://ws:8080/"
     } else {

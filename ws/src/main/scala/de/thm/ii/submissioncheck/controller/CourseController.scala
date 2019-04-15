@@ -45,6 +45,7 @@ class CourseController {
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   private final val application_json_value = "application/json"
 
   private final val PATH_LABEL_ID = "id"
@@ -159,6 +160,38 @@ class CourseController {
     courseService.getCourseDetails(courseid, user.get).getOrElse(Map.empty)
   }
 
+  // TODO please not as route but as threat
+  /**
+    * Deprecated Route, to use as threat
+    * @param courseid feedback course
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @deprecated("0", "0")
+  @RequestMapping(value = Array("{id}/plagiarismchecker"), method = Array(RequestMethod.GET))
+  def updateTask(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[String, Any] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (!this.courseService.isPermittedForCourse(courseid, user.get)) {
+      throw new UnauthorizedException("User has no edit rights and can not update a task.")
+    }
+
+    val tasksystem_id = "plagiarismchecker"
+    val kafkaMap: Map[String, Any] = Map("course_id" -> courseid, "download_zip_url" ->
+      (this.taskService.getUploadBaseURL() + "/api/v1/courses/" + courseid.toString + "/submission/users/zip"),
+      "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id))
+    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+    val kafka_topic = tasksystem_id + "_check_request"
+    logger.warn(kafka_topic)
+    logger.warn(jsonResult)
+    kafkaTemplate.send(kafka_topic, jsonResult)
+    kafkaTemplate.flush()
+
+    Map("success" -> true)
+  }
+
   /**
     * Generates a zip of one user submissions of one course
     * @author Benjamin Manns
@@ -171,7 +204,7 @@ class CourseController {
   @RequestMapping(value = Array("{courseid}/submission/users/{userid}/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer, @PathVariable userid: Int,
-                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.userid != userid)) {
@@ -206,7 +239,8 @@ class CourseController {
                                           @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
+
+    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
       throw new UnauthorizedException
     }
 

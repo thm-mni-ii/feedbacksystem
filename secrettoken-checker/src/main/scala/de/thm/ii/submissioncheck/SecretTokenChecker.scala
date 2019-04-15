@@ -20,14 +20,14 @@ import java.lang.module.Configuration
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL, URLDecoder}
 import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Path, Paths, StandardCopyOption}
+import java.nio.file._
 import java.security.cert.X509Certificate
+import java.util.zip.{ZipEntry, ZipInputStream}
 
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
 import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
-import jdk.internal.module.IllegalAccessLogger.Mode
 
 /**
   * Bypasses both client and server validation.
@@ -79,6 +79,7 @@ object SecretTokenChecker extends App {
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
+  private val LABEL_TOKEN = "jwt_token"
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
@@ -89,6 +90,12 @@ object SecretTokenChecker extends App {
   private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
 
+  // We accept also "plagiarismchecker"
+  private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
+  private val PLAGIARISM_CHECK_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_check_request"
+  private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_check_answer"
+  private val __slash = "/"
+
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
   private val config = ConfigFactory.load(appConfig)
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
@@ -98,13 +105,16 @@ object SecretTokenChecker extends App {
   private val compile_production: Boolean = config.getBoolean("compiletype.production")
 
   /** used in naming */
-  final val ULDIR = (if (compile_production) "/" else "") + "upload-dir/"
+  final val ULDIR = (if (compile_production) __slash else "") + "upload-dir/"
+  private val basedir = ULDIR + "PLAGIAT_CHECK/"
 
   private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
   private val LABEL_TASKID = "taskid"
+  private val LABEL_COURSEID = "course_id"
   private val LABEL_ACCEPT = "accept"
   private val LABEL_ERROR = "error"
+  private val EXITING_MSG = "Exiting ..."
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
@@ -121,16 +131,27 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  // Listen on plagiarismchecker
+  private val control_plagiarismchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(PLAGIARISM_CHECK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onPlagiarismReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
-        case Success(_) => logger.info("Exiting ...")
+        case Success(_) => logger.info(EXITING_MSG)
         case Failure(err) => logger.warning(err.getMessage)
       }
     control_task.shutdown().onComplete {
-        case Success(_) => logger.info("Exiting ...")
+        case Success(_) => logger.info(EXITING_MSG)
         case Failure(err) => logger.warning(err.getMessage)
       }
+    control_plagiarismchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
   })
 
   private def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
@@ -159,6 +180,32 @@ object SecretTokenChecker extends App {
     config_factory_path
   }
 
+  private def onPlagiarismReceived(record: ConsumerRecord[String, String]): Unit = {
+    logger.warning("Plagiarism Submission Received")
+    val jsonMap: Map[String, Any] = record.value()
+    val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
+    val zip_url = jsonMap("download_zip_url").asInstanceOf[String]
+    val course_id = jsonMap("course_id")
+    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, course_id.toString)
+    var msg = ""
+    if (plagiatCheckPath.isEmpty) {
+      logger.warning("Provided Zip file for plagism check could not be downloaded")
+      msg = "Provided Zip file for plagism check could not be downloaded"
+    } else {
+      // need to unzip
+      // TODO delete prevoius checks
+      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), basedir + __slash + course_id + "/unzip/")
+    }
+
+    sendCheckMessage(JsonHelper.mapToJsonStr(Map(
+      "passed" -> 0,
+      "exitcode" -> 0,
+      LABEL_ERROR -> "",
+      "msg" -> msg,
+      LABEL_COURSEID -> course_id
+    )))
+  }
+
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
     logger.warning("Submission Received")
@@ -171,7 +218,7 @@ object SecretTokenChecker extends App {
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         //new URL(url) #> new File("submit.txt") !!
-        val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
+        val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
 
         submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
         logger.info(submittedFilePath)
@@ -238,7 +285,7 @@ object SecretTokenChecker extends App {
       // Here we send multiple files!!
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-      val jwt_token: String = jsonMap("jwt_token").asInstanceOf[String]
+      val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
       if (urls.length != 1 && urls.length != 2) {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
           "Please provide one or two files (testfile and scriptfile)", LABEL_TASKID -> taskid)))
@@ -260,7 +307,7 @@ object SecretTokenChecker extends App {
     } catch {
       case e: NoSuchElementException => {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          "error" -> "Please provide valid parameters",
+          LABEL_ERROR -> "Please provide valid parameters",
           "accept" -> false,
           LABEL_TASKID -> ""
         )))
@@ -321,17 +368,36 @@ object SecretTokenChecker extends App {
     path
   }
 
-  private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
+  private def download(download_url: String, authorization: String) = {
     val timeout = 1000
-    val url = new java.net.URL(link)
-    val filename = submissionid
-
+    val url = new java.net.URL(download_url)
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
+    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + authorization)
     connection.setConnectTimeout(timeout)
     connection.setReadTimeout(timeout)
     connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
     connection.connect()
+    connection
+  }
+
+  private def downloadPlagiatCheckFiles(link: String, jwt_token: String, courseid: String): Option[Path] = {
+    val connection = download(link, jwt_token)
+    if(connection.getResponseCode >= 400){
+      logger.error(LABEL_ERROR_DOWNLOAD)
+      Option.empty
+    }
+    else {
+      val basePath = Paths.get(ULDIR).resolve("PLAGIAT_CHECK").resolve(courseid).toString
+      new File(basePath).mkdirs()
+      val dest = Paths.get(basePath).resolve("files.zip")
+      Files.copy(connection.getInputStream, dest, StandardCopyOption.REPLACE_EXISTING)
+      Some(dest)
+    }
+  }
+
+  private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
+    var connection = download(link, jwt_token)
+    val filename = submissionid
     if(connection.getResponseCode >= 400){
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
@@ -347,7 +413,7 @@ object SecretTokenChecker extends App {
     val timeout = 1000
     for(urlname <- urlnames){
       val url = new java.net.URL(urlname)
-      val urlParts = urlname.split("/")
+      val urlParts = urlname.split(__slash)
       // syntax of testfile url allows us to get filename
       val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
       downloadFileNames = downloadFileNames ++ List(filename)
@@ -397,5 +463,33 @@ object SecretTokenChecker extends App {
       s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
     }
     s
+  }
+
+  /**
+    * copied from https://stackoverflow.com/a/30642526
+    * It is more a JAVA way
+    *
+    * @param zipFile downloaded zip path
+    * @param outputFolder where to extract
+    */
+  def unZipCourseSubmission(zipFile: String, outputFolder: String): Unit = {
+    val one_K_size = 1024
+    val fis = new FileInputStream(zipFile)
+    val zis = new ZipInputStream(fis)
+    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach{ file =>
+      val fullFilePath = outputFolder + file.getName
+      val parentFolder = Paths.get(fullFilePath).getParent.toAbsolutePath
+
+      //output directory
+      try {
+        Files.createDirectories(parentFolder)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+      val fout = new FileOutputStream(fullFilePath)
+      val buffer = new Array[Byte](one_K_size)
+      Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+    }
   }
 }

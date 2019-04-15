@@ -9,7 +9,7 @@ import de.thm.ii.submissioncheck.CourseParameterDBLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -27,12 +27,23 @@ class CourseService {
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
+  private var compile_production: Boolean = true
+  private final var LABEL_ZIPDIR = "zip-dir"
+  private final var LABEL_UPLOADDIR = "upload-dir"
+
+  /**
+    * load production compilation
+    * @param prop property from config file
+    */
+  class MyBean(@Value("${compile.production}") prop: Boolean) {
+    compile_production = prop
+    LABEL_ZIPDIR = (if (compile_production) "/" else "") + "zip-dir"
+    LABEL_UPLOADDIR = (if (compile_production) "/" else "") + "upload-dir"
+  }
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
   private final val LABEL_SUCCESS = "success"
-  private final val LABEL_ZIPDIR = "zip-dir"
-  private final val LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_UNDERLINE = "_"
   private final val LABEL_COURSE_TUTOR = "course_tutor"
   private final val LABEL_COURSE_DOCENT = "course_docent"
@@ -421,7 +432,7 @@ class CourseService {
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
-            last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
+            last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
               LABEL_UNDERLINE).replace(" ", "")
             tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
               task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))

@@ -84,7 +84,14 @@ class TaskController {
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val topicName: String = "check_request"
 
-  private val storageService: StorageService = new StorageService(compile_production)
+  private var storageService: StorageService = null
+
+  /**
+    * Using autowired configuration, they will be loaded after self initialization
+    */
+  def configurateStorageService(): Unit = {
+    this.storageService = new StorageService(compile_production)
+  }
 
   /**
     * After autowiring start Kafka Listener
@@ -98,6 +105,7 @@ class TaskController {
       override def run(): Unit = {
         kafkaReloadService
         kafkaReloadNewTaskAnswerService
+        configurateStorageService
       }
     }, bean_delay)
   }
@@ -194,6 +202,7 @@ class TaskController {
         logger.warn(jsonResult)
         kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
         kafkaTemplate.flush()
+        taskService.setSubmissionFilename(submissionId, "string_submission.txt")
         // Save submission as file
         storageService.storeTaskSubmission(data, taskid, submissionId)
       }
@@ -439,6 +448,7 @@ class TaskController {
 
     Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
   }
+
   /**
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns
