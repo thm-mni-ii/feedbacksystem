@@ -50,7 +50,7 @@ import { UploadPlagiatScriptComponent } from './components/courses/modals/upload
 import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
 import {NgxDropzoneModule} from "ngx-dropzone";
-
+import { ConnectedSystemsComponent } from './connected-systems/connected-systems.component';
 
 
 @Injectable()
@@ -100,6 +100,7 @@ export const httpInterceptorProviders = [
     DeleteUserModalComponent,
     AnswerFromTestsystemDialogComponent,
     NotFound404Component,
+    ConnectedSystemsComponent,
     CourseParameterModalComponent,
     CourseParameterUserModalComponent,
     UploadPlagiatScriptComponent,
