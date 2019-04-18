@@ -569,6 +569,7 @@ class CourseService {
         var passedDate: Any = null
         var passed_string: String = null
         var coll_result_date: Any = null
+        var final_submission_id: Int = -1
         for(submission <- userSubmissions) {
           if (coll_result_date == null) {
             coll_result_date = submission("result_date")
@@ -576,18 +577,21 @@ class CourseService {
           if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
+            final_submission_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
           }
         }
-
         if (!passed && coll_result_date == null) {
           passed_string = null
+          // If no submission was correct, we send the last submission
+          if (userSubmissions.length > 0) final_submission_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
         } else {
           passed_string = passed.toString
         }
 
         tasksPassedSum = tasksPassedSum + passed.compare(false)
-        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string, "passed_date" -> passedDate))
+        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
+          "passed_date" -> passedDate, "submission_id" -> final_submission_id))
 
         processedTasks = taskStudentCell :: processedTasks
       }

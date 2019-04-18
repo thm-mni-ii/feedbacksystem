@@ -27,7 +27,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.bash.{BashExec, ShExec}
+import de.thm.ii.submissioncheck.bash.{BashExec, ShExec, PlagiatCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -186,6 +186,8 @@ object SecretTokenChecker extends App {
     val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
     val zip_url = jsonMap("download_zip_url").asInstanceOf[String]
     val course_id = jsonMap("course_id")
+    val submissionmatrix = jsonMap("submissionmatrix").asInstanceOf[List[Any]]
+
     val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, course_id.toString)
     var msg = ""
     if (plagiatCheckPath.isEmpty) {
@@ -195,6 +197,23 @@ object SecretTokenChecker extends App {
       // need to unzip
       // TODO delete prevoius checks
       unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), basedir + __slash + course_id + "/unzip/")
+      val pCheck = new PlagiatCheckExec(course_id.toString, plagiatCheckPath.get.toAbsolutePath.toString())
+      println(pCheck.exec())
+      println(pCheck.output)
+
+      var submissionList = List()
+
+      // TODO check plagiarism
+      for (userMap <- submissionmatrix) {
+        val userCastedTasks = userMap.asInstanceOf[Map[String, Any]]("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
+        //println(userCastedTasks)
+        for(task <- userCastedTasks){
+          val key = task.keys.slice(0, 1).toList(0)
+          println(task(key)("task_id"))
+          println(task(key)("submission_id"))
+          //println(task("submission_id").asInstanceOf[Int])
+        }
+      }
     }
 
     sendCheckMessage(JsonHelper.mapToJsonStr(Map(

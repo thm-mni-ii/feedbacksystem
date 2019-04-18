@@ -178,10 +178,13 @@ class CourseController {
       throw new UnauthorizedException("User has no edit rights and can not update a task.")
     }
 
+    val submissionMatrix = courseService.getSubmissionsMatrixByCourse(courseid)
+    println(submissionMatrix)
     val tasksystem_id = "plagiarismchecker"
     val kafkaMap: Map[String, Any] = Map("course_id" -> courseid, "download_zip_url" ->
-      (this.taskService.getUploadBaseURL() + "/api/v1/courses/" + courseid.toString + "/submission/users/zip"),
-      "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id))
+      (this.taskService.getUploadBaseURL() + "/api/v1/courses/" + courseid.toString + "/submission/users/zip?only_last_try=true"),
+      "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
+      "submissionmatrix" -> submissionMatrix)
     val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
     val kafka_topic = tasksystem_id + "_check_request"
     logger.warn(kafka_topic)
@@ -203,7 +206,7 @@ class CourseController {
     */
   @RequestMapping(value = Array("{courseid}/submission/users/{userid}/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer, @PathVariable userid: Int,
+  def getZipOfSubmissionsOfOneUserFromAllCourses(@PathVariable courseid: Integer, @PathVariable userid: Int,
                                           @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
@@ -236,7 +239,7 @@ class CourseController {
   @RequestMapping(value = Array("{courseid}/submission/users/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer,
-                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
 

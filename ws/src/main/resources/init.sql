@@ -123,6 +123,7 @@ CREATE TABLE `submission` (
   CONSTRAINT `submission_users_userid_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=395 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+ALTER TABLE submission ADD plagiat_passed BOOLEAN DEFAULT NULL  NULL;
 
 
 -- Table structure for table `task`
@@ -149,7 +150,7 @@ CREATE TABLE `task` (
 ) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
+ALTER TABLE task ADD plagiat_check_done BOOLEAN DEFAULT 0 NULL;
 --
 -- Table structure for table `testsystem`
 --
