@@ -2,6 +2,7 @@ package de.thm.ii.submissioncheck.controller
 
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
 
 import org.joda.time.format.DateTimeFormat
 
@@ -19,7 +20,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Bean
-import org.springframework.core.io.Resource
+import org.springframework.core.io.{Resource, UrlResource}
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.kafka.core.{DefaultKafkaConsumerFactory, KafkaTemplate}
 import org.springframework.kafka.listener.{KafkaMessageListenerContainer, MessageListener}
@@ -52,8 +53,10 @@ class TaskController {
 
   private val topicTaskRequest: String = "new_task_request"
   private val LABEL_SUCCESS = "success"
-  private var container: KafkaMessageListenerContainer[String, String] = null
-  private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = null
+  private var container: KafkaMessageListenerContainer[String, String] = _
+  private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = _
+  private var plagiatTaskCheckerContainer: KafkaMessageListenerContainer[String, String] = _
+  private def consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
 
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
@@ -61,6 +64,7 @@ class TaskController {
   @Value("${compile.production}")
   private val compile_production: Boolean = true
 
+  private val plagiatchecker_thread_interval = 60000
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
   /** JSON variable taskid ID*/
@@ -77,6 +81,8 @@ class TaskController {
   private final val LABEL_FILENAME = "filename"
   private final val LABEL_UPLOAD_URL = "upload_url"
   private final val LABEL_JWT_TOKEN = "jwt_token"
+  private val LABEL_RELOAD = "reload"
+  private val LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER = "Checker Service did not provide all parameters"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -100,12 +106,14 @@ class TaskController {
   @Bean
   def importProcessor: SmartInitializingSingleton = () => {
     /** wait 30 seconds before the kafka listeners are loaded to be sure everything is connected like it should*/
-    val bean_delay = 30000
+    val bean_delay = 3000
     new Timer().schedule(new TimerTask() {
       override def run(): Unit = {
         kafkaReloadService
         kafkaReloadNewTaskAnswerService
         configurateStorageService
+        kafkaLoadPlagiatCheckerService
+        sendTaskToPlagiatChecker
       }
     }, bean_delay)
   }
@@ -208,7 +216,7 @@ class TaskController {
       }
       else {
         submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
-        upload_url = CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
+        upload_url = CLIENT_HOST_URL + "/api/v1/" + "tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
 
       Map(LABEL_SUCCESS -> true, LABEL_TASK_ID -> taskid, LABEL_SUBMISSION_ID -> submissionId, LABEL_UPLOAD_URL -> upload_url)
@@ -386,7 +394,7 @@ class TaskController {
       var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
-      taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
+      taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
       taskInfo
     }
     catch {
@@ -396,7 +404,7 @@ class TaskController {
     }
   }
 
-  private def getUploadUrlForTastTestFile(taskid: Int): String = {
+  private def getUploadUrlForTaskTestFile(taskid: Int): String = {
     CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
   }
 
@@ -446,8 +454,109 @@ class TaskController {
 
     val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id)
 
-    Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTastTestFile(taskid))
+    Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
   }
+
+  /**
+    * Get a zipfile of all submission user made for a task
+    * @author Benjamin Manns
+    * @param taskid unique identification for a task
+    * @param request contain request information
+    * @return File Ressource to download
+    */
+  @RequestMapping(value = Array("tasks/{taskid}/submission/users/zip"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getZipOfSubmissionsOfUsersOfOneTask(@PathVariable taskid: Integer,
+                                          request: HttpServletRequest): ResponseEntity[UrlResource] = {
+    val user = userService.verifyUserByHeaderToken(request)
+
+    if ((user.isEmpty || !taskService.isPermittedForTask(taskid, user.get)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
+      throw new UnauthorizedException
+    }
+
+    val resource = new UrlResource(Paths.get(taskService.zipOfSubmissionsOfUsersFromTask(taskid)).toUri)
+
+    if (resource.exists || resource.isReadable) {
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(resource)).body(resource)
+    } else {
+      throw new RuntimeException("Zip file could not be found.")
+    }
+  }
+
+  private def httpResponseHeaderValue(resource: Resource) = "attachment; filename=\"" + resource.getFilename + "\""
+
+  // TODO please not as route but as threat
+  /**
+    * Deprecated Route, to use as threat
+    * @param taskid feedback course
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @deprecated("0", "0")
+  @RequestMapping(value = Array("tasks/{taskid}/plagiarismchecker"), method = Array(RequestMethod.GET))
+  def updateTask(@PathVariable taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new UnauthorizedException("User has no edit rights and can not update a task.")
+    }
+
+    /*val submissionMatrix = taskService.getSubmissionsByTask(taskid)
+    val tasksystem_id = "plagiarismchecker"
+    val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, "download_zip_url" ->
+      (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
+      "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
+      "submissionmatrix" -> submissionMatrix)
+    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+    val kafka_topic = tasksystem_id + "_check_request"
+    logger.warn(kafka_topic)
+    logger.warn(jsonResult)
+    kafkaTemplate.send(kafka_topic, jsonResult)
+    kafkaTemplate.flush()*/
+
+    Map(LABEL_SUCCESS -> true)
+  }
+
+  /**
+    * for every non checked but expired task, send this task to the plagiat check system
+    */
+  def sendTaskToPlagiatChecker(): Unit = {
+    val tasks = taskService.getExpiredTasks()
+    if (tasks.nonEmpty) {
+      for (task <- tasks) {
+        val taskid: Int = task(TaskDBLabels.taskid).asInstanceOf[Int]
+        val submissionMatrix = taskService.getSubmissionsByTask(taskid)
+        val tasksystem_id = "plagiarismchecker"
+        val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, "download_zip_url" ->
+          (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
+          "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
+          "submissionmatrix" -> submissionMatrix)
+        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+        val kafka_topic = tasksystem_id + "_check_request"
+        logger.warn(kafka_topic)
+        logger.warn(jsonResult)
+        kafkaTemplate.send(kafka_topic, jsonResult)
+        kafkaTemplate.flush()
+      }
+    }
+  }
+
+  /**
+    * plagiat checker background process will be started here
+    */
+  val plagiatCheckerThread = new Thread {
+    override def run {
+      logger.debug("Hello, Thread is started and looks for some task to check")
+      for(i <- Stream.from(1)) {
+        sendTaskToPlagiatChecker()
+        Thread.sleep(plagiatchecker_thread_interval)
+      }
+    }
+  }
+
+  plagiatCheckerThread.start
 
   /**
     * provide a GET URL to download testfiles for a task
@@ -467,7 +576,7 @@ class TaskController {
     val parsedFilename = URLDecoder.decode(filename, StandardCharsets.UTF_8.toString)
     try {
       val file = storageService.loadFile(parsedFilename, taskid)
-      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
     } catch {
       case _: RuntimeException => throw new ResourceNotFoundException
     }
@@ -490,7 +599,7 @@ class TaskController {
     }
     val filename = taskService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
-    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename + "\"").body(file)
+    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
   }
 
   /**
@@ -508,10 +617,10 @@ class TaskController {
     }
     this.kafkaReloadService
     this.kafkaReloadNewTaskAnswerService
+    this.kafkaLoadPlagiatCheckerService
   }
 
   private def kafkaReloadService: Map[String, AnyVal] = {
-    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
@@ -533,7 +642,7 @@ class TaskController {
         * @param data kafka message
         */
       override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
-        logger.debug("received message from topic '" + data.topic + "': " + data.value())
+        kafkaReceivedDebug(data)
         // TODO switch data.topic and save for each then!!
 
         val answeredMap = JsonParser.jsonStrToMap(data.value())
@@ -544,16 +653,15 @@ class TaskController {
             answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
             Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]))
         } catch {
-          case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
+          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
         }
       }
     })
     container.start
-    Map("reload" -> true)
+    Map(LABEL_RELOAD -> true)
   }
 
   private def kafkaReloadNewTaskAnswerService: Map[String, AnyVal] = {
-    val consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
@@ -575,22 +683,70 @@ class TaskController {
         * @param data kafka message
         */
       override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
-        logger.debug("received message from topic '" + data.topic + "': " + data.value())
+        kafkaReceivedDebug(data)
         // TODO switch data.topic and save for each then!!
 
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
           logger.warn(answeredMap.toString())
-          val taskId = Integer.parseInt(answeredMap("taskid").asInstanceOf[String])
+          val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
           val accept = answeredMap("accept").asInstanceOf[Boolean]
           val error = answeredMap("error").asInstanceOf[String]
           taskService.setTaskTestFileAcceptedState(taskId, accept, error)
         } catch {
-          case _: NoSuchElementException => logger.warn("Checker Service did not provide all parameters")
+          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
         }
       }
     })
     newTaskAnswerContainer.start
-    Map("reload" -> true)
+    Map(LABEL_RELOAD -> true)
   }
+
+  private def kafkaLoadPlagiatCheckerService: Map[String, AnyVal] = {
+    val consumerConfigJava = consumerConfigScala.asJava
+    val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
+      new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
+
+    // TODO fire this method after updates on Testsystem!
+    val kafkaTopicNewTaskAnswer: List[String] = List("plagiarismchecker_answer")
+
+    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
+    val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
+    if (plagiatTaskCheckerContainer != null) {
+      plagiatTaskCheckerContainer.stop()
+    }
+    plagiatTaskCheckerContainer = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
+
+    plagiatTaskCheckerContainer.setupMessageListener(new MessageListener[Int, String]() {
+      /**
+        * onMessage process incoming kafka messages
+        * @author Benjamin Manns
+        * @param data kafka message
+        */
+      override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
+        kafkaReceivedDebug(data)
+        val answeredMap = JsonParser.jsonStrToMap(data.value())
+        try {
+          logger.warn(answeredMap.toString())
+          val workedOut = answeredMap(LABEL_SUCCESS).asInstanceOf[Boolean]
+          val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
+
+          val submissionlist = answeredMap("submissionlist").asInstanceOf[List[Map[String, Boolean]]]
+          for (submission <- submissionlist) {
+            taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
+          }
+
+          // If every data is saved correctly
+          taskService.updateTask(taskId, null, null, null, null, true)
+
+        } catch {
+          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
+        }
+      }
+    })
+    plagiatTaskCheckerContainer.start
+    Map(LABEL_RELOAD -> true)
+  }
+
+  private def kafkaReceivedDebug(data: ConsumerRecord[Int, String]) = logger.debug("received message from topic '" + data.topic + "': " + data.value())
 }

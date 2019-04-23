@@ -30,5 +30,8 @@ object TaskDBLabels {
 
   /** DB Label test_file_accept_erorr */
   var test_file_accept_error = "test_file_accept_error"
+
+  /** DB Label plagiat_check_done */
+  var plagiat_check_done = "plagiat_check_done"
 }
 

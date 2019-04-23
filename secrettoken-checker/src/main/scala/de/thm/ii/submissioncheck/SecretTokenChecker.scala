@@ -93,7 +93,7 @@ object SecretTokenChecker extends App {
   // We accept also "plagiarismchecker"
   private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
   private val PLAGIARISM_CHECK_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_check_request"
-  private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_check_answer"
+  private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_answer"
   private val __slash = "/"
 
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
@@ -158,6 +158,8 @@ object SecretTokenChecker extends App {
     akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))
   private def sendCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
   private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
+  private def sendPlagiarismCheckMessage(message: String): Future[Done] =
+    sendMessage(new ProducerRecord[String, String](PLAGIARISM_CHECK_ANSWER_TOPIC, message))
 
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings
@@ -185,43 +187,37 @@ object SecretTokenChecker extends App {
     val jsonMap: Map[String, Any] = record.value()
     val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
     val zip_url = jsonMap("download_zip_url").asInstanceOf[String]
-    val course_id = jsonMap("course_id")
-    val submissionmatrix = jsonMap("submissionmatrix").asInstanceOf[List[Any]]
-
-    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, course_id.toString)
+    val task_id = jsonMap("task_id")
+    val submissionmatrix = jsonMap("submissionmatrix").asInstanceOf[List[Map[String, Any]]]
+    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, task_id.toString)
     var msg = ""
+    var submissionList: List[Map[String, Boolean]] = List()
+    var success: Boolean = false
+
     if (plagiatCheckPath.isEmpty) {
       logger.warning("Provided Zip file for plagism check could not be downloaded")
       msg = "Provided Zip file for plagism check could not be downloaded"
     } else {
       // need to unzip
       // TODO delete prevoius checks
-      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), basedir + __slash + course_id + "/unzip/")
-      val pCheck = new PlagiatCheckExec(course_id.toString, plagiatCheckPath.get.toAbsolutePath.toString())
-      println(pCheck.exec())
-      println(pCheck.output)
-
-      var submissionList = List()
+      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), basedir + __slash + task_id + "/unzip/")
+      val pCheck = new PlagiatCheckExec(task_id.toString, plagiatCheckPath.get.toAbsolutePath.toString())
 
       // TODO check plagiarism
       for (userMap <- submissionmatrix) {
-        val userCastedTasks = userMap.asInstanceOf[Map[String, Any]]("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
-        //println(userCastedTasks)
-        for(task <- userCastedTasks){
-          val key = task.keys.slice(0, 1).toList(0)
-          println(task(key)("task_id"))
-          println(task(key)("submission_id"))
-          //println(task("submission_id").asInstanceOf[Int])
-        }
+        //val userCastedTasks = userMap.asInstanceOf[Map[String, Any]]("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
+        userMap("submission_id")
+        // Todo run somehow plagiat test
+        submissionList = Map(userMap("submission_id").toString -> true) :: submissionList
       }
+      success = true
     }
 
-    sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-      "passed" -> 0,
-      "exitcode" -> 0,
-      LABEL_ERROR -> "",
+    sendPlagiarismCheckMessage(JsonHelper.mapToJsonStr(Map(
+      "success" -> success,
+      "submissionlist" -> submissionList,
       "msg" -> msg,
-      LABEL_COURSEID -> course_id
+      LABEL_TASKID -> task_id.toString
     )))
   }
 
@@ -399,14 +395,14 @@ object SecretTokenChecker extends App {
     connection
   }
 
-  private def downloadPlagiatCheckFiles(link: String, jwt_token: String, courseid: String): Option[Path] = {
+  private def downloadPlagiatCheckFiles(link: String, jwt_token: String, taskid: String): Option[Path] = {
     val connection = download(link, jwt_token)
     if(connection.getResponseCode >= 400){
       logger.error(LABEL_ERROR_DOWNLOAD)
       Option.empty
     }
     else {
-      val basePath = Paths.get(ULDIR).resolve("PLAGIAT_CHECK").resolve(courseid).toString
+      val basePath = Paths.get(ULDIR).resolve("PLAGIAT_CHECK").resolve(taskid).toString
       new File(basePath).mkdirs()
       val dest = Paths.get(basePath).resolve("files.zip")
       Files.copy(connection.getInputStream, dest, StandardCopyOption.REPLACE_EXISTING)

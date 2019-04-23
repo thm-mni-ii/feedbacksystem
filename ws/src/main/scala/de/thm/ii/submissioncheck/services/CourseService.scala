@@ -379,7 +379,13 @@ class CourseService {
     list.headOption
   }
 
-  private def zip(out: Path, files: Iterable[Path], replacePath: String = "") = {
+  /**
+    * Zip several files to one zuip folder
+    * @param out destination path where zip should be saved
+    * @param files list of files to zip
+    * @param replacePath substring which should be removed from filenames
+    */
+  def zip(out: Path, files: Iterable[Path], replacePath: String = ""): Unit = {
     val zip = new ZipOutputStream(Files.newOutputStream(out))
 
     files.foreach { file =>
@@ -400,7 +406,7 @@ class CourseService {
     * @param glue is somehow the opposite from a split delimeter
     * @return items glued together as a string
     */
-  private def implode(list: List[String], glue: String) = {
+  def implode(list: List[String], glue: String): String = {
     var back = ""
     for ((l, index) <- list.zipWithIndex) {
       back += l + (if (index < list.length-1) glue else "")

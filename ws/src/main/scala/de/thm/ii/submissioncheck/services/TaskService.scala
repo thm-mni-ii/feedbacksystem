@@ -2,10 +2,12 @@ package de.thm.ii.submissioncheck.services
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.security.Secrets
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -48,6 +50,15 @@ class TaskService {
       UPLOAD_BASE_URL
     }
   }
+
+  /** all interactions with tasks are done via a taskService*/
+  @Autowired
+  val courseService: CourseService = null
+
+  private final var LABEL_ZIPDIR = "zip-dir"
+  private final var LABEL_UPLOADDIR = "upload-dir"
+  private final var LABEL_UNDERLINE = "_"
+  private val LABEL_DESC = "desc"
 
   /**
     * After Upload a submitted File save it's name
@@ -129,6 +140,16 @@ class TaskService {
   }
 
   /**
+    * simply update users submission if plagiat check passed or not
+    * @param submissionid which submission
+    * @param passed passed plagiat check
+    * @return DB update succeeded
+    */
+  def setPlagiatPassedForSubmission(submissionid: String, passed: Boolean): Boolean = {
+    DB.update("UPDATE submission set plagiat_passed = ? where submission_id = ? ", passed, submissionid) == 1
+  }
+
+  /**
     * print Task Results
     * @param taskid unique identification for a task
     * @param user requesting user
@@ -170,7 +191,7 @@ class TaskService {
     * @return Scala List of Maps
     */
   def getSubmissionsByTaskAndUser(taskid: String, userid: Any, sort: String = "asc"): List[Map[String, Any]] = {
-    if (!List("asc", "desc").contains(sort)){
+    if (!List("asc", LABEL_DESC).contains(sort)){
       throw new IllegalArgumentException("sort must be a value of `asc` or `desc`")
     }
     DB.query("SELECT  s.* from task join submission s using(task_id) where task_id = ? and user_id = ? order by submit_date " + sort,
@@ -209,6 +230,64 @@ class TaskService {
           UserDBLabels.email -> res.getString(UserDBLabels.email)
         )
       }, taskid)
+  }
+
+  /**
+    * Simply return the correct course id of a task
+    * @param taskid unique identification for a task
+    * @return Course ID
+    */
+  def getCourseIdByTaskId(taskid: Int): Option[Int] = {
+    DB.query("SELECT course_id from task where task_id = ?",
+      (res, _) => {
+        res.getInt("course_id")
+      }, taskid).headOption
+  }
+
+  /**
+    * Collect all (last) submissions of a task and zip them
+    * @param taskid unique identification for a task
+    * @return zip path
+    */
+  def zipOfSubmissionsOfUsersFromTask(taskid: Integer): String = {
+    var allPath: List[Path] = List()
+    val tmp_folder = Secrets.getSHAStringFromNow()
+    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+
+    val studentList = courseService.getStudentsFromCourse(this.getCourseIdByTaskId(taskid).get)
+
+    var last_submission_date: String = null
+    val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(taskid.toString).resolve("submits")
+
+    for (student <- studentList) {
+      var studentSubmissionList = this.getSubmissionsByTaskAndUser(taskid.toString, student(UserDBLabels.user_id), LABEL_DESC)
+
+      if (studentSubmissionList.nonEmpty) {
+        val submission = studentSubmissionList.head
+
+        last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
+          LABEL_UNDERLINE).replace(" ", "")
+        val goalPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(courseService.implode(List(student(UserDBLabels.username).asInstanceOf[String],
+          taskid.toString, submission(SubmissionDBLabels.submissionid).toString, last_submission_date), LABEL_UNDERLINE))
+
+        // create path out of this
+        val filePath = taskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
+          .resolve(stringOrNull(submission(SubmissionDBLabels.filename)))
+
+        allPath = goalPath :: allPath
+
+        try {
+          Files.copy(filePath, Files.newOutputStream(goalPath))
+        }
+        catch {
+          case _: java.nio.file.NoSuchFileException => {}
+        }
+      }
+    }
+
+    val finishZipPath = "zip-dir/abgabe_task_" + taskid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
+    courseService.zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    finishZipPath
   }
 
   /**
@@ -254,7 +333,7 @@ class TaskService {
   }
 
   private def getLastSubmissionResultInfoByTaskIDAndUser(taskid: Int, userid: Int) = {
-    val submissions = getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
+    val submissions = getSubmissionsByTaskAndUser(taskid.toString, userid, LABEL_DESC)
     var map: Map[String, Any] = Map(SubmissionDBLabels.result -> null, SubmissionDBLabels.passed -> null,
       SubmissionDBLabels.filename -> null, SubmissionDBLabels.submission_data -> null, SubmissionDBLabels.result_date -> null,
       SubmissionDBLabels.submit_date -> null, SubmissionDBLabels.exitcode -> null)
@@ -411,9 +490,11 @@ class TaskService {
     * @param description Task description
     * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
+    * @param plagiat_check: plagiat check status
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null, testsystem_id: String = null): Boolean = {
+  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null, testsystem_id: String = null,
+                 plagiat_check: Any = null): Boolean = {
     var updates = 0
     var successfulUpdates = 0
     if (name != null) {
@@ -435,6 +516,13 @@ class TaskService {
       successfulUpdates += DB.update("UPDATE task set deadline = ? where task_id = ? ", deadline, taskid)
       updates += 1
     }
+
+    if (plagiat_check != null) {
+      val status = plagiat_check.asInstanceOf[Boolean]
+      successfulUpdates += DB.update("UPDATE task set plagiat_check_done = ? where task_id = ? ", status, taskid)
+      updates += 1
+    }
+
     successfulUpdates == updates
   }
 
@@ -535,7 +623,7 @@ class TaskService {
   }
 
   private def encodeValue(value: String): String = {
-    URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
+    URLEncoder.encode(value, StandardCharsets.UTF_8.toString)
   }
 
   /**
@@ -568,4 +656,22 @@ class TaskService {
     * @return topic
     */
   def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
+
+  /**
+    * get tasks which are expired and can be sent to plagiat checker
+    * @return List of tasks
+    */
+  def getExpiredTasks(): List[Map[String, Any]] = {
+    val list = DB.query("select * from task where plagiat_check_done = 0 and deadline < CURRENT_TIMESTAMP",
+      (res, _) => {
+        Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
+          TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
+          TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+          TaskDBLabels.description -> res.getString(TaskDBLabels.description),
+          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
+          TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
+          TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name))
+      })
+    list
+  }
 }

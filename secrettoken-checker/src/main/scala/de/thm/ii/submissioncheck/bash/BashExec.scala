@@ -73,7 +73,6 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
         __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, "bash:4.4", "bash",
         "/" + absPath, name, submittedFilePath)
     }
-    println(seq)
 
     val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
 
