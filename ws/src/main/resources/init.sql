@@ -258,3 +258,38 @@ CREATE TABLE `user_course` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+
+
+DROP TABLE IF EXISTS `course_parameter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `course_parameter` (
+  `course_id` int(11) NOT NULL,
+  `c_param_desc` text,
+  `c_param_key` varchar(500) NOT NULL,
+  PRIMARY KEY (`course_id`,`c_param_key`),
+  KEY `course_parameter_c_param_key_index` (`c_param_key`),
+  CONSTRAINT `course_parameter_course_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
+DROP TABLE IF EXISTS `course_parameter_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `course_parameter_user` (
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `c_param_key` varchar(500) NOT NULL,
+  `value` text,
+  PRIMARY KEY (`course_id`,`user_id`,`c_param_key`),
+  KEY `course_parameter_user_user_user_id_fk` (`user_id`),
+  KEY `course_parameter_user_course_parameter_c_param_key_fk` (`c_param_key`),
+  CONSTRAINT `course_parameter_user_course_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`),
+  CONSTRAINT `course_parameter_user_course_parameter_c_param_key_fk` FOREIGN KEY (`c_param_key`) REFERENCES `course_parameter` (`c_param_key`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `course_parameter_user_user_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+

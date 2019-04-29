@@ -203,3 +203,15 @@ export interface DashboardProf {
   user_id: number;
 
 }
+
+export interface CourseParameter {
+  course_id: number;
+  c_param_desc: string;
+  c_param_key: string;
+}
+
+export interface CourseParameterUser {
+  course_id: number;
+  value: string;
+  c_param_key: string;
+}

@@ -1,0 +1,28 @@
+<h2 matDialogTitle>Kurs Parameter</h2>
+<mat-dialog-content>
+  <p>
+    Hier kannst du weitere Kurs Parameter sehen
+  </p>
+
+
+  <div *ngFor="let param of parameterList">
+    <mat-form-field  appearance="outline">
+    <mat-label>Parameter Key</mat-label>
+    <input matInput [(ngModel)]="param.c_param_key">
+  </mat-form-field>
+
+  <mat-form-field  appearance="outline">
+    <mat-label>Parameter Beschreibung</mat-label>
+    <input matInput [(ngModel)]="param.c_param_desc">
+  </mat-form-field>
+    <mat-icon style="cursor: pointer;" (click)="deleteCourseParam(param.course_id, param.c_param_key)">delete</mat-icon>
+
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-flat-button color="accent" (click)="parameterList.push({}) ">Hinzufügen</button> &nbsp; &nbsp;
+  <button mat-flat-button color="accent" (click)="saveParamList()">Schließen und Speichern</button> &nbsp; &nbsp;
+  <button mat-flat-button color="warn" (click)="close(false)">Abbrechen</button>
+</mat-dialog-actions>

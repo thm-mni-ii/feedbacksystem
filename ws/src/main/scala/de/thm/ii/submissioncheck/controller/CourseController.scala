@@ -17,6 +17,8 @@ import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
 
+import scala.collection.immutable
+
 /**
   * Controller to manage rest api calls for a course resource.
   */
@@ -27,6 +29,8 @@ class CourseController {
   private val userService: UserService = null
   @Autowired
   private val courseService: CourseService = null
+  @Autowired
+  private val courseParamService: CourseParamService = null
   @Autowired
   private val taskService: TaskService = null
 
@@ -504,5 +508,123 @@ class CourseController {
     // this.courseService.getAllSubmissionsForAllCoursesByUser(user.get)
 
     this.courseService.getSubmissionsMatrixByUser(user.get.userid)
+  }
+
+  /**
+    * get all course parameter
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getAllCourseParameter(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || (!courseService.isPermittedForCourse(courseid, user.get) && !courseService.isSubscriberForCourse(courseid, user.get))) {
+      throw new UnauthorizedException
+    }
+    courseParamService.getAllCourseParams(courseid)
+  }
+
+  /**
+    * set  / update a course parameter (for docent and so on)
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def addNewCourseParameter(@PathVariable courseid: Int, request: HttpServletRequest,
+                            @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isPermittedForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+    try {
+      val key = jsonNode.get("key").asText()
+      val description = jsonNode.get(LABEL_DESCRIPTION).asText()
+      courseParamService.setCourseParams(courseid, key, description)
+
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide: key and description")
+    }
+  }
+
+  /**
+    * delete a course parameter
+    * @param courseid unique course identification
+    * @param key parameter key
+    * @param request Request Header containing Headers
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters/{key}"), method = Array(RequestMethod.DELETE))
+  @ResponseBody
+  def addNewCourseParameter(@PathVariable courseid: Int, @PathVariable key: String, request: HttpServletRequest): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isPermittedForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+
+    courseParamService.deleteCourseParams(courseid, key)
+  }
+
+  /**
+    * set course parameters of user
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters/users"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def addNewCourseParameterForUser(@PathVariable courseid: Int, request: HttpServletRequest,
+                            @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isSubscriberForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+    try {
+      val key = jsonNode.get("key").asText()
+      val value = jsonNode.get("value").asText()
+      courseParamService.setCourseParamsForUser(courseid, key, value, user.get)
+
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide: key and value")
+    }
+  }
+
+  /**
+    * delete a course parameter of user
+    * @param courseid unique course identification
+    * @param key parameter key
+    * @param request Request Header containing Headers
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters/users/{key}"), method = Array(RequestMethod.DELETE))
+  @ResponseBody
+  def addNewCourseParameterForUser(@PathVariable courseid: Int, @PathVariable key: String, request: HttpServletRequest): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isSubscriberForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+
+    courseParamService.deleteCourseParamsForUser(courseid, key, user.get)
+  }
+
+  /**
+    * get all course paramters of user
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/parameters/users"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getAllCourseParameterForUser(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isSubscriberForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+    courseParamService.getAllCourseParamsForUser(courseid, user.get)
   }
 }

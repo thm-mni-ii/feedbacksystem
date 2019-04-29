@@ -16,6 +16,7 @@ submissioncheck.iml
 ws/src/main/resources/static/*
 
 ws/upload-dir/*
+ws/zip-dir/*
 
 secrettoken-checker/upload-dir/*
 sql-checker/upload-dir/*

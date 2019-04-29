@@ -5,6 +5,7 @@ import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
+import de.thm.ii.submissioncheck.CourseParameterDBLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
