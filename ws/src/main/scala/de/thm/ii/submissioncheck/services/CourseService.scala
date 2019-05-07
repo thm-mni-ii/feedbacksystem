@@ -64,6 +64,22 @@ class CourseService {
   }
 
   /**
+    * get a list of student users which subscri
+    * @param courseid unique identification for a course
+    * @param roleids subscribed user type
+    * @return List of User
+    */
+  def getSubscribedUserByCourse(courseid: Int, roleids: List[Int]): List[User] = {
+    DB.query("SELECT u.*, r.* FROM user_course hc join user u using(user_id) join role r on r.role_id = hc.role_id" +
+      " where hc.course_id = ? and hc.role_id IN ?",
+    (res, _) => {
+      new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
+        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email)
+      , res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id), res.getBoolean(UserDBLabels.privacy_checked))
+    }, courseid, roleids)
+  }
+
+  /**
     * Union all courses beloning to user, no difference in edit, creation or subscription relation
     * @author Benjamin Manns
     * @param user a User object

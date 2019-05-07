@@ -6,11 +6,12 @@ import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DateParser, ResourceNotFoundException, UnauthorizedException}
+import de.thm.ii.submissioncheck.misc._
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
 import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
@@ -33,6 +34,16 @@ class CourseController {
   private val courseParamService: CourseParamService = null
   @Autowired
   private val taskService: TaskService = null
+  @Autowired
+  private val courseParameterService: CourseParamService = null
+  @Autowired
+  private val testsystemService: TestsystemService = null
+
+  @Autowired
+  private val kafkaTemplate: KafkaTemplate[String, String] = null
+  private val topicName: String = "check_request"
+
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   private final val application_json_value = "application/json"
 
@@ -626,5 +637,60 @@ class CourseController {
       throw new UnauthorizedException
     }
     courseParamService.getAllCourseParamsForUser(courseid, user.get)
+  }
+
+  /**
+    *
+    * @param courseid unique course identification
+    * @param taskid unique identification for a task
+    * @param jsonNode contains JSON request
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{courseid}/run/tasks/{taskid}"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def runAllTaskOfCourse(@PathVariable courseid: Int, @PathVariable taskid: Int, @RequestBody jsonNode: JsonNode,
+                         request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+
+    if (requestingUser.isEmpty || !courseService.isPermittedForCourse(courseid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+
+    val taskDetailsOpt = taskService.getTaskDetails(taskid)
+
+    if(taskDetailsOpt.isEmpty){
+      throw new ResourceNotFoundException
+    }
+    val taskDetails = taskDetailsOpt.get
+
+    var runComplete: Boolean = false
+
+    if (jsonNode.get("complete") != null) {
+      runComplete = jsonNode.get("complete").asBoolean()
+    }
+
+    val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
+
+    for(user <- this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID))) {
+      val submissionID = taskService.submitTaskWithData(taskid, user, "")
+      runExternalTaskSendKafka(taskDetails, user, tasksystem_id, submissionID)
+    }
+    Map("success" -> true)
+  }
+
+  private def runExternalTaskSendKafka(taskidOpt: Map[String, Any], user: User, tasksystem_id: String, submissionID: Int): Unit = {
+    var kafkaMap: Map[String, Any] = Map("taskid" -> taskidOpt(TaskDBLabels.taskid).toString, "userid" -> user.username)
+
+    kafkaMap += ("submit_typ" -> "external", "submissionid" -> submissionID,
+      "jwt_token" -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+    kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
+      taskidOpt(TaskDBLabels.courseid).asInstanceOf[Int], user))
+    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+
+    logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicName))
+    logger.warn(jsonResult)
+    kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+    kafkaTemplate.flush()
   }
 }

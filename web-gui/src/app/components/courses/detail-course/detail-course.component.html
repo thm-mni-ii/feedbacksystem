@@ -71,6 +71,8 @@
         <button  *ngIf="isAuthorized()" mat-flat-button color="accent"
                 (click)="displayTestsystemFeedback(task)">Status
         </button>
+
+        <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers(task.task_id)" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon></button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

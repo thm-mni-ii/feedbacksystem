@@ -556,4 +556,12 @@ class TaskService {
       (res, _) => res.getString(TestsystemLabels.id), taskid)
     list.head
   }
+
+  /**
+    * Connect a testsystem String with corresponding topic
+    * @param id testsystem id
+    * @param t_name action string
+    * @return topic
+    */
+  def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 }

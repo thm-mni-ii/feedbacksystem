@@ -474,6 +474,10 @@ export class DatabaseService {
       {"value": value, "key": key}).toPromise()
   }
 
+  runAllCourseTaskByDocent(courseid: number, taskid: number) {
+    return this.http.post(`/api/v1/courses/${courseid}/run/tasks/${taskid}`,
+    {"complete": true}).toPromise()
+  }
 
 
 

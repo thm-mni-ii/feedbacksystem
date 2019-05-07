@@ -176,6 +176,8 @@ CREATE TABLE `testsystem` (
 LOCK TABLES `testsystem` WRITE;
 /*!40000 ALTER TABLE `testsystem` DISABLE KEYS */;
 INSERT INTO `testsystem` VALUES ('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000'),('sqlchecker','SQL','XXXXX','.sql, ',1234,'000.000.000.000');
+INSERT INTO submissionchecker.testsystem (testsystem_id, name, description, supported_formats, machine_port, machine_ip) VALUES ('sapabapchecker', 'ABAP Testsystem', 'ABAP code will be executed in a real SAP system', '', null, null);
+
 /*!40000 ALTER TABLE `testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
 

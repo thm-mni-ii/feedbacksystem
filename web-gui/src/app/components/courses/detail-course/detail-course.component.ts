@@ -154,6 +154,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
   }
 
+  public runAllTaskAllUsers(taskid: number){
+    this.db.runAllCourseTaskByDocent(this.courseID, taskid)
+  }
+
   ngAfterViewChecked() {
     // If url fragment with task id is given, scroll to that task
     this.route.fragment.subscribe(taskIDScroll => {

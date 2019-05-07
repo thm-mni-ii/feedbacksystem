@@ -190,9 +190,9 @@ class TaskController {
         kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
           taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], requestingUser.get))
         val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        logger.warn(connectKafkaTopic(tasksystem_id, topicName))
+        logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicName))
         logger.warn(jsonResult)
-        kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+        kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
         kafkaTemplate.flush()
         // Save submission as file
         storageService.storeTaskSubmission(data, taskid, submissionId)
@@ -204,7 +204,6 @@ class TaskController {
 
       Map(LABEL_SUCCESS -> true, LABEL_TASK_ID -> taskid, LABEL_SUBMISSION_ID -> submissionId, LABEL_UPLOAD_URL -> upload_url)
     }
-    private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
   /**
     * serve a route to upload a submission file to a given submissionid
@@ -237,7 +236,7 @@ class TaskController {
       kafkaMap += ("submit_typ" -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
-      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
       kafkaTemplate.flush()
       message = true
 
@@ -337,8 +336,8 @@ class TaskController {
 
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
-      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
-      logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
+      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
+      logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest))
       kafkaTemplate.flush()
 
       Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
