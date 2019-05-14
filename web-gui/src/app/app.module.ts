@@ -46,6 +46,10 @@ import { DeleteTaskModalComponent } from './components/courses/modals/delete-tas
 import { DeleteUserModalComponent } from './components/modals/delete-user-modal/delete-user-modal.component';
 import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
 import { NotFound404Component } from './components/not-found404/not-found404.component';
+import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
+import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
+
+
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -94,6 +98,8 @@ export const httpInterceptorProviders = [
     DeleteUserModalComponent,
     AnswerFromTestsystemDialogComponent,
     NotFound404Component,
+    CourseParameterModalComponent,
+    CourseParameterUserModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -114,7 +120,8 @@ export const httpInterceptorProviders = [
     })
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
-    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent],
+    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, CourseParameterModalComponent,
+    CourseParameterUserModalComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })

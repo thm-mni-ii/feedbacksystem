@@ -21,6 +21,8 @@ import {DOCUMENT} from '@angular/common';
 import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
 import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
+import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
+import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
 
 /**
  * Shows a course in detail
@@ -115,6 +117,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       })
   }
 
+  public openSettings(){
+    if(this.isAuthorized())
+      this.dialog.open(CourseParameterModalComponent, {data:{courseid:this.courseID}})
+    else
+      this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
+  }
 
   public deleteCourse(courseDetail: DetailedCourseInformation){
     this.dialog.open(DeleteCourseModalComponent, {
@@ -144,6 +152,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
   public isAuthorized(){
     return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
+  }
+
+  public runAllTaskAllUsers(taskid: number){
+    this.db.runAllCourseTaskByDocent(this.courseID, taskid)
   }
 
   ngAfterViewChecked() {

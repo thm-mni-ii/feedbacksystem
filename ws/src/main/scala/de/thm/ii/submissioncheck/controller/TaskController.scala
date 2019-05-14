@@ -42,6 +42,8 @@ class TaskController {
   @Autowired
   private val courseService: CourseService = null
   @Autowired
+  private val courseParameterService: CourseParamService = null
+  @Autowired
   private val testsystemService: TestsystemService = null
 
   @Value("${spring.kafka.bootstrap-servers}")
@@ -162,12 +164,11 @@ class TaskController {
     }
     val taskDetails = taskDetailsOpt.get
     var upload_url: String = null
-    var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
+    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
     val dataNode = jsonNode.get(LABEL_DATA)
       var submissionId: Int = -1
       if(dataNode != null) {
         val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-
         // Check submission, if to late, return error, if no time set, it is unlimited
         if(taskDetails(TaskDBLabels.deadline) != null){
           val taskDeadline = taskDetails(TaskDBLabels.deadline).toString
@@ -186,12 +187,13 @@ class TaskController {
         kafkaMap += (LABEL_DATA -> data)
         kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
         kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+        kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
+          taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], requestingUser.get))
         val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        logger.warn(connectKafkaTopic(tasksystem_id, topicName))
+        logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicName))
         logger.warn(jsonResult)
-        kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+        kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
         kafkaTemplate.flush()
-
         // Save submission as file
         storageService.storeTaskSubmission(data, taskid, submissionId)
       }
@@ -202,7 +204,6 @@ class TaskController {
 
       Map(LABEL_SUCCESS -> true, LABEL_TASK_ID -> taskid, LABEL_SUBMISSION_ID -> submissionId, LABEL_UPLOAD_URL -> upload_url)
     }
-    private def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 
   /**
     * serve a route to upload a submission file to a given submissionid
@@ -235,7 +236,7 @@ class TaskController {
       kafkaMap += ("submit_typ" -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
-      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicName), jsonResult)
+      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
       kafkaTemplate.flush()
       message = true
 
@@ -335,8 +336,8 @@ class TaskController {
 
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
-      kafkaTemplate.send(connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
-      logger.warn(connectKafkaTopic(tasksystem_id, topicTaskRequest))
+      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
+      logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest))
       kafkaTemplate.flush()
 
       Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)

@@ -227,6 +227,7 @@ class TaskService {
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
           TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name),
           TaskDBLabels.test_file_accept ->  getNullOrBoolean(res.getString(TaskDBLabels.test_file_accept)),
+          TaskDBLabels.courseid ->  res.getInt(TaskDBLabels.courseid),
           TaskDBLabels.test_file_accept_error -> res.getString(TaskDBLabels.test_file_accept_error))
 
         if (userid.isDefined){
@@ -555,4 +556,12 @@ class TaskService {
       (res, _) => res.getString(TestsystemLabels.id), taskid)
     list.head
   }
+
+  /**
+    * Connect a testsystem String with corresponding topic
+    * @param id testsystem id
+    * @param t_name action string
+    * @return topic
+    */
+  def connectKafkaTopic(id: String, t_name: String): String = id + "_" + t_name
 }

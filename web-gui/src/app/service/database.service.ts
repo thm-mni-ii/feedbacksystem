@@ -423,4 +423,63 @@ export class DatabaseService {
     return this.http.delete<Succeeded>('/api/v1/users/' + userID);
   }
 
+
+  // Services for course parameters
+
+  /**
+   * Docent, Tutor, ... can get all course parameters
+   * @param courseid
+   */
+  getAllCourseParameters(courseid: number) {
+    return this.http.get('/api/v1/courses/' + courseid + '/parameters').toPromise()
+  }
+
+  /**
+   * delete a course parameter
+   * @param courseid course ID
+   * @param key parameter key
+   */
+  deleteCourseParameter(courseid: number, key: string) {
+    return this.http.delete('/api/v1/courses/' + courseid + '/parameters/'+key).toPromise()
+  }
+
+  /**
+   * set and update a course parameter
+   * @param courseid course ID
+   * @param key parameter key
+   * @param description
+   */
+  addUpdateCourseParameter(courseid: number, key: string, description: string) {
+    return this.http.post('/api/v1/courses/' + courseid + '/parameters',
+      {"description": description, "key": key}).toPromise()
+  }
+
+  /**
+   * get all user values of course parameters
+   * @param courseid
+   */
+  getAllCourseParametersOfUser(courseid: number) {
+    return this.http.get('/api/v1/courses/' + courseid + '/parameters/users').toPromise()
+
+  }
+
+  /**
+   * set and update a course parameter for user
+   * @param courseid course ID
+   * @param key parameter key
+   * @param value
+   */
+  addUpdateCourseParameterUser(courseid: number, key: string, value: string) {
+    return this.http.post('/api/v1/courses/' + courseid + '/parameters/users',
+      {"value": value, "key": key}).toPromise()
+  }
+
+  runAllCourseTaskByDocent(courseid: number, taskid: number) {
+    return this.http.post(`/api/v1/courses/${courseid}/run/tasks/${taskid}`,
+    {"complete": true}).toPromise()
+  }
+
+
+
+
 }

@@ -5,6 +5,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask(courseDetail)" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
     <button mat-flat-button color="primary" color="warn" *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" matTooltip="Kurs löschen"><mat-icon>delete</mat-icon></button>
+    <button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>
   </div>
   <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
      <h4>
@@ -70,6 +71,8 @@
         <button  *ngIf="isAuthorized()" mat-flat-button color="accent"
                 (click)="displayTestsystemFeedback(task)">Status
         </button>
+
+        <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers(task.task_id)" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon></button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>
