@@ -27,7 +27,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.bash.{BashExec, ShExec, PlagiatCheckExec}
+import de.thm.ii.submissioncheck.bash.{BashExec, GitCheckExec, PlagiatCheckExec, ShExec}
 
 /**
   * Bypasses both client and server validation.
@@ -71,8 +71,6 @@ object VerifiesAllHostNames extends HostnameVerifier {
   */
 object SecretTokenChecker extends App {
   /** used in naming */
-  final val TASKID = "taskid"
-  /** used in naming */
   final val DATA = "data"
 
   private val LABEL_AUTHORIZATION = "Authorization"
@@ -80,20 +78,29 @@ object SecretTokenChecker extends App {
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
   private val LABEL_TOKEN = "jwt_token"
+  private val LABEL_CHECK_REQUEST = "_check_request"
+  private val LABEL_CHECK_ANSWER = "_check_answer"
+
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
 
   private val SYSTEMIDTOPIC = "secrettokenchecker"
-  private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_check_request"
-  private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_check_answer"
+  private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
+  private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
   private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
 
   // We accept also "plagiarismchecker"
   private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
-  private val PLAGIARISM_CHECK_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_check_request"
+  private val PLAGIARISM_CHECK_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
   private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_answer"
+
+  // We accept also "gitchecker"
+  private val GIT_SYSTEMIDTOPIC = "gitchecker"
+  private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
+  private val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
+
   private val __slash = "/"
 
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
@@ -111,6 +118,7 @@ object SecretTokenChecker extends App {
   private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   private val logger = system.log
   private val LABEL_TASKID = "taskid"
+  private val LABEL_SUBMISSIONID = "submissionid"
   private val LABEL_COURSEID = "course_id"
   private val LABEL_ACCEPT = "accept"
   private val LABEL_ERROR = "error"
@@ -138,6 +146,13 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  // Listen on git
+  private val control_gitchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(GIT_CHECK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onGitReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -152,6 +167,10 @@ object SecretTokenChecker extends App {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
+    control_gitchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
   })
 
   private def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
@@ -160,6 +179,7 @@ object SecretTokenChecker extends App {
   private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
   private def sendPlagiarismCheckMessage(message: String): Future[Done] =
     sendMessage(new ProducerRecord[String, String](PLAGIARISM_CHECK_ANSWER_TOPIC, message))
+  private def sendGitCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_CHECK_ANSWER_TOPIC, message))
 
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings
@@ -180,6 +200,28 @@ object SecretTokenChecker extends App {
       config_factory_path = dev_config_file_path
     }
     config_factory_path
+  }
+
+  private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
+    logger.warning("GIT Submission Received")
+
+    val jsonMap: Map[String, Any] = record.value()
+    val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
+    val task_id = jsonMap(LABEL_TASKID)
+    val git_url = jsonMap(DATA).asInstanceOf[String]
+    val sumission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
+    val gitChecker = new GitCheckExec(sumission_id, git_url)
+    val exitcode = gitChecker.exec()
+    val passed = if (exitcode == 0) 1 else 0
+
+    sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
+      "passed" -> passed.toString,
+      "exitcode" -> exitcode.toString,
+      LABEL_TASKID -> task_id.toString,
+      LABEL_SUBMISSIONID -> sumission_id,
+      "public_key" -> gitChecker.getPublicKey,
+      DATA -> gitChecker.output
+    )))
   }
 
   private def onPlagiarismReceived(record: ConsumerRecord[String, String]): Unit = {
@@ -227,8 +269,8 @@ object SecretTokenChecker extends App {
     val jsonMap: Map[String, Any] = record.value()
     try {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
-      val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
+      val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
+      val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
       var submittedFilePath: String = ""
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
@@ -254,7 +296,7 @@ object SecretTokenChecker extends App {
         "exitcode" -> code.toString,
         "userid" -> userid,
         LABEL_TASKID -> taskid,
-        "submissionid" -> submissionid
+        LABEL_SUBMISSIONID -> submissionid
       )))
     } catch {
       case e: NoSuchElementException => {
@@ -299,7 +341,7 @@ object SecretTokenChecker extends App {
 
       // Here we send multiple files!!
       val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
-      val taskid: String = jsonMap(TASKID).asInstanceOf[String]
+      val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
       val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
       if (urls.length != 1 && urls.length != 2) {
         sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
