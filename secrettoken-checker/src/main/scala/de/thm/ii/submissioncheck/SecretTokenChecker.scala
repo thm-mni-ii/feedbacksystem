@@ -100,7 +100,6 @@ object SecretTokenChecker extends App {
   private val PLAGIARISM_SCRIPT_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_request"
   private val PLAGIARISM_SCRIPT_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_answer"
 
-
   // We accept also "gitchecker"
   private val GIT_SYSTEMIDTOPIC = "gitchecker"
   private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
@@ -193,7 +192,6 @@ object SecretTokenChecker extends App {
   private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
   private def sendPlagiarismCheckMessage(message: String): Future[Done] =
     sendMessage(new ProducerRecord[String, String](PLAGIARISM_CHECK_ANSWER_TOPIC, message))
-
 
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings

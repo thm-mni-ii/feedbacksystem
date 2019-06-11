@@ -638,6 +638,14 @@ class TaskService {
   }
 
   /**
+    * generate validated URL to download plagiat script
+    * @author Benjamin MAnns
+    * @param courseid unique courseid identification
+    * @return URl String
+    */
+  def getURLOfPlagiatScriptForCourse(courseid: Int): String = s"course/$courseid/files/plagiatscript"
+
+  /**
     * Get the unique test system name
     * @author Benjamin Manns
     * @param taskid unique identification for a task

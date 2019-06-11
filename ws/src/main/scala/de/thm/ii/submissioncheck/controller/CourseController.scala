@@ -44,8 +44,6 @@ class CourseController {
   private val topicName: String = "check_request"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
-
-  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   private final val application_json_value = "application/json"
 
   private final val PATH_LABEL_ID = "id"

@@ -1,5 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {DatabaseService} from "../../../../service/database.service";
 
 @Component({
   selector: 'app-upload-plagiat-script',
@@ -8,7 +9,8 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
 })
 export class UploadPlagiatScriptComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UploadPlagiatScriptComponent>) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UploadPlagiatScriptComponent>,
+              private db: DatabaseService) { }
 
   ngOnInit() {
   }
@@ -21,21 +23,12 @@ export class UploadPlagiatScriptComponent implements OnInit {
     console.log(files);
 
     files.forEach(file => {
-      const reader = new FileReader();
+      console.log(this.data.courseid)
+      this.db.submitPlagiatScript(file, this.data.courseid).toPromise()
+        .then(d => console.log(d))
+        .catch(e => console.log(e))
 
-      reader.onload = (e: ProgressEvent) => {
-        const content = (e.target as FileReader).result;
 
-        // this content string could be used directly as an image source
-        // or be uploaded to a webserver via HTTP request.
-        console.log(content);
-      };
-
-      // use this for basic text files like .txt or .csv
-      reader.readAsText(file);
-
-      // use this for images
-      reader.readAsDataURL(file);
     });
   }
 

@@ -49,6 +49,7 @@ import { NotFound404Component } from './components/not-found404/not-found404.com
 import { UploadPlagiatScriptComponent } from './components/courses/modals/upload-plagiat-script/upload-plagiat-script.component';
 import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
+import {NgxDropzoneModule} from "ngx-dropzone";
 
 
 

@@ -126,7 +126,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   public plagiatModule(courseDetail: DetailedCourseInformation){
-    this.dialog.open(UploadPlagiatScriptComponent, { data: {}}).afterClosed()
+    this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
       .then((close) => {
         console.log(close)

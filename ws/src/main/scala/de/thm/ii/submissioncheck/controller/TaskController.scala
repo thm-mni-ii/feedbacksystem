@@ -73,6 +73,8 @@ class TaskController {
   final val LABEL_USER_ID = "userid"
   /** JSON variable submissionid ID*/
   final val LABEL_SUBMISSION_ID = "submissionid"
+  /** JSON variable courseid*/
+  final val LABEL_COURSE_ID = "courseid"
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
@@ -82,7 +84,9 @@ class TaskController {
   private final val LABEL_UPLOAD_URL = "upload_url"
   private final val LABEL_JWT_TOKEN = "jwt_token"
   private val LABEL_RELOAD = "reload"
+  private val LABEL_SUBMIT_TYP = "submit_typ"
   private val LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER = "Checker Service did not provide all parameters"
+  private val LABEL_DOWNLOAD_NOT_PERMITTED = "Download is not permitted. Please provide a valid jwt."
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
@@ -160,6 +164,44 @@ class TaskController {
   }
 
   /**
+    * upload url for plagiat checker script
+    * @param courseid unique course id
+    * @param file multipart binary file in a form data format
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("courses/{courseid}/plagiatchecker/upload"), method = Array(RequestMethod.POST))
+  def handlePlagiatScriptFileUpload(@PathVariable courseid: Int,
+                                 @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+
+    if (requestingUser.isEmpty || !courseService.isPermittedForCourse(courseid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+
+    var message: Boolean = false
+    var filename: String = ""
+    try {
+      storageService.storePlagiatScript(file, courseid)
+      filename = file.getOriginalFilename
+
+      val tasksystem_id = "plagiatchecker"
+      var kafkaMap = Map(LABEL_COURSE_ID -> courseid, LABEL_USER_ID -> requestingUser.get.username)
+      kafkaMap += ("fileurl" -> this.taskService.getURLOfPlagiatScriptForCourse(courseid))
+      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_FILE, LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+      val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+      logger.warn(jsonResult)
+      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, "script_request"), jsonResult)
+      kafkaTemplate.flush()
+      message = true
+
+    } catch {
+      case e: Exception => {}
+    }
+    Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
+  }
+
+  /**
     * Submit data for a given task
     * @param taskid unique identification for a task
     * @param jsonNode request body containing "data" parameter
@@ -171,13 +213,9 @@ class TaskController {
   @ResponseBody
   def submitTask(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
-    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
-      throw new UnauthorizedException
-    }
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) throw new UnauthorizedException
     val taskDetailsOpt = taskService.getTaskDetails(taskid)
-    if(taskDetailsOpt.isEmpty){
-      throw new ResourceNotFoundException
-    }
+    if(taskDetailsOpt.isEmpty) throw new ResourceNotFoundException
     val taskDetails = taskDetailsOpt.get
     var upload_url: String = null
     var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
@@ -202,7 +240,7 @@ class TaskController {
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
         kafkaMap += (LABEL_DATA -> data)
         kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
-        kafkaMap += ("submit_typ" -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+        kafkaMap += (LABEL_SUBMIT_TYP -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
         kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
           taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], requestingUser.get))
         val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
@@ -250,7 +288,7 @@ class TaskController {
       var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
       kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionid))
       kafkaMap += (LABEL_SUBMISSION_ID -> submissionid.toString)
-      kafkaMap += ("submit_typ" -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+      kafkaMap += (LABEL_SUBMIT_TYP -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
       logger.warn(jsonResult)
       kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
@@ -571,7 +609,7 @@ class TaskController {
   ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
-      throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
+      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
     }
     val parsedFilename = URLDecoder.decode(filename, StandardCharsets.UTF_8.toString)
     try {
@@ -595,10 +633,27 @@ class TaskController {
                                        request: HttpServletRequest): ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
-      throw new UnauthorizedException("Download is not permitted. Please provide a valid jwt.")
+      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
     }
     val filename = taskService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
+    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
+  }
+
+  /**
+    * JWT protected download url for plagiat checker scripts
+    * @param courseid unique course identification
+    * @param request contain request information
+    * @return HTTP Response contain file
+    */
+  @GetMapping(Array("course/{courseid}/files/plagiatscript"))
+  @ResponseBody def getSubmitFileByTask(@PathVariable courseid: Int,
+                                        request: HttpServletRequest): ResponseEntity[Resource] = {
+    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
+    if (testystem.isEmpty) {
+      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
+    }
+    val file = storageService.loadPlagiatScript(courseid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
   }
 
