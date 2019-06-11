@@ -2,9 +2,14 @@ package de.thm.ii.submissioncheck.bash
 import java.io.ByteArrayOutputStream
 import java.nio.file.{Files, Paths}
 
-import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
+import akka.Done
+import de.thm.ii.submissioncheck.JsonHelper
+import de.thm.ii.submissioncheck.SecretTokenChecker.{GIT_CHECK_ANSWER_TOPIC, ULDIR, DATA, LABEL_TASKID, LABEL_TOKEN, LABEL_SUBMISSIONID, sendMessage}
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.Future
 import scala.sys.process.Process
 
 /**
@@ -56,5 +61,45 @@ class GitCheckExec(val submission_id: String, val git_url: String) {
 
     val exitcode = Process("cat", seq).#>(stdoutStream).run().exitValue()
     stdoutStream.toString
+  }
+}
+
+/**
+  * static context for GitCheckExec
+  */
+object GitCheckExec{
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  /**
+    * generates the correcpoding kafka answer message
+    * @author Benjamin Manns
+    * @param message jons string
+    * @return kafka record
+    */
+  def sendGitCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_CHECK_ANSWER_TOPIC, message))
+
+  /**
+    * Kafka Callback wen message for GitChecker is receiving
+    * @author Benjamin Manns
+    * @param jsonMap a kafka record
+    */
+  def onGitReceived(jsonMap: Map[String, Any]): Unit = {
+    logger.warn("GIT Submission Received")
+    val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
+    val task_id = jsonMap(LABEL_TASKID)
+    val git_url = jsonMap(DATA).asInstanceOf[String]
+    val sumission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
+    val gitChecker = new GitCheckExec(sumission_id, git_url)
+    val exitcode = gitChecker.exec()
+    val passed = if (exitcode == 0) 1 else 0
+
+    sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
+      "passed" -> passed.toString,
+      "exitcode" -> exitcode.toString,
+      LABEL_TASKID -> task_id.toString,
+      LABEL_SUBMISSIONID -> sumission_id,
+      "public_key" -> gitChecker.getPublicKey,
+      DATA -> gitChecker.output
+    )))
   }
 }

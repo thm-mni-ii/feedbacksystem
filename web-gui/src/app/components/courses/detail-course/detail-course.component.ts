@@ -23,6 +23,7 @@ import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
+import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
 
 /**
  * Shows a course in detail
@@ -124,6 +125,14 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
   }
 
+  public plagiatModule(courseDetail: DetailedCourseInformation){
+    this.dialog.open(UploadPlagiatScriptComponent, { data: {}}).afterClosed()
+      .toPromise()
+      .then((close) => {
+        console.log(close)
+      })
+  }
+
   public deleteCourse(courseDetail: DetailedCourseInformation){
     this.dialog.open(DeleteCourseModalComponent, {
       data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
@@ -221,6 +230,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       })
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
+      this.courseTasks.forEach(task => {
+        if(typeof this.submissionAsFile[task.task_id] == 'undefined'){
+          this.submissionAsFile[task.task_id] = false;
+        }
+      })
+
     });
   }
 
