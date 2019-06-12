@@ -56,6 +56,7 @@ class TaskController {
   private var container: KafkaMessageListenerContainer[String, String] = _
   private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = _
   private var plagiatTaskCheckerContainer: KafkaMessageListenerContainer[String, String] = _
+  private var plagiatScriptAnswerContainer: KafkaMessageListenerContainer[String, String] = _
   private def consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
 
   @Value("${cas.client-host-url}")
@@ -118,6 +119,7 @@ class TaskController {
         configurateStorageService
         kafkaLoadPlagiatCheckerService
         sendTaskToPlagiatChecker
+        kafkaLoadPlagiatScriptAnswerService
       }
     }, bean_delay)
   }
@@ -185,13 +187,15 @@ class TaskController {
       storageService.storePlagiatScript(file, courseid)
       filename = file.getOriginalFilename
 
-      val tasksystem_id = "plagiatchecker"
+      val tasksystem_id = "plagiarismchecker"
       var kafkaMap = Map(LABEL_COURSE_ID -> courseid, LABEL_USER_ID -> requestingUser.get.username)
       kafkaMap += ("fileurl" -> this.taskService.getURLOfPlagiatScriptForCourse(courseid))
       kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_FILE, LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-      logger.warn(jsonResult)
-      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, "script_request"), jsonResult)
+      logger.info(jsonResult)
+      val topic = taskService.connectKafkaTopic(tasksystem_id, "script_request")
+      kafkaTemplate.send(topic, jsonResult)
+      logger.info(topic)
       kafkaTemplate.flush()
       message = true
 
@@ -641,7 +645,7 @@ class TaskController {
   }
 
   /**
-    * JWT protected download url for plagiat checker scripts
+    * JWT protected download url for plagiarism checker scripts
     * @param courseid unique course identification
     * @param request contain request information
     * @return HTTP Response contain file
@@ -803,5 +807,43 @@ class TaskController {
     Map(LABEL_RELOAD -> true)
   }
 
-  private def kafkaReceivedDebug(data: ConsumerRecord[Int, String]) = logger.debug("received message from topic '" + data.topic + "': " + data.value())
+  private def kafkaLoadPlagiatScriptAnswerService: Map[String, AnyVal] = {
+    val consumerConfigJava = consumerConfigScala.asJava
+    val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
+      new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
+
+    val kafkaTopicNewTaskAnswer: List[String] = List("plagiarismchecker_script_answer")
+
+    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
+    val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
+    if (plagiatScriptAnswerContainer != null) {
+      plagiatScriptAnswerContainer.stop()
+    }
+    plagiatScriptAnswerContainer = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
+
+    plagiatScriptAnswerContainer.setupMessageListener(new MessageListener[Int, String]() {
+      /**
+        * onMessage process incoming kafka messages
+        * @author Benjamin Manns
+        * @param data kafka message
+        */
+      override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
+        kafkaReceivedDebug(data)
+        val answeredMap = JsonParser.jsonStrToMap(data.value())
+        try {
+          logger.warn(answeredMap.toString())
+          val workedOut = answeredMap(LABEL_SUCCESS).asInstanceOf[Boolean]
+          val courseid = answeredMap(LABEL_COURSE_ID).asInstanceOf[BigInt]
+
+          courseService.setPlagiarismScriptStatus(courseid.toInt, workedOut)
+        } catch {
+          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
+        }
+      }
+    })
+    plagiatScriptAnswerContainer.start
+    Map(LABEL_RELOAD -> true)
+  }
+
+  private def kafkaReceivedDebug(data: ConsumerRecord[Int, String]): Unit = logger.debug("received message from topic '" + data.topic + "': " + data.value())
 }

@@ -40,6 +40,7 @@ CREATE TABLE `course` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+ALTER TABLE course ADD plagiarism_script BOOLEAN DEFAULT false  NULL;
 
 --
 -- Table structure for table `login_log`

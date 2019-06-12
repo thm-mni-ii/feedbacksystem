@@ -363,6 +363,7 @@ class CourseService {
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
           CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
+          CourseDBLabels.plagiarism_script -> res.getBoolean(CourseDBLabels.plagiarism_script),
           LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
           LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
           RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
@@ -739,6 +740,16 @@ class CourseService {
       throw new RuntimeException("Error creating course.")
     }
     Map("course_id" -> holder.getKey, "success" -> true)
+  }
+
+  /**
+    * set plagiarism scritp status
+    * @param courseid unique identification for a course
+    * @param plagiarism_script check if plagiarism_script is correct set
+    * @return update success status
+    */
+  def setPlagiarismScriptStatus(courseid: Int, plagiarism_script: Boolean): Boolean = {
+    DB.update("update course set plagiarism_script = ? where course_id = ?", plagiarism_script, courseid) == 1
   }
 
   /**

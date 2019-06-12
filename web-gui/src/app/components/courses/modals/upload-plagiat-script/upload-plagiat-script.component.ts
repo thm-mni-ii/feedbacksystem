@@ -1,6 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from "@angular/material";
 import {DatabaseService} from "../../../../service/database.service";
+import {NgxDropzoneService} from "ngx-dropzone/lib/ngx-dropzone.service";
+import {Succeeded} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-upload-plagiat-script',
@@ -10,7 +12,7 @@ import {DatabaseService} from "../../../../service/database.service";
 export class UploadPlagiatScriptComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UploadPlagiatScriptComponent>,
-              private db: DatabaseService) { }
+              private db: DatabaseService,  private snackbar: MatSnackBar) { }
 
   ngOnInit() {
   }
@@ -19,13 +21,24 @@ export class UploadPlagiatScriptComponent implements OnInit {
     this.dialogRef.close({exit: exit});
   }
 
+  deleteFiles(exit: boolean){
+
+  }
+
   onFilesAdded(files: File[]) {
     console.log(files);
 
     files.forEach(file => {
       console.log(this.data.courseid)
       this.db.submitPlagiatScript(file, this.data.courseid).toPromise()
-        .then(d => console.log(d))
+        .then((answer:Succeeded) => {
+          if(answer.success){
+            this.snackbar.open('Script wurde erfolgreich hochgeladen', 'OK', {duration: 5000})
+            this.close(true)
+          } else {
+            this.snackbar.open('Es gab ein Problem beim Hochladen vom Skript.', 'OK', {duration: 5000})
+          }
+        })
         .catch(e => console.log(e))
 
 

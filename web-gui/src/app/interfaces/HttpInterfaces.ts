@@ -44,6 +44,7 @@ export interface DetailedCourseInformation {
   course_semester: string;
   personalised_submission: boolean;
   course_end_date: string;
+  plagiarism_script: boolean;
   course_docent: GeneralCourseDocent[];
   course_tutor: GeneralCourseDocent[];
 }

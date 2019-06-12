@@ -1,10 +1,16 @@
 package de.thm.ii.submissioncheck.bash
 
 import java.io._
-import java.nio.file.{Path, Paths}
-import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
+
+import akka.Done
+import de.thm.ii.submissioncheck.JsonHelper
+import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ERROR_DOWNLOAD,
+  LABEL_TOKEN, PLAGIARISM_SCRIPT_ANSWER_TOPIC, ULDIR, download, logger, sendMessage}
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.Future
 import scala.sys.process.Process
 
 /**
@@ -44,9 +50,8 @@ class PlagiatCheckExec(val courseid: String, val plagiatCheckBasePath: String) {
       dockerRelPath = ULDIR
     }
 
-    // TODO Put that script htere somehow
     val plagiatWorkingDir = Paths.get(s"$dockerRelPath/PLAGIAT_CHECK/$courseid/").toAbsolutePath.toString
-    val plagiatScriptPath = s"$plagiatWorkingDir/scriptfile.sh"
+    val plagiatScriptPath = s"$plagiatWorkingDir/plagiatscript.sh"
     val localScriptPath = Paths.get(s"$ULDIR/PLAGIAT_CHECK/$courseid/scriptfile.sh").toAbsolutePath.toString
     val unzipedDir = plagiatWorkingDir + "/unzip"
     val stdoutStream = new ByteArrayOutputStream
@@ -68,5 +73,58 @@ class PlagiatCheckExec(val courseid: String, val plagiatCheckBasePath: String) {
     }
     this.exitCode = exitCode
     exitCode
+  }
+}
+
+/**
+  * PlagiatCheckExec static decalaration
+  */
+object PlagiatCheckExec{
+  /**
+    * generates the correcpoding kafka answer message
+    * @author Benjamin Manns
+    * @param message jons string
+    * @return kafka record
+    */
+  def sendPlagiarismScriptMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](PLAGIARISM_SCRIPT_ANSWER_TOPIC, message))
+
+  /**
+    * receive and save script for plagarism check
+    * @param jsonMap kafka message
+    */
+  def onPlagiarsimScriptReceive(jsonMap: Map[String, Any]): Unit = {
+    logger.warning("Plagiarism Submission Received")
+    val jwt_token = jsonMap("jwt_token").asInstanceOf[String]
+    val fileurl = jsonMap("fileurl").asInstanceOf[String]
+    val courseid: Int = Integer.parseInt(jsonMap("courseid").toString)
+    val plagiatCheckPath = downloadPlagiatScriptFiles(fileurl, jwt_token, courseid)
+    var msg = ""
+
+    if (plagiatCheckPath.isEmpty) {
+      msg = "Provided Script file for plagism check could not be downloaded"
+      logger.warning(msg)
+    }
+
+    val answerMap = JsonHelper.mapToJsonStr(Map(
+      "success" -> plagiatCheckPath.isDefined,
+      "msg" -> msg,
+      "courseid" -> courseid
+    ))
+    sendPlagiarismScriptMessage(answerMap)
+  }
+
+  private def downloadPlagiatScriptFiles(link: String, jwt_token: String, courseid: Int): Option[Path] = {
+    val connection = download(link, jwt_token)
+    if(connection.getResponseCode >= 400){
+      logger.error(LABEL_ERROR_DOWNLOAD)
+      Option.empty
+    }
+    else {
+      val basePath = Paths.get(ULDIR).resolve("PLAGIAT_CHECK").resolve(courseid.toString).toString
+      new File(basePath).mkdirs()
+      val dest = Paths.get(basePath).resolve("plagiatscript.sh")
+      Files.copy(connection.getInputStream, dest, StandardCopyOption.REPLACE_EXISTING)
+      Some(dest)
+    }
   }
 }

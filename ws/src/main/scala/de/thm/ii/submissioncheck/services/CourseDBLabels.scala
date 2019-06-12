@@ -23,4 +23,6 @@ object CourseDBLabels {
   val course_end_date: String = "course_end_date"
   /** holds label personalised_submission*/
   val personalised_submission: String = "personalised_submission"
+  /** holds label plagiarism_script*/
+  val plagiarism_script: String = "plagiarism_script"
 }

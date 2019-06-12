@@ -643,7 +643,7 @@ class TaskService {
     * @param courseid unique courseid identification
     * @return URl String
     */
-  def getURLOfPlagiatScriptForCourse(courseid: Int): String = s"course/$courseid/files/plagiatscript"
+  def getURLOfPlagiatScriptForCourse(courseid: Int): String = getUploadBaseURL() + s"/api/v1/course/$courseid/files/plagiatscript"
 
   /**
     * Get the unique test system name

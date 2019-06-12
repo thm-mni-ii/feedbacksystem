@@ -98,7 +98,8 @@ object SecretTokenChecker extends App {
   private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_answer"
 
   private val PLAGIARISM_SCRIPT_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_request"
-  private val PLAGIARISM_SCRIPT_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_answer"
+  /** label for PLAGIARISM_SCRIPT_ANSWER_TOPIC */
+  val PLAGIARISM_SCRIPT_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_answer"
 
   // We accept also "gitchecker"
   private val GIT_SYSTEMIDTOPIC = "gitchecker"
@@ -119,9 +120,10 @@ object SecretTokenChecker extends App {
   /** used in naming */
   final val ULDIR = (if (compile_production) __slash else "") + "upload-dir/"
   private val basedir = ULDIR + "PLAGIAT_CHECK/"
-
-  private val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
-  private val logger = system.log
+  /** label for Error download file */
+  val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
+  /** logger instance */
+  val logger = system.log
   /** provides a Label for taskid*/
   val LABEL_TASKID = "taskid"
   /** provides a Label for submissionid*/
@@ -153,6 +155,12 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  private val control_plagiarismscript = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(PLAGIARISM_SCRIPT_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onPlagiarsimScriptReceive))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Listen on git
   private val control_gitchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(GIT_CHECK_REQUEST_TOPIC))
@@ -171,6 +179,10 @@ object SecretTokenChecker extends App {
         case Failure(err) => logger.warning(err.getMessage)
       }
     control_plagiarismchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_plagiarismscript.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
@@ -217,6 +229,11 @@ object SecretTokenChecker extends App {
   private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     GitCheckExec.onGitReceived(jsonMap)
+  }
+
+  private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
+    val jsonMap: Map[String, Any] = record.value()
+    PlagiatCheckExec.onPlagiarsimScriptReceive(jsonMap)
   }
 
   private def onPlagiarismReceived(record: ConsumerRecord[String, String]): Unit = {
@@ -420,7 +437,14 @@ object SecretTokenChecker extends App {
     path
   }
 
-  private def download(download_url: String, authorization: String) = {
+  /**
+    * prepare a download connection instance
+    * @author Benjamin Manns
+    * @param download_url the url where to download from
+    * @param authorization jwt token
+    * @return connection instance
+    */
+  def download(download_url: String, authorization: String): HttpURLConnection = {
     val timeout = 1000
     val url = new java.net.URL(download_url)
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]

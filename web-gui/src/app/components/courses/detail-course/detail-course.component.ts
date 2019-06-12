@@ -118,6 +118,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       })
   }
 
+  private loadCourseDetails(){
+    this.db.getCourseDetail(this.courseID).toPromise()
+      .then(course_detail => {
+        this.courseDetail = course_detail
+      })
+  }
+
   public openSettings(){
     if(this.isAuthorized())
       this.dialog.open(CourseParameterModalComponent, {data:{courseid:this.courseID}})
@@ -129,7 +136,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
       .then((close) => {
-        console.log(close)
+        if(close){
+          this.loadCourseDetails()
+        }
       })
   }
 
@@ -422,4 +431,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  get plagiarism_script_status(){
+    return (this.courseDetail.plagiarism_script) ? "primary" : "warn";
+  }
 }

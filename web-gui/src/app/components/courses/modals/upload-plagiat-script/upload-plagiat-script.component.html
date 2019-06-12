@@ -4,8 +4,8 @@
   <ngx-dropzone (filesAdded)="onFilesAdded($event)" [maxFileSize]="2000"  (filesRejected)="onFilesRejected($event)"  [showPreviews]="true"></ngx-dropzone>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-flat-button color="accent" (click)="deleteCourse(false)">Abbrechen</button> &nbsp; &nbsp;
-  <button mat-flat-button color="warn" (click)="deleteCourse(true)">Löschen</button>
+  <button mat-flat-button color="accent" (click)="close(true)">OK</button> &nbsp; &nbsp;
+  <button mat-flat-button color="warn" (click)="deleteFiles(false)">Reset</button>
 </mat-dialog-actions>
 
 
