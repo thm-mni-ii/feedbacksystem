@@ -23,6 +23,7 @@ import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
+import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
 
 /**
  * Shows a course in detail
@@ -117,11 +118,28 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       })
   }
 
+  private loadCourseDetails(){
+    this.db.getCourseDetail(this.courseID).toPromise()
+      .then(course_detail => {
+        this.courseDetail = course_detail
+      })
+  }
+
   public openSettings(){
     if(this.isAuthorized())
       this.dialog.open(CourseParameterModalComponent, {data:{courseid:this.courseID}})
     else
       this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
+  }
+
+  public plagiatModule(courseDetail: DetailedCourseInformation){
+    this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
+      .toPromise()
+      .then((close) => {
+        if(close){
+          this.loadCourseDetails()
+        }
+      })
   }
 
   public deleteCourse(courseDetail: DetailedCourseInformation){
@@ -221,6 +239,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       })
     ).subscribe(course_detail => {
       this.courseTasks = course_detail.tasks;
+      this.courseTasks.forEach(task => {
+        if(typeof this.submissionAsFile[task.task_id] == 'undefined'){
+          this.submissionAsFile[task.task_id] = false;
+        }
+      })
+
     });
   }
 
@@ -407,4 +431,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  get plagiarism_script_status(){
+    return (this.courseDetail.plagiarism_script) ? "primary" : "warn";
+  }
 }

@@ -1,10 +1,12 @@
 <div class="container">
   <div class="actions">
     <button mat-flat-button color="primary" *ngIf=" (userRole != 'admin' && userRole != 'moderator') && !courseDetail?.role_id"  (click)="subscribeCourse()">Einschreiben</button>
-    <button mat-flat-button color="primary"color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>
+    <button mat-flat-button color="primary" color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask(courseDetail)" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
     <button mat-flat-button color="primary" color="warn" *ngIf="isAuthorized()" (click)="deleteCourse(courseDetail)" matTooltip="Kurs löschen"><mat-icon>delete</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="plagiatModule(courseDetail)" matTooltip="Plagiarismchecker Skript"><mat-icon>backup</mat-icon></button>
+    <button mat-flat-button [color]="plagiarism_script_status"  *ngIf="isAuthorized()" matTooltip="Plagiarismchecker Skript Status"><mat-icon>report</mat-icon></button>
     <button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>
   </div>
   <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
@@ -37,8 +39,8 @@
 
         <!-- Submission -->
         <div class="result">
-          <p *ngIf="task.submission_data">Abgabe: {{task.submission_data}}</p>
-          <p *ngIf="task.file">Dateiname: {{task.file}}</p>
+          <p *ngIf="!!task.submission_data">Abgabe: {{task.submission_data}}</p>
+          <p *ngIf="!task.submission_data">Dateiname: {{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>

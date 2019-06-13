@@ -46,8 +46,10 @@ import { DeleteTaskModalComponent } from './components/courses/modals/delete-tas
 import { DeleteUserModalComponent } from './components/modals/delete-user-modal/delete-user-modal.component';
 import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
 import { NotFound404Component } from './components/not-found404/not-found404.component';
+import { UploadPlagiatScriptComponent } from './components/courses/modals/upload-plagiat-script/upload-plagiat-script.component';
 import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
+import {NgxDropzoneModule} from "ngx-dropzone";
 
 
 
@@ -100,6 +102,7 @@ export const httpInterceptorProviders = [
     NotFound404Component,
     CourseParameterModalComponent,
     CourseParameterUserModalComponent,
+    UploadPlagiatScriptComponent,
   ],
   imports: [
     BrowserModule,
@@ -117,11 +120,12 @@ export const httpInterceptorProviders = [
       config: {
         tokenGetter: tokenGetter,
       }
-    })
+    }),
+    NgxDropzoneModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, CourseParameterModalComponent,
-    CourseParameterUserModalComponent],
+    CourseParameterUserModalComponent, UploadPlagiatScriptComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })

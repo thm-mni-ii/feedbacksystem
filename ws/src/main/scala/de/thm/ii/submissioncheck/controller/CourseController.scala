@@ -44,7 +44,6 @@ class CourseController {
   private val topicName: String = "check_request"
 
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
-
   private final val application_json_value = "application/json"
 
   private final val PATH_LABEL_ID = "id"
@@ -170,8 +169,8 @@ class CourseController {
     */
   @RequestMapping(value = Array("{courseid}/submission/users/{userid}/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer, @PathVariable userid: Int,
-                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+  def getZipOfSubmissionsOfOneUserFromAllCourses(@PathVariable courseid: Integer, @PathVariable userid: Int,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.userid != userid)) {
@@ -203,10 +202,11 @@ class CourseController {
   @RequestMapping(value = Array("{courseid}/submission/users/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getZipOfSubmissionsOfUserFromCourse(@PathVariable courseid: Integer,
-                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean,
+                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) {
+
+    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
       throw new UnauthorizedException
     }
 

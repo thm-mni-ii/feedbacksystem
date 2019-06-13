@@ -37,9 +37,10 @@ CREATE TABLE `course` (
   UNIQUE KEY `courses_courseid_uindex` (`course_id`),
   KEY `courses_users_userid_fk` (`creator`),
   CONSTRAINT `courses_users_userid_fk` FOREIGN KEY (`creator`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+ALTER TABLE course ADD plagiarism_script BOOLEAN DEFAULT false  NULL;
 
 --
 -- Table structure for table `login_log`
@@ -116,13 +117,15 @@ CREATE TABLE `submission` (
   `task_id` int(11) DEFAULT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `submission_data` text,
+  `plagiat_passed` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`submission_id`),
   KEY `submission_task_taskid_fk` (`task_id`),
   KEY `submission_users_userid_fk` (`user_id`),
   CONSTRAINT `submission_task_taskid_fk` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submission_users_userid_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=395 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
 
 
 -- Table structure for table `task`
@@ -141,14 +144,24 @@ CREATE TABLE `task` (
   `deadline` datetime DEFAULT NULL,
   `test_file_accept` tinyint(1) DEFAULT NULL COMMENT 'Tasksystem will return true or false if provided testfile(s) are acceptable for selected testsystem',
   `test_file_accept_error` text,
+  `plagiat_check_done` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`task_id`),
   KEY `task_courses_courseid_fk` (`course_id`),
   KEY `task_testsystem_testsystem_id_fk` (`testsystem_id`),
   CONSTRAINT `task_course_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course` (`course_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `task_testsystem_testsystem_id_fk` FOREIGN KEY (`testsystem_id`) REFERENCES `testsystem` (`testsystem_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Dumping data for table `task`
+--
+
+LOCK TABLES `task` WRITE;
+/*!40000 ALTER TABLE `task` DISABLE KEYS */;
+INSERT INTO `task` VALUES (204,'dxasd','SADasd',131,'','secrettokenchecker','2019-03-29 11:31:07',1,'',0),(209,'TEST me','sql',131,'hello world.sh','secrettokenchecker','2019-03-22 14:16:29',NULL,NULL,0),(222,'dsad','## Sample Table\n\n``code``\n\n| Tables        | Are           | Cool  |\n| ------------- |:-------------:| -----:|\n| col 3 is      | right-aligned | $1600 |\n| col 2 is      | centered      |   $12 |\n| zebra stripes | are neat      |    $1 |\n',133,'hello world.sh','secrettokenchecker','2019-03-29 08:19:52',1,'',0),(223,'2','2',133,'shasum.sh','secrettokenchecker','2019-03-30 08:24:32',1,'',0),(224,'Aufagabe No 3','3',133,'sections.json,db.sql','secrettokenchecker','2019-03-30 08:24:44',1,'',0),(225,'4','4',133,'hello world.sh','secrettokenchecker','2019-03-29 08:24:51',1,'',0),(226,'5','5',133,'hello world.sh','secrettokenchecker','2019-03-30 08:24:59',1,'',0),(227,'Eine andere Aufgabe','asdas',133,'abgabe.txt','secrettokenchecker','2019-03-27 08:32:59',1,'',0),(228,'dasd','aSD',133,'db.sql,sections.json','sqlchecker','2019-03-25 08:33:14',1,'',0),(229,'asdAS','DADSASD',133,'hello world.sh','secrettokenchecker','2019-03-29 08:34:05',1,'',0),(232,'Ein Name','Das ist zu tun',133,'md5sum.sh','secrettokenchecker','2019-03-29 11:47:24',1,'',0),(239,'Test ST 001','Test ST 001',133,'scriptfile','secrettokenchecker','2019-03-29 13:18:01',1,'',0),(240,'Test ST 001','Test ST 001',133,'scriptfile','secrettokenchecker','2019-03-29 13:18:01',1,'',0),(241,'Neuer Test 2','MD5 !!!',130,'testfile,scriptfile','secrettokenchecker','2019-04-20 07:23:52',1,'',0),(242,'Test ST 001','Test ST 001',130,'scriptfile','secrettokenchecker','2019-03-31 14:24:45',1,'',0),(243,'TESTFILE_PATH','TESTFILE_PATH',130,'scriptfile','secrettokenchecker','2019-03-29 13:31:14',1,'',0),(244,'neueue','zegug',130,'scriptfile','secrettokenchecker','2019-03-30 13:37:53',1,'',0),(245,'n','iojoijio',130,'scriptfile','secrettokenchecker','2019-05-04 16:38:59',1,'',0),(246,'I Like it','I like text',130,'scriptfile','secrettokenchecker','2019-03-29 21:32:47',1,'',0),(248,'test','test',133,'scriptfile','secrettokenchecker','2019-03-30 10:17:41',NULL,NULL,0),(249,'neue aufgabe','hdsihfi',133,'scriptfile','secrettokenchecker','2019-03-29 10:18:28',NULL,NULL,0),(250,'neueneueneuen','ueneuneueneeuen',133,'scriptfile','secrettokenchecker','2019-03-30 10:19:40',1,'',0),(251,'dasdsa','asdasd',133,'scriptfile','secrettokenchecker','2019-03-30 10:39:19',1,'',0),(252,'sad','ASDASD',133,'scriptfile','secrettokenchecker','2019-03-30 10:57:27',1,'',0),(253,'sqDS','SAD',133,'scriptfile','secrettokenchecker','2019-03-30 10:58:52',1,'',0),(254,'uuu','uuu',133,'scriptfile','secrettokenchecker','2019-03-30 11:02:07',1,'',0),(255,'dssdds','sdsdsd',133,'scriptfile','secrettokenchecker','2019-03-30 11:07:48',1,'',0),(256,'d kwfnkdndfD','DASDAS',133,'scriptfile','secrettokenchecker','2019-03-30 11:08:48',1,'',0),(257,'SUPPI','JOJOJO',133,'scriptfile','secrettokenchecker','2019-03-30 11:10:21',1,'',0),(258,'NEENEI','NEIENEI',133,'scriptfile','secrettokenchecker','2019-03-30 11:11:49',1,'',0),(259,'dsdsd','sdsd',133,'scriptfile','secrettokenchecker','2019-03-30 11:14:05',1,'',0),(260,'q','q',133,'scriptfile','secrettokenchecker','2019-03-30 11:14:52',1,'',0),(261,'dsds','dsds',133,'scriptfile','secrettokenchecker','2019-03-30 13:12:24',1,'',0),(262,'dsds','dsds',133,'scriptfile','secrettokenchecker','2019-03-30 13:13:29',1,'',0),(263,'dsdsd','dsds',133,'scriptfile','secrettokenchecker','2019-03-30 13:16:14',1,'',0),(264,'balab','balbal',133,'scriptfile','secrettokenchecker','2019-05-04 13:52:24',NULL,NULL,0),(265,'SQL SQL','SQL Aufgabe',130,'sections.json,db.sql','sqlchecker','2019-04-05 06:41:53',1,'',0),(267,'fdafds','fsdfsdf',130,NULL,'secrettokenchecker','2019-04-11 17:18:06',NULL,NULL,0),(268,'fdafds','fsdfsdf',130,NULL,'secrettokenchecker','2019-04-11 17:18:06',NULL,NULL,0),(269,'SQL','SQL',130,NULL,'sqlchecker','2019-04-10 17:30:39',NULL,NULL,0),(270,'sql','sql',130,NULL,'sqlchecker','2019-04-10 17:32:27',NULL,NULL,0),(291,'aSAS','asaS',139,'scriptfile','secrettokenchecker','2019-04-18 13:54:24',1,'',0),(292,'asdas','asdasd',139,'scriptfile','secrettokenchecker','2019-04-11 14:05:39',1,'',0),(293,'SQL','SQL',139,'sections.json,db.sql','sqlchecker','2019-05-24 14:25:47',1,'',0),(294,'dsasd','sadsad',133,'scriptfile','secrettokenchecker','2019-04-26 14:30:46',1,'',0),(295,'asdsad','sadsad',133,'scriptfile','secrettokenchecker','2019-05-25 14:31:19',1,'',0),(297,'SQL 2','SQL 2',133,'sections.json,db.sql','sqlchecker','2019-04-26 14:35:18',1,'',0),(298,'sadas','asdasd',133,'scriptfile','secrettokenchecker','2019-04-25 16:34:33',1,'',0),(299,'asdsd','sdsad',133,'scriptfile','secrettokenchecker','2019-04-10 16:34:49',1,'',0),(300,'test','test',141,'scriptfile','secrettokenchecker','2019-04-25 06:57:48',1,'',0),(304,'Aufgabe','## hello  world',143,'scriptfile','secrettokenchecker','2019-04-24 12:32:45',1,'',0),(305,'test','## test\n**test**',144,'scriptfile','secrettokenchecker','2019-04-30 15:25:21',1,'',0),(306,'test 2','## dsad',144,'scriptfile','secrettokenchecker','2019-04-30 16:50:17',1,'',0);
+/*!40000 ALTER TABLE `task` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `testsystem`
@@ -175,9 +188,8 @@ CREATE TABLE `testsystem` (
 
 LOCK TABLES `testsystem` WRITE;
 /*!40000 ALTER TABLE `testsystem` DISABLE KEYS */;
-INSERT INTO `testsystem` VALUES ('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000'),('sqlchecker','SQL','XXXXX','.sql, ',1234,'000.000.000.000');
+INSERT INTO `testsystem` VALUES ('plagiarismchecker','plagiarismchecker',NULL,NULL,NULL,NULL),('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000'),('sqlchecker','SQL','XXXXX','.sql, ',1234,'000.000.000.000');
 INSERT INTO submissionchecker.testsystem (testsystem_id, name, description, supported_formats, machine_port, machine_ip) VALUES ('sapabapchecker', 'ABAP Testsystem', 'ABAP code will be executed in a real SAP system', '', null, null);
-
 /*!40000 ALTER TABLE `testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -204,9 +216,6 @@ INSERT INTO `testsystem_testfile` VALUES ('secrettokenchecker','scriptfile',1),(
 /*!40000 ALTER TABLE `testsystem_testfile` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
-
-
 --
 -- Table structure for table `user`
 --
@@ -227,7 +236,7 @@ CREATE TABLE `user` (
   PRIMARY KEY (`user_id`),
   KEY `user_role_role_id_fk` (`role_id`),
   CONSTRAINT `user_role_role_id_fk` FOREIGN KEY (`role_id`) REFERENCES `role` (`role_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=413 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

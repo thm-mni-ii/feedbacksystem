@@ -186,6 +186,20 @@ export class DatabaseService {
   }
 
   /**
+   * upload a plagiat script
+   * @param data File
+   * @param courseid unqie course id
+   */
+  submitPlagiatScript(data: File, courseid: number): Observable<Succeeded>{
+    const formDataFile = new FormData();
+    formDataFile.append('file', data, data.name);
+    let upload_url = `/api/v1/courses/${courseid}/plagiatchecker/upload`
+    return this.http.post<Succeeded>(upload_url, formDataFile, {
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+    });
+  }
+
+  /**
    * Lecturer creates a new Task
    * @param idCourse The id of course where task will be added
    * @param name This is the name of the Task

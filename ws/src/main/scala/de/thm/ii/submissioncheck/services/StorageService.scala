@@ -27,9 +27,10 @@ class StorageService(compile_production: Boolean) {
   final val UPLOAD_FOLDER: String = (if (compile_production) __slash else "") + "upload-dir/"
 
   private val rootLocation = Paths.get(UPLOAD_FOLDER)
-
+  private final val PLAGIAT_SCRIPT_NAME = "plagiatcheck.sh"
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
-
+  private final val LABEL_RESOURCE_NOT_EXIST = "Resource does not exist."
+  private final val LABEL_URL_MALFORMED = "File URL is Malformed."
   private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + __slash + taskid.toString
 
   /**
@@ -98,6 +99,53 @@ class StorageService(compile_production: Boolean) {
       }
       try {
         Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+    }
+    catch {
+      case e: Exception =>
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    }
+  }
+
+  /**
+    * load the requested plagiat checker script
+    * @param courseid unique course id
+    * @return File Resource
+    */
+  def loadPlagiatScript(courseid: Int): Resource = try {
+    val file = getPlagiatCheckerRootPath.resolve(courseid.toString).resolve(PLAGIAT_SCRIPT_NAME)
+    val resource = new UrlResource(file.toUri)
+    if (resource.exists || resource.isReadable) {resource}
+    else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
+  } catch {
+    case e: MalformedURLException =>
+      throw new RuntimeException(LABEL_URL_MALFORMED)
+  }
+
+  private def getPlagiatCheckerRootPath = Paths.get(UPLOAD_FOLDER).resolve("PLAGIAT_CHECKER")
+
+  /**
+    * simply store a plagiat script
+    * @param file file stream from users upload
+    * @param course_id the corresponding course
+    */
+  def storePlagiatScript(file: MultipartFile, course_id: Int): Unit = {
+    try {
+      val storeLocation = getPlagiatCheckerRootPath.resolve(course_id.toString)
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+      try {
+        var originalFilename = file.getOriginalFilename
+        // TODO let it be dynamic
+        originalFilename = PLAGIAT_SCRIPT_NAME
+        Files.copy(file.getInputStream, storeLocation.resolve(originalFilename), StandardCopyOption.REPLACE_EXISTING)
       }
       catch {
         case _: FileAlreadyExistsException => {}
@@ -180,10 +228,10 @@ class StorageService(compile_production: Boolean) {
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}
-    else {throw new RuntimeException("Resource does not exist.")}
+    else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
   } catch {
     case e: MalformedURLException =>
-      throw new RuntimeException("File URL is Malformed.")
+      throw new RuntimeException(LABEL_URL_MALFORMED)
   }
 
   /**
@@ -199,10 +247,10 @@ class StorageService(compile_production: Boolean) {
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}
-    else {throw new RuntimeException("Resource does not exist.")}
+    else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
   } catch {
     case e: MalformedURLException =>
-      throw new RuntimeException("File URL is Malformed.")
+      throw new RuntimeException(LABEL_URL_MALFORMED)
   }
 
   /**

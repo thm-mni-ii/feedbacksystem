@@ -49,7 +49,7 @@ After login yourself with this credentials you can create a new admin and delete
  
  services:
    zoo1:
-     image: 'bitnami/zookeeper:latest'
+     image: 'bitnami/zookeeper:3.4.13-r62'
      hostname: zoo1   # We currently use only one zookeeper
      environment:
      # This is an somehow unsecure setting, because no password and user is needed, but we use this in a virtual network.

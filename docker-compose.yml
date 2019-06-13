@@ -2,7 +2,7 @@ version: '2'
 
 services:
   zoo1:
-    image: 'bitnami/zookeeper:latest'
+    image: 'bitnami/zookeeper:3.4.13-r62'
     hostname: zoo1
     environment:
     - ALLOW_ANONYMOUS_LOGIN=yes

@@ -9,7 +9,7 @@ import de.thm.ii.submissioncheck.CourseParameterDBLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -27,12 +27,23 @@ class CourseService {
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
+  private var compile_production: Boolean = true
+  private final var LABEL_ZIPDIR = "zip-dir"
+  private final var LABEL_UPLOADDIR = "upload-dir"
+
+  /**
+    * load production compilation
+    * @param prop property from config file
+    */
+  class MyBean(@Value("${compile.production}") prop: Boolean) {
+    compile_production = prop
+    LABEL_ZIPDIR = (if (compile_production) "/" else "") + "zip-dir"
+    LABEL_UPLOADDIR = (if (compile_production) "/" else "") + "upload-dir"
+  }
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
   private final val LABEL_SUCCESS = "success"
-  private final val LABEL_ZIPDIR = "zip-dir"
-  private final val LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_UNDERLINE = "_"
   private final val LABEL_COURSE_TUTOR = "course_tutor"
   private final val LABEL_COURSE_DOCENT = "course_docent"
@@ -352,6 +363,7 @@ class CourseService {
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
           CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
+          CourseDBLabels.plagiarism_script -> res.getBoolean(CourseDBLabels.plagiarism_script),
           LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
           LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
           RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
@@ -368,7 +380,13 @@ class CourseService {
     list.headOption
   }
 
-  private def zip(out: Path, files: Iterable[Path], replacePath: String = "") = {
+  /**
+    * Zip several files to one zuip folder
+    * @param out destination path where zip should be saved
+    * @param files list of files to zip
+    * @param replacePath substring which should be removed from filenames
+    */
+  def zip(out: Path, files: Iterable[Path], replacePath: String = ""): Unit = {
     val zip = new ZipOutputStream(Files.newOutputStream(out))
 
     files.foreach { file =>
@@ -389,7 +407,7 @@ class CourseService {
     * @param glue is somehow the opposite from a split delimeter
     * @return items glued together as a string
     */
-  private def implode(list: List[String], glue: String) = {
+  def implode(list: List[String], glue: String): String = {
     var back = ""
     for ((l, index) <- list.zipWithIndex) {
       back += l + (if (index < list.length-1) glue else "")
@@ -421,7 +439,7 @@ class CourseService {
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
-            last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
+            last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
               LABEL_UNDERLINE).replace(" ", "")
             tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
               task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
@@ -558,6 +576,7 @@ class CourseService {
         var passedDate: Any = null
         var passed_string: String = null
         var coll_result_date: Any = null
+        var final_submission_id: Int = -1
         for(submission <- userSubmissions) {
           if (coll_result_date == null) {
             coll_result_date = submission("result_date")
@@ -565,18 +584,21 @@ class CourseService {
           if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
+            final_submission_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
           }
         }
-
         if (!passed && coll_result_date == null) {
           passed_string = null
+          // If no submission was correct, we send the last submission
+          if (userSubmissions.length > 0) final_submission_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
         } else {
           passed_string = passed.toString
         }
 
         tasksPassedSum = tasksPassedSum + passed.compare(false)
-        val taskStudentCell = Map( taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string, "passed_date" -> passedDate))
+        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
+          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
+          "passed_date" -> passedDate, "submission_id" -> final_submission_id))
 
         processedTasks = taskStudentCell :: processedTasks
       }
@@ -718,6 +740,16 @@ class CourseService {
       throw new RuntimeException("Error creating course.")
     }
     Map("course_id" -> holder.getKey, "success" -> true)
+  }
+
+  /**
+    * set plagiarism scritp status
+    * @param courseid unique identification for a course
+    * @param plagiarism_script check if plagiarism_script is correct set
+    * @return update success status
+    */
+  def setPlagiarismScriptStatus(courseid: Int, plagiarism_script: Boolean): Boolean = {
+    DB.update("update course set plagiarism_script = ? where course_id = ?", plagiarism_script, courseid) == 1
   }
 
   /**
