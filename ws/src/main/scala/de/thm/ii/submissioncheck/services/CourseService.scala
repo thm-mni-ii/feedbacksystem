@@ -30,6 +30,8 @@ class CourseService {
   private var compile_production: Boolean = true
   private final var LABEL_ZIPDIR = "zip-dir"
   private final var LABEL_UPLOADDIR = "upload-dir"
+  private final val LABEL_ZERO_STRING = "0"
+  private final val LABEL_ONE_STRING = "1"
 
   /**
     * load production compilation
@@ -534,26 +536,6 @@ class CourseService {
 
   /**
     * Only permitted for docents / moderator / admins
-    * This method returns all submissions of all users orderd by tasks for one course
-    *
-    * @author Benjamin Manns
-    * @param courseid unique course identification
-    * @return Java List
-    */
-  @deprecated("0", "1")
-  def getAllSubmissionsFromAllUsersByCourses(courseid: Int): List[Map[String, Any]] = {
-    DB.query("select * from task t join course c using(course_id)  where c.course_id = ? order by t.task_id",
-      (res, _) => {
-        Map(CourseDBLabels.courseid -> res.getString(CourseDBLabels.courseid),
-          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
-          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.creator -> res.getString(CourseDBLabels.creator),
-          "submissions" -> this.taskService.getSubmissionsByTask(res.getInt(TaskDBLabels.taskid)))
-      }, courseid)
-  }
-
-  /**
-    * Only permitted for docents / moderator / admins
     * This method returns a submissions matrix of all users for one course
     *
     * @author Benjamin Manns
@@ -594,7 +576,7 @@ class CourseService {
           passed_string = passed.toString
         }
         tasksPassedSum = tasksPassedSum + passed.compare(false)
-        val taskedPlagiatPassed: Any = if (plagiat_passed.contains("0")) false else if (plagiat_passed.contains("1")) true else null
+        val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
           "passed_date" -> passedDate, "submission_id" -> final_submission_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed
@@ -649,12 +631,11 @@ class CourseService {
             }
           }
           passed_string = if (!passed && coll_result_date == null) null else passed.toString
-
         }
-        val taskedPlagiatPassed: Any = if (plagiat_passed.contains("0")) false else if (plagiat_passed.contains("1")) true else null
+        val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline),SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
+          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline), SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
         deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
         processedTasks = taskStudentCell :: processedTasks
       }
@@ -792,31 +773,5 @@ class CourseService {
     } else {
       boolDBString.toInt > 0
     }
-  }
-
-  /**
-    * get a List of all submissions and information from which course
-    * @author Benjamin Manns
-    * @param user User who wants to see all his submissions
-    * @return a List of all Submissions ordered by submissiondate
-    */
-  @deprecated("0", "1")
-  def getAllSubmissionsForAllCoursesByUser(user: User): List[Map[String, Any]] = {
-    DB.query("select * from submission join task using(task_id) join course using(course_id) where user_id = ? " +
-    "order by submit_date desc", (res, _) => {
-      Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
-        TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-        CourseDBLabels.name -> res.getString(CourseDBLabels.name),
-        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-        CourseDBLabels.course_end_date-> res.getString(CourseDBLabels.course_end_date),
-        SubmissionDBLabels.passed->getNullOrBoolean(res.getString(SubmissionDBLabels.passed)),
-        SubmissionDBLabels.exitcode ->res.getString(SubmissionDBLabels.exitcode),
-        SubmissionDBLabels.result ->res.getString(SubmissionDBLabels.result),
-        SubmissionDBLabels.submit_date->res.getTimestamp(SubmissionDBLabels.submit_date),
-        SubmissionDBLabels.result_date->res.getTimestamp(SubmissionDBLabels.result_date),
-        CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
-        TaskDBLabels.taskid-> res.getInt(TaskDBLabels.taskid),
-        SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid))
-    }, user.userid)
   }
 }
