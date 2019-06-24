@@ -19,7 +19,8 @@ import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
 import {IsDocentGuard} from './guards/is-docent.guard';
 import {NotFound404Component} from "./components/not-found404/not-found404.component";
-import {ConnectedSystemsComponent} from "./connected-systems/connected-systems.component";
+import {ConnectedSystemsComponent} from "./components/connected-systems/connected-systems.component";
+
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
