@@ -633,11 +633,13 @@ class CourseService {
         var passed_string: String = null
         var passedDate: Any = null
         var coll_result_date: Any = null
+        var plagiat_passed: List[String] = List()
         if (submissionRawData.length == 0) {
           passed_string = null
         } else {
           var passed: Boolean = false
           for (submission <- submissionRawData) {
+            plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
             if (coll_result_date == null) {
               coll_result_date = submission("result_date")
             }
@@ -646,16 +648,13 @@ class CourseService {
               passedDate = submission("submit_date")
             }
           }
-          if (!passed && coll_result_date == null) {
-            passed_string = null
-          } else {
-            passed_string = passed.toString
-          }
-        }
+          passed_string = if (!passed && coll_result_date == null) null else passed.toString
 
+        }
+        val taskedPlagiatPassed: Any = if (plagiat_passed.contains("0")) false else if (plagiat_passed.contains("1")) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline)))
+          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline),SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
         deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
         processedTasks = taskStudentCell :: processedTasks
       }

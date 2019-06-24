@@ -7,6 +7,17 @@
   align-items: center;
 }
 
+.sub_feedback{
+  width: 25px;
+
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  margin: 1px;
+}
+
 .center-box {
   width: 99%;
   height: auto;
@@ -40,6 +51,7 @@
   border-radius: 2px;
   padding: 8px;
   margin: 4px;
+  display: flex;
 }
 
 .task:hover {
@@ -47,13 +59,17 @@
   background-color: $cSecondary;
 }
 
-div.true {
+.sub_feedback.true {
   background-color: mediumseagreen;
 }
 
-div.false {
+.sub_feedback.false {
   background-color: indianred;
 }
+.sub_feedback.null {
+  background-color: lightgrey;
+}
+
 
 ::ng-deep .custom-tooltip {
   color: black !important;
