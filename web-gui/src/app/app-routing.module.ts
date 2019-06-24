@@ -37,6 +37,7 @@ const routes: Routes = [
       {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
       {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
       {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
+      {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
 
       // Student
       {path: 'student/dashboard', component: StudentDashboardComponent},
@@ -46,7 +47,6 @@ const routes: Routes = [
 
       //General Sites
       {path: '404', component: NotFound404Component},
-      {path: 'systems', component: ConnectedSystemsComponent}
 
     ]
   },

@@ -25,11 +25,6 @@
           <mat-icon>search</mat-icon>
           <p>Kurs suchen</p>
         </a>
-        <a mat-list-item routerLink="/systems" routerLinkActive="selected">
-          <mat-icon>system</mat-icon>
-          <p>Verbundene Systeme</p>
-        </a>
-
       </mat-nav-list>
       <mat-divider></mat-divider>
 
@@ -54,6 +49,11 @@
         <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
           <mat-icon>supervised_user_circle</mat-icon>
           <p>Benutzer</p>
+        </a>
+
+        <a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
+          <mat-icon>widgets</mat-icon>
+          <p>Verbundene Systeme</p>
         </a>
       </mat-nav-list>
       <mat-divider></mat-divider>

@@ -51,40 +51,40 @@ services:
     - ./docker-config/mysql2:/var/lib/mysql
     ports:
     - 3309:3306
-  ws:
-    build: ws
-    depends_on:
-    - mysql1
-    - kafka1
-    - zoo1
-    ports:
-    - "443:8080"
-    volumes:
-    - ./ws/upload-dir:/upload-dir
-    - ./ws/zip-dir:/zip-dir
-    - ./docker-config/ws/application_dev.properties:/usr/local/appconfig/application.properties
-    - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
-  secrettokenchecker:
-    build: secrettoken-checker
-    depends_on:
-    - mysql1
-    - kafka1
-    - zoo1
-    - ws
-    environment:
-      HOST_UPLOAD_DIR: "${PWD}/secrettoken-checker/upload-dir"
-    volumes:
-    - /var/run/:/var/run/
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./secrettoken-checker/upload-dir:/upload-dir
-    - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
-  sqlchecker:
-    build: sql-checker
-    depends_on:
-    - mysql2
-    - kafka1
-    - zoo1
-    - ws
-    volumes:
-    - ./sql-checker/upload-dir:/upload-dir
-    - ./docker-config/sqlchecker/application_dev.conf:/usr/local/appconfig/application.config
+#  ws:
+#    build: ws
+#    depends_on:
+#    - mysql1
+#    - kafka1
+#    - zoo1
+#    ports:
+#    - "443:8080"
+#    volumes:
+#    - ./ws/upload-dir:/upload-dir
+#    - ./ws/zip-dir:/zip-dir
+#    - ./docker-config/ws/application_dev.properties:/usr/local/appconfig/application.properties
+#    - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
+#  secrettokenchecker:
+#    build: secrettoken-checker
+#    depends_on:
+#    - mysql1
+#    - kafka1
+#    - zoo1
+#    - ws
+#    environment:
+#      HOST_UPLOAD_DIR: "${PWD}/secrettoken-checker/upload-dir"
+#    volumes:
+#    - /var/run/:/var/run/
+#    - /var/run/docker.sock:/var/run/docker.sock
+#    - ./secrettoken-checker/upload-dir:/upload-dir
+#    - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
+#  sqlchecker:
+#    build: sql-checker
+#    depends_on:
+#    - mysql2
+#    - kafka1
+#    - zoo1
+#    - ws
+#    volumes:
+#    - ./sql-checker/upload-dir:/upload-dir
+#    - ./docker-config/sqlchecker/application_dev.conf:/usr/local/appconfig/application.config
