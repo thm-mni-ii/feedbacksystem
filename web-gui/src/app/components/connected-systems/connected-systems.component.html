@@ -1,6 +1,5 @@
 <div class="flex-container">
 
-
   <mat-form-field appearance="outline">
     <mat-label>Systeme filtern</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)">
@@ -29,7 +28,9 @@
     <!-- description Column -->
     <ng-container matColumnDef="description">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Beschreibung</th>
-      <td mat-cell *matCellDef="let testsystem"> {{testsystem.description}} </td>
+      <td mat-cell *matCellDef="let testsystem">
+        <markdown ngPreserveWhitespaces data="{{testsystem.description}}"></markdown>
+      </td>
     </ng-container>
 
     <!-- supported_formats Column -->
@@ -50,10 +51,33 @@
       <td mat-cell *matCellDef="let testsystem"> {{testsystem.machine_port}} </td>
     </ng-container>
 
+    <!-- Action buttons-->
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef>Löschen</th>
+      <td mat-cell *matCellDef="let testsystem">
+        <button mat-icon-button matTooltip="Testsytem löschen" color="warn" (click)="deleteTestsystem(testsystem)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="edit">
+      <th mat-header-cell *matHeaderCellDef>Bearbeiten</th>
+      <td mat-cell *matCellDef="let testsystem">
+        <button mat-icon-button matTooltip="Testsytem bearbeiten" (click)="editTestsystem(testsystem)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
 
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
   </table>
+
+  <button mat-flat-button color="accent" style="margin-top: 10px;" (click)="openAddDialog()">Hinzufügen</button>
+
+
 
   <div class="guest-account">
 
