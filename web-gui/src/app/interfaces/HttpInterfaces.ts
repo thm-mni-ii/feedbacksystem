@@ -168,6 +168,8 @@ export interface Testsystem {
   testsystem_id: string;
   description: string;
   supported_formats: string;
+  machine_port: string;
+  machine_ip: string;
   testfiles: TestsystemTestfile[]
 }
 
