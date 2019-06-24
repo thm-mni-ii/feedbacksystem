@@ -36,4 +36,7 @@ object SubmissionDBLabels {
 
   /** DB Label "exitcode" */
   val exitcode: String = "exitcode"
+
+  /** DB Label "plagiat_passed" */
+  val plagiat_passed: String = "plagiat_passed"
 }

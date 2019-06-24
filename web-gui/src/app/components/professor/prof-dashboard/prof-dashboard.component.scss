@@ -73,6 +73,16 @@ input {
   flex-wrap: wrap;
 }
 
+.sub_feedback{
+  width: 25px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  margin: 1px;
+}
+
 .task {
   display: flex;
   justify-content: center;
@@ -83,12 +93,16 @@ input {
   margin: 4px;
 }
 
-.task.true {
+.sub_feedback.true {
   background-color: green;
 }
 
-.task.false {
+.sub_feedback.false {
   background-color: red;
+}
+
+.sub_feedback.null {
+  background-color: grey;
 }
 
 ::ng-deep .custom-tooltip {

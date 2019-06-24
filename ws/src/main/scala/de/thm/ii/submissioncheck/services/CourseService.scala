@@ -565,7 +565,6 @@ class CourseService {
     val subscribedStudents = this.getStudentsFromCourse(courseid)
     val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString)
     var matrix: List[Any] = List()
-
     for(u <- subscribedStudents){
       var tasksPassedSum = 0
       var processedTasks: List[Any] = List()
@@ -577,10 +576,10 @@ class CourseService {
         var passed_string: String = null
         var coll_result_date: Any = null
         var final_submission_id: Int = -1
+        var plagiat_passed: List[String] = List()
         for(submission <- userSubmissions) {
-          if (coll_result_date == null) {
-            coll_result_date = submission("result_date")
-          }
+          plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
+          if (coll_result_date == null) coll_result_date = submission("result_date")
           if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
             passed = true
             passedDate = submission("submit_date")
@@ -594,11 +593,12 @@ class CourseService {
         } else {
           passed_string = passed.toString
         }
-
         tasksPassedSum = tasksPassedSum + passed.compare(false)
+        val taskedPlagiatPassed: Any = if (plagiat_passed.contains("0")) false else if (plagiat_passed.contains("1")) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, "submission_id" -> final_submission_id))
+          "passed_date" -> passedDate, "submission_id" -> final_submission_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed
+        ))
 
         processedTasks = taskStudentCell :: processedTasks
       }

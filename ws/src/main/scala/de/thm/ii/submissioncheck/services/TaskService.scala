@@ -204,7 +204,8 @@ class TaskService {
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
           SubmissionDBLabels.result_date -> res.getTimestamp(SubmissionDBLabels.result_date),
           SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
-          SubmissionDBLabels.exitcode -> res.getInt(SubmissionDBLabels.exitcode))
+          SubmissionDBLabels.exitcode -> res.getInt(SubmissionDBLabels.exitcode),
+          SubmissionDBLabels.plagiat_passed -> res.getString(SubmissionDBLabels.plagiat_passed))
       }, taskid, userid)
   }
 
