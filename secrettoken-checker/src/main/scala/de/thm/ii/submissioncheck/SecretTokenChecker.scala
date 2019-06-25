@@ -128,7 +128,7 @@ object SecretTokenChecker extends App {
   val LABEL_TASKID = "taskid"
   /** provides a Label for submissionid*/
   val LABEL_SUBMISSIONID = "submissionid"
-  private val LABEL_COURSEID = "course_id"
+  private val LABEL_COURSEID = "courseid"
   private val LABEL_ACCEPT = "accept"
   private val LABEL_ERROR = "error"
   private val EXITING_MSG = "Exiting ..."
@@ -273,7 +273,8 @@ object SecretTokenChecker extends App {
       "success" -> success,
       "submissionlist" -> submissionList,
       "msg" -> msg,
-      LABEL_TASKID -> task_id.toString
+      LABEL_TASKID -> task_id,
+      LABEL_COURSEID -> course_id
     )))
   }
 

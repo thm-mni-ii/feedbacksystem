@@ -46,6 +46,8 @@ class TaskController {
   private val courseParameterService: CourseParamService = null
   @Autowired
   private val testsystemService: TestsystemService = null
+  @Autowired
+  private val notificationService: NotificationService = null
 
   @Value("${spring.kafka.bootstrap-servers}")
   private val kafkaURL: String = null
@@ -797,9 +799,10 @@ class TaskController {
             for (submission <- submissionlist) {
               taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
             }
-
             // If every data is saved correctly
             taskService.updateTask(taskId, null, null, null, null, true)
+          } else {
+            notifyDocentAfterPlagiarismCheck(Integer.parseInt(answeredMap(LABEL_COURSE_ID).toString), answeredMap("msg").asInstanceOf[String])
           }
         } catch {
           case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
@@ -808,6 +811,12 @@ class TaskController {
     })
     plagiatTaskCheckerContainer.start
     Map(LABEL_RELOAD -> true)
+  }
+
+  private def notifyDocentAfterPlagiarismCheck(courseid: Int, text: String) = {
+    courseService.getCourseDocent(courseid).foreach( docent => {
+      notificationService.insertNotificationForUser(Integer.parseInt(docent(UserDBLabels.user_id)), text)
+    })
   }
 
   private def kafkaLoadPlagiatScriptAnswerService: Map[String, AnyVal] = {

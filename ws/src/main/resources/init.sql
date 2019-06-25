@@ -304,3 +304,15 @@ CREATE TABLE `course_parameter_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE TABLE notification
+(
+    n_id int PRIMARY KEY,
+    user_id int,
+    message TEXT,
+    datetime DATETIME,
+    testsystem_id varchar(30),
+    CONSTRAINT notification_user_user_id_fk FOREIGN KEY (user_id) REFERENCES user (user_id),
+    CONSTRAINT notification_testsystem_testsystem_id_fk FOREIGN KEY (testsystem_id) REFERENCES testsystem (testsystem_id)
+);
+
+ALTER TABLE notification MODIFY n_id int(11) NOT NULL auto_increment;
