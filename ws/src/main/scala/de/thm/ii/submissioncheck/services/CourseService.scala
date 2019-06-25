@@ -335,7 +335,7 @@ class CourseService {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
     val selectPart = "c.course_id, c.standard_task_typ, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
-      "c.course_semester, c.personalised_submission, t.role_id, t.role_name" + (if (isPermitted) {
+      "c.course_semester, c.personalised_submission, t.role_id, t.role_name, c.plagiarism_script " + (if (isPermitted) {
       ", c.creator" // TODO add more columns
     } else {
       ""

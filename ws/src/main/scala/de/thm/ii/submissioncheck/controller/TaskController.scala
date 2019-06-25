@@ -571,7 +571,7 @@ class TaskController {
         val taskid: Int = task(TaskDBLabels.taskid).asInstanceOf[Int]
         val submissionMatrix = taskService.getSubmissionsByTask(taskid)
         val tasksystem_id = "plagiarismchecker"
-        val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, "download_zip_url" ->
+        val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, LABEL_COURSE_ID -> task(TaskDBLabels.courseid), "download_zip_url" ->
           (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
           "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
           "submissionmatrix" -> submissionMatrix)
@@ -788,16 +788,19 @@ class TaskController {
         try {
           logger.warn(answeredMap.toString())
           val workedOut = answeredMap(LABEL_SUCCESS).asInstanceOf[Boolean]
-          val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
 
-          val submissionlist = answeredMap("submissionlist").asInstanceOf[List[Map[String, Boolean]]]
-          for (submission <- submissionlist) {
-            taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
+          if (workedOut) {
+            // TODO if not workedOut we need to protocoll this happending
+            val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
+
+            val submissionlist = answeredMap("submissionlist").asInstanceOf[List[Map[String, Boolean]]]
+            for (submission <- submissionlist) {
+              taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
+            }
+
+            // If every data is saved correctly
+            taskService.updateTask(taskId, null, null, null, null, true)
           }
-
-          // If every data is saved correctly
-          taskService.updateTask(taskId, null, null, null, null, true)
-
         } catch {
           case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
         }

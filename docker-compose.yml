@@ -40,7 +40,7 @@ services:
     ports:
     - 3308:3306
   bash1:
-    image: bash:4.4
+    build: bash
   mysql2:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password
@@ -73,6 +73,7 @@ services:
     - ws
     environment:
       HOST_UPLOAD_DIR: "${PWD}/secrettoken-checker/upload-dir"
+      BASH_DOCKER: "submissioncheck_bash1"
     volumes:
     - /var/run/:/var/run/
     - /var/run/docker.sock:/var/run/docker.sock

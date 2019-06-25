@@ -194,6 +194,7 @@ object SecretTokenChecker extends App {
 
   /**
     * sends a kafka Message
+    *
     * @param record kafka record
     * @return Done object
     */
@@ -201,7 +202,9 @@ object SecretTokenChecker extends App {
     akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))
 
   private def sendCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
+
   private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
+
   private def sendPlagiarismCheckMessage(message: String): Future[Done] =
     sendMessage(new ProducerRecord[String, String](PLAGIARISM_CHECK_ANSWER_TOPIC, message))
 
@@ -241,11 +244,12 @@ object SecretTokenChecker extends App {
     val jsonMap: Map[String, Any] = record.value()
     val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
     val zip_url = jsonMap("download_zip_url").asInstanceOf[String]
-    val task_id = jsonMap("task_id")
+    val task_id = jsonMap("task_id").toString
+    val course_id = jsonMap("courseid").toString
     val submissionmatrix = jsonMap("submissionmatrix").asInstanceOf[List[Map[String, Any]]]
-    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, task_id.toString)
+    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, task_id)
     var msg = ""
-    var submissionList: List[Map[String, Boolean]] = List()
+    var submissionList: List[Map[Int, Boolean]] = List()
     var success: Boolean = false
 
     if (plagiatCheckPath.isEmpty) {
@@ -254,17 +258,15 @@ object SecretTokenChecker extends App {
     } else {
       // need to unzip
       // TODO delete previous checks
-      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), basedir + __slash + task_id + "/unzip/")
-      val pCheck = new PlagiatCheckExec(task_id.toString, plagiatCheckPath.get.toAbsolutePath.toString())
+      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), Paths.get(basedir).resolve(course_id).resolve(task_id).resolve("unzip").toString)
 
-      // TODO check plagiarism
-      for (userMap <- submissionmatrix) {
-        //val userCastedTasks = userMap.asInstanceOf[Map[String, Any]]("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
-        userMap("submission_id")
-        // Todo run somehow plagiat test
-        submissionList = Map(userMap("submission_id").toString -> true) :: submissionList
-      }
-      success = true
+      val pCheck = new PlagiatCheckExec(course_id, task_id, plagiatCheckPath.get.toAbsolutePath.toString())
+      // run plagiat test for all submissions
+      pCheck.exec()
+
+      submissionList = pCheck.submission_checks
+      success = pCheck.execution_success
+      msg = pCheck.error_msg
     }
 
     sendPlagiarismCheckMessage(JsonHelper.mapToJsonStr(Map(
@@ -284,7 +286,7 @@ object SecretTokenChecker extends App {
       val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
       var submittedFilePath: String = ""
-      if(submit_type.equals("file")){
+      if (submit_type.equals("file")) {
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         //new URL(url) #> new File("submit.txt") !!
         val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
@@ -292,14 +294,14 @@ object SecretTokenChecker extends App {
         submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
         logger.info(submittedFilePath)
       }
-      else if (submit_type.equals(DATA)){
+      else if (submit_type.equals(DATA)) {
         submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
       }
       var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
 
       val (output, code) = bashTest(taskid, userid, submittedFilePath)
-      if(code == 0){
+      if (code == 0) {
         passed = 1
       }
       sendCheckMessage(JsonHelper.mapToJsonStr(Map(
@@ -321,6 +323,7 @@ object SecretTokenChecker extends App {
 
   /**
     * Deletes a dir recursively deleting anything inside it.
+    *
     * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
     * @param dir The dir to delete
     * @return true if the dir was successfully deleted
@@ -344,7 +347,7 @@ object SecretTokenChecker extends App {
 
   private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
-    try{
+    try {
       logger.warning("task received")
       val sslContext = SSLContext.getInstance("SSL")
       sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
@@ -398,15 +401,16 @@ object SecretTokenChecker extends App {
     * @return message and exitcode
     */
   def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-      val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
-      val exit1 = bashtest1.exec()
-      val message1 = bashtest1.output
+    val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
+    val exit1 = bashtest1.exec()
+    val message1 = bashtest1.output
 
-      (message1, exit1)
+    (message1, exit1)
   }
 
   /**
     * shTest is used by Kafka Example
+    *
     * @param token String from User
     * @return String Answer from Script
     */
@@ -420,6 +424,7 @@ object SecretTokenChecker extends App {
 
   /**
     * getShTestOut
+    *
     * @param sName shell script name
     * @param token shell parameter
     * @return Output of script
@@ -458,7 +463,7 @@ object SecretTokenChecker extends App {
 
   private def downloadPlagiatCheckFiles(link: String, jwt_token: String, taskid: String): Option[Path] = {
     val connection = download(link, jwt_token)
-    if(connection.getResponseCode >= 400){
+    if (connection.getResponseCode >= 400) {
       logger.error(LABEL_ERROR_DOWNLOAD)
       Option.empty
     }
@@ -474,7 +479,7 @@ object SecretTokenChecker extends App {
   private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
     var connection = download(link, jwt_token)
     val filename = submissionid
-    if(connection.getResponseCode >= 400){
+    if (connection.getResponseCode >= 400) {
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
@@ -487,11 +492,11 @@ object SecretTokenChecker extends App {
   private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
     var downloadFileNames: List[String] = List()
     val timeout = 1000
-    for(urlname <- urlnames){
+    for (urlname <- urlnames) {
       val url = new java.net.URL(urlname)
       val urlParts = urlname.split(__slash)
       // syntax of testfile url allows us to get filename
-      val filename = URLDecoder.decode(urlParts(urlParts.length-1), StandardCharsets.UTF_8.toString)
+      val filename = URLDecoder.decode(urlParts(urlParts.length - 1), StandardCharsets.UTF_8.toString)
       downloadFileNames = downloadFileNames ++ List(filename)
       val connection = url.openConnection().asInstanceOf[HttpURLConnection]
       connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
@@ -500,7 +505,7 @@ object SecretTokenChecker extends App {
       connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
       connection.connect()
 
-      if(connection.getResponseCode >= 400){
+      if (connection.getResponseCode >= 400) {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
@@ -530,7 +535,7 @@ object SecretTokenChecker extends App {
     connection.setRequestProperty("Connection", "close")
     connection.connect()
 
-    if(connection.getResponseCode >= 400){
+    if (connection.getResponseCode >= 400) {
       logger.error(LABEL_ERROR_DOWNLOAD)
     }
     else {
@@ -545,14 +550,14 @@ object SecretTokenChecker extends App {
     * copied from https://stackoverflow.com/a/30642526
     * It is more a JAVA way
     *
-    * @param zipFile downloaded zip path
+    * @param zipFile      downloaded zip path
     * @param outputFolder where to extract
     */
   def unZipCourseSubmission(zipFile: String, outputFolder: String): Unit = {
     val one_K_size = 1024
     val fis = new FileInputStream(zipFile)
     val zis = new ZipInputStream(fis)
-    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach{ file =>
+    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
       val fullFilePath = outputFolder + file.getName
       val parentFolder = Paths.get(fullFilePath).getParent.toAbsolutePath
 
