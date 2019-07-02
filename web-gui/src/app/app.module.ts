@@ -50,7 +50,9 @@ import { UploadPlagiatScriptComponent } from './components/courses/modals/upload
 import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
 import {NgxDropzoneModule} from "ngx-dropzone";
-
+import { ConnectedSystemsComponent } from './components/connected-systems/connected-systems.component';
+import { EditTestsystemsModalComponent } from './components/connected-systems/modals/edit-testsystems-modal/edit-testsystems-modal.component';
+import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
 
 
 @Injectable()
@@ -100,9 +102,12 @@ export const httpInterceptorProviders = [
     DeleteUserModalComponent,
     AnswerFromTestsystemDialogComponent,
     NotFound404Component,
+    ConnectedSystemsComponent,
     CourseParameterModalComponent,
     CourseParameterUserModalComponent,
     UploadPlagiatScriptComponent,
+    EditTestsystemsModalComponent,
+    DeleteTestsystemAskModalComponent,
   ],
   imports: [
     BrowserModule,
@@ -124,9 +129,9 @@ export const httpInterceptorProviders = [
     NgxDropzoneModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
-    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, CourseParameterModalComponent,
-    CourseParameterUserModalComponent, UploadPlagiatScriptComponent],
-  providers: [CookieService, MarkdownService, MarkedOptions],
+    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
+    CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
+  providers: [CookieService, MarkdownService, MarkedOptions, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {

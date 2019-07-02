@@ -43,6 +43,17 @@ export class DatabaseService {
     return this.http.get<Testsystem>('/api/v1/testsystems/' + testsystem_id).toPromise();
   }
 
+  updateTestsystem(testsystem_id: string, body: any): Promise<Succeeded> {
+    return this.http.put<Succeeded>('/api/v1/testsystems/' + testsystem_id, body).toPromise();
+  }
+
+  postTestsystem(body: any): Promise<Succeeded> {
+    return this.http.post<Succeeded>('/api/v1/testsystems', body).toPromise();
+  }
+
+  deleteTestsystem(testsystem_id: string): Promise<Succeeded> {
+    return this.http.delete<Succeeded>('/api/v1/testsystems/' + testsystem_id).toPromise();
+  }
 
   /**
    * Get impressum or dataprivacy text

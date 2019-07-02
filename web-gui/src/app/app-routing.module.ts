@@ -19,6 +19,8 @@ import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
 import {IsDocentGuard} from './guards/is-docent.guard';
 import {NotFound404Component} from "./components/not-found404/not-found404.component";
+import {ConnectedSystemsComponent} from "./components/connected-systems/connected-systems.component";
+
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -36,6 +38,7 @@ const routes: Routes = [
       {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
       {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
       {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
+      {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
 
       // Student
       {path: 'student/dashboard', component: StudentDashboardComponent},
@@ -44,7 +47,8 @@ const routes: Routes = [
       {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]},
 
       //General Sites
-      {path: '404', component: NotFound404Component}
+      {path: '404', component: NotFound404Component},
+
     ]
   },
   { path: '**', redirectTo: '404' }
