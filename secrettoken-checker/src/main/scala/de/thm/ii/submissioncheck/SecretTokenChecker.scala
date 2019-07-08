@@ -104,6 +104,8 @@ object SecretTokenChecker extends App {
   // We accept also "gitchecker"
   private val GIT_SYSTEMIDTOPIC = "gitchecker"
   private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
+  private val GIT_TASK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + "_new_task_request"
+
   /** provides a Label for gitchecker_answer*/
   val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
 
@@ -129,8 +131,10 @@ object SecretTokenChecker extends App {
   /** provides a Label for submissionid*/
   val LABEL_SUBMISSIONID = "submissionid"
   private val LABEL_COURSEID = "courseid"
-  private val LABEL_ACCEPT = "accept"
-  private val LABEL_ERROR = "error"
+  /** provide labl for accept */
+  val LABEL_ACCEPT = "accept"
+  /** provide labl for error */
+  val LABEL_ERROR = "error"
   private val EXITING_MSG = "Exiting ..."
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
@@ -168,6 +172,14 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  private val control_gittaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(GIT_TASK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onGitTaskReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -187,6 +199,10 @@ object SecretTokenChecker extends App {
       case Failure(err) => logger.warning(err.getMessage)
     }
     control_gitchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_gittaskchecker.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
@@ -230,8 +246,19 @@ object SecretTokenChecker extends App {
   }
 
   private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
+    try {
+      val jsonMap: Map[String, Any] = record.value()
+      GitCheckExec.onGitReceived(jsonMap)
+    } catch {
+      case e: Exception => println(e.getMessage)
+    }
+
+
+  }
+
+  private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
-    GitCheckExec.onGitReceived(jsonMap)
+    GitCheckExec.onTaskGitReceived(jsonMap)
   }
 
   private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
@@ -490,7 +517,16 @@ object SecretTokenChecker extends App {
     Paths.get(ULDIR).resolve(taskid).resolve(filename).resolve(filename)
   }
 
-  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
+  /**
+    *
+    * Download a from Feedbacksystem
+    * @param urlnames url
+    * @param jwt_token JSON Web Token
+    * @param taskid id of task
+    * @param subpath optional sub path prefix
+    * @return list of downloaded file names
+    */
+  def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String, subpath: String = ""): List[String] = {
     var downloadFileNames: List[String] = List()
     val timeout = 1000
     for (urlname <- urlnames) {
@@ -510,8 +546,8 @@ object SecretTokenChecker extends App {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
-        new File(Paths.get(ULDIR).resolve(taskid).toString).mkdirs()
-        Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
+        new File(Paths.get(ULDIR).resolve(subpath).resolve(taskid).toString).mkdirs()
+        Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(subpath).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
     }
     downloadFileNames
