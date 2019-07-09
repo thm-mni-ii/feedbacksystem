@@ -43,6 +43,16 @@ object JsonHelper {
   }
 
   /**
+    * parse a string to a List of Any
+    * @param jsonStr a JSON String
+    * @return Scala List
+    */
+  implicit def jsonStrToList(jsonStr: String): List[Any] = {
+    implicit val formats = org.json4s.DefaultFormats
+    parse(jsonStr).extract[List[Any]]
+  }
+
+  /**
     * mapToJsonStr use Object Mapper
     *
     * @author Benjamin Manns

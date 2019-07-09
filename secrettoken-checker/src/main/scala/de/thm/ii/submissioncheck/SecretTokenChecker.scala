@@ -178,8 +178,6 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-
-
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -250,10 +248,8 @@ object SecretTokenChecker extends App {
       val jsonMap: Map[String, Any] = record.value()
       GitCheckExec.onGitReceived(jsonMap)
     } catch {
-      case e: Exception => println(e.getMessage)
+      case e: Exception => {}
     }
-
-
   }
 
   private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
