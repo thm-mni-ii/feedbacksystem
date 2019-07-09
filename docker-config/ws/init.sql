@@ -203,7 +203,7 @@ CREATE TABLE `testsystem_testfile` (
 
 LOCK TABLES `testsystem_testfile` WRITE;
 /*!40000 ALTER TABLE `testsystem_testfile` DISABLE KEYS */;
-INSERT INTO `testsystem_testfile` VALUES ('gitchecker',	'configfile',	1), ('gitchecker', 'docentfile', 0), ('secrettokenchecker','scriptfile',1),('secrettokenchecker','testfile',0),('sqlchecker', 'sections.json', 1),('sqlchecker', 'db.sql', 1);
+INSERT INTO `testsystem_testfile` VALUES ('gitchecker',	'config.json',	1), ('gitchecker', 'structurecheck', 0), ('secrettokenchecker','scriptfile',1),('secrettokenchecker','testfile',0),('sqlchecker', 'sections.json', 1),('sqlchecker', 'db.sql', 1);
 /*!40000 ALTER TABLE `testsystem_testfile` ENABLE KEYS */;
 UNLOCK TABLES;
 
