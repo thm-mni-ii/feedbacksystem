@@ -1,0 +1,14 @@
+
+<ul *ngFor="let resultElement of taskResultList">
+  <h2>{{resultElement.header}}</h2>
+  <ul>
+      <mat-card *ngFor="let line of resultElement.result" id="resultCard" class="line.result">
+        <mat-icon [ngStyle]="{'color':'green'}" *ngIf="line.result">done</mat-icon>
+        <mat-icon [ngStyle]="{'color':'red'}" *ngIf="!line.result">error</mat-icon>
+
+        {{line.test}}
+      </mat-card>
+  </ul>
+</ul>
+
+<p *ngIf="taskResultList.length == 0" class="{{taskPassed}}" id="task-result-text">Ergebnis: {{taskResult}}</p>

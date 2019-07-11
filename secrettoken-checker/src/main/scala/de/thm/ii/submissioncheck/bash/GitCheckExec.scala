@@ -34,6 +34,9 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
   var exitCode: Int = startCode
   private val timeout = 5000
 
+  private val LABEL_TEST = "test"
+  private val LABEL_RESULT = "result"
+
   @throws(classOf[java.io.IOException])
   @throws(classOf[java.net.SocketTimeoutException])
   private def gitlabGet(url: String, token: String, connectTimeout: Int = timeout, readTimeout: Int = timeout, requestMethod: String = "GET") = {
@@ -49,7 +52,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
   }
 
   private def runStructureTest(configFile: String, targetPath: Path) = {
-    var result: Map[String, Boolean] = Map()
+    var result: List[Map[String, Any]] = List()
 
     val bufferedSource = Source.fromFile(configFile)
     for (line <- bufferedSource.getLines) {
@@ -59,17 +62,17 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
       if (trimmed.matches("!.*")) {
         // file should not be there
         val filePath = targetPath.resolve(trimmed.replace("!", ""))
-        result += (trimmed -> !Files.exists(filePath))
+        result = Map(LABEL_TEST -> trimmed, LABEL_RESULT -> !Files.exists(filePath)) :: result
       } else if (trimmed.matches("#.*")) {
         //skipp this line
       } else if (trimmed.matches("/.*")) {
         // is absolute path
         val filePath = targetPath.resolve(trimmed.replaceFirst("^/", ""))
-        result += (trimmed -> Files.exists(filePath))
+        result = Map(LABEL_TEST -> trimmed, LABEL_RESULT -> Files.exists(filePath)) :: result
       } else {
         // file should be there
         val filePath = targetPath.resolve(trimmed)
-        result += (trimmed -> Files.exists(filePath))
+        result = Map(LABEL_TEST -> trimmed, LABEL_RESULT -> Files.exists(filePath)) :: result
       }
     }
     bufferedSource.close
@@ -91,7 +94,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
   }
 
   private def runMaintainerTest(docentFile: File, target_dir: String) = {
-    var result: Map[String, Boolean] = Map()
+    var result: List[Map[String, Any]] = List()
     var docentSettingMap: Map[String, Any] = Map()
     try {
       val bufferedSource = Source.fromFile(docentFile)
@@ -115,7 +118,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
         projectMaintainer.foreach(maintainerMap => {
           val name = maintainerMap("name").asInstanceOf[String]
-          result += ("Maintainer " + name -> (pNames.contains(name) && maintainerMap("access_level").asInstanceOf[BigInt] == 40))
+          result = Map(LABEL_TEST -> name, LABEL_RESULT -> (pNames.contains(name) && maintainerMap("access_level").asInstanceOf[BigInt] == 40)) :: result
         })
         val projectDeveloper = projectMaintainer.map(maintainer => {
           val name = maintainer("name").asInstanceOf[String]
@@ -124,7 +127,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
         // check if docent is developer in this repo
         docentSettingMap("docents").asInstanceOf[List[String]].foreach(docent => {
-          result += ("Developer " + docent -> projectDeveloper.contains(docent))
+          result = Map(LABEL_TEST -> ("Developer " + docent), LABEL_RESULT -> projectDeveloper.contains(docent)) :: result
         })
       } catch {
         case e: java.net.SocketTimeoutException => {
@@ -147,14 +150,10 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     */
   def exec(): Int = {
     var dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
-    if (dockerRelPath == null) {
-      dockerRelPath = ULDIR
-    }
+    if (dockerRelPath == null) dockerRelPath = ULDIR
 
     val targetPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
     val target_dir = targetPath.toString
-    logger.warn(dockerRelPath)
-    logger.warn(target_dir)
 
     val basePath = Paths.get(dockerRelPath).resolve(taskid.toString)
     val targetDirPath = Paths.get(target_dir)
@@ -171,24 +170,29 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
       exitCode = Process("git", seq).!(logger)
       output = stdoutStream.toString() + "\n" + stderrStream.toString()
 
+      var checkresultList: List[Map[String, Any]] = List()
+      var maintainerMap: List[Map[String, Any]] = List()
       if (exitCode == 0) {
         val configFile = new File(basePath.resolve(GitCheckExec.LABEL_STRUCTUREFILE).toString)
         val configFilePathRel = configFile.getPath
         val configFileAbsPath = configFile.getAbsolutePath
 
         var structureMap = runStructureTest(configFileAbsPath, targetPath)
+        checkresultList = Map("header" -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
+
         if (Files.exists(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE))) {
           // we request to git(lab/hub) and do some activity checks
-          val maintainerMap = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString), targetDirPath.toAbsolutePath.toString)
-          maintainerMap.foreach(e => structureMap += e._1 -> e._2)  // add it to structure check
+          maintainerMap = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString), targetDirPath.toAbsolutePath.toString)
+          checkresultList = Map("header" -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
         }
 
         if (exitCode == startCode || exitCode == 0) {
           var sum = 0
-          structureMap.values.foreach(a => if (a) sum += 1)
+          structureMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
+          maintainerMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
           // If checks are passed we can send a string or a JSON String
-          output = JsonHelper.mapToJsonStr(structureMap)
-          if (sum == structureMap.values.size) exitCode = 0 else exitCode = 1
+          output = JsonHelper.listToJsonStr(checkresultList)
+          if (sum == (structureMap.size + maintainerMap.size)) exitCode = 0 else exitCode = 1
         }
       }
     }

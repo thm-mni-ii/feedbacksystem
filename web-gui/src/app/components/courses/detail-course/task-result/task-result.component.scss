@@ -1,0 +1,11 @@
+#resultCard.true{
+  background-color: green;
+}
+
+#task-result-text.true {
+  color: green;
+}
+
+#resultCard.false, #task-result-text.false {
+  color: red;
+}
