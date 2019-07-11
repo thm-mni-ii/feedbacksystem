@@ -60,7 +60,7 @@ import { TaskResultComponent } from './components/courses/detail-course/task-res
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8888'  + req.url // 'https://fk-server.mni.thm.de'
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);

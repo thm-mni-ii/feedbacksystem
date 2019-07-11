@@ -39,8 +39,8 @@ class LoginService {
     val deletedUserSubQuery = if (showDeleted) "" else " AND status = 1"
 
     var listAll = true
-    var before_std = DateParser.dateParser("00:00:00 9999-12-31")
-    var after_std = "00:00:00 0000-00-00"
+    var before_std = DateParser.dateParser("9999-12-31 00:00:00")
+    var after_std = "0001-01-01 00:00:00"
     if (before != null) {
       listAll = false
       before_std = DateParser.dateParser(before)
