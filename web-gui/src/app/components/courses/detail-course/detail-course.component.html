@@ -45,7 +45,9 @@
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>
 
-        <p id="task-result-text" class="{{task.passed}}" *ngIf="task.result">Ergebnis: {{task.result}}</p>
+
+        <app-task-result [taskResult]="task.result" [taskPassed]="task.passed"></app-task-result>
+
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
