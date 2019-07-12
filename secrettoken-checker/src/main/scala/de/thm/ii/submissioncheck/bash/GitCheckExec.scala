@@ -284,7 +284,7 @@ object GitCheckExec {
       "exitcode" -> exitcode.toString,
       LABEL_TASKID -> task_id.toString,
       LABEL_SUBMISSIONID -> sumission_id,
-      //"public_key" -> gitChecker.getPublicKey, not needed yet
+      "public_key" -> gitChecker.getPublicKey,
       DATA -> gitChecker.output
     )))
   }

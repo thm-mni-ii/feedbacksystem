@@ -13,7 +13,7 @@ docker images
 docker tag feedbacksystem_secrettokenchecker thmmniii/secrettokenchecker:$tag
 docker tag feedbacksystem_ws thmmniii/ws:$tag
 docker tag feedbacksystem_sqlchecker thmmniii/sqlchecker:$tag
-docker tag feedbacksystem_bash thmmniii/bash:$tag
+docker tag feedbacksystem_bash1 thmmniii/bash:$tag
 
 docker push thmmniii/ws:$tag
 docker push thmmniii/secrettokenchecker:$tag
@@ -25,7 +25,7 @@ tag=latest
 docker tag feedbacksystem_secrettokenchecker thmmniii/secrettokenchecker:$tag
 docker tag feedbacksystem_ws thmmniii/ws:$tag
 docker tag feedbacksystem_sqlchecker thmmniii/sqlchecker:$tag
-docker tag feedbacksystem_bash thmmniii/bash:$tag
+docker tag feedbacksystem_bash1 thmmniii/bash:$tag
 
 docker push thmmniii/ws:$tag
 docker push thmmniii/secrettokenchecker:$tag

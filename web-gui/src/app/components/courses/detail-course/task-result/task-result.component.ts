@@ -21,6 +21,7 @@ export class TaskResultComponent implements OnInit {
       this.taskResultList = JSON.parse(this.taskResult)
     } catch (e) {
       // can not parsed, do nothing
+      this.taskResultList = []
     }
 
   }
