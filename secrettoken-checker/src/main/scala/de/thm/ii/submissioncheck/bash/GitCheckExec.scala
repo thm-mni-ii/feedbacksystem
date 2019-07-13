@@ -149,8 +149,9 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     * @return exitcode
     */
   def exec(): Int = {
-    var dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
-    if (dockerRelPath == null) dockerRelPath = ULDIR
+    //var dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
+    //if (dockerRelPath == null) dockerRelPath = ULDIR
+    var dockerRelPath = ULDIR
 
     val targetPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
     val target_dir = targetPath.toString
