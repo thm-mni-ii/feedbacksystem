@@ -13,17 +13,18 @@ export class TaskResultComponent implements OnInit {
   public taskResultList: any = [];
 
   constructor() {
-
+    this.taskResultList = []
   }
 
   ngOnInit() {
+    if (this.taskResult == null) return;
+
     try {
       this.taskResultList = JSON.parse(this.taskResult)
     } catch (e) {
       // can not parsed, do nothing
       this.taskResultList = []
     }
-
   }
 
 }
