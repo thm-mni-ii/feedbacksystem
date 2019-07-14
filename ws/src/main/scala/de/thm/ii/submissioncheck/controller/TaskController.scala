@@ -600,7 +600,8 @@ class TaskController {
     }
   }
 
-  plagiatCheckerThread.start
+  // Uncomment to start plagiat checker. 2019-07-14: Checker is not ready implemented, yet
+  // plagiatCheckerThread.start
 
   /**
     * provide a GET URL to download testfiles for a task
@@ -755,9 +756,12 @@ class TaskController {
           val error = answeredMap("error").asInstanceOf[String]
           taskService.setTaskTestFileAcceptedState(taskId, accept, error)
         } catch {
-          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
+          case e: NoSuchElementException => {
+              logger.warn(e.getMessage)
+              logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
+            }
+          }
         }
-      }
     })
     newTaskAnswerContainer.start
     Map(LABEL_RELOAD -> true)
