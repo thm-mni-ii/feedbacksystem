@@ -217,6 +217,7 @@ object SQLChecker extends App {
           "Error" -> "Please provide valid parameters"
         )))
       }
+      case e: Exception => logger.warning("Got Exception from SQLTask with no catch: " + e.getMessage)
     }
   }
 
