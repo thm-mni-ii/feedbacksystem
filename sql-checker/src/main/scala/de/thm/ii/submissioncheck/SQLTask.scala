@@ -3,6 +3,7 @@ package de.thm.ii.submissioncheck
 import java.sql._
 import java.io._
 import java.nio.file.{Files, Paths}
+import java.util.regex.Pattern
 
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
@@ -140,97 +141,20 @@ class SQLTask(val filepath: String, val taskId: String){
     stmt.execute(dropdb + "IF EXISTS " + taskid.toString + us + name + sc)
   }
 
-  /*
-  /**
-    *@author Vlad Sokyrskyy
-    */
-  def saveTask(): Unit = {
-    val jsonstring = scala.io.Source.fromFile(filepath + "/sections.json").mkString
-    val content = parse(jsonstring).extract[Map[String, Any]]
-    val sections = content("sections").asInstanceOf[List[Map[String, String]]]
-    taskqueries = sections
+  private def executeComplexQueries(query: String): ResultSet = {
+    val ustatement = connection.createStatement
+    ustatement.setQueryTimeout(timeoutsec)
+    var res: ResultSet = null
+    val p = Pattern.compile("UPDATE.*", 2)
+    query.split(";").foreach( q => {
+      if (p.matcher(q.trim).matches()){
+        ustatement.executeUpdate(q)
+      } else {
+          if (q.trim.length > 1) res = ustatement.executeQuery(q)
+      }
+    })
 
-    val taskqueries: scala.Array[TaskQuery] = new scala.Array[TaskQuery](qfile.length)
-    for((sec, i) <- sections.zipWithIndex){
-      taskqueries(i).description = sec.description
-      taskqueries(i).query = sec.query
-      taskqueries(i).order = sec.order
-    }
-    createDatabase()
-    val queryres = new scala.Array[(String, ResultSet, String)](taskqueries.length)
-    for((tq, i) <- taskqueries.zipWithIndex){
-      val querystring: String = taskqueries(i)("query")
-      val desc = taskqueries(i)("description")
-      val rs = s.executeQuery(querystring)
-      val ord = taskqueries(i)("order")
-      if(ord.equals("Variable")){
-        //put lines in order
-        //nvm not here
-      }
-      queryresults += ((desc, rs))
-      queryres(i) = (desc, rs, ord)
-    }
-    for((tq, i) <- taskqueries.zipWithIndex){
-    }
-    //s.execute(dropdb + taskid.toString + us + sc)
-  }
-  */
-  /**
-    * Compares the resultset from usersubmission to the saved result sets and sets a result
-    * @param userq srting of the user query
-    * @param userid userid
-    * @return tuple with message and boolean
-    */
-  def runSubmissionold(userq: String, userid: String): (String, Boolean) = {
-    var msg = "Your Query didn't produce the correct result"
-    var success = false; var identified = false; var foundindex = -1
-    val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
-    val ustatement_ordered = connection.createStatement; ustatement_ordered.setQueryTimeout(timeoutsec)
-    val dbname = userid + us + dbliteral; val username = userid + us + taskid
-    createDatabase(dbname)
-    try{
-      val userres = ustatement.executeQuery(userq) // check sqlexception
-      val rsmd = userres.getMetaData()
-      val col = rsmd.getColumnCount()
-      userres.last()
-      val rows = userres.getRow
-      userres.beforeFirst()
-      val userarr = arrayfromRS(userres)
-      val userarr_ordered = orderArray(userarr)
-      breakable{
-        for (i <- 0 until queryc){
-          queryres(i).res.beforeFirst()
-          var queryarr = arrayfromRS(queryres(i).res)
-          var userarray = userarr
-          if( (queryarr.length == userarray.length) && (queryarr(0).length == userarray(0).length)){
-            if (queryres(i).order.equalsIgnoreCase("variable")){
-              queryarr = orderArray(queryarr);
-              userarray = userarr_ordered;
-            }
-            if (compareArray(queryarr, userarray)){
-              identified = true
-              foundindex = i
-              break()
-            }
-          }
-        }
-      }
-    } catch {
-      case ex: SQLTimeoutException => {
-        msg = "Die Query hat zu lange gedauert: " + ex.getMessage
-      }
-      case ex: SQLException => {
-        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")
-      }
-    }
-    s.execute(dropdb + taskid + us + dbname)
-    if(identified){
-      msg = queryres(foundindex).desc
-      if(msg.equals("OK")){
-        success = true
-      }
-    }
-    (msg, success)
+    res
   }
 
   /**
@@ -243,11 +167,10 @@ class SQLTask(val filepath: String, val taskId: String){
     var msg = "Your Query didn't produce the correct result"
     var success = false; var identified = false; var foundindex = -1
     val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
-    val ustatement_ordered = connection.createStatement; ustatement_ordered.setQueryTimeout(timeoutsec)
     val dbname = userid + us + dbliteral; val username = userid + us + taskid
     createDatabase(dbname)
-    try{
-      val userres = ustatement.executeQuery(userq)
+    try {
+      val userres = executeComplexQueries(userq)
       val rsmd = userres.getMetaData()
       val col = rsmd.getColumnCount()
       userres.last()
