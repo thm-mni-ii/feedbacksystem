@@ -10,7 +10,10 @@ import scala.collection.JavaConverters._
 import java.util.{Base64, Date, NoSuchElementException, Timer, TimerTask}
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
+import de.thm.ii.submissioncheck.TestsystemTestfileLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, _}
+import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services.{TestsystemService, _}
 import javax.servlet.http.HttpServletRequest
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -38,6 +41,8 @@ import org.springframework.web.multipart.MultipartFile
 class TaskController {
   @Autowired
   private val taskService: TaskService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
   @Autowired
   private val userService: UserService = null
   @Autowired
@@ -81,6 +86,7 @@ class TaskController {
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
+  private final val LABEL_SEQ = "seq"
   private final val LABEL_NAME = "name"
   private final val LABEL_DESCRIPTION = "description"
   private final val LABEL_FILENAME = "filename"
@@ -90,7 +96,7 @@ class TaskController {
   private val LABEL_SUBMIT_TYP = "submit_typ"
   private val LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER = "Checker Service did not provide all parameters"
   private val LABEL_DOWNLOAD_NOT_PERMITTED = "Download is not permitted. Please provide a valid jwt."
-
+  private val LABEL_NEW_TASK_ASNWER = "new_task_answer"
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   @Autowired
@@ -224,42 +230,42 @@ class TaskController {
     if(taskDetailsOpt.isEmpty) throw new ResourceNotFoundException
     val taskDetails = taskDetailsOpt.get
     var upload_url: String = null
-    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
+
+    if (taskDetails(TaskDBLabels.deadline) != null) {
+      val taskDeadline = taskDetails(TaskDBLabels.deadline).toString
+      val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S")
+      val dt: DateTime = formatter.parseDateTime(taskDeadline)
+      val currTimestamp = new Date().getTime
+      // Calculate overdue time
+      val diff = (dt.getMillis) - currTimestamp
+      if (diff < 0) {
+        throw new BadRequestException("Deadline for task " + taskid.toString + " is overdue since " + (diff/1000*(-1)).toString + " seconds.")
+      }
+    }
+
     val dataNode = jsonNode.get(LABEL_DATA)
       var submissionId: Int = -1
-      if(dataNode != null) {
-        val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-        // Check submission, if to late, return error, if no time set, it is unlimited
-        if(taskDetails(TaskDBLabels.deadline) != null){
-          val taskDeadline = taskDetails(TaskDBLabels.deadline).toString
-          val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S")
-          val dt: DateTime = formatter.parseDateTime(taskDeadline)
-          val currTimestamp = new Date().getTime
-          // Calculate overdue time
-          val diff = (dt.getMillis) - currTimestamp
-          if (diff < 0){
-            throw new BadRequestException("Deadline for task " + taskid.toString + " is overdue since " + (diff/1000*(-1)).toString + " seconds.")
-          }
-        }
-        // If submission was only data we send Kafka directly
+      if (dataNode != null) {
         val data = dataNode.asText
         submissionId = taskService.submitTaskWithData(taskid, requestingUser.get, data)
-        kafkaMap += (LABEL_DATA -> data)
-        kafkaMap += (LABEL_SUBMISSION_ID -> submissionId.toString)
-        kafkaMap += (LABEL_SUBMIT_TYP -> "data", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
-        kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
-          taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], requestingUser.get))
-        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicName))
-        logger.warn(jsonResult)
-        kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
-        kafkaTemplate.flush()
         taskService.setSubmissionFilename(submissionId, "string_submission.txt")
         // Save submission as file
         storageService.storeTaskSubmission(data, taskid, submissionId)
+
+        // Check submission, if to late, return error, if no time set, it is unlimited
+        // If submission was only data we send Kafka directly
+        if (this.taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
+          taskService.sendSubmissionToTestsystem(submissionId, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
+            requestingUser.get, LABEL_DATA, data)
+        } else {
+          this.taskService.getTestsystemTopicsByTaskId(taskid).foreach(tasksystem_id => {
+            taskService.sendSubmissionToTestsystem(submissionId, taskid, tasksystem_id,
+              requestingUser.get, LABEL_DATA, data)
+          })
+        }
       }
       else {
-        submissionId = taskService.submitTaskWithFile(taskid, requestingUser.get)
+        submissionId = submissionService.submitTaskWithFile(taskid, requestingUser.get)
         upload_url = CLIENT_HOST_URL + "/api/v1/" + "tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
 
@@ -287,18 +293,18 @@ class TaskController {
     var filename: String = ""
     try {
       storageService.storeTaskSubmission(file, taskid, submissionid)
-
       filename = file.getOriginalFilename
       taskService.setSubmissionFilename(submissionid, filename)
-      val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-      var kafkaMap = Map(LABEL_TASK_ID -> taskid.toString, LABEL_USER_ID -> requestingUser.get.username)
-      kafkaMap += ("fileurl" -> this.taskService.getURLOfSubmittedTestFile(taskid, submissionid))
-      kafkaMap += (LABEL_SUBMISSION_ID -> submissionid.toString)
-      kafkaMap += (LABEL_SUBMIT_TYP -> "file", LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
-      val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-      logger.warn(jsonResult)
-      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
-      kafkaTemplate.flush()
+
+      if (this.taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
+        taskService.sendSubmissionToTestsystem(submissionid, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
+          requestingUser.get, LABEL_FILE, null)
+      } else {
+        this.taskService.getTestsystemTopicsByTaskId(taskid).foreach(tasksystem_id => {
+          taskService.sendSubmissionToTestsystem(submissionid, taskid, tasksystem_id,
+            requestingUser.get, LABEL_FILE, null)
+        })
+      }
       message = true
 
      } catch {
@@ -318,7 +324,7 @@ class TaskController {
   @RequestMapping(value = Array("tasks/{id}/submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
-                        request: HttpServletRequest): List[Map[String, String]] = {
+                        request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
       throw new UnauthorizedException
@@ -366,12 +372,13 @@ class TaskController {
     * @author grokonez.com
     *
     * @param taskid unique identification for a task
+    * @param testsystem_index: the index of the testsystem for which we need config files
     * @param files an array of multipart binary file in a form data format
     * @param request Request Header containing Headers
     * @return HTTP Response with Status Code
     */
-  @RequestMapping(value = Array("tasks/{id}/testfile/upload"), method = Array(RequestMethod.POST))
-  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @RequestParam(LABEL_FILE) files: Array[MultipartFile],
+  @RequestMapping(value = Array("tasks/{id}/testfile/{testsystem_index}/upload"), method = Array(RequestMethod.POST))
+  def handleFileUpload(@PathVariable(LABEL_ID) taskid: Int, @PathVariable testsystem_index: Int, @RequestParam(LABEL_FILE) files: Array[MultipartFile],
                        request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) {
@@ -380,25 +387,27 @@ class TaskController {
 
     var message: Boolean = false
     var filename: String = ""
+
+    val testsystem_id = taskService.getTestsystemIDOfTaskByIndex(taskid, testsystem_index)
     for((file, j) <- files.zipWithIndex){
       // TODO check if all required files are uploaded
       filename += file.getOriginalFilename + (if (j < files.length-1) "," else "")
-      storageService.storeTaskTestFile(file, taskid)
+      storageService.storeTaskTestFile(file, taskid, testsystem_id)
     }
-    taskService.setTaskFilename(taskid, filename)
-    taskService.resetTaskTestStatus(taskid)
+    taskService.setTaskFilename(taskid, testsystem_id, filename)
+    taskService.resetTaskTestStatus(taskid, testsystem_id)
     try {
-      val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
-      val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid),
+      //val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
+      val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid, testsystem_id),
         LABEL_TASK_ID -> taskid.toString,
-        LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id))
+        LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
 
       message = true
 
       val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
       logger.warn(jsonStringMsg)
-      kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest), jsonStringMsg)
-      logger.warn(taskService.connectKafkaTopic(tasksystem_id, topicTaskRequest))
+      kafkaTemplate.send(taskService.connectKafkaTopic(testsystem_id, topicTaskRequest), jsonStringMsg)
+      logger.warn(taskService.connectKafkaTopic(testsystem_id, topicTaskRequest))
       kafkaTemplate.flush()
 
       Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
@@ -430,27 +439,41 @@ class TaskController {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
-      val testsystem_id = jsonNode.get(TestsystemLabels.id).asText()
-      // Test if testsystem exists
-      if (testsystemService.getTestsystem(testsystem_id).isEmpty){
-        throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
+
+      var testsystems: List[String] = List()
+
+      jsonNode.get(TaskTestsystemDBLabels.testsystems).forEach(line => {
+        testsystems = line.asText() :: testsystems
+      })
+
+      testsystems = testsystems.reverse
+
+      if (testsystems.isEmpty) {
+        throw new BadRequestException("Please provide at least one testsystem")
       }
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id)
+
+      // Test if testsystem exists
+      testsystems.foreach(testsystem_id => {
+        if (testsystemService.getTestsystem(testsystem_id).isEmpty){
+          throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
+        }
+      })
+
+    // TODO TODO
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystems)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
-      taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
+      taskInfo += (LABEL_UPLOAD_URL -> submissionService.getUploadUrlsForTaskTestFile(CLIENT_HOST_URL, taskid))
       taskInfo
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description and testsystem_id. Deadline is optional")
+        throw new BadRequestException("Please provide: name, description and testsystems. Deadline is optional")
       }
     }
   }
 
-  private def getUploadUrlForTaskTestFile(taskid: Int): String = {
-    CLIENT_HOST_URL + "/api/v1/tasks/" + taskid.toString +  "/testfile/upload"
-  }
+
 
   /**
     * delete Task by its ID
@@ -498,8 +521,35 @@ class TaskController {
 
     val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id)
 
-    Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
+    Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> submissionService.getUploadUrlsForTaskTestFile(CLIENT_HOST_URL, taskid))
   }
+
+  /**
+    * completely set testsystems for a given task
+    * @param taskid unique identification for a task
+    * @param request contain request information
+    * @param jsonNode JSON Parameter from request
+    * @return JSON
+    */
+  @RequestMapping(value = Array("/tasks/{id}/testsystems"), method = Array(RequestMethod.PUT), consumes = Array(application_json_value))
+  def setTestsystemsOfTask(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new UnauthorizedException("User has no edit rights and can not update a task.")
+    }
+
+    try {
+      val testsystems = jsonNode.get("testsystems").asInstanceOf[List[Map[String, Any]]]
+      val success = taskService.setTestsystemsForTask(testsystems, taskid)
+      Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> submissionService.getUploadUrlsForTaskTestFile(CLIENT_HOST_URL, taskid))
+    } catch {
+      case e: Exception => throw new BadRequestException("Provided testsystems is invalid " + e.getMessage)
+    }
+  }
+
 
   /**
     * Get a zipfile of all submission user made for a task
@@ -528,40 +578,6 @@ class TaskController {
   }
 
   private def httpResponseHeaderValue(resource: Resource) = "attachment; filename=\"" + resource.getFilename + "\""
-
-  // TODO please not as route but as threat
-  /**
-    * Deprecated Route, to use as threat
-    * @param taskid feedback course
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @deprecated("0", "0")
-  @RequestMapping(value = Array("tasks/{taskid}/plagiarismchecker"), method = Array(RequestMethod.GET))
-  def updateTask(@PathVariable taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
-    val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty) {
-      throw new UnauthorizedException
-    }
-    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
-      throw new UnauthorizedException("User has no edit rights and can not update a task.")
-    }
-
-    /*val submissionMatrix = taskService.getSubmissionsByTask(taskid)
-    val tasksystem_id = "plagiarismchecker"
-    val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, "download_zip_url" ->
-      (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
-      "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
-      "submissionmatrix" -> submissionMatrix)
-    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-    val kafka_topic = tasksystem_id + "_check_request"
-    logger.warn(kafka_topic)
-    logger.warn(jsonResult)
-    kafkaTemplate.send(kafka_topic, jsonResult)
-    kafkaTemplate.flush()*/
-
-    Map(LABEL_SUCCESS -> true)
-  }
 
   /**
     * for every non checked but expired task, send this task to the plagiat check system
@@ -607,12 +623,14 @@ class TaskController {
     * provide a GET URL to download testfiles for a task
     * @author Benjamin Manns
     * @param taskid unique taskid identification
+    * @param testsystem_id testsystem id
     * @param filename requested filename which should be a stored file
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/testfile/{filename}"))
-  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable filename: String, request: HttpServletRequest):
+  @GetMapping(Array("tasks/{id}/files/testfile/{testsystem_id}/{filename}"))
+  @ResponseBody def getTestFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable testsystem_id: String,
+                                      @PathVariable filename: String, request: HttpServletRequest):
   ResponseEntity[Resource] = {
     val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (testystem.isEmpty) {
@@ -620,7 +638,7 @@ class TaskController {
     }
     val parsedFilename = URLDecoder.decode(filename, StandardCharsets.UTF_8.toString)
     try {
-      val file = storageService.loadFile(parsedFilename, taskid)
+      val file = storageService.loadFile(parsedFilename, taskid, testsystem_id)
       ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
     } catch {
       case _: RuntimeException => throw new ResourceNotFoundException
@@ -642,7 +660,7 @@ class TaskController {
     if (testystem.isEmpty) {
       throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
     }
-    val filename = taskService.getSubmittedFileBySubmission(subid)
+    val filename = submissionService.getSubmittedFileBySubmission(subid)
     val file = storageService.loadFileBySubmission(filename, taskid, subid)
     ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
   }
@@ -674,12 +692,32 @@ class TaskController {
   @RequestMapping(value = Array("kafka/listener/reload"), method = Array(RequestMethod.GET))
   def kafkaReloadListeners(request: HttpServletRequest): Map[String, AnyVal] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty || user.get.roleid > 2) { // TODO Admin or else?
+    if (user.isEmpty || user.get.roleid > 2) {
       throw new UnauthorizedException
     }
     this.kafkaReloadService
     this.kafkaReloadNewTaskAnswerService
     this.kafkaLoadPlagiatCheckerService
+  }
+
+  private def sendNextTestJob(submission_id: Int) = {
+    val user = submissionService.getUserOfSubmission(submission_id).get
+    val submissionDetails = submissionService.getSubmissionDetails(submission_id)
+    if (submissionDetails.isDefined) {
+      val submission = submissionDetails.get
+      val taskid = submission(SubmissionDBLabels.taskid).asInstanceOf[Int]
+      val nextTestsystem = submissionService.getNextTestsystemFromSubmission(submission_id)
+      if (nextTestsystem.isDefined){
+        val testsytem_id = nextTestsystem.get
+        if (submission(SubmissionDBLabels.filename) == null) {
+          taskService.sendSubmissionToTestsystem(submission_id, taskid, testsytem_id,
+            user, LABEL_DATA, submission(SubmissionDBLabels.submission_data).asInstanceOf[String])
+        } else {
+          taskService.sendSubmissionToTestsystem(submission_id, taskid, testsytem_id,
+            user, LABEL_FILE, null)
+        }
+      }
+    }
   }
 
   private def kafkaReloadService: Map[String, AnyVal] = {
@@ -705,15 +743,20 @@ class TaskController {
         */
       override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
         kafkaReceivedDebug(data)
-        // TODO switch data.topic and save for each then!!
-
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
           logger.warn(answeredMap.toString())
-          taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
-            Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
-            Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]))
+          val passed = answeredMap("passed").asInstanceOf[String]
+          val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
+          val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
+          val testsystem = data.topic.replace(LABEL_NEW_TASK_ASNWER, "")
+          taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
+            Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), testsystem)
+
+            // We got an answer from a test, now on success case we need to trigger next phase if modus is SEQ
+            if (passed == "true" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
+              sendNextTestJob(submissionID)
+            }
         } catch {
           case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
         }
@@ -729,7 +772,7 @@ class TaskController {
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
 
     // TODO fire this method after updates on Testsystem!
-    val kafkaTopicNewTaskAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic("new_task_answer")
+    val kafkaTopicNewTaskAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic(LABEL_NEW_TASK_ASNWER)
 
     kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
@@ -754,7 +797,9 @@ class TaskController {
           val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
           val accept = answeredMap("accept").asInstanceOf[Boolean]
           val error = answeredMap("error").asInstanceOf[String]
-          taskService.setTaskTestFileAcceptedState(taskId, accept, error)
+          val testsystem = data.topic.replace(LABEL_NEW_TASK_ASNWER, "")
+
+          taskService.setTaskTestFileAcceptedState(taskId, accept, error, testsystem)
         } catch {
           case e: NoSuchElementException => {
               logger.warn(e.getMessage)

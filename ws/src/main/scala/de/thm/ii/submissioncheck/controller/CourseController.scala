@@ -38,7 +38,8 @@ class CourseController {
   private val courseParameterService: CourseParamService = null
   @Autowired
   private val testsystemService: TestsystemService = null
-
+  @Autowired
+  private val submissionService: SubmissionService = null
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val topicName: String = "check_request"
@@ -499,7 +500,7 @@ class CourseController {
       throw new UnauthorizedException
     }
 
-    taskService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
+    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
   }
 
   /**
@@ -670,16 +671,24 @@ class CourseController {
       runComplete = jsonNode.get("complete").asBoolean()
     }
 
-    val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-
     for(user <- this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID))) {
       val submissionID = taskService.submitTaskWithData(taskid, user, "")
-      runExternalTaskSendKafka(taskDetails, user, tasksystem_id, submissionID)
+
+      if (this.taskService.getMultiTestModeOfTask(taskid) == "SEQ") {
+        taskService.sendSubmissionToTestsystem(submissionID, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
+          requestingUser.get, "external", null)
+      } else {
+        this.taskService.getTestsystemTopicsByTaskId(taskid).foreach(tasksystem_id => {
+          taskService.sendSubmissionToTestsystem(submissionID, taskid, tasksystem_id,
+            requestingUser.get, "external", null)
+        })
+      }
     }
+    // TODO can be delted if it works runExternalTaskSendKafka(taskDetails, user, tasksystem_id, submissionID)
     Map("success" -> true)
   }
 
-  private def runExternalTaskSendKafka(taskidOpt: Map[String, Any], user: User, tasksystem_id: String, submissionID: Int): Unit = {
+  /*private def runExternalTaskSendKafka(taskidOpt: Map[String, Any], user: User, tasksystem_id: String, submissionID: Int): Unit = {
     var kafkaMap: Map[String, Any] = Map("taskid" -> taskidOpt(TaskDBLabels.taskid).toString, "userid" -> user.username)
 
     kafkaMap += ("submit_typ" -> "external", "submissionid" -> submissionID,
@@ -692,5 +701,5 @@ class CourseController {
     logger.warn(jsonResult)
     kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
     kafkaTemplate.flush()
-  }
+  }*/
 }

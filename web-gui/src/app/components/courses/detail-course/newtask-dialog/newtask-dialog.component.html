@@ -23,17 +23,24 @@
 
 
     <!-- Task type-->
-    <mat-select (valueChange)="loadFileUploadFields($event)" placeholder="Aufgaben typ" [(value)]="taskType" *ngIf="!isUpdate" required>
-      <mat-option *ngFor="let type of testTypes" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
-    </mat-select>
 
+    <div *ngFor="let testsystem of testsystemList; trackBy: trackByItems; let j = index;">
+      <mat-select (selectionChange)="loadFileUploadFields($event, j)" placeholder="Aufgaben typ" [(value)]="testsystemList[j]" *ngIf="!isUpdate" required>
+        <mat-option *ngFor="let type of testTypes" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
+      </mat-select>
 
-    <div *ngFor="let testfile of testSystemFiles">
-      {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">*</span>
+      <button>{{testsystemList[j]}}</button>
+      <mat-icon style="cursor: pointer;" (click)="deleteTestsystem(j)" color="warn">delete</mat-icon>
+      <div *ngFor="let testfile of testSystemFiles[j]">
+        {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">*</span>
 
-      <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename)" type="file" placeholder="Lösung" [required]="testfile.required">
-      <!--<span (click)="removeFilesFromList(testfile.filename)">X</span>-->
+        <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename, j)" type="file" placeholder="Lösung" [required]="testfile.required">
+
+      </div>
+      <mat-divider style="margin: 14px 0;"></mat-divider>
     </div>
+
+    <button mat-flat-button color="accent" (click)="addTestsystem()">Weiteres Testsystem hinzufügen</button>
 
 
 

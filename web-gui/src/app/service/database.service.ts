@@ -220,31 +220,38 @@ export class DatabaseService {
    * @param deadline The deadline when this tasks ends
    */
   createTask(idCourse: number, name: string, description: string,
-             files: {}, test_type: string, deadline: Date){
-
-    // Solution file
-    const formData = new FormData();
-
-    for(let j in files)
-    {
-      formData.append("file", files[j].item(0), j);
-    }
+             files: {}, testsystems: string[], deadline: Date){
 
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
       description: description,
-      testsystem_id: test_type,
+      testsystems: testsystems,
       deadline: this.formatDate(deadline)
     }).pipe(
       flatMap(result => {
+        console.log("files",files)
         let upload_url: string;
         if (result.success) {
           upload_url = result.upload_url;
+          console.log("upload_url",upload_url)
+          let uploadRequests = []
+
+          // New solution file
+          Object.keys(files).forEach(pos => {
+            const formData = new FormData();
+
+            for(let j in files[pos]) {
+              console.log("pos", pos, files[pos], "J", j)
+              formData.append("file", files[pos][j].item(0), j);
+            }
+
+            uploadRequests.push(this.http.post<Succeeded>(upload_url[pos], formData, {
+              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+            }).toPromise())
+          })
 
           return new Promise((resolve, reject) => {
-            this.http.post<Succeeded>(upload_url, formData, {
-              headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-            }).toPromise()
+            Promise.all(uploadRequests)
               .then((success) => {
                 resolve(result)
               }).catch((e) => {
@@ -373,11 +380,7 @@ export class DatabaseService {
              description: string, files: {}, test_type: string, deadline: Date): Observable<Succeeded> {
 
     if (files) {
-      // New solution file
-      const formData = new FormData();
-      for(let j in files) {
-        formData.append("file", files[j].item(0), j);
-      }
+
       return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
         name: name,
         description: description,
@@ -389,13 +392,42 @@ export class DatabaseService {
           if (res.success && Object.keys(files).length > 0) {
             uploadUrl = res.upload_url;
 
-            return this.http.post<Succeeded>(uploadUrl, formData, {
+
+            let uploadRequests = []
+
+            // New solution file
+            for(let pos in Object.keys(files)){
+              const formData = new FormData();
+
+              for(let j in files[pos]) {
+                formData.append("file", files[pos][j].item(0), j);
+              }
+
+
+              uploadRequests.push(this.http.post<Succeeded>(uploadUrl[pos], formData, {
+                headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+              }).toPromise())
+
+
+            }
+
+            return new Promise((resolve, reject) => {
+              Promise.all(uploadRequests)
+                .then((success) => {
+                  resolve(res)
+                }).catch((e) => {
+                reject(e)
+              })
+            })
+
+
+            /*return this.http.post<Succeeded>(uploadUrl, formData, {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
             }).pipe(flatMap(
               res => {
                 return of({success: res.success, fileupload: true})
               }
-            ))
+            ))*/
 
           } else {
             return of({success: true, fileupload: false})

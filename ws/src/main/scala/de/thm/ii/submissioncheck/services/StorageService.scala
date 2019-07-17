@@ -31,7 +31,7 @@ class StorageService(compile_production: Boolean) {
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
   private final val LABEL_RESOURCE_NOT_EXIST = "Resource does not exist."
   private final val LABEL_URL_MALFORMED = "File URL is Malformed."
-  private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + __slash + taskid.toString
+  private def getTaskTestFilePath(taskid: Int, testsystem_id: String): String = UPLOAD_FOLDER + __slash + taskid.toString + __slash + testsystem_id
 
   /**
     * Delete a submission File
@@ -59,10 +59,11 @@ class StorageService(compile_production: Boolean) {
     * @author grokonez.com
     * @param file a file stream
     * @param taskid the connecting task
+    * @param testsystem_id testsystem id
     */
-  def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
+  def storeTaskTestFile(file: MultipartFile, taskid: Int, testsystem_id: String): Unit = {
     try {
-      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
     try {
       Files.createDirectories(storeLocation)
     }
@@ -194,10 +195,11 @@ class StorageService(compile_production: Boolean) {
     * @param dataBytes an array of bytes which contains a file
     * @param filename the name of the requested file
     * @param taskid the connecting task
+    * @param testsystem_id testsystem id
     */
-  def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int): Unit = {
+  def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int, testsystem_id: String): Unit = {
     try {
-      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
       try {
         Files.createDirectories(storeLocation)
       }
@@ -221,10 +223,11 @@ class StorageService(compile_production: Boolean) {
     * @author grokonez.com
     * @param filename UNIX filename
     * @param taskid unique identification for a task
+    * @param testsystem_id testsystem id
     * @return File Resource
     */
-  def loadFile(filename: String, taskid: Int): Resource = try {
-    val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+  def loadFile(filename: String, taskid: Int, testsystem_id: String): Resource = try {
+    val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}

@@ -53,7 +53,8 @@ class CourseService {
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val taskService: TaskService = null
-
+  @Autowired
+  private val submissionService: SubmissionService = null
   /**
     * getSubscribedCoursesByUser search courses by a single user
     *
@@ -437,7 +438,7 @@ class CourseService {
 
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
-        var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
@@ -494,7 +495,7 @@ class CourseService {
       val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
 
       var tmpZiptaskPath: Path = null
-      var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
+      var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
       if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
       for((submission, i) <- studentSubmissionList.zipWithIndex) {
         if (i == 0) {
@@ -551,7 +552,7 @@ class CourseService {
       var tasksPassedSum = 0
       var processedTasks: List[Any] = List()
       for((task, i) <- tasks.zipWithIndex){
-        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
+        val userSubmissions = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
           /* processing - number of trials - passed - passed date */
         var passed: Boolean = false
         var passedDate: Any = null
@@ -610,7 +611,7 @@ class CourseService {
       var processedTasks: List[Any] = List()
       var deadlines: List[String] = List()
       for((task, i) <- courseTasks.zipWithIndex) {
-        val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
+        val submissionRawData = this.submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
         // process them
         var passed_string: String = null
         var passedDate: Any = null

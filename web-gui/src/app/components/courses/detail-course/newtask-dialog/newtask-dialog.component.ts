@@ -32,7 +32,8 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   testTypes: Testsystem[];
   isUpdate: boolean;
   deadline?: Date;
-  testSystemFiles: TestsystemTestfile[];
+  testSystemFiles: TestsystemTestfile[][];
+  testsystemList: string[];
 
 
   constructor(public dialogRef: MatDialogRef<NewtaskDialogComponent>, private db: DatabaseService,
@@ -41,6 +42,8 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadAndPreselectTestsystemTypes()
+    this.testSystemFiles = []
+    this.testsystemList = []
 
     if (this.data.task) {
       this.isUpdate = true;
@@ -50,7 +53,22 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       this.taskType = this.data.task.testsystem_id;
       this.newTaskDescription = this.data.task.task_description
 
+      this.testsystemList = this.data.task.testsystems.map(system => {
+        return system.testsystem_id
+      })
+      this.loadFileUploadFields(null, null)
+      console.log(this.testsystemList,this.taskType)
+    } else if(this.data.courseID) {
+        this.db.getCourseDetail(this.data.courseID).subscribe((value: DetailedCourseInformation) => {
+          console.log("INIT", value)
+          this.testsystemList.push(value.standard_task_typ)
+          this.loadFileUploadFields(null, null)
+        })
+    } else {
+      // ERROR
     }
+
+    //this.loadFileUploadFields()
 
 
     this.subs.add(this.taskForm.controls['taskName'].valueChanges.subscribe(name => {
@@ -61,32 +79,55 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       this.newTaskDescription = description;
     }));
 
-    if(this.isUpdate) {
-      this.loadFileUploadFields(this.taskType)
-    }
-
   }
 
   loadAndPreselectTestsystemTypes() {
     this.db.getTestsystemTypes().subscribe(data => {
       this.testTypes = data
-      if(this.data.courseID) {
-        this.db.getCourseDetail(this.data.courseID).subscribe((value: DetailedCourseInformation) => {
-          this.taskType = value.standard_task_typ
-          this.loadFileUploadFields(this.taskType)
-        })
-      }
     })
   }
 
-  loadFileUploadFields(taskTypeValue){
-    this.db.getTestsystemDetails(taskTypeValue)
-      .then((testsystem: Testsystem) => {
-        this.testSystemFiles = testsystem.testfiles
+  public deleteTestsystem(pos: number){
+    console.log(this.testsystemList)
+    this.testsystemList.splice(pos,1)
+    console.log(this.testsystemList)
+  }
+  public addTestsystem(){
+    this.testsystemList.push("")
+    this.testSystemFiles.push([])
+  }
+  /** very tricky hack to avoid strange behaviour in multiple mat-selects*/
+  trackByItems(index: number, item: any): number { return index; }
+
+  loadFileUploadFields($event, pos: number){
+    if(pos != null){
+      console.log($event)
+      console.log(this.testsystemList,this.testsystemList.length)
+
+      this.db.getTestsystemDetails($event.value)
+        .then((testsystem: Testsystem) => {
+          console.log(this.testSystemFiles[pos])
+          this.testSystemFiles[pos] = testsystem.testfiles
+        })
+        .catch((e) => {
+          console.log(e)
+          this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
+        })
+    } else {
+      this.testSystemFiles = []
+      this.testsystemList.forEach(testsystemItem => {
+        console.log(testsystemItem)
+        this.db.getTestsystemDetails(testsystemItem)
+          .then((testsystem: Testsystem) => {
+            console.log(testsystem.testfiles)
+            this.testSystemFiles.push(testsystem.testfiles)
+          })
+          .catch((e) => {
+            console.log(e)
+            this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
+          })
       })
-      .catch((e) => {
-        this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
-      })
+    }
   }
 
   ngOnDestroy(): void {
@@ -97,13 +138,17 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * Load solution file
    * @param file The solution file
    */
-  addFilesToList(file: FileList, filename: string) {
-    this.testFilesSubmissionList[filename] = file
+  addFilesToList(file: FileList, filename: string, pos: number) {
+    if(typeof this.testFilesSubmissionList[pos] == "undefined"){
+      this.testFilesSubmissionList[pos] = {}
+    }
+
+    this.testFilesSubmissionList[pos][filename] = file
     this.soutionFiles = file;
   }
 
-  removeFilesFromList(filename: string){
-    delete this.testFilesSubmissionList[filename]
+  removeFilesFromList(filename: string, pos: number){
+    delete this.testFilesSubmissionList[pos][filename]
   }
 
   /**
@@ -127,7 +172,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       this.snackBar.open('Bitte eine Beschreibung für die neue Aufgabe angeben', 'OK', {duration: 3000});
     }
 
-    else if(typeof this.taskType == 'undefined') {
+    else if(this.testsystemList.length == 0) {
       this.snackBar.open('Bitte ein Testsystem auswählen', 'OK', {duration: 3000});
     }
 
@@ -137,10 +182,17 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
     else {
       if(!this.checkAllNeededFilesAreSet()){
-        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + this.testSystemFiles.filter(v => v.required).map(v => v.filename).join(', '), 'OK', {duration: 3000});
+        let noticeMsg = "";
+        let num = 0;
+        this.testSystemFiles.forEach(system => {
+          num++;
+          noticeMsg += `Testsystem ${num}: ${system.filter(v => v.required).map(v => v.filename).join(', ')}. `
+        });
+
+        this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + noticeMsg, 'OK', {duration: 3000});
       } else {
         this.db.createTask(this.data.courseID, this.newTaskName,
-          this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)
+          this.newTaskDescription, this.testFilesSubmissionList, this.testsystemList, this.deadline)
           .subscribe(success => this.dialogRef.close(success));
       }
     }
@@ -150,11 +202,17 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   private checkAllNeededFilesAreSet(): boolean{
     // Check if all required files are set
     let allNeededFilesSet = true;
-    this.testSystemFiles.forEach(testfile => {
+    this.testSystemFiles.forEach((testsystem, index) => {
+      testsystem.forEach(testfile => {
       if(testfile.required) {
-        allNeededFilesSet = allNeededFilesSet && (testfile.filename in this.testFilesSubmissionList)
+        if(typeof this.testFilesSubmissionList[index] == "undefined"){
+          allNeededFilesSet = false
+        } else {
+          allNeededFilesSet = allNeededFilesSet && (testfile.filename in this.testFilesSubmissionList[index])
+        }
+
       }
-    })
+    })})
     return allNeededFilesSet
   }
 
