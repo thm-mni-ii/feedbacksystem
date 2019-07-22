@@ -201,8 +201,6 @@ class TaskService {
     }
   }
 
-
-
   /**
     * get students submissions by Tasks
     *
@@ -353,7 +351,7 @@ class TaskService {
     val num = DB.update(
       "INSERT INTO submission_testsystem (result, passed, exitcode, result_date, submission_id, testsystem_id, step) " +
         "select ?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, COALESCE(max(step),0)+1 as nextstep from submission_testsystem  where submission_id = ?;",
-      result, passed, exitcode, submissionid, testsystem_id)
+      result, passed, exitcode, submissionid, testsystem_id, submissionid)
     num > 0
   }
 
@@ -672,7 +670,7 @@ class TaskService {
     * @return the unique test system name
     */
   def getTestsystemTopicsByTaskId(taskid: Int): List[String] = {
-    val list = DB.query("select testsystem_id from task_testsystem join testsystem using(testsystem_id) where task_id = ?",
+    val list = DB.query("select testsystem_id from task_testsystem join testsystem using(testsystem_id) where task_id = ? order by ordnr",
       (res, _) => res.getString(TestsystemLabels.id), taskid)
     list
   }

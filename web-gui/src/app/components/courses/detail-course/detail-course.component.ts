@@ -154,6 +154,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     )
       .toPromise()
       .then( (value: Succeeded) => {
+        if(typeof value == "undefined"){
+          return ;
+        }
         if(value.success){
           this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
         } else {

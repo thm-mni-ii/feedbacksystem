@@ -65,8 +65,6 @@ class SubmissionService {
     taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/files/submissions/" + submissionid.toString
   }
 
-
-
   /**
     * Get the next testsystem of a task for a submission
     * @param submission_id a submitted task
@@ -74,10 +72,10 @@ class SubmissionService {
     */
   def getNextTestsystemFromSubmission(submission_id: Int): Option[String] = {
     val offsetRes = DB.query("select count(*) as offset from submission_testsystem where submission_id = ?",
-      (res, _) => res.getInt("offset") , submission_id)
+      (res, _) => res.getInt("offset"), submission_id)
     val offset: Int = offsetRes.head
     DB.query("select * from task_testsystem tt join task using(task_id) join submission s on task.task_id = s.task_id where submission_id = ? limit ?,1",
-      (res, _) => res.getString(TaskTestsystemDBLabels.testsystem_id) , submission_id, offset).headOption
+      (res, _) => res.getString(TaskTestsystemDBLabels.testsystem_id), submission_id, offset).headOption
   }
 
   /**
@@ -86,7 +84,7 @@ class SubmissionService {
     * @return User
     */
   def getUserOfSubmission(submission_id: Int): Option[User] = {
-    val users = DB.query("select u.*, s.submission_id from submission s join user u using(user_id) where s.submission_id = ?",
+    val users = DB.query("select r.*, u.*, s.submission_id from submission s join user u using(user_id) join role r using(role_id) where s.submission_id = ?",
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
           res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email)
@@ -105,11 +103,11 @@ class SubmissionService {
       (res, _) => {
         Map(SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.plagiat_passed -> res.getInt(SubmissionDBLabels.plagiat_passed),
-          SubmissionDBLabels.submit_date -> res.getInt(SubmissionDBLabels.submit_date),
-          SubmissionDBLabels.filename -> res.getInt(SubmissionDBLabels.filename),
+          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
           SubmissionDBLabels.taskid -> res.getInt(SubmissionDBLabels.taskid),
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
-        SubmissionDBLabels.submission_data -> res.getInt(SubmissionDBLabels.submission_data))
+        SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data))
 
       }, submission_id).headOption
   }
@@ -147,6 +145,12 @@ class SubmissionService {
     }
   }
 
+  /**
+    * get last submission of user for a task with its result
+    * @param taskid unique identification for a task
+    * @param userid requesting user
+    * @return submission list
+    */
   def getLastSubmissionResultInfoByTaskIDAndUser(taskid: Int, userid: Int): Map[String, Any] = {
     val submissions = getSubmissionsByTaskAndUser(taskid.toString, userid, LABEL_DESC)
     if(submissions.nonEmpty){
@@ -164,7 +168,6 @@ class SubmissionService {
       boolDBString.toInt > 0
     }
   }
-
 
   private def getEmptyTestsystemSubmissionEvaluationList(task_id: Int): List[Map[String, Any]] = {
     DB.query("select * from task_testsystem left join submission_testsystem st on false where task_id = ?",

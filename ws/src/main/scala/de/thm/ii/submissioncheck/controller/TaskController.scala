@@ -86,7 +86,7 @@ class TaskController {
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
   private final val LABEL_FILE = "file"
-  private final val LABEL_SEQ = "seq"
+  private final val LABEL_SEQ = "SEQ"
   private final val LABEL_NAME = "name"
   private final val LABEL_DESCRIPTION = "description"
   private final val LABEL_FILENAME = "filename"
@@ -254,6 +254,9 @@ class TaskController {
 
         // Check submission, if to late, return error, if no time set, it is unlimited
         // If submission was only data we send Kafka directly
+
+        println(this.taskService.getMultiTestModeOfTask(taskid))
+
         if (this.taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
           taskService.sendSubmissionToTestsystem(submissionId, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
             requestingUser.get, LABEL_DATA, data)
@@ -473,8 +476,6 @@ class TaskController {
     }
   }
 
-
-
   /**
     * delete Task by its ID
     * @param taskid unique identification for a task
@@ -549,7 +550,6 @@ class TaskController {
       case e: Exception => throw new BadRequestException("Provided testsystems is invalid " + e.getMessage)
     }
   }
-
 
   /**
     * Get a zipfile of all submission user made for a task
@@ -749,12 +749,14 @@ class TaskController {
           val passed = answeredMap("passed").asInstanceOf[String]
           val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
           val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
-          val testsystem = data.topic.replace(LABEL_NEW_TASK_ASNWER, "")
+          val testsystem = data.topic.replace("_check_answer", "")
+          println("setResultOfTask : ")
+          println(testsystem)
           taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
             Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), testsystem)
 
             // We got an answer from a test, now on success case we need to trigger next phase if modus is SEQ
-            if (passed == "true" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
+            if (passed == "1" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
               sendNextTestJob(submissionID)
             }
         } catch {

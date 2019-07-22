@@ -29,8 +29,8 @@
         <mat-option *ngFor="let type of testTypes" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
       </mat-select>
 
-      <button>{{testsystemList[j]}}</button>
-      <mat-icon style="cursor: pointer;" (click)="deleteTestsystem(j)" color="warn">delete</mat-icon>
+      <h3 *ngIf="isUpdate">{{testsystemList[j]}}</h3>
+      <mat-icon *ngIf="!isUpdate" style="cursor: pointer;" (click)="deleteTestsystem(j)" color="warn">delete</mat-icon>
       <div *ngFor="let testfile of testSystemFiles[j]">
         {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">*</span>
 
@@ -40,7 +40,7 @@
       <mat-divider style="margin: 14px 0;"></mat-divider>
     </div>
 
-    <button mat-flat-button color="accent" (click)="addTestsystem()">Weiteres Testsystem hinzufügen</button>
+    <button *ngIf="!isUpdate" mat-flat-button color="accent" (click)="addTestsystem()">Weiteres Testsystem hinzufügen</button>
 
 
 

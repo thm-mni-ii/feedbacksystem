@@ -57,10 +57,8 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
         return system.testsystem_id
       })
       this.loadFileUploadFields(null, null)
-      console.log(this.testsystemList,this.taskType)
     } else if(this.data.courseID) {
         this.db.getCourseDetail(this.data.courseID).subscribe((value: DetailedCourseInformation) => {
-          console.log("INIT", value)
           this.testsystemList.push(value.standard_task_typ)
           this.loadFileUploadFields(null, null)
         })
@@ -88,9 +86,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   }
 
   public deleteTestsystem(pos: number){
-    console.log(this.testsystemList)
     this.testsystemList.splice(pos,1)
-    console.log(this.testsystemList)
   }
   public addTestsystem(){
     this.testsystemList.push("")
@@ -101,29 +97,21 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
   loadFileUploadFields($event, pos: number){
     if(pos != null){
-      console.log($event)
-      console.log(this.testsystemList,this.testsystemList.length)
-
       this.db.getTestsystemDetails($event.value)
         .then((testsystem: Testsystem) => {
-          console.log(this.testSystemFiles[pos])
           this.testSystemFiles[pos] = testsystem.testfiles
         })
         .catch((e) => {
-          console.log(e)
           this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
         })
     } else {
       this.testSystemFiles = []
-      this.testsystemList.forEach(testsystemItem => {
-        console.log(testsystemItem)
+      this.testsystemList.forEach((testsystemItem, index) => {
         this.db.getTestsystemDetails(testsystemItem)
           .then((testsystem: Testsystem) => {
-            console.log(testsystem.testfiles)
-            this.testSystemFiles.push(testsystem.testfiles)
+            this.testSystemFiles[index] = testsystem.testfiles
           })
           .catch((e) => {
-            console.log(e)
             this.snackBar.open("Leider konnten keine Testdateien zu dem ausgewählten Testsystem geladen werden", 'OK', {duration: 3000});
           })
       })
