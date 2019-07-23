@@ -39,13 +39,18 @@
 
         <!-- Submission -->
         <div class="result">
-          <p *ngIf="!!task.submission_data">Abgabe: {{task.submission_data}}</p>
+          <p *ngIf="!!task.submission_data">
+            Abgabe: {{task.submission_data}}
+            <br>
+            <br>
+            <button mat-flat-button  color="primary" *ngIf="!deadlineTask[task.task_id]" (click)="reRunTask(task)" matTooltip="Abgabe erneut senden"><mat-icon >replay</mat-icon></button>
+          </p>
           <p *ngIf="!task.submission_data">Dateiname: {{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>
 
-
+        <p style="word-wrap: break-word;" *ngIf="task.load_external_description"><b>Externe Aufgabenstellung</b> {{task.external_description}} <span class="resetExternalInfo" (click)="triggerExternalDescriptionIfNeeded(task, true)">Reset</span></p>
         <app-task-result [taskResult]="task.result" [taskPassed]="task.passed"></app-task-result>
 
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>

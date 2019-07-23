@@ -72,6 +72,8 @@ export interface CourseTask {
   task_id: number;
   task_description: string;
   plagiat_passed: string;
+  external_description: string;
+  load_external_description: boolean;
 }
 
 
@@ -126,6 +128,8 @@ export interface NewTaskInformation {
   testsystem_id: string;
   no_reaction: boolean;
   plagiat_passed: string;
+  external_description: string;
+  load_external_description: boolean;
 }
 
 /**

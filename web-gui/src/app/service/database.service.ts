@@ -220,7 +220,7 @@ export class DatabaseService {
    * @param deadline The deadline when this tasks ends
    */
   createTask(idCourse: number, name: string, description: string,
-             files: {}, test_type: string, deadline: Date){
+             files: {}, test_type: string, deadline: Date, load_external_description: Boolean){
 
     // Solution file
     const formData = new FormData();
@@ -234,7 +234,8 @@ export class DatabaseService {
       name: name,
       description: description,
       testsystem_id: test_type,
-      deadline: this.formatDate(deadline)
+      deadline: this.formatDate(deadline),
+      load_external_description: load_external_description
     }).pipe(
       flatMap(result => {
         let upload_url: string;
@@ -370,7 +371,7 @@ export class DatabaseService {
    * @param deadline The deadline when this task ends
    */
   updateTask(idTask: number, name: string,
-             description: string, files: {}, test_type: string, deadline: Date): Observable<Succeeded> {
+             description: string, files: {}, test_type: string, deadline: Date, load_external_description: boolean): Observable<Succeeded> {
 
     if (files) {
       // New solution file
@@ -382,7 +383,8 @@ export class DatabaseService {
         name: name,
         description: description,
         test_type: test_type,
-        deadline: this.formatDate(deadline)
+        deadline: this.formatDate(deadline),
+        load_external_description: load_external_description
       }).pipe(
         flatMap(res => {
           let uploadUrl: string;
@@ -409,6 +411,10 @@ export class DatabaseService {
         deadline: this.formatDate(deadline)
       });
     }
+  }
+
+  triggerExternalInfo(task_id,): Observable<Succeeded>{
+    return this.http.post<Succeeded>(`/api/v1/tasks/${task_id}/info/trigger`, {});
   }
 
   ///**

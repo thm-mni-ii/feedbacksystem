@@ -77,6 +77,7 @@ object SecretTokenChecker extends App {
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
+  private val LABEL_ISINFO = "isinfo"
   /** provides a Label for jwt_token*/
   val LABEL_TOKEN = "jwt_token"
   private val LABEL_CHECK_REQUEST = "_check_request"
@@ -324,18 +325,23 @@ object SecretTokenChecker extends App {
       var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
 
-      val (output, code) = bashTest(taskid, userid, submittedFilePath)
+      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) {
+        jsonMap(LABEL_ISINFO).asInstanceOf[Boolean]
+      } else {
+        false
+      }
+
+      val (output, code) = bashTest(taskid, userid, submittedFilePath, isInfo)
       if (code == 0) {
         passed = 1
       }
-      sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-        DATA -> output,
-        "passed" -> passed.toString,
-        "exitcode" -> code.toString,
-        "userid" -> userid,
-        LABEL_TASKID -> taskid,
-        LABEL_SUBMISSIONID -> submissionid
-      )))
+
+      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
+        LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
+
+      if (isInfo) answerMap += (LABEL_ISINFO -> true)
+
+      sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
     } catch {
       case e: NoSuchElementException => {
         sendCheckMessage(JsonHelper.mapToJsonStr(Map(
@@ -422,10 +428,11 @@ object SecretTokenChecker extends App {
     * @param taskid id of task
     * @param name username
     * @param filePath md5hash
+    * @param isInfo calculates a info message
     * @return message and exitcode
     */
-  def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-    val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
+  def bashTest(taskid: String, name: String, filePath: String, isInfo: Boolean): (String, Int) = {
+    val bashtest1 = new BashExec(taskid, name, filePath, compile_production, isInfo)
     val exit1 = bashtest1.exec()
     val message1 = bashtest1.output
 

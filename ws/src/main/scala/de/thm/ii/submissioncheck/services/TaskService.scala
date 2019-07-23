@@ -5,11 +5,14 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
+import de.thm.ii.submissioncheck.controller.ClientService
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 
 /**
@@ -36,8 +39,15 @@ class TaskService {
   @Value("${cas.client-host-url}")
   private val UPLOAD_BASE_URL: String = null
 
+  @Autowired
+  private val testsystemService: TestsystemService = null
+  @Autowired
+  private val courseParameterService: CourseParamService = null
   /** holds connection to storageService*/
   val storageService = new StorageService(compile_production)
+  @Autowired
+  private val kafkaTemplate: KafkaTemplate[String, String] = null
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
 
   /**
    * Load base upload URL
@@ -59,6 +69,22 @@ class TaskService {
   private final var LABEL_UPLOADDIR = "upload-dir"
   private final var LABEL_UNDERLINE = "_"
   private val LABEL_DESC = "desc"
+  private val LABEL_DATA = "data"
+  private final val LABEL_FILE = "file"
+  private final val LABEL_SEQ = "seq"
+  private final val LABEL_NAME = "name"
+  private final val LABEL_DESCRIPTION = "description"
+  private final val LABEL_FILENAME = "filename"
+  private final val LABEL_UPLOAD_URL = "upload_url"
+  private final val LABEL_JWT_TOKEN = "jwt_token"
+  private val LABEL_RELOAD = "reload"
+  private val LABEL_SUBMIT_TYP = "submit_typ"
+  private val LABEL_TASK_ID = "taskid"
+  private val LABEL_USER_ID = "userid"
+  private val LABEL_SUBMISSION_ID = "submissionid"
+  private val LABEL_COURSE_ID = "courseid"
+  private val LABEL_CHECK_REQUEST: String = "check_request"
+  private val LABEL_SUCCESS = "success"
 
   /**
     * After Upload a submitted File save it's name
@@ -70,6 +96,45 @@ class TaskService {
   def setSubmissionFilename(submissionid: Int, filename: String): Boolean = {
     val num = DB.update("UPDATE submission set filename = ? where submission_id = ?;", filename, submissionid)
     num == 0
+  }
+
+  /**
+    * send submission to testsystem with several options
+    * @param submission_id unique identification for a submission
+    * @param task_id unique identification for a task
+    * @param testsystem_id task testsystem
+    * @param user sending user
+    * @param typ option which format we want to send
+    * @param data content
+    */
+  def sendSubmissionToTestsystem(submission_id: Int, task_id: Int, testsystem_id: String, user: User, typ: String, data: String): Unit = {
+    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> task_id.toString, LABEL_USER_ID -> user.username)
+    val taskDetailsOpt = getTaskDetails(task_id)
+    if (typ == LABEL_DATA){
+      kafkaMap += (LABEL_DATA -> data)
+      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
+    } else if (typ == LABEL_FILE){
+      kafkaMap += ("fileurl" ->  getURLOfSubmittedTestFile(task_id, submission_id))
+      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_FILE)
+    } else if (typ == "external") {
+      kafkaMap += (LABEL_SUBMIT_TYP -> "external")
+    } else if (typ == "info") {
+      kafkaMap += (LABEL_DATA -> data)
+      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
+      kafkaMap += ("isinfo" -> true)
+    } else {
+      throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
+    }
+
+    kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
+    kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
+    kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
+      taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], user))
+    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
+    logger.warn(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST))
+    logger.warn(jsonResult)
+    kafkaTemplate.send(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST), jsonResult)
+    kafkaTemplate.flush()
   }
 
   /**
@@ -299,9 +364,8 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT task.test_file_name,  task.test_file_accept, task.test_file_accept_error, " +
-      "`task`.`task_name`, task.deadline, `task`.`task_description`, `task`.`task_id`, `task`.`course_id`, " +
-      "task.testsystem_id from task join course using(course_id) where task_id = ?",
+    val list = DB.query("SELECT task.*, task_external_description.description as external_description from task join course " +
+      "using(course_id) left join task_external_description using(task_id) where task_id = ?",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
@@ -312,13 +376,15 @@ class TaskService {
           TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name),
           TaskDBLabels.test_file_accept ->  getNullOrBoolean(res.getString(TaskDBLabels.test_file_accept)),
           TaskDBLabels.courseid ->  res.getInt(TaskDBLabels.courseid),
-          TaskDBLabels.test_file_accept_error -> res.getString(TaskDBLabels.test_file_accept_error))
+          TaskDBLabels.test_file_accept_error -> res.getString(TaskDBLabels.test_file_accept_error),
+          TaskDBLabels.external_description -> res.getString(TaskDBLabels.external_description),
+          TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description))
 
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
           lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
             SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
-            "file" -> submissionInfos(SubmissionDBLabels.filename),
+            LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.result_date -> submissionInfos(SubmissionDBLabels.result_date),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
             SubmissionDBLabels.exitcode -> submissionInfos(SubmissionDBLabels.exitcode),
@@ -399,7 +465,8 @@ class TaskService {
     * @return JAVA List
     */
   def getTasksByCourse(courseid: Int, userid: Option[Int] = None): List[Map[String, Any]] = {
-    DB.query("select * from task where course_id = ?",
+    DB.query("select t.*, task_external_description.description as external_description from task t left join " +
+      "task_external_description using(task_id) where t.course_id = ?",
       (res, _) => {
         val lineMap = Map(
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
@@ -408,13 +475,15 @@ class TaskService {
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
           TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
           TaskDBLabels.testsystem_id -> res.getString(TaskDBLabels.testsystem_id),
-          TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name)
+          TaskDBLabels.test_file_name -> res.getString(TaskDBLabels.test_file_name),
+          TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description),
+          TaskDBLabels.external_description -> res.getString(TaskDBLabels.external_description)
         )
         if (userid.isDefined){
           val submissionInfos = getLastSubmissionResultInfoByTaskIDAndUser(res.getInt(TaskDBLabels.taskid), userid.get)
           lineMap + (SubmissionDBLabels.result -> submissionInfos(SubmissionDBLabels.result),
             SubmissionDBLabels.passed -> submissionInfos(SubmissionDBLabels.passed),
-            "file" -> submissionInfos(SubmissionDBLabels.filename),
+            LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.result_date -> submissionInfos(SubmissionDBLabels.result_date),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
             SubmissionDBLabels.exitcode -> submissionInfos(SubmissionDBLabels.exitcode),
@@ -433,23 +502,26 @@ class TaskService {
     * @param courseid Course where task is created for
     * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
+    * @param load_extern_info: load external description of task by testsytsem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystem_id: String): Map[String, AnyVal] = {
+  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystem_id: String, load_extern_info: Boolean): Map[String, AnyVal] = {
     //val availableTypes = List("FILE", "STRING")
     //if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
-        "INSERT INTO task (task_name, task_description, course_id, testsystem_id, deadline) VALUES (?,?,?,?,?)",
+        "INSERT INTO task (task_name, task_description, course_id, testsystem_id, deadline, load_external_description) VALUES (?,?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
       val magic4 = 4
       val magic5 = 5
+      val magic6 = 6
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
       ps.setString(magic4, testsystem_id)
       ps.setString(magic5, deadline)
+      ps.setBoolean(magic6, load_extern_info)
       ps
     })
 
@@ -457,7 +529,7 @@ class TaskService {
     if (num == 0) {
       throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
     }
-    Map("success" -> (num == 1), "taskid" -> insertedId)
+    Map(LABEL_SUCCESS -> (num == 1), "taskid" -> insertedId)
   }
 
   /**
@@ -492,10 +564,11 @@ class TaskService {
     * @param deadline until when the task is open
     * @param testsystem_id: refered testsystem
     * @param plagiat_check: plagiat check status
+    * @param load_extern_info: load external description of task by testsytsem
     * @return result if update works
     */
   def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null, testsystem_id: String = null,
-                 plagiat_check: Any = null): Boolean = {
+                 plagiat_check: Any = null, load_extern_info: Any = null): Boolean = {
     var updates = 0
     var successfulUpdates = 0
     if (name != null) {
@@ -524,6 +597,12 @@ class TaskService {
       updates += 1
     }
 
+    if (load_extern_info != null) {
+      val status = load_extern_info.asInstanceOf[Boolean]
+      successfulUpdates += DB.update("UPDATE task set load_external_description = ? where task_id = ? ", status, taskid)
+      updates += 1
+    }
+
     successfulUpdates == updates
   }
 
@@ -535,7 +614,22 @@ class TaskService {
     */
   def deleteTask(taskid: Int): Map[String, Boolean] = {
     val num = DB.update("DELETE from task where task_id = ? ", taskid)
-    Map("success" -> (num == 1))
+    Map(LABEL_SUCCESS -> (num == 1))
+  }
+
+  /**
+    * set info / task description of external system
+    * @author Benjamin Manns
+    * @param taskid unique taskid identification
+    * @param description description of task
+    * @param username users request
+    * @param testsystem_id answer from which testsystem
+    * @return result if delete works
+    */
+  def setExternalAnswerOfTaskByTestsytem(taskid: Int, description: String, username: String, testsystem_id: String): Map[String, Boolean] = {
+    val num = DB.update("insert into task_external_description (task_id, user_id, testsystem_id, description) select ?,user_id,?,? from user " +
+      "where username = ? on duplicate key update description = ?", taskid, testsystem_id, description, username, description)
+    Map(LABEL_SUCCESS -> (num == 1))
   }
 
   /**

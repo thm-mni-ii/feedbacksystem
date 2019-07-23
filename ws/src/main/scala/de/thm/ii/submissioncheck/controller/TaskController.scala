@@ -208,6 +208,26 @@ class TaskController {
   }
 
   /**
+    * trigger task info for a given task
+    * @param taskid unique identification for a task
+    * @param jsonNode request body containing "data" parameter
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @RequestMapping(value = Array("tasks/{id}/info/trigger"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @ResponseBody
+  def triggerTaskInfoFromTestsystem(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) throw new UnauthorizedException
+
+    val testsystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
+    taskService.setExternalAnswerOfTaskByTestsytem(taskid, null, requestingUser.get.username, testsystem_id)
+    taskService.sendSubmissionToTestsystem(-1, taskid, testsystem_id, requestingUser.get, "info", "")
+    Map(LABEL_SUCCESS -> true)
+  }
+
+  /**
     * Submit data for a given task
     * @param taskid unique identification for a task
     * @param jsonNode request body containing "data" parameter
@@ -431,11 +451,12 @@ class TaskController {
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
       val testsystem_id = jsonNode.get(TestsystemLabels.id).asText()
+      val load_external_description = jsonNode.get(TaskDBLabels.load_external_description).asBoolean()
       // Test if testsystem exists
       if (testsystemService.getTestsystem(testsystem_id).isEmpty){
         throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
       }
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id)
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id, load_external_description)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
 
       taskInfo += (LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
@@ -443,7 +464,7 @@ class TaskController {
     }
     catch {
       case e: NullPointerException => {
-        throw new BadRequestException("Please provide: name, description and testsystem_id. Deadline is optional")
+        throw new BadRequestException("Please provide: name, description, load_external_description and testsystem_id. Deadline is optional")
       }
     }
   }
@@ -491,12 +512,18 @@ class TaskController {
     val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
     val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
     val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
+    val load_external_description = if (jsonNode.get(TaskDBLabels.load_external_description) != null) {
+      jsonNode.get(TaskDBLabels.load_external_description).asBoolean()
+    } else {
+      null
+    }
+
     val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else null
     if (testsystem_id != null && testsystemService.getTestsystem(testsystem_id).isEmpty){
       throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
     }
 
-    val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id)
+    val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id, null, load_external_description)
 
     Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> getUploadUrlForTaskTestFile(taskid))
   }
@@ -709,11 +736,17 @@ class TaskController {
 
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
+          val testsystem = data.topic.replace("_check_answer", "")
           logger.warn(answeredMap.toString())
-          taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
-            Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
-            answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
-            Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]))
+          if (answeredMap.contains("isinfo") && answeredMap("isinfo").asInstanceOf[Boolean]){
+            taskService.setExternalAnswerOfTaskByTestsytem(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
+              answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap(LABEL_USER_ID).asInstanceOf[String], testsystem)
+          } else {
+            taskService.setResultOfTask(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
+              Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String]),
+              answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("passed").asInstanceOf[String],
+              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]))
+          }
         } catch {
           case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
         }

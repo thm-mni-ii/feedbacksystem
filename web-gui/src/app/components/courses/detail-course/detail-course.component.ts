@@ -24,6 +24,7 @@ import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsys
 import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
 import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
+import set = Reflect.set;
 
 /**
  * Shows a course in detail
@@ -85,6 +86,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       course_detail.tasks.forEach(task => {
         this.submissionAsFile[task.task_id] = false;
         this.processing[task.task_id] = false;
+        this.triggerExternalDescriptionIfNeeded(task, false)
+
       });
       this.titlebar.emitTitle(course_detail.course_name);
     }, error => this.router.navigate(['404']))
@@ -104,6 +107,37 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
     this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
 
+
+  }
+
+  private externalInfoPoller(task: CourseTask, step: number){
+    if (step > 10) {
+      this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
+      return
+    }
+    this.db.getTaskResult(task.task_id).toPromise()
+      .then((loadedTask: CourseTask) => {
+        if (loadedTask.external_description != null){
+          this.courseTasks[this.courseTasks.indexOf(task)] = loadedTask;
+        } else {
+          setTimeout(() => {
+            this.externalInfoPoller(task, step+1)
+          }, 5000)
+        }
+      })
+  }
+
+  public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean){
+    if (force) {
+      task.external_description = ""
+    }
+    if (task.load_external_description && task.external_description == null || force){
+      this.db.triggerExternalInfo(task.task_id).toPromise().then(() => {
+        this.externalInfoPoller(task, 0)
+      }).catch(() => {
+        this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
+      })
+    }
 
   }
 
@@ -185,6 +219,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         this.hasScrolledToTask = true;
       }
     });
+  }
+
+  reRunTask(task: CourseTask){
+    this.submissionData[task.task_id] = task.submission_data
+    this.submitTask(task)
   }
 
   private submitTask(currentTask: CourseTask) {

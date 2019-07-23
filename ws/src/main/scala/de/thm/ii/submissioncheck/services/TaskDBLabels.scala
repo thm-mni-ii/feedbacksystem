@@ -33,5 +33,11 @@ object TaskDBLabels {
 
   /** DB Label plagiat_check_done */
   var plagiat_check_done = "plagiat_check_done"
+
+  /** DB Label external_description */
+  var external_description = "external_description"
+
+  /** DB Label load_external_description */
+  var load_external_description = "load_external_description"
 }
 
