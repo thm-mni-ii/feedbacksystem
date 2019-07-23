@@ -363,9 +363,10 @@ class TaskService {
     * @return JAVA Map
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
-    // TODO check if user has this course where the task is from
-    val list = DB.query("SELECT task.*, task_external_description.description as external_description from task join course " +
-      "using(course_id) left join task_external_description using(task_id) where task_id = ?",
+    val usersIdOrNull = if (userid.isDefined) userid.get else null
+    val list = DB.query("SELECT task.*, ted.description as external_description from task join course using(course_id) " +
+      "left join task_external_description ted on ted.testsystem_id =  task.testsystem_id and ted.task_id = task.task_id " +
+      "and ted.user_id = ? where task.task_id = ?",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
@@ -392,7 +393,7 @@ class TaskService {
         } else {
           lineMap
         }
-      }, taskid)
+      }, usersIdOrNull, taskid)
     if(list.isEmpty) {
       throw new ResourceNotFoundException
     }
@@ -465,8 +466,9 @@ class TaskService {
     * @return JAVA List
     */
   def getTasksByCourse(courseid: Int, userid: Option[Int] = None): List[Map[String, Any]] = {
-    DB.query("select t.*, task_external_description.description as external_description from task t left join " +
-      "task_external_description using(task_id) where t.course_id = ?",
+    val usersIdOrNull = if (userid.isDefined) userid.get else null
+    DB.query("select t.*, ted.description as external_description from task t left join task_external_description ted on " +
+      "ted.task_id = t.task_id and ted.user_id = ? and t.testsystem_id = ted.testsystem_id where t.course_id = ?",
       (res, _) => {
         val lineMap = Map(
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
@@ -491,7 +493,7 @@ class TaskService {
         } else {
           lineMap
         }
-      }, courseid)
+      }, usersIdOrNull, courseid)
   }
 
   /**
