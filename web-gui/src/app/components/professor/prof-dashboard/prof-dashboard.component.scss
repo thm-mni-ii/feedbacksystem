@@ -110,3 +110,15 @@ input {
   background-color: white !important;
   white-space: pre-line !important;
 }
+
+.cloumn_header_task{
+  width: 50px;
+  display: flex;
+  background-color: #f2f2f1;
+  height: 38px;
+  overflow: hidden;
+  font-size: 12px;
+  word-wrap: anywhere;
+  border-radius: 5px;
+  padding: 2px 0 0 4px;
+}

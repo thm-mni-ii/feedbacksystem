@@ -63,11 +63,11 @@ export class SearchCourseComponent implements OnInit {
     return this.courses.filter(option => {
       if (option.course_modul_id) {
         // Filter for course and module id
-        return option.course_name.toLowerCase().indexOf(filterValue) === 0 ||
-          option.course_modul_id.toLowerCase().indexOf(filterValue) === 0;
+        return option.course_name.toLowerCase().indexOf(filterValue) >= 0 ||
+          option.course_modul_id.toLowerCase().indexOf(filterValue) >= 0;
       } else {
         // filter only for course name
-        return option.course_name.toLowerCase().indexOf(filterValue) === 0;
+        return option.course_name.toLowerCase().indexOf(filterValue) >= 0;
       }
     });
   }

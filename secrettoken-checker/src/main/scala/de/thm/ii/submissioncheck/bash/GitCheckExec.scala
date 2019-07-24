@@ -36,6 +36,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
   private val LABEL_TEST = "test"
   private val LABEL_RESULT = "result"
+  private val LABEL_HEADER = "header"
 
   @throws(classOf[java.io.IOException])
   @throws(classOf[java.net.SocketTimeoutException])
@@ -95,6 +96,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
   private def runMaintainerTest(docentFile: File, target_dir: String) = {
     var result: List[Map[String, Any]] = List()
+    var docentResult: List[Map[String, Any]] = List()
     var docentSettingMap: Map[String, Any] = Map()
     try {
       val bufferedSource = Source.fromFile(docentFile)
@@ -127,7 +129,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
         // check if docent is developer in this repo
         docentSettingMap("docents").asInstanceOf[List[String]].foreach(docent => {
-          result = Map(LABEL_TEST -> ("Developer " + docent), LABEL_RESULT -> projectDeveloper.contains(docent)) :: result
+          docentResult = Map(LABEL_TEST -> docent, LABEL_RESULT -> projectDeveloper.contains(docent)) :: docentResult
         })
       } catch {
         case e: java.net.SocketTimeoutException => {
@@ -140,7 +142,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
         }
       }
     }
-    result
+    (result, docentResult)
   }
 
   /**
@@ -162,35 +164,35 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
     if (exitCode == startCode) { // no problems yet
       var seq: Seq[String] = null
-      val stdoutStream = new StringBuilder
-      val stderrStream = new StringBuilder
-
+      val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
       val logger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
-
       seq = Seq("clone", git_url, target_dir)
       exitCode = Process("git", seq).!(logger)
       output = stdoutStream.toString() + "\n" + stderrStream.toString()
 
       var checkresultList: List[Map[String, Any]] = List()
       var maintainerMap: List[Map[String, Any]] = List()
+      var docentMap: List[Map[String, Any]] = List()
       if (exitCode == 0) {
         val configFile = new File(basePath.resolve(GitCheckExec.LABEL_STRUCTUREFILE).toString)
         val configFilePathRel = configFile.getPath
         val configFileAbsPath = configFile.getAbsolutePath
-
         var structureMap = runStructureTest(configFileAbsPath, targetPath)
-        checkresultList = Map("header" -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
+        checkresultList = Map(LABEL_HEADER -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
 
         if (Files.exists(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE))) {
           // we request to git(lab/hub) and do some activity checks
-          maintainerMap = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString), targetDirPath.toAbsolutePath.toString)
-          checkresultList = Map("header" -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
+          (maintainerMap, docentMap) = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString),
+            targetDirPath.toAbsolutePath.toString)
+          checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
+          checkresultList = Map(LABEL_HEADER -> "Docent Check", LABEL_RESULT -> docentMap) :: checkresultList
         }
 
         if (exitCode == startCode || exitCode == 0) {
           var sum = 0
           structureMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
           maintainerMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
+          docentMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
           // If checks are passed we can send a string or a JSON String
           output = JsonHelper.listToJsonStr(checkresultList)
           if (sum == (structureMap.size + maintainerMap.size)) exitCode = 0 else exitCode = 1
