@@ -120,7 +120,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
         projectMaintainer.foreach(maintainerMap => {
           val name = maintainerMap("name").asInstanceOf[String]
-          result = Map(LABEL_TEST -> name, LABEL_RESULT -> (pNames.contains(name) && maintainerMap("access_level").asInstanceOf[BigInt] == 40)) :: result
+          if (maintainerMap("access_level").asInstanceOf[BigInt] == 40) result = Map(LABEL_TEST -> name, LABEL_RESULT -> pNames.contains(name)) :: result
         })
         val projectDeveloper = projectMaintainer.map(maintainer => {
           val name = maintainer("name").asInstanceOf[String]
@@ -151,8 +151,6 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     * @return exitcode
     */
   def exec(): Int = {
-    //var dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
-    //if (dockerRelPath == null) dockerRelPath = ULDIR
     var dockerRelPath = ULDIR
 
     val targetPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
@@ -182,8 +180,9 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
         if (Files.exists(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE))) {
           // we request to git(lab/hub) and do some activity checks
-          (maintainerMap, docentMap) = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString),
+          val mapTuple = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString),
             targetDirPath.toAbsolutePath.toString)
+          maintainerMap = mapTuple._1; docentMap = mapTuple._2;
           checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
           checkresultList = Map(LABEL_HEADER -> "Docent Check", LABEL_RESULT -> docentMap) :: checkresultList
         }
@@ -278,17 +277,29 @@ object GitCheckExec {
     val task_id = jsonMap(LABEL_TASKID)
     val git_url = jsonMap(DATA).asInstanceOf[String]
     val sumission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
-    val gitChecker = new GitCheckExec(sumission_id, task_id, git_url)
-    val exitcode = gitChecker.exec()
-    val passed = if (exitcode == 0) 1 else 0
+    try {
+      val gitChecker = new GitCheckExec(sumission_id, task_id, git_url)
+      val exitcode = gitChecker.exec()
+      val passed = if (exitcode == 0) 1 else 0
 
-    sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
-      "passed" -> passed.toString,
-      "exitcode" -> exitcode.toString,
-      LABEL_TASKID -> task_id.toString,
-      LABEL_SUBMISSIONID -> sumission_id,
-      "public_key" -> gitChecker.getPublicKey,
-      DATA -> gitChecker.output
-    )))
+      sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
+        "passed" -> passed.toString,
+        "exitcode" -> exitcode.toString,
+        LABEL_TASKID -> task_id.toString,
+        LABEL_SUBMISSIONID -> sumission_id,
+        "public_key" -> gitChecker.getPublicKey,
+        DATA -> gitChecker.output
+      )))
+    } catch {
+      case e: Exception => {
+        sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
+          "passed" -> "0",
+          "exitcode" -> "42",
+          LABEL_TASKID -> task_id.toString,
+          LABEL_SUBMISSIONID -> sumission_id,
+          DATA -> e.getMessage
+        )))
+      }
+    }
   }
 }

@@ -246,10 +246,13 @@ object SecretTokenChecker extends App {
 
   private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
     try {
+      logger.warning("GIT Checker Received Message")
       val jsonMap: Map[String, Any] = record.value()
       GitCheckExec.onGitReceived(jsonMap)
     } catch {
-      case e: Exception => {}
+      case e: Exception => {
+        logger.warning("GITCHECKER Exception: " + e.getMessage)
+      }
     }
   }
 
