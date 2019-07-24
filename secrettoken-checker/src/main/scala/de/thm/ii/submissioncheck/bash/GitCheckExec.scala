@@ -138,7 +138,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
         }
         case e: Exception => {
           output = "GIT Url is invalid"
-          exitCode = 1
+          exitCode = 2
         }
       }
     }

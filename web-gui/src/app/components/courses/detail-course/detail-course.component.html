@@ -62,7 +62,7 @@
                (change)="getSubmissionFile($event.target.files[0], task)">
         <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
-          <input (keyup.enter)="submission(courseDetail.course_id, task)" matInput type="text" [(ngModel)]="submissionData[task.task_id]">
+          <textarea style="height: 60px;" matInput type="text" [(ngModel)]="submissionData[task.task_id]"></textarea>
         </mat-form-field>
       </div>
 
