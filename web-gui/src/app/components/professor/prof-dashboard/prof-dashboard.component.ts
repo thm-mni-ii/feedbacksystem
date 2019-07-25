@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
 import {Observable} from 'rxjs';
-import {DashboardProf, GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
+import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {MatTabChangeEvent} from '@angular/material';
 import {map, startWith} from 'rxjs/operators';
@@ -58,6 +58,13 @@ export class ProfDashboardComponent implements OnInit {
     });
   }
 
+  plagiatColor(task: CourseTask): string {
+    if (task.plagiat_passed == null) {
+      return "null"
+    } else {
+      return task.plagiat_passed
+    }
+  }
 
   /**
    * Load matrix for the right tab. Every tab represents a course

@@ -11,7 +11,7 @@
       <li  class="course">
         <!-- Tasks a1, a2...-->
         <div *ngFor="let task of entry.tasks" >
-          <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
+          <div *ngFor="let key of keys(task)" class="task"
                matTooltipPosition="above"
                matTooltipClass="custom-tooltip"
                matTooltip="
@@ -19,7 +19,9 @@
                Versuche: {{task[key].trials}}
                Deadline: {{task[key].deadline | date:'medium'}}"
                (click)="goToTask(entry.course_id, task[key].task_id)">
-            {{key}}
+              <span class="sub_feedback {{task[key].passed}}">{{key}}</span>
+              <span class="sub_feedback {{plagiatColor(task[key])}}"></span>
+
           </div>
         </div>
 

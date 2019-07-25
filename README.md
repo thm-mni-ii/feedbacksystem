@@ -185,6 +185,31 @@ fi
 ````
 
 
+## Plagiarism Script
+````bash 
+#!/bin/bash
+
+php_array='['
+
+for fil in $(ls $USERS_SUBMISSION_DIR)
+do
+    # split the $fil name and extract the submission number  
+    IFS='_'
+    read -ra ADDR <<< "$fil"
+    php_array=$php_array$(echo -n ${ADDR[1]})","
+done
+
+php_array=$php_array"]"
+
+#echo $php_array
+php -r "\$a="$php_array";foreach("\$a" as &\$elem){\$elem = [\$elem => true];};echo json_encode("\$a");"
+
+
+exit 0
+
+
+````
+
 ## Supervised By
 
 * Frank Kammer

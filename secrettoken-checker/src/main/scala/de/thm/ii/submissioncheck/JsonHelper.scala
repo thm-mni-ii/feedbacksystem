@@ -1,9 +1,12 @@
 package de.thm.ii.submissioncheck
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import akka.japi.Option
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import org.json4s.jackson.JsonMethods.parse
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
+import scala.concurrent.Future
 
 /**
   * Provides functions to transform json to map and map to json.
@@ -20,6 +23,23 @@ object JsonHelper {
   implicit def jsonStrToMap(jsonStr: String): Map[String, Any] = {
     implicit val formats = org.json4s.DefaultFormats
     parse(jsonStr).extract[Map[String, Any]]
+  }
+
+  /**
+    * parse any JSON String to ANY object, has to be cast later on
+    * @author Benjamin Manns
+    * @param jsonStr a json String
+    * @return Scala Object
+    */
+  implicit def jsonStrToAny(jsonStr: String): Any = {
+    implicit val formats = org.json4s.DefaultFormats
+    try {
+      parse(jsonStr).extract[Any]
+    } catch {
+      case e: Exception => {
+        null
+      }
+    }
   }
 
   /**

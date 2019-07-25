@@ -22,7 +22,8 @@ repositories {
     mavenCentral()
 }
 
-run.doFirst { environment 'CONFDIR', "${projectDir}" }
+run.doFirst { environment 'CONFDIR', "${projectDir}"
+                environment 'BASH_DOCKER', "submissioncheck_bash1"  }
 
 sourceSets {
     main {

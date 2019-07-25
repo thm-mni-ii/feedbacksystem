@@ -5,30 +5,41 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import akka.Done
 import de.thm.ii.submissioncheck.JsonHelper
-import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ERROR_DOWNLOAD,
-  LABEL_TOKEN, PLAGIARISM_SCRIPT_ANSWER_TOPIC, ULDIR, download, logger, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ERROR_DOWNLOAD, LABEL_TOKEN, PLAGIARISM_SCRIPT_ANSWER_TOPIC, ULDIR, download, logger, sendMessage}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.sys.process.Process
+import scala.util.{Failure, Success}
 
 /**
   * Class for executing Plagiat scripts
   *
   * @author Benjamin Manns
   * @param courseid of submitted task
+  * @param taskid of submitted task
   * @param plagiatCheckBasePath users submission saved all in a folder
   */
-class PlagiatCheckExec(val courseid: String, val plagiatCheckBasePath: String) {
+class PlagiatCheckExec(val courseid: String, val taskid: String, val plagiatCheckBasePath: String) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   private val __option_v = "-v"
   private val __slash = "/"
   private val __colon = ":"
   private val startCode = -99
-  /** save the success of our execution */
-  var success: Boolean = false
+  private val EXIT_CODE_1 = 1
+  private val EXIT_CODE_4 = 4
+
+  private val PLAGIAT_CHECK = "PLAGIAT_CHECK"
+  /** save the passed status of each submission*/
+  var submission_checks: List[Map[Int, Boolean]] = List()
+
+  /** save if execution wa successfully */
+  var execution_success: Boolean = false
+  /** error message */
+  var error_msg: String = ""
+
   /** save the exit code of our execution */
   var exitCode: Int = startCode
   /** save the output of our execution */
@@ -37,7 +48,7 @@ class PlagiatCheckExec(val courseid: String, val plagiatCheckBasePath: String) {
     * simply display some usefull status information
     * @return string describing PlagiatCheckExec
     */
-  override def toString: String = s"PlagiatCheckExec(success=$success,exitCode=$exitCode,output=$output) [" + super.toString + "]"
+  override def toString: String = s"PlagiatCheckExec(exitCode=$exitCode,output=$output) [" + super.toString + "]"
 
   /**
     * exec()
@@ -50,28 +61,44 @@ class PlagiatCheckExec(val courseid: String, val plagiatCheckBasePath: String) {
       dockerRelPath = ULDIR
     }
 
-    val plagiatWorkingDir = Paths.get(s"$dockerRelPath/PLAGIAT_CHECK/$courseid/").toAbsolutePath.toString
+    val plagiatWorkingDir = Paths.get(dockerRelPath).resolve(PLAGIAT_CHECK).resolve(courseid).toAbsolutePath.toString
     val plagiatScriptPath = s"$plagiatWorkingDir/plagiatscript.sh"
-    val localScriptPath = Paths.get(s"$ULDIR/PLAGIAT_CHECK/$courseid/scriptfile.sh").toAbsolutePath.toString
-    val unzipedDir = plagiatWorkingDir + "/unzip"
+    val localScriptPath = Paths.get(s"$ULDIR/PLAGIAT_CHECK/$courseid/plagiatscript.sh").toAbsolutePath
+    val unzipedDir = Paths.get(plagiatWorkingDir).resolve(taskid).resolve("unzip")
     val stdoutStream = new ByteArrayOutputStream
+    val localScriptPathString = localScriptPath.toString
 
-    var seq: Seq[String] = null
-
-    seq = Seq("run", "--rm", __option_v, s"$plagiatScriptPath:$localScriptPath", __option_v, s"$unzipedDir:$unzipedDir", "--env",
-        "USERS_SUBMISSION_DIR=" + unzipedDir, "bash:4.4", "bash", localScriptPath)
-
-    val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
-
-    output = stdoutStream.toString
-
-    if (exitCode == 0) {
-      success = true
+    if (!Files.exists(localScriptPath)){
+      error_msg = "The plagiat script is not available. Path should be: " + localScriptPath
+      exitCode = EXIT_CODE_4
     } else {
-      logger.debug("Exit with non-zero code: " + exitCode)
-      success = false
+      var seq: Seq[String] = null
+
+      val bashDockerImage = System.getenv("BASH_DOCKER")
+
+      seq = Seq("run", "--rm", __option_v, s"$plagiatScriptPath:$localScriptPathString", __option_v, s"$unzipedDir:$unzipedDir", "--env",
+        "USERS_SUBMISSION_DIR=" + unzipedDir, bashDockerImage, "bash", localScriptPathString)
+
+      exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
+      output = stdoutStream.toString
+      val parsedObject = JsonHelper.jsonStrToAny(output)
+
+      if (parsedObject == null){
+        // answer was an invalid json string
+        error_msg = "Answer form plagiarism script was an invalid json string"
+        exitCode = 1
+      } else {
+        try {
+          submission_checks = parsedObject.asInstanceOf[List[Map[Int, Boolean]]]
+          execution_success = true
+        } catch {
+          case _: Exception => {
+            exitCode = 1
+            error_msg = "Answer form plagiarism script has to be a JSON of format: List[Map[Int, Boolean]]"
+          }
+        }
+      }
     }
-    this.exitCode = exitCode
     exitCode
   }
 }

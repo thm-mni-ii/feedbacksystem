@@ -24,10 +24,20 @@
           <!-- Tasks-->
           <div class="task-container">
             <div *ngFor="let task of student.tasks" class="task-row">
-              <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
-                   matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
-                {{task[key].trials}}
-              </div>
+              <span>
+                <div *ngFor="let key of keys(task)" class="task "
+                     matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
+                  <span class="sub_feedback {{task[key].passed}}">
+                    {{task[key].trials}}
+                  </span>
+                  <span class="sub_feedback {{plagiatColor(task[key])}}" >
+                    P
+                  </span>
+
+                </div>
+
+              </span>
+
             </div>
           </div>
 

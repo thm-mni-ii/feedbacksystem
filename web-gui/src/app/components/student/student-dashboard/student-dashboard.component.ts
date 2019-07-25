@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {DashboardStudent} from '../../../interfaces/HttpInterfaces';
+import {CourseTask, DashboardStudent} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {Router} from '@angular/router';
 
@@ -37,6 +37,14 @@ export class StudentDashboardComponent implements OnInit {
    */
   goToTask(courseID: number, taskID: string) {
     this.router.navigate(['courses', courseID], {fragment: taskID});
+  }
+
+  plagiatColor(task: CourseTask): string {
+    if (task.plagiat_passed == null) {
+      return "null"
+    } else {
+      return task.plagiat_passed
+    }
   }
 
 }
