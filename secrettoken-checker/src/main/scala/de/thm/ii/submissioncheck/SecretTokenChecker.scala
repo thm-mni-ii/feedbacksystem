@@ -109,6 +109,8 @@ object SecretTokenChecker extends App {
 
   /** provides a Label for gitchecker_answer*/
   val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
+  /** provides a Label for task answer of gitchecker*/
+  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + "_new_task_answer"
 
   private val __slash = "/"
 

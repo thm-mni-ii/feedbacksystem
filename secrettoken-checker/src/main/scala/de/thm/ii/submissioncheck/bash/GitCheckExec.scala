@@ -5,7 +5,7 @@ import java.nio.file.{Files, Path, Paths}
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, LABEL_ACCEPT, LABEL_ERROR, LABEL_SUBMISSIONID,
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, GIT_TASK_ANSWER_TOPIC, LABEL_ACCEPT, LABEL_ERROR, LABEL_SUBMISSIONID,
   LABEL_TASKID, LABEL_TOKEN, ULDIR, downloadFilesToFS, sendMessage, sendTaskMessage}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -235,6 +235,8 @@ object GitCheckExec {
     */
   def sendGitCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_CHECK_ANSWER_TOPIC, message))
 
+  private def sendGitTaskAnswer(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_TASK_ANSWER_TOPIC, message))
+
   /**
     * Kafka Callback when message for GitChecker is receiving
     *
@@ -246,21 +248,21 @@ object GitCheckExec {
     val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
     val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
     if (urls.length != 1 && urls.length != 2) {
-      sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+      sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
         s"Please provide one or two files (${LABEL_STRUCTUREFILE} and ${LABEL_CONFIGFILE})", LABEL_TASKID -> taskid)))
     } else {
       val sendedFileNames = SecretTokenChecker.downloadFilesToFS(urls, jwt_token, taskid)
 
       // validation if sent files are useful
       if (sendedFileNames.length == 1 && !sendedFileNames.contains(LABEL_STRUCTUREFILE)) {
-        sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
           s"Provided file should call '${LABEL_STRUCTUREFILE}'", LABEL_TASKID -> taskid)))
       }
       else if (sendedFileNames.length == 2 && (!sendedFileNames.contains(LABEL_CONFIGFILE) || !sendedFileNames.contains(LABEL_STRUCTUREFILE))) {
-        sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
+        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
           s"Provided files should call '${LABEL_STRUCTUREFILE}' and '${LABEL_CONFIGFILE}'", LABEL_TASKID -> taskid)))
       } else {
-        sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
       }
     }
   }
