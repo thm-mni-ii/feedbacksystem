@@ -3,7 +3,7 @@ import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {
-  CourseTask,
+  CourseTask, CourseTaskEvaluation,
   DetailedCourseInformation,
   NewTaskInformation,
   Succeeded,
@@ -190,6 +190,16 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  public resultOfTaskIsAllEmpty(task: CourseTask){
+    let tasksystemPassed = task.evaluation
+      .map( (eva:CourseTaskEvaluation) => eva.passed )
+      .filter(passed => {
+        return (passed == null || typeof passed === undefined)
+      });
+
+    return tasksystemPassed.length == task.evaluation.length
+  }
+
   private submitTask(currentTask: CourseTask) {
     this.processing[currentTask.task_id] = true;
     this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
@@ -197,8 +207,16 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
+
             this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
-            if (taskResult.passed == null || typeof taskResult.passed === undefined) {
+
+            let tasksystemPassed = taskResult.evaluation
+              .map( (eva:CourseTaskEvaluation) => eva.passed )
+              .filter(passed => {
+                  return (passed == null || typeof passed === undefined)
+              });
+
+            if (tasksystemPassed.length == taskResult.evaluation.length) {
               return throwError('No result yet');
             }
             return of(taskResult);
@@ -365,7 +383,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     }
 
     // if user submits but there is a pending submission
-    if (currentTask.submit_date && !currentTask.result_date) {
+    if (currentTask.submit_date && this.resultOfTaskIsAllEmpty(currentTask)) {
       this.snackbar.open('Für Aufgabe "' + currentTask.task_name +
         '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
         .onAction()

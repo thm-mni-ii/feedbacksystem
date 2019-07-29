@@ -1,4 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {MatTabChangeEvent} from "@angular/material";
+import {FormControl} from "@angular/forms";
+import {CourseTaskEvaluation} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-task-result',
@@ -7,7 +10,7 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class TaskResultComponent implements OnInit {
 
-  @Input() taskResult: string;
+  @Input() taskResults: CourseTaskEvaluation[];
   @Input() taskPassed: string;
 
   public taskResultList: any = [];
@@ -16,15 +19,23 @@ export class TaskResultComponent implements OnInit {
     this.taskResultList = []
   }
 
-  ngOnInit() {
-    if (this.taskResult == null) return;
-
+  parseResultString(resultstring: string): any[]{
+    if (resultstring == null) return []
     try {
-      this.taskResultList = JSON.parse(this.taskResult)
+      let obj = JSON.parse(resultstring)
+      if (obj == null)
+        return null
+      else
+        return obj
     } catch (e) {
-      // can not parsed, do nothing
-      this.taskResultList = []
+      return [];
     }
   }
 
+  ngOnInit() {
+  }
+
+  tabChanged(event: MatTabChangeEvent) {
+
+  }
 }

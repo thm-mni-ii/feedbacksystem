@@ -419,7 +419,8 @@ class TaskService {
           lineMap + (SubmissionDBLabels.evaluation -> submissionInfos(SubmissionDBLabels.evaluation),
             "file" -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
-            SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data))
+            SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data),
+            SubmissionDBLabels.combined_passed -> submissionService.getSubmissionPassed(Integer.parseInt(submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String])))
         } else {
           lineMap
         }

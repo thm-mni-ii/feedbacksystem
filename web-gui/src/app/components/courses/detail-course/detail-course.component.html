@@ -21,12 +21,13 @@
       <span class="filler"></span>
       <div>{{task.result_date | date: 'medium'}}</div>
       <ng-template #result id="result">
-        <mat-icon id="passed" *ngIf="task.passed && task.result_date">check_box</mat-icon>
-        <mat-icon id="failed" *ngIf="!task.passed && task.result_date">clear</mat-icon>
-        <mat-icon id="not-done" *ngIf="!task.result_date">check_box_outline_blank
+        {{task.combined_passed}}
+        <mat-icon id="passed" *ngIf="task.combined_passed != null && task.combined_passed">check_box</mat-icon>
+        <mat-icon id="failed" *ngIf="!task.combined_passed && task.combined_passed">clear</mat-icon>
+        <mat-icon id="not-done" *ngIf="task.combined_passed == null">check_box_outline_blank
         </mat-icon>
       </ng-template>
-      <mat-spinner *ngIf="processing[task.task_id] || (task.submit_date && !task.result_date); else result"
+      <mat-spinner *ngIf="processing[task.task_id] || resultOfTaskIsAllEmpty(task); else result"
                    diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>
@@ -46,7 +47,7 @@
         </div>
 
 
-        <app-task-result [taskResult]="task.result" [taskPassed]="task.passed"></app-task-result>
+        <app-task-result [taskResults]="task.evaluation" [taskPassed]="task.passed"></app-task-result>
 
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">

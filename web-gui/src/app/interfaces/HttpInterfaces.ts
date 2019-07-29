@@ -62,18 +62,27 @@ export interface CourseTask {
   testsystem_id: string;
   submit_date?: Date;
   exitcode: number;
-  result: string;
   submission_data: string;
   task_name: string;
-  passed?: boolean;
+  combined_passed: boolean;
   deadline: Date;
   result_date: Date;
   file: string;
   task_id: number;
   task_description: string;
   plagiat_passed: string;
+  evaluation: CourseTaskEvaluation[];
 }
 
+export interface CourseTaskEvaluation {
+  testsystem_id: string;
+  exitcode: number;
+  result: string;
+  passed: boolean;
+  result_date: Date;
+  ordnr: number;
+  submission_id: number;
+}
 
 /**
  * Information after user logged in.
@@ -112,8 +121,7 @@ export interface NewTaskInformation {
   deadline: Date;
   exitcode: number;
   file: string;
-  passed: boolean;
-  result: string;
+  combined_passed: boolean;
   result_date: Date;
   submission_data: string;
   submit_date: Date;
@@ -126,6 +134,7 @@ export interface NewTaskInformation {
   testsystem_id: string;
   no_reaction: boolean;
   plagiat_passed: string;
+  evaluation: CourseTaskEvaluation[];
 }
 
 /**

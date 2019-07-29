@@ -1,14 +1,23 @@
 
-<ul *ngFor="let resultElement of taskResultList">
-  <h2>{{resultElement.header}}</h2>
-  <ul>
-      <mat-card *ngFor="let line of resultElement.result" id="resultCard" class="line.result">
-        <mat-icon [ngStyle]="{'color':'green'}" *ngIf="line.result">done</mat-icon>
-        <mat-icon [ngStyle]="{'color':'red'}" *ngIf="!line.result">error</mat-icon>
+<mat-tab-group (selectedTabChange)="tabChanged($event)">
+  <mat-tab *ngFor="let taskResult of taskResults" label="{{taskResult.testsystem_id}}" class="tab">
 
-        {{line.test}}
-      </mat-card>
-  </ul>
-</ul>
 
-<p *ngIf="taskResultList.length == 0" class="{{taskPassed}}" id="task-result-text">Ergebnis: {{taskResult}}</p>
+    <ul *ngFor="let resultElement of parseResultString(taskResult.result)">
+      <h2>{{resultElement.header}}</h2>
+      <ul>
+        <mat-card *ngFor="let line of resultElement.result" id="resultCard" class="line.result">
+          <mat-icon [ngStyle]="{'color':'green'}" *ngIf="line.result">done</mat-icon>
+          <mat-icon [ngStyle]="{'color':'red'}" *ngIf="!line.result">error</mat-icon>
+
+          {{line.test}}
+        </mat-card>
+      </ul>
+    </ul>
+
+    <p *ngIf="parseResultString(taskResult.result).length == 0" class="{{taskResult.passed}}" id="task-result-text">Ergebnis: {{taskResult.result}}</p>
+
+
+  </mat-tab>
+</mat-tab-group>
+

@@ -557,31 +557,30 @@ class CourseService {
         var passed: Boolean = false
         var passedDate: Any = null
         var passed_string: String = null
-        var coll_result_date: Any = null
-        var final_submission_id: Int = -1
+        var final_sub_id: Int = -1
         var plagiat_passed: List[String] = List()
         for(submission <- userSubmissions) {
           plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-          if (coll_result_date == null) coll_result_date = submission("result_date")
-          if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
+          println(submission)
+          val submissionPassed = submissionService.getSubmissionPassed(Integer.parseInt(submission(SubmissionDBLabels.submissionid).toString))
+          if (submissionPassed != null && passed_string == null) passed_string = submissionPassed
+          if (passed_string == "false" && submissionPassed == "true") passed_string = submissionPassed
+
+          if (!passed &&  submissionPassed == "true") {
             passed = true
             passedDate = submission("submit_date")
-            final_submission_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
+            final_sub_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
           }
         }
-        if (!passed && coll_result_date == null) {
-          passed_string = null
-          // If no submission was correct, we send the last submission
-          if (userSubmissions.length > 0) final_submission_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
-        } else {
-          passed_string = passed.toString
-        }
+
+        // If no submission was correct, we send the last submission
+        if (!passed && userSubmissions.length > 0) final_sub_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
+
         tasksPassedSum = tasksPassedSum + passed.compare(false)
         val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, "submission_id" -> final_submission_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed
-        ))
+          "passed_date" -> passedDate, "submission_id" -> final_sub_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
 
         processedTasks = taskStudentCell :: processedTasks
       }
