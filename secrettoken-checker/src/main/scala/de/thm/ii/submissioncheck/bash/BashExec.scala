@@ -2,10 +2,14 @@ package de.thm.ii.submissioncheck.bash
 
 import java.io._
 import java.nio.file.{Path, Paths}
+
 import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
+import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_CHECK
+import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_INFO
+import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_TASK
 import org.slf4j.LoggerFactory
 
-import scala.sys.process.Process
+import scala.sys.process.{Process, ProcessLogger}
 
 /**
   * Class for executing Bash scripts
@@ -15,9 +19,9 @@ import scala.sys.process.Process
   * @param name username parameter
   * @param submittedFilePath users submission saved as file
   * @param compile_production run different docker command if inside docker or outside
-  * @param isInfo calculates a info message
+  * @param executionMode 1 = Execute a user submission, 2 = calculates a info message, 3 = test a submitted task
   */
-class BashExec(val taskid: String, val name: String, val submittedFilePath: String, val compile_production: Boolean, isInfo: Boolean) {
+class BashExec(val taskid: String, val name: String, val submittedFilePath: String, val compile_production: Boolean, executionMode: Int) {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
@@ -56,18 +60,17 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
     if (scriptContent.split("\n").head.matches("#!.*php.*")) {
       interpreter = "php"
     }
-    val absPath = scriptFile.getAbsolutePath
 
+    val absPath = scriptFile.getAbsolutePath
     val testfileFile = new File(baseFilePath.resolve("testfile").toString)
     val testfilePathRel = testfileFile.getPath
     val testfilePath = testfileFile.getAbsolutePath
     val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { testfilePath } else ""
 
-    val stdoutStream = new ByteArrayOutputStream
     val bashDockerImage = "thmmniii/bash" // "bash:4.4"
     var seq: Seq[String] = null
 
-    val infoArgument = if (isInfo) { "info"} else ""
+    val infoArgument = if (executionMode == BASH_EXEC_MODE_INFO) { "info"} else ""
 
     if (compile_production) {
       seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + scriptpath.replace(ULDIR, "") + __colon + scriptpath,
@@ -80,8 +83,12 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
         __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter,
         "/" + absPath, name, submittedFilePath, infoArgument)
     }
-    val exitCode = Process("docker", seq).#>(stdoutStream).run().exitValue()
-    output = stdoutStream.toString
+
+    val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
+    val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
+    var exitCode = Process("docker", seq).!(procLogger)
+    output = stdoutStream.toString() + "\n" + stderrStream.toString()
+    if (executionMode == BASH_EXEC_MODE_TASK && stderrStream.toString.length == 0) exitCode = 0
 
     if (exitCode == 0) {
       success = true
