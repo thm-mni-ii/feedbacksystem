@@ -16,6 +16,7 @@ import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io._
+import java.lang.System.Logger
 import java.lang.module.Configuration
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL, URLDecoder}
@@ -77,10 +78,21 @@ object SecretTokenChecker extends App {
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
+  private val LABEL_ISINFO = "isinfo"
   /** provides a Label for jwt_token*/
   val LABEL_TOKEN = "jwt_token"
   private val LABEL_CHECK_REQUEST = "_check_request"
   private val LABEL_CHECK_ANSWER = "_check_answer"
+
+  private val LABEL_ONLY_TEST_TASK_SUBMISSION_ID = "-2"
+  private val LABEL_ONLY_TEST_TASK_DATA = "empty data"
+
+  /** 1 = Execute a user submission */
+  val BASH_EXEC_MODE_CHECK = 1
+  /** 2 = calculates a info message*/
+  val BASH_EXEC_MODE_INFO = 2
+  /** 3 = test a submitted task*/
+  val BASH_EXEC_MODE_TASK = 3
 
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
@@ -108,6 +120,8 @@ object SecretTokenChecker extends App {
 
   /** provides a Label for gitchecker_answer*/
   val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
+  /** provides a Label for task answer of gitchecker*/
+  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + "_new_task_answer"
 
   private val __slash = "/"
 
@@ -245,10 +259,13 @@ object SecretTokenChecker extends App {
 
   private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
     try {
+      logger.warning("GIT Checker Received Message")
       val jsonMap: Map[String, Any] = record.value()
       GitCheckExec.onGitReceived(jsonMap)
     } catch {
-      case e: Exception => {}
+      case e: Exception => {
+        logger.warning("GITCHECKER Exception: " + e.getMessage)
+      }
     }
   }
 
@@ -312,7 +329,6 @@ object SecretTokenChecker extends App {
       var submittedFilePath: String = ""
       if (submit_type.equals("file")) {
         val url: String = jsonMap("fileurl").asInstanceOf[String]
-        //new URL(url) #> new File("submit.txt") !!
         val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
 
         submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
@@ -324,18 +340,24 @@ object SecretTokenChecker extends App {
       var passed: Int = 0
       val userid: String = jsonMap("userid").asInstanceOf[String]
 
-      val (output, code) = bashTest(taskid, userid, submittedFilePath)
+      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) {
+        jsonMap(LABEL_ISINFO).asInstanceOf[Boolean]
+      } else {
+        false
+      }
+      val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
+
+      val (output, code) = bashTest(taskid, userid, submittedFilePath, exeMode)
       if (code == 0) {
         passed = 1
       }
-      sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-        DATA -> output,
-        "passed" -> passed.toString,
-        "exitcode" -> code.toString,
-        "userid" -> userid,
-        LABEL_TASKID -> taskid,
-        LABEL_SUBMISSIONID -> submissionid
-      )))
+
+      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
+        LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
+
+      if (isInfo) answerMap += (LABEL_ISINFO -> true)
+
+      sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
     } catch {
       case e: NoSuchElementException => {
         sendCheckMessage(JsonHelper.mapToJsonStr(Map(
@@ -397,7 +419,10 @@ object SecretTokenChecker extends App {
           sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
             "Provided files should call 'scriptfile' and 'testfile'", LABEL_TASKID -> taskid)))
         } else {
-          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+          // Need to execute files to see if there are syntax errors
+          val submittedFilePath = saveStringToFile(LABEL_ONLY_TEST_TASK_DATA, taskid, LABEL_ONLY_TEST_TASK_SUBMISSION_ID).toAbsolutePath.toString
+          val (output, code) = bashTest(taskid, "secrettokenchecker_testname", submittedFilePath, BASH_EXEC_MODE_TASK)
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> (code == 0), LABEL_ERROR -> output, LABEL_TASKID -> taskid)))
         }
       }
     } catch {
@@ -408,6 +433,7 @@ object SecretTokenChecker extends App {
           LABEL_TASKID -> ""
         )))
       }
+      case e: Exception => logger.warning(s"${e.getClass.toString} with message: ${e.getMessage}")
     }
   }
 
@@ -422,10 +448,11 @@ object SecretTokenChecker extends App {
     * @param taskid id of task
     * @param name username
     * @param filePath md5hash
+    * @param executionMode 1 = Execute a user submission, 2 = calculates a info message, 3 = test a submitted task
     * @return message and exitcode
     */
-  def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-    val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
+  def bashTest(taskid: String, name: String, filePath: String, executionMode: Int): (String, Int) = {
+    val bashtest1 = new BashExec(taskid, name, filePath, compile_production, executionMode)
     val exit1 = bashtest1.exec()
     val message1 = bashtest1.output
 

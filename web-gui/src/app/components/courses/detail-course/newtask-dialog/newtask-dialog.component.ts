@@ -1,9 +1,10 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar, MatSlideToggle} from '@angular/material';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DatabaseService} from '../../../../service/database.service';
 import {Observable, Subscription} from 'rxjs';
 import {DetailedCourseInformation, Testsystem, TestsystemTestfile} from '../../../../interfaces/HttpInterfaces';
+
 
 /**
  * Dialog to create a new task or update
@@ -34,6 +35,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   deadline?: Date;
   testSystemFiles: TestsystemTestfile[][];
   testsystemList: string[];
+  load_external_description: boolean = false;
 
 
   constructor(public dialogRef: MatDialogRef<NewtaskDialogComponent>, private db: DatabaseService,
@@ -52,6 +54,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
       this.deadline = new Date(this.data.task.deadline);
       this.taskType = this.data.task.testsystem_id;
       this.newTaskDescription = this.data.task.task_description
+      this.load_external_description = this.data.task.load_external_description
 
       this.testsystemList = this.data.task.testsystems.map(system => {
         return system.testsystem_id
@@ -65,8 +68,6 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
     } else {
       // ERROR
     }
-
-    //this.loadFileUploadFields()
 
 
     this.subs.add(this.taskForm.controls['taskName'].valueChanges.subscribe(name => {
@@ -180,7 +181,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
         this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + noticeMsg, 'OK', {duration: 3000});
       } else {
         this.db.createTask(this.data.courseID, this.newTaskName,
-          this.newTaskDescription, this.testFilesSubmissionList, this.testsystemList, this.deadline)
+          this.newTaskDescription, this.testFilesSubmissionList, this.testsystemList, this.deadline, this.load_external_description)
           .subscribe(success => this.dialogRef.close(success));
       }
     }
@@ -211,7 +212,7 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
   updateTask() {
       let formatedDeadline = this.deadline.toLocaleDateString() + " " + this.deadline.toLocaleTimeString()
     this.db.updateTask(this.data.task.task_id, this.newTaskName,
-      this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline)
+      this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline, this.load_external_description)
         .subscribe(success => this.dialogRef.close(success));
   }
 

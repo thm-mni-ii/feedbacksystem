@@ -24,7 +24,9 @@
           <!-- Tasks-->
           <div class="task-container">
             <div *ngFor="let task of student.tasks" class="task-row">
+
               <span>
+                <span class="cloumn_header_task" matTooltip="{{ task[keys(task)[0]].task_name }}">{{ task[keys(task)[0]].task_name }}</span>
                 <div *ngFor="let key of keys(task)" class="task "
                      matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
                   <span class="sub_feedback {{task[key].passed}}">

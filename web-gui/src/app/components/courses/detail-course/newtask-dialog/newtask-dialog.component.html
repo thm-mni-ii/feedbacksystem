@@ -42,9 +42,14 @@
 
     <button *ngIf="!isUpdate" mat-flat-button color="accent" (click)="addTestsystem()">Weiteres Testsystem hinzufügen</button>
 
-
+    <mat-divider style="margin: 14px 0;"></mat-divider>
 
   </form>
+
+  <mat-slide-toggle [(ngModel)]="load_external_description" aria-label="Info vom Testsystem">
+    Lade Aufgabenstellung vom Testsystem:
+  </mat-slide-toggle>
+
 
   <!-- Deadline picker-->
   <br>

@@ -6,6 +6,10 @@
   color: green;
 }
 
+#task-result-text{
+  word-break: break-word;
+}
+
 #resultCard.false, #task-result-text.false {
   color: red;
 }

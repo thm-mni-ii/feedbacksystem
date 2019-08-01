@@ -153,9 +153,11 @@ The following section will show some examples.
 ````sh
 #!/bin/bash
 
-casname=$1  # Provides the CAS ID of submiting user
-submission_file=$2     # Provides the submitted file path (even if it was a text, it will be converted to a file) 
-
+casname=$1             # Provides the CAS ID of submiting user
+submission_file=$2     # Provides the submitted file path (even if it was a text, it will be converted to a file)
+need_info=$3           # some exercises generates specific task for users. If this flagg contains "info"
+                       # the script can provide an user specific question 
+                       
 # You can use $casname to generate a user specific token
 
 # Everything written to the stdout will be caught and returned to the student.
@@ -165,6 +167,12 @@ submission_file=$2     # Provides the submitted file path (even if it was a text
 
 
 content=$(cat $submission_file)
+
+if [ "$need_info" == "info" ]
+then
+echo "This is a user specific exercise for "$casname
+fi
+
 
 if [ -n "$TESTFILE_PATH" ] # check if the variabe is set to access the path of the testfile
 	then

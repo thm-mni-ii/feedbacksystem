@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.13, for macos10.14 (x86_64)
 --
--- Host: mysql1    Database: submissionchecker
+-- Host: 127.0.0.1    Database: submissionchecker
 -- ------------------------------------------------------
 -- Server version	8.0.16
 
@@ -42,6 +42,9 @@ CREATE TABLE `course` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
+--
+-- Table structure for table `course_parameter`
+--
 
 DROP TABLE IF EXISTS `course_parameter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -75,9 +78,6 @@ CREATE TABLE `course_parameter_user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
---
--- Table structure for table `login_log`
---
 
 DROP TABLE IF EXISTS `login_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -111,8 +111,27 @@ CREATE TABLE `notification` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `role`
+-- Table structure for table `notification`
 --
+
+DROP TABLE IF EXISTS `notification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `notification` (
+  `n_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `message` text,
+  `datetime` datetime DEFAULT NULL,
+  `testsystem_id` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`n_id`),
+  KEY `notification_user_user_id_fk` (`user_id`),
+  KEY `notification_testsystem_testsystem_id_fk` (`testsystem_id`),
+  CONSTRAINT `notification_testsystem_testsystem_id_fk` FOREIGN KEY (`testsystem_id`) REFERENCES `testsystem` (`testsystem_id`),
+  CONSTRAINT `notification_user_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 
 DROP TABLE IF EXISTS `role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -135,9 +154,6 @@ INSERT INTO `role` VALUES (1,'admin','Can delete and grand users. Can create cou
 /*!40000 ALTER TABLE `role` ENABLE KEYS */;
 UNLOCK TABLES;
 
---
--- Table structure for table `setting`
---
 
 DROP TABLE IF EXISTS `setting`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -187,10 +203,25 @@ CREATE TABLE `submission` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `submission_testsystem`
+--
 
---
--- Table structure for table `task`
---
+DROP TABLE IF EXISTS `submission_testsystem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `submission_testsystem` (
+  `submission_id` int(11) NOT NULL,
+  `testsystem_id` varchar(500) NOT NULL,
+  `exitcode` int(11) DEFAULT NULL,
+  `passed` tinyint(1) DEFAULT NULL,
+  `result_date` datetime DEFAULT NULL,
+  `step` int(11) DEFAULT NULL,
+  `result` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
 
 DROP TABLE IF EXISTS `task`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -207,6 +238,8 @@ CREATE TABLE `task` (
   `test_file_accept_error` text,
   `plagiat_check_done` tinyint(1) DEFAULT '0',
   `testsystem_modus` enum('SEQ','MULTI') NOT NULL,
+  `testsystem_modus` enum('SEQ','MULTI') NOT NULL,
+  `load_external_description` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`task_id`),
   KEY `task_courses_courseid_fk` (`course_id`),
   KEY `task_testsystem_testsystem_id_fk` (`testsystem_id`),
@@ -247,9 +280,38 @@ LOCK TABLES `task_testsystem` WRITE;
 /*!40000 ALTER TABLE `task_testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `task_external_description`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `task_external_description` (
+  `task_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `testsystem_id` varchar(100) NOT NULL,
+  `description` text,
+  PRIMARY KEY (`user_id`,`task_id`,`testsystem_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+
 --
--- Table structure for table `testsystem`
+-- Table structure for table `task_testsystem`
 --
+
+DROP TABLE IF EXISTS `task_testsystem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `task_testsystem` (
+  `task_id` int(11) NOT NULL,
+  `testsystem_id` varchar(500) NOT NULL,
+  `ordnr` int(11) NOT NULL,
+  `test_file_accept` tinyint(1) DEFAULT NULL,
+  `test_file_accept_error` text,
+  `test_file_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`task_id`,`ordnr`,`testsystem_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 
 DROP TABLE IF EXISTS `testsystem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -292,9 +354,6 @@ CREATE TABLE `testsystem_testfile` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Dumping data for table `testsystem_testfile`
---
 
 LOCK TABLES `testsystem_testfile` WRITE;
 /*!40000 ALTER TABLE `testsystem_testfile` DISABLE KEYS */;

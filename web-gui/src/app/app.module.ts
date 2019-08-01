@@ -54,6 +54,7 @@ import { ConnectedSystemsComponent } from './components/connected-systems/connec
 import { EditTestsystemsModalComponent } from './components/connected-systems/modals/edit-testsystems-modal/edit-testsystems-modal.component';
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
 import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
+import {MatSlideToggleModule} from "@angular/material";
 
 
 @Injectable()
@@ -128,7 +129,8 @@ export const httpInterceptorProviders = [
         tokenGetter: tokenGetter,
       }
     }),
-    NgxDropzoneModule
+    NgxDropzoneModule,
+    MatSlideToggleModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
