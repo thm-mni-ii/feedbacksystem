@@ -317,7 +317,6 @@ class TaskService {
           TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description),
           TaskDBLabels.courseid ->  res.getInt(TaskDBLabels.courseid))
 
-
         if (userid.isDefined){
           val submissionInfos = submissionService.getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
           lineMap + (SubmissionDBLabels.evaluation -> submissionInfos(SubmissionDBLabels.evaluation),
@@ -333,8 +332,6 @@ class TaskService {
     }
     list.headOption
   }
-
-
 
   /**
     * Testsystems answer (ansynchron) if provided testfiles are acceptable or not, they have there individual logic.
@@ -403,10 +400,10 @@ class TaskService {
   }
 
   /**
-    *
-    * @param task_id
-    * @param index
-    * @return
+    * get the ith testsystem id of a task
+    * @param task_id unique id of task
+    * @param index which index of testsystem
+    * @return testsystem id
     */
   def getTestsystemIDOfTaskByIndex(task_id: Int, index: Int): String = {
     DB.query("select testsystem_id from task_testsystem where task_id = ? limit ?,1", (res, _) => {
@@ -440,7 +437,8 @@ class TaskService {
             LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
             SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data),
-            SubmissionDBLabels.combined_passed -> submissionService.getSubmissionPassed(Integer.parseInt(submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String])))
+            SubmissionDBLabels.combined_passed -> submissionService.getSubmissionPassed(Integer.parseInt(
+              submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String])))
         } else {
           lineMap
         }
@@ -458,9 +456,8 @@ class TaskService {
     * @param load_extern_info: load external description of task by testsytsem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystems: List[String], load_extern_info: Boolean): Map[String, AnyVal] = {
-    //val availableTypes = List("FILE", "STRING")
-    //if (!availableTypes.contains(test_type)) throw new BadRequestException(test_type + "as `test_type` is not implemented.")
+  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystems: List[String],
+                 load_extern_info: Boolean): Map[String, AnyVal] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
         "INSERT INTO task (task_name, task_description, course_id, deadline, load_external_description) VALUES (?,?,?,?,?)",
@@ -512,7 +509,8 @@ class TaskService {
     */
   def resetTaskTestStatus(taskid: Int, testsystem_id: String): Boolean = {
     // TODO Maybe reset for all?
-    val num = DB.update("update task_testsystem set test_file_accept_error = null, test_file_accept = null where task_id = ? and testsystem_id = ?", taskid, testsystem_id)
+    val num = DB.update("update task_testsystem set test_file_accept_error = null, test_file_accept = null where " +
+      "task_id = ? and testsystem_id = ?", taskid, testsystem_id)
     num == 1
   }
 
@@ -573,9 +571,9 @@ class TaskService {
     *
     * @param testsystem list of testsystem which should be set
     * @param task_id set testsystem to a specific task
+    * @return update succeeded
     */
   def setTestsystemsForTask(testsystem: List[Map[String, Any]], task_id: Int): Boolean = {
-
     val input_ordnr = testsystem.map(l => l(TaskTestsystemDBLabels.ordnr))
     if (input_ordnr.length > input_ordnr.distinct.length) {
       throw new IllegalArgumentException("`ordnr` musst be distinct")
@@ -586,7 +584,8 @@ class TaskService {
     DB.update("DELETE from task_testsystem where task_id = ? ", task_id)
 
     testsystem.foreach(line => {
-      success_steps += DB.update("INSERT INTO task_testsystem (task_id, testsystem_id, ordnr) VALUES (?,?,?) ", task_id, line(TaskTestsystemDBLabels.testsystem_id),
+      success_steps += DB.update("INSERT INTO task_testsystem (task_id, testsystem_id, ordnr) VALUES (?,?,?) ", task_id,
+        line(TaskTestsystemDBLabels.testsystem_id),
         line(TaskTestsystemDBLabels.ordnr))
       steps += 1
     })
@@ -693,13 +692,9 @@ class TaskService {
     })
   }
 
-
-
   private def encodeValue(value: String): String = {
     URLEncoder.encode(value, StandardCharsets.UTF_8.toString)
   }
-
-
 
   /**
     * generate validated URL to download plagiat script
@@ -732,8 +727,6 @@ class TaskService {
       (res, _) => res.getString(TaskDBLabels.testsystem_modus), taskid)
     list.head
   }
-
-
 
   /**
     * Connect a testsystem String with corresponding topic

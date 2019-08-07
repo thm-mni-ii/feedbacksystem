@@ -276,8 +276,6 @@ class TaskController {
         // Check submission, if to late, return error, if no time set, it is unlimited
         // If submission was only data we send Kafka directly
 
-        println(this.taskService.getMultiTestModeOfTask(taskid))
-
         if (this.taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
           taskService.sendSubmissionToTestsystem(submissionId, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
             requestingUser.get, LABEL_DATA, data)
@@ -464,9 +462,8 @@ class TaskController {
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
       val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
       val load_external_description = jsonNode.get(TaskDBLabels.load_external_description).asBoolean()
+
       // Test if testsystem exists
-
-
       var testsystems: List[String] = List()
 
       jsonNode.get(TaskTestsystemDBLabels.testsystems).forEach(line => {
@@ -781,8 +778,6 @@ class TaskController {
             val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
             val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
             val testsystem = data.topic.replace("_check_answer", "")
-            println("setResultOfTask : ")
-            println(testsystem)
             taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
               Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), testsystem)
 

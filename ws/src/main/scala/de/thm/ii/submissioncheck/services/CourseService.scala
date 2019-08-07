@@ -32,6 +32,8 @@ class CourseService {
   private final var LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_ZERO_STRING = "0"
   private final val LABEL_ONE_STRING = "1"
+  private final val LABEL_TRUE = "true"
+  private final val LABEL_FALSE = "false"
 
   /**
     * load production compilation
@@ -561,12 +563,11 @@ class CourseService {
         var plagiat_passed: List[String] = List()
         for(submission <- userSubmissions) {
           plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-          println(submission)
           val submissionPassed = submissionService.getSubmissionPassed(Integer.parseInt(submission(SubmissionDBLabels.submissionid).toString))
           if (submissionPassed != null && passed_string == null) passed_string = submissionPassed
-          if (passed_string == "false" && submissionPassed == "true") passed_string = submissionPassed
+          if (passed_string == LABEL_FALSE && submissionPassed == LABEL_TRUE) passed_string = submissionPassed
 
-          if (!passed &&  submissionPassed == "true") {
+          if (!passed &&  submissionPassed == LABEL_TRUE) {
             passed = true
             passedDate = submission("submit_date")
             final_sub_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
@@ -760,7 +761,7 @@ class CourseService {
     if (course_semester != null) { suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1 }
     if (course_end_date != null) { suceeds += DB.update("update course set course_end_date = ? where course_id = ?", course_end_date, courseid); updates += 1 }
     if (personalised_submission != null) {
-      val dbBool = if (personalised_submission == "true") 1 else 0
+      val dbBool = if (personalised_submission == LABEL_TRUE) 1 else 0
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1
     }
