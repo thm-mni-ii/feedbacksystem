@@ -59,7 +59,7 @@ export interface NewCourse{
  * Task of one course
  */
 export interface CourseTask {
-  testsystem_id: string;
+  testsystem_id: string[];
   submit_date?: Date;
   exitcode: number;
   submission_data: string;
@@ -133,7 +133,7 @@ export interface NewTaskInformation {
   test_file_accept: boolean;
   test_file_accept_error: string;
   test_file_name: string;
-  testsystem_id: string;
+  testsystem_id: string[];
   no_reaction: boolean;
   plagiat_passed: string;
   evaluation: CourseTaskEvaluation[];

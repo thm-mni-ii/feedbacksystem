@@ -86,6 +86,7 @@ class TaskService {
   private val LABEL_COURSE_ID = "courseid"
   private val LABEL_CHECK_REQUEST: String = "check_request"
   private val LABEL_SUCCESS = "success"
+  private val LABEL_EXTERNAL = "external"
 
   /**
     * After Upload a submitted File save it's name
@@ -115,59 +116,14 @@ class TaskService {
       kafkaMap += (LABEL_DATA -> data)
       kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
     } else if (typ == LABEL_FILE){
-      kafkaMap += ("fileurl" ->  getURLOfSubmittedTestFile(task_id, submission_id))
+      kafkaMap += ("fileurl" ->  submissionService.getURLOfSubmittedTestFile(task_id, submission_id))
       kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_FILE)
-    } else if (typ == "external") {
-      kafkaMap += (LABEL_SUBMIT_TYP -> "external")
+    } else if (typ == LABEL_EXTERNAL) {
+      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_EXTERNAL)
     } else if (typ == "info") {
       kafkaMap += (LABEL_DATA -> data)
       kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
       kafkaMap += ("isinfo" -> true)
-    } else {
-      throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
-    }
-
-    kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
-    kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
-    kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
-      taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], user))
-    val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-    logger.warn(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST))
-    logger.warn(jsonResult)
-    kafkaTemplate.send(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST), jsonResult)
-    kafkaTemplate.flush()
-  }
-
-  /**
-    * submitTaskWithFile
-    * @author Benjamin Manns
-    * @param taskid unique identification for a task
-    * @param user requesting user
-    * @return SubmissionID
-    */
-  def submitTaskWithFile(taskid: Int, user: User): Int = {
-    try {
-      val (num, holder) = DB.update((con: Connection) => {
-        val ps = con.prepareStatement(
-          "INSERT INTO submission (task_id, user_id) VALUES (?,?);",
-          Statement.RETURN_GENERATED_KEYS
-        )
-        ps.setInt(1, taskid)
-        ps.setInt(2, user.userid)
-        ps
-      })
-
-  def sendSubmissionToTestsystem(submission_id: Int, task_id: Int, testsystem_id: String, user: User, typ: String, data: String) = {
-    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> task_id.toString, LABEL_USER_ID -> user.username)
-    val taskDetailsOpt = getTaskDetails(task_id)
-    if (typ == "data"){
-      kafkaMap += (LABEL_DATA -> data)
-      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
-    } else if (typ == LABEL_FILE){
-      kafkaMap += ("fileurl" ->  this.submissionService.getURLOfSubmittedTestFile(task_id, submission_id))
-      kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_FILE)
-    } else if (typ == "external") {
-      kafkaMap += (LABEL_SUBMIT_TYP -> "external")
     } else {
       throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
     }

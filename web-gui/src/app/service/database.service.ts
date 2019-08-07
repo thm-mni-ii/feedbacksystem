@@ -445,8 +445,8 @@ export class DatabaseService {
     }
   }
 
-  triggerExternalInfo(task_id,): Observable<Succeeded>{
-    return this.http.post<Succeeded>(`/api/v1/tasks/${task_id}/info/trigger`, {});
+  triggerExternalInfo(task_id: number,testsystem: string): Observable<Succeeded>{
+    return this.http.post<Succeeded>(`/api/v1/tasks/${task_id}/info/${testsystem}/trigger`, {});
   }
 
   ///**

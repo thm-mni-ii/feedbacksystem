@@ -132,7 +132,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       task.external_description = ""
     }
     if (task.load_external_description && task.external_description == null || force){
-      this.db.triggerExternalInfo(task.task_id).toPromise().then(() => {
+      this.db.triggerExternalInfo(task.task_id, task.testsystem_id[0]).toPromise().then(() => {
         this.externalInfoPoller(task, 0)
       }).catch(() => {
         this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});

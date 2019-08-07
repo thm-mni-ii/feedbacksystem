@@ -216,20 +216,21 @@ class TaskController {
   /**
     * trigger task info for a given task
     * @param taskid unique identification for a task
+    * @param testsystem for which testsystem we need a info
     * @param jsonNode request body containing "data" parameter
     * @param request Request Header containing Headers
     * @return JSON
     */
   @ResponseStatus(HttpStatus.ACCEPTED)
-  @RequestMapping(value = Array("tasks/{id}/info/trigger"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @RequestMapping(value = Array("tasks/{id}/info/{testsystem}/trigger"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
   @ResponseBody
-  def triggerTaskInfoFromTestsystem(@PathVariable(LABEL_ID) taskid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
+  def triggerTaskInfoFromTestsystem(@PathVariable(LABEL_ID) taskid: Integer, @PathVariable testsystem: String,
+                                    @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) throw new UnauthorizedException
 
-    val testsystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-    taskService.setExternalAnswerOfTaskByTestsytem(taskid, null, requestingUser.get.username, testsystem_id)
-    taskService.sendSubmissionToTestsystem(-1, taskid, testsystem_id, requestingUser.get, "info", "")
+    taskService.setExternalAnswerOfTaskByTestsytem(taskid, null, requestingUser.get.username, testsystem)
+    taskService.sendSubmissionToTestsystem(-1, taskid, testsystem, requestingUser.get, "info", "")
     Map(LABEL_SUCCESS -> true)
   }
 
@@ -474,9 +475,7 @@ class TaskController {
 
       testsystems = testsystems.reverse
 
-      if (testsystems.isEmpty) {
-        throw new BadRequestException("Please provide at least one testsystem")
-      }
+      if (testsystems.isEmpty) throw new BadRequestException("Please provide at least one testsystem")
 
       // Test if testsystem exists
       testsystems.foreach(testsystem_id => {
@@ -485,9 +484,7 @@ class TaskController {
         }
       })
 
-
-
-      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystem_id, load_external_description)
+      var taskInfo: Map[String, Any] = this.taskService.createTask(name, description, courseid, deadline, testsystems, load_external_description)
       val taskid: Int = taskInfo(LABEL_TASK_ID).asInstanceOf[Int]
       taskInfo += (LABEL_UPLOAD_URL -> submissionService.getUploadUrlsForTaskTestFile(CLIENT_HOST_URL, taskid))
       taskInfo
@@ -639,7 +636,7 @@ class TaskController {
     override def run {
       logger.debug("Hello, Thread is started and looks for some task to check")
       for(i <- Stream.from(1)) {
-        sendTaskToPlagiatChecker()
+        //sendTaskToPlagiatChecker()
         Thread.sleep(plagiatchecker_thread_interval)
       }
     }
