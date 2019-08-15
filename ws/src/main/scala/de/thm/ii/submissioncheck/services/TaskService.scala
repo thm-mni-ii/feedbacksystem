@@ -319,8 +319,12 @@ class TaskService {
 
         if (userid.isDefined){
           val submissionInfos = submissionService.getLastSubmissionResultInfoByTaskIDAndUser(taskid, userid.get)
+
+          val subId = submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String]
+          val combinedPassed: String = if (subId == null) null else submissionService.getSubmissionPassed(Integer.parseInt(subId))
           lineMap + (SubmissionDBLabels.evaluation -> submissionInfos(SubmissionDBLabels.evaluation),
             LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
+            SubmissionDBLabels.combined_passed -> combinedPassed,
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
             SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data))
         } else {
@@ -446,7 +450,7 @@ class TaskService {
         if (userid.isDefined){
           val submissionInfos = submissionService.getLastSubmissionResultInfoByTaskIDAndUser(res.getInt(TaskDBLabels.taskid), userid.get)
           val subId = submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String]
-          val combinedPassed = if (subId == null) subId else submissionService.getSubmissionPassed(Integer.parseInt(subId))
+          val combinedPassed: String = if (subId == null) null else submissionService.getSubmissionPassed(Integer.parseInt(subId))
           lineMap + (SubmissionDBLabels.evaluation -> submissionInfos(SubmissionDBLabels.evaluation),
             LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),

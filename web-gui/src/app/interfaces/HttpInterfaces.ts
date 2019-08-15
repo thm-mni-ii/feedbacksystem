@@ -64,7 +64,7 @@ export interface CourseTask {
   exitcode: number;
   submission_data: string;
   task_name: string;
-  combined_passed: boolean;
+  combined_passed: string;
   deadline: Date;
   result_date: Date;
   file: string;
@@ -123,7 +123,7 @@ export interface NewTaskInformation {
   deadline: Date;
   exitcode: number;
   file: string;
-  combined_passed: boolean;
+  combined_passed: string;
   result_date: Date;
   submission_data: string;
   submit_date: Date;

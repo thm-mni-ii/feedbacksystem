@@ -11,9 +11,11 @@
     Diese Fehlermeldungen kommen von den Testsystemen:
 
     <ul>
-      <li *ngFor="let testsystem of data.testsystems">
+      <span *ngFor="let testsystem of data.testsystems">
+        <li *ngIf="!testsystem.test_file_accept">
         <b>{{testsystem.test_file_accept_error}}</b>
       </li>
+    </span>
     </ul>
 
   </span>

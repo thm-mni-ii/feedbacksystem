@@ -21,9 +21,8 @@
       <span class="filler"></span>
       <div>{{task.result_date | date: 'medium'}}</div>
       <ng-template #result id="result">
-        {{task.combined_passed}}
-        <mat-icon id="passed" *ngIf="task.combined_passed != null && task.combined_passed">check_box</mat-icon>
-        <mat-icon id="failed" *ngIf="!task.combined_passed && task.combined_passed">clear</mat-icon>
+        <mat-icon id="passed" *ngIf="['true',true].indexOf(task.combined_passed) >= 0">check_box</mat-icon>
+        <mat-icon id="failed" *ngIf="['false',false].indexOf(task.combined_passed) >= 0">clear</mat-icon>
         <mat-icon id="not-done" *ngIf="task.combined_passed == null">check_box_outline_blank
         </mat-icon>
       </ng-template>

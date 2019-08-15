@@ -211,7 +211,7 @@ class SubmissionService {
     */
   def getSubmissionPassed(submission_id: Int): String = {
     val passedList = getTestsystemSubmissionEvaluationList(submission_id).map(line => line(SubmissionTestsystemDBLabels.passed))
-    if (passedList.contains("false")){
+    if (passedList.contains(false)){
       "false"
     } else if (passedList.contains(null)){
       null

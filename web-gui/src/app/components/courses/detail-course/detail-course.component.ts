@@ -232,14 +232,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   public isInFetchingResultOfTasks(task: CourseTask){
     let tasksystemPassed = task.evaluation
       .map( (eva:CourseTaskEvaluation) => eva.passed )
-      .filter(passed => {
-        return (passed == null || typeof passed === undefined)
-      });
-
+     let tasksystemNulls = tasksystemPassed.filter(passed => {
+                              return (passed == null || typeof passed === undefined)
+                            });
     if(tasksystemPassed.indexOf(false) >= 0){
       return false
     } else {
-      return tasksystemPassed.length > 0
+      return tasksystemNulls.length > 0
     }
   }
 

@@ -826,7 +826,6 @@ class TaskController {
           val accept = answeredMap("accept").asInstanceOf[Boolean]
           val error = answeredMap("error").asInstanceOf[String]
           val testsystem = data.topic.replace(s"_${LABEL_NEW_TASK_ASNWER}", "")
-          println(testsystem);println( accept); println(error); println(taskId);
           taskService.setTaskTestFileAcceptedState(taskId, accept, error, testsystem)
         } catch {
           case e: NoSuchElementException => {
