@@ -157,6 +157,7 @@ class SubmissionService {
       submissions.head
     } else {
       Map(SubmissionDBLabels.filename -> null, SubmissionDBLabels.submission_data -> null,
+        SubmissionDBLabels.submissionid -> null,
         SubmissionDBLabels.submit_date -> null, SubmissionDBLabels.evaluation -> getEmptyTestsystemSubmissionEvaluationList(taskid))
     }
   }

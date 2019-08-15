@@ -27,7 +27,7 @@
         <mat-icon id="not-done" *ngIf="task.combined_passed == null">check_box_outline_blank
         </mat-icon>
       </ng-template>
-      <mat-spinner *ngIf="processing[task.task_id] || resultOfTaskIsAllEmpty(task); else result"
+      <mat-spinner *ngIf="processing[task.task_id] || isInFetchingResultOfTasks(task); else result"
                    diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>

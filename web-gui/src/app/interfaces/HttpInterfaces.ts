@@ -59,7 +59,7 @@ export interface NewCourse{
  * Task of one course
  */
 export interface CourseTask {
-  testsystem_id: string[];
+  testsystems: TaskTestsystem[];
   submit_date?: Date;
   exitcode: number;
   submission_data: string;
@@ -133,7 +133,7 @@ export interface NewTaskInformation {
   test_file_accept: boolean;
   test_file_accept_error: string;
   test_file_name: string;
-  testsystem_id: string[];
+  testsystems: TaskTestsystem[];
   no_reaction: boolean;
   plagiat_passed: string;
   evaluation: CourseTaskEvaluation[];
@@ -174,6 +174,21 @@ export interface User {
   user_id: number;
   prename: string;
   last_login?: Date;
+}
+
+
+export interface TaskTestsystem{
+  name:	string;
+  test_file_accept: boolean;
+  test_file_accept_error: string;
+  testsystem_id: string;
+  description: string;
+  machine_port: string;
+  machine_ip: string;
+  supported_formats: string;
+  test_file_name: string;
+  task_id	: number;
+  ordnr	: number;
 }
 
 export interface Testsystem {

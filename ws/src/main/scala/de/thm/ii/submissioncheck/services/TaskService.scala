@@ -303,9 +303,9 @@ class TaskService {
     */
   def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
     val usersIdOrNull = if (userid.isDefined) userid.get else null
-    val list = DB.query("SELECT task.*, ted.description as external_description from task join course using(course_id) " +
-      "left join task_external_description ted on ted.testsystem_id =  task.testsystem_id and ted.task_id = task.task_id " +
-      "and ted.user_id = ? where task.task_id = ?",
+    val list = DB.query("SELECT t.*, ted.description as external_description from task_testsystem t_t join task t " +
+      "on t.task_id = t_t.task_id left join task_external_description ted on ted.testsystem_id = t_t.testsystem_id " +
+      "and ted.task_id = t.task_id and ted.user_id = ? where t_t.task_id = ? order by t_t.ordnr limit 1",
       (res, _) => {
         val lineMap = Map(TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
@@ -419,8 +419,20 @@ class TaskService {
     */
   def getTasksByCourse(courseid: Int, userid: Option[Int] = None): List[Map[String, Any]] = {
     val usersIdOrNull = if (userid.isDefined) userid.get else null
-    DB.query("select t.*, ted.description as external_description from task t left join task_external_description ted on " +
-      "ted.task_id = t.task_id and ted.user_id = ? and t.testsystem_id = ted.testsystem_id where t.course_id = ?",
+    DB.query("select t.*, ted.description as external_description " +
+      "from task t " +
+      "       left join (select task_external_description.* " +
+      "                  from task_external_description " +
+      "                         join (select t_t.task_id, testsystem_id " +
+      "                               from task_testsystem t_t " +
+      "                                      join (select min(ordnr) as ordnr, task_id " +
+      "                                            from task_testsystem " +
+      "                                            group by task_id) ttm " +
+      "                                       on ttm.ordnr = t_t.ordnr and ttm.task_id = t_t.task_id) " +
+      "                      tsys on tsys.testsystem_id = task_external_description.testsystem_id and " +
+      "                              tsys.task_id = task_external_description.task_id) " +
+      "    ted on ted.task_id = t.task_id and ted.user_id = ? " +
+      "where t.course_id = ?",
       (res, _) => {
         val lineMap = Map(
           TaskDBLabels.courseid -> res.getString(TaskDBLabels.courseid),
@@ -433,12 +445,13 @@ class TaskService {
           "testsystems" -> getTestsystemsByTask(res.getInt(TaskDBLabels.taskid)))
         if (userid.isDefined){
           val submissionInfos = submissionService.getLastSubmissionResultInfoByTaskIDAndUser(res.getInt(TaskDBLabels.taskid), userid.get)
+          val subId = submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String]
+          val combinedPassed = if (subId == null) subId else submissionService.getSubmissionPassed(Integer.parseInt(subId))
           lineMap + (SubmissionDBLabels.evaluation -> submissionInfos(SubmissionDBLabels.evaluation),
             LABEL_FILE -> submissionInfos(SubmissionDBLabels.filename),
             SubmissionDBLabels.submit_date -> submissionInfos(SubmissionDBLabels.submit_date),
             SubmissionDBLabels.submission_data -> submissionInfos(SubmissionDBLabels.submission_data),
-            SubmissionDBLabels.combined_passed -> submissionService.getSubmissionPassed(Integer.parseInt(
-              submissionInfos(SubmissionDBLabels.submissionid).asInstanceOf[String])))
+            SubmissionDBLabels.combined_passed -> combinedPassed)
         } else {
           lineMap
         }

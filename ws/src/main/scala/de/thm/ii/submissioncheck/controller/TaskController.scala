@@ -228,7 +228,6 @@ class TaskController {
                                     @RequestBody jsonNode: JsonNode, request: HttpServletRequest): Map[String, Any] = {
     val requestingUser = userService.verifyUserByHeaderToken(request)
     if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) throw new UnauthorizedException
-
     taskService.setExternalAnswerOfTaskByTestsytem(taskid, null, requestingUser.get.username, testsystem)
     taskService.sendSubmissionToTestsystem(-1, taskid, testsystem, requestingUser.get, "info", "")
     Map(LABEL_SUCCESS -> true)
@@ -826,8 +825,8 @@ class TaskController {
           val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
           val accept = answeredMap("accept").asInstanceOf[Boolean]
           val error = answeredMap("error").asInstanceOf[String]
-          val testsystem = data.topic.replace(LABEL_NEW_TASK_ASNWER, "")
-
+          val testsystem = data.topic.replace(s"_${LABEL_NEW_TASK_ASNWER}", "")
+          println(testsystem);println( accept); println(error); println(taskId);
           taskService.setTaskTestFileAcceptedState(taskId, accept, error, testsystem)
         } catch {
           case e: NoSuchElementException => {
