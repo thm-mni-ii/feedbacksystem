@@ -238,7 +238,6 @@ CREATE TABLE `task` (
   `test_file_accept_error` text,
   `plagiat_check_done` tinyint(1) DEFAULT '0',
   `testsystem_modus` enum('SEQ','MULTI') NOT NULL,
-  `testsystem_modus` enum('SEQ','MULTI') NOT NULL,
   `load_external_description` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`task_id`),
   KEY `task_courses_courseid_fk` (`course_id`),

@@ -210,14 +210,6 @@ class TaskService {
       }, taskid, user.userid)
   }
 
-  private def getNullOrBoolean(boolDBString: String) = {
-    if (boolDBString == null) {
-      null
-    } else {
-      boolDBString.toInt > 0
-    }
-  }
-
   /**
     * get students submissions by Tasks
     *
@@ -376,7 +368,12 @@ class TaskService {
     num > 0
   }
 
-  private def stringOrNull(any: Any): String = {
+  /**
+    * convert any to string, if it is null return null
+    * @param any any variable
+    * @return variable as string
+    */
+  def stringOrNull(any: Any): String = {
     if (any == null) {
       null
     } else {
@@ -395,7 +392,7 @@ class TaskService {
       Map(TaskTestsystemDBLabels.taskid -> res.getInt(TaskTestsystemDBLabels.taskid),
         TaskTestsystemDBLabels.testsystem_id -> res.getString(TaskTestsystemDBLabels.testsystem_id),
         TaskTestsystemDBLabels.ordnr -> res.getInt(TaskTestsystemDBLabels.ordnr),
-        TaskTestsystemDBLabels.test_file_accept -> res.getBoolean(TaskTestsystemDBLabels.test_file_accept),
+        TaskTestsystemDBLabels.test_file_accept -> submissionService.getNullOrBoolean(res.getString(TaskTestsystemDBLabels.test_file_accept)),
         TaskTestsystemDBLabels.test_file_accept_error -> res.getString(TaskTestsystemDBLabels.test_file_accept_error),
         TaskTestsystemDBLabels.test_file_name -> res.getString(TaskTestsystemDBLabels.test_file_name),
         TestsystemLabels.name -> res.getString(TestsystemLabels.name),

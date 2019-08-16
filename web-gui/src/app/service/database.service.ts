@@ -398,14 +398,12 @@ export class DatabaseService {
             let uploadRequests = []
 
             // New solution file
-            console.warn("yoyoy",files)
             let filesKeys = Object.keys(files)
 
             for(let filesKeyPos in filesKeys){
               let pos = filesKeys[filesKeyPos]
               const formData = new FormData();
               if(typeof files[pos] == 'undefined') continue;
-              console.warn("yoyoy",files[pos])
               for(let j in files[pos]) {
                 formData.append("file", files[pos][j].item(0), j);
               }

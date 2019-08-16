@@ -311,12 +311,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
-          console.log(taskResult.testsystems.map(t => t.test_file_accept))
-          if (taskResult.test_file_accept !== null) {
+          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept))
+
+          if (acceptance_flaggs.indexOf(null) < 0) {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
             return of({success: true})
           } else {
-            return throwError('No result yet');
+            return throwError('Not all results yet');
           }
         }),
         retryWhen(errors => errors.pipe(

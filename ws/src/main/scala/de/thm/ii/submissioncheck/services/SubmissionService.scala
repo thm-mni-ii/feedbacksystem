@@ -162,7 +162,12 @@ class SubmissionService {
     }
   }
 
-  private def getNullOrBoolean(boolDBString: String) = {
+  /**
+    * convert a "boolean string" which is 1, 0 or null to a understandable boolean (true, false, null)
+    * @param boolDBString a string from DB which is a boolean / tinyint column
+    * @return (true, false, null)
+    */
+  def getNullOrBoolean(boolDBString: String): Any = {
     if (boolDBString == null) {
       null
     } else {
