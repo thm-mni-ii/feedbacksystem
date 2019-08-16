@@ -70,8 +70,7 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
     val bashDockerImage = "thmmniii/bash" // "bash:4.4"
     var seq: Seq[String] = null
 
-    val infoArgument = if (executionMode == BASH_EXEC_MODE_INFO) { "info"} else ""
-
+    val infoArgument = if (executionMode == BASH_EXEC_MODE_INFO) "info" else ""
     if (compile_production) {
       seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + scriptpath.replace(ULDIR, "") + __colon + scriptpath,
         __option_v, dockerRelPath + __slash + testfilePathRel.replace(ULDIR, "") + __colon + __slash + testfilePath, __option_v,

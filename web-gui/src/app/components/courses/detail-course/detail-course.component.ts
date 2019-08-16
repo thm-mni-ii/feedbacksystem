@@ -252,13 +252,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
             this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
 
-            let tasksystemPassed = taskResult.evaluation
-              .map( (eva:CourseTaskEvaluation) => eva.passed )
-              .filter(passed => {
-                  return (passed == null || typeof passed === undefined)
-              });
-
-            if (tasksystemPassed.length == taskResult.evaluation.length) {
+            if (this.isInFetchingResultOfTasks(taskResult)) {
               return throwError('No result yet');
             }
             return of(taskResult);

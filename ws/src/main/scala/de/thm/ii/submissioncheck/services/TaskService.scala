@@ -108,8 +108,10 @@ class TaskService {
     * @param user sending user
     * @param typ option which format we want to send
     * @param data content
+    * @param queued_test set label for tests which will use already existing files, not creating new ones.
     */
-  def sendSubmissionToTestsystem(submission_id: Int, task_id: Int, testsystem_id: String, user: User, typ: String, data: String): Unit = {
+  def sendSubmissionToTestsystem(submission_id: Int, task_id: Int, testsystem_id: String, user: User, typ: String, data: String,
+                                 queued_test: Boolean = false): Unit = {
     var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> task_id.toString, LABEL_USER_ID -> user.username)
     val taskDetailsOpt = getTaskDetails(task_id)
     if (typ == LABEL_DATA){
@@ -127,6 +129,7 @@ class TaskService {
     } else {
       throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
     }
+    kafkaMap += ("use_extern" -> queued_test)
 
     kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
     kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))

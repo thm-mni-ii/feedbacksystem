@@ -142,6 +142,8 @@ object SecretTokenChecker extends App {
   val logger = system.log
   /** provides a Label for taskid*/
   val LABEL_TASKID = "taskid"
+  /** provides a Label for use_extern*/
+  val LABEL_USE_EXTERN = "use_extern"
   /** provides a Label for submissionid*/
   val LABEL_SUBMISSIONID = "submissionid"
   private val LABEL_COURSEID = "courseid"
@@ -323,40 +325,36 @@ object SecretTokenChecker extends App {
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
+      val userid: String = jsonMap("userid").asInstanceOf[String]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
+      val use_extern: Boolean = jsonMap(LABEL_USE_EXTERN).asInstanceOf[Boolean]
       var submittedFilePath: String = ""
-      if (submit_type.equals("file")) {
-        val url: String = jsonMap("fileurl").asInstanceOf[String]
-        val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
+      if (use_extern) {
+        val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("submission.txt")
+        submittedFilePath = path.toAbsolutePath.toString
 
-        submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
-        logger.info(submittedFilePath)
-      }
-      else if (submit_type.equals(DATA)) {
-        submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
-      }
-      var passed: Int = 0
-      val userid: String = jsonMap("userid").asInstanceOf[String]
+      } else if (submit_type.equals("file")) {
+          val url: String = jsonMap("fileurl").asInstanceOf[String]
+          val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
 
-      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) {
-        jsonMap(LABEL_ISINFO).asInstanceOf[Boolean]
-      } else {
-        false
-      }
+          submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
+          logger.info(submittedFilePath)
+        }
+        else if (submit_type.equals(DATA)) {
+          submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
+        }
+
+      var passed: Int = 0;
+      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
       val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
 
       val (output, code) = bashTest(taskid, userid, submittedFilePath, exeMode)
-      if (code == 0) {
-        passed = 1
-      }
-
+      if (code == 0) passed = 1
       var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
         LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
-
       if (isInfo) answerMap += (LABEL_ISINFO -> true)
-
       sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
     } catch {
       case e: NoSuchElementException => {

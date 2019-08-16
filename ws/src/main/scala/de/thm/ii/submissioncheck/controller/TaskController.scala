@@ -733,10 +733,10 @@ class TaskController {
         val testsytem_id = nextTestsystem.get
         if (submission(SubmissionDBLabels.filename) == null) {
           taskService.sendSubmissionToTestsystem(submission_id, taskid, testsytem_id,
-            user, LABEL_DATA, submission(SubmissionDBLabels.submission_data).asInstanceOf[String])
+            user, LABEL_DATA, submission(SubmissionDBLabels.submission_data).asInstanceOf[String], true)
         } else {
           taskService.sendSubmissionToTestsystem(submission_id, taskid, testsytem_id,
-            user, LABEL_FILE, null)
+            user, LABEL_FILE, null, true)
         }
       }
     }
