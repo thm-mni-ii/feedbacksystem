@@ -29,6 +29,7 @@ import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
 import de.thm.ii.submissioncheck.bash.{BashExec, GitCheckExec, PlagiatCheckExec, ShExec}
+import de.thm.ii.submissioncheck.checker.NodeCheckExec
 
 /**
   * Bypasses both client and server validation.
@@ -83,6 +84,8 @@ object SecretTokenChecker extends App {
   val LABEL_TOKEN = "jwt_token"
   private val LABEL_CHECK_REQUEST = "_check_request"
   private val LABEL_CHECK_ANSWER = "_check_answer"
+  private val LABEL_TASK_REQUEST = "_new_task_request"
+  private val LABEL_TASK_ANSWER = "_new_task_answer"
 
   private val LABEL_ONLY_TEST_TASK_SUBMISSION_ID = "-2"
   private val LABEL_ONLY_TEST_TASK_DATA = "empty data"
@@ -101,8 +104,8 @@ object SecretTokenChecker extends App {
   private val SYSTEMIDTOPIC = "secrettokenchecker"
   private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
   private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
-  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
-  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
+  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_REQUEST
+  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
   // We accept also "plagiarismchecker"
   private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
@@ -116,12 +119,23 @@ object SecretTokenChecker extends App {
   // We accept also "gitchecker"
   private val GIT_SYSTEMIDTOPIC = "gitchecker"
   private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
-  private val GIT_TASK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + "_new_task_request"
+  private val GIT_TASK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_REQUEST
 
   /** provides a Label for gitchecker_answer*/
   val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
   /** provides a Label for task answer of gitchecker*/
-  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + "_new_task_answer"
+  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
+
+
+  // We accept also "nodechecker"
+  private val NODE_SYSTEMIDTOPIC = "nodechecker"
+  private val NODE_CHECK_REQUEST_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
+  private val NODE_TASK_REQUEST_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_TASK_REQUEST
+  /** provides a Label for nodechecker_answer*/
+  val NODE_CHECK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
+  /** provides a Label for task answer of nodechecker*/
+  val NODE_TASK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
+
 
   private val __slash = "/"
 
@@ -191,6 +205,19 @@ object SecretTokenChecker extends App {
   private val control_gittaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(GIT_TASK_REQUEST_TOPIC))
     .toMat(Sink.foreach(onGitTaskReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  // Listen on nodechecker
+  private val control_nodechecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(NODE_CHECK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onNodeReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_nodetaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(NODE_TASK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onNodeTaskReceived))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -274,6 +301,23 @@ object SecretTokenChecker extends App {
   private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     GitCheckExec.onTaskGitReceived(jsonMap)
+  }
+
+  private def onNodeReceived(record: ConsumerRecord[String, String]): Unit = {
+    try {
+      logger.warning("NODE Checker Received Message")
+      val jsonMap: Map[String, Any] = record.value()
+      NodeCheckExec.onNodeReceived(jsonMap)
+    } catch {
+      case e: Exception => {
+        logger.warning("NODE CHECKER Exception: " + e.getMessage)
+      }
+    }
+  }
+
+  private def onNodeTaskReceived(record: ConsumerRecord[String, String]): Unit = {
+    val jsonMap: Map[String, Any] = record.value()
+    NodeCheckExec.onNodeTaskReceived(jsonMap)
   }
 
   private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
