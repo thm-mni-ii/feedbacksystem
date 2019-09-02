@@ -79,7 +79,8 @@ object SecretTokenChecker extends App {
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
-  private val LABEL_ISINFO = "isinfo"
+  /** JSON Config isinfo label*/
+  val LABEL_ISINFO = "isinfo"
   /** provides a Label for jwt_token*/
   val LABEL_TOKEN = "jwt_token"
   private val LABEL_CHECK_REQUEST = "_check_request"
@@ -126,7 +127,6 @@ object SecretTokenChecker extends App {
   /** provides a Label for task answer of gitchecker*/
   val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
-
   // We accept also "nodechecker"
   private val NODE_SYSTEMIDTOPIC = "nodechecker"
   private val NODE_CHECK_REQUEST_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
@@ -135,7 +135,6 @@ object SecretTokenChecker extends App {
   val NODE_CHECK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
   /** provides a Label for task answer of nodechecker*/
   val NODE_TASK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
-
 
   private val __slash = "/"
 
@@ -304,18 +303,13 @@ object SecretTokenChecker extends App {
   }
 
   private def onNodeReceived(record: ConsumerRecord[String, String]): Unit = {
-    try {
-      logger.warning("NODE Checker Received Message")
-      val jsonMap: Map[String, Any] = record.value()
-      NodeCheckExec.onNodeReceived(jsonMap)
-    } catch {
-      case e: Exception => {
-        logger.warning("NODE CHECKER Exception: " + e.getMessage)
-      }
-    }
+    logger.warning("NODE Checker Received Message")
+    val jsonMap: Map[String, Any] = record.value()
+    NodeCheckExec.onNodeReceived(jsonMap, compile_production)
   }
 
   private def onNodeTaskReceived(record: ConsumerRecord[String, String]): Unit = {
+    logger.warning("NODE Checker Received Task Message")
     val jsonMap: Map[String, Any] = record.value()
     NodeCheckExec.onNodeTaskReceived(jsonMap)
   }
@@ -569,8 +563,16 @@ object SecretTokenChecker extends App {
     }
   }
 
-  private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
-    var connection = download(link, jwt_token)
+  /**
+    * download a file from WS
+    * @param link url / link where to download from
+    * @param jwt_token JSON Web Token which protects given url
+    * @param taskid submitted task id
+    * @param submissionid submitted submission id
+    * @return downloaded file
+    */
+  def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
+    val connection = download(link, jwt_token)
     val filename = submissionid
     if (connection.getResponseCode >= 400) {
       logger.error(LABEL_ERROR_DOWNLOAD)
