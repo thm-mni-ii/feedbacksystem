@@ -6,12 +6,15 @@ import java.util.zip.ZipInputStream
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, NODE_TASK_ANSWER_TOPIC, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID,
+  LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, NODE_TASK_ANSWER_TOPIC, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile,
+  sendMessage, NODE_CHECK_ANSWER_TOPIC}
 import de.thm.ii.submissioncheck.bash.GitCheckExec.{LABEL_CONFIGFILE, LABEL_STRUCTUREFILE, logger, sendGitTaskAnswer}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
+import scala.sys.process.{Process, ProcessLogger}
 
 /** Excpetion wrapper for Node Checker purpose
   * @param message an exception message
@@ -42,39 +45,54 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
   private val __colon = ":"
 
   /**
+    * give a usefull debug information
+    * @return deccription of current state
+    */
+  override def toString: String = {
+    s"NodeCheckExec(exitcode=${exitCode}, success=${success}, output=${output})"
+  }
+
+  /**
     * execute on node docker
     * @return exitcode
     */
   def exec(): Int = {
     logger.info("Execute Node Checker")
 
-    val nodeDockerImage = "thmmniii/node"
-    val interpreter = "node"
+    val nodeDockerImage = "nodechecker" // "thmmniii/node"
+    val interpreter = "npm"
     var seq: Seq[String] = null
 
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val baseFilePath = Paths.get(ULDIR).resolve(taskid.toString)
 
-    val testfileFile = new File(baseFilePath.resolve("config.js").toString)
-    val testfilePathRel = testfileFile.getPath
-
     val infoArgument = if (isInfo) "info" else ""
 
-
-    val testRootPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(NodeCheckExec.LABEL_NODETEST)
-
-    val nodeTestPath = NodeCheckExec.getFullNPMPath(testRootPath.toString)
-
-
+    val nodeTestPath = NodeCheckExec.getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(NodeCheckExec.LABEL_NODETEST).toString)
+    val insideDockerNodeTestPath = "/usr/src/app"
 
     if (compile_production){
-      seq = Seq("run", "--rm", __option_v, submission_path_url + __colon + submission_path_url,
-        __option_v, dockerRelPath + __slash + testfilePathRel.replace(ULDIR, "") + __colon + __slash + testfileFile, __option_v,
-        nodeDockerImage, interpreter, "index.js", infoArgument)
-      println(seq)
-    } // TODO for non compile production
+      val relatedSubPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
 
+      seq = Seq("run", "--rm", __option_v, relatedSubPath.toString + __slash + nodeTestPath + __colon + nodeTestPath, __option_v,
+        relatedSubPath.toString + __colon + nodeTestPath + __slash + "sub", nodeDockerImage, interpreter, "test", infoArgument)
+    } else {
+      val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
+      val absSubPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("unzip").toAbsolutePath
+      seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
+        absSubPath.toString + __colon + insideDockerNodeTestPath + __slash + "sub", nodeDockerImage, interpreter, "i", "&&", interpreter, "test", infoArgument)
+    }
 
+    val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
+    val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
+    this.exitCode = Process("docker", seq).!(procLogger)
+    output = stdoutStream.toString() + "\n" + stderrStream.toString()
+
+    if (this.exitCode == 0) {
+      success = true
+    } else {
+      logger.debug("Exit with non-zero code: " + this.exitCode)
+    }
 
     this.exitCode
   }
@@ -105,10 +123,12 @@ object NodeCheckExec {
     sendNodeTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid.toString)))
   }
 
+  private def sendNodeCheckAnswer(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](NODE_CHECK_ANSWER_TOPIC, message))
+
   private def sendNodeCheckExceptionAnswer(exception: String, taskid: Option[Int], submissionid: Option[Int]): Future[Done] = {
     val zero = "0"
     if (taskid.isDefined && submissionid.isDefined) {
-      sendNodeTaskAnswer(JsonHelper.mapToJsonStr(Map(
+      sendNodeCheckAnswer(JsonHelper.mapToJsonStr(Map(
         LABEL_PASSED -> zero,
         LABEL_EXITCODE -> "42",
         LABEL_TASKID -> taskid.get.toString,
@@ -116,7 +136,7 @@ object NodeCheckExec {
         DATA -> exception
       )))
     } else {
-      sendNodeTaskAnswer(JsonHelper.mapToJsonStr(Map(
+      sendNodeCheckAnswer(JsonHelper.mapToJsonStr(Map(
         LABEL_PASSED -> zero,
         LABEL_EXITCODE -> "42",
         DATA -> exception
@@ -147,7 +167,6 @@ object NodeCheckExec {
         throw new NodeCheckerException("Provided config zip file is not usefull. There are multiple main folders, " +
           "if you provide a nested folder please avoid multiple root folders")
       }
-
   }
 
   /**
@@ -189,8 +208,6 @@ object NodeCheckExec {
       if (nodeTestFile.exists()) deleteDirectory(nodeTestFile)
 
       unzip(Paths.get(ULDIR).resolve(task_id.toString).resolve(sendedFileNames.head).toAbsolutePath.toString, nodeTestPath)
-
-      println("AT last: " + getFullNPMPath(nodeTestPath.toString))
 
       sendNodeTaskAcceptAnswer(task_id)
     } catch {
@@ -273,7 +290,7 @@ object NodeCheckExec {
       val nodechecker = new NodeCheckExec(submission_id, task_id, nodeExecutionPath.toString, compile_production, isInfo)
       nodechecker.exec()
 
-      sendNodeTaskAnswer(JsonHelper.mapToJsonStr(Map(
+      sendNodeCheckAnswer(JsonHelper.mapToJsonStr(Map(
         LABEL_PASSED -> (if (nodechecker.success) "1" else "0"),
         LABEL_EXITCODE -> nodechecker.exitCode.toString,
         LABEL_TASKID -> task_id.toString,
