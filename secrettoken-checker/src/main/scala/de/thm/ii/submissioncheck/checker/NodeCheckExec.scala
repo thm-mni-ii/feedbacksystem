@@ -59,7 +59,7 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
   def exec(): Int = {
     logger.info("Execute Node Checker")
 
-    val nodeDockerImage = "nodechecker" // "thmmniii/node"
+    val nodeDockerImage = "submissioncheck_nodeenv:latest" // "thmmniii/node"
     val interpreter = "npm"
     var seq: Seq[String] = null
 
@@ -80,9 +80,9 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
       val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
       val absSubPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("unzip").toAbsolutePath
       seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
-        absSubPath.toString + __colon + insideDockerNodeTestPath + __slash + "sub", nodeDockerImage, interpreter, "i", "&&", interpreter, "test", infoArgument)
+        absSubPath.toString + __colon + insideDockerNodeTestPath + __slash + "sub", nodeDockerImage, "bash", "/usr/src/script/run.sh", infoArgument)
     }
-
+    
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     this.exitCode = Process("docker", seq).!(procLogger)

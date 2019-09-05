@@ -3,14 +3,10 @@ FROM node:10
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-#COPY package*.json ./
-
-RUN npm install mocha
-# If you are building your code for production
-# RUN npm ci --only=production
-
+ADD run.sh /usr/src/script/run.sh
+RUN npm install -g mocha
+RUN npm install -g typescript@
+RUN npm install -g ts-node
+RUN npm install -g typescript
 
 CMD [ "node" ]
