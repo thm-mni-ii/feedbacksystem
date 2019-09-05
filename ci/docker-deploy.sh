@@ -23,7 +23,7 @@ function dockerPush(){
     docker push thmmniii/ws:$tag
     docker push thmmniii/secrettokenchecker:$tag
     docker push thmmniii/sqlchecker:$tag
-    docker push thmmniii/bash:$tag
+    docker push thmmniii/bashenv:$tag
 }
 
 
