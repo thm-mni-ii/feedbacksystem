@@ -58,36 +58,46 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
     */
   def exec(): Int = {
     logger.info("Execute Node Checker")
-
-    val nodeDockerImage = "submissioncheck_nodeenv:latest" // "thmmniii/node"
+    val nodeDockerImage = "feedbacksystem_nodeenv:latest" // "thmmniii/node"
     val interpreter = "npm"
     var seq: Seq[String] = null
-
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val baseFilePath = Paths.get(ULDIR).resolve(taskid.toString)
-
     val infoArgument = if (isInfo) "info" else ""
-
     val nodeTestPath = NodeCheckExec.getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(NodeCheckExec.LABEL_NODETEST).toString)
     val insideDockerNodeTestPath = "/usr/src/app"
+    val insideDockerNodeResPath = "/usr/src/results"
+    val relatedSubPath = NodeCheckExec.getFullSubPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("unzip").toString)
+    val resultsPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("results")
+
+    // prepare a folder to put the results in (submission specific)
+    try {
+      Files.createDirectories(resultsPath)
+    }
+    catch {
+      case e: FileAlreadyExistsException => { }
+    }
 
     if (compile_production){
-      val relatedSubPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
-
       seq = Seq("run", "--rm", __option_v, relatedSubPath.toString + __slash + nodeTestPath + __colon + nodeTestPath, __option_v,
-        relatedSubPath.toString + __colon + nodeTestPath + __slash + "sub", nodeDockerImage, interpreter, "test", infoArgument)
+        relatedSubPath + __colon + nodeTestPath + __slash + "src", nodeDockerImage, interpreter, "test", infoArgument)
     } else {
+      val absSubPath = Paths.get(relatedSubPath).toAbsolutePath.toString
       val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
-      val absSubPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("unzip").toAbsolutePath
       seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
-        absSubPath.toString + __colon + insideDockerNodeTestPath + __slash + "sub", nodeDockerImage, "bash", "/usr/src/script/run.sh", infoArgument)
+        absSubPath + __colon + insideDockerNodeTestPath + __slash + "src", __option_v,
+        resultsPath.toAbsolutePath.toString() + __colon +  insideDockerNodeResPath, nodeDockerImage, "bash", "/usr/src/script/run.sh", infoArgument)
     }
-    
+
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     this.exitCode = Process("docker", seq).!(procLogger)
-    output = stdoutStream.toString() + "\n" + stderrStream.toString()
-
+    val resultFile = new File(resultsPath.resolve("test.results.json").toString)
+    output = if (resultFile.isFile) {
+      scala.io.Source.fromFile(resultsPath.resolve("test.results.json").toString).mkString
+    } else {
+      stdoutStream.toString() + "\n" + stderrStream.toString()
+    }
     if (this.exitCode == 0) {
       success = true
     } else {
@@ -154,7 +164,7 @@ object NodeCheckExec {
   def getFullNPMPath(rootPath: String): String = {
       val d = new File(rootPath)
       val fileList = if (d.exists && d.isDirectory) {
-        d.listFiles.filter(!_.toString.contains("__")).toList
+        d.listFiles.filter(!_.toString.contains("__MACOSX")).toList
       } else {
         List[File]()
       }
@@ -167,6 +177,31 @@ object NodeCheckExec {
         throw new NodeCheckerException("Provided config zip file is not usefull. There are multiple main folders, " +
           "if you provide a nested folder please avoid multiple root folders")
       }
+  }
+
+  /**
+    * Figure out where the main submission path is (contains just files), take the best folder inside the provided zip.
+    * If it can not be found, send an error to the user that he should provide a better zip file / folder
+    *
+    * @param rootPath where to start looking for the node folder
+    * @return the path where a npm structure has been found
+    */
+  def getFullSubPath(rootPath: String): String = {
+    val d = new File(rootPath)
+    val fileList = if (d.exists && d.isDirectory) {
+      d.listFiles.filter(!_.toString.contains("__MACOSX")).toList
+    } else {
+      List[File]()
+    }
+
+    if (fileList.filter(f => {f.isFile}).nonEmpty) {
+      rootPath
+    } else if (fileList.filter(_.isDirectory).nonEmpty) {
+      getFullSubPath(fileList.filter(_.isDirectory).head.toPath.toString)
+    } else {
+      throw new NodeCheckerException("Provided submission zip file or git folder is not usefull. There are multiple main folders, " +
+        "if you provide a nested folder please avoid multiple root folders")
+    }
   }
 
   /**
