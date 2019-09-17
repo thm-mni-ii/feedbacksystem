@@ -152,7 +152,6 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     */
   def exec(): Int = {
     var dockerRelPath = ULDIR
-
     val targetPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
     val target_dir = targetPath.toString
 
@@ -194,7 +193,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
           docentMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
           // If checks are passed we can send a string or a JSON String
           output = JsonHelper.listToJsonStr(checkresultList)
-          if (sum == (structureMap.size + maintainerMap.size)) exitCode = 0 else exitCode = 1
+          if (sum == (structureMap.size + maintainerMap.size + docentMap.size)) exitCode = 0 else exitCode = 1
         }
       }
     }
@@ -299,7 +298,7 @@ object GitCheckExec {
           "exitcode" -> "42",
           LABEL_TASKID -> task_id.toString,
           LABEL_SUBMISSIONID -> sumission_id,
-          DATA -> e.getMessage
+          DATA -> (e.getMessage + e.getStackTrace.mkString(" "))
         )))
       }
     }

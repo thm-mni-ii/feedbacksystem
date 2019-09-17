@@ -28,9 +28,10 @@ class NodeCheckerException(message: String) extends RuntimeException(message)
   * @param submission_path_url path of folder with js content
   * @param compile_production if is in production we need different relative paths
   * @param isInfo execute info procedure for given task
+  * @param use_extern include an existing folder, otherwise download a zip
   */
 class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_path_url: String, val compile_production: Boolean,
-                    isInfo: Boolean) {
+                    isInfo: Boolean, use_extern: Boolean) {
   private val logger = LoggerFactory.getLogger(this.getClass)
   /** save the output of our execution */
   var output: String = ""
@@ -59,16 +60,16 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
   def exec(): Int = {
     logger.info("Execute Node Checker")
     val nodeDockerImage = "feedbacksystem_nodeenv:latest" // "thmmniii/node"
-    val interpreter = "npm"
+    val interpreter = "bash"; val action = "/usr/src/script/run.sh"
     var seq: Seq[String] = null
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
-    val baseFilePath = Paths.get(ULDIR).resolve(taskid.toString)
     val infoArgument = if (isInfo) "info" else ""
     val nodeTestPath = NodeCheckExec.getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(NodeCheckExec.LABEL_NODETEST).toString)
     val insideDockerNodeTestPath = "/usr/src/app"
     val insideDockerNodeResPath = "/usr/src/results"
-    val relatedSubPath = NodeCheckExec.getFullSubPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("unzip").toString)
-    val resultsPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id).resolve("results")
+    val subPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submission_id)
+    val relatedSubPath = if (use_extern) subPath.toString else NodeCheckExec.getFullSubPath(subPath.resolve("unzip").toString)
+    val resultsPath = subPath.resolve("results")
 
     // prepare a folder to put the results in (submission specific)
     try {
@@ -80,15 +81,16 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
 
     if (compile_production){
       seq = Seq("run", "--rm", __option_v, relatedSubPath.toString + __slash + nodeTestPath + __colon + nodeTestPath, __option_v,
-        relatedSubPath + __colon + nodeTestPath + __slash + "src", nodeDockerImage, interpreter, "test", infoArgument)
+        relatedSubPath + __colon + nodeTestPath + __slash + "src", __option_v, resultsPath.toString + __colon + nodeTestPath,
+        nodeDockerImage, interpreter, action, infoArgument)
     } else {
       val absSubPath = Paths.get(relatedSubPath).toAbsolutePath.toString
       val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
       seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
         absSubPath + __colon + insideDockerNodeTestPath + __slash + "src", __option_v,
-        resultsPath.toAbsolutePath.toString() + __colon +  insideDockerNodeResPath, nodeDockerImage, "bash", "/usr/src/script/run.sh", infoArgument)
+        resultsPath.toAbsolutePath.toString + __colon +  insideDockerNodeResPath, nodeDockerImage, interpreter, action, infoArgument)
     }
-
+    logger.warn(seq.toString())
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     this.exitCode = Process("docker", seq).!(procLogger)
@@ -322,7 +324,7 @@ object NodeCheckExec {
         unzip(filename.toAbsolutePath.toString, nodeExecutionPath)
       }
 
-      val nodechecker = new NodeCheckExec(submission_id, task_id, nodeExecutionPath.toString, compile_production, isInfo)
+      val nodechecker = new NodeCheckExec(submission_id, task_id, nodeExecutionPath.toString, compile_production, isInfo, use_extern)
       nodechecker.exec()
 
       sendNodeCheckAnswer(JsonHelper.mapToJsonStr(Map(
