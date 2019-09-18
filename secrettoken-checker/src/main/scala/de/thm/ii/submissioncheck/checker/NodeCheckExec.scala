@@ -59,10 +59,9 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
     */
   def exec(): Int = {
     logger.info("Execute Node Checker")
-    val nodeDockerImage = "feedbacksystem_nodeenv:latest" // "thmmniii/node"
+    val nodeDockerImage = "thmmniii/nodeenv:dev-latest" // "thmmniii/node"
     val interpreter = "bash"; val action = "/usr/src/script/run.sh"
-    var seq: Seq[String] = null
-    val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
+    var seq: Seq[String] = null; val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val infoArgument = if (isInfo) "info" else ""
     val nodeTestPath = NodeCheckExec.getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(NodeCheckExec.LABEL_NODETEST).toString)
     val insideDockerNodeTestPath = "/usr/src/app"
@@ -78,16 +77,16 @@ class NodeCheckExec(val submission_id: String, val taskid: Any, val submission_p
     catch {
       case e: FileAlreadyExistsException => { }
     }
-
     if (compile_production){
-      seq = Seq("run", "--rm", __option_v, relatedSubPath.toString + __slash + nodeTestPath + __colon + nodeTestPath, __option_v,
-        relatedSubPath + __colon + nodeTestPath + __slash + "src", __option_v, resultsPath.toString + __colon + nodeTestPath,
+      seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + nodeTestPath.toString.replace(ULDIR, "") + __colon + insideDockerNodeTestPath, __option_v,
+        dockerRelPath + __slash + relatedSubPath.replace(ULDIR, "") + __colon + insideDockerNodeTestPath + __slash + "src", __option_v,
+        dockerRelPath + __slash + resultsPath.toString.replace(ULDIR, "") + __colon + insideDockerNodeResPath,
         nodeDockerImage, interpreter, action, infoArgument)
     } else {
       val absSubPath = Paths.get(relatedSubPath).toAbsolutePath.toString
       val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
-      seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
-        absSubPath + __colon + insideDockerNodeTestPath + __slash + "src", __option_v,
+      seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v, absSubPath + __colon
+        + insideDockerNodeTestPath + __slash + "src", __option_v,
         resultsPath.toAbsolutePath.toString + __colon +  insideDockerNodeResPath, nodeDockerImage, interpreter, action, infoArgument)
     }
     logger.warn(seq.toString())

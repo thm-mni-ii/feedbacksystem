@@ -33,9 +33,10 @@ services:
       MYSQL_DATABASE: submissionchecker
     volumes:
     - ./docker-config/mysql1:/var/lib/mysql
-  bash1:
-    image: thmmniii/bash:latest
-    #build: bash
+  bashenv:
+    image: thmmniii/bashenv:dev-latest
+  nodeenv:
+    image: thmmniii/nodeenv:dev-latest
   mysql2:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
@@ -45,7 +46,7 @@ services:
     volumes:
     - ./docker-config/mysql2:/var/lib/mysql
   ws:
-    image: thmmniii/ws:latest
+    image: thmmniii/ws:dev-latest
     #build: ws
     depends_on:
     - mysql1
@@ -59,7 +60,7 @@ services:
     - ./docker-config/ws/application_prod.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
   secrettokenchecker:
-    image: thmmniii/secrettokenchecker:latest
+    image: thmmniii/secrettokenchecker:dev-latest
     #build: secrettoken-checker
     depends_on:
     - mysql1
@@ -75,7 +76,7 @@ services:
     - ./secrettoken-checker/upload-dir:/upload-dir
     - ./docker-config/secrettoken/application_prod.conf:/usr/local/appconfig/application.config
   sqlchecker:
-    image: thmmniii/sqlchecker:latest
+    image: thmmniii/sqlchecker:dev-latest
     #build: sql-checker
     depends_on:
     - mysql2
