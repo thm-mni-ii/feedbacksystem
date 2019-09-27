@@ -58,6 +58,7 @@ services:
     - ./ws/zip-dir:/zip-dir
     - ./docker-config/ws/application_prod.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
+    - ./docker-config/ws/feedback.cert_v2.p12:/usr/local/appconfig/feedback.cert_v2.p12
   secrettokenchecker:
     image: thmmniii/secrettokenchecker:latest
     #build: secrettoken-checker
