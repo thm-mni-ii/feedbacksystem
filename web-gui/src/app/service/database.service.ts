@@ -300,6 +300,33 @@ export class DatabaseService {
     return this.http.post<Succeeded>('/api/v1/courses/' + courseID + '/deny/docent', {userid: userID});
   }
 
+
+  /**
+   * access the download url for submission exports
+   * @param courseID
+   */
+  exportCourseSubmissions(courseID: number) {
+    //location.href=`https://localhost:8080/api/v1/courses/${courseID}/submission/users/zip?only_last_try=false`
+    return this.http.get(`/api/v1/courses/${courseID}/submission/users/zip?only_last_try=false`, {responseType: 'arraybuffer'}).
+    subscribe(response => this.downLoadFile(response, "application/zip"))
+  }
+
+  /**
+   * Method is use to download file.
+   * @param data - Array Buffer data
+   * @param type - type of the document.
+   */
+  downLoadFile(data: any, type: string) {
+    let blob = new Blob([data], {type: type});
+    let url = window.URL.createObjectURL(blob);
+    console.log(url)
+    let pwa = window.open(url);
+    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
+      alert('Please disable your Pop-up blocker and try again.');
+    }
+  }
+
+  
   /**
    * Admin chooses user role
    * @param userID The id of user

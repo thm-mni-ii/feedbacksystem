@@ -207,7 +207,8 @@ class CourseController {
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
 
-    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
+    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && user.get.roleid > 4
+      && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
       throw new UnauthorizedException
     }
 

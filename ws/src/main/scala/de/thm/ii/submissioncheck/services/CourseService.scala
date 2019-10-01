@@ -27,23 +27,15 @@ class CourseService {
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
-  private var compile_production: Boolean = true
-  private final var LABEL_ZIPDIR = "zip-dir"
-  private final var LABEL_UPLOADDIR = "upload-dir"
+  private var LABEL_ZIPDIR = "zip-dir"
+  private var LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_ZERO_STRING = "0"
   private final val LABEL_ONE_STRING = "1"
   private final val LABEL_TRUE = "true"
   private final val LABEL_FALSE = "false"
 
-  /**
-    * load production compilation
-    * @param prop property from config file
-    */
-  class MyBean(@Value("${compile.production}") prop: Boolean) {
-    compile_production = prop
-    LABEL_ZIPDIR = (if (compile_production) "/" else "") + "zip-dir"
-    LABEL_UPLOADDIR = (if (compile_production) "/" else "") + "upload-dir"
-  }
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
@@ -77,6 +69,14 @@ class CourseService {
           CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date)
         )
       }, userid)
+  }
+
+  private def getZIPDIR = {
+    (if (compile_production) "/" else "") + LABEL_ZIPDIR
+  }
+
+  private def getUPLOADDIR = {
+    (if (compile_production) "/" else "") + LABEL_UPLOADDIR
   }
 
   /**
@@ -430,13 +430,13 @@ class CourseService {
   def zipOfSubmissionsOfUsersFromCourse(only_last_try: Boolean, courseid: Integer): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
 
     val studentList = getStudentsFromCourse(courseid)
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
 
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
@@ -446,7 +446,7 @@ class CourseService {
           if (i == 0) {
             last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
               LABEL_UNDERLINE).replace(" ", "")
-            tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
+            tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
               task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
             Files.createDirectories(tmpZiptaskPath)
           }
@@ -467,7 +467,7 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    zip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -490,11 +490,11 @@ class CourseService {
   def zipOfSubmissionsOfUserFromCourse(only_last_try: Boolean, courseid: Integer, user: User): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
 
       var tmpZiptaskPath: Path = null
       var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
@@ -503,7 +503,7 @@ class CourseService {
         if (i == 0) {
           last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
             LABEL_UNDERLINE).replace(" ", "")
-          tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
+          tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
             task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
           Files.createDirectories(tmpZiptaskPath)
         }
@@ -522,7 +522,7 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_" + user.username + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    zip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
   }
 

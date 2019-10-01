@@ -166,6 +166,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
   }
 
+  public exportSubmissions(){
+    this.db.exportCourseSubmissions(this.courseID)
+  }
+
   public plagiatModule(courseDetail: DetailedCourseInformation){
     this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
