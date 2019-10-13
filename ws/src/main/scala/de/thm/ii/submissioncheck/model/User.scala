@@ -1,6 +1,6 @@
 package de.thm.ii.submissioncheck.model
 
-import de.thm.ii.submissioncheck.services.UserDBLabels
+import de.thm.ii.submissioncheck.services.{RoleDBLabels, UserDBLabels}
 
 /**
   * Class User holds all data from the user table
@@ -37,3 +37,39 @@ class User(val userid: Int, val username: String, val prename: String, val surna
     asMap().toString()
   }
 }
+
+/**
+  * a simple User for the System
+  *
+  * @param userid local DB's userid
+  * @param username User's username
+  * @param prename User's prename
+  * @param surname User's surname
+  * @param email User's email
+  * @param role User's role name
+  * @param roleid User's role id
+  * @param privacy_checked did user accept the policy
+  */
+class SimpleUser(override val userid: Int = -1, override val username: String = "", override val prename: String = "",
+                 override val surname: String = "",
+                 override val email: String = "", override val role: String = RoleDBLabels.STUDENT,
+                 override val roleid: Int = RoleDBLabels.USER_ROLE_ID, override val privacy_checked: Boolean = false) extends
+                User(userid, username, prename, surname, email, role, roleid, privacy_checked)
+
+/**
+  * the admin User for the System
+  *
+  * @param userid local DB's userid
+  * @param username User's username
+  * @param prename User's prename
+  * @param surname User's surname
+  * @param email User's email
+  * @param role User's role name
+  * @param roleid User's role id
+  * @param privacy_checked did user accept the policy
+  */
+class AdminUser(override val userid: Int = 1, override val username: String = "admin", override val prename: String = "admin",
+                 override val surname: String = "",
+                 override val email: String = "", override val role: String = RoleDBLabels.ADMIN,
+                 override val roleid: Int = RoleDBLabels.ADMIN_ROLE_ID, override val privacy_checked: Boolean = false) extends
+  User(userid, username, prename, surname, email, role, roleid, privacy_checked)

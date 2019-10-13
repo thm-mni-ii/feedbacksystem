@@ -400,6 +400,9 @@ object SecretTokenChecker extends App {
           "Error" -> "Please provide valid parameters"
         )))
       }
+      case e: Exception => {
+        logger.warning(e.getMessage)
+      }
     }
   }
 

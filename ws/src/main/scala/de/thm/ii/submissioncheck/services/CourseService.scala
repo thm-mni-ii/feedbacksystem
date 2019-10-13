@@ -1,18 +1,21 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
+import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
 import de.thm.ii.submissioncheck.CourseParameterDBLabels
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
+import de.thm.ii.submissioncheck.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.submissioncheck.security.Secrets
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-
+import java.util.Calendar
 /**
   * CourseService provides interaction with DB
   *
@@ -33,12 +36,16 @@ class CourseService {
   private final val LABEL_ONE_STRING = "1"
   private final val LABEL_TRUE = "true"
   private final val LABEL_FALSE = "false"
+  private final val LABEL_DESC = "desc"
+  private final val LABEL_COURSE_JSON = "course.json"
+  private final val LABEL_COURSE = "course"
 
   @Value("${compile.production}")
   private val compile_production: Boolean = true
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
+  private val LABEL_SUBMITS = "submits"
   private final val LABEL_SUCCESS = "success"
   private final val LABEL_UNDERLINE = "_"
   private final val LABEL_COURSE_TUTOR = "course_tutor"
@@ -386,27 +393,6 @@ class CourseService {
   }
 
   /**
-    * Zip several files to one zuip folder
-    * @param out destination path where zip should be saved
-    * @param files list of files to zip
-    * @param replacePath substring which should be removed from filenames
-    */
-  def zip(out: Path, files: Iterable[Path], replacePath: String = ""): Unit = {
-    val zip = new ZipOutputStream(Files.newOutputStream(out))
-
-    files.foreach { file =>
-      zip.putNextEntry(new ZipEntry(file.toString.replace(replacePath, "")))
-      try {
-        Files.copy(file, zip)
-      } catch {
-        case _: java.nio.file.NoSuchFileException => {}
-      }
-      zip.closeEntry()
-    }
-    zip.close()
-  }
-
-  /**
     * I have to apologize that I somehow think in the php way. Therefor I need this implode method
     * @param list contains items which will be glued by a given string
     * @param glue is somehow the opposite from a split delimeter
@@ -436,11 +422,11 @@ class CourseService {
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve(LABEL_SUBMITS)
 
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
-        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), LABEL_DESC)
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
@@ -467,7 +453,46 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    finishZipPath
+  }
+
+  /**
+    * Generates a zip of all course data which can be imported
+    * @param courseid unique course identification
+    * @return the path where to download from
+    */
+  def exportCourseImportable(courseid: Int): Path = {
+    val tmp_folder = Secrets.getSHAStringFromNow()
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
+    var courseMap: Map[String, Any] = Map(LABEL_COURSE -> getCourseDetails(courseid, new SimpleUser()))
+
+    val tasksDir = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_TASKS)
+    Files.createDirectories(tasksDir)
+
+    val studentList = getStudentsFromCourse(courseid)
+
+    var taskList = taskService.getTasksByCourse(courseid)
+    var subs: List[Any] = List()
+    for (task <- taskList) {
+      val taskid = task(TaskDBLabels.taskid).toString
+      val success = FileOperations.copy(Paths.get(getUPLOADDIR).resolve(taskid).toString, tasksDir.resolve(taskid).toString)
+
+      for(student <- studentList){
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(taskid, student(UserDBLabels.user_id), LABEL_DESC)
+        for(entry <- studentSubmissionList){
+          val modEntry = entry + (SubmissionDBLabels.taskid -> taskid.toInt)
+          subs = modEntry :: subs
+        }
+      }
+    }
+
+    courseMap += (LABEL_TASKS -> taskList)
+    courseMap += ("submissions" -> subs)
+    FileOperations.writeToFile(JsonParser.mapToJsonStr(courseMap), Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_COURSE_JSON))
+
+    val finishZipPath = Paths.get(getZIPDIR).resolve(s"export_${courseid}_${tmp_folder}.zip")
+    FileOperations.zip(finishZipPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -494,10 +519,10 @@ class CourseService {
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve(LABEL_SUBMITS)
 
       var tmpZiptaskPath: Path = null
-      var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
+      var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, LABEL_DESC)
       if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
       for((submission, i) <- studentSubmissionList.zipWithIndex) {
         if (i == 0) {
@@ -522,8 +547,119 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_" + user.username + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
+  }
+
+  /**
+    * import and restore all course data
+    *
+    * @param courseid unique course identification
+    * @param zipdir  the path where the zip is uploaded
+    * @return if import worked out
+    */
+  def recoverACourse(courseid: Int, zipdir: Path): Boolean = {
+    FileOperations.unzip(zipdir, zipdir.getParent)
+    val completeConfig = JsonParser.jsonStrToMap(FileOperations.readFromFile(zipdir.getParent.resolve(LABEL_COURSE_JSON)))
+    val courseConfig: Map[String, Any] = completeConfig(LABEL_COURSE).asInstanceOf[Map[String, Any]]
+    val confCourseId = courseConfig(CourseDBLabels.courseid).toString.toInt
+
+    if (courseid != confCourseId){
+      throw new BadRequestException("Provided ZIP and course id do not match")
+    }
+
+    // check if course exists
+    if (getCourseDetails(courseid, new AdminUser()).isEmpty) {
+      throw new ResourceNotFoundException
+    }
+    val semester = if (courseConfig(CourseDBLabels.course_semester) == null) null else courseConfig(CourseDBLabels.course_semester).toString
+    val module = if (courseConfig(CourseDBLabels.course_modul_id) == null) null else courseConfig(CourseDBLabels.course_modul_id).toString
+    val c_end = if (courseConfig(CourseDBLabels.course_end_date) == null) null else courseConfig(CourseDBLabels.course_end_date).toString
+    updateCourse(courseid, courseConfig(CourseDBLabels.name).toString, courseConfig(CourseDBLabels.description).toString,
+      courseConfig(CourseDBLabels.standard_task_typ).toString, module,
+      semester, c_end, courseConfig(CourseDBLabels.personalised_submission).toString)
+
+    var taskIDMap: Map[Int, Int] = Map() // (original -> new id)
+    for (task <- completeConfig(LABEL_TASKS).asInstanceOf[List[Map[String, Any]]]) {
+      val taskID = task(TaskDBLabels.taskid).toString.toInt
+      val datime = DateTimeOperation.fromTimestamp(task(TaskDBLabels.deadline).toString)
+      var newTaskId = taskID
+      val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
+      val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
+      // check if task exists exists
+      if (taskService.getTaskDetails(taskID, None, raise = false).isEmpty) {
+        val taskConfig = taskService.createTask(task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString, courseid,
+          datime, testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+        newTaskId = taskConfig("taskid").toString.toInt
+        taskIDMap += (taskID -> newTaskId)
+      } else {
+        taskService.updateTask(taskID, task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString,
+          datime, null, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+      }
+
+      for ((testsystem, j) <- testsystems.zipWithIndex) {
+        taskService.setTaskFilename(newTaskId, testsystem, (testsystemConfig(j)("test_file_name")).toString)
+        taskService.resetTaskTestStatus(newTaskId, testsystem)
+        taskService.sendTaskToTestsystem(newTaskId, testsystem)  // send to kafka
+      }
+    }
+    // update SUBMISSION -> replace into!
+    submissionService.replaceUpdateSubmission(completeConfig("submissions").asInstanceOf[List[Map[String, Any]]], taskIDMap)
+  }
+
+  /**
+    * create and import a curse with corresponsing tasks
+    *
+    * @param zipdir the path where the zip is uploaded
+    * @return if import worked out
+    */
+  def importACourse(zipdir: Path): Boolean = {
+    FileOperations.unzip(zipdir, zipdir.getParent)
+    val completeConfig = JsonParser.jsonStrToMap(FileOperations.readFromFile(zipdir.getParent.resolve(LABEL_COURSE_JSON)))
+    val courseConfig: Map[String, Any] = completeConfig(LABEL_COURSE).asInstanceOf[Map[String, Any]]
+
+    val createdCourse = createCourseByUser(new AdminUser(), courseConfig(CourseDBLabels.name).toString, courseConfig(CourseDBLabels.description).toString,
+      courseConfig(CourseDBLabels.standard_task_typ).toString, courseConfig(CourseDBLabels.course_modul_id).toString, null, null)
+    val courseID: Int = Integer.parseInt(createdCourse("course_id").toString)
+
+    // we need a map of old taskids to the new ones, where we then can copy task definitions and everything to the right place
+    var taskIdMap: Map[Int, Int] = Map()
+    var taskTestsystems: Map[Int, List[String]] = Map()
+    for (task <- completeConfig(LABEL_TASKS).asInstanceOf[List[Map[String, Any]]]) {
+      val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
+      val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
+
+      val taskDeadline = task(TaskDBLabels.deadline).toString
+      val oldTaskId = Integer.parseInt(task(TaskDBLabels.taskid).toString)
+
+      val createdTask = taskService.createTask(task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString, courseID,
+        DateTimeOperation.fromTimestamp(taskDeadline), testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+      val taskid: Int = Integer.parseInt(createdTask("taskid").toString)
+
+      for ((testsystem, j) <- testsystems.zipWithIndex) {
+        taskService.setTaskFilename(taskid, testsystem, (testsystemConfig(j)("test_file_name")).toString)
+        taskService.resetTaskTestStatus(taskid, testsystem)
+      }
+
+      taskIdMap += (oldTaskId -> taskid)
+      taskTestsystems += (taskid -> testsystems)
+    }
+    // 1. remove "submit" folder from task, if it exists
+    val uploadedTaskRoot = zipdir.getParent.resolve(LABEL_TASKS)
+    taskIdMap.keys.foreach(taskid => FileOperations.rmdir(uploadedTaskRoot.resolve(taskid.toString).resolve(LABEL_SUBMITS).toFile))
+
+    // 2. copy each task folder while renaming it
+    taskIdMap.foreach(entry => {
+      FileOperations.copy(uploadedTaskRoot.resolve(entry._1.toString).toString, Paths.get(getUPLOADDIR).resolve(entry._2.toString).toString)
+    })
+
+    // 3. send the tasks to the checker systems
+    taskTestsystems.foreach(entry => {
+      for (testsytem_id <- entry._2) {
+        taskService.sendTaskToTestsystem(entry._1, testsytem_id)
+      }
+    })
+    true
   }
 
   /**

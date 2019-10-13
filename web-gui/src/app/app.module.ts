@@ -55,6 +55,7 @@ import { EditTestsystemsModalComponent } from './components/connected-systems/mo
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
 import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
 import {MatSlideToggleModule} from "@angular/material";
+import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
 
 
 @Injectable()
@@ -111,6 +112,7 @@ export const httpInterceptorProviders = [
     EditTestsystemsModalComponent,
     DeleteTestsystemAskModalComponent,
     TaskResultComponent,
+    ImportCourseComponent,
   ],
   imports: [
     BrowserModule,

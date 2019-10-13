@@ -58,7 +58,6 @@ class TaskController {
   private val kafkaURL: String = null
   private final val application_json_value = "application/json"
 
-  private val topicTaskRequest: String = "new_task_request"
   private val LABEL_SUCCESS = "success"
   private var container: KafkaMessageListenerContainer[String, String] = _
   private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = _
@@ -419,20 +418,8 @@ class TaskController {
     taskService.resetTaskTestStatus(taskid, testsystem_id)
     try {
       //val tasksystem_id = taskService.getTestsystemTopicByTaskId(taskid)
-      val jsonMsg: Map[String, Any] = Map("testfile_urls" -> this.taskService.getURLsOfTaskTestFiles(taskid, testsystem_id),
-        LABEL_TASK_ID -> taskid.toString,
-        LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
-
-      message = true
-
-      val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-      logger.warn(jsonStringMsg)
-      kafkaTemplate.send(taskService.connectKafkaTopic(testsystem_id, topicTaskRequest), jsonStringMsg)
-      logger.warn(taskService.connectKafkaTopic(testsystem_id, topicTaskRequest))
-      kafkaTemplate.flush()
-
-      Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
-
+      Map(LABEL_SUCCESS -> taskService.sendTaskToTestsystem(taskid, testsystem_id),
+        LABEL_FILENAME -> filename)
     } catch {
       case _: NoSuchElementException => throw new ResourceNotFoundException()
     }
@@ -538,11 +525,11 @@ class TaskController {
     }
 
     val testsystem_id = if (jsonNode.get(TestsystemLabels.id) != null) jsonNode.get(TestsystemLabels.id).asText() else null
-    if (testsystem_id != null && testsystemService.getTestsystem(testsystem_id).isEmpty){
-      throw new BadRequestException("Provided testsystem_id (" + testsystem_id + ") is invalid")
+    if (testsystem_id != null){
+      throw new BadRequestException("Please do not update the testsystem_id here")
     }
 
-    val success = this.taskService.updateTask(taskid, name, description, deadline, testsystem_id, null, load_external_description)
+    val success = this.taskService.updateTask(taskid, name, description, deadline, null, load_external_description)
 
     Map(LABEL_SUCCESS -> success, LABEL_UPLOAD_URL -> submissionService.getUploadUrlsForTaskTestFile(CLIENT_HOST_URL, taskid))
   }
@@ -876,7 +863,7 @@ class TaskController {
               taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
             }
             // If every data is saved correctly
-            taskService.updateTask(taskId, null, null, null, null, true)
+            taskService.updateTask(taskId, null, null, null, true)
           } else {
             notifyDocentAfterPlagiarismCheck(Integer.parseInt(answeredMap(LABEL_COURSE_ID).toString), answeredMap("msg").asInstanceOf[String])
           }

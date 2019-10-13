@@ -14,7 +14,7 @@ import {
   User
 } from '../interfaces/HttpInterfaces';
 import {flatMap} from 'rxjs/operators';
-
+import {saveAs as importedSaveAs} from "file-saver";
 /**
  *  Service to communicate with db.
  *  Get submission result or submit for a given Task.
@@ -304,29 +304,37 @@ export class DatabaseService {
   /**
    * access the download url for submission exports
    * @param courseID
+   * @param courseName
    */
-  exportCourseSubmissions(courseID: number) {
-    //location.href=`https://localhost:8080/api/v1/courses/${courseID}/submission/users/zip?only_last_try=false`
-    return this.http.get(`/api/v1/courses/${courseID}/submission/users/zip?only_last_try=false`, {responseType: 'arraybuffer'}).
-    subscribe(response => this.downLoadFile(response, "application/zip"))
+  exportCourseSubmissions(courseID: number, courseName: string) {
+    let name = courseName.replace(/ /g, '').replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '').substr(0, 10);
+    return this.http.get(`/api/v1/courses/${courseID}/export/zip`, {responseType: 'arraybuffer'}).
+    subscribe(response => {
+      let blob = new Blob([response], {type: 'application/zip'});
+      importedSaveAs(blob, `course_export_${courseID}_${name}.zip`);
+
+    })
   }
 
-  /**
-   * Method is use to download file.
-   * @param data - Array Buffer data
-   * @param type - type of the document.
-   */
-  downLoadFile(data: any, type: string) {
-    let blob = new Blob([data], {type: type});
-    let url = window.URL.createObjectURL(blob);
-    console.log(url)
-    let pwa = window.open(url);
-    if (!pwa || pwa.closed || typeof pwa.closed == 'undefined') {
-      alert('Please disable your Pop-up blocker and try again.');
-    }
+  importCompleteCourse(files: File[]){
+    let file = files[0]
+    const formDataFile = new FormData();
+    formDataFile.append('file', file, file.name);
+    return this.http.post<Succeeded>(`/api/v1/courses/import`, formDataFile, {
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+    }).toPromise()
+
   }
 
-  
+  recoverCourse(courseID: number, files: File[]){
+    let file = files[0]
+    const formDataFile = new FormData();
+    formDataFile.append('file', file, file.name);
+    return this.http.post<Succeeded>(`/api/v1/courses/${courseID}/recover`, formDataFile, {
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+    }).toPromise()
+  }
+
   /**
    * Admin chooses user role
    * @param userID The id of user

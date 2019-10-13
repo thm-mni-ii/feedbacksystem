@@ -20,6 +20,7 @@ import {AdminGuard} from './guards/admin.guard';
 import {IsDocentGuard} from './guards/is-docent.guard';
 import {NotFound404Component} from "./components/not-found404/not-found404.component";
 import {ConnectedSystemsComponent} from "./components/connected-systems/connected-systems.component";
+import {ImportCourseComponent} from "./components/courses/import-course/import-course.component";
 
 
 const routes: Routes = [
@@ -32,6 +33,7 @@ const routes: Routes = [
       {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [DocentGuard]},
       {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCourseComponent},
+      {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: DetailCourseComponent},
 
       // Admin

@@ -112,6 +112,75 @@ class SubmissionService {
       }, submission_id).headOption
   }
 
+  private def replaceSubmissionTestsystem(submissionid: Int, result: Any, passed: Any, result_date: Any, exitcode: Int,
+                                          testsystem_id: String, step: Int): Boolean = {
+    val num = DB.update(
+      "REPLACE INTO submission_testsystem (result, passed, exitcode, result_date, submission_id, testsystem_id, step) values (?, ?, ?, ?, ?, ?, ?);",
+      result, passed, exitcode, result_date, submissionid, testsystem_id, step)
+    num > 0
+  }
+
+  private def insertReplaceSubmission(subid: Any, submit_date: String, user_id: Int, task_id: Int, filename: String, sub_data: String,
+                                      plagiat_passed: Boolean): Int = {
+      val (num, holder) = DB.update((con: Connection) => {
+        val ps = con.prepareStatement("REPLACE INTO submission (submission_id, submit_date, user_id, task_id, filename, submission_data," +
+          "plagiat_passed) VALUES (?,?,?,?,?,?,?);",
+          Statement.RETURN_GENERATED_KEYS
+        )
+        var paramIndex = 1
+        if (subid == null) {
+          ps.setNull(paramIndex, 1);
+        } else {
+          ps.setInt(paramIndex, subid.toString.toInt)
+        }
+        paramIndex+=1
+        ps.setString(paramIndex, submit_date); paramIndex+=1
+        ps.setInt(paramIndex, user_id); paramIndex+=1
+        ps.setInt(paramIndex, task_id); paramIndex+=1
+        ps.setString(paramIndex, filename); paramIndex+=1
+        ps.setString(paramIndex, sub_data); paramIndex+=1
+        ps.setBoolean(paramIndex, plagiat_passed); paramIndex+=1
+        ps
+      })
+
+      val insertedId = holder.getKeyList
+      if (num == 0) {
+        throw new RuntimeException(ERROR_CREATING_ADMIN_MSG)
+      }
+    if (subid == null) insertedId.get(0).get("GENERATED_KEY").toString.toInt else subid.toString.toInt
+  }
+
+  /**
+    * restore, replace or insert submission and testsystem answers
+    * @param data submission config map
+    * @param taskIDMap if tasks has been new created, the reference is saved there
+    * @return worked out
+    */
+  def replaceUpdateSubmission(data: List[Map[String, Any]], taskIDMap: Map[Int, Int]): Boolean = {
+    for (submission <- data){
+      var subID = submission(SubmissionDBLabels.submissionid).toString.toInt
+      val insertSubId = if (getSubmissionDetails(subID).nonEmpty) subID else null
+      val s_date = DateTimeOperation.fromTimestamp(submission(SubmissionDBLabels.submit_date).toString)
+
+      var corTaskID = submission(SubmissionDBLabels.taskid).toString.toInt
+      if (taskIDMap.contains(corTaskID)) corTaskID = taskIDMap(corTaskID) // if there is a mapping used this
+
+      subID = insertReplaceSubmission(insertSubId, s_date, submission(SubmissionDBLabels.userid).toString.toInt, corTaskID,
+        submission(SubmissionDBLabels.filename).toString, submission(SubmissionDBLabels.submission_data).toString,
+        submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[Boolean])
+
+      val evaList = submission("evaluation").asInstanceOf[List[Map[String, Any]]]
+      for (eva <- evaList) { //then insert update replace evaluation list
+        val resDateRaw = eva(SubmissionTestsystemDBLabels.result_date)
+        val res_date = if (resDateRaw == null) null else DateTimeOperation.fromTimestamp(resDateRaw.toString)
+        replaceSubmissionTestsystem(eva(SubmissionDBLabels.submissionid).toString.toInt, eva(SubmissionTestsystemDBLabels.result),
+          eva(SubmissionTestsystemDBLabels.passed), res_date, eva(SubmissionTestsystemDBLabels.exitcode).toString.toInt,
+          eva(SubmissionTestsystemDBLabels.testsystem_id).toString, eva("ordnr").toString.toInt)
+      }
+    }
+    true
+  }
+
   /**
     * submitTaskWithFile
     * @author Benjamin Manns

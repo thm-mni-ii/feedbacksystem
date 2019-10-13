@@ -1,0 +1,11 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#description {
+  width: 80%;
+  min-width: 180px;
+}

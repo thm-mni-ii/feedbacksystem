@@ -87,6 +87,7 @@ class TaskService {
   private val LABEL_CHECK_REQUEST: String = "check_request"
   private val LABEL_SUCCESS = "success"
   private val LABEL_EXTERNAL = "external"
+  private val topicTaskRequest: String = "new_task_request"
 
   /**
     * After Upload a submitted File save it's name
@@ -140,6 +141,26 @@ class TaskService {
     logger.warn(jsonResult)
     kafkaTemplate.send(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST), jsonResult)
     kafkaTemplate.flush()
+  }
+
+  /**
+    * send task and upladed files to testsystem with several options
+    * @param taskid unique identification for a task
+    * @param testsystem_id task testystem
+    * @return true (to be extended)
+    */
+  def sendTaskToTestsystem(taskid: Int, testsystem_id: String): Boolean = {
+    val jsonMsg: Map[String, Any] = Map("testfile_urls" -> getURLsOfTaskTestFiles(taskid, testsystem_id),
+      LABEL_TASK_ID -> taskid.toString,
+      LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
+
+    val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
+    logger.warn(jsonStringMsg)
+    kafkaTemplate.send(connectKafkaTopic(testsystem_id, topicTaskRequest), jsonStringMsg)
+    logger.warn(connectKafkaTopic(testsystem_id, topicTaskRequest))
+    kafkaTemplate.flush()
+
+    true
   }
 
   /**
@@ -286,7 +307,7 @@ class TaskService {
     }
 
     val finishZipPath = "zip-dir/abgabe_task_" + taskid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    courseService.zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -294,9 +315,10 @@ class TaskService {
     * print detail information of a given task
     * @param taskid unique identification for a task
     * @param userid unique identification for a User
+    * @param raise if the 404 error should be raised here
     * @return JAVA Map
     */
-  def getTaskDetails(taskid: Integer, userid: Option[Int] = None): Option[Map[String, Any]] = {
+  def getTaskDetails(taskid: Integer, userid: Option[Int] = None, raise: Boolean = true): Option[Map[String, Any]] = {
     val usersIdOrNull = if (userid.isDefined) userid.get else null
     val list = DB.query("SELECT t.*, ted.description as external_description from task_testsystem t_t join task t " +
       "on t.task_id = t_t.task_id left join task_external_description ted on ted.testsystem_id = t_t.testsystem_id " +
@@ -326,7 +348,7 @@ class TaskService {
           lineMap
         }
       }, usersIdOrNull, taskid)
-    if(list.isEmpty) {
+    if(list.isEmpty && raise) {
       throw new ResourceNotFoundException
     }
     list.headOption
@@ -538,12 +560,11 @@ class TaskService {
     * @param name Task name
     * @param description Task description
     * @param deadline until when the task is open
-    * @param testsystem_id: refered testsystem
     * @param plagiat_check: plagiat check status
     * @param load_extern_info: load external description of task by testsytsem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null, testsystem_id: String = null,
+  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null,
                  plagiat_check: Any = null, load_extern_info: Any = null): Boolean = {
     var updates = 0
     var successfulUpdates = 0
@@ -554,11 +575,6 @@ class TaskService {
 
     if (description != null) {
       successfulUpdates += DB.update("UPDATE task set task_description = ?  where task_id = ? ", description, taskid)
-      updates += 1
-    }
-
-    if (testsystem_id != null) {
-      successfulUpdates += DB.update("UPDATE task set testsystem_id = ? where task_id = ? ", testsystem_id, taskid)
       updates += 1
     }
 

@@ -167,7 +167,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   public exportSubmissions(){
-    this.db.exportCourseSubmissions(this.courseID)
+    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name)
   }
 
   public plagiatModule(courseDetail: DetailedCourseInformation){
