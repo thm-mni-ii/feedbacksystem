@@ -171,45 +171,41 @@ class SQLTask(val filepath: String, val taskId: String){
     createDatabase(dbname)
     try {
       val userres = executeComplexQueries(userq)
-      val rsmd = userres.getMetaData()
-      val col = rsmd.getColumnCount()
-      userres.last()
-      val rows = userres.getRow
-      userres.beforeFirst()
-      val userarr = arrayfromRS(userres)
-      val userarr_ordered = orderArray(userarr)
+      userres.last();userres.beforeFirst();val userarr = arrayfromRS(userres);val userarr_ordered = orderArray(userarr)
       breakable{
         for (i <- 0 until queryc){
           queryres(i).res.beforeFirst()
           var queryarr = arrayfromRS(queryres(i).res)
           var userarray = userarr
-          if( (queryarr.length == userarray.length) && (queryarr(0).length == userarray(0).length)){
-            if (queryres(i).order.equalsIgnoreCase("variable")){
-              queryarr = orderArray(queryarr);
-              userarray = userarr_ordered;
-            }
-            if (compareArray(queryarr, userarray)){
+          if (queryarr.toList.isEmpty) { // no result from original query, what should compared?
+            if (userarray.toList.isEmpty) {
               identified = true
               foundindex = i
               break()
+            }
+          } else {
+            if ((queryarr.length == userarray.length) && (queryarr(0).length == userarray(0).length)){
+              if (queryres(i).order.equalsIgnoreCase("variable")){
+                queryarr = orderArray(queryarr);
+                userarray = userarr_ordered;
+              }
+              if (compareArray(queryarr, userarray)){
+                identified = true
+                foundindex = i
+                break()
+              }
             }
           }
         }
       }
     } catch {
-      case ex: SQLTimeoutException => {
-        msg = "Das Query hat zu lange gedauert: " + ex.getMessage
-      }
-      case ex: SQLException => {
-        msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")
-      }
+      case ex: SQLTimeoutException => msg = "Das Query hat zu lange gedauert: " + ex.getMessage
+      case ex: SQLException => msg = "Es gab eine SQLException: " + ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")
     }
     s.execute(dropdb + taskid + us + dbname)
     if(identified){
       msg = queryres(foundindex).desc
-      if(msg.equals("OK")){
-        success = true
-      }
+      if(msg.equals("OK")) success = true
     }
     (msg, success)
   }
