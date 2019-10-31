@@ -1,12 +1,9 @@
-package de.thm.ii.submissioncheck.bash
+package de.thm.ii.submissioncheck.checker
 
 import java.io._
-import java.nio.file.{Path, Paths}
+import java.nio.file.Paths
 
-import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
-import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_CHECK
-import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_INFO
-import de.thm.ii.submissioncheck.SecretTokenChecker.BASH_EXEC_MODE_TASK
+import de.thm.ii.submissioncheck.SecretTokenChecker.{BASH_EXEC_MODE_INFO, BASH_EXEC_MODE_TASK, ULDIR}
 import org.slf4j.LoggerFactory
 
 import scala.sys.process.{Process, ProcessLogger}

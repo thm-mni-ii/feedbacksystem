@@ -28,8 +28,8 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.bash.{BashExec, GitCheckExec, PlagiatCheckExec, ShExec}
-import de.thm.ii.submissioncheck.checker.NodeCheckExec
+import de.thm.ii.submissioncheck.bash.ShExec
+import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, NodeCheckExec, PlagiatCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -510,19 +510,6 @@ object SecretTokenChecker extends App {
     shtest1.exec()
     val shmessage1 = shtest1.output
     shmessage1
-  }
-
-  /**
-    * getShTestOut
-    *
-    * @param sName shell script name
-    * @param token shell parameter
-    * @return Output of script
-    */
-  def getShTestOut(sName: String, token: String): String = {
-    val shtest = new ShExec(sName, token)
-    shtest.exec()
-    shtest.output
   }
 
   private def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {

@@ -1,20 +1,18 @@
-package de.thm.ii.submissioncheck.bash
+package de.thm.ii.submissioncheck.checker
 
 import java.io.{ByteArrayOutputStream, File}
+import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.nio.file.{Files, Path, Paths}
 
 import akka.Done
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, GIT_TASK_ANSWER_TOPIC, LABEL_ACCEPT, LABEL_ERROR, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, ULDIR, sendMessage}
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, GIT_TASK_ANSWER_TOPIC, LABEL_ACCEPT,
-  LABEL_ERROR, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, ULDIR, sendMessage}
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.io.Source
 import scala.sys.process.{Process, ProcessLogger}
-import java.net.{HttpURLConnection, URL, URLEncoder}
 
 /**
   * Provides a service to download / clone a git uri
