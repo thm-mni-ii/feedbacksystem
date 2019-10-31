@@ -28,7 +28,6 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.bash.ShExec
 import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, NodeCheckExec, PlagiatCheckExec}
 
 /**
@@ -496,20 +495,6 @@ object SecretTokenChecker extends App {
     val message1 = bashtest1.output
 
     (message1, exit1)
-  }
-
-  /**
-    * shTest is used by Kafka Example
-    *
-    * @param token String from User
-    * @return String Answer from Script
-    */
-  def shTest(token: String): String = {
-    val shtest1 = new ShExec("./script.sh", token)
-    //execute script with arguments and save exit code (successful (0) or not (not 0) )
-    shtest1.exec()
-    val shmessage1 = shtest1.output
-    shmessage1
   }
 
   private def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
