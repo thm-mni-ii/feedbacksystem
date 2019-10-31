@@ -9,7 +9,7 @@ import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
 import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID,
   LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, NODE_TASK_ANSWER_TOPIC, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile,
   sendMessage, NODE_CHECK_ANSWER_TOPIC}
-import de.thm.ii.submissioncheck.bash.GitCheckExec.{LABEL_CONFIGFILE, LABEL_STRUCTUREFILE, logger, sendGitTaskAnswer}
+import de.thm.ii.submissioncheck.checker.GitCheckExec.{LABEL_CONFIGFILE, LABEL_STRUCTUREFILE, logger, sendGitTaskAnswer}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
