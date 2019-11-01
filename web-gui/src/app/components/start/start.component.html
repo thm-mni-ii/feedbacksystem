@@ -63,6 +63,14 @@
       </mat-nav-list>
       <mat-divider></mat-divider>
 
+      <mat-nav-list *ngIf="user.isGuest()">
+        <p>Einstellungen</p>
+        <a mat-list-item routerLink="/users/passwd" routerLinkActive="selected">
+          <mat-icon>settings</mat-icon>
+          <p>Profil</p>
+        </a>
+      </mat-nav-list>
+
       <span class="filler"></span>
 
       <mat-divider></mat-divider>

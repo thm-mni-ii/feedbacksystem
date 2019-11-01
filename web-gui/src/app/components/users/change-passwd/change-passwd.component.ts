@@ -1,0 +1,56 @@
+import { Component, OnInit } from '@angular/core';
+import {UserService} from "../../../service/user.service";
+import {DatabaseService} from "../../../service/database.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {Succeeded} from "../../../interfaces/HttpInterfaces";
+
+@Component({
+  selector: 'app-change-passwd',
+  templateUrl: './change-passwd.component.html',
+  styleUrls: ['./change-passwd.component.scss']
+})
+export class ChangePasswdComponent implements OnInit {
+
+
+  passwd_repeat: string;
+  passwd: string;
+
+  constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
+
+  showOK(){
+    this.snackbar.open("Super, der Import hat funktioniert", 'OK', {duration: 3000}).afterDismissed().toPromise()
+      .then()
+  }
+
+  showError(msg: string){
+    this.snackbar.open(msg, 'OK', {duration: 3000});
+  }
+  save(){
+    console.log(this.passwd)
+    if(this.passwd.length == 0){
+      this.showError("Bitte ein Passwort eingeben")
+    }
+    else if(this.passwd != this.passwd_repeat) {
+      this.showError("Passwörter stimmen nicht überein")
+    } else {
+      this.db.setNewPWOfGuestAccount(this.userService.getUserId(), this.passwd, this.passwd_repeat).toPromise()
+        .then((data:Succeeded) => {
+          if(data.success){
+            this.showOK()
+          } else {
+            this.showError("Leider gab es einen Fehler mit dem Update")
+          }
+        }).catch((e) => {
+        this.showError("Leider gab es einen Fehler mit dem Update")
+      }).then(() => {
+        this.passwd_repeat = ''
+        this.passwd = ''
+      })
+    }
+
+  }
+
+  ngOnInit() {
+  }
+
+}

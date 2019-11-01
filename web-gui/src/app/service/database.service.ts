@@ -335,6 +335,10 @@ export class DatabaseService {
     }).toPromise()
   }
 
+  setNewPWOfGuestAccount(userid: number, password: string, password_repeat){
+    return this.http.put<Succeeded>(`/api/v1/users/${userid}/passwd`, {passwd: password, passwd_repeat: password_repeat});
+  }
+
   /**
    * Admin chooses user role
    * @param userID The id of user

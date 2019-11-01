@@ -25,6 +25,9 @@ object UserDBLabels{
   /** DB Label "email" */
   val email: String = "email"
 
+  /** DB Label "password" */
+  val password: String = "password"
+
   /** DB Label "privacy_checked" */
   val privacy_checked: String = "privacy_checked"
 }

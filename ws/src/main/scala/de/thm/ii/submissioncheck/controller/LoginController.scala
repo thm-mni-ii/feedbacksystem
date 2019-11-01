@@ -68,7 +68,7 @@ class LoginController extends CasClientConfigurerAdapter {
         name = principal.getName
       }
 
-      var existingUser = userService.loadUserFromDB(name)
+      var existingUser = userService.loadUserFromDB(name, true)
       if (existingUser.isEmpty) {
         // Load more Infos from LDAP
         val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
@@ -134,10 +134,15 @@ class LoginController extends CasClientConfigurerAdapter {
       userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
         ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
       */
-      val user = userService.loadUserFromDB(username)
-      if (user.isEmpty) {
+      val user = userService.loadUserFromDB(username, true)
+      if (user.isEmpty || user.get.password == null) {
+        throw new UnauthorizedException("User is not a guest account.")
+      }
+
+      if(user.get.password != userService.hashPassword(password)){
         throw new UnauthorizedException("Username or password does not match.")
       }
+
       val jwtToken: String = this.userService.generateTokenFromUser(user.get)
       setBearer(response, jwtToken)
       Map(LABEL_SUCCESS -> true)

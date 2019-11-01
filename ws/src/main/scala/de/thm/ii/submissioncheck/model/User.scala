@@ -14,9 +14,10 @@ import de.thm.ii.submissioncheck.services.{RoleDBLabels, UserDBLabels}
   * @param role User's role name
   * @param roleid User's role id
   * @param privacy_checked did user accept the policy
+  * @param password the DB password hash
   */
 class User(val userid: Int, val username: String, val prename: String, val surname: String, val email: String, val role: String,
-           val roleid: Int, val privacy_checked: Boolean = false) {
+           val roleid: Int, val privacy_checked: Boolean = false, val password: String = null) {
   /**
     * Return User as Map. Simply answer in HTTPResonses
     *

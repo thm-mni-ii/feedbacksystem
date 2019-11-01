@@ -56,6 +56,7 @@ import { DeleteTestsystemAskModalComponent } from './components/connected-system
 import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
 import {MatSlideToggleModule} from "@angular/material";
 import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
+import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
 
 
 @Injectable()
@@ -113,6 +114,7 @@ export const httpInterceptorProviders = [
     DeleteTestsystemAskModalComponent,
     TaskResultComponent,
     ImportCourseComponent,
+    ChangePasswdComponent,
   ],
   imports: [
     BrowserModule,

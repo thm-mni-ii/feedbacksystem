@@ -49,6 +49,37 @@ class UserController {
   }
 
   /**
+    * set a new password for a guest account
+    * @param userid user identification
+    * @param request http request contains all headers
+    * @param jsonNode http request contains all headers
+    * @return success state
+    */
+  @RequestMapping(value = Array("users/{userid}/passwd"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def updateGuestUserPassword(@PathVariable userid: Int, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if(user.isEmpty || (user.get.userid != userid) && (user.get.roleid != 1)) {
+      throw new UnauthorizedException
+    }
+
+    if(user.get.password == null){
+      throw new BadRequestException("This user has no guest account, a password can not set")
+    }
+
+    try {
+      val passwd = jsonNode.get("passwd").asText()
+      val passwd_repeat = jsonNode.get("passwd_repeat").asText()
+      if (passwd_repeat != passwd){
+        throw new BadRequestException("passwd and passwd_repeat do not match")
+      }
+      Map(LABEL_SUCCESS -> userService.updatePasswordByUser(userid, passwd))
+
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("Please provide: passwd and passwd_repeat")
+    }
+  }
+
+  /**
     * Create a guest user / login / account
     * @author Benjamin Manns
     * @param request http request contains all headers

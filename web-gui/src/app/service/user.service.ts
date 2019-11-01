@@ -55,8 +55,16 @@ export class UserService {
   getEmail(): string {
     return this.getDecodedToken().email;
   }
+  /**
+   * Guest state of user
+   */
+  isGuest(): boolean {
+    return this.getDecodedToken().guest;
+  }
 
-
+  getUserId(): number {
+    return this.getDecodedToken().user_id;
+  }
 }
 
 
@@ -74,4 +82,5 @@ export interface JWTToken {
   readonly token_type: string;
   readonly iat: number;
   readonly exp: number;
+  readonly guest: boolean;
 }
