@@ -72,12 +72,11 @@ class UserService {
     * @return Option of User, can be empty
     */
   def guestLogin(username: String, password: String): Option[User] = {
-    val md = java.security.MessageDigest.getInstance("SHA-1")
-    val passwordHash = md.digest(password.getBytes("UTF-8")).map("%02x".format(_)).mkString
     val users = DB.query("SELECT * FROM user join role using(role_id) where username = ? and password = ?", (res, _) => {
       new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
-    }, username, passwordHash)
+        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
+        false, res.getString(UserDBLabels.password))
+    }, username, hashPassword(password))
     users.headOption
   }
 
