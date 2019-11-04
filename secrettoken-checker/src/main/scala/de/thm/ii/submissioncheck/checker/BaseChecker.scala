@@ -142,7 +142,6 @@ class BaseChecker(val compile_production: Boolean) {
     onCheckSubmissionReceived(jsonMap)
   }
 
-
   private def onCheckerTaskReceived(jsonMap: Map[String, Any]): Unit = {
     try {
       logger.warning(s"${checkername} Task received")
@@ -222,5 +221,4 @@ class BaseChecker(val compile_production: Boolean) {
     * @param taskid submitted task id
     */
   def taskReceiveExtendedCheck(taskid: Int): Unit = {}
-
 }

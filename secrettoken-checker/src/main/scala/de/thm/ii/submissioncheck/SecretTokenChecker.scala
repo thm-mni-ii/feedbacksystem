@@ -167,7 +167,7 @@ object SecretTokenChecker extends App {
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
-
+  /**  the hello world instance*/
   val helloworldCheckExec = new HelloworldCheckExec(compile_production)
 
   private val control_submission = Consumer
@@ -221,7 +221,6 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  // Listen on nodechecker
   private val control_helloworldchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerSubmissionRequestTopic))
     .toMat(Sink.foreach(helloworldCheckExec.submissionReceiver))(Keep.both)
@@ -373,7 +372,6 @@ object SecretTokenChecker extends App {
   }
 
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
-    logger.warning(helloworldCheckExec.checkerSubmissionRequestTopic)
     // Hack by https://stackoverflow.com/a/29914564/5885054
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
@@ -513,6 +511,13 @@ object SecretTokenChecker extends App {
     (message1, exit1)
   }
 
+  /**
+    * simply convert data submissions to a file and return its path
+    * @param content submitted data
+    * @param taskid corresponding taskid
+    * @param submissionid corresponding submissionid
+    * @return path of created file
+    */
   def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
     new File(Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toString).mkdirs()
     val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve(submissionid)
