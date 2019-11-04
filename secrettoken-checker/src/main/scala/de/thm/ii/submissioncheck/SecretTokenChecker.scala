@@ -28,7 +28,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, NodeCheckExec, PlagiatCheckExec}
+import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -168,6 +168,8 @@ object SecretTokenChecker extends App {
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
 
+  val helloworldCheckExec = new HelloworldCheckExec(compile_production)
+
   private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
     .toMat(Sink.foreach(onSubmissionReceived))(Keep.both)
@@ -216,6 +218,19 @@ object SecretTokenChecker extends App {
   private val control_nodetaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(NODE_TASK_REQUEST_TOPIC))
     .toMat(Sink.foreach(onNodeTaskReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  // Listen on nodechecker
+  private val control_helloworldchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(helloworldCheckExec.submissionReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_helloworldtaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(helloworldCheckExec.taskReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -358,6 +373,7 @@ object SecretTokenChecker extends App {
   }
 
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
+    logger.warning(helloworldCheckExec.checkerSubmissionRequestTopic)
     // Hack by https://stackoverflow.com/a/29914564/5885054
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
@@ -497,7 +513,7 @@ object SecretTokenChecker extends App {
     (message1, exit1)
   }
 
-  private def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
+  def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
     new File(Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toString).mkdirs()
     val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve(submissionid)
     Files.write(path, content.getBytes(StandardCharsets.UTF_8))
