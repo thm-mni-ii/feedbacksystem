@@ -1,14 +1,16 @@
 package de.thm.ii.submissioncheck.checker
 
-import java.nio.file.{Path, Paths}
+import java.io.{File, FileInputStream, FileOutputStream}
+import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
+import java.util.zip.ZipInputStream
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
 import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, compile_production, logger}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
-import de.thm.ii.submissioncheck.SecretTokenChecker.{logger, DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID,
-  LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID,
+  LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.concurrent.Future
@@ -27,6 +29,13 @@ class BaseChecker(val compile_production: Boolean) {
   val checkername = "base"
   private val LABEL_PASSED = "passed"
   private val LABEL_EXITCODE = "exitcode"
+
+  /** LABEL -v*/
+  val __option_v = "-v"
+  /** LABEL "/" */
+  val __slash = "/"
+    /** LABEL : */
+  val __colon = ":"
 
   /** define which configuration files the checker need - to be overwritten */
   val configFiles: List[String] = List()
@@ -160,11 +169,11 @@ class BaseChecker(val compile_production: Boolean) {
       if (fileurls.length != configFiles.length) {
         throw new CheckerException(s"${checkername} Checker does only accept one config file")
       }
-      val sendedFileNames = SecretTokenChecker.downloadFilesToFS(fileurls, jwt_token, task_id.toString)
+      val sentFileNames = SecretTokenChecker.downloadFilesToFS(fileurls, jwt_token, task_id.toString)
       for(configfile <- configFiles) {
-        if (!sendedFileNames.contains(configfile)) throw new CheckerException(s"${checkername} Checker need '${configfile}' configfile")
+        if (!sentFileNames.contains(configfile)) throw new CheckerException(s"${checkername} Checker need '${configfile}' configfile")
       }
-      taskReceiveExtendedCheck(task_id)
+      taskReceiveExtendedCheck(task_id, sentFileNames)
       sendCheckerTaskAcceptAnswer(task_id)
     } catch {
       case e: Exception => sendCheckerTaskExceptionAnswer(e.getMessage, Some(task_id))
@@ -176,16 +185,18 @@ class BaseChecker(val compile_production: Boolean) {
     * @param jsonMap a kafka record
     */
   def onCheckSubmissionReceived(jsonMap: Map[String, Any]): Unit = {
+    var task_id: Any = null
+    var submission_id: Any = null
     try {
       logger.warning(s"${checkername} Submission Received")
-      val task_id = jsonMap(LABEL_TASKID)
-      val submission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
+      task_id = jsonMap(LABEL_TASKID)
+      submission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val use_extern: Boolean = jsonMap(LABEL_USE_EXTERN).asInstanceOf[Boolean]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
       var submittedFilePath: String = ""
       if (use_extern && !allowedSubmissionTypes.contains("extern")) throw new CheckerException(s"${checkername} Checker does not allow extern check")
-      if (!allowedSubmissionTypes.contains(submit_type)) throw new CheckerException(s"${checkername} Checker does not allow ${submission_id} submission")
+      if (!allowedSubmissionTypes.contains(submit_type)) throw new CheckerException(s"${checkername} Checker does not allow ${submit_type} submission type")
 
       if (use_extern) {
         val path = Paths.get(ULDIR).resolve(task_id.toString).resolve(submission_id.toString).resolve(externSubmissionFilename)
@@ -202,7 +213,7 @@ class BaseChecker(val compile_production: Boolean) {
         submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], task_id.toString, submission_id.toString).toAbsolutePath.toString
       }
 
-      val (success, output, exitcode) = exec(task_id.toString, submission_id, submittedFilePath, isInfo, use_extern)
+      val (success, output, exitcode) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern)
 
       sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(
         LABEL_PASSED -> (if (success) "1" else "0"),
@@ -212,13 +223,71 @@ class BaseChecker(val compile_production: Boolean) {
         DATA -> output
       )))
     } catch {
-      case e: Exception => sendCheckerExceptionAnswer(e.getMessage + " " + e.getStackTrace.mkString("\n"), None, None)
+      case e: Exception => {
+        val (taskSome, subSome) = if (task_id != null && submission_id != null) {
+          (Some(task_id.toString.toInt), Some(submission_id.toString.toInt))
+        } else {
+          (None, None)
+        }
+        sendCheckerExceptionAnswer(e.getMessage + " " + e.getStackTrace.mkString("\n"), taskSome, subSome)
+      }
     }
   }
 
   /**
     * perform some extra checks on task receive if needed, exceptions will be catched in callee
     * @param taskid submitted task id
+    * @param sentFileNames list of sent files
     */
-  def taskReceiveExtendedCheck(taskid: Int): Unit = {}
+  def taskReceiveExtendedCheck(taskid: Int, sentFileNames: List[String]): Unit = {}
+
+  /**
+    * Delets a dir recursively deleting anything inside it.
+    * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
+    * @param dir The dir to delete
+    * @return true if the dir was successfully deleted
+    */
+  def deleteDirectory(dir: File): Boolean = {
+    if (!dir.exists() || !dir.isDirectory()) {
+      false
+    } else {
+      val files = dir.list()
+      for (file <- files) {
+        val f = new File(dir, file)
+        if (f.isDirectory()) {
+          deleteDirectory(f)
+        } else {
+          f.delete()
+        }
+      }
+      dir.delete()
+    }
+  }
+
+  /** a bit based on https://stackoverflow.com/a/30642526
+    * It is more a JAVA way
+    *
+    * @param zipFile      downloaded zip path
+    * @param outputFolder where to extract
+    */
+  def unzip(zipFile: String, outputFolder: Path): Unit = {
+    val one_K_size = 1024
+    val fis = new FileInputStream(zipFile)
+    val zis = new ZipInputStream(fis)
+    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
+      val fullFilePath = outputFolder.resolve(file.getName)
+      if (file.isDirectory) {
+        try {
+          Files.createDirectories(fullFilePath)
+        }
+        catch {
+          case e: FileAlreadyExistsException => { }
+        }
+      } else {
+        val fout = new FileOutputStream(fullFilePath.toString)
+        val buffer = new Array[Byte](one_K_size)
+        Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+      }
+    }
+  }
 }

@@ -126,15 +126,6 @@ object SecretTokenChecker extends App {
   /** provides a Label for task answer of gitchecker*/
   val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
-  // We accept also "nodechecker"
-  private val NODE_SYSTEMIDTOPIC = "nodechecker"
-  private val NODE_CHECK_REQUEST_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
-  private val NODE_TASK_REQUEST_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_TASK_REQUEST
-  /** provides a Label for nodechecker_answer*/
-  val NODE_CHECK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
-  /** provides a Label for task answer of nodechecker*/
-  val NODE_TASK_ANSWER_TOPIC = NODE_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
-
   private val __slash = "/"
 
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
@@ -169,6 +160,8 @@ object SecretTokenChecker extends App {
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
   /**  the hello world instance*/
   val helloworldCheckExec = new HelloworldCheckExec(compile_production)
+  /**  the node check instance*/
+  val nodeCheckExec = new NodeCheckExec(compile_production)
 
   private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
@@ -210,14 +203,14 @@ object SecretTokenChecker extends App {
 
   // Listen on nodechecker
   private val control_nodechecker = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(NODE_CHECK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onNodeReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(nodeCheckExec.submissionReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
   private val control_nodetaskchecker = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(NODE_TASK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onNodeTaskReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(nodeCheckExec.taskReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -313,18 +306,6 @@ object SecretTokenChecker extends App {
   private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
     GitCheckExec.onTaskGitReceived(jsonMap)
-  }
-
-  private def onNodeReceived(record: ConsumerRecord[String, String]): Unit = {
-    logger.warning("NODE Checker Received Message")
-    val jsonMap: Map[String, Any] = record.value()
-    NodeCheckExec.onNodeReceived(jsonMap, compile_production)
-  }
-
-  private def onNodeTaskReceived(record: ConsumerRecord[String, String]): Unit = {
-    logger.warning("NODE Checker Received Task Message")
-    val jsonMap: Map[String, Any] = record.value()
-    NodeCheckExec.onNodeTaskReceived(jsonMap)
   }
 
   private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
