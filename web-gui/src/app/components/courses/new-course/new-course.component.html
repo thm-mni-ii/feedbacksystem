@@ -109,10 +109,10 @@
     <!-- Step 8-->
     <mat-step label="{{'Dozent / Tutor zuweisen'}}">
       <form class="step-flex">
-
+        <h4>Dozenten</h4>
         <app-grant-docent-snipp style="margin-bottom: 15px;" [(docent_list)]="docent_list" [liveUpdate]="false" (loadAllCourses)="null" [course]="{}" ></app-grant-docent-snipp>
+        <h4>Tutoren</h4>
         <app-grant-tutor-snipp [(tutor_list)]="tutor_list" (loadAllCourses)="null" [course]="{}" [liveUpdate]="false"></app-grant-tutor-snipp>
-
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
           <button mat-flat-button color="accent" matStepperNext>Weiter</button>
