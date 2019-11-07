@@ -3,7 +3,7 @@ import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {
-  CourseTask,
+  CourseTask, CourseTaskEvaluation,
   DetailedCourseInformation,
   NewTaskInformation,
   Succeeded,
@@ -24,6 +24,7 @@ import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsys
 import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
 import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
+import set = Reflect.set;
 
 /**
  * Shows a course in detail
@@ -85,6 +86,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       course_detail.tasks.forEach(task => {
         this.submissionAsFile[task.task_id] = false;
         this.processing[task.task_id] = false;
+        this.triggerExternalDescriptionIfNeeded(task, false)
+
       });
       this.titlebar.emitTitle(course_detail.course_name);
     }, error => this.router.navigate(['404']))
@@ -104,6 +107,37 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
     this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
 
+
+  }
+
+  private externalInfoPoller(task: CourseTask, step: number){
+    if (step > 10) {
+      this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
+      return
+    }
+    this.db.getTaskResult(task.task_id).toPromise()
+      .then((loadedTask: CourseTask) => {
+        if (loadedTask.external_description != null){
+          this.courseTasks[this.courseTasks.indexOf(task)] = loadedTask;
+        } else {
+          setTimeout(() => {
+            this.externalInfoPoller(task, step+1)
+          }, 5000)
+        }
+      })
+  }
+
+  public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean){
+    if (force) {
+      task.external_description = ""
+    }
+    if (task.load_external_description && task.external_description == null || force){
+      this.db.triggerExternalInfo(task.task_id, task.testsystems[0].testsystem_id).toPromise().then(() => {
+        this.externalInfoPoller(task, 0)
+      }).catch(() => {
+        this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
+      })
+    }
 
   }
 
@@ -132,6 +166,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
   }
 
+  public exportSubmissions(){
+    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name)
+  }
+
   public plagiatModule(courseDetail: DetailedCourseInformation){
     this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
@@ -154,6 +192,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     )
       .toPromise()
       .then( (value: Succeeded) => {
+        if(typeof value == "undefined"){
+          return ;
+        }
         if(value.success){
           this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
         } else {
@@ -187,6 +228,24 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  reRunTask(task: CourseTask){
+    this.submissionData[task.task_id] = task.submission_data
+    this.submitTask(task)
+  }
+
+  public isInFetchingResultOfTasks(task: CourseTask){
+    let tasksystemPassed = task.evaluation
+      .map( (eva:CourseTaskEvaluation) => eva.passed )
+     let tasksystemNulls = tasksystemPassed.filter(passed => {
+                              return (passed == null || typeof passed === undefined)
+                            });
+    if(tasksystemPassed.indexOf(false) >= 0){
+      return false
+    } else {
+      return tasksystemNulls.length > 0
+    }
+  }
+
   private submitTask(currentTask: CourseTask) {
     this.processing[currentTask.task_id] = true;
     this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
@@ -194,8 +253,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
+
             this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
-            if (taskResult.passed == null || typeof taskResult.passed === undefined) {
+
+            if (this.isInFetchingResultOfTasks(taskResult)) {
               return throwError('No result yet');
             }
             return of(taskResult);
@@ -254,11 +315,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
-          if (taskResult.test_file_accept !== null) {
+          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept))
+
+          if (acceptance_flaggs.indexOf(null) < 0) {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
             return of({success: true})
           } else {
-            return throwError('No result yet');
+            return throwError('Not all results yet');
           }
         }),
         retryWhen(errors => errors.pipe(
@@ -300,9 +363,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       flatMap((value: SucceededUpdateTask) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-          if(value.fileupload) {
-            this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
-          }
+          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
+
         }
         return this.db.getCourseDetail(this.courseDetail.course_id);
       })
@@ -362,7 +424,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     }
 
     // if user submits but there is a pending submission
-    if (currentTask.submit_date && !currentTask.result_date) {
+    if (currentTask.submit_date && this.isInFetchingResultOfTasks(currentTask)) {
       this.snackbar.open('Für Aufgabe "' + currentTask.task_name +
         '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
         .onAction()

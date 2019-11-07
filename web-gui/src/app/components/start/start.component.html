@@ -55,8 +55,21 @@
           <mat-icon>widgets</mat-icon>
           <p>Verbundene Systeme</p>
         </a>
+
+        <a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
+          <mat-icon>import_export</mat-icon>
+          <p>Kurs Importieren</p>
+        </a>
       </mat-nav-list>
       <mat-divider></mat-divider>
+
+      <mat-nav-list *ngIf="user.isGuest()">
+        <p>Einstellungen</p>
+        <a mat-list-item routerLink="/users/passwd" routerLinkActive="selected">
+          <mat-icon>settings</mat-icon>
+          <p>Profil</p>
+        </a>
+      </mat-nav-list>
 
       <span class="filler"></span>
 

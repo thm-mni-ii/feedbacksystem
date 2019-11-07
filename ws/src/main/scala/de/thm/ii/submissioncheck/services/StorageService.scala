@@ -11,6 +11,9 @@ import java.nio.file._
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
 
+import de.thm.ii.submissioncheck.controller.ClientService
+import de.thm.ii.submissioncheck.security.Secrets
+
 /**
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server
   * and integrate own task logic
@@ -25,13 +28,16 @@ class StorageService(compile_production: Boolean) {
   private val __slash = "/"
   /** upload folder name */
   final val UPLOAD_FOLDER: String = (if (compile_production) __slash else "") + "upload-dir/"
+  private val ZIP_IMPORT_FOLDER: String = (if (compile_production) __slash else "") + "zip-dir/imports"
 
   private val rootLocation = Paths.get(UPLOAD_FOLDER)
+  private val rootZipImportLocation = Paths.get(ZIP_IMPORT_FOLDER)
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   private final val PLAGIAT_SCRIPT_NAME = "plagiatcheck.sh"
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
   private final val LABEL_RESOURCE_NOT_EXIST = "Resource does not exist."
   private final val LABEL_URL_MALFORMED = "File URL is Malformed."
-  private def getTaskTestFilePath(taskid: Int): String = UPLOAD_FOLDER + __slash + taskid.toString
+  private def getTaskTestFilePath(taskid: Int, testsystem_id: String): String = UPLOAD_FOLDER + __slash + taskid.toString + __slash + testsystem_id
 
   /**
     * Delete a submission File
@@ -59,10 +65,11 @@ class StorageService(compile_production: Boolean) {
     * @author grokonez.com
     * @param file a file stream
     * @param taskid the connecting task
+    * @param testsystem_id testsystem id
     */
-  def storeTaskTestFile(file: MultipartFile, taskid: Int): Unit = {
+  def storeTaskTestFile(file: MultipartFile, taskid: Int, testsystem_id: String): Unit = {
     try {
-      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
     try {
       Files.createDirectories(storeLocation)
     }
@@ -103,6 +110,36 @@ class StorageService(compile_production: Boolean) {
       catch {
         case _: FileAlreadyExistsException => {}
       }
+    }
+    catch {
+      case e: Exception =>
+        throw new RuntimeException(FILE_NOT_STORED_MSG)
+    }
+  }
+
+  /**
+    * store a uploaded zip file on a temporary place
+    *
+    * @param file file stream from users upload
+    * @return the path where the zip is stored
+    */
+  def storeZipImportFile(file: MultipartFile): Path = {
+    try {
+      val storeLocation = Paths.get(ZIP_IMPORT_FOLDER).resolve(Secrets.getSHAStringFromNow())
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+      try {
+        Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
+
+      storeLocation
     }
     catch {
       case e: Exception =>
@@ -194,10 +231,11 @@ class StorageService(compile_production: Boolean) {
     * @param dataBytes an array of bytes which contains a file
     * @param filename the name of the requested file
     * @param taskid the connecting task
+    * @param testsystem_id testsystem id
     */
-  def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int): Unit = {
+  def storeTaskTestFile(dataBytes: Array[Byte], filename: String, taskid: Int, testsystem_id: String): Unit = {
     try {
-      val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+      val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
       try {
         Files.createDirectories(storeLocation)
       }
@@ -221,12 +259,14 @@ class StorageService(compile_production: Boolean) {
     * @author grokonez.com
     * @param filename UNIX filename
     * @param taskid unique identification for a task
+    * @param testsystem_id testsystem id
     * @return File Resource
     */
-  def loadFile(filename: String, taskid: Int): Resource = try {
-    val storeLocation = Paths.get(getTaskTestFilePath(taskid))
+  def loadFile(filename: String, taskid: Int, testsystem_id: String): Resource = try {
+    val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
+    logger.warn(s"loadFile from ${file.toUri.toString}")
     if (resource.exists || resource.isReadable) {resource}
     else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
   } catch {
@@ -259,8 +299,10 @@ class StorageService(compile_production: Boolean) {
     * @author grokonez.com
     */
   def init(): Unit = {
-    try
+    try {
       Files.createDirectory(rootLocation)
+      Files.createDirectory(rootZipImportLocation)
+    }
     catch {
       case e: IOException =>
         throw new RuntimeException("Could not initialize storage!")

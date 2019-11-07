@@ -8,6 +8,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="plagiatModule(courseDetail)" matTooltip="Plagiarismchecker Skript"><mat-icon>backup</mat-icon></button>
     <button mat-flat-button [color]="plagiarism_script_status"  *ngIf="isAuthorized()" matTooltip="Plagiarismchecker Skript Status"><mat-icon>report</mat-icon></button>
     <button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>
+    <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>
   </div>
   <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
      <h4>
@@ -21,12 +22,12 @@
       <span class="filler"></span>
       <div>{{task.result_date | date: 'medium'}}</div>
       <ng-template #result id="result">
-        <mat-icon id="passed" *ngIf="task.passed && task.result_date">check_box</mat-icon>
-        <mat-icon id="failed" *ngIf="!task.passed && task.result_date">clear</mat-icon>
-        <mat-icon id="not-done" *ngIf="!task.result_date">check_box_outline_blank
+        <mat-icon id="passed" *ngIf="['true',true].indexOf(task.combined_passed) >= 0">check_box</mat-icon>
+        <mat-icon id="failed" *ngIf="['false',false].indexOf(task.combined_passed) >= 0">clear</mat-icon>
+        <mat-icon id="not-done" *ngIf="task.combined_passed == null">check_box_outline_blank
         </mat-icon>
       </ng-template>
-      <mat-spinner *ngIf="processing[task.task_id] || (task.submit_date && !task.result_date); else result"
+      <mat-spinner *ngIf="processing[task.task_id] && isInFetchingResultOfTasks(task); else result"
                    diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>
@@ -39,13 +40,20 @@
 
         <!-- Submission -->
         <div class="result">
-          <p *ngIf="!!task.submission_data">Abgabe: {{task.submission_data}}</p>
+          <p *ngIf="!!task.submission_data">
+            Abgabe: {{task.submission_data}}
+            <br>
+            <br>
+            <button mat-flat-button  color="primary" *ngIf="!deadlineTask[task.task_id]" (click)="reRunTask(task)" matTooltip="Abgabe erneut senden"><mat-icon >replay</mat-icon></button>
+          </p>
           <p *ngIf="!task.submission_data">Dateiname: {{task.file}}</p>
           <span class="filler"></span>
           <p>{{task.submit_date| date:'medium'}}</p>
         </div>
 
-        <p id="task-result-text" class="{{task.passed}}" *ngIf="task.result">Ergebnis: {{task.result}}</p>
+        <p style="word-wrap: break-word;" *ngIf="task.load_external_description"><b>Externe Aufgabenstellung</b> {{task.external_description}} <span class="resetExternalInfo" (click)="triggerExternalDescriptionIfNeeded(task, true)">Reset</span></p>
+        <app-task-result [taskResults]="task.evaluation" [taskPassed]="task.passed"></app-task-result>
+
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
@@ -55,7 +63,7 @@
                (change)="getSubmissionFile($event.target.files[0], task)">
         <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
-          <input (keyup.enter)="submission(courseDetail.course_id, task)" matInput type="text" [(ngModel)]="submissionData[task.task_id]">
+          <textarea style="height: 60px;" matInput type="text" [(ngModel)]="submissionData[task.task_id]"></textarea>
         </mat-form-field>
       </div>
 

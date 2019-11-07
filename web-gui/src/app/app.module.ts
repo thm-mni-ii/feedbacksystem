@@ -53,6 +53,10 @@ import {NgxDropzoneModule} from "ngx-dropzone";
 import { ConnectedSystemsComponent } from './components/connected-systems/connected-systems.component';
 import { EditTestsystemsModalComponent } from './components/connected-systems/modals/edit-testsystems-modal/edit-testsystems-modal.component';
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
+import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
+import {MatSlideToggleModule} from "@angular/material";
+import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
+import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
 
 
 @Injectable()
@@ -108,6 +112,9 @@ export const httpInterceptorProviders = [
     UploadPlagiatScriptComponent,
     EditTestsystemsModalComponent,
     DeleteTestsystemAskModalComponent,
+    TaskResultComponent,
+    ImportCourseComponent,
+    ChangePasswdComponent,
   ],
   imports: [
     BrowserModule,
@@ -126,12 +133,13 @@ export const httpInterceptorProviders = [
         tokenGetter: tokenGetter,
       }
     }),
-    NgxDropzoneModule
+    NgxDropzoneModule,
+    MatSlideToggleModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
     CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
-  providers: [CookieService, MarkdownService, MarkedOptions, httpInterceptorProviders],
+  providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
 })
 export class AppModule {

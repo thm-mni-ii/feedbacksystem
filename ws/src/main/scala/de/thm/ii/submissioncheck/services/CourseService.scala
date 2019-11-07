@@ -1,18 +1,21 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
+import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 
 import de.thm.ii.submissioncheck.CourseParameterDBLabels
-import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
+import de.thm.ii.submissioncheck.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.submissioncheck.security.Secrets
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-
+import java.util.Calendar
 /**
   * CourseService provides interaction with DB
   *
@@ -27,24 +30,22 @@ class CourseService {
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
-  private var compile_production: Boolean = true
-  private final var LABEL_ZIPDIR = "zip-dir"
-  private final var LABEL_UPLOADDIR = "upload-dir"
+  private var LABEL_ZIPDIR = "zip-dir"
+  private var LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_ZERO_STRING = "0"
   private final val LABEL_ONE_STRING = "1"
+  private final val LABEL_TRUE = "true"
+  private final val LABEL_FALSE = "false"
+  private final val LABEL_DESC = "desc"
+  private final val LABEL_COURSE_JSON = "course.json"
+  private final val LABEL_COURSE = "course"
 
-  /**
-    * load production compilation
-    * @param prop property from config file
-    */
-  class MyBean(@Value("${compile.production}") prop: Boolean) {
-    compile_production = prop
-    LABEL_ZIPDIR = (if (compile_production) "/" else "") + "zip-dir"
-    LABEL_UPLOADDIR = (if (compile_production) "/" else "") + "upload-dir"
-  }
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
+  private val LABEL_SUBMITS = "submits"
   private final val LABEL_SUCCESS = "success"
   private final val LABEL_UNDERLINE = "_"
   private final val LABEL_COURSE_TUTOR = "course_tutor"
@@ -53,7 +54,8 @@ class CourseService {
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val taskService: TaskService = null
-
+  @Autowired
+  private val submissionService: SubmissionService = null
   /**
     * getSubscribedCoursesByUser search courses by a single user
     *
@@ -74,6 +76,14 @@ class CourseService {
           CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date)
         )
       }, userid)
+  }
+
+  private def getZIPDIR = {
+    (if (compile_production) "/" else "") + LABEL_ZIPDIR
+  }
+
+  private def getUPLOADDIR = {
+    (if (compile_production) "/" else "") + LABEL_UPLOADDIR
   }
 
   /**
@@ -383,27 +393,6 @@ class CourseService {
   }
 
   /**
-    * Zip several files to one zuip folder
-    * @param out destination path where zip should be saved
-    * @param files list of files to zip
-    * @param replacePath substring which should be removed from filenames
-    */
-  def zip(out: Path, files: Iterable[Path], replacePath: String = ""): Unit = {
-    val zip = new ZipOutputStream(Files.newOutputStream(out))
-
-    files.foreach { file =>
-      zip.putNextEntry(new ZipEntry(file.toString.replace(replacePath, "")))
-      try {
-        Files.copy(file, zip)
-      } catch {
-        case _: java.nio.file.NoSuchFileException => {}
-      }
-      zip.closeEntry()
-    }
-    zip.close()
-  }
-
-  /**
     * I have to apologize that I somehow think in the php way. Therefor I need this implode method
     * @param list contains items which will be glued by a given string
     * @param glue is somehow the opposite from a split delimeter
@@ -427,23 +416,23 @@ class CourseService {
   def zipOfSubmissionsOfUsersFromCourse(only_last_try: Boolean, courseid: Integer): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
 
     val studentList = getStudentsFromCourse(courseid)
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve(LABEL_SUBMITS)
 
       for (student <- studentList) {
         var tmpZiptaskPath: Path = null
-        var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), "desc")
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, student(UserDBLabels.user_id), LABEL_DESC)
         if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
         for ((submission, i) <- studentSubmissionList.zipWithIndex) {
           if (i == 0) {
             last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
               LABEL_UNDERLINE).replace(" ", "")
-            tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
+            tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
               task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
             Files.createDirectories(tmpZiptaskPath)
           }
@@ -464,7 +453,46 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    finishZipPath
+  }
+
+  /**
+    * Generates a zip of all course data which can be imported
+    * @param courseid unique course identification
+    * @return the path where to download from
+    */
+  def exportCourseImportable(courseid: Int): Path = {
+    val tmp_folder = Secrets.getSHAStringFromNow()
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
+    var courseMap: Map[String, Any] = Map(LABEL_COURSE -> getCourseDetails(courseid, new SimpleUser()))
+
+    val tasksDir = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_TASKS)
+    Files.createDirectories(tasksDir)
+
+    val studentList = getStudentsFromCourse(courseid)
+
+    var taskList = taskService.getTasksByCourse(courseid)
+    var subs: List[Any] = List()
+    for (task <- taskList) {
+      val taskid = task(TaskDBLabels.taskid).toString
+      val success = FileOperations.copy(Paths.get(getUPLOADDIR).resolve(taskid).toString, tasksDir.resolve(taskid).toString)
+
+      for(student <- studentList){
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(taskid, student(UserDBLabels.user_id), LABEL_DESC)
+        for(entry <- studentSubmissionList){
+          val modEntry = entry + (SubmissionDBLabels.taskid -> taskid.toInt)
+          subs = modEntry :: subs
+        }
+      }
+    }
+
+    courseMap += (LABEL_TASKS -> taskList)
+    courseMap += ("submissions" -> subs)
+    FileOperations.writeToFile(JsonParser.mapToJsonStr(courseMap), Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_COURSE_JSON))
+
+    val finishZipPath = Paths.get(getZIPDIR).resolve(s"export_${courseid}_${tmp_folder}.zip")
+    FileOperations.zip(finishZipPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -487,20 +515,20 @@ class CourseService {
   def zipOfSubmissionsOfUserFromCourse(only_last_try: Boolean, courseid: Integer, user: User): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(LABEL_ZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
-      val taskPath = Paths.get(LABEL_UPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve("submits")
+      val taskPath = Paths.get(getUPLOADDIR).resolve(task(TaskDBLabels.taskid).toString).resolve(LABEL_SUBMITS)
 
       var tmpZiptaskPath: Path = null
-      var studentSubmissionList = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, "desc")
+      var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, user.userid, LABEL_DESC)
       if (only_last_try) studentSubmissionList = (if (studentSubmissionList.isEmpty) List() else List(studentSubmissionList(0)))
       for((submission, i) <- studentSubmissionList.zipWithIndex) {
         if (i == 0) {
           last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
             LABEL_UNDERLINE).replace(" ", "")
-          tmpZiptaskPath = Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
+          tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
             task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
           Files.createDirectories(tmpZiptaskPath)
         }
@@ -519,8 +547,119 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_" + user.username + LABEL_UNDERLINE + tmp_folder + ".zip"
-    zip(Paths.get(finishZipPath), allPath, Paths.get(LABEL_ZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
     finishZipPath
+  }
+
+  /**
+    * import and restore all course data
+    *
+    * @param courseid unique course identification
+    * @param zipdir  the path where the zip is uploaded
+    * @return if import worked out
+    */
+  def recoverACourse(courseid: Int, zipdir: Path): Boolean = {
+    FileOperations.unzip(zipdir, zipdir.getParent)
+    val completeConfig = JsonParser.jsonStrToMap(FileOperations.readFromFile(zipdir.getParent.resolve(LABEL_COURSE_JSON)))
+    val courseConfig: Map[String, Any] = completeConfig(LABEL_COURSE).asInstanceOf[Map[String, Any]]
+    val confCourseId = courseConfig(CourseDBLabels.courseid).toString.toInt
+
+    if (courseid != confCourseId){
+      throw new BadRequestException("Provided ZIP and course id do not match")
+    }
+
+    // check if course exists
+    if (getCourseDetails(courseid, new AdminUser()).isEmpty) {
+      throw new ResourceNotFoundException
+    }
+    val semester = if (courseConfig(CourseDBLabels.course_semester) == null) null else courseConfig(CourseDBLabels.course_semester).toString
+    val module = if (courseConfig(CourseDBLabels.course_modul_id) == null) null else courseConfig(CourseDBLabels.course_modul_id).toString
+    val c_end = if (courseConfig(CourseDBLabels.course_end_date) == null) null else courseConfig(CourseDBLabels.course_end_date).toString
+    updateCourse(courseid, courseConfig(CourseDBLabels.name).toString, courseConfig(CourseDBLabels.description).toString,
+      courseConfig(CourseDBLabels.standard_task_typ).toString, module,
+      semester, c_end, courseConfig(CourseDBLabels.personalised_submission).toString)
+
+    var taskIDMap: Map[Int, Int] = Map() // (original -> new id)
+    for (task <- completeConfig(LABEL_TASKS).asInstanceOf[List[Map[String, Any]]]) {
+      val taskID = task(TaskDBLabels.taskid).toString.toInt
+      val datime = DateTimeOperation.fromTimestamp(task(TaskDBLabels.deadline).toString)
+      var newTaskId = taskID
+      val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
+      val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
+      // check if task exists exists
+      if (taskService.getTaskDetails(taskID, None, raise = false).isEmpty) {
+        val taskConfig = taskService.createTask(task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString, courseid,
+          datime, testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+        newTaskId = taskConfig("taskid").toString.toInt
+        taskIDMap += (taskID -> newTaskId)
+      } else {
+        taskService.updateTask(taskID, task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString,
+          datime, null, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+      }
+
+      for ((testsystem, j) <- testsystems.zipWithIndex) {
+        taskService.setTaskFilename(newTaskId, testsystem, (testsystemConfig(j)("test_file_name")).toString)
+        taskService.resetTaskTestStatus(newTaskId, testsystem)
+        taskService.sendTaskToTestsystem(newTaskId, testsystem)  // send to kafka
+      }
+    }
+    // update SUBMISSION -> replace into!
+    submissionService.replaceUpdateSubmission(completeConfig("submissions").asInstanceOf[List[Map[String, Any]]], taskIDMap)
+  }
+
+  /**
+    * create and import a curse with corresponsing tasks
+    *
+    * @param zipdir the path where the zip is uploaded
+    * @return if import worked out
+    */
+  def importACourse(zipdir: Path): Boolean = {
+    FileOperations.unzip(zipdir, zipdir.getParent)
+    val completeConfig = JsonParser.jsonStrToMap(FileOperations.readFromFile(zipdir.getParent.resolve(LABEL_COURSE_JSON)))
+    val courseConfig: Map[String, Any] = completeConfig(LABEL_COURSE).asInstanceOf[Map[String, Any]]
+
+    val createdCourse = createCourseByUser(new AdminUser(), courseConfig(CourseDBLabels.name).toString, courseConfig(CourseDBLabels.description).toString,
+      courseConfig(CourseDBLabels.standard_task_typ).toString, courseConfig(CourseDBLabels.course_modul_id).toString, null, null)
+    val courseID: Int = Integer.parseInt(createdCourse("course_id").toString)
+
+    // we need a map of old taskids to the new ones, where we then can copy task definitions and everything to the right place
+    var taskIdMap: Map[Int, Int] = Map()
+    var taskTestsystems: Map[Int, List[String]] = Map()
+    for (task <- completeConfig(LABEL_TASKS).asInstanceOf[List[Map[String, Any]]]) {
+      val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
+      val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
+
+      val taskDeadline = task(TaskDBLabels.deadline).toString
+      val oldTaskId = Integer.parseInt(task(TaskDBLabels.taskid).toString)
+
+      val createdTask = taskService.createTask(task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString, courseID,
+        DateTimeOperation.fromTimestamp(taskDeadline), testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+      val taskid: Int = Integer.parseInt(createdTask("taskid").toString)
+
+      for ((testsystem, j) <- testsystems.zipWithIndex) {
+        taskService.setTaskFilename(taskid, testsystem, (testsystemConfig(j)("test_file_name")).toString)
+        taskService.resetTaskTestStatus(taskid, testsystem)
+      }
+
+      taskIdMap += (oldTaskId -> taskid)
+      taskTestsystems += (taskid -> testsystems)
+    }
+    // 1. remove "submit" folder from task, if it exists
+    val uploadedTaskRoot = zipdir.getParent.resolve(LABEL_TASKS)
+    taskIdMap.keys.foreach(taskid => FileOperations.rmdir(uploadedTaskRoot.resolve(taskid.toString).resolve(LABEL_SUBMITS).toFile))
+
+    // 2. copy each task folder while renaming it
+    taskIdMap.foreach(entry => {
+      FileOperations.copy(uploadedTaskRoot.resolve(entry._1.toString).toString, Paths.get(getUPLOADDIR).resolve(entry._2.toString).toString)
+    })
+
+    // 3. send the tasks to the checker systems
+    taskTestsystems.foreach(entry => {
+      for (testsytem_id <- entry._2) {
+        taskService.sendTaskToTestsystem(entry._1, testsytem_id)
+      }
+    })
+    true
   }
 
   /**
@@ -551,36 +690,34 @@ class CourseService {
       var tasksPassedSum = 0
       var processedTasks: List[Any] = List()
       for((task, i) <- tasks.zipWithIndex){
-        val userSubmissions = taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
+        val userSubmissions = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
           /* processing - number of trials - passed - passed date */
         var passed: Boolean = false
         var passedDate: Any = null
         var passed_string: String = null
-        var coll_result_date: Any = null
-        var final_submission_id: Int = -1
+        var final_sub_id: Int = -1
         var plagiat_passed: List[String] = List()
         for(submission <- userSubmissions) {
           plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-          if (coll_result_date == null) coll_result_date = submission("result_date")
-          if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
+          val submissionPassed = submissionService.getSubmissionPassed(Integer.parseInt(submission(SubmissionDBLabels.submissionid).toString))
+          if (submissionPassed != null && passed_string == null) passed_string = submissionPassed
+          if (passed_string == LABEL_FALSE && submissionPassed == LABEL_TRUE) passed_string = submissionPassed
+
+          if (!passed &&  submissionPassed == LABEL_TRUE) {
             passed = true
             passedDate = submission("submit_date")
-            final_submission_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
+            final_sub_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
           }
         }
-        if (!passed && coll_result_date == null) {
-          passed_string = null
-          // If no submission was correct, we send the last submission
-          if (userSubmissions.length > 0) final_submission_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
-        } else {
-          passed_string = passed.toString
-        }
+
+        // If no submission was correct, we send the last submission
+        if (!passed && userSubmissions.length > 0) final_sub_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
+
         tasksPassedSum = tasksPassedSum + passed.compare(false)
         val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
         val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
           TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, "submission_id" -> final_submission_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed
-        ))
+          "passed_date" -> passedDate, "submission_id" -> final_sub_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
 
         processedTasks = taskStudentCell :: processedTasks
       }
@@ -610,7 +747,7 @@ class CourseService {
       var processedTasks: List[Any] = List()
       var deadlines: List[String] = List()
       for((task, i) <- courseTasks.zipWithIndex) {
-        val submissionRawData = this.taskService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
+        val submissionRawData = this.submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
         // process them
         var passed_string: String = null
         var passedDate: Any = null
@@ -760,7 +897,7 @@ class CourseService {
     if (course_semester != null) { suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1 }
     if (course_end_date != null) { suceeds += DB.update("update course set course_end_date = ? where course_id = ?", course_end_date, courseid); updates += 1 }
     if (personalised_submission != null) {
-      val dbBool = if (personalised_submission == "true") 1 else 0
+      val dbBool = if (personalised_submission == LABEL_TRUE) 1 else 0
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1
     }

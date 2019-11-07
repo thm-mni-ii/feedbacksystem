@@ -72,13 +72,22 @@ class UserService {
     * @return Option of User, can be empty
     */
   def guestLogin(username: String, password: String): Option[User] = {
-    val md = java.security.MessageDigest.getInstance("SHA-1")
-    val passwordHash = md.digest(password.getBytes("UTF-8")).map("%02x".format(_)).mkString
     val users = DB.query("SELECT * FROM user join role using(role_id) where username = ? and password = ?", (res, _) => {
       new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id))
-    }, username, passwordHash)
+        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
+        false, res.getString(UserDBLabels.password))
+    }, username, hashPassword(password))
     users.headOption
+  }
+
+  /**
+    * hash the plain text a standard way
+    * @param password plain password
+    * @return the hashed password
+    */
+  def hashPassword(password: String): String = {
+    val md = java.security.MessageDigest.getInstance("SHA-1")
+    md.digest(password.getBytes("UTF-8")).map("%02x".format(_)).mkString
   }
 
   /**
@@ -93,11 +102,18 @@ class UserService {
     * @return success of update
     */
   def createGuestAccount(prename: String, surname: String, role_id: Int, username: String, password: String, email: String): Boolean = {
-    val md = java.security.MessageDigest.getInstance("SHA-1")
-    val passwordHash = md.digest(password.getBytes("UTF-8")).map("%02x".format(_)).mkString
-
     1 == DB.update("INSERT INTO user (username, email, prename, surname, role_id, password) VALUES (?,?,?,?,?,?);",
-      username, email, prename, surname, role_id, passwordHash)
+      username, email, prename, surname, role_id, hashPassword(password))
+  }
+
+  /**
+    * Set a new passwd for a guest account
+    * @param userid the user identification
+    * @param password plain password which just set
+    * @return success of update
+    */
+  def updatePasswordByUser(userid: Int, password: String): Boolean = {
+    1 == DB.update("UPDATE user set password = ? WHERE user_id = ?;", hashPassword(password), userid)
   }
 
   /**
@@ -123,7 +139,7 @@ class UserService {
           if (tokenDate * 1000L - currentDate.getTime <= 0) {
             None
           } else {
-            this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String])
+            this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String], true)
           }
         } catch {
           case _: JwtException | _: IllegalArgumentException => None
@@ -183,14 +199,16 @@ class UserService {
   /**
     * Load user by a given username.
     * @param username a unique identification for a user
+    * @param loadPW load DB pw hash, otherwise NULL
     * @return The user having the given username if such one exists.
     */
-  def loadUserFromDB(username: String): Option[User] = {
+  def loadUserFromDB(username: String, loadPW: Boolean = false): Option[User] = {
     val users = DB.query("SELECT u.*, r.role_name as role_name FROM user u join role r using(role_id) where username = ? LIMIT 1",
       (res, _) => {
+        val pw = if (loadPW) res.getString(UserDBLabels.password) else null
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
           res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
-          res.getBoolean(UserDBLabels.privacy_checked))
+          res.getBoolean(UserDBLabels.privacy_checked), pw)
       }, username)
 
     users.headOption
@@ -314,6 +332,7 @@ class UserService {
       .claim(UserDBLabels.role_id, role_id)
       .claim(UserDBLabels.role_name, role_name)
       .claim(UserDBLabels.email, user.email)
+      .claim("guest", user.password != null)
       .claim("token_type", "user")
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))

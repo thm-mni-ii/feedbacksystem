@@ -16,6 +16,7 @@ import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io._
+import java.lang.System.Logger
 import java.lang.module.Configuration
 import java.util.NoSuchElementException
 import java.net.{HttpURLConnection, URL, URLDecoder}
@@ -27,7 +28,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.bash.{BashExec, GitCheckExec, PlagiatCheckExec, ShExec}
+import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -77,10 +78,24 @@ object SecretTokenChecker extends App {
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
+  /** JSON Config isinfo label*/
+  val LABEL_ISINFO = "isinfo"
   /** provides a Label for jwt_token*/
   val LABEL_TOKEN = "jwt_token"
   private val LABEL_CHECK_REQUEST = "_check_request"
   private val LABEL_CHECK_ANSWER = "_check_answer"
+  private val LABEL_TASK_REQUEST = "_new_task_request"
+  private val LABEL_TASK_ANSWER = "_new_task_answer"
+
+  private val LABEL_ONLY_TEST_TASK_SUBMISSION_ID = "-2"
+  private val LABEL_ONLY_TEST_TASK_DATA = "empty data"
+
+  /** 1 = Execute a user submission */
+  val BASH_EXEC_MODE_CHECK = 1
+  /** 2 = calculates a info message*/
+  val BASH_EXEC_MODE_INFO = 2
+  /** 3 = test a submitted task*/
+  val BASH_EXEC_MODE_TASK = 3
 
 // +++++++++++++++++++++++++++++++++++++++++++
 //               Kafka Settings
@@ -89,8 +104,8 @@ object SecretTokenChecker extends App {
   private val SYSTEMIDTOPIC = "secrettokenchecker"
   private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
   private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
-  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
-  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
+  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_REQUEST
+  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
   // We accept also "plagiarismchecker"
   private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
@@ -104,8 +119,12 @@ object SecretTokenChecker extends App {
   // We accept also "gitchecker"
   private val GIT_SYSTEMIDTOPIC = "gitchecker"
   private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
+  private val GIT_TASK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_REQUEST
+
   /** provides a Label for gitchecker_answer*/
   val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
+  /** provides a Label for task answer of gitchecker*/
+  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
   private val __slash = "/"
 
@@ -126,15 +145,23 @@ object SecretTokenChecker extends App {
   val logger = system.log
   /** provides a Label for taskid*/
   val LABEL_TASKID = "taskid"
+  /** provides a Label for use_extern*/
+  val LABEL_USE_EXTERN = "use_extern"
   /** provides a Label for submissionid*/
   val LABEL_SUBMISSIONID = "submissionid"
   private val LABEL_COURSEID = "courseid"
-  private val LABEL_ACCEPT = "accept"
-  private val LABEL_ERROR = "error"
+  /** provide labl for accept */
+  val LABEL_ACCEPT = "accept"
+  /** provide labl for error */
+  val LABEL_ERROR = "error"
   private val EXITING_MSG = "Exiting ..."
 
   private val producerSettings = ProducerSettings(system, new StringSerializer, new StringSerializer)
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
+  /**  the hello world instance*/
+  val helloworldCheckExec = new HelloworldCheckExec(compile_production)
+  /**  the node check instance*/
+  val nodeCheckExec = new NodeCheckExec(compile_production)
 
   private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
@@ -168,6 +195,37 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  private val control_gittaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(GIT_TASK_REQUEST_TOPIC))
+    .toMat(Sink.foreach(onGitTaskReceived))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  // Listen on nodechecker
+  private val control_nodechecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(nodeCheckExec.submissionReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_nodetaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(nodeCheckExec.taskReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_helloworldchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(helloworldCheckExec.submissionReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_helloworldtaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(helloworldCheckExec.taskReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -187,6 +245,10 @@ object SecretTokenChecker extends App {
       case Failure(err) => logger.warning(err.getMessage)
     }
     control_gitchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_gittaskchecker.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
@@ -230,8 +292,20 @@ object SecretTokenChecker extends App {
   }
 
   private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
+    try {
+      logger.warning("GIT Checker Received Message")
+      val jsonMap: Map[String, Any] = record.value()
+      GitCheckExec.onGitReceived(jsonMap)
+    } catch {
+      case e: Exception => {
+        logger.warning("GITCHECKER Exception: " + e.getMessage)
+      }
+    }
+  }
+
+  private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
     val jsonMap: Map[String, Any] = record.value()
-    GitCheckExec.onGitReceived(jsonMap)
+    GitCheckExec.onTaskGitReceived(jsonMap)
   }
 
   private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
@@ -283,41 +357,45 @@ object SecretTokenChecker extends App {
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
+      val userid: String = jsonMap("userid").asInstanceOf[String]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
+      val use_extern: Boolean = jsonMap(LABEL_USE_EXTERN).asInstanceOf[Boolean]
       var submittedFilePath: String = ""
-      if (submit_type.equals("file")) {
-        val url: String = jsonMap("fileurl").asInstanceOf[String]
-        //new URL(url) #> new File("submit.txt") !!
-        val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
+      if (use_extern) {
+        val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("submission.txt")
+        submittedFilePath = path.toAbsolutePath.toString
 
-        submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
-        logger.info(submittedFilePath)
-      }
-      else if (submit_type.equals(DATA)) {
-        submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
-      }
-      var passed: Int = 0
-      val userid: String = jsonMap("userid").asInstanceOf[String]
+      } else if (submit_type.equals("file")) {
+          val url: String = jsonMap("fileurl").asInstanceOf[String]
+          val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
 
-      val (output, code) = bashTest(taskid, userid, submittedFilePath)
-      if (code == 0) {
-        passed = 1
-      }
-      sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-        DATA -> output,
-        "passed" -> passed.toString,
-        "exitcode" -> code.toString,
-        "userid" -> userid,
-        LABEL_TASKID -> taskid,
-        LABEL_SUBMISSIONID -> submissionid
-      )))
+          submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
+          logger.info(submittedFilePath)
+        }
+        else if (submit_type.equals(DATA)) {
+          submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
+        }
+
+      var passed: Int = 0;
+      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
+      val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
+
+      val (output, code) = bashTest(taskid, userid, submittedFilePath, exeMode)
+      if (code == 0) passed = 1
+      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
+        LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
+      if (isInfo) answerMap += (LABEL_ISINFO -> true)
+      sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
     } catch {
       case e: NoSuchElementException => {
         sendCheckMessage(JsonHelper.mapToJsonStr(Map(
           "Error" -> "Please provide valid parameters"
         )))
+      }
+      case e: Exception => {
+        logger.warning(e.getMessage)
       }
     }
   }
@@ -374,7 +452,10 @@ object SecretTokenChecker extends App {
           sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
             "Provided files should call 'scriptfile' and 'testfile'", LABEL_TASKID -> taskid)))
         } else {
-          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
+          // Need to execute files to see if there are syntax errors
+          val submittedFilePath = saveStringToFile(LABEL_ONLY_TEST_TASK_DATA, taskid, LABEL_ONLY_TEST_TASK_SUBMISSION_ID).toAbsolutePath.toString
+          val (output, code) = bashTest(taskid, "secrettokenchecker_testname", submittedFilePath, BASH_EXEC_MODE_TASK)
+          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> (code == 0), LABEL_ERROR -> output, LABEL_TASKID -> taskid)))
         }
       }
     } catch {
@@ -385,6 +466,7 @@ object SecretTokenChecker extends App {
           LABEL_TASKID -> ""
         )))
       }
+      case e: Exception => logger.warning(s"${e.getClass.toString} with message: ${e.getMessage}")
     }
   }
 
@@ -399,10 +481,11 @@ object SecretTokenChecker extends App {
     * @param taskid id of task
     * @param name username
     * @param filePath md5hash
+    * @param executionMode 1 = Execute a user submission, 2 = calculates a info message, 3 = test a submitted task
     * @return message and exitcode
     */
-  def bashTest(taskid: String, name: String, filePath: String): (String, Int) = {
-    val bashtest1 = new BashExec(taskid, name, filePath, compile_production)
+  def bashTest(taskid: String, name: String, filePath: String, executionMode: Int): (String, Int) = {
+    val bashtest1 = new BashExec(taskid, name, filePath, compile_production, executionMode)
     val exit1 = bashtest1.exec()
     val message1 = bashtest1.output
 
@@ -410,33 +493,13 @@ object SecretTokenChecker extends App {
   }
 
   /**
-    * shTest is used by Kafka Example
-    *
-    * @param token String from User
-    * @return String Answer from Script
+    * simply convert data submissions to a file and return its path
+    * @param content submitted data
+    * @param taskid corresponding taskid
+    * @param submissionid corresponding submissionid
+    * @return path of created file
     */
-  def shTest(token: String): String = {
-    val shtest1 = new ShExec("./script.sh", token)
-    //execute script with arguments and save exit code (successful (0) or not (not 0) )
-    shtest1.exec()
-    val shmessage1 = shtest1.output
-    shmessage1
-  }
-
-  /**
-    * getShTestOut
-    *
-    * @param sName shell script name
-    * @param token shell parameter
-    * @return Output of script
-    */
-  def getShTestOut(sName: String, token: String): String = {
-    val shtest = new ShExec(sName, token)
-    shtest.exec()
-    shtest.output
-  }
-
-  private def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
+  def saveStringToFile(content: String, taskid: String, submissionid: String): Path = {
     new File(Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toString).mkdirs()
     val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve(submissionid)
     Files.write(path, content.getBytes(StandardCharsets.UTF_8))
@@ -477,8 +540,16 @@ object SecretTokenChecker extends App {
     }
   }
 
-  private def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
-    var connection = download(link, jwt_token)
+  /**
+    * download a file from WS
+    * @param link url / link where to download from
+    * @param jwt_token JSON Web Token which protects given url
+    * @param taskid submitted task id
+    * @param submissionid submitted submission id
+    * @return downloaded file
+    */
+  def downloadSubmittedFileToFS(link: String, jwt_token: String, taskid: String, submissionid: String): Path = {
+    val connection = download(link, jwt_token)
     val filename = submissionid
     if (connection.getResponseCode >= 400) {
       logger.error(LABEL_ERROR_DOWNLOAD)
@@ -490,7 +561,16 @@ object SecretTokenChecker extends App {
     Paths.get(ULDIR).resolve(taskid).resolve(filename).resolve(filename)
   }
 
-  private def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
+  /**
+    *
+    * Download a from Feedbacksystem
+    * @param urlnames url
+    * @param jwt_token JSON Web Token
+    * @param taskid id of task
+    * @param subpath optional sub path prefix
+    * @return list of downloaded file names
+    */
+  def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String, subpath: String = ""): List[String] = {
     var downloadFileNames: List[String] = List()
     val timeout = 1000
     for (urlname <- urlnames) {
@@ -510,8 +590,8 @@ object SecretTokenChecker extends App {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
-        new File(Paths.get(ULDIR).resolve(taskid).toString).mkdirs()
-        Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
+        new File(Paths.get(ULDIR).resolve(subpath).resolve(taskid).toString).mkdirs()
+        Files.copy(connection.getInputStream, Paths.get(ULDIR).resolve(subpath).resolve(taskid).resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
     }
     downloadFileNames

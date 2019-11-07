@@ -2,23 +2,22 @@ package de.thm.ii.submissioncheck.controller
 
 import java.nio.file.{Files, Path, Paths}
 import java.time.format.DateTimeFormatter
-import java.util.zip.{ZipEntry, ZipOutputStream}
+import java.util.{Timer, TimerTask}
 import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc._
-import de.thm.ii.submissioncheck.model.User
-import de.thm.ii.submissioncheck.security.Secrets
 import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.SmartInitializingSingleton
+import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.context.annotation.Bean
 import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
-
-import scala.collection.immutable
+import org.springframework.web.multipart.MultipartFile
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -38,33 +37,49 @@ class CourseController {
   private val courseParameterService: CourseParamService = null
   @Autowired
   private val testsystemService: TestsystemService = null
-
+  @Autowired
+  private val submissionService: SubmissionService = null
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val topicName: String = "check_request"
 
+  @Value("${compile.production}")
+  private val compile_production: Boolean = true
+
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   private final val application_json_value = "application/json"
-
   private final val PATH_LABEL_ID = "id"
-
   private final val PATH_REST_LABEL_ID = "{id}"
-
-  private final val LABEL_DOCENT = "docent"
-
-  private final val LABEL_ADMIN = "admin"
-
   private final val LABEL_NAME = "name"
-
   private final val LABEL_USERID = "userid"
-
   private final val LABEL_DESCRIPTION = "description"
-
   private final val PLEASE_PROVIDE_COURSE_LABEL = "Please provide: name, description, standard_task_typ, " +
     " personalised_submission. The parameter course_semester, course_modul_id and course_end_date are optional"
+  private val LABEL_SUCCESS = "success"
+  private val LABEL_ZIP_NOT_FOUND = "Zip file could not be found."
+  private var storageService: StorageService = null
 
-  private final val PLEASE_PROVIDE_COURSE_LABEL_UPDATE = "Please provide: name, description, standard_task_typ." +
-  "The parameter course_semester, course_modul_id and course_end_date are optional"
+  /**
+    * Using autowired configuration, they will be loaded after self initialization
+    */
+  def configurateStorageService(): Unit = {
+    this.storageService = new StorageService(compile_production)
+  }
+
+  /**
+    * After autowiring initialize storage service
+    * @return timer run
+    */
+  @Bean
+  def importStorageProcessor: SmartInitializingSingleton = () => {
+    /** wait 3 seconds to be sure everything is connected like it should*/
+    val bean_delay = 300
+    new Timer().schedule(new TimerTask() {
+      override def run(): Unit = {
+        configurateStorageService
+      }
+    }, bean_delay)
+  }
 
   /**
     * getAllCourses is a route for all courses
@@ -185,11 +200,13 @@ class CourseController {
     val resource = new UrlResource(Paths.get(courseService.zipOfSubmissionsOfUserFromCourse(only_last_try, courseid, requestedUser.get)).toUri)
 
     if (resource.exists || resource.isReadable) {
-      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename + "\"").body(resource)
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, buildAttachmentHeader(resource.getFilename)).body(resource)
     } else {
-      throw new RuntimeException("Zip file could not be found.")
+      throw new RuntimeException(LABEL_ZIP_NOT_FOUND)
     }
   }
+
+  private def buildAttachmentHeader(filename: String): String = "attachment; filename=\"" + filename + "\""
 
   /**
     * Generates a zip of all user submissions  of one course
@@ -206,17 +223,87 @@ class CourseController {
                                           request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
 
-    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
+    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && user.get.roleid > 4
+      && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
       throw new UnauthorizedException
     }
 
     val resource = new UrlResource(Paths.get(courseService.zipOfSubmissionsOfUsersFromCourse(only_last_try, courseid)).toUri)
 
     if (resource.exists || resource.isReadable) {
-      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename + "\"").body(resource)
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, buildAttachmentHeader(resource.getFilename)).body(resource)
     } else {
-      throw new RuntimeException("Zip file could not be found.")
+      throw new RuntimeException(LABEL_ZIP_NOT_FOUND)
     }
+  }
+
+  /**
+    * Generates a zip of all course data
+    * @author Benjamin Manns
+    *
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @return Zip File
+    */
+  @RequestMapping(value = Array("{courseid}/export/zip"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getCompleteReusableExportOfCourse(@PathVariable courseid: Integer, request: HttpServletRequest): ResponseEntity[UrlResource] = {
+    val user = userService.verifyUserByHeaderToken(request)
+
+    if ((user.isEmpty || !courseService.isDocentForCourse(courseid, user.get)) && user.get.roleid > 4
+      && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
+      throw new UnauthorizedException
+    }
+
+    val resource = new UrlResource(courseService.exportCourseImportable(courseid).toUri)
+
+    if (resource.exists || resource.isReadable) {
+      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, buildAttachmentHeader(resource.getFilename)).body(resource)
+    } else {
+      throw new RuntimeException(LABEL_ZIP_NOT_FOUND)
+    }
+  }
+
+  /**
+    * recover a course based by uploading a zip file
+    * @param courseid unique course identification
+    * @param file multipart binary file in a form data format
+    * @param request Request Header containing Headers
+    * @return if recover worked out
+    */
+  @RequestMapping(value = Array("{courseid}/recover"), method = Array(RequestMethod.POST))
+  def recoverACourse(@PathVariable courseid: Int,
+                                    @RequestParam file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+
+    if (requestingUser.isEmpty || !courseService.isPermittedForCourse(courseid, requestingUser.get)) {
+      throw new UnauthorizedException
+    }
+
+    val storagePath = storageService.storeZipImportFile(file)
+    val filename = file.getOriginalFilename
+
+    Map(LABEL_SUCCESS -> courseService.recoverACourse(courseid, storagePath.resolve(filename)))
+  }
+
+  /**
+    * import and create a new course based by uploading a zip file
+    * @param file multipart binary file in a form data format
+    * @param request Request Header containing Headers
+    * @return if import worked out
+    */
+  @RequestMapping(value = Array("/import"), method = Array(RequestMethod.POST))
+  def importANewCourse(@RequestParam file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+
+    if (requestingUser.isEmpty || requestingUser.get.roleid > 4) {
+      throw new UnauthorizedException
+    }
+
+    val storagePath = storageService.storeZipImportFile(file)
+    val filename = file.getOriginalFilename
+
+    Map(LABEL_SUCCESS -> courseService.importACourse(storagePath.resolve(filename)))
   }
 
   /**
@@ -499,7 +586,7 @@ class CourseController {
       throw new UnauthorizedException
     }
 
-    taskService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
+    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
   }
 
   /**
@@ -670,16 +757,24 @@ class CourseController {
       runComplete = jsonNode.get("complete").asBoolean()
     }
 
-    val tasksystem_id = this.taskService.getTestsystemTopicByTaskId(taskid)
-
     for(user <- this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID))) {
       val submissionID = taskService.submitTaskWithData(taskid, user, "")
-      runExternalTaskSendKafka(taskDetails, user, tasksystem_id, submissionID)
+
+      if (this.taskService.getMultiTestModeOfTask(taskid) == "SEQ") {
+        taskService.sendSubmissionToTestsystem(submissionID, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
+          requestingUser.get, "external", null)
+      } else {
+        this.taskService.getTestsystemTopicsByTaskId(taskid).foreach(tasksystem_id => {
+          taskService.sendSubmissionToTestsystem(submissionID, taskid, tasksystem_id,
+            requestingUser.get, "external", null)
+        })
+      }
     }
+    // TODO can be delted if it works runExternalTaskSendKafka(taskDetails, user, tasksystem_id, submissionID)
     Map("success" -> true)
   }
 
-  private def runExternalTaskSendKafka(taskidOpt: Map[String, Any], user: User, tasksystem_id: String, submissionID: Int): Unit = {
+  /*private def runExternalTaskSendKafka(taskidOpt: Map[String, Any], user: User, tasksystem_id: String, submissionID: Int): Unit = {
     var kafkaMap: Map[String, Any] = Map("taskid" -> taskidOpt(TaskDBLabels.taskid).toString, "userid" -> user.username)
 
     kafkaMap += ("submit_typ" -> "external", "submissionid" -> submissionID,
@@ -692,5 +787,5 @@ class CourseController {
     logger.warn(jsonResult)
     kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
     kafkaTemplate.flush()
-  }
+  }*/
 }

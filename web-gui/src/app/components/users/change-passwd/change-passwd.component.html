@@ -1,0 +1,33 @@
+<div class="container">
+
+  <mat-card id="description">
+
+
+    <h3 id="example-radio-group-label">Neues Passwort eingeben</h3>
+    <br>
+
+    <mat-form-field class="user-input-text" appearance="outline">
+      <mat-label>Passwort</mat-label>
+      <input type="text" matInput [(ngModel)]="passwd" required/>
+    </mat-form-field>
+    <br>
+    <br>
+    <mat-form-field class="user-input-text" appearance="outline">
+      <mat-label>Passwort wiederholen</mat-label>
+      <input type="text" matInput [(ngModel)]="passwd_repeat" required />
+    </mat-form-field>
+
+    <br>
+    <mat-divider></mat-divider>
+    <br>
+    <br>
+
+    <mat-card-actions>
+      <button mat-flat-button color="accent"
+              (click)="save()">Speichern
+      </button>
+
+    </mat-card-actions>
+  </mat-card>
+</div>
+

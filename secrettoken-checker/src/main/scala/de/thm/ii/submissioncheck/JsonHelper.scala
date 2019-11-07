@@ -43,6 +43,16 @@ object JsonHelper {
   }
 
   /**
+    * parse a string to a List of Any
+    * @param jsonStr a JSON String
+    * @return Scala List
+    */
+  implicit def jsonStrToList(jsonStr: String): List[Any] = {
+    implicit val formats = org.json4s.DefaultFormats
+    parse(jsonStr).extract[List[Any]]
+  }
+
+  /**
     * mapToJsonStr use Object Mapper
     *
     * @author Benjamin Manns
@@ -54,5 +64,16 @@ object JsonHelper {
     mapper.registerModule(DefaultScalaModule)
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
     jsonResult
+  }
+
+  /**
+    * @author Benjamin Manns
+    * @param jsonList a Scala List
+    * @return JSON String
+    */
+  implicit def listToJsonStr(jsonList: List[Any]): String = {
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+    mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonList)
   }
 }

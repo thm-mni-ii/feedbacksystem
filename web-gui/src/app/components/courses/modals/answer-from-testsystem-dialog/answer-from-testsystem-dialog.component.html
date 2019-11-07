@@ -6,10 +6,19 @@
 </mat-dialog-content>
 
 <mat-dialog-content *ngIf="!data.no_reaction">
-  Das Testsystem <span class="success" *ngIf="data.test_file_accept">akzeptiert</span><span class="error" *ngIf="!data.test_file_accept">akzeptiert nicht</span> Ihre Testdaten.<br>
-  <p *ngIf="!data.test_file_accept">
-    Diese Fehlermeldung hat das Testsystem gemeldet: <b>{{data.test_file_accept_error}}</b>
-  </p>
+  Das Testsystem <span class="success" *ngIf="testFileAccept(data)">akzeptiert</span><span class="error" *ngIf="!testFileAccept(data)">akzeptiert nicht</span> Ihre Testdaten.<br>
+  <span *ngIf="!testFileAccept(data)">
+    Diese Fehlermeldungen kommen von den Testsystemen:
+
+    <ul>
+      <span *ngFor="let testsystem of data.testsystems">
+        <li *ngIf="!testsystem.test_file_accept">
+        <b>{{testsystem.test_file_accept_error}}</b>
+      </li>
+    </span>
+    </ul>
+
+  </span>
 
 </mat-dialog-content>
 <mat-dialog-actions>

@@ -1,17 +1,16 @@
-package de.thm.ii.submissioncheck.bash
+package de.thm.ii.submissioncheck.checker
 
 import java.io._
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import akka.Done
 import de.thm.ii.submissioncheck.JsonHelper
-import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ERROR_DOWNLOAD, LABEL_TOKEN, PLAGIARISM_SCRIPT_ANSWER_TOPIC, ULDIR, download, logger, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ERROR_DOWNLOAD, PLAGIARISM_SCRIPT_ANSWER_TOPIC, ULDIR, download, logger, sendMessage}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 import scala.sys.process.Process
-import scala.util.{Failure, Success}
 
 /**
   * Class for executing Plagiat scripts

@@ -14,6 +14,14 @@ export class AnswerFromTestsystemDialogComponent implements OnInit {
   ngOnInit() {
   }
 
+  testFileAccept(task: NewTaskInformation){
+    let accept = true;
+    task.testsystems.forEach(t => {
+      accept = accept && t.test_file_accept
+    })
+    return accept
+  }
+
   close(val){
     this.dialogRef.close({exit: val});
   }

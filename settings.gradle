@@ -1,4 +1,4 @@
-rootProject.name = 'submissioncheck'
+rootProject.name = 'feedbacksystem'
 
 include 'ws'
 include 'java-checker'

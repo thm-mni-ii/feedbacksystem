@@ -1,6 +1,7 @@
-FROM docker:dind
+FROM bees4ever/docker-git-ssh:latest
+RUN apk update
 RUN apk add --no-cache openjdk8
-RUN apk add --no-cache git
+RUN ssh-keyscan git.thm.de >> ~/.ssh/known_hosts
 ADD build/install/secrettoken-checker /usr/local/secrettoken-checker
 VOLUME /upload-dir
 VOLUME /usr/local/appconfig/application.config
