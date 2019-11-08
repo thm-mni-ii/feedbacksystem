@@ -18,7 +18,7 @@ export class ChangePasswdComponent implements OnInit {
   constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
 
   showOK(){
-    this.snackbar.open("Super, der Import hat funktioniert", 'OK', {duration: 3000}).afterDismissed().toPromise()
+    this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000}).afterDismissed().toPromise()
       .then()
   }
 
@@ -26,7 +26,6 @@ export class ChangePasswdComponent implements OnInit {
     this.snackbar.open(msg, 'OK', {duration: 3000});
   }
   save(){
-    console.log(this.passwd)
     if(this.passwd.length == 0){
       this.showError("Bitte ein Passwort eingeben")
     }
@@ -37,14 +36,14 @@ export class ChangePasswdComponent implements OnInit {
         .then((data:Succeeded) => {
           if(data.success){
             this.showOK()
+            setTimeout(() => {
+              location.reload()
+            }, 2000)
           } else {
             this.showError("Leider gab es einen Fehler mit dem Update")
           }
         }).catch((e) => {
         this.showError("Leider gab es einen Fehler mit dem Update")
-      }).then(() => {
-        this.passwd_repeat = ''
-        this.passwd = ''
       })
     }
 
