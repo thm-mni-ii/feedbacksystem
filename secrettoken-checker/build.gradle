@@ -23,7 +23,7 @@ repositories {
 }
 
 run.doFirst { environment 'CONFDIR', "${projectDir}"
-                environment 'BASH_DOCKER', "submissioncheck_bash1"  }
+                environment 'BASH_DOCKER', "thmmniii/bashenv:dev-latest"  }
 
 sourceSets {
     main {
@@ -53,6 +53,8 @@ dependencies {
     compile 'org.scala-lang:scala-library:2.12.6'
     compile 'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.9.7'
     compile 'com.typesafe.akka:akka-stream-kafka_2.12:1.0-M1'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
     testCompile 'junit:junit:4.12'
 }
 

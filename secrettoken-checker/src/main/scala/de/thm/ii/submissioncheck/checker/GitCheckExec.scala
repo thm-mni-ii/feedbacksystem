@@ -7,6 +7,7 @@ import java.nio.file.{Files, Path, Paths}
 import akka.Done
 import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, GIT_TASK_ANSWER_TOPIC, LABEL_ACCEPT,
   LABEL_ERROR, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, ULDIR, sendMessage}
+import de.thm.ii.submissioncheck.services.FileOperations
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
@@ -51,22 +52,9 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     content
   }
 
-  private def tree(root: File, skipHidden: Boolean = false): Stream[File] = {
-    if (!root.exists || (skipHidden && root.isHidden)) {
-      Stream.empty
-    }
-    else {
-      root #:: (
-        root.listFiles match {
-          case null => Stream.empty
-          case files: Any => files.toStream.flatMap(tree(_, skipHidden))
-        })
-    }
-  }
-
   private def runStructureTest(configFile: String, targetPath: Path) = {
     var result: List[Map[String, Any]] = List()
-    val submittedFiles = tree(targetPath.toFile)
+    val submittedFiles = FileOperations.tree(targetPath.toFile)
     val bufferedSource = Source.fromFile(configFile)
     for (line <- bufferedSource.getLines) {
       // Handle lines, with gitignore syntax

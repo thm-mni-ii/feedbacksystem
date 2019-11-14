@@ -132,6 +132,11 @@ class TaskService {
     }
     kafkaMap += ("use_extern" -> queued_test)
 
+    // TODO make it more generic
+    if (testsystem_id == "plagiarismchecker") {
+      kafkaMap += ("plagiatinfo" -> Map("usersubmission" ->  submissionService.getSubmissionsByTaskAndUser(task_id.toString, user.userid)))
+    }
+
     kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
     kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
     kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
