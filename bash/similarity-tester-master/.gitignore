@@ -1,0 +1,15 @@
+*.o
+clang.c
+javalang.c
+lisplang.c
+m2lang.c
+miralang.c
+pascallang.c
+textlang.c
+sim_c
+sim_java
+sim_lisp
+sim_m2
+sim_mira
+sim_pasc
+sim_text
