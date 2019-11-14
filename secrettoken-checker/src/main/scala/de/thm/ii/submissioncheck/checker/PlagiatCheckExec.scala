@@ -33,9 +33,8 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
   (Boolean, String, Int) = {
     // A submission a user does
-    val plagiatExecPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toAbsolutePath
-    var success = true
-    var output = s"The ${checkername} checker results: ${success}"
+    var plagiatExecPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toAbsolutePath.toString
+    var output = s"The ${checkername} checker results: ${true}"
     var exitcode = -1
     val otherSubmissionsNotFromUser = Paths.get(ULDIR).resolve(taskid).resolve("PLAGIAT_CHECK").resolve(Secrets.getSHAStringFromNow())
     otherSubmissionsNotFromUser.toFile.mkdirs()
@@ -57,7 +56,12 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
       val logger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
 
       val bashDockerImage = System.getenv("BASH_DOCKER")
-      val oldPath = otherSubmissionsNotFromUser.toAbsolutePath
+      var oldPath = otherSubmissionsNotFromUser.toAbsolutePath.toString
+      if (compile_production) {
+        oldPath = dockerRelPath + __slash + oldPath.replace(ULDIR, "")
+        plagiatExecPath = dockerRelPath + __slash + plagiatExecPath.toString.replace(ULDIR, "")
+      }
+      // That's how we use sim (https://manpages.ubuntu.com/manpages/trusty/man1/similarity-tester.1.html)
       seq = Seq("run", "--rm", __option_v, s"$plagiatExecPath:/upload-dir/plagiat/new", __option_v, s"${oldPath}:/upload-dir/plagiat/old", bashDockerImage,
        "bash", "/opt/sim/run_check.sh")
 
@@ -72,7 +76,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
     // Always return TRUE, not to inform the user about this plagirism, but to give feedback, all checks are done
     // feedback musst be saved in a other possibility
-    (success, output, exitcode)
+    (true, output, exitcode)
   }
 
   private def sendPlagiatAnswer(subid: Any, plagiatOK: Boolean, taskid: Any) = {
