@@ -53,7 +53,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
       var seq: Seq[String] = null
       val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
-      val logger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
+      val prozessLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
 
       val bashDockerImage = System.getenv("BASH_DOCKER")
       var oldPath = otherSubmissionsNotFromUser.toAbsolutePath.toString
@@ -65,8 +65,10 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
       seq = Seq("run", "--rm", __option_v, s"$plagiatExecPath:/upload-dir/plagiat/new", __option_v, s"${oldPath}:/upload-dir/plagiat/old", bashDockerImage,
        "bash", "/opt/sim/run_check.sh")
 
-      exitcode = Process("docker", seq).!(logger)
-      val plagiatSuccess = processSIMOutput(stdoutStream.toString() + "\n" + stderrStream.toString())._1
+      exitcode = Process("docker", seq).!(prozessLogger)
+      val process = processSIMOutput(stdoutStream.toString() + "\n" + stderrStream.toString())
+      val plagiatSuccess = process._1
+      logger.warning(process._2.reduce((a, b) => s"${a}, ${b}"))
       sendPlagiatAnswer(submissionid, plagiatSuccess, taskid)
     } catch {
       case e: Exception => output = e.getMessage
@@ -90,10 +92,10 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
   private def processSIMOutput(output: String): (Boolean, List[String]) = {
     val pattern = "(consists for (\\d+) % of)".r
-
+    logger.warning(output)
     val found = pattern.findFirstIn(output)
     if (found.isEmpty) {
-      (true, List())
+      (true, List("nothing"))
     } else {
       (false, pattern.findAllMatchIn(output).map(m => m.group(2).toString).toList)
     }

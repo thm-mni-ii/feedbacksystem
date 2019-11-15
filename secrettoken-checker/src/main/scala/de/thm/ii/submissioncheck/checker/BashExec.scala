@@ -64,7 +64,7 @@ class BashExec(val taskid: String, val name: String, val submittedFilePath: Stri
     val testfilePath = testfileFile.getAbsolutePath
     val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { testfilePath } else ""
 
-    val bashDockerImage = "thmmniii/bash" // "bash:4.4"
+    val bashDockerImage = System.getenv("BASH_DOCKER")
     var seq: Seq[String] = null
 
     val infoArgument = if (executionMode == BASH_EXEC_MODE_INFO) "info" else ""
