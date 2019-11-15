@@ -74,7 +74,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
       case e: Exception => output = e.getMessage
     }
 
-    FileOperations.rmdir(otherSubmissionsNotFromUser.toFile)
+    // FileOperations.rmdir(otherSubmissionsNotFromUser.toFile)
 
     // Always return TRUE, not to inform the user about this plagirism, but to give feedback, all checks are done
     // feedback musst be saved in a other possibility
