@@ -675,6 +675,24 @@ class TaskController {
   }
 
   /**
+    *
+    * get full submission list (mainly submisison ids) of a task and user
+    * @param taskid unique taskid identification
+    * @param userid unique user identification
+    * @param request contain request information
+    * @return list of submissions
+    */
+  @GetMapping(Array("tasks/{taskid}/submissions/{userid}"))
+  @ResponseBody def getFullSubmissionOfTaskByUser(@PathVariable taskid: Int, @PathVariable userid: Int,
+                                        request: HttpServletRequest): List[Map[String, Any]] = {
+    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
+    if (testystem.isEmpty) {
+      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
+    }
+    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid)
+  }
+
+  /**
     * JWT protected download url for plagiarism checker scripts
     * @param courseid unique course identification
     * @param request contain request information
@@ -758,7 +776,7 @@ class TaskController {
           logger.warn(answeredMap.toString())
           if (answeredMap.contains("isinfo") && answeredMap("isinfo").asInstanceOf[Boolean]){
             taskService.setExternalAnswerOfTaskByTestsytem(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
-              answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap(LABEL_USER_ID).asInstanceOf[String], testsystem)
+              answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("username").toString, testsystem)
           } else {
             val passed = answeredMap("passed").asInstanceOf[String]
             val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])

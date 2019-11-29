@@ -1,16 +1,16 @@
 package de.thm.ii.submissioncheck.checker
 
-import java.io.{File, FileInputStream, FileOutputStream}
+import java.io.{BufferedReader, File, FileInputStream, FileOutputStream, InputStream, InputStreamReader}
+import java.net.HttpURLConnection
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 import java.util.zip.ZipInputStream
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, compile_production, logger}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN,
+  LABEL_USE_EXTERN, ULDIR, compile_production, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID,
-  LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.concurrent.Future
@@ -179,6 +179,38 @@ class BaseChecker(val compile_production: Boolean) {
       sendCheckerTaskAcceptAnswer(task_id)
     } catch {
       case e: Exception => sendCheckerTaskExceptionAnswer(e.getMessage, Some(task_id))
+    }
+  }
+
+  /**
+    * create a connection with authorization and by method
+    * @author Benjamin Manns
+    * @param download_url the url where to download from
+    * @param authorization jwt token
+    * @param method the request method
+    * @return HTTP Code, Response, parsed JSON
+    */
+  def apiCall(download_url: String, authorization: String, method: String): (Int, String, Any) = {
+    try {
+      val LABEL_AUTHORIZATION = "Authorization"
+
+    val LABEL_BEARER = "Bearer: "
+
+    val timeout = 1000
+    val url = new java.net.URL(download_url)
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + authorization)
+    connection.setConnectTimeout(timeout)
+    connection.setReadTimeout(timeout)
+    connection.setRequestMethod(method)
+    connection.setRequestProperty("Connection", "close")
+    connection.connect()
+    val in: InputStream = connection.getInputStream
+    val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
+    val s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
+    (connection.getResponseCode, s, JsonHelper.jsonStrToAny(s))
+    } catch {
+      case e: Exception => (400, e.toString, Map())
     }
   }
 

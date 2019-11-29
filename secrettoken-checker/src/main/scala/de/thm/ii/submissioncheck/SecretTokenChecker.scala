@@ -317,7 +317,7 @@ object SecretTokenChecker extends App {
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
-      val userid: String = jsonMap("userid").asInstanceOf[String]
+      val username: String = jsonMap("username").asInstanceOf[String]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
@@ -342,9 +342,9 @@ object SecretTokenChecker extends App {
       val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
       val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
 
-      val (output, code) = bashTest(taskid, userid, submittedFilePath, exeMode)
+      val (output, code) = bashTest(taskid, username, submittedFilePath, exeMode)
       if (code == 0) passed = 1
-      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
+      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "username" -> username,
         LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
       if (isInfo) answerMap += (LABEL_ISINFO -> true)
       sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
