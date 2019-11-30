@@ -1,14 +1,15 @@
 package de.thm.ii.submissioncheck.checker
 
 import java.io.{BufferedReader, File, FileInputStream, FileOutputStream, InputStream, InputStreamReader}
-import java.net.HttpURLConnection
-import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
+import java.net.{HttpURLConnection, URLDecoder}
+import java.nio.charset.StandardCharsets
+import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
 import java.util.zip.ZipInputStream
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN,
-  LABEL_USE_EXTERN, ULDIR, compile_production, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO, LABEL_SUBMISSIONID,
+  LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -29,6 +30,10 @@ class BaseChecker(val compile_production: Boolean) {
   val checkername = "base"
   private val LABEL_PASSED = "passed"
   private val LABEL_EXITCODE = "exitcode"
+  private val LABEL_AUTHORIZATION = "Authorization"
+  private val LABEL_CONNECTION = "Connection"
+  private val LABEL_CLOSE = "close"
+  private val LABEL_BEARER = "Bearer: "
 
   /** LABEL -v*/
   val __option_v = "-v"
@@ -43,6 +48,12 @@ class BaseChecker(val compile_production: Boolean) {
   val allowedSubmissionTypes: List[String] = List("data", "file", "extern")
   /** define which external file is needed - to be overwritten */
   val externSubmissionFilename = "submission.txt"
+
+  /**
+    * the unique identification of a checker, is extended to "basechecker"
+    * @return checker name
+    */
+  def checkernameExtened: String = checkername + "checker"
 
   /**
     * kafka topic submission request
@@ -112,8 +123,8 @@ class BaseChecker(val compile_production: Boolean) {
     * @return base path and config path
     */
   def loadCheckerConfig(taskid: String): (Path, List[Path]) = {
-    logger.warning(s"Load ${checkername} Checker Config")
-    val baseFilePath = Paths.get(ULDIR).resolve(taskid)
+    logger.warning(s"Load ${checkername} Checker Config at ${checkernameExtened}")
+    val baseFilePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
     val configfiles = configFiles.map(f => baseFilePath.resolve(f))
     (baseFilePath, configfiles)
   }
@@ -171,7 +182,7 @@ class BaseChecker(val compile_production: Boolean) {
       if (fileurls.length != configFiles.length) {
         throw new CheckerException(s"${checkername} Checker does only accept one config file")
       }
-      val sentFileNames = SecretTokenChecker.downloadFilesToFS(fileurls, jwt_token, task_id.toString)
+      val sentFileNames = downloadFilesToFS(fileurls, jwt_token, task_id.toString)
       for(configfile <- configFiles) {
         if (!sentFileNames.contains(configfile)) throw new CheckerException(s"${checkername} Checker need '${configfile}' configfile")
       }
@@ -180,6 +191,47 @@ class BaseChecker(val compile_production: Boolean) {
     } catch {
       case e: Exception => sendCheckerTaskExceptionAnswer(e.getMessage, Some(task_id))
     }
+  }
+
+  private def createConnectionToFeedbacksystem(download_url: String, jwt_token: String) = {
+    val url = new java.net.URL(download_url)
+    val timeout = 1000
+    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + jwt_token)
+    connection.setConnectTimeout(timeout)
+    connection.setReadTimeout(timeout)
+    connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
+    connection.connect()
+    connection
+  }
+
+  /**
+    *
+    * Download taskfiles from Feedbacksystem
+    * @param urlnames url
+    * @param jwt_token JSON Web Token
+    * @param taskid id of task
+    * @return list of downloaded file names
+    */
+  def downloadFilesToFS(urlnames: List[String], jwt_token: String, taskid: String): List[String] = {
+    var downloadFileNames: List[String] = List()
+    for (urlname <- urlnames) {
+      val urlParts = urlname.split(__slash)
+      // syntax of testfile url allows us to get filename
+      val filename = URLDecoder.decode(urlParts(urlParts.length - 1), StandardCharsets.UTF_8.toString)
+      downloadFileNames = downloadFileNames ++ List(filename)
+      val connection = createConnectionToFeedbacksystem(urlname, jwt_token)
+
+      if (connection.getResponseCode >= 400) {
+        logger.error(LABEL_ERROR_DOWNLOAD)
+      }
+      else {
+        val basePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
+        basePath.toFile.mkdir()
+        Files.copy(connection.getInputStream, basePath.resolve(filename), StandardCopyOption.REPLACE_EXISTING)
+      }
+    }
+    downloadFileNames
   }
 
   /**
@@ -192,19 +244,7 @@ class BaseChecker(val compile_production: Boolean) {
     */
   def apiCall(download_url: String, authorization: String, method: String): (Int, String, Any) = {
     try {
-      val LABEL_AUTHORIZATION = "Authorization"
-
-    val LABEL_BEARER = "Bearer: "
-
-    val timeout = 1000
-    val url = new java.net.URL(download_url)
-    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setRequestProperty(LABEL_AUTHORIZATION, LABEL_BEARER + authorization)
-    connection.setConnectTimeout(timeout)
-    connection.setReadTimeout(timeout)
-    connection.setRequestMethod(method)
-    connection.setRequestProperty("Connection", "close")
-    connection.connect()
+    val connection = createConnectionToFeedbacksystem(download_url, authorization)
     val in: InputStream = connection.getInputStream
     val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
     val s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")

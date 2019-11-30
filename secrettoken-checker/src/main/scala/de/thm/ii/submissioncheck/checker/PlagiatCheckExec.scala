@@ -19,7 +19,10 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
   /** the unique identification of a checker, will extended to "plagiarismchecker" */
   override val checkername = "plagiarism"
   /** define which configuration files the checker need - to be overwritten */
-  override val configFiles: List[String] = List("")
+  override val configFiles: List[String] = List("config.json")
+
+  /** limit where a similarity between files is a plagism */
+  var similarity_limit = 2*10
 
   private def submissionIdsOfUser(jsonMap: Map[String, Any], userid: Int) = {
     val token = jsonMap("jwt_token").asInstanceOf[String]
@@ -59,6 +62,14 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     (pathesOfUsers.toList, basepath)
   }
 
+  private def loadSIMConfig(taskid: String) = {
+    val (baseFilePath, configfiles) = loadCheckerConfig(taskid)
+
+    val checkerConfig = scala.io.Source.fromFile(configfiles(0).toString).mkString
+    val plagiatConfig = JsonHelper.jsonStrToAny(checkerConfig).asInstanceOf[Map[String, Any]]
+    plagiatConfig("similarity").toString.toInt
+  }
+
   /**
     * perform a check of request, will be executed after processing the kafka message
     *
@@ -76,7 +87,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     var plagiatExecPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toAbsolutePath.toString
     var output = s"The ${checkername} checker results: ${true}"
     var exitcode = -1
-
+    similarity_limit = loadSIMConfig(taskid)
     try {
       val (pathsToCompare, basepath) = createFoldersForEachUser(jsonMap)
       val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
@@ -103,7 +114,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
           exitcode = Process("docker", seq).!(prozessLogger)
           val process = processSIMOutput(stdoutStream.toString() + "\n" + stderrStream.toString())
           summerizedPassed = (summerizedPassed && process._1)
-          logger.warning(process._2.reduce((a, b) => s"${a}, ${b}"))
+          logger.warning(process._2.map(num => num.toString).reduce((a, b) => s"${a}, ${b}"))
           // always needs to send also the paires submission, ONLY on failures!
           if (!process._1) sendPlagiatAnswer(subInfo._2, process._1, taskid)
       }
@@ -128,14 +139,19 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     sendMessage(new ProducerRecord[String, String](topic, msg))
   }
 
-  private def processSIMOutput(output: String): (Boolean, List[String]) = {
+  private def processSIMOutput(output: String): (Boolean, List[Int]) = {
     val pattern = "(consists for (\\d+) % of)".r
     logger.warning(output)
     val found = pattern.findFirstIn(output)
     if (found.isEmpty) {
-      (true, List("nothing"))
+      (true, List(0))
     } else {
-      (false, pattern.findAllMatchIn(output).map(m => m.group(2).toString).toList)
+      val similarities = pattern.findAllMatchIn(output)
+        .map(m => m.group(2).toString.toInt)
+        .filter(sim => sim >= similarity_limit)
+        .toList
+      val passed = similarities.isEmpty
+      (passed, similarities)
     }
   }
 }
