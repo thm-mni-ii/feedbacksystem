@@ -3,28 +3,23 @@ package de.thm.ii.submissioncheck.checker
 import java.io.{ByteArrayOutputStream, File}
 import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.nio.file.{Files, Path, Paths}
-
-import akka.Done
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, GIT_CHECK_ANSWER_TOPIC, GIT_TASK_ANSWER_TOPIC, LABEL_ACCEPT,
-  LABEL_ERROR, LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, ULDIR, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
 import de.thm.ii.submissioncheck.services.FileOperations
 import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.slf4j.LoggerFactory
-
-import scala.concurrent.Future
 import scala.io.Source
 import scala.sys.process.{Process, ProcessLogger}
 
 /**
-  * Provides a service to download / clone a git uri
-  *
-  * @param submission_id users submission id
-  * @param taskid        : submissions task id
-  * @param git_url       git url
+  * Check submissions wich can handle php and bash tests
+  * @param compile_production flagg which compiles the path corresponding if app runs in docker or not
   */
-class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: String) {
-  private val logger = LoggerFactory.getLogger(this.getClass)
+class GitCheckExec(override val compile_production: Boolean) extends BaseChecker(compile_production) {
+  /** the unique identification of a checker, will extended to "gitchecker" */
+  override val checkername = "git"
+  /** define which configuration files the checker need - to be overwritten */
+  override val configFiles: Map[String, Boolean] = Map("structurecheck" -> true, "config.json" -> false)
+
+  private val timeout = 5000
   /** save the output of our execution */
   var output: String = ""
   private val startCode = -99
@@ -32,11 +27,15 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
   var success: Boolean = false
   /** save the exit code of our execution */
   var exitCode: Int = startCode
-  private val timeout = 5000
 
   private val LABEL_TEST = "test"
   private val LABEL_RESULT = "result"
   private val LABEL_HEADER = "header"
+  private val LABEL_GIT = "git"
+  /** file of checker to configure it */
+  var LABEL_CONFIGFILE = "config.json"
+  /** file in gitignore syntax to check if seomthing is there or not */
+  var LABEL_STRUCTUREFILE = "structurecheck"
 
   @throws(classOf[java.io.IOException])
   @throws(classOf[java.net.SocketTimeoutException])
@@ -92,14 +91,14 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
     val gitLogOutput = new ByteArrayOutputStream
     val seq = Seq("-C", target_dir, "shortlog", "-sne", "--all")
 
-    Process("git", seq).#>(gitLogOutput).run().exitValue()
+    Process(LABEL_GIT, seq).#>(gitLogOutput).run().exitValue()
 
    gitLogOutput.toString.split("\n").map(entry => {
       entry.replaceFirst("^\\s*[0-9]+\\s+", "").replaceFirst("<.+>", "").trim
     }).toList
   }
 
-  private def runMaintainerTest(docentFile: File, target_dir: String) = {
+  private def runMaintainerTest(docentFile: File, target_dir: String, git_url: String) = {
     var result: List[Map[String, Any]] = List()
     var docentResult: List[Map[String, Any]] = List()
     var docentSettingMap: Map[String, Any] = Map()
@@ -151,16 +150,23 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
   }
 
   /**
-    * run the git clone process
-    *
-    * @return exitcode
+    * perform a check of request, will be executed after processing the kafka message
+    * @param taskid submissions task id
+    * @param submissionid submitted submission id
+    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param isInfo execute info procedure for given task
+    * @param use_extern include an existing file, from previous checks
+    * @param jsonMap complete submission payload
+    * @return check succeeded, output string, exitcode
     */
-  def exec(): Int = {
-    var dockerRelPath = ULDIR
-    val targetPath = Paths.get(dockerRelPath).resolve(taskid.toString).resolve(submission_id)
+  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
+  (Boolean, String, Int) = {
+    val git_url = scala.io.Source.fromFile(submittedFilePath).mkString
+    new File(submittedFilePath).delete()
+    val targetPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid)
     val target_dir = targetPath.toString
 
-    val basePath = Paths.get(dockerRelPath).resolve(taskid.toString)
+    val basePath = Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened)
     val targetDirPath = Paths.get(target_dir)
     Files.createDirectories(targetDirPath)
 
@@ -169,23 +175,23 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
       val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
       val logger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
       seq = Seq("clone", git_url, target_dir)
-      exitCode = Process("git", seq).!(logger)
+      exitCode = Process(LABEL_GIT, seq).!(logger)
       output = stdoutStream.toString() + "\n" + stderrStream.toString()
 
       var checkresultList: List[Map[String, Any]] = List()
       var maintainerMap: List[Map[String, Any]] = List()
       var docentMap: List[Map[String, Any]] = List()
       if (exitCode == 0) {
-        val configFile = new File(basePath.resolve(GitCheckExec.LABEL_STRUCTUREFILE).toString)
+        val configFile = new File(basePath.resolve(LABEL_STRUCTUREFILE).toString)
         val configFilePathRel = configFile.getPath
         val configFileAbsPath = configFile.getAbsolutePath
         var structureMap = runStructureTest(configFileAbsPath, targetPath)
         checkresultList = Map(LABEL_HEADER -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
 
-        if (Files.exists(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE))) {
+        if (Files.exists(basePath.resolve(LABEL_CONFIGFILE))) {
           // we request to git(lab/hub) and do some activity checks
-          val mapTuple = runMaintainerTest(new File(basePath.resolve(GitCheckExec.LABEL_CONFIGFILE).toString),
-            targetDirPath.toAbsolutePath.toString)
+          val mapTuple = runMaintainerTest(new File(basePath.resolve(LABEL_CONFIGFILE).toString),
+            targetDirPath.toAbsolutePath.toString, git_url)
           maintainerMap = mapTuple._1; docentMap = mapTuple._2;
           checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
           checkresultList = Map(LABEL_HEADER -> "Docent Check", LABEL_RESULT -> docentMap) :: checkresultList
@@ -202,7 +208,7 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
         }
       }
     }
-    exitCode
+    (exitCode == 0, output, exitCode)
   }
 
   /**
@@ -217,95 +223,5 @@ class GitCheckExec(val submission_id: String, val taskid: Any, val git_url: Stri
 
     val exitcode = Process("cat", seq).#>(stdoutStream).run().exitValue()
     stdoutStream.toString
-  }
-}
-
-/**
-  * static context for GitCheckExec
-  */
-object GitCheckExec {
-  private val logger = LoggerFactory.getLogger(this.getClass)
-  /** file of checker to configure it */
-  var LABEL_CONFIGFILE = "config.json"
-  /** file in gitignore syntax to check if seomthing is there or not */
-  var LABEL_STRUCTUREFILE = "structurecheck"
-
-  /**
-    * generates the correcpoding kafka answer message
-    *
-    * @author Benjamin Manns
-    * @param message jons string
-    * @return kafka record
-    */
-  def sendGitCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_CHECK_ANSWER_TOPIC, message))
-
-  private def sendGitTaskAnswer(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](GIT_TASK_ANSWER_TOPIC, message))
-
-  /**
-    * Kafka Callback when message for GitChecker is receiving
-    *
-    * @author Benjamin Manns
-    * @param jsonMap a kafka record
-    */
-  def onTaskGitReceived(jsonMap: Map[String, Any]): Unit = {
-    val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
-    val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
-    val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
-    if (urls.length != 1 && urls.length != 2) {
-      sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
-        s"Please provide one or two files (${LABEL_STRUCTUREFILE} and ${LABEL_CONFIGFILE})", LABEL_TASKID -> taskid)))
-    } else {
-      val sendedFileNames = SecretTokenChecker.downloadFilesToFS(urls, jwt_token, taskid)
-
-      // validation if sent files are useful
-      if (sendedFileNames.length == 1 && !sendedFileNames.contains(LABEL_STRUCTUREFILE)) {
-        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
-          s"Provided file should call '${LABEL_STRUCTUREFILE}'", LABEL_TASKID -> taskid)))
-      }
-      else if (sendedFileNames.length == 2 && (!sendedFileNames.contains(LABEL_CONFIGFILE) || !sendedFileNames.contains(LABEL_STRUCTUREFILE))) {
-        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
-          s"Provided files should call '${LABEL_STRUCTUREFILE}' and '${LABEL_CONFIGFILE}'", LABEL_TASKID -> taskid)))
-      } else {
-        sendGitTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid)))
-      }
-    }
-  }
-
-  /**
-    * Kafka Callback when message for GitChecker is receiving
-    *
-    * @author Benjamin Manns
-    * @param jsonMap a kafka record
-    */
-  def onGitReceived(jsonMap: Map[String, Any]): Unit = {
-    logger.warn("GIT Submission Received")
-    val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
-    val task_id = jsonMap(LABEL_TASKID)
-    val git_url = jsonMap(DATA).asInstanceOf[String]
-    val sumission_id = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
-    try {
-      val gitChecker = new GitCheckExec(sumission_id, task_id, git_url)
-      val exitcode = gitChecker.exec()
-      val passed = if (exitcode == 0) 1 else 0
-
-      sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
-        "passed" -> passed.toString,
-        "exitcode" -> exitcode.toString,
-        LABEL_TASKID -> task_id.toString,
-        LABEL_SUBMISSIONID -> sumission_id,
-        "public_key" -> gitChecker.getPublicKey,
-        DATA -> gitChecker.output
-      )))
-    } catch {
-      case e: Exception => {
-        sendGitCheckMessage(JsonHelper.mapToJsonStr(Map(
-          "passed" -> "0",
-          "exitcode" -> "42",
-          LABEL_TASKID -> task_id.toString,
-          LABEL_SUBMISSIONID -> sumission_id,
-          DATA -> (e.getMessage + e.getStackTrace.mkString(" "))
-        )))
-      }
-    }
   }
 }

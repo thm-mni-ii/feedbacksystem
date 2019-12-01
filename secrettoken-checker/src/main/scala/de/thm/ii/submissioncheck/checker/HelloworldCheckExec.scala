@@ -8,7 +8,7 @@ class HelloworldCheckExec(override val compile_production: Boolean) extends Base
   /** the unique identification of a checker, will extended to "helloworldchecker" */
   override val checkername = "helloworld"
   /** define which configuration files the checker need - to be overwritten */
-  override val configFiles: List[String] = List("configfile")
+  override val configFiles: Map[String, Boolean] = Map("configfile"->true)
 
   /**
     * perform a check of request, will be executed after processing the kafka message

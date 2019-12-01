@@ -28,7 +28,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec}
+import de.thm.ii.submissioncheck.checker.{GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -82,13 +82,6 @@ object SecretTokenChecker extends App {
   val LABEL_ISINFO = "isinfo"
   /** provides a Label for jwt_token*/
   val LABEL_TOKEN = "jwt_token"
-  private val LABEL_CHECK_REQUEST = "_check_request"
-  private val LABEL_CHECK_ANSWER = "_check_answer"
-  private val LABEL_TASK_REQUEST = "_new_task_request"
-  private val LABEL_TASK_ANSWER = "_new_task_answer"
-
-  private val LABEL_ONLY_TEST_TASK_SUBMISSION_ID = "-2"
-  private val LABEL_ONLY_TEST_TASK_DATA = "empty data"
 
   /** 1 = Execute a user submission */
   val BASH_EXEC_MODE_CHECK = 1
@@ -101,30 +94,9 @@ object SecretTokenChecker extends App {
 //               Kafka Settings
 // +++++++++++++++++++++++++++++++++++++++++++
 
-  private val SYSTEMIDTOPIC = "secrettokenchecker"
-  private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
-  private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
-  private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_REQUEST
-  private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + LABEL_TASK_ANSWER
-
-  // We accept also "plagiarismchecker"
   private val PLAGIARISM_SYSTEMIDTOPIC = "plagiarismchecker"
-  private val PLAGIARISM_CHECK_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
-  private val PLAGIARISM_CHECK_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_answer"
-
-  private val PLAGIARISM_SCRIPT_REQUEST_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_request"
   /** label for PLAGIARISM_SCRIPT_ANSWER_TOPIC */
   val PLAGIARISM_SCRIPT_ANSWER_TOPIC = PLAGIARISM_SYSTEMIDTOPIC + "_script_answer"
-
-  // We accept also "gitchecker"
-  private val GIT_SYSTEMIDTOPIC = "gitchecker"
-  private val GIT_CHECK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_REQUEST
-  private val GIT_TASK_REQUEST_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_REQUEST
-
-  /** provides a Label for gitchecker_answer*/
-  val GIT_CHECK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_CHECK_ANSWER
-  /** provides a Label for task answer of gitchecker*/
-  val GIT_TASK_ANSWER_TOPIC = GIT_SYSTEMIDTOPIC + LABEL_TASK_ANSWER
 
   private val __slash = "/"
 
@@ -133,7 +105,6 @@ object SecretTokenChecker extends App {
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
-
   private val compile_production: Boolean = config.getBoolean("compiletype.production")
 
   /** used in naming */
@@ -163,16 +134,20 @@ object SecretTokenChecker extends App {
   val plagiatCheckExec = new PlagiatCheckExec(compile_production)
   /**  the node check instance*/
   val nodeCheckExec = new NodeCheckExec(compile_production)
+  /**  the secrettoken check instance*/
+  val secrettokenCheckExec = new SecrettokenCheckExec(compile_production)
+  /**  the secrettoken check instance*/
+  val gitCheckExec = new GitCheckExec(compile_production)
 
   private val control_submission = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(CHECK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onSubmissionReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(secrettokenCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(secrettokenCheckExec.submissionReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
   private val control_task = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(TASK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onTaskReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(secrettokenCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(secrettokenCheckExec.taskReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -190,14 +165,14 @@ object SecretTokenChecker extends App {
 
   // Listen on git
   private val control_gitchecker = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(GIT_CHECK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onGitReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(gitCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(gitCheckExec.submissionReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
   private val control_gittaskchecker = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(GIT_TASK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onGitTaskReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(gitCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(gitCheckExec.taskReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -256,6 +231,22 @@ object SecretTokenChecker extends App {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
+    control_nodechecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_nodetaskchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_helloworldchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_helloworldtaskchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
   })
 
   /**
@@ -266,13 +257,6 @@ object SecretTokenChecker extends App {
     */
   def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
     akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))
-
-  private def sendCheckMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](CHECK_ANSWER_TOPIC, message))
-
-  private def sendTaskMessage(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](TASK_ANSWER_TOPIC, message))
-
-  private def sendPlagiarismCheckMessage(message: String): Future[Done] =
-    sendMessage(new ProducerRecord[String, String](PLAGIARISM_CHECK_ANSWER_TOPIC, message))
 
   // +++++++++++++++++++++++++++++++++++++++++
   //                Network Settings
@@ -294,164 +278,6 @@ object SecretTokenChecker extends App {
     }
     config_factory_path
   }
-
-  private def onGitReceived(record: ConsumerRecord[String, String]): Unit = {
-    try {
-      logger.warning("GIT Checker Received Message")
-      val jsonMap: Map[String, Any] = record.value()
-      GitCheckExec.onGitReceived(jsonMap)
-    } catch {
-      case e: Exception => {
-        logger.warning("GITCHECKER Exception: " + e.getMessage)
-      }
-    }
-  }
-
-  private def onGitTaskReceived(record: ConsumerRecord[String, String]): Unit = {
-    val jsonMap: Map[String, Any] = record.value()
-    GitCheckExec.onTaskGitReceived(jsonMap)
-  }
-
-  private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
-    // Hack by https://stackoverflow.com/a/29914564/5885054
-    logger.warning("Submission Received")
-    val jsonMap: Map[String, Any] = record.value()
-    try {
-      val username: String = jsonMap("username").asInstanceOf[String]
-      val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
-      val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
-      val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
-      val use_extern: Boolean = jsonMap(LABEL_USE_EXTERN).asInstanceOf[Boolean]
-      var submittedFilePath: String = ""
-      if (use_extern) {
-        val path = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("submission.txt")
-        submittedFilePath = path.toAbsolutePath.toString
-
-      } else if (submit_type.equals("file")) {
-          val url: String = jsonMap("fileurl").asInstanceOf[String]
-          val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
-
-          submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, taskid, submissionid).toAbsolutePath.toString
-          logger.info(submittedFilePath)
-        }
-        else if (submit_type.equals(DATA)) {
-          submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], taskid, submissionid).toAbsolutePath.toString
-        }
-
-      var passed: Int = 0;
-      val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
-      val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
-
-      val (output, code) = bashTest(taskid, username, submittedFilePath, exeMode)
-      if (code == 0) passed = 1
-      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "username" -> username,
-        LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
-      if (isInfo) answerMap += (LABEL_ISINFO -> true)
-      sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
-    } catch {
-      case e: NoSuchElementException => {
-        sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-          "Error" -> "Please provide valid parameters"
-        )))
-      }
-      case e: Exception => {
-        logger.warning(e.getMessage)
-      }
-    }
-  }
-
-  /**
-    * Deletes a dir recursively deleting anything inside it.
-    *
-    * @author https://stackoverflow.com/users/306602/naikus by https://stackoverflow.com/a/3775864/5885054
-    * @param dir The dir to delete
-    * @return true if the dir was successfully deleted
-    */
-  private def deleteDirectory(dir: File): Boolean = {
-    if (!dir.exists() || !dir.isDirectory()) {
-      false
-    } else {
-      val files = dir.list()
-      for (file <- files) {
-        val f = new File(dir, file)
-        if (f.isDirectory()) {
-          deleteDirectory(f)
-        } else {
-          f.delete()
-        }
-      }
-      dir.delete()
-    }
-  }
-
-  private def onTaskReceived(record: ConsumerRecord[String, String]): Unit = {
-    val jsonMap: Map[String, Any] = record.value()
-    try {
-      logger.warning("task received")
-      val sslContext = SSLContext.getInstance("SSL")
-      sslContext.init(null, Array(TrustAll), new java.security.SecureRandom())
-      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
-      HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
-
-      // Here we send multiple files!!
-      val urls: List[String] = jsonMap("testfile_urls").asInstanceOf[List[String]]
-      val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
-      val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
-      if (urls.length != 1 && urls.length != 2) {
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
-          "Please provide one or two files (testfile and scriptfile)", LABEL_TASKID -> taskid)))
-      } else {
-        //deleteDirectory(new File(Paths.get(ULDIR).resolve(taskid).toString))
-        val sendedFileNames = downloadFilesToFS(urls, jwt_token, taskid)
-
-        // validation if sent files are useful
-        if (sendedFileNames.length == 1 && !sendedFileNames.contains("scriptfile")) {
-          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR -> "Provided file should call 'scriptfile'", LABEL_TASKID -> taskid)))
-        }
-        else if (sendedFileNames.length == 2 && (!sendedFileNames.contains("scriptfile") || !sendedFileNames.contains("testfile"))) {
-          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> false, LABEL_ERROR ->
-            "Provided files should call 'scriptfile' and 'testfile'", LABEL_TASKID -> taskid)))
-        } else {
-          // Need to execute files to see if there are syntax errors
-          val submittedFilePath = saveStringToFile(LABEL_ONLY_TEST_TASK_DATA, taskid, LABEL_ONLY_TEST_TASK_SUBMISSION_ID).toAbsolutePath.toString
-          val (output, code) = bashTest(taskid, "secrettokenchecker_testname", submittedFilePath, BASH_EXEC_MODE_TASK)
-          sendTaskMessage(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> (code == 0), LABEL_ERROR -> output, LABEL_TASKID -> taskid)))
-        }
-      }
-    } catch {
-      case e: NoSuchElementException => {
-        sendTaskMessage(JsonHelper.mapToJsonStr(Map(
-          LABEL_ERROR -> "Please provide valid parameters",
-          "accept" -> false,
-          LABEL_TASKID -> ""
-        )))
-      }
-      case e: Exception => logger.warning(s"${e.getClass.toString} with message: ${e.getMessage}")
-    }
-  }
-
-  private val message_err = "Error: Task doesn't contain a testfile"
-  /**
-    * Name of the md5 test script
-    */
-  val dummyscript = "md5-script.sh"
-
-  /**
-    * Method for the callback function
-    * @param taskid id of task
-    * @param name username
-    * @param filePath md5hash
-    * @param executionMode 1 = Execute a user submission, 2 = calculates a info message, 3 = test a submitted task
-    * @return message and exitcode
-    */
-  def bashTest(taskid: String, name: String, filePath: String, executionMode: Int): (String, Int) = {
-    val bashtest1 = new BashExec(taskid, name, filePath, compile_production, executionMode)
-    val exit1 = bashtest1.exec()
-    val message1 = bashtest1.output
-
-    (message1, exit1)
-  }
-
   /**
     * simply convert data submissions to a file and return its path
     * @param content submitted data
