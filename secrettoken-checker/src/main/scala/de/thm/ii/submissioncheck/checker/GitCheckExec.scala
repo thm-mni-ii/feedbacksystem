@@ -20,13 +20,6 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
   override val configFiles: Map[String, Boolean] = Map("structurecheck" -> true, "config.json" -> false)
 
   private val timeout = 5000
-  /** save the output of our execution */
-  var output: String = ""
-  private val startCode = -99
-  /** save the success of our execution */
-  var success: Boolean = false
-  /** save the exit code of our execution */
-  var exitCode: Int = startCode
 
   private val LABEL_TEST = "test"
   private val LABEL_RESULT = "result"
@@ -106,12 +99,11 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
       val bufferedSource = Source.fromFile(docentFile)
       docentSettingMap = JsonHelper.jsonStrToMap(bufferedSource.mkString)
     } catch {
-      case e: Exception => {
-        output = "Feedbacksystem has invalid testfiles (GIT Checker). Please contact your docent."
-        exitCode = 2
+      case _: Exception => {
+        throw new CheckerException("Feedbacksystem has invalid testfiles (GIT Checker). Please contact your docent.")
       }
     }
-    if (exitCode == startCode || exitCode == 0) {
+
       try {
         val base_url = docentSettingMap("base_url")
         val API_TOKEN = docentSettingMap("API_TOKEN").toString
@@ -137,15 +129,12 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
         })
       } catch {
         case e: java.net.SocketTimeoutException => {
-          output = "Connection to GIT failed"
-          exitCode = 1
+          throw new CheckerException("Connection to GIT failed")
         }
         case e: Exception => {
-          output = "GIT Url is invalid"
-          exitCode = 2
+          throw new CheckerException("GIT Url is invalid")
         }
       }
-    }
     (result, docentResult)
   }
 
@@ -161,54 +150,51 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
   (Boolean, String, Int) = {
-    val git_url = scala.io.Source.fromFile(submittedFilePath).mkString
-    new File(submittedFilePath).delete()
-    val targetPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid)
-    val target_dir = targetPath.toString
+    val git_url = scala.io.Source.fromFile(submittedFilePath).mkString; new File(submittedFilePath).delete()
+    val targetPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid); val target_dir = targetPath.toString
 
     val basePath = Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened)
     val targetDirPath = Paths.get(target_dir)
     Files.createDirectories(targetDirPath)
-
-    if (exitCode == startCode) { // no problems yet
+    try {
       var seq: Seq[String] = null
-      val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
+      val stdoutStream = new StringBuilder;
+      val stderrStream = new StringBuilder
       val logger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
       seq = Seq("clone", git_url, target_dir)
-      exitCode = Process(LABEL_GIT, seq).!(logger)
-      output = stdoutStream.toString() + "\n" + stderrStream.toString()
+      var exitCode = Process(LABEL_GIT, seq).!(logger)
+      var output = stdoutStream.toString() + "\n" + stderrStream.toString()
+      if (exitCode != 0) throw new CheckerException(output)
 
       var checkresultList: List[Map[String, Any]] = List()
       var maintainerMap: List[Map[String, Any]] = List()
       var docentMap: List[Map[String, Any]] = List()
-      if (exitCode == 0) {
-        val configFile = new File(basePath.resolve(LABEL_STRUCTUREFILE).toString)
-        val configFilePathRel = configFile.getPath
-        val configFileAbsPath = configFile.getAbsolutePath
-        var structureMap = runStructureTest(configFileAbsPath, targetPath)
-        checkresultList = Map(LABEL_HEADER -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
+      val configFile = new File(basePath.resolve(LABEL_STRUCTUREFILE).toString)
+      val configFileAbsPath = configFile.getAbsolutePath
+      var structureMap = runStructureTest(configFileAbsPath, targetPath)
+      checkresultList = Map(LABEL_HEADER -> "Structure Check", LABEL_RESULT -> structureMap) :: checkresultList
 
-        if (Files.exists(basePath.resolve(LABEL_CONFIGFILE))) {
-          // we request to git(lab/hub) and do some activity checks
-          val mapTuple = runMaintainerTest(new File(basePath.resolve(LABEL_CONFIGFILE).toString),
-            targetDirPath.toAbsolutePath.toString, git_url)
-          maintainerMap = mapTuple._1; docentMap = mapTuple._2;
-          checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
-          checkresultList = Map(LABEL_HEADER -> "Docent Check", LABEL_RESULT -> docentMap) :: checkresultList
-        }
-
-        if (exitCode == startCode || exitCode == 0) {
-          var sum = 0
-          structureMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
-          maintainerMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
-          docentMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
-          // If checks are passed we can send a string or a JSON String
-          output = JsonHelper.listToJsonStr(checkresultList)
-          if (sum == (structureMap.size + maintainerMap.size + docentMap.size)) exitCode = 0 else exitCode = 1
-        }
+      if (Files.exists(basePath.resolve(LABEL_CONFIGFILE))) {
+        // we request to git(lab/hub) and do some activity checks
+        val mapTuple = runMaintainerTest(new File(basePath.resolve(LABEL_CONFIGFILE).toString),
+          targetDirPath.toAbsolutePath.toString, git_url)
+        maintainerMap = mapTuple._1;
+        docentMap = mapTuple._2;
+        checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList
+        checkresultList = Map(LABEL_HEADER -> "Docent Check", LABEL_RESULT -> docentMap) :: checkresultList
       }
+
+        var sum = 0
+        structureMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
+        maintainerMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
+        docentMap.foreach(a => if (a(LABEL_RESULT).asInstanceOf[Boolean]) sum += 1)
+        // If checks are passed we can send a string or a JSON String
+        output = JsonHelper.listToJsonStr(checkresultList)
+        if (sum == (structureMap.size + maintainerMap.size + docentMap.size)) exitCode = 0 else exitCode = 1
+      (exitCode == 0, output, exitCode)
+    } catch {
+      case e: CheckerException => (false, e.getMessage, 42)
     }
-    (exitCode == 0, output, exitCode)
   }
 
   /**
