@@ -225,7 +225,9 @@ class BaseChecker(val compile_production: Boolean) {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
-        val basePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
+        var basePath = Paths.get(ULDIR).resolve(taskid)
+        basePath.toFile.mkdir()
+        basePath = basePath.resolve(checkernameExtened)
         basePath.toFile.mkdir()
         Files.copy(connection.getInputStream, basePath.resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
