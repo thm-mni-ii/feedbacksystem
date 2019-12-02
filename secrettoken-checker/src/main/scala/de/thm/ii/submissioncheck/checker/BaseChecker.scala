@@ -290,12 +290,11 @@ class BaseChecker(val compile_production: Boolean) {
 
       val (success, output, exitcode) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern, jsonMap)
 
-      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(
+      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ISINFO -> isInfo, "username" ->jsonMap("username"),
         LABEL_PASSED -> (if (success) "1" else "0"),
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
-        LABEL_SUBMISSIONID -> submission_id.toString,
-        DATA -> output
+        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output
       )))
     } catch {
       case e: Exception => {
