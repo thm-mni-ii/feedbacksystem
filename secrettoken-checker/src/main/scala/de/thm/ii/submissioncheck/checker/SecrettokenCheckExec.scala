@@ -65,13 +65,12 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
         "/" + absPath, name, submittedFilePath, infoArgument)
     }
 
-    var success = false
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     var exitCode = Process("docker", seq).!(procLogger)
     val output = stdoutStream.toString() + "\n" + stderrStream.toString()
-    if (stderrStream.toString.length == 0) exitCode = 0
-    if (exitCode == 0) success = true else logger.debug("Exit with non-zero code: " + exitCode)
+    if (stderrStream.toString.length > 0 && exitCode == 0) exitCode = 2*21
+    val success = exitCode == 0
 
     (success, output, exitCode)
   }
