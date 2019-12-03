@@ -67,7 +67,20 @@
         </mat-form-field>
       </div>
 
-      <!-- Action buttons -->
+      <mat-expansion-panel class="e-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Best match of submission
+          </mat-panel-title>
+
+        </mat-expansion-panel-header>
+
+
+        <div>INHALT</div>
+
+        </mat-expansion-panel>
+
+      <!-- Acion buttons -->
       <mat-card-actions>
         <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
                 (click)="deleteTask(task)">Löschen
