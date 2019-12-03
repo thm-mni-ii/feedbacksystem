@@ -76,6 +76,7 @@ class TaskController {
   final val LABEL_ID = "id"
   /** JSON variable taskid ID*/
   final val LABEL_TASK_ID = "taskid"
+  private val LABEL_BEST_FIT = "choice_best_result_fit"
   /** JSON variable userid ID*/
   final val LABEL_USER_ID = "userid"
   /** JSON variable submissionid ID*/
@@ -783,7 +784,7 @@ class TaskController {
             val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
             val testsystem = data.topic.replace("_check_answer", "")
             taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
-              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), testsystem)
+              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), answeredMap(LABEL_BEST_FIT).toString, testsystem)
 
             // We got an answer from a test, now on success case we need to trigger next phase if modus is SEQ
             if (passed == "1" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
