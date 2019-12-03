@@ -93,5 +93,6 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-security:2.1.0.RELEASE'
     compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'au.com.bytecode', name: 'opencsv', version: '2.4'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

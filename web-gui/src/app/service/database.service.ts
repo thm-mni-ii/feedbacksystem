@@ -94,6 +94,15 @@ export class DatabaseService {
     return this.http.get<DashboardProf[]>('/api/v1/courses/' + courseID + '/submissions');
   }
 
+  getAllUserSubmissionsAsCSV(courseID: number){
+    this.http.get('/api/v1/courses/' + courseID + '/submissions/csv',{responseType: 'arraybuffer'}).
+    subscribe(response => {
+      let blob = new Blob([response], {type: 'application/zip'});
+      importedSaveAs(blob, `${courseID}_submission_csv.csv`);
+    })
+  }
+
+
   /**
    * Return submission list for this task
    * @param taskID The id of task
@@ -312,7 +321,6 @@ export class DatabaseService {
     subscribe(response => {
       let blob = new Blob([response], {type: 'application/zip'});
       importedSaveAs(blob, `course_export_${courseID}_${name}.zip`);
-
     })
   }
 

@@ -5,7 +5,7 @@
     <div class="container">
 
       <mat-card class="card">
-
+        <button (click)="exportCourse(course.course_id)" mat-flat-button color="primary" matTooltip="Feedback exportieren"><mat-icon>table_chart</mat-icon></button>
         <mat-form-field appearance="fill"  class="filter-input">
           <mat-label>Filter</mat-label>
           <input matInput [formControl]="filter">

@@ -1,16 +1,26 @@
 package de.thm.ii.submissioncheck.services
 
+import java.io.{BufferedWriter, FileWriter}
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
+import java.util.{Timer, TimerTask}
 
+import scala.collection.JavaConverters._
+import au.com.bytecode.opencsv.CSVWriter
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.security.Secrets
+import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.context.annotation.Bean
+import org.springframework.core.io.UrlResource
+import org.springframework.http.ResponseEntity
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+
+import scala.collection.mutable.ListBuffer
 
 /**
   * Enable communication with Tasks and their Results
@@ -34,8 +44,30 @@ class SubmissionService {
   private val compile_production: Boolean = true
   @Value("${cas.client-host-url}")
   private val UPLOAD_BASE_URL: String = null
-  /** holds connection to storageService*/
-  val storageService = new StorageService(compile_production)
+
+  private var storageService: StorageService = null
+
+  /**
+    * Using autowired configuration, they will be loaded after self initialization
+    */
+  def configurateStorageService(): Unit = {
+    this.storageService = new StorageService(compile_production)
+  }
+
+  /**
+    * After autowiring initialize storage service
+    * @return timer run
+    */
+  @Bean
+  def importStorageProcessor: SmartInitializingSingleton = () => {
+    /** wait 3 seconds to be sure everything is connected like it should*/
+    val bean_delay = 300
+    new Timer().schedule(new TimerTask() {
+      override def run(): Unit = {
+        configurateStorageService
+      }
+    }, bean_delay)
+  }
   /** all interactions with tasks are done via a taskService*/
   @Autowired
   val courseService: CourseService = null
@@ -331,5 +363,52 @@ class SubmissionService {
           "evaluation" -> getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid))
         )
       }, taskid, userid)
+  }
+
+  /**
+    * generate a Submission CSV based on the submission matrix
+    * @param courseid the unique course id
+    * @return web compatble file resource
+    */
+  def generateSubmissionCSV(courseid: Int): ResponseEntity[UrlResource] = {
+    // put this in a service!
+    val matrix = this.courseService.getSubmissionsMatrixByCourse(courseid).asInstanceOf[List[Map[String, Any]]]
+    //var csvSchema = Array("username", "surname", "", "city")
+    val tasks = matrix(0)("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
+    var csvSchema: List[String] = List("student")
+
+    tasks.foreach(t => {
+      for (k <- t.keys) {
+        csvSchema = s"${k} (${t(k)("task_name")})" :: csvSchema
+        // also put a header for the plagiarism information
+        csvSchema = s"${k} - plagiarism passed" :: csvSchema
+      }
+    })
+
+    val asString = (v: Any) => if (v == null) "0" else v.toString
+    var listOfRecords = new ListBuffer[Array[String]]()
+    listOfRecords += csvSchema.reverse.toArray
+    // https://blog.knoldus.com/write-a-csv-fileusing-scala/
+    for(m <- matrix){
+      var csvLine: List[String] = List()
+      csvLine = s"${m("prename")} ${m("surname")}" :: csvLine
+
+      val tasks = m("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
+
+      tasks.foreach(t => { // only one key!
+        for (k <- t.keys) {
+          csvLine = s"${asString(t(k)("passed"))} of ${asString(t(k)("trials"))}" :: csvLine
+          csvLine = s"""${t(k)("plagiat_passed")}""" :: csvLine
+        }
+      })
+      listOfRecords += csvLine.reverse.toArray
+    }
+    val writer = storageService.createTemporaryFileWriter(s"""${courseid}_submission_matrix.csv""")
+    val outputFile = new BufferedWriter(writer.filewriter)
+    val csvWriter = new CSVWriter(outputFile)
+    csvWriter.writeAll(listOfRecords.toList.asJava)
+    //csvSchema.toArray
+    outputFile.close()
+    writer.getWebResource()
   }
 }

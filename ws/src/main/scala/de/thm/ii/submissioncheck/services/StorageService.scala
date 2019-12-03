@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
 
 import de.thm.ii.submissioncheck.controller.ClientService
+import de.thm.ii.submissioncheck.model.TemporaryFileWriter
 import de.thm.ii.submissioncheck.security.Secrets
 
 /**
@@ -28,7 +29,7 @@ class StorageService(compile_production: Boolean) {
   private val __slash = "/"
   /** upload folder name */
   final val UPLOAD_FOLDER: String = (if (compile_production) __slash else "") + "upload-dir/"
-  private val ZIP_IMPORT_FOLDER: String = (if (compile_production) __slash else "") + "zip-dir/imports"
+    private val ZIP_IMPORT_FOLDER: String = (if (compile_production) __slash else "") + "zip-dir/imports"
 
   private val rootLocation = Paths.get(UPLOAD_FOLDER)
   private val rootZipImportLocation = Paths.get(ZIP_IMPORT_FOLDER)
@@ -272,6 +273,17 @@ class StorageService(compile_production: Boolean) {
   } catch {
     case e: MalformedURLException =>
       throw new RuntimeException(LABEL_URL_MALFORMED)
+  }
+
+  /**
+    * create a new instance of the TemporaryFileWriter
+    * @param filename name of file
+    * @return file writer wrapper
+    */
+  def createTemporaryFileWriter(filename: String): TemporaryFileWriter = {
+    val basepath = rootZipImportLocation.getParent.resolve(Secrets.getSHAStringFromNow())
+    basepath.toFile.mkdir()
+    new TemporaryFileWriter(filename, basepath)
   }
 
   /**
