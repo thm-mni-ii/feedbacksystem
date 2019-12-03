@@ -34,7 +34,7 @@ class BaseChecker(val compile_production: Boolean) {
   private val LABEL_CONNECTION = "Connection"
   private val LABEL_CLOSE = "close"
   private val LABEL_BEARER = "Bearer: "
-
+  private val LABEL_BEST_FIT = "choice_best_result_fit"
   /** LABEL -v*/
   val __option_v = "-v"
   /** LABEL "/" */
@@ -294,7 +294,8 @@ class BaseChecker(val compile_production: Boolean) {
         LABEL_PASSED -> (if (success) "1" else "0"),
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
-        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output
+        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output,
+        LABEL_BEST_FIT -> ""
       )))
     } catch {
       case e: Exception => {
