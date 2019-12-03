@@ -69,7 +69,7 @@
         </mat-form-field>
       </div>
 
-      <!-- Acion buttons -->
+      <!-- Action buttons -->
       <mat-card-actions>
         <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
                 (click)="deleteTask(task)">Löschen
