@@ -43,7 +43,7 @@ class BaseChecker(val compile_production: Boolean) {
   val __colon = ":"
 
   /** define which configuration files the checker need - to be overwritten */
-  val configFiles: List[String] = List()
+  val configFiles: Map[String, Boolean] = Map()
   /** define allowed submission types - to be overwritten */
   val allowedSubmissionTypes: List[String] = List("data", "file", "extern")
   /** define which external file is needed - to be overwritten */
@@ -125,7 +125,7 @@ class BaseChecker(val compile_production: Boolean) {
   def loadCheckerConfig(taskid: String): (Path, List[Path]) = {
     logger.warning(s"Load ${checkername} Checker Config at ${checkernameExtened}")
     val baseFilePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
-    val configfiles = configFiles.map(f => baseFilePath.resolve(f))
+    val configfiles = configFiles.keys.map(f => baseFilePath.resolve(f)).toList.filter(f => f.toFile.exists())
     (baseFilePath, configfiles)
   }
 
@@ -179,11 +179,10 @@ class BaseChecker(val compile_production: Boolean) {
   private def onCheckerTaskReceivedHandler(task_id: Int, fileurls: List[String], jwt_token: String) = {
     try {
       logger.warning(s"${checkername} Task Receiver")
-      if (fileurls.length != configFiles.length) {
-        throw new CheckerException(s"${checkername} Checker does only accept one config file")
-      }
+
       val sentFileNames = downloadFilesToFS(fileurls, jwt_token, task_id.toString)
-      for(configfile <- configFiles) {
+      val requiredConfigFiles = configFiles.filter(f => f._2).keys
+      for(configfile <- requiredConfigFiles) {
         if (!sentFileNames.contains(configfile)) throw new CheckerException(s"${checkername} Checker need '${configfile}' configfile")
       }
       taskReceiveExtendedCheck(task_id, sentFileNames)
@@ -226,7 +225,9 @@ class BaseChecker(val compile_production: Boolean) {
         logger.error(LABEL_ERROR_DOWNLOAD)
       }
       else {
-        val basePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
+        var basePath = Paths.get(ULDIR).resolve(taskid)
+        basePath.toFile.mkdir()
+        basePath = basePath.resolve(checkernameExtened)
         basePath.toFile.mkdir()
         Files.copy(connection.getInputStream, basePath.resolve(filename), StandardCopyOption.REPLACE_EXISTING)
       }
@@ -289,12 +290,11 @@ class BaseChecker(val compile_production: Boolean) {
 
       val (success, output, exitcode) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern, jsonMap)
 
-      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(
+      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ISINFO -> isInfo, "username" ->jsonMap("username"),
         LABEL_PASSED -> (if (success) "1" else "0"),
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
-        LABEL_SUBMISSIONID -> submission_id.toString,
-        DATA -> output
+        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output
       )))
     } catch {
       case e: Exception => {

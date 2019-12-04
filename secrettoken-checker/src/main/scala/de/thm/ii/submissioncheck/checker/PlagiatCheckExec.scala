@@ -19,8 +19,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
   /** the unique identification of a checker, will extended to "plagiarismchecker" */
   override val checkername = "plagiarism"
   /** define which configuration files the checker need - to be overwritten */
-  override val configFiles: List[String] = List("config.json")
-
+  override val configFiles: Map[String, Boolean] = Map("config.json" -> true)
   /** limit where a similarity between files is a plagism */
   var similarity_limit = 2*10
 

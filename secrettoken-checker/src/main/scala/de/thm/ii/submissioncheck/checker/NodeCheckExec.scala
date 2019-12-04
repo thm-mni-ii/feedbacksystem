@@ -14,7 +14,7 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
   /** the unique identification of a checker, will extended to "helloworldchecker" */
   override val checkername = "node"
   /** define which configuration files the checker need - to be overwritten */
-  override val configFiles: List[String] = List("nodetest.zip")
+  override val configFiles: Map[String, Boolean] = Map("nodetest.zip" -> true)
   /** define allowed submission types - to be overwritten */
   override val allowedSubmissionTypes: List[String] = List("file", "extern")
 
@@ -92,7 +92,7 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
     val interpreter = "bash"; val action = "/usr/src/script/run.sh"
     var seq: Seq[String] = null; val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val infoArgument = if (isInfo) "info" else ""
-    val nodeTestPath = getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(LABEL_NODETEST).toString)
+    val nodeTestPath = getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened).resolve(LABEL_NODETEST).toString)
     val insideDockerNodeTestPath = "/usr/src/app"
     val insideDockerNodeResPath = "/usr/src/results"
     val subPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid)
@@ -138,12 +138,12 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
     * @param sentFileNames list of sent files
     */
   override def taskReceiveExtendedCheck(taskid: Int, sentFileNames: List[String]): Unit = {
-    val nodeTestPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(LABEL_NODETEST)
+    val nodeTestPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened).resolve(LABEL_NODETEST)
 
-    val nodeTestFile = new File(nodeTestPath.toAbsolutePath.toString)
+    val nodeTestFile = nodeTestPath.toFile
     if (nodeTestFile.exists()) deleteDirectory(nodeTestFile)
 
-    unzip(Paths.get(ULDIR).resolve(taskid.toString).resolve(sentFileNames.head).toAbsolutePath.toString, nodeTestPath)
+    unzip(Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened).resolve(sentFileNames.head).toAbsolutePath.toString, nodeTestPath)
   }
 }
 
