@@ -26,6 +26,9 @@ export class ProfDashboardComponent implements OnInit {
   filteredMatrix$: Observable<DashboardProf[]>;
   keys = Object.keys;
   filter = new FormControl();
+  limit: number = 1;
+  offset: number = 0;
+  currentCourse: number = -1;
 
 
   private _filter(value: string): DashboardProf[] {
@@ -71,23 +74,31 @@ export class ProfDashboardComponent implements OnInit {
     }
   }
 
-  /**
-   * Load matrix for the right tab. Every tab represents a course
-   * @param event The event when tab changes
-   */
-  tabChanged(event: MatTabChangeEvent) {
-    const course = this.courses.find(value => {
-      return value.course_name === event.tab.textLabel;
-    });
-
-    this.db.getAllUserSubmissions(course.course_id).subscribe(students => {
+  public loadAllSubmissionsAtCurrent(courseid: number){
+    this.currentCourse = courseid;
+    this.db.getAllUserSubmissions(courseid, this.offset, this.limit).subscribe(students => {
       this.matrix = students;
       // update filter to show values in filtered Matrix (Bug hack)
       this.filter.setValue(' ');
       this.filter.setValue('');
     });
+  }
 
+  public reloadSubmission(dir: number){
+    this.offset = this.offset + (dir * this.limit);
+    this.loadAllSubmissionsAtCurrent(this.currentCourse);
+  }
 
+  /**
+   * Load matrix for the right tab. Every tab represents a course
+   * @param event The event when tab changes
+   */
+  tabChanged(event: MatTabChangeEvent) {
+    this.offset = 0;
+    const course = this.courses.find(value => {
+      return value.course_name === event.tab.textLabel;
+    });
+    this.loadAllSubmissionsAtCurrent(course.course_id)
   }
 
 }
