@@ -9,6 +9,8 @@
     <button mat-flat-button [color]="plagiarism_script_status"  *ngIf="isAuthorized()" matTooltip="Plagiarismchecker Skript Status"><mat-icon>report</mat-icon></button>
     <button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>
     <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>
+    <button mat-flat-button color="primary"  *ngIf="isAuthorized()" [routerLink]="['/', 'courses', courseID, 'result']"  matTooltip="Open Course Results View"><mat-icon>insert_chart_outlined</mat-icon></button>
+
   </div>
   <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
      <h4>
@@ -67,7 +69,7 @@
         </mat-form-field>
       </div>
 
-      <!-- Action buttons -->
+      <!-- Acion buttons -->
       <mat-card-actions>
         <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
                 (click)="deleteTask(task)">Löschen

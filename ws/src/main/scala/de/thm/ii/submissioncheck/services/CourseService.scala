@@ -93,13 +93,14 @@ class CourseService {
     * @return List of User
     */
   def getSubscribedUserByCourse(courseid: Int, roleids: List[Int]): List[User] = {
+    val sqlList = "(" + roleids.map(a => a.toString).reduce((a, b) => s"${a}, ${b}") + ")"
     DB.query("SELECT u.*, r.* FROM user_course hc join user u using(user_id) join role r on r.role_id = hc.role_id" +
-      " where hc.course_id = ? and hc.role_id IN ?",
+      " where hc.course_id = ? and hc.role_id IN " + sqlList,
     (res, _) => {
       new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
         res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email)
       , res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id), res.getBoolean(UserDBLabels.privacy_checked))
-    }, courseid, roleids)
+    }, courseid)
   }
 
   /**

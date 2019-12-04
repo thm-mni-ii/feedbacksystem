@@ -379,14 +379,15 @@ class TaskService {
     * @param result answer coming from a checker service
     * @param passed test result passed information (0 = failed, 1 = passed)
     * @param exitcode tiny peace of status information
+    * @param best_result_fit contains the solution which the testsystem select the best match to check the submission
     * @param testsystem_id from which testsystem we got the answer
     * @return Boolean: did update work
     */
-  def setResultOfTask(submissionid: Int, result: String, passed: String, exitcode: Int, testsystem_id: String): Boolean = {
+  def setResultOfTask(submissionid: Int, result: String, passed: String, exitcode: Int, best_result_fit: String, testsystem_id: String): Boolean = {
     val num = DB.update(
-      "INSERT INTO submission_testsystem (result, passed, exitcode, result_date, submission_id, testsystem_id, step) " +
-        "select ?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, COALESCE(max(step),0)+1 as nextstep from submission_testsystem  where submission_id = ?;",
-      result, passed, exitcode, submissionid, testsystem_id, submissionid)
+      "INSERT INTO submission_testsystem (result, choice_best_result_fit, passed, exitcode, result_date, submission_id, testsystem_id, step) " +
+        "select ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, COALESCE(max(step),0)+1 as nextstep from submission_testsystem  where submission_id = ?;",
+      result, best_result_fit, passed, exitcode, submissionid, testsystem_id, submissionid)
     num > 0
   }
 

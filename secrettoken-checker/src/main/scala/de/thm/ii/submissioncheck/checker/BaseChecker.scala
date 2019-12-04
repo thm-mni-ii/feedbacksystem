@@ -29,7 +29,7 @@ class BaseChecker(val compile_production: Boolean) {
   val checkername = "base"
   private val LABEL_PASSED = "passed"
   private val LABEL_EXITCODE = "exitcode"
-
+  private val LABEL_BEST_FIT = "choice_best_result_fit"
   /** LABEL -v*/
   val __option_v = "-v"
   /** LABEL "/" */
@@ -220,7 +220,8 @@ class BaseChecker(val compile_production: Boolean) {
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
         LABEL_SUBMISSIONID -> submission_id.toString,
-        DATA -> output
+        DATA -> output,
+        LABEL_BEST_FIT -> ""
       )))
     } catch {
       case e: Exception => {

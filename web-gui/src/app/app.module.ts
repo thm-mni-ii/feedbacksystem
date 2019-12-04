@@ -57,6 +57,8 @@ import { TaskResultComponent } from './components/courses/detail-course/task-res
 import {MatSlideToggleModule} from "@angular/material";
 import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
 import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
+import { CourseResultDetailsComponent } from './components/courses/course-result-details/course-result-details.component';
+import { CourseResultDetailTableComponent } from './components/courses/course-result-detail-table/course-result-detail-table.component';
 
 
 @Injectable()
@@ -115,6 +117,8 @@ export const httpInterceptorProviders = [
     TaskResultComponent,
     ImportCourseComponent,
     ChangePasswdComponent,
+    CourseResultDetailsComponent,
+    CourseResultDetailTableComponent,
   ],
   imports: [
     BrowserModule,
