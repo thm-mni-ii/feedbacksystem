@@ -95,11 +95,16 @@ export class DatabaseService {
   }
 
   getAllUserSubmissionsAsCSV(courseID: number){
-    this.http.get('/api/v1/courses/' + courseID + '/submissions/csv',{responseType: 'arraybuffer'}).
-    subscribe(response => {
-      let blob = new Blob([response], {type: 'application/zip'});
-      importedSaveAs(blob, `${courseID}_submission_csv.csv`);
-    })
+    return new Promise((resolve, reject) => {
+      this.http.get('/api/v1/courses/' + courseID + '/submissions/csv',{responseType: 'arraybuffer'}).
+      subscribe(response => {
+        let blob = new Blob([response], {type: 'application/zip'});
+        importedSaveAs(blob, `${courseID}_submission_csv.csv`);
+        resolve("done")
+      },error => {
+        reject(error)
+      })
+    });
   }
 
 
