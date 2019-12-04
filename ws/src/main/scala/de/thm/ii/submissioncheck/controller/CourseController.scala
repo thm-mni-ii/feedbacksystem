@@ -527,12 +527,14 @@ class CourseController {
     */
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
-  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): List[Any] = {
+  def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer,
+                        request: HttpServletRequest): List[Any] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty) {
+    val testsystem = testsystemService.verfiyTestsystemByHeaderToken(request)
+    if (user.isEmpty && testsystem.isEmpty) {
       throw new UnauthorizedException
     }
-    if (!this.courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 2) {
+    if (testsystem.isEmpty && !this.courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 2) {
       throw new UnauthorizedException
     }
     // old version

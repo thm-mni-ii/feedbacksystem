@@ -73,14 +73,16 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
 
   /**
    * perform a check of request, will be executed after processing the kafka message
-   * @param taskid submissions task id
-   * @param submissionid submitted submission id
-   * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
-   * @param isInfo execute info procedure for given task
-   * @param use_extern include an existing file, from previous checks
-   * @return check succeeded, output string, exitcode
-   */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean): (Boolean, String, Int) = {
+    * @param taskid submissions task id
+    * @param submissionid submitted submission id
+    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param isInfo execute info procedure for given task
+    * @param use_extern include an existing file, from previous checks
+    * @param jsonMap complete submission payload
+    * @return check succeeded, output string, exitcode
+    */
+  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
+  (Boolean, String, Int) = {
     logger.info("Execute Node Checker")
     // if use_extern it is the same path
     val nodeExecutionPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("unzip").toAbsolutePath

@@ -138,7 +138,6 @@ object SecretTokenChecker extends App {
 
   /** used in naming */
   final val ULDIR = (if (compile_production) __slash else "") + "upload-dir/"
-  private val basedir = ULDIR + "PLAGIAT_CHECK/"
   /** label for Error download file */
   val LABEL_ERROR_DOWNLOAD = "Error when downloading file!"
   /** logger instance */
@@ -160,6 +159,8 @@ object SecretTokenChecker extends App {
   private val consumerSettings = ConsumerSettings(system, new StringDeserializer, new StringDeserializer)
   /**  the hello world instance*/
   val helloworldCheckExec = new HelloworldCheckExec(compile_production)
+  /**  the plagiat checker instance*/
+  val plagiatCheckExec = new PlagiatCheckExec(compile_production)
   /**  the node check instance*/
   val nodeCheckExec = new NodeCheckExec(compile_production)
 
@@ -175,16 +176,15 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  // Listen on plagiarismchecker
   private val control_plagiarismchecker = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(PLAGIARISM_CHECK_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onPlagiarismReceived))(Keep.both)
+    .plainSource(consumerSettings, Subscriptions.topics(plagiatCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(plagiatCheckExec.submissionReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  private val control_plagiarismscript = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics(PLAGIARISM_SCRIPT_REQUEST_TOPIC))
-    .toMat(Sink.foreach(onPlagiarsimScriptReceive))(Keep.both)
+  private val control_plagiarismtaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(plagiatCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(plagiatCheckExec.taskReceiver))(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
@@ -240,7 +240,11 @@ object SecretTokenChecker extends App {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
-    control_plagiarismscript.shutdown().onComplete {
+    control_plagiarismchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_plagiarismtaskchecker.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }
@@ -308,56 +312,12 @@ object SecretTokenChecker extends App {
     GitCheckExec.onTaskGitReceived(jsonMap)
   }
 
-  private def onPlagiarsimScriptReceive(record: ConsumerRecord[String, String]) = {
-    val jsonMap: Map[String, Any] = record.value()
-    PlagiatCheckExec.onPlagiarsimScriptReceive(jsonMap)
-  }
-
-  private def onPlagiarismReceived(record: ConsumerRecord[String, String]): Unit = {
-    logger.warning("Plagiarism Submission Received")
-    val jsonMap: Map[String, Any] = record.value()
-    val jwt_token = jsonMap(LABEL_TOKEN).asInstanceOf[String]
-    val zip_url = jsonMap("download_zip_url").asInstanceOf[String]
-    val task_id = jsonMap("task_id").toString
-    val course_id = jsonMap("courseid").toString
-    val submissionmatrix = jsonMap("submissionmatrix").asInstanceOf[List[Map[String, Any]]]
-    val plagiatCheckPath = downloadPlagiatCheckFiles(zip_url, jwt_token, task_id)
-    var msg = ""
-    var submissionList: List[Map[Int, Boolean]] = List()
-    var success: Boolean = false
-
-    if (plagiatCheckPath.isEmpty) {
-      logger.warning("Provided Zip file for plagism check could not be downloaded")
-      msg = "Provided Zip file for plagism check could not be downloaded"
-    } else {
-      // need to unzip
-      // TODO delete previous checks
-      unZipCourseSubmission(plagiatCheckPath.get.toAbsolutePath.toString(), Paths.get(basedir).resolve(course_id).resolve(task_id).resolve("unzip").toString)
-
-      val pCheck = new PlagiatCheckExec(course_id, task_id, plagiatCheckPath.get.toAbsolutePath.toString())
-      // run plagiat test for all submissions
-      pCheck.exec()
-
-      submissionList = pCheck.submission_checks
-      success = pCheck.execution_success
-      msg = pCheck.error_msg
-    }
-
-    sendPlagiarismCheckMessage(JsonHelper.mapToJsonStr(Map(
-      "success" -> success,
-      "submissionlist" -> submissionList,
-      "msg" -> msg,
-      LABEL_TASKID -> task_id,
-      LABEL_COURSEID -> course_id
-    )))
-  }
-
   private def onSubmissionReceived(record: ConsumerRecord[String, String]): Unit = {
     // Hack by https://stackoverflow.com/a/29914564/5885054
     logger.warning("Submission Received")
     val jsonMap: Map[String, Any] = record.value()
     try {
-      val userid: String = jsonMap("userid").asInstanceOf[String]
+      val username: String = jsonMap("username").asInstanceOf[String]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap(LABEL_SUBMISSIONID).asInstanceOf[String]
       val taskid: String = jsonMap(LABEL_TASKID).asInstanceOf[String]
@@ -382,9 +342,9 @@ object SecretTokenChecker extends App {
       val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
       val exeMode = if (isInfo) BASH_EXEC_MODE_INFO else BASH_EXEC_MODE_CHECK
 
-      val (output, code) = bashTest(taskid, userid, submittedFilePath, exeMode)
+      val (output, code) = bashTest(taskid, username, submittedFilePath, exeMode)
       if (code == 0) passed = 1
-      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "userid" -> userid,
+      var answerMap: Map[String, Any] = Map(DATA -> output, "passed" -> passed.toString, "exitcode" -> code.toString, "username" -> username,
         LABEL_TASKID -> taskid, LABEL_SUBMISSIONID -> submissionid)
       if (isInfo) answerMap += (LABEL_ISINFO -> true)
       sendCheckMessage(JsonHelper.mapToJsonStr(answerMap))
@@ -523,21 +483,6 @@ object SecretTokenChecker extends App {
     connection.setRequestProperty(LABEL_CONNECTION, LABEL_CLOSE)
     connection.connect()
     connection
-  }
-
-  private def downloadPlagiatCheckFiles(link: String, jwt_token: String, taskid: String): Option[Path] = {
-    val connection = download(link, jwt_token)
-    if (connection.getResponseCode >= 400) {
-      logger.error(LABEL_ERROR_DOWNLOAD)
-      Option.empty
-    }
-    else {
-      val basePath = Paths.get(ULDIR).resolve("PLAGIAT_CHECK").resolve(taskid).toString
-      new File(basePath).mkdirs()
-      val dest = Paths.get(basePath).resolve("files.zip")
-      Files.copy(connection.getInputStream, dest, StandardCopyOption.REPLACE_EXISTING)
-      Some(dest)
-    }
   }
 
   /**

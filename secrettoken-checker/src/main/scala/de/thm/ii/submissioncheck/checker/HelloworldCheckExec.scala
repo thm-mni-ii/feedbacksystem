@@ -17,9 +17,11 @@ class HelloworldCheckExec(override val compile_production: Boolean) extends Base
     * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
     * @param isInfo execute info procedure for given task
     * @param use_extern include an existing file, from previous checks
+    * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean): (Boolean, String, Int) = {
+  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
+  (Boolean, String, Int) = {
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
     val docentsContent = scala.io.Source.fromFile(configfiles(0).toString).mkString
     val usersContent = scala.io.Source.fromFile(submittedFilePath).mkString

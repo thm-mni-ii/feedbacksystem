@@ -113,7 +113,7 @@ class TaskService {
     */
   def sendSubmissionToTestsystem(submission_id: Int, task_id: Int, testsystem_id: String, user: User, typ: String, data: String,
                                  queued_test: Boolean = false): Unit = {
-    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> task_id.toString, LABEL_USER_ID -> user.username)
+    var kafkaMap: Map[String, Any] = Map(LABEL_TASK_ID -> task_id.toString, LABEL_USER_ID -> user.userid, "username" -> user.username)
     val taskDetailsOpt = getTaskDetails(task_id)
     if (typ == LABEL_DATA){
       kafkaMap += (LABEL_DATA -> data)
@@ -131,6 +131,8 @@ class TaskService {
       throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
     }
     kafkaMap += ("use_extern" -> queued_test)
+    kafkaMap += ("api_url" -> s"${UPLOAD_BASE_URL}/api/v1/")
+    kafkaMap += ("courseid" -> getCourseIdByTaskId(task_id).get)
 
     kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
     kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
