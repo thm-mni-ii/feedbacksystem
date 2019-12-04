@@ -1,10 +1,10 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.io.{BufferedWriter, FileWriter}
 import java.nio.file.{Files, Path, Paths}
 import java.time.format.DateTimeFormatter
 import java.util.{Timer, TimerTask}
 import java.{io, util}
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc._
 import de.thm.ii.submissioncheck.services._
@@ -18,6 +18,8 @@ import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
+import scala.collection.mutable.ListBuffer
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -540,6 +542,25 @@ class CourseController {
     // old version
     // this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
     this.courseService.getSubmissionsMatrixByCourse(courseid)
+  }
+
+  /**
+    * Docents who want to get all results of all users of all tasks as CSV
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @return FILE
+    */
+  @RequestMapping(value = Array("{id}/submissions/csv"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def seeAllSubmissionsAsCSV(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): ResponseEntity[UrlResource] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty) throw new UnauthorizedException
+
+    if (!this.courseService.isDocentForCourse(courseid, user.get) && user.get.roleid > 2) {
+      throw new UnauthorizedException
+    }
+
+    submissionService.generateSubmissionCSV(courseid)
   }
 
   /**

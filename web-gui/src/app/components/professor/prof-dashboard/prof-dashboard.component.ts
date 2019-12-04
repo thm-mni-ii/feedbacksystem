@@ -58,6 +58,11 @@ export class ProfDashboardComponent implements OnInit {
     });
   }
 
+  exportCourse(courseID: number){
+    console.log(courseID)
+    this.db.getAllUserSubmissionsAsCSV(courseID)
+  }
+
   plagiatColor(task: CourseTask): string {
     if (task.plagiat_passed == null) {
       return "null"
