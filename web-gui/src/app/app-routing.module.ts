@@ -23,6 +23,7 @@ import {ConnectedSystemsComponent} from "./components/connected-systems/connecte
 import {ImportCourseComponent} from "./components/courses/import-course/import-course.component";
 import {ChangePasswdComponent} from "./components/users/change-passwd/change-passwd.component";
 import {GuestGuard} from "./guards/guest.guard";
+import {CourseResultDetailsComponent} from "./components/courses/course-result-details/course-result-details.component";
 
 
 const routes: Routes = [
@@ -37,6 +38,7 @@ const routes: Routes = [
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: DetailCourseComponent},
+      {path: 'courses/:id/result', component: CourseResultDetailsComponent},
 
       // Admin
       {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
