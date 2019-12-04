@@ -260,21 +260,24 @@ class SubmissionService {
   /**
     * get evaluated list of testsystems by submission
     * @param submission_id unique submission identification
+    * @param with_result_fit also select the best fit of matching result
     * @return list of evaluated submission
     */
-  def getTestsystemSubmissionEvaluationList(submission_id: Int): List[Map[String, Any]] = {
-    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.step, st.result_date, ss.submission_id from submission ss " +
+  def getTestsystemSubmissionEvaluationList(submission_id: Int, with_result_fit: Boolean = false): List[Map[String, Any]] = {
+    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.step, st.result_date, st.choice_best_result_fit, ss.submission_id from submission ss " +
       "join task t using(task_id) join task_testsystem tt using (task_id) " +
       "left join submission_testsystem st on st.testsystem_id = tt.testsystem_id and st.submission_id = ? and tt.ordnr <= st.step " +
       "where ss.submission_id = ? order by tt.ordnr",
       (res, _) => {
-        Map(TaskTestsystemDBLabels.testsystem_id -> res.getString(TaskTestsystemDBLabels.testsystem_id),
+        var m = Map(TaskTestsystemDBLabels.testsystem_id -> res.getString(TaskTestsystemDBLabels.testsystem_id),
           SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid),
           TaskTestsystemDBLabels.ordnr -> res.getInt(TaskTestsystemDBLabels.ordnr),
           SubmissionTestsystemDBLabels.exitcode -> res.getInt(SubmissionTestsystemDBLabels.exitcode),
           SubmissionTestsystemDBLabels.passed -> getNullOrBoolean(res.getString(SubmissionTestsystemDBLabels.passed)),
           SubmissionTestsystemDBLabels.result -> res.getString(SubmissionTestsystemDBLabels.result),
           SubmissionTestsystemDBLabels.result_date -> res.getTimestamp(SubmissionTestsystemDBLabels.result_date))
+          if(with_result_fit) m += (SubmissionTestsystemDBLabels.choice_best_result_fit -> res.getString(SubmissionTestsystemDBLabels.choice_best_result_fit))
+        m
       }, submission_id, submission_id)
   }
 
@@ -314,9 +317,10 @@ class SubmissionService {
     * @param taskid unique identification for a task
     * @param userid requesting user
     * @param sort sort submissions by date (asc, desc)
+    * @param with_result_fit also select the choice_best_result_fit
     * @return Scala List of Maps
     */
-  def getSubmissionsByTaskAndUser(taskid: String, userid: Any, sort: String = "asc"): List[Map[String, Any]] = {
+  def getSubmissionsByTaskAndUser(taskid: String, userid: Any, sort: String = "asc", with_result_fit: Boolean = false): List[Map[String, Any]] = {
     if (!List("asc", LABEL_DESC).contains(sort)){
       throw new IllegalArgumentException("sort must be a value of `asc` or `desc`")
     }
@@ -328,7 +332,7 @@ class SubmissionService {
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
           SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
           SubmissionDBLabels.plagiat_passed -> res.getString(SubmissionDBLabels.plagiat_passed),
-          "evaluation" -> getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid))
+          "evaluation" -> getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid), with_result_fit)
         )
       }, taskid, userid)
   }

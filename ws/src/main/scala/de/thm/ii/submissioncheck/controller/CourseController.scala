@@ -7,6 +7,7 @@ import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.submissioncheck.misc._
+import de.thm.ii.submissioncheck.model.User
 import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
@@ -160,14 +161,20 @@ class CourseController {
   /**
     * getCourse provides course details for a specific course by given id
     * @param courseid unique course identification
+    * @param permitted force to only accept permitted users
     * @param request Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET))
   @ResponseBody
-  def getCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
+  def getCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer,
+                @RequestParam(value = "permitted", required = false) permitted: Boolean = false,
+                request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     val user = userService.verifyUserByHeaderToken(request)
     if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if(permitted && !courseService.isPermittedForCourse(courseid, user.get)){
       throw new UnauthorizedException
     }
     courseService.getCourseDetails(courseid, user.get).getOrElse(Map.empty)
@@ -586,7 +593,7 @@ class CourseController {
       throw new UnauthorizedException
     }
 
-    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc")
+    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc", true)
   }
 
   /**
@@ -724,6 +731,25 @@ class CourseController {
       throw new UnauthorizedException
     }
     courseParamService.getAllCourseParamsForUser(courseid, user.get)
+  }
+
+  /**
+    * get all subscribed users of course
+    * @param courseid unique course identification
+    * @param request Request Header containing Headers
+    * @return JSON Map
+    */
+  @RequestMapping(value = Array("{courseid}/users"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getAllSubscribedUsersOfCourse(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || !courseService.isPermittedForCourse(courseid, user.get)) {
+      throw new UnauthorizedException
+    }
+
+    this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID)).map(user => {
+      user.asMap()
+    })
   }
 
   /**

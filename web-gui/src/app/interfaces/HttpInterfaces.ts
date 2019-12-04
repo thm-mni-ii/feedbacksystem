@@ -76,6 +76,16 @@ export interface CourseTask {
   load_external_description: boolean;
 }
 
+export interface TaskSubmission {
+  evaluation: CourseTaskEvaluation[];
+  filename: string;
+  plagiat_passed: boolean;
+  submission_data: string;
+  submission_id: number;
+  submit_date: Date;
+  user_id: number;
+}
+
 export interface CourseTaskEvaluation {
   testsystem_id: string;
   exitcode: number;
@@ -84,6 +94,7 @@ export interface CourseTaskEvaluation {
   result_date: Date;
   ordnr: number;
   submission_id: number;
+  choice_best_result_fit?: string;
 }
 
 /**
