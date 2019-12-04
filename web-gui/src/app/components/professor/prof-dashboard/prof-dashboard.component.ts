@@ -29,6 +29,7 @@ export class ProfDashboardComponent implements OnInit {
   limit: number = 1;
   offset: number = 0;
   currentCourse: number = -1;
+  userlength: number = 0
 
 
   private _filter(value: string): DashboardProf[] {
@@ -93,7 +94,12 @@ export class ProfDashboardComponent implements OnInit {
     const course = this.courses.find(value => {
       return value.course_name === event.tab.textLabel;
     });
-    this.loadAllSubmissionsAtCurrent(course.course_id)
+    this.db.getSubscribedUsersOfCourse(course.course_id).subscribe(
+      result => {this.userlength = result.length},
+      error => {},
+      () => this.loadAllSubmissionsAtCurrent(course.course_id)
+    )
+
   }
 
 }
