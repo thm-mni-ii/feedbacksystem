@@ -89,9 +89,11 @@ export class DatabaseService {
   /**
    * Get all results of all users of all tasks
    * @param courseID of course to obtain all submissions
+   * @param offset
+   * @param limit
    */
-  getAllUserSubmissions(courseID: number): Observable<DashboardProf[]> {
-    return this.http.get<DashboardProf[]>('/api/v1/courses/' + courseID + '/submissions');
+  getAllUserSubmissions(courseID: number, offset: number, limit: number): Observable<DashboardProf[]> {
+    return this.http.get<DashboardProf[]>(`/api/v1/courses/${courseID}/submissions?offset=${offset}&limit=${limit}`);
   }
 
   /**

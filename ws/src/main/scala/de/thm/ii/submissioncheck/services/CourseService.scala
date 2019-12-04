@@ -230,6 +230,23 @@ class CourseService {
   }
 
   /**
+    * Get all subscribed students form one course with limit and offset
+    * @param courseid unique identification for a course
+    * @param offset offset the user list
+    * @param limit limit the user list
+    * @return Scala List
+    */
+  def getStudentsFromCourse(courseid: Int, offset: Int, limit: Int): List[Map[String, Any]] = {
+    val list = DB.query("select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and uc.role_id = 16 limit ?,?",
+      (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
+        UserDBLabels.prename -> res.getString(UserDBLabels.prename),
+        UserDBLabels.surname -> res.getString(UserDBLabels.surname),
+        UserDBLabels.username -> res.getString(UserDBLabels.username)) }
+      , courseid, offset, limit)
+    list
+  }
+
+  /**
     * grant tutor rights to a user for a course
     *
     * @author Benjamin Manns
@@ -679,11 +696,13 @@ class CourseService {
     *
     * @author Benjamin Manns
     * @param courseid unique course identification
+    * @param offset offset of user list
+    * @param limit limit the user list
     * @return Scala List
     */
-  def getSubmissionsMatrixByCourse(courseid: Int): List[Any] = {
+  def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int): List[Any] = {
     val tasks = taskService.getTasksByCourse(courseid).reverse
-    val subscribedStudents = this.getStudentsFromCourse(courseid)
+    val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit)
     val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString)
     var matrix: List[Any] = List()
     for(u <- subscribedStudents){
