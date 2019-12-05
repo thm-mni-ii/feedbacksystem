@@ -7,6 +7,7 @@ import {MatTabChangeEvent} from '@angular/material';
 import {map, startWith} from 'rxjs/operators';
 import {FormControl} from '@angular/forms';
 import {UserService} from "../../../service/user.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 /**
  * Matrix for every course docent has
@@ -18,7 +19,7 @@ import {UserService} from "../../../service/user.service";
 })
 export class ProfDashboardComponent implements OnInit {
 
-  constructor(private db: DatabaseService, private tb: TitlebarService, private userService: UserService) {
+  constructor(private db: DatabaseService, private tb: TitlebarService, private userService: UserService,  private snackbar: MatSnackBar) {
   }
 
   courses: GeneralCourseInformation[];
@@ -26,7 +27,7 @@ export class ProfDashboardComponent implements OnInit {
   filteredMatrix$: Observable<DashboardProf[]>;
   keys = Object.keys;
   filter = new FormControl();
-
+  csvLoading: boolean = false;
 
   private _filter(value: string): DashboardProf[] {
     const filterValue = value.toLowerCase().replace(' ', '');
@@ -59,8 +60,14 @@ export class ProfDashboardComponent implements OnInit {
   }
 
   exportCourse(courseID: number){
-    console.log(courseID)
-    this.db.getAllUserSubmissionsAsCSV(courseID)
+    console.log(courseID);
+    this.csvLoading = true;
+    this.db.getAllUserSubmissionsAsCSV(courseID).then(() => {
+      this.csvLoading = false;
+    }).catch(() => {
+      this.csvLoading = false;
+      this.snackbar.open("Export failed", "OK",{duration: 3000})
+    })
   }
 
   plagiatColor(task: CourseTask): string {
