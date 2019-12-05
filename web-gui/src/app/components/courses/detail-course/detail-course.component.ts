@@ -47,10 +47,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   userRole: string;
   submissionData: { [task: number]: File | string };
   processing: { [task: number]: boolean };
-  submissionAsFile: { [task: number]: boolean };
+  submissionAsFile: { [task: number]: string };
   deadlineTask: { [task: number]: boolean };
   courseID: number;
   breakpoint: number;
+  multipleChoices: { [task: number]: boolean };
 
   hasScrolledToTask: boolean = false;
 
@@ -84,7 +85,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.userRole = course_detail.role_name;
 
       course_detail.tasks.forEach(task => {
-        this.submissionAsFile[task.task_id] = false;
+        this.submissionAsFile[task.task_id] = 'task';
         this.processing[task.task_id] = false;
         this.triggerExternalDescriptionIfNeeded(task, false)
 
@@ -119,6 +120,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       .then((loadedTask: CourseTask) => {
         if (loadedTask.external_description != null){
           this.courseTasks[this.courseTasks.indexOf(task)] = loadedTask;
+          if(this.externalInfoIsForm(loadedTask)) this.submissionAsFile[loadedTask.task_id] = 'choice'
         } else {
           setTimeout(() => {
             this.externalInfoPoller(task, step+1)
@@ -126,6 +128,21 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         }
       })
   }
+
+  externalInfoIsForm(task: CourseTask) {
+    if(!task.load_external_description || !task.external_description) {
+      return false
+    } else {
+      try{
+        return JSON.parse(task.external_description)
+      } catch (e) {
+        return false
+      }
+
+    }
+
+  }
+
 
   public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean){
     if (force) {
@@ -302,7 +319,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.courseTasks = course_detail.tasks;
       this.courseTasks.forEach(task => {
         if(typeof this.submissionAsFile[task.task_id] == 'undefined'){
-          this.submissionAsFile[task.task_id] = false;
+
+          if(this.externalInfoIsForm(task))
+            this.submissionAsFile[task.task_id] = 'choice'
+          else
+            this.submissionAsFile[task.task_id] = 'text';
         }
       })
 

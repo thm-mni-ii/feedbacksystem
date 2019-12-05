@@ -58,16 +58,20 @@
 
         <p style="font-style: italic;" *ngIf="task.result">Exitcode: {{task.exitcode}}</p>
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
-          <mat-radio-button [value]="true">Datei</mat-radio-button>
-          <mat-radio-button [value]="false">Text</mat-radio-button>
-          <mat-radio-button [value]="false">Choice</mat-radio-button>
+          <mat-radio-button [value]="'file'">Datei</mat-radio-button>
+          <mat-radio-button [value]="'text'">Text</mat-radio-button>
+          <mat-radio-button [value]="'choice'">Choice</mat-radio-button>
         </mat-radio-group>
-        <input *ngIf="submissionAsFile[task.task_id]" type="file"
+
+        <input *ngIf="submissionAsFile[task.task_id] == 'file'" type="file"
                (change)="getSubmissionFile($event.target.files[0], task)">
-        <mat-form-field *ngIf="!submissionAsFile[task.task_id]" class="user-input-text" appearance="outline">
+        <mat-form-field *ngIf="submissionAsFile[task.task_id] == 'text'" class="user-input-text" appearance="outline">
           <mat-label>Abgabe Text</mat-label>
           <textarea style="height: 60px;" matInput type="text" [(ngModel)]="submissionData[task.task_id]"></textarea>
         </mat-form-field>
+        <div *ngIf="submissionAsFile[task.task_id] == 'choice'" id="choice_form">
+            <mat-checkbox *ngFor="let answer of externalInfoIsForm(task)" [value]="answer['id']">{{answer['text']}}</mat-checkbox>
+        </div>
       </div>
 
       <!-- Action buttons -->

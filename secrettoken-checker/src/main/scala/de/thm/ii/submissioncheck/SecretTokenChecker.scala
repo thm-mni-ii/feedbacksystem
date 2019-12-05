@@ -28,7 +28,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.checker.{BashExec, GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec, MultiplechoiceCheckExec}
+import de.thm.ii.submissioncheck.checker.{GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec, MultiplechoiceCheckExec}
 
 /**
   * Bypasses both client and server validation.
