@@ -163,8 +163,8 @@ class SQLTask(val filepath: String, val taskId: String){
     * @param userid userid
     * @return tuple with message and boolean
     */
-  def runSubmission(userq: String, userid: String): (String, Boolean) = {
-    var msg = "Your Query didn't produce the correct result"
+  def runSubmission(userq: String, userid: String): (String, Boolean, String) = {
+    var msg = "Your Query didn't produce the correct result"; var fit = "No query did match"
     var success = false; var identified = false; var foundindex = -1
     val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
     val dbname = userid + us + dbliteral; val username = userid + us + taskid
@@ -205,9 +205,10 @@ class SQLTask(val filepath: String, val taskId: String){
     s.execute(dropdb + taskid + us + dbname)
     if(identified){
       msg = queryres(foundindex).desc
+      fit = taskqueries(foundindex)("query")
       if(msg.equals("OK")) success = true
     }
-    (msg, success)
+    (msg, success, fit)
   }
 
   private def compareRow(userres: ResultSet, querynum: Int): Boolean = {

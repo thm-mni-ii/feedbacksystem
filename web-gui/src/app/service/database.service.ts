@@ -7,7 +7,7 @@ import {
   FileUpload,
   GeneralCourseInformation,
   RoleChanged,
-  Succeeded,
+  Succeeded, TaskSubmission,
   Testsystem,
   TestsystemTestfile,
   TextType,
@@ -81,11 +81,21 @@ export class DatabaseService {
    * Get detail of specific course
    * @param courseID of course to obtain task from
    */
-  getCourseDetail(courseID: number): Observable<DetailedCourseInformation> {
-    return this.http.get<DetailedCourseInformation>('/api/v1/courses/' + courseID);
+  getCourseDetail(courseID: number, permitted: boolean = false): Observable<DetailedCourseInformation> {
+    return this.http.get<DetailedCourseInformation>(`/api/v1/courses/${courseID}?permitted=${permitted}`);
   }
 
+  /**
+   * First this are only students - can be extended in backend easily
+   */
+  getSubscribedUsersOfCourse(courseID: number) {
+    return this.http.get<User[]>(`/api/v1/courses/${courseID}/users`);
 
+  }
+
+  getSubmissionsOfUserOfTask(courseID: number, userid: number, taskid: number) {
+    return this.http.get<TaskSubmission[]>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
+  }
   /**
    * Get all results of all users of all tasks
    * @param courseID of course to obtain all submissions

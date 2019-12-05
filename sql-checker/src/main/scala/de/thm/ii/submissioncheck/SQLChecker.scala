@@ -78,6 +78,7 @@ object SQLChecker extends App {
   private val CHECK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_check_answer"
   private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
+  private val LABEL_BEST_FIT = "choice_best_result_fit"
 
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
   private val config = ConfigFactory.load(appConfig)
@@ -199,7 +200,7 @@ object SQLChecker extends App {
       }
       val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
       var passed: Int = 0
-      val (msg, success) = task.runSubmission(userquery, userid)
+      val (msg, success, best_fit) = task.runSubmission(userquery, userid)
       if (success){
         passed = 1
       }
@@ -209,7 +210,8 @@ object SQLChecker extends App {
         "exitcode" -> "0",
         "userid" -> userid,
         LABEL_TASKID -> taskid,
-        "submissionid" -> submissionid
+        "submissionid" -> submissionid,
+        LABEL_BEST_FIT -> best_fit
       )))
     } catch {
       case e: NoSuchElementException => {
