@@ -45,6 +45,7 @@
 
         </div>
 
+        <mat-icon id="loadingIcon" *ngIf="loading">view_week</mat-icon>
         <!--<mat-grid-list cols="20">
 
           <mat-grid-tile colspan="5">
@@ -70,6 +71,8 @@
           </mat-grid-tile>
         </mat-grid-list>-->
 
+        <button mat-flat-button color="accent" *ngIf="offset > 0" (click)="reloadSubmission(-1)" matTooltip="Previous"><mat-icon>skip_previous</mat-icon></button>
+        <button mat-flat-button color="accent" *ngIf="(offset + limit) < userlength" (click)="reloadSubmission(1)" matTooltip="Next"><mat-icon>skip_next</mat-icon></button>
 
       </mat-card>
     </div>

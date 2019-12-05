@@ -28,6 +28,11 @@ export class ProfDashboardComponent implements OnInit {
   keys = Object.keys;
   filter = new FormControl();
   csvLoading: boolean = false;
+  limit: number = 10;
+  offset: number = 0;
+  currentCourse: number = -1;
+  userlength: number = 0;
+  loading: boolean = true;
 
   private _filter(value: string): DashboardProf[] {
     const filterValue = value.toLowerCase().replace(' ', '');
@@ -78,22 +83,45 @@ export class ProfDashboardComponent implements OnInit {
     }
   }
 
+  public loadAllSubmissionsAtCurrent(courseid: number){
+    this.currentCourse = courseid;
+    this.db.getAllUserSubmissions(courseid, this.offset, this.limit).subscribe(students => {
+      this.matrix = students;
+      this.loading = false;
+      // update filter to show values in filtered Matrix (Bug hack)
+      this.filter.setValue(' ');
+      this.filter.setValue('');
+    });
+  }
+
+  public reloadSubmission(dir: number){
+    this.offset = this.offset + (dir * this.limit);
+    this.loadAllSubmissionsAtCurrent(this.currentCourse);
+  }
+
+  private truncateTap(){
+    this.matrix = [];
+    // update filter to show values in filtered Matrix (Bug hack)
+    this.filter.setValue(' ');
+    this.filter.setValue('');
+    this.loading = true;
+  }
   /**
    * Load matrix for the right tab. Every tab represents a course
    * @param event The event when tab changes
    */
   tabChanged(event: MatTabChangeEvent) {
+    this.truncateTap();
+    this.offset = 0;
     const course = this.courses.find(value => {
       return value.course_name === event.tab.textLabel;
     });
 
-    this.db.getAllUserSubmissions(course.course_id).subscribe(students => {
-      this.matrix = students;
-      // update filter to show values in filtered Matrix (Bug hack)
-      this.filter.setValue(' ');
-      this.filter.setValue('');
-    });
-
+    this.db.getSubscribedUsersOfCourse(course.course_id).subscribe(
+      result => {this.userlength = result.length},
+      error => {},
+      () => this.loadAllSubmissionsAtCurrent(course.course_id)
+    )
 
   }
 
