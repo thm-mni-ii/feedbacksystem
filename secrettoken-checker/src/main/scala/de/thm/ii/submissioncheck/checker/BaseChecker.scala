@@ -37,6 +37,12 @@ class BaseChecker(val compile_production: Boolean) {
   private val LABEL_BEST_FIT = "choice_best_result_fit"
   private val LABEL_PRE_RESULT = "calculate_pre_result"
 
+  /** label header for multi dim answer generation */
+  val LABEL_HEADER = "header"
+  /** label result for multi dim answer generation */
+  val LABEL_RESULT = "result"
+  /** label test for multi dim answer generation */
+  val LABEL_TEST = "test"
   /** LABEL -v*/
   val __option_v = "-v"
   /** LABEL "/" */

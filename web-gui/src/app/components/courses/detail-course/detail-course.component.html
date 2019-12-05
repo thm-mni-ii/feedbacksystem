@@ -60,6 +60,7 @@
         <mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
           <mat-radio-button [value]="true">Datei</mat-radio-button>
           <mat-radio-button [value]="false">Text</mat-radio-button>
+          <mat-radio-button [value]="false">Choice</mat-radio-button>
         </mat-radio-group>
         <input *ngIf="submissionAsFile[task.task_id]" type="file"
                (change)="getSubmissionFile($event.target.files[0], task)">
