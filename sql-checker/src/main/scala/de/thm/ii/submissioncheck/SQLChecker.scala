@@ -186,7 +186,7 @@ object SQLChecker extends App {
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val submissionid: String = jsonMap("submissionid").asInstanceOf[String]
       val taskid: String = jsonMap(TASKID).asInstanceOf[String]
-      val userid: String = jsonMap("userid").asInstanceOf[String]
+      val userid: String = jsonMap("userid").toString
       var userquery: String = ""
       if(submit_type.equals("file")){
         val url: String = jsonMap("fileurl").asInstanceOf[String]
