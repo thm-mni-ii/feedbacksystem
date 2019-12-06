@@ -46,6 +46,10 @@ class SubmissionService {
   private val UPLOAD_BASE_URL: String = null
 
   private var storageService: StorageService = null
+  private final val LABEL_ZERO_STRING = "0"
+  private final val LABEL_ONE_STRING = "1"
+  private final val LABEL_TRUE = "true"
+  private final val LABEL_FALSE = "false"
 
   /**
     * Using autowired configuration, they will be loaded after self initialization
@@ -341,6 +345,43 @@ class SubmissionService {
       linenumber += 1
       s"${client_host_url}/api/v1/tasks/${taskid}/testfile/${linenumber}/upload"
     })
+  }
+
+  /**
+    * get one line of submission matrix
+    * @param userid user id
+    * @param courseid course id
+    * @return submission matrix row
+    */
+  def getSummarizedSubmissionEvaluationOfCourseOfUser(userid: Int, courseid: Int): (Boolean, List[Map[String, Any]]) = {
+    var globalPassed: Int = 0
+    val list = DB.query("SELECT  u.prename, u.surname, t.task_name, t.task_id, min(s.plagiat_passed) plagiat_sum, " +
+      "max(st.passed) as passed_sum, count(st.passed) as count_sum, st.result_date " +
+      "from task t left join submission s on t.task_id = s.task_id and s.user_id = ? " +
+      "                                              left join submission_testsystem st on s.submission_id = st.submission_id " +
+      "                                               left join user u on s.user_id = u.user_id " +
+      "where t.course_id = ? " +
+      "group by t.task_id",
+      (res, rowNum) => {
+        val db_passed = res.getString("passed_sum")
+        val passed_string: Any = if (db_passed == LABEL_ONE_STRING) true else if (db_passed == LABEL_ZERO_STRING) false else null
+        if (passed_string != null && passed_string == true) globalPassed += 1
+
+        val db_plagiat = res.getString("plagiat_sum")
+        val taskPlagiatPassed: Any = if (db_plagiat == null){
+          null
+        } else if (db_plagiat.contains(LABEL_ZERO_STRING)) {
+          false
+        } else if (db_plagiat.contains(LABEL_ONE_STRING)) {
+          true
+        }
+
+        Map(s"""A${rowNum}""" -> Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
+          TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid), "trials" -> res.getInt("count_sum"), "passed" -> passed_string,
+          "passed_date" -> res.getDate("result_date"), SubmissionDBLabels.plagiat_passed -> taskPlagiatPassed))
+      }, userid, courseid)
+
+    (list.length == globalPassed, list)
   }
 
   /**
