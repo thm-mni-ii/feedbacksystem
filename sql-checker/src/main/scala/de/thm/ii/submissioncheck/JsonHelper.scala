@@ -35,4 +35,18 @@ object JsonHelper {
     val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
     jsonResult
   }
+
+  /**
+    * listToJsonStr use Object Mapper
+    *
+    * @author Benjamin Manns
+    * @param jsonMap a Scala Map
+    * @return Json String
+    */
+  implicit def listToJsonStr(jsonMap: List[Any]): String = {
+    val mapper = new ObjectMapper() with ScalaObjectMapper
+    mapper.registerModule(DefaultScalaModule)
+    val jsonResult = mapper.writerWithDefaultPrettyPrinter.writeValueAsString(jsonMap)
+    jsonResult
+  }
 }

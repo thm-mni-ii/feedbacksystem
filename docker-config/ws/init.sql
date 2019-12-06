@@ -224,6 +224,9 @@ CREATE TABLE `submission_testsystem` (
 alter table submission_testsystem
 	add choice_best_result_fit text null;
 
+alter table submission_testsystem
+	add calculate_pre_result text null;
+
 
 
 
