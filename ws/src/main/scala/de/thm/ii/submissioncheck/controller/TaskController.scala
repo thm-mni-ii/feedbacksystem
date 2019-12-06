@@ -126,7 +126,6 @@ class TaskController {
         kafkaReloadNewTaskAnswerService
         configurateStorageService
         kafkaLoadPlagiatCheckerService
-        sendTaskToPlagiatChecker
         kafkaLoadPlagiatScriptAnswerService
       }
     }, bean_delay)
@@ -588,30 +587,6 @@ class TaskController {
   }
 
   private def httpResponseHeaderValue(resource: Resource) = "attachment; filename=\"" + resource.getFilename + "\""
-
-  /**
-    * for every non checked but expired task, send this task to the plagiat check system
-    */
-  def sendTaskToPlagiatChecker(): Unit = {
-    val tasks = taskService.getExpiredTasks()
-    if (tasks.nonEmpty) {
-      for (task <- tasks) {
-        val taskid: Int = task(TaskDBLabels.taskid).asInstanceOf[Int]
-        val submissionMatrix = taskService.getSubmissionsByTask(taskid)
-        val tasksystem_id = "plagiarismchecker"
-        val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, LABEL_COURSE_ID -> task(TaskDBLabels.courseid), "download_zip_url" ->
-          (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
-          "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
-          "submissionmatrix" -> submissionMatrix)
-        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        val kafka_topic = tasksystem_id + "_check_request"
-        logger.warn(kafka_topic)
-        logger.warn(jsonResult)
-        kafkaTemplate.send(kafka_topic, jsonResult)
-        kafkaTemplate.flush()
-      }
-    }
-  }
 
   /**
     * plagiat checker background process will be started here
