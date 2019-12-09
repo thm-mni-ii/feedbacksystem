@@ -321,7 +321,7 @@ CREATE TABLE `task_testsystem` (
 
 DROP TABLE IF EXISTS `testsystem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `testsystem` (
   `testsystem_id` varchar(30) NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -329,6 +329,7 @@ CREATE TABLE `testsystem` (
   `supported_formats` varchar(255) DEFAULT NULL COMMENT 'has to be a comma seperated list of values, like: sql, java, php, bash',
   `machine_port` int(11) DEFAULT NULL,
   `machine_ip` varchar(255) DEFAULT NULL,
+  `accepted_input` int(11) DEFAULT NULL COMMENT '0 - nothing\n1 - text\n2 - file\n4 - choice',
   PRIMARY KEY (`testsystem_id`),
   UNIQUE KEY `testsystem_testsystem_id_uindex` (`testsystem_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -340,9 +341,10 @@ CREATE TABLE `testsystem` (
 
 LOCK TABLES `testsystem` WRITE;
 /*!40000 ALTER TABLE `testsystem` DISABLE KEYS */;
-INSERT INTO `testsystem` VALUES ('gitchecker','Downloads From GIT','In development','',NULL,NULL),('plagiarismchecker','plagiarismchecker',NULL,NULL,NULL,NULL),('sapabapchecker','ABAP Testsystem','ABAP code will be executed in a real SAP system','',NULL,NULL),('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000'),('sqlchecker','SQL','XXXXX','.sql, ',1234,'000.000.000.000');
+INSERT INTO `testsystem` VALUES ('gitchecker','gitchecker',NULL,NULL,NULL,NULL,1),('multiplechoicechecker','Multiplechoice Checker',NULL,NULL,NULL,NULL,4),('nodechecker','Node Checker','Provides Node Docker with Pupeteer for Testing JavaScript',NULL,NULL,NULL,2),('plagiarismchecker','plagiarismchecker',NULL,NULL,NULL,NULL,0),('sapabapchecker','ABAP Testsystem','ABAP code will be executed in a real SAP system','',NULL,NULL,3),('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000',3),('sqlchecker','SQL Checker','XXXXX','.sql, ',1234,'000.000.000.000',3);
 /*!40000 ALTER TABLE `testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `testsystem_testfile`
