@@ -18,17 +18,23 @@
       <!-- Name Column -->
       <ng-container matColumnDef="result">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Result</th>
-        <td style="max-width: 260px;" mat-cell *matCellDef="let eval"> {{eval.result}} </td>
+        <td style="max-width: 260px;" mat-cell *matCellDef="let eval">
+          <span *ngIf="!isJSON(eval.calculate_pre_result)" >{{eval.calculate_pre_result}}</span>
+          <app-course-result-as-table *ngIf="isJSON(eval.calculate_pre_result)" [data]="eval.calculate_pre_result"></app-course-result-as-table>
+        </td>
       </ng-container>
 
       <!-- Weight Column -->
       <ng-container matColumnDef="choice_best_result_fit">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Choosen Result</th>
-        <td style="max-width: 260px;" mat-cell *matCellDef="let eval"> {{eval.choice_best_result_fit}} </td>
+        <td style="max-width: 260px;" mat-cell *matCellDef="let eval">
+          <span *ngIf="!isJSON(eval.choice_best_result_fit)" >{{eval.choice_best_result_fit}}</span>
+          <app-course-result-as-table *ngIf="isJSON(eval.choice_best_result_fit)" [data]="eval.choice_best_result_fit"></app-course-result-as-table>
+        </td>
       </ng-container>
 
       <!-- Symbol Column -->
-      <ng-container matColumnDef="result_date">
+      <!--<ng-container matColumnDef="result_date">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Result Date</th>
         <td mat-cell *matCellDef="let eval"> {{ parseDate(eval.result_date) | date: "yyyy-MM-dd" }} </td>
       </ng-container>
@@ -36,7 +42,7 @@
       <ng-container matColumnDef="testsystem_id">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Testsystem</th>
       <td mat-cell *matCellDef="let eval"> {{eval.testsystem_id}} </td>
-    </ng-container>
+    </ng-container>-->
 
       <ng-container matColumnDef="passed">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Passed</th>

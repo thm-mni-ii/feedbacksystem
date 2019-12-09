@@ -223,7 +223,6 @@ object SQLChecker extends App {
       }
       case e: Exception => {
         logger.warning("Got Exception from SQLTask with no catch: " + e.getMessage + " " + e.toString)
-        e.printStackTrace()
       }
     }
   }
