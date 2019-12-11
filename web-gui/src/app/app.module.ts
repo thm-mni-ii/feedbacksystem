@@ -60,6 +60,9 @@ import { ChangePasswdComponent } from './components/users/change-passwd/change-p
 import { CourseResultDetailsComponent } from './components/courses/course-result-details/course-result-details.component';
 import { CourseResultDetailTableComponent } from './components/courses/course-result-detail-table/course-result-detail-table.component';
 import { CourseResultAsTableComponent } from './components/courses/course-result-as-table/course-result-as-table.component';
+import { TaskSubmissionFileComponent } from './components/course/detail-course/task/task-submission-file/task-submission-file.component';
+import { TaskSubmissionTextComponent } from './components/course/detail-course/task/task-submission-text/task-submission-text.component';
+import { TaskSubmissionChoiceComponent } from './components/course/detail-course/task/task-submission-choice/task-submission-choice.component';
 
 
 @Injectable()
@@ -121,6 +124,9 @@ export const httpInterceptorProviders = [
     CourseResultDetailsComponent,
     CourseResultDetailTableComponent,
     CourseResultAsTableComponent,
+    TaskSubmissionFileComponent,
+    TaskSubmissionTextComponent,
+    TaskSubmissionChoiceComponent,
   ],
   imports: [
     BrowserModule,

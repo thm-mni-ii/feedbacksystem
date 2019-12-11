@@ -1,0 +1,19 @@
+<div class="result">
+  <p *ngIf="!!task.submission_data">
+    Abgabe: {{task.submission_data}} Todo as Table
+    <br>
+    <br>
+  </p>
+  <p *ngIf="!task.submission_data">Dateiname: {{task.file}}</p>
+  <span class="filler"></span>
+  <p>{{task.submit_date| date:'medium'}}</p>
+</div>
+
+<div id="choice_form">
+  <mat-form-field matCheckboxes [(ngModel)]="submission" (change)="updateSubmission($event.target)">
+    <mat-checkbox *ngFor="let answer of parse(task)" [value]="answer['id']">{{answer['text']}}</mat-checkbox>
+  </mat-form-field>
+
+</div>
+
+

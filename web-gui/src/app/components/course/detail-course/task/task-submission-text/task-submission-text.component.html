@@ -1,0 +1,17 @@
+<div class="result">
+  <p *ngIf="!!task.submission_data">
+    Abgabe: {{task.submission_data}}
+    <br>
+    <br>
+    <button mat-flat-button  color="primary"  (click)="reRunTask(task)" *ngIf="!deadlineTask" matTooltip="Abgabe erneut senden"><mat-icon >replay</mat-icon></button>
+  </p>
+  <p *ngIf="!task.submission_data">Dateiname: {{task.file}}</p>
+  <span class="filler"></span>
+  <p>{{task.submit_date| date:'medium'}}</p>
+</div>
+
+
+<mat-form-field class="user-input-text" appearance="outline">
+  <mat-label>Abgabe Text</mat-label>
+  <textarea style="height: 60px;" matInput type="text" (change)="updateSubmission($event.target)" [(ngModel)]="task.submission_data"></textarea>
+</mat-form-field>
