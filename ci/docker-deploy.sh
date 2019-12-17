@@ -4,15 +4,8 @@ tag=$1
 branch=$2
 
 function dockerPush(){
-    branch=$2
-    if [ "$branch" = "master" ]
-        then
-            tag=$1
-        else
-            tag="dev-"$1
-        fi
-
-     echo "tag is: "$tag
+    tag=$1
+    echo "tag is: "$tag
 
 
     docker tag feedbacksystem_secrettokenchecker thmmniii/secrettokenchecker:$tag
@@ -37,8 +30,8 @@ docker login --password $DOCKER_PWD  --username $DOCKER_LOGIN
 echo "DOCKER IMAGES"
 docker images
 
-dockerPush $tag $branch
-dockerPush latest $branch
+dockerPush $tag
+dockerPush latest
 
 
 
