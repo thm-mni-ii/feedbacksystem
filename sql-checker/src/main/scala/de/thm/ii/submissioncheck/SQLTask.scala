@@ -218,7 +218,8 @@ class SQLTask(val filepath: String, val taskId: String){
       fit = taskqueries(foundindex)("query")
       if(msg.equals("OK")) success = true
     }
-    (msg, success, JsonHelper.listToJsonStr(toList(arrayfromRS(queryres(foundindex).res))), JsonHelper.listToJsonStr(userResultSet))
+    val userqueryRes = if (identified) toList(arrayfromRS(queryres(foundindex).res)) else List()
+    (msg, success, JsonHelper.listToJsonStr(userqueryRes), JsonHelper.listToJsonStr(userResultSet))
   }
 
   private def compareRow(userres: ResultSet, querynum: Int): Boolean = {
