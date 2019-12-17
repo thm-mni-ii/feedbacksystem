@@ -12,7 +12,7 @@ export class TaskSubmissionFileComponent implements OnInit {
 
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @Output() trigger: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
-  // triggerExternalDescriptionIfNeeded(task, true)
+
   submissionFile: File;
   constructor() { }
 

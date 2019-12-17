@@ -1,24 +1,28 @@
 <div style="word-wrap: break-word;" *ngIf="task.load_external_description">
-  <b>Externe Aufgabenstellung</b>
+  <b>Externe Aufgabenstellung</b> <a class="resetExternalInfo" (click)="triggerInfo()">Reset</a>
 
-  <div id="choice_form">
-  <mat-checkbox *ngFor="let answer of parse(task)" [value]="answer['id']">{{answer['text']}}</mat-checkbox>
-  <!--<mat-form-field matCheckboxes [(ngModel)]="submission" (change)="updateSubmission($event.target)">
-
-  </mat-form-field>-->
-
+  <div class="choice_form">
+    <div *ngFor="let answer of checkModel">
+      <mat-checkbox  [value]="answer['value']" (change)="eventChange(answer['id'], $event)">{{answer['text']}}</mat-checkbox>
+      <br>
+    </div>
   </div>
 
 
-<span class="resetExternalInfo" (click)="triggerInfo()">Reset</span>
+
 </div>
 
 <div class="result">
-  <p *ngIf="!!task.submission_data">
-    Abgabe: {{task.submission_data}} Todo as Table
-    <br>
-    <br>
-  </p>
+  <p *ngIf="!!task.submission_data">Abgabe: </p>
+
+  <div class="choice_form">
+    <div *ngFor="let answer of submittedChoices">
+      <mat-checkbox disabled="true" [checked]="answer['value']">{{answer['text']}}</mat-checkbox>
+      <br>
+    </div>
+  </div>
+
+
   <span class="filler"></span>
   <p>{{task.submit_date| date:'medium'}}</p>
 </div>

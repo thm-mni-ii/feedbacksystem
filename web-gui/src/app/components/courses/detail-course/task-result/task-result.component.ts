@@ -20,11 +20,11 @@ export class TaskResultComponent implements OnInit {
   }
 
   parseResultString(resultstring: string): any[]{
-    if (resultstring == null) return []
+    if (resultstring == null) return [];
     try {
-      let obj = JSON.parse(resultstring)
+      let obj = JSON.parse(resultstring);
       if (obj == null)
-        return null
+        return null;
       else
         return obj
     } catch (e) {
