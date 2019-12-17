@@ -7,7 +7,6 @@ function dockerPush(){
     tag=$1
     echo "tag is: "$tag
 
-
     docker tag feedbacksystem_secrettokenchecker thmmniii/secrettokenchecker:$tag
     docker tag feedbacksystem_ws thmmniii/ws:$tag
     docker tag feedbacksystem_sqlchecker thmmniii/sqlchecker:$tag
@@ -31,7 +30,15 @@ echo "DOCKER IMAGES"
 docker images
 
 dockerPush $tag
-dockerPush latest
+
+if [[ $tag == *"dev"* ]]
+    then
+      dockerPush dev-latest
+    else
+      dockerPush latest
+    fi
+
+
 
 
 
