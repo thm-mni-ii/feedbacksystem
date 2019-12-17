@@ -42,7 +42,7 @@
 
 
         <mat-tab-group animationDuration="0ms">
-          <mat-tab *ngFor="let subTypes of ['text','file','choice']" label="{{subTypes}}" class="tab">
+          <mat-tab *ngFor="let subTypes of submissionTypeOfTask(task)" label="{{subTypes}}" class="tab">
             <!-- Submission -->
             <app-task-submission-file *ngIf="subTypes == 'file'" [task]="task" [deadlineTask]="deadlineTask[task.task_id]" (triggerInfo)="triggerExternalDescriptionIfNeeded($event, true)"  (update)="updateSubmissionContent($event)" ></app-task-submission-file>
             <app-task-submission-text *ngIf="subTypes == 'text'" [task]="task" [deadlineTask]="deadlineTask[task.task_id]" (update)="updateSubmissionContent($event)" (rerun)="reRunTask($event)"></app-task-submission-text>

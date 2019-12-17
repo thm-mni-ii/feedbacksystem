@@ -11,7 +11,7 @@
 </div>
 
 
-<mat-form-field class="user-input-text" appearance="outline">
+<mat-form-field style="width: 100%;" class="user-input-text" appearance="outline">
   <mat-label>Abgabe Text</mat-label>
-  <textarea style="height: 60px;" matInput type="text" (change)="updateSubmission($event.target)" [(ngModel)]="task.submission_data"></textarea>
+  <textarea style="height: 60px;" matInput type="text" (change)="updateSubmission($event)" [(ngModel)]="task.submission_data"></textarea>
 </mat-form-field>

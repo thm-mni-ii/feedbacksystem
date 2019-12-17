@@ -74,8 +74,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     if((flagg >> 2) & 1){
       accepted.push({typ: "choice", text: "Multiple Choice"})
     }
-    //console.log(accepted)
-    return accepted;
+
+    return ['text','file','choice'].filter(v => {
+      return accepted.map(v => v.typ).indexOf(v) >= 0
+    });
   }
 
   ngOnInit() {

@@ -17,9 +17,9 @@ export class TaskSubmissionTextComponent implements OnInit {
 
   }
 
-  updateSubmission(data: any){
-    console.log("update", data)
-    this.udapte.emit({taskid: this.task.task_id, content: data})
+  updateSubmission(event){
+    console.log("update", this.task.submission_data)
+    this.udapte.emit({taskid: this.task.task_id, content: this.task.submission_data})
   }
 
 }

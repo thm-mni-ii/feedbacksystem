@@ -10,9 +10,10 @@
 </div>
 
 <div id="choice_form">
-  <mat-form-field matCheckboxes [(ngModel)]="submission" (change)="updateSubmission($event.target)">
-    <mat-checkbox *ngFor="let answer of parse(task)" [value]="answer['id']">{{answer['text']}}</mat-checkbox>
-  </mat-form-field>
+  <mat-checkbox *ngFor="let answer of parse(task)" [value]="answer['id']">{{answer['text']}}</mat-checkbox>
+  <!--<mat-form-field matCheckboxes [(ngModel)]="submission" (change)="updateSubmission($event.target)">
+
+  </mat-form-field>-->
 
 </div>
 

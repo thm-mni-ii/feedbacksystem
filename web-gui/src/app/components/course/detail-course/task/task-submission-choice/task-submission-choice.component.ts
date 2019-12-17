@@ -19,9 +19,8 @@ export class TaskSubmissionChoiceComponent implements OnInit {
   }
 
   parse(task: CourseTask){
-    return [];
-    // TODO only correct task use this component
-    // return JSON.parse(task.external_description)
+    console.warn(task.external_description)
+    return JSON.parse(task.external_description)
   }
 
 
