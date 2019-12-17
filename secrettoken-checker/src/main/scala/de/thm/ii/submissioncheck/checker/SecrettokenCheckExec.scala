@@ -50,7 +50,6 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
 
     val infoArgument = if (isInfo) "info" else ""
     val name = jsonMap("username").asInstanceOf[String]
-    
     if (compile_production) {
       seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + scriptpath.replace(ULDIR, "") + __colon + scriptpath,
         __option_v, dockerRelPath + __slash + testfilePathRel.replace(ULDIR, "") + __colon + __slash + testfilePath, __option_v,
