@@ -31,7 +31,6 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
   (Boolean, String, Int) = {
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
-    val baseFilePath = Paths.get(ULDIR).resolve(taskid)
     val (basepath, checkerfiles) = loadCheckerConfig(taskid)
 
     val scriptFile = checkerfiles(0).toFile
@@ -42,17 +41,16 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     if (scriptContent.split("\n").head.matches("#!.*php.*")) interpreter = "php"
 
     val absPath = scriptFile.getAbsolutePath
-    val testfileFile = new File(baseFilePath.resolve("testfile").toString)
+    val testfileFile = new File(basepath.resolve("testfile").toString)
     val testfilePathRel = testfileFile.getPath
     val testfilePath = testfileFile.getAbsolutePath
     val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { testfilePath } else ""
-
     val bashDockerImage = System.getenv("BASH_DOCKER")
     var seq: Seq[String] = null
 
     val infoArgument = if (isInfo) "info" else ""
     val name = jsonMap("username").asInstanceOf[String]
-
+    
     if (compile_production) {
       seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + scriptpath.replace(ULDIR, "") + __colon + scriptpath,
         __option_v, dockerRelPath + __slash + testfilePathRel.replace(ULDIR, "") + __colon + __slash + testfilePath, __option_v,
@@ -68,7 +66,7 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     var exitCode = Process("docker", seq).!(procLogger)
-    val output = stdoutStream.toString() + "\n" + stderrStream.toString()
+    val output = stdoutStream.toString() //+ "\n" + stderrStream.toString()
     if (stderrStream.toString.length > 0 && exitCode == 0) exitCode = 2*21
     val success = exitCode == 0
 
