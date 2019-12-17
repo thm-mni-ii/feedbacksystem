@@ -11,7 +11,7 @@ export class TaskSubmissionFileComponent implements OnInit {
   @Input() deadlineTask:any;
 
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
-  @Output() triggerInfo: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
+  @Output() trigger: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
   // triggerExternalDescriptionIfNeeded(task, true)
   submissionFile: File;
   constructor() { }
@@ -19,12 +19,14 @@ export class TaskSubmissionFileComponent implements OnInit {
   ngOnInit() {
 
   }
+  triggerInfo(){
+    this.trigger.emit(this.task)
+  }
+
   updateSubmissionFile(file: File){
     this.submissionFile = file;
     this.update.emit({taskid: this.task.task_id, content: this.submissionFile})
 
   }
-  trigger(){
-    this.triggerInfo.emit(this.task)
-  }
+
 }

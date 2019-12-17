@@ -12,13 +12,20 @@ export class TaskSubmissionChoiceComponent implements OnInit {
 
   submission: any;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
+  @Output() trigger: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
+
   constructor() { }
 
   ngOnInit() {
 
   }
 
+  triggerInfo(){
+    this.trigger.emit(this.task)
+  }
+
   parse(task: CourseTask){
+    if (!task.load_external_description) return [];
     console.warn(task.external_description)
     return JSON.parse(task.external_description)
   }

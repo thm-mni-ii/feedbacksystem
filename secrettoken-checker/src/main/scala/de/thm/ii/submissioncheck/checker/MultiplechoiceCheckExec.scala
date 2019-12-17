@@ -18,7 +18,7 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
   /** the unique identification of a checker, will extended to "helloworldchecker" */
   override val checkername = "multiplechoice"
   /** define which configuration files the checker need - to be overwritten */
-  override val configFiles: Map[String, Boolean] = Map("exercise.json" -> true)
+  override val configFiles: Map[String, Boolean] = Map("exercise.csv" -> true)
   /** define allowed submission types - to be overwritten */
   override val allowedSubmissionTypes: List[String] = List("file", "data")
   private val LABEL_TEXT = "text"
@@ -43,7 +43,6 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
 
     val inputCSVData = scala.io.Source.fromFile(configfiles(0).toString).mkString
-
 
     val originalSolution: List[Map[String, Boolean]] = inputCSVData.split("\n").map(line => {
       val row = line.split(",")
@@ -72,7 +71,6 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
       List(Map(LABEL_HEADER -> "Multiple Choice", LABEL_RESULT -> correctedMap))
     }
     (passed, JsonHelper.listToJsonStr(output), if (passed) 0 else 1)
-
   }
 }
 
