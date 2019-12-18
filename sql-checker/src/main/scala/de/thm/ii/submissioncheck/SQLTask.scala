@@ -120,6 +120,15 @@ class SQLTask(val filepath: String, val taskId: String){
   deleteDatabase("little_test")
   logger.warning("sqltask-constructor ended")
 
+  private def toList(res: scala.Array[scala.Array[String]]) = {
+    val liste = res.toList
+    if (liste.isEmpty){
+      List()
+    } else {
+      liste.map(l => l.toList)
+    }
+  }
+
   private def createDatabase(name: String): Unit = {
     val dbdef = scala.io.Source.fromFile(filepath + "/db.sql").mkString.split(';')
     connection.setAutoCommit(false)
@@ -163,11 +172,11 @@ class SQLTask(val filepath: String, val taskId: String){
     * @param userid userid
     * @return tuple with message and boolean
     */
-  def runSubmission(userq: String, userid: String): (String, Boolean, String) = {
+  def runSubmission(userq: String, userid: String): (String, Boolean, String, String) = {
     var msg = "Your Query didn't produce the correct result"; var fit = "No query did match"
     var success = false; var identified = false; var foundindex = -1
     val ustatement = connection.createStatement; ustatement.setQueryTimeout(timeoutsec)
-    val dbname = userid + us + dbliteral; val username = userid + us + taskid
+    val dbname = userid + us + dbliteral; var userResultSet: List[List[String]] = List()
     createDatabase(dbname)
     try {
       val userres = executeComplexQueries(userq)
@@ -176,6 +185,7 @@ class SQLTask(val filepath: String, val taskId: String){
         for (i <- 0 until queryc){
           queryres(i).res.beforeFirst()
           var queryarr = arrayfromRS(queryres(i).res)
+          userResultSet = toList(userarr)
           var userarray = userarr
           if (queryarr.toList.isEmpty) { // no result from original query, what should compared?
             if (userarray.toList.isEmpty) {
@@ -208,7 +218,8 @@ class SQLTask(val filepath: String, val taskId: String){
       fit = taskqueries(foundindex)("query")
       if(msg.equals("OK")) success = true
     }
-    (msg, success, fit)
+    val userqueryRes = if (identified) toList(arrayfromRS(queryres(foundindex).res)) else List()
+    (msg, success, JsonHelper.listToJsonStr(userqueryRes), JsonHelper.listToJsonStr(userResultSet))
   }
 
   private def compareRow(userres: ResultSet, querynum: Int): Boolean = {

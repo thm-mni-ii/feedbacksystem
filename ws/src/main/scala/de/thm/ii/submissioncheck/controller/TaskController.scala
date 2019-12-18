@@ -77,6 +77,7 @@ class TaskController {
   /** JSON variable taskid ID*/
   final val LABEL_TASK_ID = "taskid"
   private val LABEL_BEST_FIT = "choice_best_result_fit"
+  private val LABEL_PRE_RESULT = "calculate_pre_result"
   /** JSON variable userid ID*/
   final val LABEL_USER_ID = "userid"
   /** JSON variable submissionid ID*/
@@ -126,7 +127,6 @@ class TaskController {
         kafkaReloadNewTaskAnswerService
         configurateStorageService
         kafkaLoadPlagiatCheckerService
-        sendTaskToPlagiatChecker
         kafkaLoadPlagiatScriptAnswerService
       }
     }, bean_delay)
@@ -590,30 +590,6 @@ class TaskController {
   private def httpResponseHeaderValue(resource: Resource) = "attachment; filename=\"" + resource.getFilename + "\""
 
   /**
-    * for every non checked but expired task, send this task to the plagiat check system
-    */
-  def sendTaskToPlagiatChecker(): Unit = {
-    val tasks = taskService.getExpiredTasks()
-    if (tasks.nonEmpty) {
-      for (task <- tasks) {
-        val taskid: Int = task(TaskDBLabels.taskid).asInstanceOf[Int]
-        val submissionMatrix = taskService.getSubmissionsByTask(taskid)
-        val tasksystem_id = "plagiarismchecker"
-        val kafkaMap: Map[String, Any] = Map("task_id" -> taskid, LABEL_COURSE_ID -> task(TaskDBLabels.courseid), "download_zip_url" ->
-          (this.taskService.getUploadBaseURL() + "/api/v1/tasks/" + taskid.toString + "/submission/users/zip"),
-          "jwt_token" ->  testsystemService.generateTokenFromTestsystem(tasksystem_id),
-          "submissionmatrix" -> submissionMatrix)
-        val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-        val kafka_topic = tasksystem_id + "_check_request"
-        logger.warn(kafka_topic)
-        logger.warn(jsonResult)
-        kafkaTemplate.send(kafka_topic, jsonResult)
-        kafkaTemplate.flush()
-      }
-    }
-  }
-
-  /**
     * plagiat checker background process will be started here
     */
   val plagiatCheckerThread = new Thread {
@@ -784,8 +760,8 @@ class TaskController {
             val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
             val testsystem = data.topic.replace("_check_answer", "")
             taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
-              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), answeredMap(LABEL_BEST_FIT).toString, testsystem)
-
+              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), answeredMap(LABEL_BEST_FIT).toString,
+              answeredMap(LABEL_PRE_RESULT).toString, testsystem)
             // We got an answer from a test, now on success case we need to trigger next phase if modus is SEQ
             if (passed == "1" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
               sendNextTestJob(submissionID)

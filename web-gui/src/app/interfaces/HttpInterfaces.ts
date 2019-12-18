@@ -95,6 +95,7 @@ export interface CourseTaskEvaluation {
   ordnr: number;
   submission_id: number;
   choice_best_result_fit?: string;
+  calculate_pre_result?: string;
 }
 
 /**

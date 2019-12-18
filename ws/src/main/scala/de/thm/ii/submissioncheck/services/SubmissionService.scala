@@ -296,7 +296,8 @@ class SubmissionService {
     * @return list of evaluated submission
     */
   def getTestsystemSubmissionEvaluationList(submission_id: Int, with_result_fit: Boolean = false): List[Map[String, Any]] = {
-    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.step, st.result_date, st.choice_best_result_fit, ss.submission_id from submission ss " +
+    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.step, st.result_date, st.choice_best_result_fit, " +
+      "st.calculate_pre_result, ss.submission_id from submission ss " +
       "join task t using(task_id) join task_testsystem tt using (task_id) " +
       "left join submission_testsystem st on st.testsystem_id = tt.testsystem_id and st.submission_id = ? and tt.ordnr <= st.step " +
       "where ss.submission_id = ? order by tt.ordnr",
@@ -308,7 +309,11 @@ class SubmissionService {
           SubmissionTestsystemDBLabels.passed -> getNullOrBoolean(res.getString(SubmissionTestsystemDBLabels.passed)),
           SubmissionTestsystemDBLabels.result -> res.getString(SubmissionTestsystemDBLabels.result),
           SubmissionTestsystemDBLabels.result_date -> res.getTimestamp(SubmissionTestsystemDBLabels.result_date))
-          if(with_result_fit) m += (SubmissionTestsystemDBLabels.choice_best_result_fit -> res.getString(SubmissionTestsystemDBLabels.choice_best_result_fit))
+
+          if(with_result_fit) {
+            m += (SubmissionTestsystemDBLabels.choice_best_result_fit -> res.getString(SubmissionTestsystemDBLabels.choice_best_result_fit))
+            m += (SubmissionTestsystemDBLabels.calculate_pre_result -> res.getString(SubmissionTestsystemDBLabels.calculate_pre_result))
+          }
         m
       }, submission_id, submission_id)
   }

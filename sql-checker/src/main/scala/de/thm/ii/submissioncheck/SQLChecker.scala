@@ -79,6 +79,7 @@ object SQLChecker extends App {
   private val TASK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_new_task_request"
   private val TASK_ANSWER_TOPIC = SYSTEMIDTOPIC + "_new_task_answer"
   private val LABEL_BEST_FIT = "choice_best_result_fit"
+  private val LABEL_PRE_RESULT = "calculate_pre_result"
 
   private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
   private val config = ConfigFactory.load(appConfig)
@@ -200,7 +201,7 @@ object SQLChecker extends App {
       }
       val task: SQLTask = new SQLTask(ULDIR + taskid, taskid)
       var passed: Int = 0
-      val (msg, success, best_fit) = task.runSubmission(userquery, userid)
+      val (msg, success, best_fit, pre_result) = task.runSubmission(userquery, userid)
       if (success){
         passed = 1
       }
@@ -211,7 +212,8 @@ object SQLChecker extends App {
         "userid" -> userid,
         LABEL_TASKID -> taskid,
         "submissionid" -> submissionid,
-        LABEL_BEST_FIT -> best_fit
+        LABEL_BEST_FIT -> best_fit,
+        LABEL_PRE_RESULT -> pre_result
       )))
     } catch {
       case e: NoSuchElementException => {
@@ -219,7 +221,9 @@ object SQLChecker extends App {
           "Error" -> "Please provide valid parameters"
         )))
       }
-      case e: Exception => logger.warning("Got Exception from SQLTask with no catch: " + e.getMessage + " " + e.toString)
+      case e: Exception => {
+        logger.warning("Got Exception from SQLTask with no catch: " + e.getMessage + " " + e.toString)
+      }
     }
   }
 

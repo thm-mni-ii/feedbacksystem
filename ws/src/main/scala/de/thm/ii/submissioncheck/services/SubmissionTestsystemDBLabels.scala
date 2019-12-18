@@ -27,4 +27,7 @@ object SubmissionTestsystemDBLabels {
 
   /** Db Label choice_best_result_fit */
   val choice_best_result_fit: String = "choice_best_result_fit"
+
+  /** Db Label calculate_pre_result */
+  val calculate_pre_result: String = "calculate_pre_result"
 }

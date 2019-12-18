@@ -35,6 +35,7 @@ class BaseChecker(val compile_production: Boolean) {
   private val LABEL_CLOSE = "close"
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_BEST_FIT = "choice_best_result_fit"
+  private val LABEL_PRE_RESULT = "calculate_pre_result"
 
   /** LABEL -v*/
   val __option_v = "-v"
@@ -296,7 +297,8 @@ class BaseChecker(val compile_production: Boolean) {
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
         LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output,
-        LABEL_BEST_FIT -> ""
+        LABEL_BEST_FIT -> "",
+        LABEL_PRE_RESULT -> ""
       )))
     } catch {
       case e: Exception => {

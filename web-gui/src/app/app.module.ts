@@ -59,6 +59,7 @@ import { ImportCourseComponent } from './components/courses/import-course/import
 import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
 import { CourseResultDetailsComponent } from './components/courses/course-result-details/course-result-details.component';
 import { CourseResultDetailTableComponent } from './components/courses/course-result-detail-table/course-result-detail-table.component';
+import { CourseResultAsTableComponent } from './components/courses/course-result-as-table/course-result-as-table.component';
 
 
 @Injectable()
@@ -119,6 +120,7 @@ export const httpInterceptorProviders = [
     ChangePasswdComponent,
     CourseResultDetailsComponent,
     CourseResultDetailTableComponent,
+    CourseResultAsTableComponent,
   ],
   imports: [
     BrowserModule,
