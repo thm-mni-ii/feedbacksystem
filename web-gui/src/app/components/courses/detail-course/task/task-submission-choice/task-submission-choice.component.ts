@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CourseTask} from "../../../../../interfaces/HttpInterfaces";
+import {MiscService} from "../../../../../service/misc.service";
 
 @Component({
   selector: 'app-task-submission-choice',
@@ -15,7 +16,7 @@ export class TaskSubmissionChoiceComponent implements OnInit {
   @Output() rerun: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
   checkModel = [];
   submittedChoices = [];
-  constructor() { }
+  constructor(private misc: MiscService) { }
 
   ngOnInit() {
     this.checkModel = this.parse(this.task).map(v => {
@@ -25,18 +26,19 @@ export class TaskSubmissionChoiceComponent implements OnInit {
 
     if(this.task.load_external_description){
 
-      // TODO check if parsable
-      let subMap = JSON.parse(this.task.submission_data)
+      if(this.misc.isJSON(this.task.submission_data)) {
+        let subMap = JSON.parse(this.task.submission_data);
 
-      for (let key in Object.keys(subMap)){
-        let val = subMap[key];
+        for (let key in Object.keys(subMap)){
+          let val = subMap[key];
 
-        let text = this.checkModel.filter(v => v["id"] == key)[0]["text"]
-        this.submittedChoices.push({
-          'id' : key,
-          'text': text,
-          'value': val
-        })
+          let text = this.checkModel.filter(v => v["id"] == key)[0]["text"];
+          this.submittedChoices.push({
+            'id' : key,
+            'text': text,
+            'value': val
+          })
+        }
       }
     }
 
