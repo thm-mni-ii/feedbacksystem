@@ -109,7 +109,6 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         this.processing[task.task_id] = false;
         this.triggerExternalDescriptionIfNeeded(task, false)
       });
-      console.log( this.submissionAsFile)
       this.titlebar.emitTitle(course_detail.course_name);
     }, error => this.router.navigate(['404']))
 
@@ -453,7 +452,6 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   updateSubmissionContent(payload: any){
-    console.log("454", payload);
     this.submissionData[payload['taskid']] = payload['content'];
   }
 

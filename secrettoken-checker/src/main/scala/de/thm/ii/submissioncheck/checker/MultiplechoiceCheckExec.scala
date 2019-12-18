@@ -42,12 +42,12 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     // read csv
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
 
-    val inputCSVData = scala.io.Source.fromFile(configfiles(0).toString).mkString
-
-    val originalSolution: List[Map[String, Boolean]] = inputCSVData.split("\n").map(line => {
-      val row = line.split(",")
-      Map(row(0) -> toBool(row(1)))
-    }).toList
+    val reader = new CSVReader(new FileReader(configfiles(0).toString))
+    var originalSolution: List[Map[String, Boolean]] = List()
+    reader.readAll().toArray().toList.asInstanceOf[List[Array[String]]].foreach(line => {
+      val readerLine = line.toList
+      originalSolution = Map(readerLine(0) -> toBool(readerLine(1))) :: originalSolution
+    })
 
     var passed = true
 
