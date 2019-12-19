@@ -61,29 +61,6 @@ class CourseController {
     " personalised_submission. The parameter course_semester, course_modul_id and course_end_date are optional"
   private val LABEL_SUCCESS = "success"
   private val LABEL_ZIP_NOT_FOUND = "Zip file could not be found."
-  private var storageService: StorageService = null
-
-  /**
-    * Using autowired configuration, they will be loaded after self initialization
-    */
-  def configurateStorageService(): Unit = {
-    this.storageService = new StorageService(compile_production)
-  }
-
-  /**
-    * After autowiring initialize storage service
-    * @return timer run
-    */
-  @Bean
-  def importStorageProcessor: SmartInitializingSingleton = () => {
-    /** wait 3 seconds to be sure everything is connected like it should*/
-    val bean_delay = 300
-    new Timer().schedule(new TimerTask() {
-      override def run(): Unit = {
-        configurateStorageService
-      }
-    }, bean_delay)
-  }
 
   /**
     * getAllCourses is a route for all courses
@@ -289,8 +266,7 @@ class CourseController {
     if (requestingUser.isEmpty || !courseService.isPermittedForCourse(courseid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-
-    val storagePath = storageService.storeZipImportFile(file)
+    val storagePath = (new StorageService(compile_production)).storeZipImportFile(file)
     val filename = file.getOriginalFilename
 
     Map(LABEL_SUCCESS -> courseService.recoverACourse(courseid, storagePath.resolve(filename)))
@@ -310,7 +286,7 @@ class CourseController {
       throw new UnauthorizedException
     }
 
-    val storagePath = storageService.storeZipImportFile(file)
+    val storagePath = (new StorageService(compile_production)).storeZipImportFile(file)
     val filename = file.getOriginalFilename
 
     Map(LABEL_SUCCESS -> courseService.importACourse(storagePath.resolve(filename)))
