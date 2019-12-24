@@ -27,12 +27,16 @@ class StorageService(compile_production: Boolean) {
   val log: Logger = LoggerFactory.getLogger(this.getClass.getName)
 
   private val __slash = "/"
+  private val systemTempDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
   /** upload folder name */
-  final val UPLOAD_FOLDER: String = (if (compile_production) __slash else "") + "upload-dir/"
-    private val ZIP_IMPORT_FOLDER: String = (if (compile_production) __slash else "") + "zip-dir/imports"
+  final val UPLOAD_FOLDER: Path = Paths.get((if (compile_production) __slash else "") + "upload-dir/")
 
-  private val rootLocation = Paths.get(UPLOAD_FOLDER)
-  private val rootZipImportLocation = Paths.get(ZIP_IMPORT_FOLDER)
+  private var ZIP_IMPORT_FOLDER: Path = systemTempDir.resolve("zip-dir")
+  // create folders
+  ZIP_IMPORT_FOLDER.toFile.mkdir()
+  ZIP_IMPORT_FOLDER = ZIP_IMPORT_FOLDER.resolve("imports")
+  ZIP_IMPORT_FOLDER.toFile.mkdir()
+
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   private final val PLAGIAT_SCRIPT_NAME = "plagiatcheck.sh"
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
@@ -126,7 +130,7 @@ class StorageService(compile_production: Boolean) {
     */
   def storeZipImportFile(file: MultipartFile): Path = {
     try {
-      val storeLocation = Paths.get(ZIP_IMPORT_FOLDER).resolve(Secrets.getSHAStringFromNow())
+      val storeLocation = ZIP_IMPORT_FOLDER.resolve(Secrets.getSHAStringFromNow())
       try {
         Files.createDirectories(storeLocation)
       }
@@ -163,7 +167,7 @@ class StorageService(compile_production: Boolean) {
       throw new RuntimeException(LABEL_URL_MALFORMED)
   }
 
-  private def getPlagiatCheckerRootPath = Paths.get(UPLOAD_FOLDER).resolve("PLAGIAT_CHECKER")
+  private def getPlagiatCheckerRootPath = UPLOAD_FOLDER.resolve("PLAGIAT_CHECKER")
 
   /**
     * simply store a plagiat script
@@ -281,7 +285,7 @@ class StorageService(compile_production: Boolean) {
     * @return file writer wrapper
     */
   def createTemporaryFileWriter(filename: String): TemporaryFileWriter = {
-    val basepath = rootZipImportLocation.getParent.resolve(Secrets.getSHAStringFromNow())
+    val basepath = ZIP_IMPORT_FOLDER.getParent.resolve(Secrets.getSHAStringFromNow())
     basepath.toFile.mkdir()
     new TemporaryFileWriter(filename, basepath)
   }
@@ -312,8 +316,8 @@ class StorageService(compile_production: Boolean) {
     */
   def init(): Unit = {
     try {
-      Files.createDirectory(rootLocation)
-      Files.createDirectory(rootZipImportLocation)
+      Files.createDirectory(UPLOAD_FOLDER)
+      Files.createDirectory(ZIP_IMPORT_FOLDER)
     }
     catch {
       case e: IOException =>

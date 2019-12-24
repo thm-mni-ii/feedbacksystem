@@ -82,7 +82,7 @@ class CourseService {
   }
 
   private def getZIPDIR = {
-    (if (compile_production) "/" else "") + LABEL_ZIPDIR
+    Paths.get(System.getProperty("java.io.tmpdir")).resolve(LABEL_ZIPDIR)
   }
 
   private def getUPLOADDIR = {
@@ -437,7 +437,7 @@ class CourseService {
   def zipOfSubmissionsOfUsersFromCourse(only_last_try: Boolean, courseid: Integer): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(getZIPDIR.resolve(tmp_folder))
 
     val studentList = getStudentsFromCourse(courseid)
 
@@ -453,7 +453,7 @@ class CourseService {
           if (i == 0) {
             last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[java.sql.Timestamp].toString.replace(":",
               LABEL_UNDERLINE).replace(" ", "")
-            tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
+            tmpZiptaskPath = getZIPDIR.resolve(tmp_folder).resolve(implode(List(student(UserDBLabels.username).asInstanceOf[String],
               task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
             Files.createDirectories(tmpZiptaskPath)
           }
@@ -474,7 +474,7 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, getZIPDIR.resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -485,10 +485,10 @@ class CourseService {
     */
   def exportCourseImportable(courseid: Int): Path = {
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(getZIPDIR.resolve(tmp_folder))
     var courseMap: Map[String, Any] = Map(LABEL_COURSE -> getCourseDetails(courseid, new SimpleUser()))
 
-    val tasksDir = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_TASKS)
+    val tasksDir = getZIPDIR.resolve(tmp_folder).resolve(LABEL_TASKS)
     Files.createDirectories(tasksDir)
 
     val studentList = getStudentsFromCourse(courseid)
@@ -510,10 +510,10 @@ class CourseService {
 
     courseMap += (LABEL_TASKS -> taskList)
     courseMap += ("submissions" -> subs)
-    FileOperations.writeToFile(JsonParser.mapToJsonStr(courseMap), Paths.get(getZIPDIR).resolve(tmp_folder).resolve(LABEL_COURSE_JSON))
+    FileOperations.writeToFile(JsonParser.mapToJsonStr(courseMap), getZIPDIR.resolve(tmp_folder).resolve(LABEL_COURSE_JSON))
 
-    val finishZipPath = Paths.get(getZIPDIR).resolve(s"export_${courseid}_${tmp_folder}.zip")
-    FileOperations.zip(finishZipPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    val finishZipPath = getZIPDIR.resolve(s"export_${courseid}_${tmp_folder}.zip")
+    FileOperations.zip(finishZipPath, getZIPDIR.resolve(tmp_folder).toString)
     finishZipPath
   }
 
@@ -536,7 +536,7 @@ class CourseService {
   def zipOfSubmissionsOfUserFromCourse(only_last_try: Boolean, courseid: Integer, user: User): String = {
     var allPath: List[Path] = List()
     val tmp_folder = Secrets.getSHAStringFromNow()
-    Files.createDirectories(Paths.get(getZIPDIR).resolve(tmp_folder))
+    Files.createDirectories(getZIPDIR.resolve(tmp_folder))
 
     for (task <- taskService.getTasksByCourse(courseid)) {
       var last_submission_date: String = null
@@ -549,7 +549,7 @@ class CourseService {
         if (i == 0) {
           last_submission_date = submission(SubmissionDBLabels.submit_date).asInstanceOf[String].replace(":",
             LABEL_UNDERLINE).replace(" ", "")
-          tmpZiptaskPath = Paths.get(getZIPDIR).resolve(tmp_folder).resolve(implode(List(user.username,
+          tmpZiptaskPath = getZIPDIR.resolve(tmp_folder).resolve(implode(List(user.username,
             task(TaskDBLabels.taskid).toString, last_submission_date), LABEL_UNDERLINE))
           Files.createDirectories(tmpZiptaskPath)
         }
@@ -568,7 +568,7 @@ class CourseService {
       }
     }
     val finishZipPath = "zip-dir/abgabe_" + user.username + LABEL_UNDERLINE + tmp_folder + ".zip"
-    FileOperations.complexZip(Paths.get(finishZipPath), allPath, Paths.get(getZIPDIR).resolve(tmp_folder).toString)
+    FileOperations.complexZip(Paths.get(finishZipPath), allPath, getZIPDIR.resolve(tmp_folder).toString)
     finishZipPath
   }
 

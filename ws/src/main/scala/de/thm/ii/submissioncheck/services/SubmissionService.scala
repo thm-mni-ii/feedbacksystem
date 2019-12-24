@@ -157,7 +157,7 @@ class SubmissionService {
   }
 
   private def insertReplaceSubmission(subid: Any, submit_date: String, user_id: Int, task_id: Int, filename: String, sub_data: String,
-                                      plagiat_passed: Boolean): Int = {
+                                      plagiat_passed: Any): Int = {
       val (num, holder) = DB.update((con: Connection) => {
         val ps = con.prepareStatement("REPLACE INTO submission (submission_id, submit_date, user_id, task_id, filename, submission_data," +
           "plagiat_passed) VALUES (?,?,?,?,?,?,?);",
@@ -175,7 +175,12 @@ class SubmissionService {
         ps.setInt(paramIndex, task_id); paramIndex+=1
         ps.setString(paramIndex, filename); paramIndex+=1
         ps.setString(paramIndex, sub_data); paramIndex+=1
-        ps.setBoolean(paramIndex, plagiat_passed); paramIndex+=1
+        if (plagiat_passed == null){
+          ps.setString(paramIndex, null); paramIndex+=1
+        } else {
+          ps.setString(paramIndex, plagiat_passed.toString); paramIndex+=1
+        }
+
         ps
       })
 
@@ -203,7 +208,7 @@ class SubmissionService {
 
       subID = insertReplaceSubmission(insertSubId, s_date, submission(SubmissionDBLabels.userid).toString.toInt, corTaskID,
         submission(SubmissionDBLabels.filename).toString, submission(SubmissionDBLabels.submission_data).toString,
-        submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[Boolean])
+        submission(SubmissionDBLabels.plagiat_passed))
 
       val evaList = submission("evaluation").asInstanceOf[List[Map[String, Any]]]
       for (eva <- evaList) { //then insert update replace evaluation list
