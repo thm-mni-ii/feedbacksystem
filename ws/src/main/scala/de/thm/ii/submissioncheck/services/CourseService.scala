@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import java.util.Calendar
+
+import de.thm.ii.submissioncheck.controller.ClientService
+import org.slf4j.{Logger, LoggerFactory}
 /**
   * CourseService provides interaction with DB
   *
@@ -39,7 +42,7 @@ class CourseService {
   private final val LABEL_DESC = "desc"
   private final val LABEL_COURSE_JSON = "course.json"
   private final val LABEL_COURSE = "course"
-
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClientService])
   @Value("${compile.production}")
   private val compile_production: Boolean = true
 
@@ -702,46 +705,12 @@ class CourseService {
     * @return Scala List
     */
   def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int): List[Any] = {
-    val tasks = taskService.getTasksByCourse(courseid).reverse
     val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit)
-    val taskShortLabels = List.range(1, tasks.length + 1, 1).map(f => "A" + f.toString)
     var matrix: List[Any] = List()
     for(u <- subscribedStudents){
-      var tasksPassedSum = 0
-      var processedTasks: List[Any] = List()
-      for((task, i) <- tasks.zipWithIndex){
-        val userSubmissions = submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, u("user_id"))
-          /* processing - number of trials - passed - passed date */
-        var passed: Boolean = false
-        var passedDate: Any = null
-        var passed_string: String = null
-        var final_sub_id: Int = -1
-        var plagiat_passed: List[String] = List()
-        for(submission <- userSubmissions) {
-          plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-          val submissionPassed = submissionService.getSubmissionPassed(Integer.parseInt(submission(SubmissionDBLabels.submissionid).toString))
-          if (submissionPassed != null && passed_string == null) passed_string = submissionPassed
-          if (passed_string == LABEL_FALSE && submissionPassed == LABEL_TRUE) passed_string = submissionPassed
-
-          if (!passed &&  submissionPassed == LABEL_TRUE) {
-            passed = true
-            passedDate = submission("submit_date")
-            final_sub_id = Integer.parseInt(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
-          }
-        }
-
-        // If no submission was correct, we send the last submission
-        if (!passed && userSubmissions.length > 0) final_sub_id = Integer.parseInt(userSubmissions.last(SubmissionDBLabels.submissionid).asInstanceOf[String])
-
-        tasksPassedSum = tasksPassedSum + passed.compare(false)
-        val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
-        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> userSubmissions.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, "submission_id" -> final_sub_id, SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
-
-        processedTasks = taskStudentCell :: processedTasks
-      }
-      val passed_glob = (processedTasks.length == tasksPassedSum)
+      logger.warn("[getSubmissionsMatrixByCourse]: " + u.toString())
+      val (passed_glob, processedTasks: List[Any]) = submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(
+        u(UserDBLabels.user_id).toString.toInt, courseid)
       val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
         UserDBLabels.user_id -> u(UserDBLabels.user_id),
         UserDBLabels.prename -> u(UserDBLabels.prename), UserDBLabels.surname -> u(UserDBLabels.surname),
