@@ -427,7 +427,8 @@ class TaskService {
         TestsystemLabels.description -> res.getString(TestsystemLabels.description),
         TestsystemLabels.supported_formats -> res.getString(TestsystemLabels.supported_formats),
         TestsystemLabels.machine_ip -> res.getString(TestsystemLabels.machine_ip),
-        TestsystemLabels.machine_port -> res.getString(TestsystemLabels.machine_port))
+        TestsystemLabels.machine_port -> res.getString(TestsystemLabels.machine_port),
+        TestsystemLabels.accepted_input -> res.getInt(TestsystemLabels.accepted_input))
     }, taskid)
   }
 

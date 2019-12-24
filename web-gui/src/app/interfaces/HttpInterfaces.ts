@@ -201,6 +201,7 @@ export interface TaskTestsystem{
   test_file_name: string;
   task_id	: number;
   ordnr	: number;
+  accepted_input: number; // needs a calculation of what the input is accepted
 }
 
 export interface Testsystem {

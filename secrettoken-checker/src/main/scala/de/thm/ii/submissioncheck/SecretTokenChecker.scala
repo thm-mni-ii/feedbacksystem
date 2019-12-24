@@ -28,7 +28,7 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.checker.{GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec}
+import de.thm.ii.submissioncheck.checker.{GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec, MultiplechoiceCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -134,6 +134,8 @@ object SecretTokenChecker extends App {
   val plagiatCheckExec = new PlagiatCheckExec(compile_production)
   /**  the node check instance*/
   val nodeCheckExec = new NodeCheckExec(compile_production)
+  /** Connection to Multiplechoice Checker  */
+  val multiplechoiceCheckExec = new MultiplechoiceCheckExec(compile_production)
   /**  the secrettoken check instance*/
   val secrettokenCheckExec = new SecrettokenCheckExec(compile_production)
   /**  the secrettoken check instance*/
@@ -201,6 +203,18 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  private val control_multiplechoicechecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(multiplechoiceCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(multiplechoiceCheckExec.submissionReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_multiplechoicetaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(multiplechoiceCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(multiplechoiceCheckExec.taskReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -228,6 +242,14 @@ object SecretTokenChecker extends App {
       case Failure(err) => logger.warning(err.getMessage)
     }
     control_gittaskchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_multiplechoicechecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_multiplechoicetaskchecker.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }

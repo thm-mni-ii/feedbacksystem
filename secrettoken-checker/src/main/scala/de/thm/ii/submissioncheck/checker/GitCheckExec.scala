@@ -20,10 +20,6 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
   override val configFiles: Map[String, Boolean] = Map("structurecheck" -> true, "config.json" -> false)
 
   private val timeout = 5000
-
-  private val LABEL_TEST = "test"
-  private val LABEL_RESULT = "result"
-  private val LABEL_HEADER = "header"
   private val LABEL_GIT = "git"
   /** file of checker to configure it */
   var LABEL_CONFIGFILE = "config.json"

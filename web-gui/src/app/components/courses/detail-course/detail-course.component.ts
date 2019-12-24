@@ -25,6 +25,7 @@ import {CourseParameterModalComponent} from "./course-parameter-modal/course-par
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
 import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
 import set = Reflect.set;
+import {MatTabChangeEvent} from "@angular/material/tabs";
 
 /**
  * Shows a course in detail
@@ -47,10 +48,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   userRole: string;
   submissionData: { [task: number]: File | string };
   processing: { [task: number]: boolean };
-  submissionAsFile: { [task: number]: boolean };
+  submissionAsFile: { [task: number]: string };
   deadlineTask: { [task: number]: boolean };
   courseID: number;
   breakpoint: number;
+  multipleChoices: { [task: number]: boolean };
 
   hasScrolledToTask: boolean = false;
 
@@ -59,12 +61,30 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     return now > deadline;
   }
 
+  public submissionTypeOfTask(task: CourseTask): any[]{
+    let accepted = [];
+    let flagg = task.testsystems[0].accepted_input;
+
+    if(flagg & 1){
+      accepted.push({typ: "text", text: "Text"})
+    }
+    if((flagg >> 1) & 1){
+      accepted.push({typ: "file", text: "Datei"})
+    }
+    if((flagg >> 2) & 1){
+      accepted.push({typ: "choice", text: "Multiple Choice"})
+    }
+
+    return ['text','file','choice'].filter(v => {
+      return accepted.map(v => v.typ).indexOf(v) >= 0
+    });
+  }
+
   ngOnInit() {
     this.submissionAsFile = {};
     this.processing = {};
     this.submissionData = {};
     this.deadlineTask = {};
-
 
     // Get course id from url and receive data
     this.route.params.pipe(
@@ -81,13 +101,13 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.courseDetail = course_detail;
       this.courseTasks = course_detail.tasks;
 
+
       this.userRole = course_detail.role_name;
 
       course_detail.tasks.forEach(task => {
-        this.submissionAsFile[task.task_id] = false;
+        this.submissionAsFile[task.task_id] = 'task';
         this.processing[task.task_id] = false;
         this.triggerExternalDescriptionIfNeeded(task, false)
-
       });
       this.titlebar.emitTitle(course_detail.course_name);
     }, error => this.router.navigate(['404']))
@@ -119,6 +139,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       .then((loadedTask: CourseTask) => {
         if (loadedTask.external_description != null){
           this.courseTasks[this.courseTasks.indexOf(task)] = loadedTask;
+          if(this.externalInfoIsForm(loadedTask)) this.submissionAsFile[loadedTask.task_id] = 'choice'
         } else {
           setTimeout(() => {
             this.externalInfoPoller(task, step+1)
@@ -126,6 +147,21 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         }
       })
   }
+
+  externalInfoIsForm(task: CourseTask) {
+    if(!task.load_external_description || !task.external_description) {
+      return false
+    } else {
+      try{
+        return JSON.parse(task.external_description)
+      } catch (e) {
+        return false
+      }
+
+    }
+
+  }
+
 
   public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean){
     if (force) {
@@ -302,7 +338,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.courseTasks = course_detail.tasks;
       this.courseTasks.forEach(task => {
         if(typeof this.submissionAsFile[task.task_id] == 'undefined'){
-          this.submissionAsFile[task.task_id] = false;
+
+          if(this.externalInfoIsForm(task))
+            this.submissionAsFile[task.task_id] = 'choice'
+          else
+            this.submissionAsFile[task.task_id] = 'text';
         }
       })
 
@@ -411,6 +451,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.submissionData[currentTask.task_id] = file;
   }
 
+  updateSubmissionContent(payload: any){
+    this.submissionData[payload['taskid']] = payload['content'];
+  }
 
   /**
    * Submission of user solution
@@ -491,6 +534,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       this.courseDetail = courseDetail;
       this.courseTasks = courseDetail.tasks;
     });
+  }
+
+  tabChanged(event: MatTabChangeEvent) {
+
   }
 
   get plagiarism_script_status(){
