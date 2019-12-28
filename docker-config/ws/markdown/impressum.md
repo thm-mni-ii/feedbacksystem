@@ -1,14 +1,11 @@
 # Impressum
 
-
 THM Gießen
 Wiesenstraße 14
 D - 35390 Gießen
 
 Telefon: +49 (641) 309 2300 / 2301
 Telefax: +49 (641) 309 2908
-
-Mail: 
 
 ## Haftungshinweis:
 

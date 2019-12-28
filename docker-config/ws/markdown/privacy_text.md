@@ -35,7 +35,7 @@ Wir benutzen nach Ihrer Anmeldung (mit Benutzernamen und Passwort) sogenannte �
 
 ## 5. Links zu anderen Webseiten
 
-Gelegentlich enthält die Lernplattform "www.evolution.uni-giessen.de" interaktive Verweise (sog. Links) auf Internetauftritte Dritter, für die "www.evolution.uni-giessen.de" nicht verantwortlich ist. Insbesondere hat "www.evolution.uni-giessen.de" keinerlei Einfluss auf Inhalt und Gestaltung der verlinkten externen Seiten bzw. den Internetauftritten, auf die Sie über diese Seiten gelangen. Für Inhalt und Gestaltung dieser Internetauftritte sowie die Einhaltung datenschutzrechtlicher Bestimmungen sind ausschließlich die jeweiligen Anbieter verantwortlich.
+Gelegentlich enthält die Lernplattform "www.feedback.mni.thm.de" interaktive Verweise (sog. Links) auf Internetauftritte Dritter, für die "www.feedback.mni.thm.de" nicht verantwortlich ist. Insbesondere hat "www.feedback.mni.thm.de" keinerlei Einfluss auf Inhalt und Gestaltung der verlinkten externen Seiten bzw. den Internetauftritten, auf die Sie über diese Seiten gelangen. Für Inhalt und Gestaltung dieser Internetauftritte sowie die Einhaltung datenschutzrechtlicher Bestimmungen sind ausschließlich die jeweiligen Anbieter verantwortlich.
 
 ## 6. Änderungen
 
@@ -45,4 +45,4 @@ Wir behalten uns das Recht vor, diese Bestimmungen jederzeit mit Wirkung für di
 
 Sie können sich jederzeit an uns wenden, wenn Sie wünschen, dass Ihr Profil und die zu Ihrer Person gespeicherten Daten berichtigt, gesperrt oder gelöscht werden. Darüber hinaus erteilen wir Ihnen jederzeit Auskunft darüber, welche Daten wir von Ihnen gespeichert haben sowie deren Herkunft und Empfänger sowie den Zweck der Speicherung. Für Fragen zum Datenschutz wenden Sie sich bitte an:
 
-THM Gießen, Wiesenstraße 14, D - 35390 Gießen, Telefon: +49 (641) 309 2300 / 2301, Mail:
+THM Gießen, Wiesenstraße 14, D - 35390 Gießen, Telefon: +49 (641) 309 2300 / 2301
