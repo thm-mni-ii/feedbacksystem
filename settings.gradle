@@ -1,7 +1,6 @@
 rootProject.name = 'feedbacksystem'
 
 include 'ws'
-include 'java-checker'
 include 'web-gui'
 include 'secrettoken-checker'
 include 'sql-checker'
