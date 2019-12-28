@@ -35,6 +35,23 @@ button {
   width: 100%;
 }
 
+.divider-block {
+  display: flex;
+  justify-content: center;
+  .divider {
+    margin-top: 15px;
+  }
+  div {
+    width: 30px;
+    height: 30px;
+    background-color: $cPrimary;
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+  }
+}
+
 .login-inputs {
   display: flex;
   flex-direction: column;
@@ -45,7 +62,6 @@ button {
   justify-content: center;
   flex-direction: column;
   .cas {
-    margin-top: 5px;
     background-color: green;
   }
 }
@@ -76,7 +92,6 @@ button {
 }
 
 #cas-login {
-  margin-top: 12px;
   align-self: center;
   color: blue;
   text-decoration: underline;
