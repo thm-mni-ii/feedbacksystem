@@ -1,4 +1,5 @@
 import {BrowserModule} from '@angular/platform-browser';
+import {MatDialogModule} from '@angular/material/dialog';
 import {Injectable, NgModule} from '@angular/core';
 
 import {AppComponent} from './app.component';
@@ -18,7 +19,10 @@ import {
 } from '@angular/common/http';
 import {JwtModule} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
-import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
+import {
+  AdminUserManagementComponent,
+  CreateGuestUserDialog
+} from './components/admin/admin-user-management/admin-user-management.component';
 import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-dashboard.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
 import {StartComponent} from './components/start/start.component';
@@ -64,7 +68,6 @@ import { TaskSubmissionFileComponent } from './components/courses/detail-course/
 import { TaskSubmissionTextComponent } from './components/courses/detail-course/task/task-submission-text/task-submission-text.component';
 import { TaskSubmissionChoiceComponent } from './components/courses/detail-course/task/task-submission-choice/task-submission-choice.component';
 
-
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -87,6 +90,7 @@ export const httpInterceptorProviders = [
   declarations: [
     AppComponent,
     AdminUserManagementComponent,
+    CreateGuestUserDialog,
     AdminDashboardComponent,
     AdminCheckerComponent,
     LoginComponent,
@@ -146,9 +150,10 @@ export const httpInterceptorProviders = [
       }
     }),
     NgxDropzoneModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatDialogModule
   ],
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent,
+  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
     CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
