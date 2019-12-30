@@ -1,65 +1,13 @@
 <div class="flex-container">
-
-
   <mat-form-field appearance="outline">
     <mat-label>User filtern</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)">
     <mat-icon matSuffix>filter_list</mat-icon>
   </mat-form-field>
 
-  <mat-expansion-panel class="e-panel">
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Gast Account
-      </mat-panel-title>
-      <mat-panel-description>
-        Lege einen Gast Account an
-      </mat-panel-description>
-    </mat-expansion-panel-header>
-
-    <div class="guest-account">
-      <mat-form-field>
-        <mat-label>Username</mat-label>
-        <input matInput [(ngModel)]="gUsername">
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>Vorname</mat-label>
-        <input matInput [(ngModel)]="gPrename">
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>Nachname</mat-label>
-        <input matInput [(ngModel)]="gSurname">
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>Passwort</mat-label>
-        <input type="password" matInput [(ngModel)]="gPassword">
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-select [(value)]="gRole" placeholder="Rolle">
-          <mat-option value="1">Admin</mat-option>
-          <mat-option value="2">Moderator</mat-option>
-          <mat-option value="16">User</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>E-Mail</mat-label>
-        <input matInput [(ngModel)]="gEmail">
-      </mat-form-field>
-
-      <button mat-flat-button color="accent" (click)="createGuestAccount()">Hinzufügen</button>
-    </div>
-
-  </mat-expansion-panel>
+  <button class="create-guest-user" mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person</mat-icon> Create Guest Account</button>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
-
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
 
     <!-- Position Column -->
     <ng-container matColumnDef="username">
@@ -107,7 +55,6 @@
       </td>
     </ng-container>
 
-
     <!-- Last login-->
     <ng-container matColumnDef="last_login">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Letzter login</th>
@@ -116,13 +63,7 @@
       </td>
     </ng-container>
 
-
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
   </table>
-
-  <div class="guest-account">
-
-
-  </div>
 </div>

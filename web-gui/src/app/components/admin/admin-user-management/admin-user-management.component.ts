@@ -1,10 +1,23 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {MatDialog, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
+import {MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {User} from '../../../interfaces/HttpInterfaces';
 import {DeleteUserModalComponent} from "../../modals/delete-user-modal/delete-user-modal.component";
+import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {Observable, pipe, throwError} from "rxjs";
+
+export interface GuestUserAccount {
+  gPrename: string;
+  gSurname: string;
+  gPassword: string;
+  gPasswordRepeat: string;
+  gUsername: string;
+  gEmail: string;
+  gRole: number;
+}
 
 /**
  * This component is for admin managing
@@ -23,20 +36,22 @@ export class AdminUserManagementComponent implements OnInit {
               private dialog: MatDialog) {
   }
 
-
   columns = ['surname', 'prename', 'email', 'username', 'last_login', 'role_id', 'action'];
   dataSource = new MatTableDataSource<User>();
 
   // Guest Account
-  gPrename: string;
-  gSurname: string;
-  gPassword: string;
-  gUsername: string;
-  gEmail: string;
-  gRole: number;
+
+  userData: GuestUserAccount = {
+    gPrename: '',
+    gSurname: '',
+    gPassword: '',
+    gPasswordRepeat: '',
+    gUsername: '',
+    gEmail: '',
+    gRole: 16
+  };
 
   ngOnInit() {
-    this.gRole = 16;
     this.titlebar.emitTitle('User Management');
     this.loadAllUsers();
   }
@@ -47,7 +62,6 @@ export class AdminUserManagementComponent implements OnInit {
       this.dataSource.sort = this.sort;
     });
   }
-
 
   /**
    * Admin selects new role for user
@@ -69,7 +83,6 @@ export class AdminUserManagementComponent implements OnInit {
       }
     });
   }
-
 
   /**
    * User gets deleted
@@ -96,7 +109,6 @@ export class AdminUserManagementComponent implements OnInit {
 
   }
 
-
   /**
    * Admin searches for user
    * @param filterValue String the admin provides to search for
@@ -105,28 +117,68 @@ export class AdminUserManagementComponent implements OnInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  createGuestAccount() {
-    if (!this.gUsername || !this.gPassword || !this.gRole || !this.gPrename || !this.gSurname || !this.gEmail) {
-      this.snackBar.open('Bitte alle Felder ausfüllen', 'OK');
-      return;
-    }
-
-    this.db.createGuestUser(this.gUsername, this.gPassword, this.gRole, this.gPrename, this.gSurname, this.gEmail).pipe(
-      flatMap(success => {
-        if (success.success) {
-          this.snackBar.open('Gast ' + this.gUsername + ' erstellt', null, {duration: 5000});
-          return this.db.getAllUsers();
-        }
-      })).subscribe(users => {
-      this.dataSource.data = users;
-      this.gPrename = '';
-      this.gSurname = '';
-      this.gEmail = '';
-      this.gPassword = '';
-      this.gRole = null;
-      this.gUsername = '';
+  showGuestUserDialog() {
+    const dialogRef = this.dialog.open(CreateGuestUserDialog, {
+      width: '500px',
+      data: this.userData
     });
+
+    dialogRef.afterClosed()
+      .subscribe(user => {
+        if (user) {
+          this.db.createGuestUser(user.gUsername, user.gPassword, user.gRole, user.gPrename, user.gSurname, user.gEmail).pipe(
+            flatMap(result => (result.success) ? this.db.getAllUsers() : throwError(result))
+          ).subscribe(users => {
+            this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
+            this.dataSource.data = users;
+            this.resetUserData();
+          }, error => {
+            this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
+          });
+        }
+      });
   }
 
+  private resetUserData(): void {
+    this.userData.gPrename = '';
+    this.userData.gSurname = '';
+    this.userData.gEmail = '';
+    this.userData.gPassword = '';
+    this.userData.gRole = 16;
+    this.userData.gUsername = '';
+  }
+}
 
+@Component({
+  selector: 'create-guest-user-dialog',
+  templateUrl: 'create-guest-user-dialog.html',
+  styleUrls: ['./create-guest-user-dialog.scss']
+})
+export class CreateGuestUserDialog {
+
+  private passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    return control.value == this.data.gPassword ? null : { 'notMatch': true };
+  };
+
+  passwordMatcher = new FormControl('', [ Validators.required, this.passwordsMatchValidator]);
+
+  constructor(public dialog: MatDialog,
+    public dialogRef: MatDialogRef<CreateGuestUserDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: GuestUserAccount) {
+  }
+
+  onCancel(): void {
+    this.data.gPrename = '';
+    this.data.gSurname = '';
+    this.data.gEmail = '';
+    this.data.gPassword = '';
+    this.data.gPasswordRepeat = '';
+    this.data.gUsername  = '';
+    this.data.gRole = 16;
+    this.dialogRef.close(null);
+  }
+
+  onSubmit(): void {
+    this.dialogRef.close(this.data);
+  }
 }
