@@ -3,9 +3,11 @@ package de.thm.ii.submissioncheck.checker
 import java.io.{ByteArrayOutputStream, File}
 import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.nio.file.{Files, Path, Paths}
+
 import de.thm.ii.submissioncheck.SecretTokenChecker.ULDIR
 import de.thm.ii.submissioncheck.services.FileOperations
-import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
+import de.thm.ii.submissioncheck.{JsonHelper, ResultType, SecretTokenChecker}
+
 import scala.io.Source
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -145,7 +147,7 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     val git_url = scala.io.Source.fromFile(submittedFilePath).mkString; new File(submittedFilePath).delete()
     val targetPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid); val target_dir = targetPath.toString
 
@@ -187,9 +189,9 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
         // If checks are passed we can send a string or a JSON String
         output = JsonHelper.listToJsonStr(checkresultList)
         if (sum == (structureMap.size + maintainerMap.size + docentMap.size)) exitCode = 0 else exitCode = 1
-      (exitCode == 0, output, exitCode)
+      (exitCode == 0, output, exitCode, ResultType.JSON)
     } catch {
-      case e: CheckerException => (false, e.getMessage, 42)
+      case e: CheckerException => (false, e.getMessage, 42, ResultType.STRING)
     }
   }
 

@@ -1,7 +1,7 @@
 package de.thm.ii.submissioncheck.checker
 import java.nio.file.{Path, Paths}
 
-import de.thm.ii.submissioncheck.JsonHelper
+import de.thm.ii.submissioncheck.{JsonHelper, ResultType}
 import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ACCEPT, LABEL_TASKID, ULDIR, logger, sendMessage}
 import de.thm.ii.submissioncheck.security.Secrets
 import de.thm.ii.submissioncheck.services.FileOperations
@@ -81,7 +81,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     // A submission a user does
     var plagiatExecPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toAbsolutePath.toString
     var output = s"The ${checkername} checker results: ${true}"
@@ -126,7 +126,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
     // Always return TRUE, not to inform the user about this plagirism, but to give feedback, all checks are done
     // feedback is saved in another way
-    (true, output, exitcode)
+    (true, output, exitcode, ResultType.STRING)
   }
 
   private def sendPlagiatAnswer(subid: Any, plagiatOK: Boolean, taskid: Any) = {

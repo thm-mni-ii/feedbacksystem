@@ -1,8 +1,10 @@
 package de.thm.ii.submissioncheck.checker
-import java.io.{File}
+import java.io.File
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile,
-  sendMessage}
+
+import de.thm.ii.submissioncheck.ResultType
+import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+
 import scala.sys.process.{Process, ProcessLogger}
 
 /**
@@ -29,7 +31,7 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val (basepath, checkerfiles) = loadCheckerConfig(taskid)
 
@@ -69,6 +71,6 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     if (stderrStream.toString.length > 0 && exitCode == 0) exitCode = 2*21
     val success = exitCode == 0
 
-    (success, output, exitCode)
+    (success, output, exitCode, ResultType.STRING)
   }
 }

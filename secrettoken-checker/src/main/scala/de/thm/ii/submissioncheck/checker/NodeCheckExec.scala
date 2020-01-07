@@ -1,9 +1,11 @@
 package de.thm.ii.submissioncheck.checker
 
-import java.io.{File}
+import java.io.File
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile,
-  sendMessage}
+
+import de.thm.ii.submissioncheck.ResultType
+import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+
 import scala.sys.process.{Process, ProcessLogger}
 
 /**
@@ -82,7 +84,7 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     logger.info("Execute Node Checker")
     // if use_extern it is the same path
     val nodeExecutionPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("unzip").toAbsolutePath
@@ -129,7 +131,7 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
       stdoutStream.toString() + "\n" + stderrStream.toString()
     }
     val success = (exitcode == 0)
-    (success, output, exitcode)
+    (success, output, exitcode, ResultType.JSON)
   }
 
   /**

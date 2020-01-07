@@ -72,6 +72,7 @@ object SQLChecker extends App {
   final val TASKID = "taskid"
   /** used in naming */
   final val DATA = "data"
+  private val DATATYPE = "datatype"
 
   private val SYSTEMIDTOPIC = "sqlchecker"
   private val CHECK_REQUEST_TOPIC = SYSTEMIDTOPIC + "_check_request"
@@ -206,7 +207,7 @@ object SQLChecker extends App {
         passed = 1
       }
       sendCheckMessage(JsonHelper.mapToJsonStr(Map(
-        DATA -> msg,
+        DATA -> msg, DATATYPE -> "string",
         "passed" -> passed.toString,
         "exitcode" -> "0",
         "userid" -> userid,

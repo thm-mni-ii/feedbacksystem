@@ -24,6 +24,7 @@ import {ImportCourseComponent} from "./components/courses/import-course/import-c
 import {ChangePasswdComponent} from "./components/users/change-passwd/change-passwd.component";
 import {GuestGuard} from "./guards/guest.guard";
 import {CourseResultDetailsComponent} from "./components/courses/course-result-details/course-result-details.component";
+import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze-submissions/task-analyze-submissions.component";
 
 
 const routes: Routes = [
@@ -39,6 +40,7 @@ const routes: Routes = [
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: DetailCourseComponent},
       {path: 'courses/:id/result', component: CourseResultDetailsComponent},
+      {path: 'courses/:id/task/:taskid/analyze', component: TaskAnalyzeSubmissionsComponent},
 
       // Admin
       {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},

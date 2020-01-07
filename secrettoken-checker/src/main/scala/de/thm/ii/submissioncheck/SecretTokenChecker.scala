@@ -28,7 +28,8 @@ import java.util.zip.{ZipEntry, ZipInputStream}
 import javax.net.ssl._
 import JsonHelper._
 import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.submissioncheck.checker.{GitCheckExec, HelloworldCheckExec, NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec, MultiplechoiceCheckExec}
+import de.thm.ii.submissioncheck.checker.{GitCheckExec, GitstatsCheckExec, HelloworldCheckExec, MultiplechoiceCheckExec, NodeCheckExec, PlagiatCheckExec,
+  SecrettokenCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -73,7 +74,6 @@ object VerifiesAllHostNames extends HostnameVerifier {
 object SecretTokenChecker extends App {
   /** provides a Label for data*/
   final val DATA = "data"
-
   private val LABEL_AUTHORIZATION = "Authorization"
   private val LABEL_BEARER = "Bearer: "
   private val LABEL_CONNECTION = "Connection"
@@ -140,6 +140,8 @@ object SecretTokenChecker extends App {
   val secrettokenCheckExec = new SecrettokenCheckExec(compile_production)
   /**  the secrettoken check instance*/
   val gitCheckExec = new GitCheckExec(compile_production)
+  /**  the gitstats check instance*/
+  val gitstatsCheckExec = new GitstatsCheckExec(compile_production)
 
   private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(secrettokenCheckExec.checkerSubmissionRequestTopic))
@@ -215,6 +217,18 @@ object SecretTokenChecker extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
+  private val control_gitstatschecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(gitstatsCheckExec.checkerSubmissionRequestTopic))
+    .toMat(Sink.foreach(gitstatsCheckExec.submissionReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
+  private val control_gitstatstaskchecker = Consumer
+    .plainSource(consumerSettings, Subscriptions.topics(gitstatsCheckExec.checkerTaskRequestTopic))
+    .toMat(Sink.foreach(gitstatsCheckExec.taskReceiver))(Keep.both)
+    .mapMaterializedValue(DrainingControl.apply)
+    .run()
+
   // Correctly handle Ctrl+C and docker container stop
   sys.addShutdownHook({
     control_submission.shutdown().onComplete {
@@ -266,6 +280,14 @@ object SecretTokenChecker extends App {
       case Failure(err) => logger.warning(err.getMessage)
     }
     control_helloworldtaskchecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_gitstatschecker.shutdown().onComplete {
+      case Success(_) => logger.info(EXITING_MSG)
+      case Failure(err) => logger.warning(err.getMessage)
+    }
+    control_gitstatstaskchecker.shutdown().onComplete {
       case Success(_) => logger.info(EXITING_MSG)
       case Failure(err) => logger.warning(err.getMessage)
     }

@@ -33,6 +33,7 @@
                    diameter="20"></mat-spinner>
     </div>
     <mat-card-subtitle>
+      <a *ngIf="isAuthorized()" [routerLink]="'/courses/'+courseID+'/task/'+task.task_id+'/analyze'">Analyse</a>
     </mat-card-subtitle>
     <mat-card-content>
       <h5>{{task.deadline | date:'medium'}}</h5>

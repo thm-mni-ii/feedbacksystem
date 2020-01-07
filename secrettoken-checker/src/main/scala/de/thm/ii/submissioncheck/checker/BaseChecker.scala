@@ -7,9 +7,9 @@ import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths, StandardCo
 import java.util.zip.ZipInputStream
 
 import akka.Done
-import de.thm.ii.submissioncheck.{JsonHelper, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO, LABEL_SUBMISSIONID,
-  LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.{JsonHelper, ResultType, SecretTokenChecker}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID,
+  LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -28,6 +28,7 @@ class CheckerException(message: String) extends RuntimeException(message)
 class BaseChecker(val compile_production: Boolean) {
   /** the unique identification of a checker, will extended to "basechecker" */
   val checkername = "base"
+  private val DATA_TYPE = "datatype"
   private val LABEL_PASSED = "passed"
   private val LABEL_EXITCODE = "exitcode"
   private val LABEL_AUTHORIZATION = "Authorization"
@@ -148,8 +149,8 @@ class BaseChecker(val compile_production: Boolean) {
     * @return check succeeded, output string, exitcode
     */
   def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
-    (false, "output", 42)
+  (Boolean, String, Int, String) = {
+    (false, "output", 42, ResultType.STRING)
   }
 
   /**
@@ -296,15 +297,14 @@ class BaseChecker(val compile_production: Boolean) {
         submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], task_id.toString, submission_id.toString).toAbsolutePath.toString
       }
 
-      val (success, output, exitcode) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern, jsonMap)
+      val (success, output, exitcode, datatype) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern, jsonMap)
 
-      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ISINFO -> isInfo, "username" ->jsonMap("username"),
-        LABEL_PASSED -> (if (success) "1" else "0"),
+      sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ISINFO -> isInfo, "resubmit" -> submit_type.equals("resubmit"),
+        "username" ->jsonMap("username"), LABEL_PASSED -> (if (success) "1" else "0"),
         LABEL_EXITCODE ->  exitcode.toString,
         LABEL_TASKID -> task_id.toString,
-        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output,
-        LABEL_BEST_FIT -> "",
-        LABEL_PRE_RESULT -> ""
+        LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output, DATA_TYPE -> datatype,
+        LABEL_BEST_FIT -> "", LABEL_PRE_RESULT -> ""
       )))
     } catch {
       case e: Exception => {

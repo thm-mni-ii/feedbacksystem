@@ -127,8 +127,10 @@ class TaskService {
       kafkaMap += (LABEL_DATA -> data)
       kafkaMap += (LABEL_SUBMIT_TYP -> LABEL_DATA)
       kafkaMap += ("isinfo" -> true)
+    } else if (typ == "resubmit"){
+      kafkaMap += (LABEL_SUBMIT_TYP -> "resubmit")
     } else {
-      throw new IllegalArgumentException("`typ` keyword is IN (data, file, external)")
+      throw new IllegalArgumentException("`typ` keyword is IN (data, file, external, resubmit)")
     }
     kafkaMap += ("use_extern" -> queued_test)
     kafkaMap += ("api_url" -> s"${UPLOAD_BASE_URL}/api/v1/")
@@ -241,7 +243,8 @@ class TaskService {
     * @return Scala List
     */
   def getSubmissionsByTask(taskid: Int): List[Map[String, Any]] = {
-    DB.query("SELECT u.*, s.* from task join submission s using(task_id) join user u using(user_id) where task_id = ?",
+    DB.query("SELECT u.*, max(s.submission_id) as submission_id from task join submission s using(task_id) join user u using(user_id)" +
+      " where task_id = ? group by u.user_id",
       (res, _) => {
         Map(SubmissionDBLabels.combined_passed ->  submissionService.getSubmissionPassed(res.getInt(SubmissionDBLabels.submissionid)),
           SubmissionDBLabels.evaluation -> submissionService.getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid)),
@@ -379,6 +382,7 @@ class TaskService {
     * @author Benjamin Manns
     * @param submissionid unique identification for a submissionid
     * @param result answer coming from a checker service
+    * @param result_type type of answers encoding
     * @param passed test result passed information (0 = failed, 1 = passed)
     * @param exitcode tiny peace of status information
     * @param best_result_fit contains the solution which the testsystem select the best match to check the submission
@@ -386,13 +390,13 @@ class TaskService {
     * @param testsystem_id from which testsystem we got the answer
     * @return Boolean: did update work
     */
-  def setResultOfTask(submissionid: Int, result: String, passed: String, exitcode: Int, best_result_fit: String,
+  def setResultOfTask(submissionid: Int, result: String, result_type: String, passed: String, exitcode: Int, best_result_fit: String,
                       pre_result: String, testsystem_id: String): Boolean = {
     val num = DB.update(
-      "INSERT INTO submission_testsystem (result, choice_best_result_fit, calculate_pre_result, passed, exitcode, " +
+      "INSERT INTO submission_testsystem (result, result_type, choice_best_result_fit, calculate_pre_result, passed, exitcode, " +
         "result_date, submission_id, testsystem_id, step) " +
-        "select ?, ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, COALESCE(max(step),0)+1 as nextstep from submission_testsystem  where submission_id = ?;",
-      result, best_result_fit, pre_result, passed, exitcode, submissionid, testsystem_id, submissionid)
+        "select ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP(), ?, ?, COALESCE(max(step),0)+1 as nextstep from submission_testsystem  where submission_id = ?;",
+      result, result_type, best_result_fit, pre_result, passed, exitcode, submissionid, testsystem_id, submissionid)
     num > 0
   }
 

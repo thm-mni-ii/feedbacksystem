@@ -182,14 +182,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `submission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `submission` (
   `submission_id` int(11) NOT NULL AUTO_INCREMENT,
-  `passed` tinyint(4) DEFAULT NULL,
-  `exitcode` int(5) DEFAULT NULL,
-  `result` text,
   `submit_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `result_date` timestamp NULL DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `task_id` int(11) DEFAULT NULL,
   `filename` varchar(255) DEFAULT NULL,
@@ -200,7 +196,7 @@ CREATE TABLE `submission` (
   KEY `submission_users_userid_fk` (`user_id`),
   CONSTRAINT `submission_task_taskid_fk` FOREIGN KEY (`task_id`) REFERENCES `task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `submission_users_userid_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17252 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,8 +204,7 @@ CREATE TABLE `submission` (
 --
 
 DROP TABLE IF EXISTS `submission_testsystem`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
- SET character_set_client = utf8mb4 ;
+
 CREATE TABLE `submission_testsystem` (
   `submission_id` int(11) NOT NULL,
   `testsystem_id` varchar(500) NOT NULL,
@@ -217,16 +212,12 @@ CREATE TABLE `submission_testsystem` (
   `passed` tinyint(1) DEFAULT NULL,
   `result_date` datetime DEFAULT NULL,
   `step` int(11) DEFAULT NULL,
-  `result` text
+  `result` text,
+  `result_type` varchar(50) DEFAULT NULL,
+  `choice_best_result_fit` text,
+  `calculate_pre_result` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-alter table submission_testsystem
-	add choice_best_result_fit text null;
-
-alter table submission_testsystem
-	add calculate_pre_result text null;
-
 
 
 
@@ -341,7 +332,7 @@ CREATE TABLE `testsystem` (
 
 LOCK TABLES `testsystem` WRITE;
 /*!40000 ALTER TABLE `testsystem` DISABLE KEYS */;
-INSERT INTO `testsystem` VALUES ('gitchecker','gitchecker',NULL,NULL,NULL,NULL,1),('multiplechoicechecker','Multiplechoice Checker',NULL,NULL,NULL,NULL,4),('nodechecker','Node Checker','Provides Node Docker with Pupeteer for Testing JavaScript',NULL,NULL,NULL,2),('plagiarismchecker','plagiarismchecker',NULL,NULL,NULL,NULL,0),('sapabapchecker','ABAP Testsystem','ABAP code will be executed in a real SAP system','',NULL,NULL,3),('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000',3),('sqlchecker','SQL Checker','XXXXX','.sql, ',1234,'000.000.000.000',3);
+INSERT INTO `testsystem` VALUES ('gitchecker','gitchecker',NULL,NULL,NULL,NULL,1), ('gitstatschecker','gitstatschecker',NULL,NULL,NULL,NULL,4),('multiplechoicechecker','Multiplechoice Checker',NULL,NULL,NULL,NULL,4),('nodechecker','Node Checker','Provides Node Docker with Pupeteer for Testing JavaScript',NULL,NULL,NULL,2),('plagiarismchecker','plagiarismchecker',NULL,NULL,NULL,NULL,0),('sapabapchecker','ABAP Testsystem','ABAP code will be executed in a real SAP system','',NULL,NULL,3),('secrettokenchecker','Secretoken Checker','Sectretoken','BASH',8000,'000.000.000.000',3),('sqlchecker','SQL Checker','XXXXX','.sql, ',1234,'000.000.000.000',3);
 /*!40000 ALTER TABLE `testsystem` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -368,6 +359,31 @@ LOCK TABLES `testsystem_testfile` WRITE;
 INSERT INTO `testsystem_testfile` VALUES ('gitchecker',	'config.json',	0), ('gitchecker', 'structurecheck', 1), ('secrettokenchecker','scriptfile',1),('secrettokenchecker','testfile',0),('sqlchecker', 'sections.json', 1),('sqlchecker', 'db.sql', 1);
 /*!40000 ALTER TABLE `testsystem_testfile` ENABLE KEYS */;
 UNLOCK TABLES;
+
+
+--
+-- Table structure for table `resubmission`
+--
+
+DROP TABLE IF EXISTS `resubmission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `resubmission` (
+  `subid` int(11) DEFAULT NULL,
+  `ordnr` int(11) DEFAULT NULL,
+  `testsystem_id` varchar(500) DEFAULT NULL,
+  `result` text,
+  `test_file_accept` tinyint(1) DEFAULT NULL,
+  `test_file_accept_error` text,
+  `test_file_name` varchar(255) DEFAULT NULL,
+  `result_type` varchar(50) DEFAULT NULL,
+  KEY `resubmission_submission_submission_id_fk` (`subid`),
+  KEY `resubmission_testsystem_testsystem_id_fk` (`testsystem_id`),
+  CONSTRAINT `resubmission_submission_submission_id_fk` FOREIGN KEY (`subid`) REFERENCES `submission` (`submission_id`),
+  CONSTRAINT `resubmission_testsystem_testsystem_id_fk` FOREIGN KEY (`testsystem_id`) REFERENCES `testsystem` (`testsystem_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
 
 --
 -- Table structure for table `user`

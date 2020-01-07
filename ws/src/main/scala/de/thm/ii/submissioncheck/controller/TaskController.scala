@@ -86,6 +86,7 @@ class TaskController {
   final val LABEL_COURSE_ID = "courseid"
   /** JSON variable submissionid ID*/
   final val LABEL_DATA = "data"
+  private val LABEL_TYPE = "datatype"
   private final val LABEL_FILE = "file"
   private final val LABEL_SEQ = "SEQ"
   private final val LABEL_NAME = "name"
@@ -294,6 +295,49 @@ class TaskController {
     }
 
   /**
+    * re submit a task, i.e. its submission by the submission id
+    * @param taskid the task id
+    * @param subid submisison id
+    * @param jsonNode json object
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/resubmit"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @ResponseBody
+  def reSubmitTask(@PathVariable taskid: Integer, @PathVariable subid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest):
+  Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) throw new UnauthorizedException
+    val taskDetailsOpt = taskService.getTaskDetails(taskid)
+    if(taskDetailsOpt.isEmpty) throw new ResourceNotFoundException
+
+    val systemList: List[String] = jsonNode.get("testsystems").asScala.toList.map(f => f.asText())
+    this.submissionService.reSubmitASubmission(subid, taskid, systemList)
+
+  Map(LABEL_SUCCESS -> true)
+  }
+
+  /**
+    * return the re submission results
+    * @param taskid task id
+    * @param subid submission id
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/resubmit"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getReSubmittedResults(@PathVariable taskid: Integer, @PathVariable subid: Integer,
+                        request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if(user.isEmpty || !this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new UnauthorizedException
+    }
+
+    this.submissionService.getReSubmittedResults(subid)
+  }
+
+  /**
     * serve a route to upload a submission file to a given submissionid
     * @author grokonez.com, Benjamin Manns
     * @param taskid unique identification for a task
@@ -342,7 +386,7 @@ class TaskController {
     * @param request Request Header containing Headers
     * @return JSON
     */
-  @RequestMapping(value = Array("tasks/{id}/submissions"), method = Array(RequestMethod.GET), consumes = Array(application_json_value))
+  @RequestMapping(value = Array("tasks/{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
                         request: HttpServletRequest): List[Map[String, Any]] = {
@@ -728,15 +772,12 @@ class TaskController {
     val consumerConfigJava = consumerConfigScala.asJava
     val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
-
     // TODO fire this method after updates on Testsystem!
     val kafkaTopicCheckAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic("check_answer")
 
     kafkaTopicCheckAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicCheckAnswer: _*)
-    if (container != null) {
-      container.stop()
-    }
+    if (container != null) container.stop()
     container = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
 
     container.setupMessageListener(new MessageListener[Int, String]() {
@@ -750,17 +791,19 @@ class TaskController {
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
           val testsystem = data.topic.replace("_check_answer", "")
+          val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
           logger.warn(answeredMap.toString())
           if (answeredMap.contains("isinfo") && answeredMap("isinfo").asInstanceOf[Boolean]){
             taskService.setExternalAnswerOfTaskByTestsytem(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
               answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("username").toString, testsystem)
+          } else if (answeredMap.contains("resubmit") && answeredMap("resubmit").asInstanceOf[Boolean]){
+            submissionService.setResultOfReSubmit(submissionID, testsystem, answeredMap(LABEL_DATA).toString, answeredMap(LABEL_TYPE).toString)
           } else {
             val passed = answeredMap("passed").asInstanceOf[String]
-            val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
             val taskid: Int = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
             val testsystem = data.topic.replace("_check_answer", "")
-            taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).asInstanceOf[String], passed,
-              Integer.parseInt(answeredMap("exitcode").asInstanceOf[String]), answeredMap(LABEL_BEST_FIT).toString,
+            taskService.setResultOfTask(submissionID, answeredMap(LABEL_DATA).toString, answeredMap(LABEL_TYPE).toString, passed,
+              answeredMap("exitcode").toString.toInt, answeredMap(LABEL_BEST_FIT).toString,
               answeredMap(LABEL_PRE_RESULT).toString, testsystem)
             // We got an answer from a test, now on success case we need to trigger next phase if modus is SEQ
             if (passed == "1" && taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {

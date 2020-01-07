@@ -22,6 +22,9 @@ object SubmissionTestsystemDBLabels {
   /** DB Label "result" */
   val result: String = "result"
 
+  /** DB Label "result_type" */
+  val result_type: String = "result_type"
+
   /** DB Label "result_date" */
   val result_date: String = "result_date"
 

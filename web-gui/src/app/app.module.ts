@@ -67,6 +67,7 @@ import { CourseResultAsTableComponent } from './components/courses/course-result
 import { TaskSubmissionFileComponent } from './components/courses/detail-course/task/task-submission-file/task-submission-file.component';
 import { TaskSubmissionTextComponent } from './components/courses/detail-course/task/task-submission-text/task-submission-text.component';
 import { TaskSubmissionChoiceComponent } from './components/courses/detail-course/task/task-submission-choice/task-submission-choice.component';
+import { TaskAnalyzeSubmissionsComponent } from './components/courses/task-analyze-submissions/task-analyze-submissions.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -131,6 +132,7 @@ export const httpInterceptorProviders = [
     TaskSubmissionFileComponent,
     TaskSubmissionTextComponent,
     TaskSubmissionChoiceComponent,
+    TaskAnalyzeSubmissionsComponent,
   ],
   imports: [
     BrowserModule,

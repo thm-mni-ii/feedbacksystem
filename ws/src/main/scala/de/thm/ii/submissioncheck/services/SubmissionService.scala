@@ -9,8 +9,9 @@ import java.util.{Timer, TimerTask}
 
 import scala.collection.JavaConverters._
 import au.com.bytecode.opencsv.CSVWriter
+import de.thm.ii.submissioncheck.ReSubmissionDBLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.User
+import de.thm.ii.submissioncheck.model.{AdminUser, User}
 import de.thm.ii.submissioncheck.security.Secrets
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -223,6 +224,55 @@ class SubmissionService {
   }
 
   /**
+    * prepare database for resubmitting / analyzing a submission
+    * @param subid submisison id
+    * @param taskid task id
+    * @param testsystems list of all testsystems which should triggered
+    */
+  def reSubmitASubmission(subid: Int, taskid: Int, testsystems: List[String]): Unit = {
+    // clean old entries
+    DB.update("DELETE from resubmission where subid = ?", subid)
+    // add new entries
+    for((system, i) <- testsystems.zipWithIndex){
+      DB.update("insert into resubmission (subid, ordnr, testsystem_id) values (?,?,?) ", subid, i + 1, system)
+    }
+
+    // trigger re submission
+    this.taskService.sendSubmissionToTestsystem(subid, taskid, testsystems.head, new AdminUser(), "resubmit", "")
+  }
+
+  /**
+    * set a result entry for a resubmission
+    * @param subid submission id
+    * @param testsystem testsystem id
+    * @param result result string of testsystem
+    * @param result_type result type (is a string)
+    * @return update succeeded
+    */
+  def setResultOfReSubmit(subid: Int, testsystem: String, result: String, result_type: String): Boolean = {
+    DB.update("update resubmission set result = ?, result_type = ? where subid = ? and testsystem_id = ? ", result, result_type, subid, testsystem) == 1
+  }
+
+  /**
+    * get (none ready) result sets of resubmissions/analyze of a submission id
+    * @param subid the submission id
+    * @return result set
+    */
+  def getReSubmittedResults(subid: Int): List[Map[String, Any]] = {
+    DB.query("select * from resubmission where subid = ?",
+      (res, _) => {
+        Map(ReSubmissionDBLabels.subid -> res.getInt(ReSubmissionDBLabels.subid),
+          ReSubmissionDBLabels.ordnr -> res.getInt(ReSubmissionDBLabels.ordnr),
+          ReSubmissionDBLabels.testsystem_id -> res.getString(ReSubmissionDBLabels.testsystem_id),
+          ReSubmissionDBLabels.result -> res.getString(ReSubmissionDBLabels.result),
+          ReSubmissionDBLabels.result_type -> res.getString(ReSubmissionDBLabels.result_type),
+          ReSubmissionDBLabels.test_file_accept -> res.getBoolean(ReSubmissionDBLabels.test_file_accept),
+          ReSubmissionDBLabels.test_file_accept_error -> res.getString(ReSubmissionDBLabels.test_file_accept_error),
+          ReSubmissionDBLabels.test_file_name -> res.getString(ReSubmissionDBLabels.test_file_name))
+      }, subid)
+  }
+
+  /**
     * submitTaskWithFile
     * @author Benjamin Manns
     * @param taskid unique identification for a task
@@ -305,7 +355,7 @@ class SubmissionService {
     * @return list of evaluated submission
     */
   def getTestsystemSubmissionEvaluationList(submission_id: Int, with_result_fit: Boolean = false): List[Map[String, Any]] = {
-    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.step, st.result_date, st.choice_best_result_fit, " +
+    DB.query("select tt.*, st.exitcode, st.passed, st.result, st.result_type, st.step, st.result_date, st.choice_best_result_fit, " +
       "st.calculate_pre_result, ss.submission_id from submission ss " +
       "join task t using(task_id) join task_testsystem tt using (task_id) " +
       "left join submission_testsystem st on st.testsystem_id = tt.testsystem_id and st.submission_id = ? and tt.ordnr <= st.step " +
@@ -317,6 +367,7 @@ class SubmissionService {
           SubmissionTestsystemDBLabels.exitcode -> res.getInt(SubmissionTestsystemDBLabels.exitcode),
           SubmissionTestsystemDBLabels.passed -> getNullOrBoolean(res.getString(SubmissionTestsystemDBLabels.passed)),
           SubmissionTestsystemDBLabels.result -> res.getString(SubmissionTestsystemDBLabels.result),
+          SubmissionTestsystemDBLabels.result_type -> res.getString(SubmissionTestsystemDBLabels.result_type),
           SubmissionTestsystemDBLabels.result_date -> res.getTimestamp(SubmissionTestsystemDBLabels.result_date))
 
           if(with_result_fit) {

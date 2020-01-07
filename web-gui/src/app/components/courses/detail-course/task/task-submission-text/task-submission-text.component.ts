@@ -1,5 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CourseTask} from "../../../../../interfaces/HttpInterfaces";
+import {Observable, of} from "rxjs";
+
 
 @Component({
   selector: 'app-task-submission-text',
@@ -27,8 +29,13 @@ export class TaskSubmissionTextComponent implements OnInit {
     this.rerun.emit(this.task);
   }
 
-  updateSubmission(event){
-    this.update.emit({taskid: this.task.task_id, content: this.toSubmitt})
+    updateSubmission(event){
+    // more worse is not possible
+    setTimeout(() => {
+      console.log(this.toSubmitt)
+      this.update.emit({taskid: this.task.task_id, content: this.toSubmitt})
+    },1);
+
   }
 
 }

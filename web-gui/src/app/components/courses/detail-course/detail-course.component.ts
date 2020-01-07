@@ -26,6 +26,7 @@ import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/c
 import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
 import set = Reflect.set;
 import {MatTabChangeEvent} from "@angular/material/tabs";
+import {DomSanitizer} from "@angular/platform-browser";
 
 /**
  * Shows a course in detail
@@ -39,7 +40,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
-              private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar,
+              private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
