@@ -76,6 +76,27 @@ export interface CourseTask {
   load_external_description: boolean;
 }
 
+export interface TaskLastSubmission {
+  evaluation: CourseTaskEvaluation[];
+  email: string;
+  combined_passed: boolean;
+  submission_id: number;
+  prename: number;
+  ​​surname: number;
+  ​​username: number;
+  user_id: number;
+}
+
+export interface ReSubmissionResult{
+  subid: string;
+  ordnr: string;
+  testsystem_id: string;
+  result: string;
+  test_file_accept: string;
+  test_file_accept_error: string;
+  test_file_name: string;
+}
+
 export interface TaskSubmission {
   evaluation: CourseTaskEvaluation[];
   filename: string;
@@ -90,6 +111,7 @@ export interface CourseTaskEvaluation {
   testsystem_id: string;
   exitcode: number;
   result: string;
+  result_type: string;
   passed: boolean;
   result_date: Date;
   ordnr: number;

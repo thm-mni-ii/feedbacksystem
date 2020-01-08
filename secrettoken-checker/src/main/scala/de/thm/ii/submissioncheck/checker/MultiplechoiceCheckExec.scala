@@ -2,7 +2,7 @@ package de.thm.ii.submissioncheck.checker
 
 import java.io.{BufferedReader, BufferedWriter, FileReader}
 
-import de.thm.ii.submissioncheck.JsonHelper
+import de.thm.ii.submissioncheck.{JsonHelper, ResultType}
 import de.thm.ii.submissioncheck.SecretTokenChecker.logger
 import au.com.bytecode.opencsv.{CSVReader, CSVWriter}
 
@@ -37,7 +37,7 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     logger.info("Execute Multiplechoice Checker")
     // read csv
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
@@ -70,7 +70,7 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
       }
       List(Map(LABEL_HEADER -> "Multiple Choice", LABEL_RESULT -> correctedMap))
     }
-    (passed, JsonHelper.listToJsonStr(output), if (passed) 0 else 1)
+    (passed, JsonHelper.listToJsonStr(output), if (passed) 0 else 1, ResultType.JSON)
   }
 }
 

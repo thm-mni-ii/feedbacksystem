@@ -2,6 +2,8 @@ import {Component, Input, OnInit} from '@angular/core';
 import {MatTabChangeEvent} from "@angular/material";
 import {FormControl} from "@angular/forms";
 import {CourseTaskEvaluation} from "../../../../interfaces/HttpInterfaces";
+import {DomSanitizer} from "@angular/platform-browser";
+import {MiscService} from "../../../../service/misc.service";
 
 @Component({
   selector: 'app-task-result',
@@ -15,7 +17,7 @@ export class TaskResultComponent implements OnInit {
 
   public taskResultList: any = [];
 
-  constructor() {
+  constructor(private sanitizer: DomSanitizer, private misc: MiscService) {
     this.taskResultList = []
   }
 
@@ -30,6 +32,14 @@ export class TaskResultComponent implements OnInit {
     } catch (e) {
       return [];
     }
+  }
+
+  public isBase64(data){
+    return this.misc.isBase64(data)
+  }
+
+  getImageOfData(data){
+    return this.sanitizer.bypassSecurityTrustUrl("data:Image/*;base64,"+data);
   }
 
   ngOnInit() {

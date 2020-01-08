@@ -1,20 +1,24 @@
 <mat-tab-group (selectedTabChange)="tabChanged($event)">
   <mat-tab *ngFor="let taskResult of taskResults" label="{{taskResult.testsystem_id}}" class="tab">
 
+    <div *ngIf="taskResult.result_type == 'json'">
+      <ul *ngFor="let resultElement of parseResultString(taskResult.result)">
+        <h2>{{resultElement.header}}</h2>
+        <ul>
+          <mat-card *ngFor="let line of resultElement.result" id="resultCard" class="line.result">
+            <mat-icon [ngStyle]="{'color':'green'}" *ngIf="line.result">done</mat-icon>
+            <mat-icon [ngStyle]="{'color':'red'}" *ngIf="!line.result">error</mat-icon>
 
-    <ul *ngFor="let resultElement of parseResultString(taskResult.result)">
-      <h2>{{resultElement.header}}</h2>
-      <ul>
-        <mat-card *ngFor="let line of resultElement.result" id="resultCard" class="line.result">
-          <mat-icon [ngStyle]="{'color':'green'}" *ngIf="line.result">done</mat-icon>
-          <mat-icon [ngStyle]="{'color':'red'}" *ngIf="!line.result">error</mat-icon>
-
-          {{line.test}}
-        </mat-card>
+            {{line.test}}
+          </mat-card>
+        </ul>
       </ul>
-    </ul>
+    </div>
 
-    <p *ngIf="parseResultString(taskResult.result).length == 0" class="{{taskResult.passed}}" id="task-result-text">Ergebnis: {{taskResult.result}}</p>
+    <img *ngIf="taskResult.result_type == 'base64'" [src]="getImageOfData(taskResult.result)" />
+
+    <!-- this is kind of the default case-->
+    <p *ngIf="taskResult.result_type == 'string' || taskResult.result_type == '' || taskResult.result_type == null" class="{{taskResult.passed}}" id="task-result-text">Ergebnis: {{taskResult.result}}</p>
 
 
   </mat-tab>

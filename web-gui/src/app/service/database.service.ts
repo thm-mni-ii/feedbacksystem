@@ -5,9 +5,9 @@ import {
   CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation,
   FileUpload,
-  GeneralCourseInformation,
+  GeneralCourseInformation, ReSubmissionResult,
   RoleChanged,
-  Succeeded, TaskSubmission,
+  Succeeded, TaskLastSubmission, TaskSubmission,
   Testsystem,
   TestsystemTestfile,
   TextType,
@@ -135,7 +135,17 @@ export class DatabaseService {
    * @param idTask of task where all submissions will be returned
    */
   getTaskSubmissions(idCourse: number, idTask: number) {
-    return this.http.get('/api/v1/courses/' + idCourse + '/tasks/' + idTask + '/submissions');
+    return this.http.get<TaskLastSubmission[]>('/api/v1/tasks/' + idTask + '/submissions');
+  }
+
+  reSubmitASubmission(taskid: number, subid: number, testsystems: string[]){
+    return this.http.post(`/api/v1/tasks/${taskid}/submissions/${subid}/resubmit`, {
+      'testsystems': testsystems
+    })
+  }
+
+  getReSubmissionResults(taskid: number, subid: number){
+    return this.http.get<ReSubmissionResult[]>(`/api/v1/tasks/${taskid}/submissions/${subid}/resubmit`)
   }
 
   getOverview(): Observable<DashboardStudent[]> {

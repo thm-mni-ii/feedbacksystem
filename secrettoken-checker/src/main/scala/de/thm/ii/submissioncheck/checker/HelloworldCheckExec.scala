@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.checker
-import de.thm.ii.submissioncheck.SecretTokenChecker.{logger}
+import de.thm.ii.submissioncheck.ResultType
+import de.thm.ii.submissioncheck.SecretTokenChecker.logger
 /**
   * Hello World Checker Class is an example
   * @param compile_production flagg which compiles the path corresponding if app runs in docker or not
@@ -21,7 +22,7 @@ class HelloworldCheckExec(override val compile_production: Boolean) extends Base
     * @return check succeeded, output string, exitcode
     */
   override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int) = {
+  (Boolean, String, Int, String) = {
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
     val docentsContent = scala.io.Source.fromFile(configfiles(0).toString).mkString
     val usersContent = scala.io.Source.fromFile(submittedFilePath).mkString
@@ -29,7 +30,7 @@ class HelloworldCheckExec(override val compile_production: Boolean) extends Base
     val success = (docentsContent.trim == usersContent.trim)
     val output = s"The ${checkername} checker results: ${success}"
     val exitcode = 0
-    (success, output, exitcode)
+    (success, output, exitcode, ResultType.STRING)
   }
 }
 

@@ -17,6 +17,15 @@ export class MiscService {
     }
   }
 
+  public isBase64(data){
+    try {
+      window.atob(data)
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /**
    * https://stackoverflow.com/a/8273091/5885054 - like python range()
    * @param start
