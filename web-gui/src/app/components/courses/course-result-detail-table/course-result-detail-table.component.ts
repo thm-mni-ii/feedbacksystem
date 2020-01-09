@@ -14,13 +14,20 @@ export class CourseResultDetailTableComponent implements OnInit {
 
   constructor(private misc: MiscService) { }
 
-  columns = ['result', 'choice_best_result_fit', 'passed'];
+  columns = ['submission_data', 'result', 'choice_best_result_fit', 'passed'];
 
   dataSource = new MatTableDataSource<CourseTaskEvaluation>();
 
 
   ngOnInit() {
-    this.dataSource.data = this.taskSubmission.evaluation
+    let evaluation = this.taskSubmission.evaluation;
+    evaluation = evaluation.map(ev => {
+      ev['submission_data'] = this.taskSubmission.submission_data;
+      ev['filename'] = this.taskSubmission.filename;
+      return ev;
+    });
+
+    this.dataSource.data = evaluation;
   }
 
   parseDate(datestring){
@@ -28,7 +35,6 @@ export class CourseResultDetailTableComponent implements OnInit {
   }
 
   isJSON(data: string){
-    console.log(data, this.misc.isJSON(data))
     return this.misc.isJSON(data)
   }
 
