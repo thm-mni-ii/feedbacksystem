@@ -4,7 +4,7 @@ import {
   CourseTask,
   CourseTaskEvaluation,
   DetailedCourseInformation,
-  Succeeded
+  Succeeded, TaskSubmission
 } from "../../../../interfaces/HttpInterfaces";
 import {DatabaseService} from "../../../../service/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -43,8 +43,23 @@ export class CourseProfDetailsComponent implements OnInit {
       (result: CourseTask) => {
         // Handle result
         this.taskDetails = result;
-        this.taskResults = result.evaluation;
-        this.taskPassed = result.combined_passed
+
+
+        this.db.getSubmissionsOfUserOfTask(this.taskDetails.course_id, this.userid, this.taskid).subscribe(
+          (value: TaskSubmission[]) => {
+            if(value.length > 0){
+              let submission: TaskSubmission = value[value.length - 1]
+
+              this.taskResults = submission.evaluation;
+              this.taskPassed = submission.plagiat_passed
+            } else {
+              this.taskPassed = false;
+            }
+
+          }
+        )
+
+
       },
       error => {
         console.log(error)
@@ -55,9 +70,9 @@ export class CourseProfDetailsComponent implements OnInit {
 
 
 
-  markAsPassed(task: CourseTask){
-    console.log(task.evaluation[0].submission_id)
-    this.db.markTaskAsPassed(task.task_id, task.evaluation[0].submission_id).subscribe(
+  markAsPassed(){
+    console.log(this.taskResults[0].submission_id)
+    this.db.markTaskAsPassed(this.taskid, this.taskResults[0].submission_id).subscribe(
       (value: Succeeded) => {
         if(value.success){
           this.db.getTaskResult(this.taskid).subscribe(
