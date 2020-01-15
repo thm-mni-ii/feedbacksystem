@@ -149,6 +149,23 @@ class SubmissionService {
       }, submission_id).headOption
   }
 
+  /**
+    * set all submissions for the tas as passed (if docent think it is passed, thought)
+    * @param submissionid submission id
+    * @param taskid taskid
+    * @return update passed
+    */
+  def setSubmissionAsPassed(submissionid: Int, taskid: Int): Boolean = {
+    val testsystems = getEmptyTestsystemSubmissionEvaluationList(taskid)
+    var num = 0
+    for ((testsystem, i) <- testsystems.zipWithIndex) {
+      num += DB.update("INSERT INTO submission_testsystem (submission_id, testsystem_id, exitcode, passed, result_date, step, result, result_type) " +
+        " values (?, ?, 0, 1, CURRENT_TIMESTAMP, ?, 'Docent marked as passed', 'string') " +
+        " on duplicate key update  exitcode = 0, passed = 1", submissionid, testsystem(TaskTestsystemDBLabels.testsystem_id), i + 1)
+    }
+    num == testsystems.length
+  }
+
   private def replaceSubmissionTestsystem(submissionid: Int, result: Any, passed: Any, result_date: Any, exitcode: Int,
                                           testsystem_id: String, step: Int): Boolean = {
     val num = DB.update(

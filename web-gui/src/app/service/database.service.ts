@@ -583,6 +583,10 @@ export class DatabaseService {
     return this.http.delete('/api/v1/courses/' + courseid + '/parameters/'+key).toPromise()
   }
 
+  markTaskAsPassed(taskid: number, subid: number) {
+    return this.http.post<Succeeded>(`/api/v1/tasks/${taskid}/submissions/${subid}/passed`, {})
+  }
+
   /**
    * set and update a course parameter
    * @param courseid course ID

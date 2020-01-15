@@ -1,0 +1,35 @@
+#passed {
+  color: green;
+}
+
+#failed {
+  color: red;
+}
+
+#result {
+  margin-left: 12px;
+}
+
+.user-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+
+.user-input-text {
+  width: 100%;
+}
+
+.result {
+  display: flex;
+  width: 100%;
+}
+
+#task-result-text.true {
+  color: green;
+}
+
+#task-result-text.false {
+  color: red;
+}

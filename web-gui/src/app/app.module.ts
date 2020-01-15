@@ -68,6 +68,7 @@ import { TaskSubmissionFileComponent } from './components/courses/detail-course/
 import { TaskSubmissionTextComponent } from './components/courses/detail-course/task/task-submission-text/task-submission-text.component';
 import { TaskSubmissionChoiceComponent } from './components/courses/detail-course/task/task-submission-choice/task-submission-choice.component';
 import { TaskAnalyzeSubmissionsComponent } from './components/courses/task-analyze-submissions/task-analyze-submissions.component';
+import { CourseProfDetailsComponent } from './components/courses/detail-course/course-prof-details/course-prof-details.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -133,6 +134,7 @@ export const httpInterceptorProviders = [
     TaskSubmissionTextComponent,
     TaskSubmissionChoiceComponent,
     TaskAnalyzeSubmissionsComponent,
+    CourseProfDetailsComponent,
   ],
   imports: [
     BrowserModule,
@@ -158,7 +160,7 @@ export const httpInterceptorProviders = [
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
     CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
-  providers: [CookieService, MarkdownService, MarkedOptions],
+  providers: [CookieService, MarkdownService, MarkedOptions, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {
