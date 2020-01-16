@@ -163,7 +163,7 @@ class SubmissionService {
         " values (?, ?, 0, 1, CURRENT_TIMESTAMP, ?, 'Docent marked as passed', 'string') " +
         " on duplicate key update  exitcode = 0, passed = 1", submissionid, testsystem(TaskTestsystemDBLabels.testsystem_id), i + 1)
     }
-    num == testsystems.length
+    testsystems.nonEmpty
   }
 
   private def replaceSubmissionTestsystem(submissionid: Int, result: Any, passed: Any, result_date: Any, exitcode: Int,

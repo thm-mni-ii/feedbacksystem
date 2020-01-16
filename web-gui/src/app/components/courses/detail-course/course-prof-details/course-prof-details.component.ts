@@ -27,38 +27,24 @@ export class CourseProfDetailsComponent implements OnInit {
   }
 
   taskid: number;
-  userid: string;
+  userid: number;
   taskResults: CourseTaskEvaluation[];
-  taskPassed: string;
+  taskPassed: string = null;
   taskDetails: CourseTask = {} as CourseTask;
-
+  submissionExist: boolean = false;
 
   ngOnInit() {
     this.route.params.pipe(
       flatMap(params => {
         this.taskid = parseInt(params['taskid']);
-        this.userid = params['userid'];
+        this.userid = parseInt(params['userid']);
         return this.db.getTaskResult(this.taskid)
       })).subscribe(
       (result: CourseTask) => {
         // Handle result
         this.taskDetails = result;
 
-
-        this.db.getSubmissionsOfUserOfTask(this.taskDetails.course_id, this.userid, this.taskid).subscribe(
-          (value: TaskSubmission[]) => {
-            if(value.length > 0){
-              let submission: TaskSubmission = value[value.length - 1]
-
-              this.taskResults = submission.evaluation;
-              this.taskPassed = submission.plagiat_passed
-            } else {
-              this.taskPassed = false;
-            }
-
-          }
-        )
-
+        this.loadUsersSubmission()
 
       },
       error => {
@@ -68,20 +54,47 @@ export class CourseProfDetailsComponent implements OnInit {
     );
   }
 
+  private combinedPassed(passedList){
+    if (passedList.indexOf(false) >= 0){
+      return 'false'
+    } else if (passedList.indexOf(null) >= 0){
+      return null
+    } else {
+      return 'true'
+    }
+  }
+
+
+  loadUsersSubmission(){
+    this.db.getSubmissionsOfUserOfTask(parseInt(this.taskDetails.course_id), this.userid, this.taskid).subscribe(
+      (value: TaskSubmission[]) => {
+        if(value.length > 0){
+          this.submissionExist = true;
+          let submission: TaskSubmission = value[value.length - 1]
+
+          this.taskResults = submission.evaluation;
+
+          let passedList = this.taskResults.map((eva: CourseTaskEvaluation) => eva.passed);
+
+          this.taskPassed = this.combinedPassed(passedList)
+        } else {
+          this.submissionExist = false;
+          this.taskPassed = '' + false;
+        }
+
+      }
+    )
+  }
 
 
   markAsPassed(){
-    console.log(this.taskResults[0].submission_id)
+    if(!this.submissionExist){
+        return
+    }
     this.db.markTaskAsPassed(this.taskid, this.taskResults[0].submission_id).subscribe(
       (value: Succeeded) => {
         if(value.success){
-          this.db.getTaskResult(this.taskid).subscribe(
-            result => {
-              this.taskDetails = result;
-              this.taskResults = result.evaluation;
-              this.taskPassed = result.combined_passed
-            }
-          )
+            setTimeout(this.loadUsersSubmission(), 1000);
         }
       },
       error => {}

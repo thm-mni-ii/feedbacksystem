@@ -4,19 +4,19 @@
   <h2>Detail Ansicht Task: <span style="font-style: italic;">{{taskDetails.task_name}}</span> von User: {{userid}}</h2>
 
   <span style="font-style: italic;" >Passed:
-    <mat-icon id="passed" *ngIf="['true',true].indexOf(taskDetails.combined_passed) >= 0">check_box</mat-icon>
-    <mat-icon id="failed" *ngIf="['false',false].indexOf(taskDetails.combined_passed) >= 0">clear</mat-icon>
-    <mat-icon id="not-done" *ngIf="taskDetails.combined_passed == null">check_box_outline_blank
+    <mat-icon id="passed" *ngIf="['true',true].indexOf(taskPassed) >= 0">check_box</mat-icon>
+    <mat-icon id="failed" *ngIf="['false',false].indexOf(taskPassed) >= 0">clear</mat-icon>
+    <mat-icon id="not-done" *ngIf="taskPassed == null">check_box_outline_blank
     </mat-icon>
   </span>
 
   <br>
   <br>
 
-  <button  mat-flat-button color="accent" (click)="markAsPassed(taskDetails)">Abgabe als Bestanden markieren</button>
+  <button [disabled]="!submissionExist" mat-flat-button color="accent" (click)="markAsPassed()">Abgabe als Bestanden markieren</button>
 
 
-
+  <p *ngIf="!submissionExist">Der Benutzer hat keine Abgabe durchgeführt, es kann somit auch keine Auswertung betrachtet werden.</p>
 
 
 <app-task-result style="background:rgba(194,199,216,0.16);border-radius: 13px;"
