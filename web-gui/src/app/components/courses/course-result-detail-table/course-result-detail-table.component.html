@@ -15,6 +15,15 @@
       <!--- Note that these columns can be defined in any order.
             The actual rendered columns are set as a property on the row definition" -->
 
+
+      <ng-container matColumnDef="submission_data">
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>Submission Data</th>
+        <td style="max-width: 260px;" mat-cell *matCellDef="let eval">
+          <span>{{eval.submission_data}}</span>
+          <span *ngIf="eval.submission_data == ''">{{eval.filename}}</span>
+        </td>
+      </ng-container>
+
       <!-- Name Column -->
       <ng-container matColumnDef="result">
         <th mat-header-cell mat-sort-header *matHeaderCellDef>Result</th>
