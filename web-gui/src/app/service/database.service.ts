@@ -5,7 +5,7 @@ import {
   CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation,
   FileUpload,
-  GeneralCourseInformation, ReSubmissionResult,
+  GeneralCourseInformation, GlobalSetting, ReSubmissionResult,
   RoleChanged,
   Succeeded, TaskLastSubmission, TaskSubmission,
   Testsystem,
@@ -61,6 +61,33 @@ export class DatabaseService {
    */
   getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
     return this.http.get<{ markdown: string }>('/api/v1/settings/markdown/' + type.toString());
+  }
+
+
+  // Routes for Settings Entries
+
+  createNewSetting(key: string, value: string, typ: string){
+    return this.http.post<Succeeded>('/api/v1/settings' , {
+        key: key,
+        val: value,
+        typ: typ,
+        enable: true
+    });
+  }
+
+  updateSetting(key: string, value: string, typ: string){
+    return this.http.put<Succeeded>(`/api/v1/settings/${encodeURI(key)}` , {
+      val: value,
+      typ: typ
+    });
+  }
+
+  deleteSetting(key: string) {
+    return this.http.delete<Succeeded>(`/api/v1/settings/${encodeURI(key)}` );
+  }
+
+  getAllSettings() {
+    return this.http.get<GlobalSetting[]>(`/api/v1/settings` );
   }
 
   /**

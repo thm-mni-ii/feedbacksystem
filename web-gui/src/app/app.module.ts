@@ -70,6 +70,7 @@ import { TaskSubmissionChoiceComponent } from './components/courses/detail-cours
 import { TaskAnalyzeSubmissionsComponent } from './components/courses/task-analyze-submissions/task-analyze-submissions.component';
 import { AdminSettingsComponent } from './components/admin/admin-settings/admin-settings.component';
 import { CreateUpdateSettingDialogComponent } from './components/admin/admin-settings/create-update-setting-dialog/create-update-setting-dialog.component';
+import { DeleteSettingDialogComponent } from './components/admin/admin-settings/delete-setting-dialog/delete-setting-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -137,6 +138,7 @@ export const httpInterceptorProviders = [
     TaskAnalyzeSubmissionsComponent,
     AdminSettingsComponent,
     CreateUpdateSettingDialogComponent,
+    DeleteSettingDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -160,7 +162,7 @@ export const httpInterceptorProviders = [
     MatDialogModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
-    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent,
+    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
     CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
   providers: [CookieService, MarkdownService, MarkedOptions],
   bootstrap: [AppComponent]
