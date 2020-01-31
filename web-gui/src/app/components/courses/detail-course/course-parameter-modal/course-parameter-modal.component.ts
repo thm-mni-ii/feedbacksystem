@@ -12,7 +12,7 @@ export class CourseParameterModalComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<CourseParameterModalComponent>, private db: DatabaseService) { }
 
-  parameterList: CourseParameter[] = []
+  parameterList: CourseParameter[] = [];
 
   ngOnInit() {
     this.loadParameters()
@@ -26,7 +26,7 @@ export class CourseParameterModalComponent implements OnInit {
 
   loadParameters(){
     this.db.getAllCourseParameters(this.data.courseid).then((data: CourseParameter[]) => {
-      console.log(data)
+      console.log(data);
       this.parameterList = data
     }).catch()
 
@@ -38,7 +38,7 @@ export class CourseParameterModalComponent implements OnInit {
         this.db.addUpdateCourseParameter(this.data.courseid, parameter.c_param_key, parameter.c_param_desc)
       }
 
-    })
+    });
     this.close(true)
   }
 

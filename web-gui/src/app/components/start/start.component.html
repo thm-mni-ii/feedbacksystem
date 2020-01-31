@@ -51,15 +51,21 @@
           <p>Benutzer</p>
         </a>
 
+        <a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
+          <mat-icon>import_export</mat-icon>
+          <p>Kurs Importieren</p>
+        </a>
+
         <a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
           <mat-icon>widgets</mat-icon>
           <p>Verbundene Systeme</p>
         </a>
 
-        <a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
-          <mat-icon>import_export</mat-icon>
-          <p>Kurs Importieren</p>
+        <a mat-list-item routerLink="/admin/settings" routerLinkActive="selected">
+          <mat-icon>settings</mat-icon>
+          <p>Einstellungen</p>
         </a>
+
       </mat-nav-list>
       <mat-divider></mat-divider>
 

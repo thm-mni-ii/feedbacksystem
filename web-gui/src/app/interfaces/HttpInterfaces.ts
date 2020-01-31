@@ -284,3 +284,9 @@ export interface CourseParameterUser {
   value: string;
   c_param_key: string;
 }
+
+export interface GlobalSetting {
+  setting_key: string;
+  setting_val: string;
+  setting_typ: string;
+}
