@@ -495,7 +495,7 @@ class SubmissionService {
     */
   def generateSubmissionCSV(courseid: Int): ResponseEntity[UrlResource] = {
     // put this in a service!
-    val matrix = this.courseService.getSubmissionsMatrixByCourse(courseid, 0, Int.MaxValue).asInstanceOf[List[Map[String, Any]]]
+    val matrix = this.courseService.getSubmissionsMatrixByCourse(courseid, 0, Int.MaxValue, "").asInstanceOf[List[Map[String, Any]]]
     //var csvSchema = Array("username", "surname", "", "city")
     val tasks = matrix(0)("tasks").asInstanceOf[List[Map[String, Map[String, Any]]]]
     var csvSchema: List[String] = List("student")

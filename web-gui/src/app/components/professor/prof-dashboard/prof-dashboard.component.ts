@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {MatTabChangeEvent} from '@angular/material';
@@ -23,7 +23,7 @@ export class ProfDashboardComponent implements OnInit {
   }
 
   courses: GeneralCourseInformation[];
-  matrix?: DashboardProf[];
+  matrix: DashboardProf[];
   filteredMatrix$: Observable<DashboardProf[]>;
   keys = Object.keys;
   filter = new FormControl();
@@ -35,11 +35,12 @@ export class ProfDashboardComponent implements OnInit {
   loading: boolean = true;
 
   private _filter(value: string): DashboardProf[] {
-    const filterValue = value.toLowerCase().replace(' ', '');
+    const filterValue = ''.toLowerCase().replace(' ', '');
 
     return this.matrix.filter(student => {
-      return student.surname.toLowerCase().concat(student.prename.toLowerCase()).replace(' ', '').includes(filterValue) ||
-        student.prename.toLowerCase().concat(student.surname.toLowerCase()).replace(' ', '').includes(filterValue);
+      return true
+      /*return student.surname.toLowerCase().concat(student.prename.toLowerCase()).replace(' ', '').includes(filterValue) ||
+        student.prename.toLowerCase().concat(student.surname.toLowerCase()).replace(' ', '').includes(filterValue);*/
     });
 
   }
@@ -47,10 +48,18 @@ export class ProfDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.matrix = [];
 
-    this.filteredMatrix$ = this.filter.valueChanges.pipe(
+    /*this.filteredMatrix$ = this.filter.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value))
     );
+     */
+
+    //this.filteredMatrix$ = of(this.matrix)
+
+
+      this.filter.valueChanges.subscribe(
+      (value) => {this.onFilterChange(value)}
+    )
 
 
     this.tb.emitTitle('Dashboard');
@@ -62,6 +71,13 @@ export class ProfDashboardComponent implements OnInit {
       }
 
     });
+  }
+
+    onFilterChange(payload: string){
+    if(payload.length > 0){
+      console.log('request', payload)
+      this.loadAllSubmissionsAtCurrent(this.currentCourse, payload)
+    }
   }
 
   exportCourse(courseID: number){
@@ -83,20 +99,22 @@ export class ProfDashboardComponent implements OnInit {
     }
   }
 
-  public loadAllSubmissionsAtCurrent(courseid: number){
+  public loadAllSubmissionsAtCurrent(courseid: number, filter: string = ''){
     this.currentCourse = courseid;
-    this.db.getAllUserSubmissions(courseid, this.offset, this.limit).subscribe(students => {
-      this.matrix = students;
-      this.loading = false;
-      // update filter to show values in filtered Matrix (Bug hack)
-      this.filter.setValue(' ');
-      this.filter.setValue('');
-    });
+    return new Promise((resolve) => {
+      this.db.getAllUserSubmissions(courseid, this.offset, this.limit, filter).subscribe(students => {
+        this.matrix = students;
+        this.loading = false;
+
+        resolve(true)
+      });
+    })
+
   }
 
   public reloadSubmission(dir: number){
     this.offset = this.offset + (dir * this.limit);
-    this.loadAllSubmissionsAtCurrent(this.currentCourse);
+    this.loadAllSubmissionsAtCurrent(this.currentCourse, '');
   }
 
   private truncateTap(){
@@ -120,7 +138,7 @@ export class ProfDashboardComponent implements OnInit {
     this.db.getSubscribedUsersOfCourse(course.course_id).subscribe(
       result => {this.userlength = result.length},
       error => {},
-      () => this.loadAllSubmissionsAtCurrent(course.course_id)
+      () => this.loadAllSubmissionsAtCurrent(course.course_id, '')
     )
 
   }

@@ -238,16 +238,27 @@ class CourseService {
     * @param courseid unique identification for a course
     * @param offset offset the user list
     * @param limit limit the user list
+    * @param filter filter the user list
     * @return Scala List
     */
-  def getStudentsFromCourse(courseid: Int, offset: Int, limit: Int): List[Map[String, Any]] = {
-    val list = DB.query("select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and uc.role_id = 16 limit ?,?",
+  def getStudentsFromCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Map[String, Any]] = {
+    var queryArgs: List[Any] = List(courseid)
+    var filterQuery = ""
+    if(filter != null && filter.length > 0) {
+      val filterLike = filter + "%"
+      queryArgs = queryArgs ++ List(filterLike, filterLike, filterLike)
+      filterQuery = " and (u.username like ? OR u.prename like ? OR u.surname like ?) "
+    }
+    queryArgs = queryArgs ++ List(offset, limit)
+
+    val list = DB.query(s"select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and " +
+      s"uc.role_id = 16 ${filterQuery} order by u.surname asc limit ?,?",
       (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
         UserDBLabels.prename -> res.getString(UserDBLabels.prename),
         UserDBLabels.surname -> res.getString(UserDBLabels.surname),
         UserDBLabels.username -> res.getString(UserDBLabels.username)) }
-      , courseid, offset, limit)
-    list
+      , queryArgs: _*) // decompose the list to args
+    list.reverse
   }
 
   /**
@@ -702,10 +713,11 @@ class CourseService {
     * @param courseid unique course identification
     * @param offset offset of user list
     * @param limit limit the user list
+    * @param filter filter the user list
     * @return Scala List
     */
-  def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int): List[Any] = {
-    val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit)
+  def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Any] = {
+    val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit, filter)
     var matrix: List[Any] = List()
     for(u <- subscribedStudents){
       logger.warn("[getSubmissionsMatrixByCourse]: " + u.toString())

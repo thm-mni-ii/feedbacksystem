@@ -8,17 +8,17 @@
         <button (click)="exportCourse(course.course_id)" mat-flat-button color="primary" [disabled]="csvLoading" matTooltip="Feedback exportieren"><mat-icon>table_chart</mat-icon></button>
         <mat-form-field appearance="fill"  class="filter-input">
           <mat-label>Filter</mat-label>
-          <input matInput [formControl]="filter">
+          <input matInput  [formControl]="filter"> <!-- (ngModelChange)="onFilterChange($event)" -->
         </mat-form-field>
 
 
-        <div *ngFor="let student of filteredMatrix$ | async" class="student-row">
+        <div *ngFor="let student of matrix " class="student-row">
 
           <!-- Name -->
           <div class="name-container">
             <mat-icon *ngIf="student.passed === 1" class="student-passed" color="#00ffff">done</mat-icon>
             <mat-icon *ngIf="student.passed === 0" class="student-failed" color="#ff0000">clear</mat-icon>
-            <h3 class="name">{{student.surname}} {{student.prename}}</h3>
+            <h3 class="name">{{student.surname}}, {{student.prename}}</h3> <small>&nbsp;&nbsp;({{student.username}})</small>
           </div>
 
           <!-- Tasks-->
