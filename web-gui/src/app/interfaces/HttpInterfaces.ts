@@ -60,6 +60,7 @@ export interface NewCourse{
  */
 export interface CourseTask {
   testsystems: TaskTestsystem[];
+  course_id: string;
   submit_date?: Date;
   exitcode: number;
   submission_data: string;

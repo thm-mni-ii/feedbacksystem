@@ -25,6 +25,9 @@ import {ChangePasswdComponent} from "./components/users/change-passwd/change-pas
 import {GuestGuard} from "./guards/guest.guard";
 import {CourseResultDetailsComponent} from "./components/courses/course-result-details/course-result-details.component";
 import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze-submissions/task-analyze-submissions.component";
+import {CourseProfDetailsComponent} from "./components/courses/detail-course/course-prof-details/course-prof-details.component";
+import {IsGeqDocentGuard} from "./guards/is-geq-docent";
+import {isGeneratedFile} from "@angular/compiler/src/aot/util";
 
 
 const routes: Routes = [
@@ -56,6 +59,7 @@ const routes: Routes = [
 
       // Prof
       {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]},
+      {path: 'docent/dashboard/task/:taskid/user/:userid', component: CourseProfDetailsComponent, canActivate: [IsGeqDocentGuard]},
 
       //General Sites
       {path: '404', component: NotFound404Component},

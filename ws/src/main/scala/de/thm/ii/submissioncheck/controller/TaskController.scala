@@ -319,6 +319,27 @@ class TaskController {
   }
 
   /**
+    * set a task as passed, i.e. its submission by the submission id
+    * @param taskid the task id
+    * @param subid submisison id
+    * @param jsonNode json object
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @ResponseStatus(HttpStatus.OK)
+  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/passed"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
+  @ResponseBody
+  def setTaskAsPassed(@PathVariable taskid: Integer, @PathVariable subid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest):
+  Map[String, Any] = {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.isPermittedForTask(taskid, requestingUser.get)) throw new UnauthorizedException
+    val taskDetailsOpt = taskService.getTaskDetails(taskid)
+    if(taskDetailsOpt.isEmpty) throw new ResourceNotFoundException
+
+    Map(LABEL_SUCCESS -> this.submissionService.setSubmissionAsPassed(subid, taskid))
+  }
+
+  /**
     * return the re submission results
     * @param taskid task id
     * @param subid submission id
