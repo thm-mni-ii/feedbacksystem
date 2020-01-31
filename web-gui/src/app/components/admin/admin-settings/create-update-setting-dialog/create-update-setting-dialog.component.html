@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Create Guest User Account</h1>
 <div class="single-setting" mat-dialog-content>
 
-  <form class="single-setting" #singleSettingForm="ngForm">
+  <form class="single-setting" style="min-height: 400px;" #singleSettingForm="ngForm">
     <mat-form-field *ngIf="new_setting">
       <mat-label>Eindeutiger Key</mat-label>
       <input matInput required [(ngModel)]="data.setting_key" name="key">
@@ -26,7 +26,10 @@
 
     <div class="actions" mat-dialog-actions>
       <button mat-raised-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="accent" [disabled]="singleSettingForm.form.invalid" (click)="onSubmit()">Hinzufügen (TODO UPDATE)</button>
+      <button mat-raised-button color="accent" [disabled]="singleSettingForm.form.invalid" (click)="onSubmit()">
+        <span *ngIf="new_setting">Hinzufügen</span>
+        <span *ngIf="!new_setting">Updaten</span>
+      </button>
     </div>
   </form>
 </div>

@@ -1,15 +1,13 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {GlobalSetting} from "../../../interfaces/HttpInterfaces";
+import {GlobalSetting, Succeeded} from "../../../interfaces/HttpInterfaces";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatSort} from "@angular/material/sort";
 import {DatabaseService} from "../../../service/database.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {TitlebarService} from "../../../service/titlebar.service";
 import {MatDialog} from "@angular/material/dialog";
-import {flatMap} from "rxjs/operators";
-import {throwError} from "rxjs";
-import {CreateGuestUserDialog} from "../admin-user-management/admin-user-management.component";
 import {CreateUpdateSettingDialogComponent} from "./create-update-setting-dialog/create-update-setting-dialog.component";
+import {DeleteSettingDialogComponent} from "./delete-setting-dialog/delete-setting-dialog.component";
 
 @Component({
   selector: 'app-admin-settings',
@@ -22,34 +20,52 @@ export class AdminSettingsComponent implements OnInit {
   columns = ['setting_key', 'setting_val', 'setting_typ', 'delete', 'edit'];
   parameterList: GlobalSetting[] = [];
   dataSource = new MatTableDataSource<GlobalSetting>();
+
   constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
-              private dialog: MatDialog) { }
+              private dialog: MatDialog) {
+  }
 
   ngOnInit() {
     this.titlebar.emitTitle('Global Settings');
     this.loadSettingsList();
   }
 
-  loadSettingsList(){
-    // TODO from API
+  loadSettingsList() {
+    this.db.getAllSettings().subscribe((settings: GlobalSetting[]) => {
+      this.parameterList = settings
 
-    let bla = {
-      setting_key: "1",
-      setting_val: "dsd",
-      setting_typ: "INT"
-    };
-
-    this.parameterList.push(<GlobalSetting> bla);
-
-    this.dataSource.data = this.parameterList;
-    this.dataSource.sort = this.sort
-  }
-  deleteSetting(setting: GlobalSetting){
-
+      this.dataSource.data = this.parameterList;
+      this.dataSource.sort = this.sort
+    });
   }
 
-  editSetting(setting: GlobalSetting){
-    let emptyGlobalSetting = ({} as GlobalSetting)
+
+
+  deleteSetting(setting: GlobalSetting) {
+    this.dialog.open(DeleteSettingDialogComponent, {
+      data: setting
+    }).afterClosed().subscribe((answer: any) => {
+      if(answer.exit) {
+          this.handleDeleteSetting(setting)
+        }
+    })
+  }
+
+  handleDeleteSetting(setting: GlobalSetting) {
+    this.db.deleteSetting(setting.setting_key).subscribe(
+      (ok: Succeeded) => {
+        if (ok) {
+          this.loadSettingsList()
+        } else {
+          this.snackBar.open('Diese Einstellung konnte leider nicht gelöscht werden.', null, {duration: 5000});
+        }
+      },
+      (error) => this.snackBar.open('Error: ' + error.message, null, {duration: 5000}));
+
+  }
+
+  editSetting(setting: GlobalSetting) {
+    let emptyGlobalSetting = ({} as GlobalSetting);
 
     const dialogRef = this.dialog.open(CreateUpdateSettingDialogComponent, {
       width: '500px',
@@ -58,13 +74,24 @@ export class AdminSettingsComponent implements OnInit {
 
     dialogRef.afterClosed()
       .subscribe((setting: GlobalSetting) => {
-        console.warn(setting)
-        // TODO update it
+        this.db.updateSetting(setting.setting_key, setting.setting_val, setting.setting_typ).subscribe(
+          (ok) => {
+            if (ok.success) {
+              this.snackBar.open('Das Update war erfolgreich', null, {duration: 5000});
+              this.loadSettingsList()
+            }
+          }
+          ,
+          (error) => {
+            this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
+            this.loadSettingsList()
+          })
       })
 
   }
-  showNewSettingsDialog(){
-    let emptyGlobalSetting = ({} as GlobalSetting)
+
+  showNewSettingsDialog() {
+    let emptyGlobalSetting = ({} as GlobalSetting);
 
     const dialogRef = this.dialog.open(CreateUpdateSettingDialogComponent, {
       width: '500px',
@@ -73,22 +100,14 @@ export class AdminSettingsComponent implements OnInit {
 
     dialogRef.afterClosed()
       .subscribe((setting: GlobalSetting) => {
-        console.warn(setting)
-
-        /*if (user) {
-          this.db.createGuestUser(user.gUsername, user.gPassword, user.gRole, user.gPrename, user.gSurname, user.gEmail).pipe(
-            flatMap(result => (result.success) ? this.db.getAllUsers() : throwError(result))
-          ).subscribe(users => {
-            this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
-            this.dataSource.data = users;
-            this.resetUserData();
-          }, error => {
-            this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
-          });
-        }*/
-      });
-
-
+        this.db.createNewSetting(setting.setting_key, setting.setting_val, setting.setting_typ).subscribe(
+          (ok) => {
+            if (ok.success) {
+              this.snackBar.open('Neue Setting wurde erfolgreich erstellt', null, {duration: 5000});
+              this.loadSettingsList()
+            }
+          },
+          (error) => this.snackBar.open('Error: ' + error.message, null, {duration: 5000}));
+      })
   }
-
 }

@@ -24,15 +24,45 @@ class SettingService {
     * @return Boolean if update succeeded
     */
   def insertOrUpdateSetting(key: String, value: Any, typ: String): Boolean = {
-    // Todo make a list in properties which keys are allowed
-    val allowedKeys: List[String] = List("privacy.privacy_text", "privacy.impressum_text", "privacy.show")
-    if (!allowedKeys.contains(key)) {
-      throw new NotImplementedError("Your key: `" + key + "` is not implemented yet")
-    }
+     val parsedVal = typeConverter(typ, value.toString)
+
     val num = DB.update("INSERT into setting (setting_val, setting_key, setting_typ) VALUES (?, ?, ?) " +
       " ON DUPLICATE KEY UPDATE setting_val = ?, setting_typ = ?",
-      value, key, typ, value, typ)
+      value, key, typ, parsedVal, typ)
     List(0, 1).contains(num)
+  }
+
+  /**
+    * Delete a settings entry
+    * @param key the settings key
+    * @return deletion succeeds
+    */
+  def deleteByKey(key: String): Boolean = {
+    val num = DB.update("DELETE from setting where setting_key = ?", key)
+    List(0, 1).contains(num)
+  }
+
+  private def typeConverter(typ: String, data: String): Any = {
+    typ match {
+      case "BOOL" => data.toBoolean
+      case "INT" => data.toInt
+      case "FLOAT" => data.toFloat
+      case _ => data.toString
+    }
+  }
+
+  /**
+    * get all settings entry, some are parsed
+    * @return list of settings
+    */
+  def getAll(): List[Map[String, Any]] = {
+    val list = DB.query("SELECT * FROM setting", (res, _) => {
+      Map(SettingDBLabels.setting_key -> res.getString(SettingDBLabels.setting_key),
+        SettingDBLabels.setting_typ -> res.getString(SettingDBLabels.setting_typ),
+        SettingDBLabels.setting_val -> typeConverter(res.getString("setting_typ"), res.getString(SettingDBLabels.setting_val))
+      )
+    })
+    list
   }
 
   /**
@@ -43,11 +73,7 @@ class SettingService {
     */
   def loadSetting(key: String): Option[Any] = {
     val list = DB.query("SELECT * FROM setting where setting_key = ?", (res, _) => {
-      res.getString("setting_typ") match {
-        case "BOOL" => res.getBoolean(SettingDBLabels.setting_val)
-        case "TEXT" => res.getString(SettingDBLabels.setting_val)
-        case _ => res.getString(SettingDBLabels.setting_val)
-      }
+      typeConverter(res.getString("setting_typ"), res.getString(SettingDBLabels.setting_val))
     }, key)
     list.headOption
   }
