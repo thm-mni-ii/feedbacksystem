@@ -102,8 +102,8 @@ export class DatabaseService {
    * @param offset
    * @param limit
    */
-  getAllUserSubmissions(courseID: number, offset: number, limit: number): Observable<DashboardProf[]> {
-    return this.http.get<DashboardProf[]>(`/api/v1/courses/${courseID}/submissions?offset=${offset}&limit=${limit}`);
+  getAllUserSubmissions(courseID: number, offset: number, limit: number, filter: string): Observable<DashboardProf[]> {
+    return this.http.get<DashboardProf[]>(`/api/v1/courses/${courseID}/submissions?offset=${offset}&limit=${limit}&filter=${encodeURI(filter)}`);
   }
 
   getAllUserSubmissionsAsCSV(courseID: number){

@@ -511,6 +511,7 @@ class CourseController {
     * @param request Request Header containing Headers
     * @param offset offset of user list
     * @param limit limit the user list
+    * @param filter filter the user list
     * @return JSON
     */
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
@@ -518,6 +519,7 @@ class CourseController {
   def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer,
                         @RequestParam(value = "offset", required = false) offset: Int,
                         @RequestParam(value = "limit", required = false) limit: Int = LIMIT_MAX_20,
+                        @RequestParam(value = "filter", required = false) filter: String = "",
                         request: HttpServletRequest): List[Any] = {
     if (limit > LIMIT_MAX_20 || limit < 0) throw new BadRequestException("choose a `limit` within 0 and 20")
     val user = userService.verifyUserByHeaderToken(request)
@@ -530,7 +532,7 @@ class CourseController {
     }
     // old version
     // this.courseService.getAllSubmissionsFromAllUsersByCourses(courseid)
-    this.courseService.getSubmissionsMatrixByCourse(courseid, offset, limit)
+    this.courseService.getSubmissionsMatrixByCourse(courseid, offset, limit, filter)
   }
 
   /**
