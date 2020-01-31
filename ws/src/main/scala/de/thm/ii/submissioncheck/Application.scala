@@ -68,4 +68,15 @@ class Application {
   */
 object Application extends App {
   SpringApplication.run(classOf[Application])
+
+  import org.springframework.boot.web.servlet.MultipartConfigFactory
+  import org.springframework.context.annotation.Bean
+  import javax.servlet.MultipartConfigElement
+
+  @Bean def multipartConfigElement = {
+    val factory = new MultipartConfigFactory
+    factory.setMaxFileSize(512000000L)
+    factory.setMaxRequestSize(512000000L)
+    factory.createMultipartConfig
+  }
 }

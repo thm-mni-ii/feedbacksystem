@@ -111,6 +111,14 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         this.triggerExternalDescriptionIfNeeded(task, false)
       });
       this.titlebar.emitTitle(course_detail.course_name);
+
+
+      setTimeout(() => {
+        if(location.hash === '#edit'){
+          this.updateCourse();
+        }
+      },100)
+
     }, error => this.router.navigate(['404']))
 
     // Check if task reached deadline
@@ -127,8 +135,6 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
 
     this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
-
-
   }
 
   private externalInfoPoller(task: CourseTask, step: number){
@@ -511,6 +517,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       width: '800px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
+      location.hash = ''
       if (value.success) {
         this.db.getCourseDetail(this.courseID).subscribe(courses => {
           this.courseDetail = courses;
