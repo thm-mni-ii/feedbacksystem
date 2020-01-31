@@ -25,6 +25,7 @@ import {ChangePasswdComponent} from "./components/users/change-passwd/change-pas
 import {GuestGuard} from "./guards/guest.guard";
 import {CourseResultDetailsComponent} from "./components/courses/course-result-details/course-result-details.component";
 import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze-submissions/task-analyze-submissions.component";
+import {AdminSettingsComponent} from "./components/admin/admin-settings/admin-settings.component";
 
 
 const routes: Routes = [
@@ -47,6 +48,7 @@ const routes: Routes = [
       {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
       {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
       {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
+      {path: 'admin/settings', component: AdminSettingsComponent, canActivate: [AdminGuard]},
 
       // Users self settings
       {path: 'users/passwd', component: ChangePasswdComponent, canActivate: [GuestGuard]},
