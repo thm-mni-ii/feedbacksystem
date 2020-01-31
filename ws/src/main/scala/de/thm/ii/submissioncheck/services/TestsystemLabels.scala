@@ -20,4 +20,6 @@ object TestsystemLabels {
   val testfiles = "testfiles"
   /** provide accepted_input label **/
   val accepted_input = "accepted_input"
+  /** provide settings label **/
+  val settings = "settings"
 }

@@ -138,6 +138,7 @@ class TaskService {
 
     kafkaMap += (LABEL_SUBMISSION_ID -> submission_id.toString)
     kafkaMap += (LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
+    kafkaMap += ("global_settings" -> testsystemService.getSettingsOfTestsystem(testsystem_id))
     kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
       taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], user))
     val jsonResult = JsonParser.mapToJsonStr(kafkaMap)

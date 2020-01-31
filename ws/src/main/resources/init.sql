@@ -155,6 +155,8 @@ INSERT INTO `role` VALUES (1,'admin','Can delete and grand users. Can create cou
 UNLOCK TABLES;
 
 
+
+
 DROP TABLE IF EXISTS `setting`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
@@ -414,4 +416,16 @@ CREATE TABLE `user_course` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
+create table testsystem_setting
+(
+	testsystem_id varchar(30) not null,
+	setting_key varchar(200) not null,
+	constraint testsystem_setting_pk
+		primary key (testsystem_id, setting_key),
+	constraint testsystem_setting_setting_setting_key_fk
+		foreign key (setting_key) references setting (setting_key),
+	constraint testsystem_setting_testsystem_testsystem_id_fk
+		foreign key (testsystem_id) references testsystem (testsystem_id)
+);
 
