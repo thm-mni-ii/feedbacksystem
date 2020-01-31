@@ -162,6 +162,7 @@ object FileOperations {
         val fout = new FileOutputStream(fullFilePath.toString)
         val buffer = new Array[Byte](one_K_size)
         Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+        fout.close()
       }
     }
   }

@@ -289,7 +289,8 @@ class CourseController {
     val storagePath = (new StorageService(compile_production)).storeZipImportFile(file)
     val filename = file.getOriginalFilename
 
-    Map(LABEL_SUCCESS -> courseService.importACourse(storagePath.resolve(filename)))
+    val result = courseService.importACourse(storagePath.resolve(filename))
+    Map(LABEL_SUCCESS -> result._1, CourseDBLabels.courseid -> result._2)
   }
 
   /**

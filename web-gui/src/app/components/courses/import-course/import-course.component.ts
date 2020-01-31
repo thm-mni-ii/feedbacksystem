@@ -23,9 +23,12 @@ export class ImportCourseComponent implements OnInit {
     this.filesToUpload = files;
   }
 
+  private snackOK(){
+    return this.snackbar.open("Super, der Import hat funktioniert", 'OK', {duration: 3000}).afterDismissed().toPromise()
+  }
+
   showOK(){
-    this.snackbar.open("Super, der Import hat funktioniert", 'OK', {duration: 3000}).afterDismissed().toPromise()
-      .then(() => this.router.navigate(['courses', 'user']) )
+    this.snackOK().then(() => this.router.navigate(['courses', 'user']) )
   }
 
   showError(msg: string){
@@ -36,7 +39,7 @@ export class ImportCourseComponent implements OnInit {
     if (this.filesToUpload.length != 1) {
       this.snackbar.open("Bitte nur eine Zip Datei für den Import angeben", 'OK', {duration: 3000});
     }
-    console.log(this.importMode)
+
     if (this.importMode == 'recover'){
       if (!this.courseId) {
         this.snackbar.open("Bitte eine Course ID eingeben", 'OK', {duration: 3000});
@@ -44,12 +47,16 @@ export class ImportCourseComponent implements OnInit {
         this.db.recoverCourse(this.courseId, this.filesToUpload).then(data => this.showOK()).catch(e => this.showError(e))
       }
     } else if (this.importMode == 'createCourse'){
-      this.db.importCompleteCourse(this.filesToUpload).then(data => this.showOK()).catch(e => this.showError(e))
+      this.db.importCompleteCourse(this.filesToUpload).then(data => {
+        this.snackOK().then(() => {
+          this.router.navigate(['courses', data['course_id']], {fragment: 'edit'})
+        })
+      }).catch(e => this.showError(e))
     }
   }
 
   onFilesRejected(files: File[]) {
-    // Todo need to remive it somehow
+    // Todo need to remove it somehow
     console.log(files);
   }
 

@@ -13,7 +13,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.{PropertySource}
 import org.springframework.context.event.EventListener
 import org.springframework.util.ResourceUtils
-
+import org.springframework.boot.web.servlet.MultipartConfigFactory
+import org.springframework.context.annotation.Bean
+import javax.servlet.MultipartConfigElement
 import scala.io.{Codec, Source}
 
 /**
@@ -68,4 +70,16 @@ class Application {
   */
 object Application extends App {
   SpringApplication.run(classOf[Application])
+
+  /**
+    * configure upload and request size
+    * @return new configuration
+    */
+  @Bean def multipartConfigElement: MultipartConfigElement = {
+    val maxsize = 512000000L
+    val factory = new MultipartConfigFactory
+    factory.setMaxFileSize(maxsize)
+    factory.setMaxRequestSize(maxsize)
+    factory.createMultipartConfig
+  }
 }

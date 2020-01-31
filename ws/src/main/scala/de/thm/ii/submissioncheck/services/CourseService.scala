@@ -645,7 +645,7 @@ class CourseService {
     * @param zipdir the path where the zip is uploaded
     * @return if import worked out
     */
-  def importACourse(zipdir: Path): Boolean = {
+  def importACourse(zipdir: Path): (Boolean, Int) = {
     FileOperations.unzip(zipdir, zipdir.getParent)
     val completeConfig = JsonParser.jsonStrToMap(FileOperations.readFromFile(zipdir.getParent.resolve(LABEL_COURSE_JSON)))
     val courseConfig: Map[String, Any] = completeConfig(LABEL_COURSE).asInstanceOf[Map[String, Any]]
@@ -691,7 +691,7 @@ class CourseService {
         taskService.sendTaskToTestsystem(entry._1, testsytem_id)
       }
     })
-    true
+    (true, courseID)
   }
 
   /**
