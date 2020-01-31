@@ -235,6 +235,7 @@ export interface Testsystem {
   machine_port: string;
   machine_ip: string;
   testfiles: TestsystemTestfile[]
+  settings: string[]
 }
 
 export interface TestsystemTestfile {

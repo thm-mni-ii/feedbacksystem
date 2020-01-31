@@ -89,7 +89,7 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
     }).toList
   }
 
-  private def runMaintainerTest(docentFile: File, target_dir: String, git_url: String) = {
+  private def runMaintainerTest(docentFile: File, target_dir: String, git_url: String, API_TOKEN: String) = {
     var result: List[Map[String, Any]] = List()
     var docentResult: List[Map[String, Any]] = List()
     var docentSettingMap: Map[String, Any] = Map()
@@ -104,7 +104,6 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
 
       try {
         val base_url = docentSettingMap("base_url")
-        val API_TOKEN = docentSettingMap("API_TOKEN").toString
         val projectID = URLEncoder.encode(git_url.replaceFirst("^git.*:", "").replaceFirst(".git", ""), "UTF-8")
 
         val projectInfo: Map[String, Any] = JsonHelper.jsonStrToMap(gitlabGet(base_url + projectID, API_TOKEN))
@@ -134,6 +133,17 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
         }
       }
     (result, docentResult)
+  }
+
+  private def getGitlabApiToken(jsonMap: Map[String, Any]): String = {
+    var API_TOKEN = ""
+    val configs = jsonMap("global_settings").asInstanceOf[List[Map[String, Any]]]
+    configs.foreach((f: Map[String, Any]) => {
+      if (f("setting_key") == "GITLAB_API_KEY"){
+        API_TOKEN = f("setting_val").toString
+      }
+    })
+    API_TOKEN
   }
 
   /**
@@ -175,7 +185,7 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
       if (Files.exists(basePath.resolve(LABEL_CONFIGFILE))) {
         // we request to git(lab/hub) and do some activity checks
         val mapTuple = runMaintainerTest(new File(basePath.resolve(LABEL_CONFIGFILE).toString),
-          targetDirPath.toAbsolutePath.toString, git_url)
+          targetDirPath.toAbsolutePath.toString, git_url, getGitlabApiToken(jsonMap))
         maintainerMap = mapTuple._1;
         docentMap = mapTuple._2;
         checkresultList = Map(LABEL_HEADER -> "Maintainer Check", LABEL_RESULT -> maintainerMap) :: checkresultList

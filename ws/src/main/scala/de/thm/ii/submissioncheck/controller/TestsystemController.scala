@@ -1,5 +1,6 @@
 package de.thm.ii.submissioncheck.controller
 
+import java.util.Iterator
 import java.{io, util}
 
 import com.fasterxml.jackson.databind.JsonNode
@@ -31,12 +32,21 @@ class TestsystemController {
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
-  def getAllTestystems(request: HttpServletRequest): List[Map[String, String]] = {
+  def getAllTestystems(request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
         throw new UnauthorizedException
     }
     testsystemService.getTestsystems()
+  }
+
+  private def nodeIteratorToList[A](iterNode: util.Iterator[JsonNode]) = {
+    var list: List[A] = List()
+
+    iterNode.forEachRemaining(node => {
+      list = node.asText().asInstanceOf[A] :: list
+      })
+    list
   }
 
   /**
@@ -58,7 +68,13 @@ class TestsystemController {
       val supported_formats = jsonNode.get(TestsystemLabels.supported_formats).asText()
       val machine_port: Int = if (jsonNode.get(TestsystemLabels.machine_port) != null)  jsonNode.get(TestsystemLabels.machine_port).asInt() else 0
       val machine_ip: String = if (jsonNode.get(TestsystemLabels.machine_ip) != null)  jsonNode.get(TestsystemLabels.machine_ip).asText() else ""
-      testsystemService.insertTestsystem(id, name, description, supported_formats, machine_port, machine_ip)
+      var settings: List[String] = if (jsonNode.get(TestsystemLabels.settings) != null) {
+        nodeIteratorToList[String](jsonNode.get(TestsystemLabels.settings).iterator())
+      } else {
+        List()
+      }
+
+      testsystemService.insertTestsystem(id, name, description, supported_formats, machine_port, machine_ip, settings)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: id, name, description, supported_formats")
     }
@@ -81,10 +97,14 @@ class TestsystemController {
       val name: String = if (jsonNode.get("name") != null)  jsonNode.get("name").asText() else null
       val description: String = if (jsonNode.get("description") != null)  jsonNode.get("description").asText() else null
       val supported_formats: String = if (jsonNode.get("supported_formats") != null)  jsonNode.get("supported_formats").asText() else null
-      val machine_port: Int = if (jsonNode.get("machine_port") != null)  jsonNode.get("machine_port").asInt() else 0
-      val machine_ip: String = if (jsonNode.get("machine_ip") != null)  jsonNode.get("machine_ip").asText() else null
+      val machine_port: Int = if (jsonNode.get("machine_port") != null) jsonNode.get("machine_port").asInt() else 0
+      val machine_ip: String = if (jsonNode.get("machine_ip") != null) jsonNode.get("machine_ip").asText() else null
+      val settingNode = jsonNode.get(TestsystemLabels.settings)
+      var settings: List[String] = if (settingNode != null) nodeIteratorToList[String](settingNode.iterator()) else List()
+
+      //val settings : List[]
       // this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
-      Map("success" -> testsystemService.updateTestsystem(testsystemid, name, description, supported_formats, machine_port, machine_ip))
+      Map("success" -> testsystemService.updateTestsystem(testsystemid, name, description, supported_formats, machine_port, machine_ip, settings))
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: name, description, supported_formats")
     }

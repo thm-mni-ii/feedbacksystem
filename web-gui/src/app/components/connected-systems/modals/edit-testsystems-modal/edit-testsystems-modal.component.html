@@ -42,11 +42,39 @@
     </mat-form-field>
 
 
+
+
+    <mat-chip-list>
+      <mat-chip
+        *ngFor="let setting of settings; let i = index"
+        color="accent"
+        selected="true"
+        removable="true"
+        (removed)="removeSetting(i)">
+        {{setting}}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+
+      <mat-form-field>
+        <input type="text" matInput [formControl]="settingsFormControl" [matAutocomplete]="auto"
+               placeholder="Settings Keys auswählen" (keyup)="addSetting($event.key)">
+      </mat-form-field>
+
+      <!--[displayWith]="displayFn"-->
+      <mat-autocomplete  #auto="matAutocomplete" >
+        <mat-option *ngFor="let setting of settingsOptions" [value]="setting">
+          {{setting}}
+        </mat-option>
+      </mat-autocomplete>
+
+
+    </mat-chip-list>
+
   </mat-dialog-content>
 
 
   <mat-action-list class="action-buttons">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+    <button mat-flat-button color="warn" (click)="closeDialog(false)">Abbrechen</button>
     <button mat-flat-button color="accent"  *ngIf="modal_type == 'edit'" (click)="updateTestsystem()">Speichern</button>
     <button mat-flat-button color="accent"  *ngIf="modal_type == 'new'" (click)="createTestsystem()">Erstellen</button>
   </mat-action-list>
