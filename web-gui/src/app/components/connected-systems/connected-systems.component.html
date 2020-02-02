@@ -51,6 +51,11 @@
       <td mat-cell *matCellDef="let testsystem"> {{testsystem.machine_port}} </td>
     </ng-container>
 
+    <ng-container matColumnDef="settings">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Einstellungen</th>
+      <td mat-cell *matCellDef="let testsystem"> {{testsystem.settings}} </td>
+    </ng-container>
+
     <!-- Action buttons-->
     <ng-container matColumnDef="delete">
       <th mat-header-cell *matHeaderCellDef>Löschen</th>

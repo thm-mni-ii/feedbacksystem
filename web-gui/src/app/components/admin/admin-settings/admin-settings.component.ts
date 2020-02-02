@@ -32,7 +32,7 @@ export class AdminSettingsComponent implements OnInit {
 
   loadSettingsList() {
     this.db.getAllSettings().subscribe((settings: GlobalSetting[]) => {
-      this.parameterList = settings
+      this.parameterList = settings;
 
       this.dataSource.data = this.parameterList;
       this.dataSource.sort = this.sort
