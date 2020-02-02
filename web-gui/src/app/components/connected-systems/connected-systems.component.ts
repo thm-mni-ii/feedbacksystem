@@ -19,7 +19,7 @@ export class ConnectedSystemsComponent implements OnInit {
               private dialog: MatDialog) {
   }
 
-  columns = ['testsystem_id', 'name', 'description', 'supported_formats', 'machine_port', 'machine_ip', 'delete', 'edit'];
+  columns = ['testsystem_id', 'name', 'description', 'supported_formats', 'machine_port', 'machine_ip', 'settings', 'delete', 'edit'];
   dataSource = new MatTableDataSource<Testsystem>();
 
   ngOnInit() {
