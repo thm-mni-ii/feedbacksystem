@@ -1,4 +1,7 @@
-<h1 mat-dialog-title>Create Guest User Account</h1>
+<h1 mat-dialog-title>Gobale Einstellung
+  <span *ngIf="new_setting">hinzufügen</span>
+  <span *ngIf="!new_setting">updaten</span>
+</h1>
 <div class="single-setting" mat-dialog-content>
 
   <form class="single-setting" style="min-height: 400px;" #singleSettingForm="ngForm">
