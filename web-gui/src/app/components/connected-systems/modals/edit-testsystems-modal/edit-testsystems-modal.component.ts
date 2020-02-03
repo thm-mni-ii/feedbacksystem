@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../../service/database.service';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import {GlobalSetting, Succeeded, User} from "../../../../interfaces/HttpInterfaces";
+import {GlobalSetting, Succeeded, TestsystemTestfile, User} from "../../../../interfaces/HttpInterfaces";
 import {Testsystem} from "../../../../interfaces/HttpInterfaces";
 import {COMMA, ENTER} from "@angular/cdk/keycodes";
 import {MatChipInputEvent} from "@angular/material/chips";
@@ -27,6 +27,7 @@ export class EditTestsystemsModalComponent implements OnInit {
   public port: string = '';
   public ip: string = '';
   public settings: string[] = [];
+  public testfiles: TestsystemTestfile[] = [];
 
   settingsFormControl = new FormControl();
   settingsOptions: string[];
@@ -55,6 +56,26 @@ export class EditTestsystemsModalComponent implements OnInit {
       this.port = testsystem.machine_port;
       this.ip = testsystem.machine_ip;
       this.settings = testsystem.settings;
+      this.testfiles = testsystem.testfiles;
+      this.addEmptyTestfile();
+    }
+  }
+
+  public deleteTestfile(index){
+    this.testfiles.splice(index, 1);
+  }
+
+  private addEmptyTestfile(){
+    this.testfiles.push({
+      required: false,
+      filename: ''
+    })
+  }
+
+  smartFieldAdder(){
+    let emptyFields = this.testfiles.filter((v: TestsystemTestfile) => v.filename.length === 0).length;
+    if(emptyFields == 0){
+      this.addEmptyTestfile()
     }
   }
 
@@ -66,7 +87,8 @@ export class EditTestsystemsModalComponent implements OnInit {
       supported_formats: this.formats,
       machine_port: this.port,
       machine_ip: this.ip,
-      settings: this.settings
+      settings: this.settings,
+      testfiles: this.testfiles.filter((v: TestsystemTestfile) => v.filename !== null && v.filename.length > 0)
     }
   }
 
