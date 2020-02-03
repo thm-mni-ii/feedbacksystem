@@ -75,7 +75,6 @@ export class ProfDashboardComponent implements OnInit {
 
     onFilterChange(payload: string){
     if(payload.length > 0){
-      console.log('request', payload)
       this.loadAllSubmissionsAtCurrent(this.currentCourse, payload)
     }
   }

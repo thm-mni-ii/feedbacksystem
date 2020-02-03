@@ -47,13 +47,12 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     reader.readAll().toArray().toList.asInstanceOf[List[Array[String]]].foreach(line => {
       val readerLine = line.toList
       originalSolution = Map(readerLine(0) -> toBool(readerLine(1))) :: originalSolution
-      logger.warning("line50: " + originalSolution)
+
     })
 
     var passed = true
 
     val output = if (isInfo) {
-      logger.warning("It is INFO")
       var generatedAnswer: List[Map[String, Any]] = List()
       for ((answer, i) <- originalSolution.zipWithIndex) {
         generatedAnswer = Map(LABEL_TEXT -> answer.keys.toList(0), "id" -> i) :: generatedAnswer
@@ -64,7 +63,6 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     } else {
       val userSolution = JsonHelper.jsonStrToMap(scala.io.Source.fromFile(submittedFilePath).mkString).asInstanceOf[Map[String, Boolean]]
       var correctedMap: List[Map[String, Any]] = List()
-      logger.warning(originalSolution.toString())
       for ((answer, i) <- originalSolution.zipWithIndex) {
         val doMatch = if (!userSolution.keys.toList.contains(i.toString)) false else userSolution(i.toString) == answer.values.toList.head
 
