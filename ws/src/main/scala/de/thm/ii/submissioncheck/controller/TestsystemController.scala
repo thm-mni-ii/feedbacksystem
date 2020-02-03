@@ -6,7 +6,6 @@ import java.{io, util}
 import com.fasterxml.jackson.databind.{DeserializationFeature, JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import de.thm.ii.submissioncheck.misc.{BadRequestException, UnauthorizedException}
-import de.thm.ii.submissioncheck.model.{Testfile, User}
 import de.thm.ii.submissioncheck.services._
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired

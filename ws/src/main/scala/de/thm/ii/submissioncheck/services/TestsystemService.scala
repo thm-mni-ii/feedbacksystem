@@ -6,7 +6,7 @@ import java.io
 
 import de.thm.ii.submissioncheck.TestsystemTestfileLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.{Testfile, Testsystem, User}
+import de.thm.ii.submissioncheck.model.{Testsystem}
 import de.thm.ii.submissioncheck.security.Secrets
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
