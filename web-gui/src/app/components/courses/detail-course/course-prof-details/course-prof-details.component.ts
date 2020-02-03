@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {flatMap} from "rxjs/operators";
 import {
   CourseTask,
@@ -54,10 +54,10 @@ export class CourseProfDetailsComponent implements OnInit {
     );
   }
 
-  private combinedPassed(passedList){
-    if (passedList.indexOf(false) >= 0){
+  private combinedPassed(passedList) {
+    if (passedList.indexOf(false) >= 0) {
       return 'false'
-    } else if (passedList.indexOf(null) >= 0){
+    } else if (passedList.indexOf(null) >= 0) {
       return null
     } else {
       return 'true'
@@ -65,18 +65,30 @@ export class CourseProfDetailsComponent implements OnInit {
   }
 
 
-  loadUsersSubmission(){
+  loadUsersSubmission() {
     this.db.getSubmissionsOfUserOfTask(parseInt(this.taskDetails.course_id), this.userid, this.taskid).subscribe(
       (value: TaskSubmission[]) => {
-        if(value.length > 0){
+        if (value.length > 0) {
           this.submissionExist = true;
-          let submission: TaskSubmission = value[value.length - 1]
+
+          let submission: TaskSubmission = null
+          value.forEach((sub, index) => {
+            let summedPassed = this.combinedPassed(sub.evaluation.map((eva: CourseTaskEvaluation) => eva.passed));
+            if ('true' === summedPassed) {
+              submission = sub;
+            }
+          });
+
+          if (submission === null) {
+            submission = value[0]
+          }
 
           this.taskResults = submission.evaluation;
 
           let passedList = this.taskResults.map((eva: CourseTaskEvaluation) => eva.passed);
 
           this.taskPassed = this.combinedPassed(passedList)
+
         } else {
           this.submissionExist = false;
           this.taskPassed = '' + false;
@@ -87,17 +99,18 @@ export class CourseProfDetailsComponent implements OnInit {
   }
 
 
-  markAsPassed(){
-    if(!this.submissionExist){
-        return
+  markAsPassed() {
+    if (!this.submissionExist) {
+      return
     }
     this.db.markTaskAsPassed(this.taskid, this.taskResults[0].submission_id).subscribe(
       (value: Succeeded) => {
-        if(value.success){
-            setTimeout(this.loadUsersSubmission(), 1000);
+        if (value.success) {
+          setTimeout(this.loadUsersSubmission(), 1000);
         }
       },
-      error => {}
+      error => {
+      }
     )
   }
 }
