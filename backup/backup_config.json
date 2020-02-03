@@ -1,7 +1,7 @@
 {
     "data": {
         "DEST_BASEPATH": "git_backup",
-        "SRC_BASEPATH": "feedbacksyste,",
+        "SRC_BASEPATH": "feedbacksystem",
         "backup_dirs": [
             "docker-config/mysql1",
             "docker-config/mysql2",
