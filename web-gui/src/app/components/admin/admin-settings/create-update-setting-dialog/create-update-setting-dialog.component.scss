@@ -1,0 +1,11 @@
+.single-setting {
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  float: right;
+  button {
+    margin-left: 10px;
+  }
+}

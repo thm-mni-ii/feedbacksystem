@@ -54,6 +54,93 @@ class SettingController {
     }
   }
 
+  /**
+    * create a new settings entry
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return success state
+    */
+  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
+  def createNewSetting(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 1) {
+      throw new UnauthorizedException
+    }
+    try {
+      val key = jsonNode.get("key").asText()
+      val value = jsonNode.get("val").asText()
+      val typ = jsonNode.get("typ").asText()
+
+      Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting(key, value, typ))
+
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("JSON Request need this three keys: (key, val, typ)")
+      case e: Exception => throw new BadRequestException(e.toString)
+    }
+  }
+
+  /**
+    * update an existing entry
+    * @param settingskey key of entry
+    * @param request Request Header containing Headers
+    * @param jsonNode contains JSON request
+    * @return success state
+    */
+  @RequestMapping(value = Array("{settingskey}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
+  def updateSetting(@PathVariable settingskey: String, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 1) {
+      throw new UnauthorizedException
+    }
+    try {
+      val value = jsonNode.get("val").asText()
+      val typ = jsonNode.get("typ").asText()
+
+      Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting(settingskey, value, typ))
+
+    } catch {
+      case _: NullPointerException => throw new BadRequestException("JSON Request need this three keys: (val, typ)")
+      case e: Exception => throw new BadRequestException(e.toString)
+    }
+  }
+
+  /**
+    * delete a settings entry
+    * @param settingskey key of entry
+    * @param request Request Header containing Headers
+    * @return success state
+    */
+  @RequestMapping(value = Array("{settingskey}"), method = Array(RequestMethod.DELETE))
+  def deleteSetting(@PathVariable settingskey: String, request: HttpServletRequest): Map[String, Boolean] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 1) {
+      throw new UnauthorizedException
+    }
+
+    Map(LABEL_SUCCESS -> settingService.deleteByKey(settingskey))
+  }
+
+  /**
+    * get all entries
+    * @param request Request Header containing Headers
+    * @return list of all entries
+    */
+  @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
+  def getAllSetting(request: HttpServletRequest): List[Map[String, Any]] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty || user.get.roleid > 1) {
+      throw new UnauthorizedException
+    }
+
+    try {
+      settingService.getAll()
+    } catch {
+      case e: Exception => throw new BadRequestException(e.toString)
+    }
+  }
+
   /** Set value if a privacy message has to be shown
     * @author Benjamin Manns
     * @param request Request Header containing Headers

@@ -1,8 +1,17 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../../service/database.service';
 import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import {Succeeded} from "../../../../interfaces/HttpInterfaces";
+import {GlobalSetting, Succeeded, TestsystemTestfile, User} from "../../../../interfaces/HttpInterfaces";
 import {Testsystem} from "../../../../interfaces/HttpInterfaces";
+import {COMMA, ENTER} from "@angular/cdk/keycodes";
+import {MatChipInputEvent} from "@angular/material/chips";
+import {FormControl} from "@angular/forms";
+import {Observable} from "rxjs";
+import {flatMap, map, startWith} from "rxjs/operators";
+import set = Reflect.set;
+
+
+
 
 @Component({
   selector: 'app-edit-modal',
@@ -17,7 +26,15 @@ export class EditTestsystemsModalComponent implements OnInit {
   public formats: string = '';
   public port: string = '';
   public ip: string = '';
-  
+  public settings: string[] = [];
+  public testfiles: TestsystemTestfile[] = [];
+  public accepted_input: number;
+
+  settingsFormControl = new FormControl();
+  settingsOptions: string[];
+
+  dataSourcesSettingsKeys : string[];
+
   public modal_type: string = '';
 
   constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
@@ -26,7 +43,9 @@ export class EditTestsystemsModalComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log(this.data.data);
+
+    this.initSettingsList();
+
     this.modal_type = this.data.type;
 
     let testsystem: Testsystem = this.data.testsystem;
@@ -37,6 +56,28 @@ export class EditTestsystemsModalComponent implements OnInit {
       this.formats = testsystem.supported_formats;
       this.port = testsystem.machine_port;
       this.ip = testsystem.machine_ip;
+      this.settings = testsystem.settings;
+      this.testfiles = testsystem.testfiles;
+      this.accepted_input = testsystem.accepted_input;
+      this.addEmptyTestfile();
+    }
+  }
+
+  public deleteTestfile(index){
+    this.testfiles.splice(index, 1);
+  }
+
+  private addEmptyTestfile(){
+    this.testfiles.push({
+      required: false,
+      filename: ''
+    })
+  }
+
+  smartFieldAdder(){
+    let emptyFields = this.testfiles.filter((v: TestsystemTestfile) => v.filename.length === 0).length;
+    if(emptyFields == 0){
+      this.addEmptyTestfile()
     }
   }
 
@@ -47,7 +88,10 @@ export class EditTestsystemsModalComponent implements OnInit {
       description: this.description,
       supported_formats: this.formats,
       machine_port: this.port,
-      machine_ip: this.ip
+      machine_ip: this.ip,
+      settings: this.settings,
+      accepted_input: this.accepted_input,
+      testfiles: this.testfiles.filter((v: TestsystemTestfile) => v.filename !== null && v.filename.length > 0)
     }
   }
 
@@ -69,6 +113,44 @@ export class EditTestsystemsModalComponent implements OnInit {
       }
     })
   }
+
+
+
+  initSettingsList(){
+    this.db.getAllSettings().subscribe((value => {
+      this.dataSourcesSettingsKeys = value.map((v: GlobalSetting) => v.setting_key)
+    }));
+
+
+    this.settingsFormControl.valueChanges.subscribe((payload: string) => {
+      this.settingsOptions = this.dataSourcesSettingsKeys.filter(setting => {
+        return payload.length > 0 && setting.toLowerCase().indexOf(payload.toLowerCase()) > -1
+      })
+    })
+
+  }
+
+  /**
+   * Add setting to list
+   * @param key Keyboard press key 'ENTER'
+   */
+  addSetting(key: string) {
+    if (key === 'Enter') {
+      const selectedKey: string = this.settingsFormControl.value;
+      this.settingsFormControl.setValue('');
+
+      if(this.settings.indexOf(selectedKey) == -1)  this.settings.push(selectedKey)
+    }
+
+  }
+
+
+
+  removeSetting(index: number) {
+    this.settings.splice(index, 1);
+  }
+
+
 
 
   /**

@@ -234,7 +234,9 @@ export interface Testsystem {
   supported_formats: string;
   machine_port: string;
   machine_ip: string;
-  testfiles: TestsystemTestfile[]
+  testfiles: TestsystemTestfile[];
+  settings: string[];
+  accepted_input: number;
 }
 
 export interface TestsystemTestfile {
@@ -283,4 +285,10 @@ export interface CourseParameterUser {
   course_id: number;
   value: string;
   c_param_key: string;
+}
+
+export interface GlobalSetting {
+  setting_key: string;
+  setting_val: string;
+  setting_typ: string;
 }

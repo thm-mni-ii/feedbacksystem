@@ -51,6 +51,19 @@
       <td mat-cell *matCellDef="let testsystem"> {{testsystem.machine_port}} </td>
     </ng-container>
 
+    <ng-container matColumnDef="settings">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Einstellungen</th>
+      <td mat-cell *matCellDef="let testsystem"> {{testsystem.settings}} </td>
+    </ng-container>
+    <ng-container matColumnDef="testfiles">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Testfiles</th>
+      <td mat-cell *matCellDef="let testsystem"> {{asFilename(testsystem)}} </td>
+    </ng-container>
+    <ng-container matColumnDef="accepted_input">
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Input Type (Codiert)</th>
+      <td mat-cell *matCellDef="let testsystem"> {{testsystem.accepted_input}} </td>
+    </ng-container>
+
     <!-- Action buttons-->
     <ng-container matColumnDef="delete">
       <th mat-header-cell *matHeaderCellDef>Löschen</th>

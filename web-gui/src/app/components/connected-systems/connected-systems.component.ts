@@ -19,13 +19,16 @@ export class ConnectedSystemsComponent implements OnInit {
               private dialog: MatDialog) {
   }
 
-  columns = ['testsystem_id', 'name', 'description', 'supported_formats', 'machine_port', 'machine_ip', 'delete', 'edit'];
+  columns = ['testsystem_id', 'name', 'description', 'supported_formats', 'machine_port', 'machine_ip', 'settings', 'testfiles', 'accepted_input', 'delete', 'edit'];
   dataSource = new MatTableDataSource<Testsystem>();
 
   ngOnInit() {
     this.loadAllTestsystem()
   }
 
+  asFilename(testsystem: Testsystem){
+      return testsystem.testfiles.map(v => v.filename)
+  }
   openAddDialog(){
     this.dialog.open(EditTestsystemsModalComponent,{data:{
         type: 'new',
