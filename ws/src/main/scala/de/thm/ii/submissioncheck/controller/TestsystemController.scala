@@ -41,17 +41,6 @@ class TestsystemController {
     testsystemService.getTestsystems()
   }
 
-  private def nodeIteratorToList[A](iterNode: util.Iterator[JsonNode]) (implicit manifest: Manifest[A]) = {
-    var list: List[A] = List()
-    val mapper = new ObjectMapper()
-    mapper.registerModule(DefaultScalaModule)
-
-    iterNode.forEachRemaining(node => {
-      list = mapper.convertValue(node, manifest.runtimeClass).asInstanceOf[A] :: list
-      })
-    list
-  }
-
   /**
     * createTestsystem is a route to register a tasksystem
     * @param request contain request information
@@ -65,24 +54,7 @@ class TestsystemController {
       throw new UnauthorizedException
     }
     try {
-      val id = jsonNode.get(PATH_LABEL_ID).asText()
-      val name = jsonNode.get(TestsystemLabels.name).asText()
-      val description = jsonNode.get(TestsystemLabels.description).asText()
-      val supported_formats = jsonNode.get(TestsystemLabels.supported_formats).asText()
-      val machine_port: Int = if (jsonNode.get(TestsystemLabels.machine_port) != null)  jsonNode.get(TestsystemLabels.machine_port).asInt() else 0
-      val machine_ip: String = if (jsonNode.get(TestsystemLabels.machine_ip) != null)  jsonNode.get(TestsystemLabels.machine_ip).asText() else ""
-      val settings: List[String] = if (jsonNode.get(TestsystemLabels.settings) != null) {
-        nodeIteratorToList[String](jsonNode.get(TestsystemLabels.settings).iterator())
-      } else {
-        List()
-      }
-      val testfiles: List[Map[String, Any]] = if (jsonNode.get(TestsystemLabels.testfiles) != null) {
-        nodeIteratorToList[Map[String, Any]](jsonNode.get(TestsystemLabels.testfiles).iterator())
-      } else {
-        List()
-      }
-
-      testsystemService.insertTestsystem(id, name, description, supported_formats, machine_port, machine_ip, settings, testfiles)
+      testsystemService.insertTestsystem(jsonNode)
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: id, name, description, supported_formats")
     }
@@ -102,19 +74,7 @@ class TestsystemController {
       throw new UnauthorizedException
     }
     try {
-      val name: String = if (jsonNode.get("name") != null)  jsonNode.get("name").asText() else null
-      val description: String = if (jsonNode.get("description") != null)  jsonNode.get("description").asText() else null
-      val supported_formats: String = if (jsonNode.get("supported_formats") != null)  jsonNode.get("supported_formats").asText() else null
-      val machine_port: Int = if (jsonNode.get("machine_port") != null) jsonNode.get("machine_port").asInt() else 0
-      val machine_ip: String = if (jsonNode.get("machine_ip") != null) jsonNode.get("machine_ip").asText() else null
-      val settingNode = jsonNode.get(TestsystemLabels.settings)
-      var settings: List[String] = if (settingNode != null) nodeIteratorToList[String](settingNode.iterator()) else List()
-      val filesNode = jsonNode.get(TestsystemLabels.testfiles)
-      val testfiles: List[Map[String, Any]] = if (filesNode != null) nodeIteratorToList[Map[String, Any]](filesNode.iterator()) else List()
-
-      //val settings : List[]
-      // this.courseService.createCourseByUser(user.get, name, description, standard_task_typ)
-      Map("success" -> testsystemService.updateTestsystem(testsystemid, name, description, supported_formats, machine_port, machine_ip, settings, testfiles))
+      Map("success" -> testsystemService.updateTestsystem(testsystemid, jsonNode))
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: name, description, supported_formats")
     }

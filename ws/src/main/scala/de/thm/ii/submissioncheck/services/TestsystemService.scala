@@ -2,17 +2,21 @@ package de.thm.ii.submissioncheck.services
 import java.util.Date
 
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
-import java.io
+import java.{io, util}
 
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import de.thm.ii.submissioncheck.TestsystemTestfileLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.{Testsystem}
+import de.thm.ii.submissioncheck.model.Testsystem
 import de.thm.ii.submissioncheck.security.Secrets
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+
+import scala.reflect.Manifest
 
 /**
   * TestsystemService provides interaction with DB table testsystem
@@ -26,21 +30,31 @@ class TestsystemService {
 
   @Value("${jwt.expiration.time}")
   private val jwtExpirationTime: String = null
+
   /**
     * create and insert a testsystem information
     * @author Benjamin Manns
-    * @param id_string unique identification for a testsystem
-    * @param name testsystem name
-    * @param description testsystem description
-    * @param supportedFormats which format does a testystem provide
-    * @param machinePort port of docker instance
-    * @param machineIp ip of docker instance
-    * @param settings list of settings keys
-    * @param testfiles list of testfiles
+    * @param jsonNode JsonNode provided by APi Request
     * @return inserted primary key
     */
-  def insertTestsystem(id_string: String, name: String, description: String, supportedFormats: String, machinePort: Int,
-                       machineIp: String, settings: List[String], testfiles: List[Map[String, Any]]): Map[String, String] = {
+  def insertTestsystem(jsonNode: JsonNode): Map[String, String] = {
+    val id_string = jsonNode.get("id").asText()
+    val name = jsonNode.get(TestsystemLabels.name).asText()
+    val description = jsonNode.get(TestsystemLabels.description).asText()
+    val supportedFormats = jsonNode.get(TestsystemLabels.supported_formats).asText()
+    val machinePort: Int = if (jsonNode.get(TestsystemLabels.machine_port) != null)  jsonNode.get(TestsystemLabels.machine_port).asInt() else 0
+    val machineIp: String = if (jsonNode.get(TestsystemLabels.machine_ip) != null)  jsonNode.get(TestsystemLabels.machine_ip).asText() else ""
+    val settings: List[String] = if (jsonNode.get(TestsystemLabels.settings) != null) {
+      nodeIteratorToList[String](jsonNode.get(TestsystemLabels.settings).iterator())
+    } else {
+      List()
+    }
+    val testfiles: List[Map[String, Any]] = if (jsonNode.get(TestsystemLabels.testfiles) != null) {
+      nodeIteratorToList[Map[String, Any]](jsonNode.get(TestsystemLabels.testfiles).iterator())
+    } else {
+      List()
+    }
+
     val parsedIDString = id_string.toLowerCase.replace(" ", "")
     try{
       var num = DB.update(
@@ -64,21 +78,37 @@ class TestsystemService {
     }
   }
 
+  private def nodeIteratorToList[A](iterNode: util.Iterator[JsonNode]) (implicit manifest: Manifest[A]) = {
+    var list: List[A] = List()
+    val mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)
+
+    iterNode.forEachRemaining(node => {
+      list = mapper.convertValue(node, manifest.runtimeClass).asInstanceOf[A] :: list
+    })
+    list
+  }
+
   /**
     * update testsystem information
     * @author Benjamin Manns
     * @param id_string unique identification for a testsystem
-    * @param name testsystem name
-    * @param description testsystem description
-    * @param supportedFormats which format does a testystem provide
-    * @param machine_port port of docker instance
-    * @param machine_ip ip of docker instance
-    * @param settings list of settings keys
-    * @param testfiles list of testfiles
+    * @param jsonNode JsonNode provided by APi Request
     * @return if update worked out
     */
-  def updateTestsystem(id_string: String, name: String, description: String, supportedFormats: String, machine_port: Int, machine_ip: String,
-                       settings: List[String], testfiles: List[Map[String, Any]]): Boolean = {
+  def updateTestsystem(id_string: String, jsonNode: JsonNode): Boolean = {
+    val name: String = if (jsonNode.get("name") != null)  jsonNode.get("name").asText() else null
+    val description: String = if (jsonNode.get("description") != null)  jsonNode.get("description").asText() else null
+    val supported_formats: String = if (jsonNode.get("supported_formats") != null)  jsonNode.get("supported_formats").asText() else null
+    val machine_port: Int = if (jsonNode.get("machine_port") != null) jsonNode.get("machine_port").asInt() else 0
+    val machine_ip: String = if (jsonNode.get("machine_ip") != null) jsonNode.get("machine_ip").asText() else null
+    val accepted_input: Int = if (jsonNode.get("accepted_input") != null) jsonNode.get("accepted_input").asInt() else 0
+
+    val settingNode = jsonNode.get(TestsystemLabels.settings)
+    var settings: List[String] = if (settingNode != null) nodeIteratorToList[String](settingNode.iterator()) else List()
+    val filesNode = jsonNode.get(TestsystemLabels.testfiles)
+    val testfiles: List[Map[String, Any]] = if (filesNode != null) nodeIteratorToList[Map[String, Any]](filesNode.iterator()) else List()
+
     var ok = true
     if (name != null) {
       val num = DB.update("update testsystem set name = ? where testsystem_id = ?", name, id_string)
@@ -86,14 +116,17 @@ class TestsystemService {
     if (description != null) {
       ok = ok && (DB.update("update testsystem set description = ? where testsystem_id = ?", description, id_string) == 1)
     }
-    if (supportedFormats != null) {
-      ok = ok && (DB.update("update testsystem set supported_formats = ? where testsystem_id = ?", supportedFormats, id_string) == 1)
+    if (supported_formats != null) {
+      ok = ok && (DB.update("update testsystem set supported_formats = ? where testsystem_id = ?", supported_formats, id_string) == 1)
     }
     if (machine_port > 0) {
       ok = ok && (DB.update("update testsystem set machine_port = ? where testsystem_id = ?", machine_port, id_string) == 1)
     }
     if (machine_ip != null) {
       ok = ok && (DB.update("update testsystem set machine_ip = ? where testsystem_id = ?", machine_ip, id_string) == 1)
+    }
+    if (accepted_input > 0){
+      ok = ok && (DB.update("update testsystem set accepted_input = ? where testsystem_id = ?", accepted_input, id_string) == 1)
     }
 
     DB.update("delete from testsystem_setting where testsystem_id = ?", id_string)
@@ -165,6 +198,7 @@ class TestsystemService {
     DB.query("select * from testsystem", (res, _) => {
       Map(TestsystemLabels.id -> res.getString(TestsystemLabels.id),
         TestsystemLabels.name -> res.getString(TestsystemLabels.name),
+        TestsystemLabels.accepted_input -> res.getInt(TestsystemLabels.accepted_input),
         TestsystemLabels.description -> res.getString(TestsystemLabels.description),
         TestsystemLabels.supported_formats -> res.getString(TestsystemLabels.supported_formats),
         TestsystemLabels.machine_ip -> res.getString(TestsystemLabels.machine_ip),

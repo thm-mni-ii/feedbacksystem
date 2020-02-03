@@ -234,8 +234,9 @@ export interface Testsystem {
   supported_formats: string;
   machine_port: string;
   machine_ip: string;
-  testfiles: TestsystemTestfile[]
-  settings: string[]
+  testfiles: TestsystemTestfile[];
+  settings: string[];
+  accepted_input: number;
 }
 
 export interface TestsystemTestfile {

@@ -28,6 +28,7 @@ export class EditTestsystemsModalComponent implements OnInit {
   public ip: string = '';
   public settings: string[] = [];
   public testfiles: TestsystemTestfile[] = [];
+  public accepted_input: number;
 
   settingsFormControl = new FormControl();
   settingsOptions: string[];
@@ -57,6 +58,7 @@ export class EditTestsystemsModalComponent implements OnInit {
       this.ip = testsystem.machine_ip;
       this.settings = testsystem.settings;
       this.testfiles = testsystem.testfiles;
+      this.accepted_input = testsystem.accepted_input;
       this.addEmptyTestfile();
     }
   }
@@ -88,6 +90,7 @@ export class EditTestsystemsModalComponent implements OnInit {
       machine_port: this.port,
       machine_ip: this.ip,
       settings: this.settings,
+      accepted_input: this.accepted_input,
       testfiles: this.testfiles.filter((v: TestsystemTestfile) => v.filename !== null && v.filename.length > 0)
     }
   }
