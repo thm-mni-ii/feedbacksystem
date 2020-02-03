@@ -47,7 +47,6 @@ class MultiplechoiceCheckExec(override val compile_production: Boolean) extends 
     reader.readAll().toArray().toList.asInstanceOf[List[Array[String]]].foreach(line => {
       val readerLine = line.toList
       originalSolution = Map(readerLine(0) -> toBool(readerLine(1))) :: originalSolution
-
     })
 
     var passed = true
