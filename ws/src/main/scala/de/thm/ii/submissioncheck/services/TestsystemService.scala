@@ -44,6 +44,7 @@ class TestsystemService {
     val supportedFormats = jsonNode.get(TestsystemLabels.supported_formats).asText()
     val machinePort: Int = if (jsonNode.get(TestsystemLabels.machine_port) != null)  jsonNode.get(TestsystemLabels.machine_port).asInt() else 0
     val machineIp: String = if (jsonNode.get(TestsystemLabels.machine_ip) != null)  jsonNode.get(TestsystemLabels.machine_ip).asText() else ""
+    val accepted_input: Int = if (jsonNode.get(TestsystemLabels.accepted_input) != null) jsonNode.get(TestsystemLabels.accepted_input).asInt() else 0
     val settings: List[String] = if (jsonNode.get(TestsystemLabels.settings) != null) {
       nodeIteratorToList[String](jsonNode.get(TestsystemLabels.settings).iterator())
     } else {
@@ -58,8 +59,8 @@ class TestsystemService {
     val parsedIDString = id_string.toLowerCase.replace(" ", "")
     try{
       var num = DB.update(
-        "insert into testsystem (testsystem_id, name, description, supported_formats, machine_port, machine_ip) values (?,?,?,?,?,?)",
-        parsedIDString, name, description, supportedFormats, machinePort, machineIp)
+        "insert into testsystem (testsystem_id, name, description, supported_formats, machine_port, machine_ip, accepted_input) values (?,?,?,?,?,?,?)",
+        parsedIDString, name, description, supportedFormats, machinePort, machineIp, accepted_input)
 
       for (setting <- settings) {
         DB.update("insert into testsystem_setting (testsystem_id, setting_key) values (?,?)", id_string, setting)
@@ -102,7 +103,7 @@ class TestsystemService {
     val supported_formats: String = if (jsonNode.get("supported_formats") != null)  jsonNode.get("supported_formats").asText() else null
     val machine_port: Int = if (jsonNode.get("machine_port") != null) jsonNode.get("machine_port").asInt() else 0
     val machine_ip: String = if (jsonNode.get("machine_ip") != null) jsonNode.get("machine_ip").asText() else null
-    val accepted_input: Int = if (jsonNode.get("accepted_input") != null) jsonNode.get("accepted_input").asInt() else 0
+    val accepted_input: Int = if (jsonNode.get(TestsystemLabels.accepted_input) != null) jsonNode.get(TestsystemLabels.accepted_input).asInt() else 0
 
     val settingNode = jsonNode.get(TestsystemLabels.settings)
     var settings: List[String] = if (settingNode != null) nodeIteratorToList[String](settingNode.iterator()) else List()
