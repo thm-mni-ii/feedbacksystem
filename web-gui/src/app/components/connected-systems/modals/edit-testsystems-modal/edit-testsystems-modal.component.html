@@ -5,7 +5,7 @@
   <div *ngIf="modal_type == 'new'" matDialogTitle>Testsystem erstellen</div>
 
 
-  <mat-dialog-content style="max-height: 100%; overflow: hidden;">
+  <mat-dialog-content style="overflow: scroll;max-height: 79vh;">
 
     <mat-form-field *ngIf="modal_type !== 'edit'">
       <mat-label>ID</mat-label>
@@ -41,7 +41,33 @@
       <input matInput [(ngModel)]="port">
     </mat-form-field>
 
+    <mat-divider></mat-divider>
 
+    <h3>Konfigurationsdateien</h3>
+
+
+    <div *ngFor="let testfile of testfiles; let i = index">
+
+      <div fxLayout="row">
+      <mat-form-field  appearance="outline" style="width: 50%;">
+        <mat-label>Filename</mat-label>
+        <input matInput (ngModelChange)="smartFieldAdder()" [(ngModel)]="testfile.filename">
+      </mat-form-field>
+
+        <mat-checkbox matInput style="margin: 0 0 0 10px;" [(ngModel)]="testfile.required">Erforderliche Datei</mat-checkbox>
+
+        <mat-icon style="cursor: pointer; margin-left: 10px; color: red;" (click)="deleteTestfile(i)">delete</mat-icon>
+        </div>
+    </div>
+
+    <button style="margin-bottom: 10px;" mat-raised-button color="accent" (click)="addEmptyTestfile()"><mat-icon>add</mat-icon> Weitere Datei definieren</button>
+
+    <mat-divider></mat-divider>
+
+
+
+
+    <h3>Zugewiesene globale Parameter</h3>
 
 
     <mat-chip-list>

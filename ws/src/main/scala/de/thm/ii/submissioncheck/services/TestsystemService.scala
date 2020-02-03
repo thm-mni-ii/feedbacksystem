@@ -6,7 +6,7 @@ import java.io
 
 import de.thm.ii.submissioncheck.TestsystemTestfileLabels
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, ResourceNotFoundException}
-import de.thm.ii.submissioncheck.model.{Testsystem, User}
+import de.thm.ii.submissioncheck.model.{Testfile, Testsystem, User}
 import de.thm.ii.submissioncheck.security.Secrets
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
@@ -36,10 +36,11 @@ class TestsystemService {
     * @param machinePort port of docker instance
     * @param machineIp ip of docker instance
     * @param settings list of settings keys
+    * @param testfiles list of testfiles
     * @return inserted primary key
     */
   def insertTestsystem(id_string: String, name: String, description: String, supportedFormats: String, machinePort: Int,
-                       machineIp: String, settings: List[String]): Map[String, String] = {
+                       machineIp: String, settings: List[String], testfiles: List[Map[String, Any]]): Map[String, String] = {
     val parsedIDString = id_string.toLowerCase.replace(" ", "")
     try{
       var num = DB.update(
@@ -47,14 +48,19 @@ class TestsystemService {
         parsedIDString, name, description, supportedFormats, machinePort, machineIp)
 
       for (setting <- settings) {
-       DB.update("insert into testsystem_setting (?,?)", id_string, setting)
+        DB.update("insert into testsystem_setting (testsystem_id, setting_key) values (?,?)", id_string, setting)
+      }
+
+      for (testfile <- testfiles) {
+        DB.update("insert into testsystem_testfile (testsystem_id, filename, required) values (?,?,?)", id_string,
+          testfile(TestsystemTestfileLabels.filename), testfile(TestsystemTestfileLabels.required)) >= 0
       }
 
       Map(TestsystemLabels.id -> parsedIDString)
     }
     catch {
-      case _: Exception => throw new BadRequestException("Provided testsystem id_string may not be unique" +
-        " or is too long. Please use a length of maximum 30 characters.")
+      case e: Exception => throw new BadRequestException("Provided testsystem id_string may not be unique" +
+        " or is too long. Please use a length of maximum 30 characters." + e.toString)
     }
   }
 
@@ -68,10 +74,11 @@ class TestsystemService {
     * @param machine_port port of docker instance
     * @param machine_ip ip of docker instance
     * @param settings list of settings keys
+    * @param testfiles list of testfiles
     * @return if update worked out
     */
   def updateTestsystem(id_string: String, name: String, description: String, supportedFormats: String, machine_port: Int, machine_ip: String,
-                       settings: List[String]): Boolean = {
+                       settings: List[String], testfiles: List[Map[String, Any]]): Boolean = {
     var ok = true
     if (name != null) {
       val num = DB.update("update testsystem set name = ? where testsystem_id = ?", name, id_string)
@@ -94,6 +101,13 @@ class TestsystemService {
       ok = ok && (DB.update("insert into testsystem_setting (testsystem_id, setting_key) values (?,?)", id_string, setting) >= 0)
     }
 
+    DB.update("delete from testsystem_testfile where testsystem_id = ?", id_string)
+
+    for (testfile <- testfiles) {
+      ok = ok && (DB.update("insert into testsystem_testfile (testsystem_id, filename, required) values (?,?,?)", id_string,
+        testfile(TestsystemTestfileLabels.filename), testfile(TestsystemTestfileLabels.required)) >= 0)
+    }
+
     ok
   }
 
@@ -104,7 +118,9 @@ class TestsystemService {
     * @return if it worked out
     */
   def deleteTestsystem(id_string: String): Boolean = {
-    DB.update("delete from testsystem  where testsystem_id = ?", id_string) == 1
+    DB.update("delete from testsystem_setting where testsystem_id = ?", id_string)
+    DB.update("delete from testsystem_testfile where testsystem_id = ?", id_string)
+    DB.update("delete from testsystem where testsystem_id = ?", id_string) == 1
   }
 
   /**
@@ -153,7 +169,8 @@ class TestsystemService {
         TestsystemLabels.supported_formats -> res.getString(TestsystemLabels.supported_formats),
         TestsystemLabels.machine_ip -> res.getString(TestsystemLabels.machine_ip),
         TestsystemLabels.machine_port -> res.getString(TestsystemLabels.machine_port),
-        TestsystemLabels.settings -> getSettingsOfTestsystem(res.getString(TestsystemLabels.id)).map(v => v(SettingDBLabels.setting_key))
+        TestsystemLabels.settings -> getSettingsOfTestsystem(res.getString(TestsystemLabels.id)).map(v => v(SettingDBLabels.setting_key)),
+        TestsystemLabels.testfiles -> loadTestfilesByTestsystem(res.getString(TestsystemLabels.id))
       )
     })
   }
