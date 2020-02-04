@@ -1,3 +1,6 @@
+<mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+
 <mat-tab-group (selectedTabChange)="tabChanged($event)">
   <mat-tab *ngFor="let course of courses" label="{{course.course_name}}" class="tab">
 
@@ -99,8 +102,15 @@
           </mat-grid-tile>
         </mat-grid-list>-->
 
-        <button mat-flat-button color="accent" *ngIf="offset > 0" (click)="reloadSubmission(-1)" matTooltip="Previous"><mat-icon>skip_previous</mat-icon></button>
-        <button mat-flat-button color="accent" *ngIf="(offset + limit) < userlength" (click)="reloadSubmission(1)" matTooltip="Next"><mat-icon>skip_next</mat-icon></button>
+
+        <mat-paginator [length]="userlength"
+                       [pageSize]="limit"
+                       [pageSizeOptions]="[5, 10, 20]"
+                       (page)="pageEvent($event)">
+        </mat-paginator>
+
+
+
 
       </mat-card>
     </div>

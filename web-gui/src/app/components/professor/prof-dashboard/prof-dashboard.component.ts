@@ -8,7 +8,7 @@ import {map, startWith} from 'rxjs/operators';
 import {FormControl} from '@angular/forms';
 import {UserService} from "../../../service/user.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-
+import {MatProgressBarModule} from '@angular/material'
 /**
  * Matrix for every course docent has
  */
@@ -62,6 +62,8 @@ export class ProfDashboardComponent implements OnInit {
     )
 
 
+
+
     this.tb.emitTitle('Dashboard');
     this.db.getSubscribedCourses().subscribe(courses => {
       if(this.userService.getUserRole() === 4) {
@@ -72,6 +74,7 @@ export class ProfDashboardComponent implements OnInit {
 
     });
   }
+
 
     onFilterChange(payload: string){
     if(payload.length > 0){
@@ -99,6 +102,8 @@ export class ProfDashboardComponent implements OnInit {
   }
 
   public loadAllSubmissionsAtCurrent(courseid: number, filter: string = ''){
+    this.matrix = []
+    this.loading = true;
     this.currentCourse = courseid;
     return new Promise((resolve) => {
       this.db.getAllUserSubmissions(courseid, this.offset, this.limit, filter).subscribe(students => {
@@ -111,10 +116,12 @@ export class ProfDashboardComponent implements OnInit {
 
   }
 
-  public reloadSubmission(dir: number){
-    this.offset = this.offset + (dir * this.limit);
+  pageEvent($event){
+    this.limit = $event.pageSize;
+    this.offset = $event.pageIndex * this.limit;
     this.loadAllSubmissionsAtCurrent(this.currentCourse, '');
   }
+
 
   private truncateTap(){
     this.matrix = [];
