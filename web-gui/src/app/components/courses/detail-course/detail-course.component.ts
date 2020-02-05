@@ -54,7 +54,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   courseID: number;
   breakpoint: number;
   multipleChoices: { [task: number]: boolean };
-
+  taskID: number;
   hasScrolledToTask: boolean = false;
 
 
@@ -91,6 +91,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.route.params.pipe(
       flatMap(params => {
         this.courseID = +params['id'];
+        this.taskID = params.taskid
         return this.db.getCourseDetail(this.courseID);
       })
     ).subscribe(course_detail => {
@@ -100,7 +101,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       }
 
       this.courseDetail = course_detail;
-      this.courseTasks = course_detail.tasks;
+
+      //TODO convert hack -> use other APi route
+      this.courseTasks = course_detail.tasks.filter( (v: CourseTask) => v.task_id == this.taskID);
 
 
       this.userRole = course_detail.role_name;
@@ -191,7 +194,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   private loadCourseDetailsTasks(){
     this.db.getCourseDetail(this.courseID).toPromise()
       .then(course_detail => {
-          this.courseTasks = course_detail.tasks;
+          this.courseTasks = course_detail.tasks.filter( (v: CourseTask) => v.task_id == this.taskID);
       })
   }
 

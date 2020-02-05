@@ -1,0 +1,13 @@
+
+
+<h2>{{'Aufgaben Übersicht'}}</h2>
+
+<!-- task list-->
+<mat-card [routerLink]="'/courses/'+courseID+'/task/'+task.task_id" *ngFor="let task of tasks" class="task-container" id="{{task.task_id}}">
+  <mat-card-subtitle>
+    {{task.task_name}}
+  </mat-card-subtitle>
+  <mat-card-content>
+    <small>{{task.task_description}}</small> | <small>{{task.deadline | date:'medium'}}</small>
+  </mat-card-content>
+</mat-card>

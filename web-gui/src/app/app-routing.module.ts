@@ -29,6 +29,7 @@ import {AdminSettingsComponent} from "./components/admin/admin-settings/admin-se
 import {CourseProfDetailsComponent} from "./components/courses/detail-course/course-prof-details/course-prof-details.component";
 import {IsGeqDocentGuard} from "./guards/is-geq-docent";
 import {isGeneratedFile} from "@angular/compiler/src/aot/util";
+import {CourseTasksOverviewComponent} from "./components/courses/course-tasks-overview/course-tasks-overview.component";
 
 
 const routes: Routes = [
@@ -42,7 +43,8 @@ const routes: Routes = [
       {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
-      {path: 'courses/:id', component: DetailCourseComponent},
+      {path: 'courses/:id', component: CourseTasksOverviewComponent},
+      {path: 'courses/:id/task/:taskid', component: DetailCourseComponent},
       {path: 'courses/:id/result', component: CourseResultDetailsComponent},
       {path: 'courses/:id/task/:taskid/analyze', component: TaskAnalyzeSubmissionsComponent},
 
