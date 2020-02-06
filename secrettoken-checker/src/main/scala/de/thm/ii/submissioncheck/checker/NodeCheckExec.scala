@@ -5,6 +5,7 @@ import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
 
 import de.thm.ii.submissioncheck.ResultType
 import de.thm.ii.submissioncheck.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.services.FileOperations
 
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -73,53 +74,52 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
     }
   }
 
+  private def copyNodeConfigToTmp(orgpath: Path) = {
+    val tmpdir = getTempFile("nodetest")
+    FileOperations.copy(orgpath.toFile, tmpdir.toFile)
+    tmpdir
+  }
+
   /**
-   * perform a check of request, will be executed after processing the kafka message
+    * perform a check of request, will be executed after processing the kafka message
     * @param taskid submissions task id
     * @param submissionid submitted submission id
-    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param subBasePath, subFileame path of folder, where submitted file is in
+    * @param subFilename path of submitted file (if zip or something, it is also a "file")
     * @param isInfo execute info procedure for given task
     * @param use_extern include an existing file, from previous checks
     * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int, String) = {
+  override def exec(taskid: String, submissionid: String, subBasePath: Path, subFilename: Path, isInfo: Boolean, use_extern: Boolean,
+                    jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     logger.info("Execute Node Checker")
     // if use_extern it is the same path
-    val nodeExecutionPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).resolve("unzip").toAbsolutePath
-    if (!use_extern) unzip(submittedFilePath, nodeExecutionPath)
+    val nodeExecutionPath = subBasePath.resolve("unzip").toAbsolutePath; nodeExecutionPath.toFile.mkdir()
+    // TODO somehow export this execution path to copy those files where they belong (dont know if necessary)
+    if (!use_extern) unzip(subFilename.toAbsolutePath.toString, nodeExecutionPath)
 
     val nodeDockerImage = "thmmniii/nodeenv:dev-latest" // "thmmniii/node"
     val interpreter = "bash"; val action = "/usr/src/script/run.sh"
     var seq: Seq[String] = null; val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val infoArgument = if (isInfo) "info" else ""
-    val nodeTestPath = getFullNPMPath(Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened).resolve(LABEL_NODETEST).toString)
-    val insideDockerNodeTestPath = "/usr/src/app"
-    val insideDockerNodeResPath = "/usr/src/results"
-    val subPath = Paths.get(ULDIR).resolve(taskid.toString).resolve(submissionid)
-    val relatedSubPath = if (use_extern) subPath.toString else getFullSubPath(subPath.resolve("unzip").toString)
-    val resultsPath = subPath.resolve("results")
+    val nodeTestOrg = Paths.get(ULDIR).resolve(taskid.toString).resolve(checkernameExtened).resolve(LABEL_NODETEST)
+    var nodeTestPath = getFullNPMPath(copyNodeConfigToTmp(nodeTestOrg).toString)
+    val (insideDockerNodeTestPath, insideDockerNodeResPath) = ("/usr/src/app", "/usr/src/results")
+    var relatedSubPath = if (use_extern) subBasePath.toString else getFullSubPath(subBasePath.resolve("unzip").toString)
+    val resultsPath = subBasePath.resolve("results")
+    resultsPath.toFile.mkdirs()
 
-    // prepare a folder to put the results in (submission specific)
-    try {
-      Files.createDirectories(resultsPath)
+    if (compile_production) {
+      nodeTestPath = getCorespondigHOSTTempDir(Paths.get(nodeTestPath)).toString
+      relatedSubPath = getCorespondigHOSTTempDir(Paths.get(relatedSubPath)).toString
     }
-    catch {
-      case e: FileAlreadyExistsException => { }
-    }
-    if (compile_production){
-      seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + nodeTestPath.toString.replace(ULDIR, "") + __colon + insideDockerNodeTestPath, __option_v,
-        dockerRelPath + __slash + relatedSubPath.replace(ULDIR, "") + __colon + insideDockerNodeTestPath + __slash + "src", __option_v,
-        dockerRelPath + __slash + resultsPath.toString.replace(ULDIR, "") + __colon + insideDockerNodeResPath,
+
+    val resultsPathAdapt = (if (compile_production) getCorespondigHOSTTempDir(resultsPath) else resultsPath).toString
+
+    seq = Seq("run", "--rm", __option_v, nodeTestPath + __colon + insideDockerNodeTestPath, __option_v,
+        relatedSubPath + __colon + insideDockerNodeTestPath + __slash + "src", __option_v, resultsPathAdapt + __colon + insideDockerNodeResPath,
         nodeDockerImage, interpreter, action, infoArgument)
-    } else {
-      val absSubPath = Paths.get(relatedSubPath).toAbsolutePath.toString
-      val absNodeTestPath = Paths.get(nodeTestPath).toAbsolutePath.toString
-      seq = Seq("run", "--rm", __option_v, absNodeTestPath + __colon + insideDockerNodeTestPath, __option_v, absSubPath + __colon
-        + insideDockerNodeTestPath + __slash + "src", __option_v,
-        resultsPath.toAbsolutePath.toString + __colon +  insideDockerNodeResPath, nodeDockerImage, interpreter, action, infoArgument)
-    }
     logger.warning(seq.toString())
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
@@ -131,7 +131,7 @@ class NodeCheckExec(override val compile_production: Boolean) extends BaseChecke
       stdoutStream.toString() + "\n" + stderrStream.toString()
     }
     val success = (exitcode == 0)
-    (success, output, exitcode, ResultType.JSON)
+    (success, output, exitcode, if (success) ResultType.JSON else ResultType.STRING)
   }
 
   /**

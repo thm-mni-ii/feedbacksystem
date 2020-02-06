@@ -8,8 +8,10 @@ import java.util.zip.ZipInputStream
 
 import akka.Done
 import de.thm.ii.submissioncheck.{JsonHelper, ResultType, SecretTokenChecker}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO, LABEL_SUBMISSIONID, LABEL_TASKID,
-  LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO,
+  LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.submissioncheck.security.Secrets
+import de.thm.ii.submissioncheck.services.FileOperations
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -132,7 +134,7 @@ class BaseChecker(val compile_production: Boolean) {
     * @return base path and config path
     */
   def loadCheckerConfig(taskid: String): (Path, List[Path]) = {
-    logger.warning(s"Load ${checkername} Checker Config at ${checkernameExtened}")
+    logger.warning(s"Load ${checkername} Checker Config at ${checkernameExtened} ")
     val baseFilePath = Paths.get(ULDIR).resolve(taskid).resolve(checkernameExtened)
     val configfiles = configFiles.keys.map(f => baseFilePath.resolve(f)).toList.filter(f => f.toFile.exists())
     (baseFilePath, configfiles)
@@ -142,13 +144,14 @@ class BaseChecker(val compile_production: Boolean) {
     * perform a check of request, will be executed after processing the kafka message
     * @param taskid submissions task id
     * @param submissionid submitted submission id
-    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param subBasePath, subFileame path of folder, where submitted file is in
+    * @param subFilename path of submitted file (if zip or something, it is also a "file")
     * @param isInfo execute info procedure for given task
     * @param use_extern include an existing file, from previous checks
     * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
+  def exec(taskid: String, submissionid: String, subBasePath: Path, subFilename: Path, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
   (Boolean, String, Int, String) = {
     (false, "output", 42, ResultType.STRING)
   }
@@ -264,6 +267,61 @@ class BaseChecker(val compile_production: Boolean) {
     }
   }
 
+  private val insideDockerDockerTemp = Paths.get("/dockertemp")
+
+  /**
+    * simple wrapper of java's tmp file generation
+    * @param placeholder some extra infos in path
+    * @return path on host and inside docker (tuple)
+    */
+  def getTempFile(placeholder: String = ""): Path = {
+    /*val tmppath = if (System.getProperty("os.name") == "Mac OS X") {
+      new File("/tmp").toPath.resolve(s"submission_${placeholder}_tmp_${Secrets.getSHAStringFromNow()}")
+    } else {
+      File.createTempFile(s"submission_${placeholder}_tmp_${Secrets.getSHAStringFromNow()}", "").toPath
+    }*/
+    val dockertemp = if (!compile_production){
+      val localTmpPath = new File("/tmp").toPath.resolve("fb-dockertemp")
+      localTmpPath.toFile.mkdirs()
+      localTmpPath
+    } else {
+      insideDockerDockerTemp
+    }
+
+    if (!dockertemp.toFile.exists()){
+      throw new CheckerException(s"Folder ${dockertemp} need to mounted / created from HOST system")
+    }
+    val tmpdir = s"submission_${placeholder}_tmp_${Secrets.getSHAStringFromNow()}"
+    val tmppath = dockertemp.resolve(tmpdir)
+    tmppath.toFile.mkdir() // generate a folder of it
+
+    //val hostTMPDir = if (System.getenv("HOST_TMP_DIR") != null) System.getenv("HOST_TMP_DIR") else "/tmp"
+    //(new File(hostTMPDir).toPath.resolve(tmpdir), )
+    tmppath
+  }
+
+  /**
+    * get corresponsing temp dir path of host, to get docker in docker run
+    * @param appTempDir path accessable from app
+    * @return path of host system, if a host exists
+    */
+  def getCorespondigHOSTTempDir(appTempDir: Path): Path = {
+    if (compile_production) {
+      Paths.get(System.getenv("HOST_TMP_DIR")).resolve(appTempDir.subpath(insideDockerDockerTemp.getNameCount, appTempDir.getNameCount))
+    } else {
+      throw new CheckerException("getCorespondigHOSTTempDir in local dev is not defined")
+    }
+  }
+
+  private def generateAndGetTempSubmittedFilePath(originalPath: Path, subid: String) = {
+    // for copy we need the folder where our app has access to
+    val copyTempPath = getTempFile(subid)
+    val tmpfile = copyTempPath.resolve(originalPath.toFile.getName)
+
+    FileOperations.copy(originalPath.getParent.toFile, copyTempPath.toFile)
+    (copyTempPath, tmpfile)
+  }
+
   /**
     * handle incoming submissions
     * @param jsonMap a kafka record
@@ -278,31 +336,33 @@ class BaseChecker(val compile_production: Boolean) {
       val use_extern: Boolean = jsonMap(LABEL_USE_EXTERN).asInstanceOf[Boolean]
       val submit_type: String = jsonMap("submit_typ").asInstanceOf[String]
       val isInfo = if (jsonMap.contains(LABEL_ISINFO)) jsonMap(LABEL_ISINFO).asInstanceOf[Boolean] else false
-      var submittedFilePath: String = ""
+      var submittedFilePath: Path = null
       if (use_extern && !allowedSubmissionTypes.contains("extern")) throw new CheckerException(s"${checkername} Checker does not allow extern check")
       if (!allowedSubmissionTypes.contains(submit_type)) throw new CheckerException(s"${checkername} Checker does not allow ${submit_type} submission type")
 
       if (use_extern) {
         val path = Paths.get(ULDIR).resolve(task_id.toString).resolve(submission_id.toString).resolve(externSubmissionFilename)
-        submittedFilePath = path.toAbsolutePath.toString
+        submittedFilePath = path
 
       } else if (submit_type.equals("file")) {
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
 
-        submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, task_id.toString, submission_id.toString).toAbsolutePath.toString
-        logger.warning(submittedFilePath)
+        submittedFilePath = downloadSubmittedFileToFS(url, jwt_token, task_id.toString, submission_id.toString)
+        logger.warning(submittedFilePath.toString)
       }
       else if (submit_type.equals(DATA)) {
-        submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], task_id.toString, submission_id.toString).toAbsolutePath.toString
+        submittedFilePath = saveStringToFile(jsonMap(DATA).asInstanceOf[String], task_id.toString, submission_id.toString)
       }
+      val (subBasePath, subFilename) = generateAndGetTempSubmittedFilePath(submittedFilePath, submission_id.toString)
+      logger.warning( (subBasePath, subFilename).toString() )
+      val (success, output, exitcode, datatype) = exec(task_id.toString, submission_id.toString, subBasePath, subFilename, isInfo, use_extern, jsonMap)
 
-      val (success, output, exitcode, datatype) = exec(task_id.toString, submission_id.toString, submittedFilePath, isInfo, use_extern, jsonMap)
-
+      // Copy generated files, output and stuff to the original submission folder, for multichecks. The next checker needs access to this files
+      FileOperations.copy(subBasePath.toFile, submittedFilePath.getParent.toFile)
       sendCheckerSubmissionAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ISINFO -> isInfo, "resubmit" -> submit_type.equals("resubmit"),
         "username" ->jsonMap("username"), LABEL_PASSED -> (if (success) "1" else "0"),
-        LABEL_EXITCODE ->  exitcode.toString,
-        LABEL_TASKID -> task_id.toString,
+        LABEL_EXITCODE ->  exitcode.toString, LABEL_TASKID -> task_id.toString,
         LABEL_SUBMISSIONID -> submission_id.toString, DATA -> output, DATA_TYPE -> datatype,
         LABEL_BEST_FIT -> "", LABEL_PRE_RESULT -> ""
       )))

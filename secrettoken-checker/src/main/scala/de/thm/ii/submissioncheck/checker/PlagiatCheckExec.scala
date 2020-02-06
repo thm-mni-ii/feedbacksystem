@@ -71,19 +71,19 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
   /**
     * perform a check of request, will be executed after processing the kafka message
-    *
-    * @param taskid            submissions task id
-    * @param submissionid      submitted submission id
-    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
-    * @param isInfo            execute info procedure for given task
-    * @param use_extern        include an existing file, from previous checks
-    * @param jsonMap           complete submission payload
+    * @param taskid submissions task id
+    * @param submissionid submitted submission id
+    * @param subBasePath, subFileame path of folder, where submitted file is in
+    * @param subFilename path of submitted file (if zip or something, it is also a "file")
+    * @param isInfo execute info procedure for given task
+    * @param use_extern include an existing file, from previous checks
+    * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int, String) = {
+  override def exec(taskid: String, submissionid: String, subBasePath: Path, subFilename: Path, isInfo: Boolean, use_extern: Boolean,
+           jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     // A submission a user does
-    var plagiatExecPath = Paths.get(ULDIR).resolve(taskid).resolve(submissionid).toAbsolutePath.toString
+    var plagiatExecPath = subBasePath.toAbsolutePath.toString
     var output = s"The ${checkername} checker results: ${true}"
     var exitcode = -1
     similarity_limit = loadSIMConfig(taskid)

@@ -299,7 +299,7 @@ class StorageService(compile_production: Boolean) {
     * @return File Resource
     */
   def loadFileBySubmission(filename: String, taskid: Int, submission_id: Int): Resource = try {
-    val storeLocation = Paths.get(UPLOAD_FOLDER + taskid.toString + "/submits/" + submission_id.toString)
+    val storeLocation = UPLOAD_FOLDER.resolve(taskid.toString).resolve("submits").resolve(submission_id.toString)
     val file = storeLocation.resolve(filename)
     val resource = new UrlResource(file.toUri)
     if (resource.exists || resource.isReadable) {resource}

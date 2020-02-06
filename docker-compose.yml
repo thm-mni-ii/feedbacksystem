@@ -75,10 +75,12 @@ services:
     - ws
     environment:
       HOST_UPLOAD_DIR: "${PWD}/secrettoken-checker/upload-dir"
+      HOST_TMP_DIR: "/tmp/feebi" # Need to be the same folder as mounted to /dockertemp
       BASH_DOCKER: "submissioncheck_bash1"
     volumes:
     - /var/run/:/var/run/
     - /var/run/docker.sock:/var/run/docker.sock
+    - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
     - ./secrettoken-checker/upload-dir:/upload-dir
     - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
   sqlchecker:
