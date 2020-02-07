@@ -4,7 +4,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {
   CourseTask, CourseTaskEvaluation,
-  DetailedCourseInformation,
+  DetailedCourseInformation, DetailedCourseInformationSingleTask,
   NewTaskInformation,
   Succeeded,
   SucceededUpdateTask
@@ -36,7 +36,7 @@ import {DomSanitizer} from "@angular/platform-browser";
   templateUrl: './detail-course.component.html',
   styleUrls: ['./detail-course.component.scss']
 })
-export class DetailCourseComponent implements OnInit, AfterViewChecked {
+export class DetailCourseComponent implements OnInit { // AfterViewChecked
 
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
@@ -44,18 +44,17 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
-  courseDetail: DetailedCourseInformation = <DetailedCourseInformation>{};
-  courseTasks: CourseTask[];
+  courseDetail: DetailedCourseInformationSingleTask = <DetailedCourseInformationSingleTask>{};
+  courseTask: CourseTask = {} as CourseTask;
   userRole: string;
-  submissionData: { [task: number]: File | string };
-  processing: { [task: number]: boolean };
-  submissionAsFile: { [task: number]: string };
-  deadlineTask: { [task: number]: boolean };
+  submissionData: string | File;
+  processing: boolean;
+  submissionAsFile: string;
+  deadlineTask: boolean;
   courseID: number;
   breakpoint: number;
-  multipleChoices: { [task: number]: boolean };
+  //multipleChoices: { [task: number]: boolean };
   taskID: number;
-  hasScrolledToTask: boolean = false;
 
 
   private reachedDeadline(now: Date, deadline: Date): boolean {
@@ -64,6 +63,9 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
   public submissionTypeOfTask(task: CourseTask): any[]{
     let accepted = [];
+
+    if (typeof task.testsystems === 'undefined') return [];
+
     let flagg = task.testsystems[0].accepted_input;
 
     if(flagg & 1){
@@ -82,17 +84,17 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
-    this.submissionAsFile = {};
-    this.processing = {};
-    this.submissionData = {};
-    this.deadlineTask = {};
+    this.submissionAsFile = '';
+    this.processing = false;
+    this.submissionData = '';
+    this.deadlineTask = false;
 
     // Get course id from url and receive data
     this.route.params.pipe(
       flatMap(params => {
         this.courseID = +params['id'];
         this.taskID = params.taskid
-        return this.db.getCourseDetail(this.courseID);
+        return this.db.getCourseDetailOfTask(this.courseID, this.taskID);
       })
     ).subscribe(course_detail => {
 
@@ -102,17 +104,15 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
       this.courseDetail = course_detail;
 
-      //TODO convert hack -> use other APi route
-      this.courseTasks = course_detail.tasks.filter( (v: CourseTask) => v.task_id == this.taskID);
 
+      this.courseTask = course_detail.task
 
       this.userRole = course_detail.role_name;
 
-      course_detail.tasks.forEach(task => {
-        this.submissionAsFile[task.task_id] = 'task';
-        this.processing[task.task_id] = false;
-        this.triggerExternalDescriptionIfNeeded(task, false)
-      });
+      this.submissionAsFile = 'task';
+      this.processing = false;
+      this.triggerExternalDescriptionIfNeeded(this.courseTask, false)
+
       this.titlebar.emitTitle(course_detail.course_name);
 
 
@@ -126,13 +126,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
 
     // Check if task reached deadline
     setInterval(() => {
-      if (this.courseTasks) {
-        this.courseTasks.forEach(task => {
-            if (task.deadline) {
-              this.deadlineTask[task.task_id] = this.reachedDeadline(new Date(), new Date(task.deadline));
-            }
-          }
-        );
+      if (this.courseTask) {
+        if(this.courseTask){
+          this.deadlineTask = this.reachedDeadline(new Date(), new Date(this.courseTask.deadline));
+        }
       }
     }, 1000);
 
@@ -148,8 +145,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.db.getTaskResult(task.task_id).toPromise()
       .then((loadedTask: CourseTask) => {
         if (loadedTask.external_description != null){
-          this.courseTasks[this.courseTasks.indexOf(task)] = loadedTask;
-          if(this.externalInfoIsForm(loadedTask)) this.submissionAsFile[loadedTask.task_id] = 'choice'
+          this.courseTask = loadedTask;
+          if(this.externalInfoIsForm(loadedTask)) this.submissionAsFile = 'choice'
         } else {
           setTimeout(() => {
             this.externalInfoPoller(task, step+1)
@@ -192,14 +189,14 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   private loadCourseDetailsTasks(){
-    this.db.getCourseDetail(this.courseID).toPromise()
+    this.db.getCourseDetailOfTask(this.courseID, this.taskID).toPromise()
       .then(course_detail => {
-          this.courseTasks = course_detail.tasks.filter( (v: CourseTask) => v.task_id == this.taskID);
+          this.courseTask = course_detail.task
       })
   }
 
   private loadCourseDetails(){
-    this.db.getCourseDetail(this.courseID).toPromise()
+    this.db.getCourseDetailOfTask(this.courseID, this.taskID).toPromise()
       .then(course_detail => {
         this.courseDetail = course_detail
       })
@@ -263,7 +260,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     this.db.runAllCourseTaskByDocent(this.courseID, taskid)
   }
 
-  ngAfterViewChecked() {
+  /*ngAfterViewChecked() {
     // If url fragment with task id is given, scroll to that task
     this.route.fragment.subscribe(taskIDScroll => {
       const elem = document.getElementById(taskIDScroll);
@@ -272,10 +269,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
         this.hasScrolledToTask = true;
       }
     });
-  }
+  }*/
 
   reRunTask(task: CourseTask){
-    this.submissionData[task.task_id] = task.submission_data
+    this.submissionData = task.submission_data
     this.submitTask(task)
   }
 
@@ -293,14 +290,16 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
   }
 
   private submitTask(currentTask: CourseTask) {
-    this.processing[currentTask.task_id] = true;
-    this.db.submitTask(currentTask.task_id, this.submissionData[currentTask.task_id]).subscribe(res => {
-      this.submissionData[currentTask.task_id] = '';
+    this.processing = true;
+    this.courseTask.submission_data = ''
+    this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
+      this.submissionData = '';
+
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
 
-            this.courseTasks[this.courseTasks.indexOf(currentTask)] = taskResult;
+            this.courseTask = taskResult;
 
             if (this.isInFetchingResultOfTasks(taskResult)) {
               return throwError('No result yet');
@@ -311,16 +310,8 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
             delay(5000),
             take(120)))
         ).subscribe(taskResult => {
-          this.processing[currentTask.task_id] = false;
-
-          let index = -1
-          for(let k in this.courseTasks){
-            if(this.courseTasks[k].task_id == currentTask.task_id){
-              index = parseInt(k); // stupid TS, it is an int, always will be
-              break;
-            }
-          }
-          this.courseTasks[index] = taskResult;
+          this.processing = false;
+          this.courseTask = taskResult;
         });
 
       }
@@ -342,19 +333,18 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
           this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid)
         }
-        return this.db.getCourseDetail(course.course_id);
+        return this.db.getCourseDetailOfTask(course.course_id, this.taskID);
       })
     ).subscribe(course_detail => {
-      this.courseTasks = course_detail.tasks;
-      this.courseTasks.forEach(task => {
-        if(typeof this.submissionAsFile[task.task_id] == 'undefined'){
+      this.courseTask = course_detail.task;
 
-          if(this.externalInfoIsForm(task))
-            this.submissionAsFile[task.task_id] = 'choice'
+        if(typeof this.submissionAsFile == 'undefined'){
+          if(this.externalInfoIsForm(this.courseTask))
+            this.submissionAsFile = 'choice';
           else
-            this.submissionAsFile[task.task_id] = 'text';
+            this.submissionAsFile = 'text';
         }
-      })
+
 
     });
   }
@@ -416,10 +406,10 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
           this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
 
         }
-        return this.db.getCourseDetail(this.courseDetail.course_id);
+        return this.db.getCourseDetailOfTask(this.courseDetail.course_id, this.taskID);
       })
     ).subscribe(course_detail => {
-      this.courseTasks = course_detail.tasks;
+      this.courseTask = course_detail.task;
     });
   }
 
@@ -458,11 +448,11 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    * @param currentTask The current task to get file from
    */
   getSubmissionFile(file: File, currentTask: CourseTask) {
-    this.submissionData[currentTask.task_id] = file;
+    this.submissionData = file;
   }
 
   updateSubmissionContent(payload: any){
-    this.submissionData[payload['taskid']] = payload['content'];
+    this.submissionData = payload['content'];
   }
 
   /**
@@ -471,7 +461,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
    * @param currentTask The current task for submission
    */
   submission(courseID: number, currentTask: CourseTask) {
-    if (this.submissionData[currentTask.task_id] == null) {
+    if (this.submissionData == null) {
       this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + currentTask.task_name + ' abgegeben', 'Ups!');
       return;
     }
@@ -522,7 +512,7 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
     }).afterClosed().subscribe((value: Succeeded) => {
       location.hash = ''
       if (value.success) {
-        this.db.getCourseDetail(this.courseID).subscribe(courses => {
+        this.db.getCourseDetailOfTask(this.courseID, this.taskID).subscribe(courses => {
           this.courseDetail = courses;
           this.titlebar.emitTitle(this.courseDetail.course_name);
         });
@@ -538,12 +528,12 @@ export class DetailCourseComponent implements OnInit, AfterViewChecked {
       flatMap(success => {
         if (success.success) {
           this.snackbar.open('Kurs ' + this.courseDetail.course_name + ' beigetreten', 'OK', {duration: 3000});
-          return this.db.getCourseDetail(this.courseID);
+          return this.db.getCourseDetailOfTask(this.courseID, this.taskID);
         }
       })
     ).subscribe(courseDetail => {
       this.courseDetail = courseDetail;
-      this.courseTasks = courseDetail.tasks;
+      this.courseTask = courseDetail.task;
     });
   }
 

@@ -27,6 +27,7 @@ export class TaskSubmissionTextComponent implements OnInit {
   reRunTask(){
     this.update.emit({taskid: this.task.task_id, content: this.task.submission_data})
     this.rerun.emit(this.task);
+
   }
 
     updateSubmission(event){

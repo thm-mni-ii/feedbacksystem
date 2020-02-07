@@ -8,6 +8,12 @@
     {{task.task_name}}
   </mat-card-subtitle>
   <mat-card-content>
-    <small>{{task.task_description}}</small> | <small>{{task.deadline | date:'medium'}}</small>
+    <small>
+      <markdown [data]="task.task_description"></markdown>
+    </small> <small> <mat-icon class="material-icons" color="accent" >access_time</mat-icon> {{task.deadline | date:'medium'}}</small>
+
+
+    <button  mat-flat-button  style="margin-left: calc(100% - 59px);margin-top: -10px;" color="primary" matTooltip="{{ 'Zur Aufgabe: \'' + task.task_description + '\'' }}"><mat-icon >forward</mat-icon></button>
+
   </mat-card-content>
 </mat-card>

@@ -371,9 +371,10 @@ class CourseService {
     * @author Benjamin Manns
     * @param courseid unique course identification
     * @param user User object
+    * @param taskid optional taskid information
     * @return Scala Map
     */
-  def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
+  def getCourseDetails(courseid: Int, user: User, taskid: Option[Int] = None): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
     val selectPart = "c.course_id, c.standard_task_typ, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
@@ -383,7 +384,8 @@ class CourseService {
       ""
     })
 
-    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1 || user.roleid == 2) {
+    val taskList = if (taskid.isDefined) { this.taskService.getTaskDetails(taskid.get, Some(user.userid), true).getOrElse(Map.empty) }
+    else if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1 || user.roleid == 2) {
       this.taskService.getTasksByCourse(courseid, Some(user.userid))
     } else {
       List.empty
@@ -396,11 +398,10 @@ class CourseService {
         "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?"
     }
 
-    val list = DB.query(sql,
-      (res, _) => {
+    val label = if (taskid.isDefined) "task" else LABEL_TASKS
+    val list = DB.query(sql, (res, _) => {
         val courseMap = Map(
-          CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
-          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+          CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid), CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           CourseDBLabels.course_end_date -> res.getTimestamp(CourseDBLabels.course_end_date),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
@@ -409,11 +410,8 @@ class CourseService {
           CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
           CourseDBLabels.plagiarism_script -> res.getBoolean(CourseDBLabels.plagiarism_script),
           LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
-          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
-          RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
-          RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
-          LABEL_TASKS -> taskList
-        )
+          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)), label -> taskList,
+          RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id), RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name))
         if (isPermitted) {
           courseMap + (CourseDBLabels.creator -> res.getInt(CourseDBLabels.creator))
         } else {
