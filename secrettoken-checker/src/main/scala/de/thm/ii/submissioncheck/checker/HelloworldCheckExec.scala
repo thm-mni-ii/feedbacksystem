@@ -1,4 +1,6 @@
 package de.thm.ii.submissioncheck.checker
+import java.nio.file.Path
+
 import de.thm.ii.submissioncheck.ResultType
 import de.thm.ii.submissioncheck.SecretTokenChecker.logger
 /**
@@ -15,17 +17,18 @@ class HelloworldCheckExec(override val compile_production: Boolean) extends Base
     * perform a check of request, will be executed after processing the kafka message
     * @param taskid submissions task id
     * @param submissionid submitted submission id
-    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param subBasePath, subFileame path of folder, where submitted file is in
+    * @param subFilename path of submitted file (if zip or something, it is also a "file")
     * @param isInfo execute info procedure for given task
     * @param use_extern include an existing file, from previous checks
     * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int, String) = {
+  override def exec(taskid: String, submissionid: String, subBasePath: Path, subFilename: Path, isInfo: Boolean, use_extern: Boolean,
+           jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     var (baseFilePath, configfiles) = loadCheckerConfig(taskid)
     val docentsContent = scala.io.Source.fromFile(configfiles(0).toString).mkString
-    val usersContent = scala.io.Source.fromFile(submittedFilePath).mkString
+    val usersContent = scala.io.Source.fromFile(subFilename.toFile).mkString
     logger.warning(usersContent)
     val success = (docentsContent.trim == usersContent.trim)
     val output = s"The ${checkername} checker results: ${success}"

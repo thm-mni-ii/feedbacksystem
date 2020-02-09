@@ -24,14 +24,15 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     * perform a check of request, will be executed after processing the kafka message
     * @param taskid submissions task id
     * @param submissionid submitted submission id
-    * @param submittedFilePath path of submitted file (if zip or something, it is also a "file"
+    * @param subBasePath, subFileame path of folder, where submitted file is in
+    * @param subFilename path of submitted file (if zip or something, it is also a "file")
     * @param isInfo execute info procedure for given task
     * @param use_extern include an existing file, from previous checks
     * @param jsonMap complete submission payload
     * @return check succeeded, output string, exitcode
     */
-  override def exec(taskid: String, submissionid: String, submittedFilePath: String, isInfo: Boolean, use_extern: Boolean, jsonMap: Map[String, Any]):
-  (Boolean, String, Int, String) = {
+  override def exec(taskid: String, submissionid: String, subBasePath: Path, subFilename: Path, isInfo: Boolean, use_extern: Boolean,
+                    jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val (basepath, checkerfiles) = loadCheckerConfig(taskid)
 
@@ -43,27 +44,33 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     if (scriptContent.split("\n").head.matches("#!.*php.*")) interpreter = "php"
 
     val absPath = scriptFile.getAbsolutePath
-    val testfileFile = new File(basepath.resolve("testfile").toString)
-    val testfilePathRel = testfileFile.getPath
-    val testfilePath = testfileFile.getAbsolutePath
-    val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { testfilePath } else ""
+    val testfileFile = basepath.resolve("testfile").toFile
+
     val bashDockerImage = System.getenv("BASH_DOCKER")
     var seq: Seq[String] = null
+    val submittedFilePath = (if (true) getCorespondigHOSTTempDir(subFilename) else subFilename).toString
 
     val infoArgument = if (isInfo) "info" else ""
     val name = jsonMap("username").asInstanceOf[String]
-    if (compile_production) {
-      seq = Seq("run", "--rm", __option_v, dockerRelPath + __slash + scriptpath.replace(ULDIR, "") + __colon + scriptpath,
-        __option_v, dockerRelPath + __slash + testfilePathRel.replace(ULDIR, "") + __colon + __slash + testfilePath, __option_v,
-        dockerRelPath + __slash + submittedFilePath.replace(ULDIR, "") + __colon + submittedFilePath, "--env",
-        "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter, scriptpath, name, submittedFilePath, infoArgument)
-      // "-c", "'ls -al " + scriptpath + "; cat " + scriptpath + "'")
+
+    val mountingOrgScriptPath = if (compile_production) {
+      dockerRelPath + __slash + scriptpath.replace(ULDIR, "")
     } else {
-      seq = Seq("run", "--rm", __option_v, absPath + ":/" + absPath, __option_v, testfilePath + ":/" + testfilePath,
-        __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter,
-        "/" + absPath, name, submittedFilePath, infoArgument)
+      absPath
+    }
+    val mountingTestfilePath = if (compile_production) {
+      dockerRelPath + __slash + testfileFile.toPath.toAbsolutePath.toString.replace(ULDIR, "")
+    } else {
+      testfileFile.toPath.toAbsolutePath.toString
     }
 
+    val testfileEnvParam = if (testfileFile.exists() && testfileFile.isFile) { mountingTestfilePath } else ""
+
+    seq = Seq("run", "--rm", __option_v, mountingOrgScriptPath + ":" + absPath, __option_v, mountingTestfilePath + ":" + mountingTestfilePath,
+      __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter,
+      absPath, name, submittedFilePath, infoArgument)
+
+    logger.warning(seq.toString())
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     var exitCode = Process("docker", seq).!(procLogger)
