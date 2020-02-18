@@ -10,7 +10,8 @@ import {
   SucceededUpdateTask
 } from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
-import {MatDialog, MatSnackBar} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
 import {UserService} from '../../../service/user.service';
 import {ExitCourseComponent} from './exit-course/exit-course.component';
@@ -24,7 +25,6 @@ import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsys
 import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
 import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
 import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
-import set = Reflect.set;
 import {MatTabChangeEvent} from "@angular/material/tabs";
 import {DomSanitizer} from "@angular/platform-browser";
 

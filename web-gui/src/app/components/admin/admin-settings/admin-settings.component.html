@@ -1,12 +1,5 @@
-
-
-
-
-
 <div class="flex-container">
-
   <button class="create-guest-user" mat-raised-button color="accent" (click)="showNewSettingsDialog()"><mat-icon>add_circle</mat-icon> Neue systemweite Einstellung hinzufügen</button>
-
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
 
     <!-- Position Column -->
@@ -48,5 +41,4 @@
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
   </table>
-
 </div>

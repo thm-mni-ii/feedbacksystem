@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
-import {MatSnackBar, MatSort} from "@angular/material";
+import {MatSort} from "@angular/material/sort";
+import {MatSnackBar} from "@angular/material/snack-bar";
 import {User} from "../../../interfaces/HttpInterfaces";
 import {flatMap, map, startWith} from "rxjs/operators";
 import {DatabaseService} from "../../../service/database.service";

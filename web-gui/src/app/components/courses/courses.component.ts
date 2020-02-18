@@ -4,9 +4,10 @@ import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {DatabaseService} from '../../service/database.service';
 import {GeneralCourseInformation, Succeeded} from '../../interfaces/HttpInterfaces';
-import {MatDialog, MatSnackBar} from "@angular/material";
+import {MatDialog} from "@angular/material/dialog";
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeleteCourseModalComponent} from "./modals/delete-course-modal/delete-course-modal.component";
-import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
+import {flatMap} from 'rxjs/operators';
 
 /**
  * Show all courses user subscribed

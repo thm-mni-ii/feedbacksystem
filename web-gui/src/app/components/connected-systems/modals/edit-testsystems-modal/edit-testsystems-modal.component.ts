@@ -1,17 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../../service/database.service';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from '@angular/material';
-import {GlobalSetting, Succeeded, TestsystemTestfile, User} from "../../../../interfaces/HttpInterfaces";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {GlobalSetting, Succeeded, TestsystemTestfile} from "../../../../interfaces/HttpInterfaces";
 import {Testsystem} from "../../../../interfaces/HttpInterfaces";
-import {COMMA, ENTER} from "@angular/cdk/keycodes";
-import {MatChipInputEvent} from "@angular/material/chips";
 import {FormControl} from "@angular/forms";
-import {Observable} from "rxjs";
-import {flatMap, map, startWith} from "rxjs/operators";
-import set = Reflect.set;
-
-
-
 
 @Component({
   selector: 'app-edit-modal',

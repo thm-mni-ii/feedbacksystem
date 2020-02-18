@@ -1,5 +1,8 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatDialog, MatSnackBar, MatSort, MatTableDataSource} from "@angular/material";
+import {MatDialog} from "@angular/material/dialog";
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSort} from '@angular/material/sort';
+import {MatTableDataSource} from '@angular/material/table';
 import {DatabaseService} from "../../service/database.service";
 import {TitlebarService} from "../../service/titlebar.service";
 import {Succeeded, Testsystem} from "../../interfaces/HttpInterfaces";

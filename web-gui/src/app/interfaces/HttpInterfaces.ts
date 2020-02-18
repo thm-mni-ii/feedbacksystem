@@ -1,10 +1,4 @@
 /**
- * Interfaces used when data comes from db
- */
-
-
-
-/**
  * General information of course.
  * Used to show for list of Courses
  */
@@ -82,9 +76,9 @@ export interface TaskLastSubmission {
   email: string;
   combined_passed: boolean;
   submission_id: number;
-  prename: number;
-  ​​surname: number;
-  ​​username: number;
+  prename: string;
+  ​​surname: string;
+  ​​username: string;
   user_id: number;
 }
 
@@ -139,6 +133,7 @@ export interface AfterLogin {
  */
 export interface Succeeded {
   success: boolean;
+  fileupload?: boolean;
 }
 
 

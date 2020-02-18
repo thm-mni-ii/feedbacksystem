@@ -10,15 +10,15 @@ import {Succeeded} from "../../../interfaces/HttpInterfaces";
   styleUrls: ['./change-passwd.component.scss']
 })
 export class ChangePasswdComponent implements OnInit {
-
-
   passwd_repeat: string;
   passwd: string;
 
   constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
 
   showOK(){
-    this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000}).afterDismissed().toPromise()
+    this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
+      .afterDismissed()
+      .toPromise()
       .then()
   }
 
@@ -46,10 +46,8 @@ export class ChangePasswdComponent implements OnInit {
         this.showError("Leider gab es einen Fehler mit dem Update")
       })
     }
-
   }
 
   ngOnInit() {
   }
-
 }

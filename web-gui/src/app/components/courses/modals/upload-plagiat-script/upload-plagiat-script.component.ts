@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatSnackBar} from "@angular/material";
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {MatSnackBar} from "@angular/material/snack-bar";
 import {DatabaseService} from "../../../../service/database.service";
-import {NgxDropzoneService} from "ngx-dropzone/lib/ngx-dropzone.service";
 import {Succeeded} from "../../../../interfaces/HttpInterfaces";
 
 @Component({

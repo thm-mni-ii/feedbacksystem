@@ -3,12 +3,10 @@ import {DatabaseService} from '../../../service/database.service';
 import {Observable, of} from 'rxjs';
 import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {MatTabChangeEvent} from '@angular/material';
-import {map, startWith} from 'rxjs/operators';
+import {MatTabChangeEvent} from '@angular/material/tabs';
 import {FormControl} from '@angular/forms';
 import {UserService} from "../../../service/user.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {MatProgressBarModule} from '@angular/material'
 /**
  * Matrix for every course docent has
  */

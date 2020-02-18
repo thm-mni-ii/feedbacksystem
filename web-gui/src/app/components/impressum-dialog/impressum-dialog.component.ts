@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialogRef, MatSnackBar} from '@angular/material';
+import {MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DatabaseService} from '../../service/database.service';
 import {TextType} from '../../interfaces/HttpInterfaces';
 import {UserService} from '../../service/user.service';

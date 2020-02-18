@@ -1,5 +1,7 @@
-apply plugin: 'idea'
-apply plugin: 'distribution'
+plugins {
+    id 'idea'
+    id 'distribution'
+}
 
 ext {
     scalaStyleConfig = "$rootDir/scalastyle_config.xml"
@@ -12,13 +14,13 @@ subprojects { subproject ->
 
 task dist(dependsOn: ['ws:installDist', 'secrettoken-checker:installDist', 'sql-checker:installDist', "web-gui:installDist"]) {
     doLast({
-        tasks.installDist.execute();
+        installDist
     })
 }
 
 distributions {
     main {
-        baseName = project.name
+        distributionBaseName = project.name
         contents {
             project.subprojects.each { sub ->
                 switch (sub.name) {
@@ -43,8 +45,3 @@ distributions {
         }
     }
 }
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.9'
-}
-

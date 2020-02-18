@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../../service/database.service';
 import {Observable} from 'rxjs';
 import {DetailedCourseInformation, Testsystem} from '../../../../interfaces/HttpInterfaces';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 /**
  * Updates course information in dialog

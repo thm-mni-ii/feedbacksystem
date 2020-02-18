@@ -2,7 +2,8 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angula
 import {FormControl} from "@angular/forms";
 import {DatabaseService} from "../../../service/database.service";
 import {UserService} from "../../../service/user.service";
-import {MatSnackBar, MatSort} from "@angular/material";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {MatSort} from "@angular/material/sort";
 import {flatMap, map, startWith} from "rxjs/operators";
 import {User} from "../../../interfaces/HttpInterfaces";
 import {Observable} from "rxjs";

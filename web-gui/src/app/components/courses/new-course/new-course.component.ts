@@ -1,8 +1,9 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
-import {MatSnackBar, MatStepper} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatStepper} from '@angular/material/stepper';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {NewCourse, Testsystem, User} from '../../../interfaces/HttpInterfaces';
 import {Router} from "@angular/router";
@@ -161,7 +162,7 @@ export class NewCourseComponent implements OnInit, OnDestroy {
 
       console.log(this.docent_list,this.tutor_list, updateDocentTutorList)
       Promise.all(updateDocentTutorList).then(() => {
-        setTimeout(this.router.navigate(['courses', data.course_id]),100)
+        setTimeout( () => {this.router.navigate(['courses', data.course_id])},100)
       })
     });
   }

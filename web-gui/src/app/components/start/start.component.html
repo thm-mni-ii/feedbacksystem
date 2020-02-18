@@ -35,10 +35,10 @@
           <p>Kurs erstellen</p>
         </a>
 
-        <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/docent" routerLinkActive="selected">
+        <!--<a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/docent" routerLinkActive="selected">
           <mat-icon>person</mat-icon>
           <p>Dozenten / Tutoren</p>
-        </a>
+        </a>-->
 
         <a mat-list-item *ngIf="false && (isAdmin || isDocent)" routerLink="/courses/tutor" routerLinkActive="selected">
           <!-- Deprecated -->
@@ -56,7 +56,7 @@
           <p>Kurs Importieren</p>
         </a>
 
-        <a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
+        <!--<a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
           <mat-icon>widgets</mat-icon>
           <p>Verbundene Systeme</p>
         </a>
@@ -64,7 +64,7 @@
         <a mat-list-item routerLink="/admin/settings" routerLinkActive="selected">
           <mat-icon>settings</mat-icon>
           <p>Einstellungen</p>
-        </a>
+        </a>-->
 
       </mat-nav-list>
       <mat-divider></mat-divider>

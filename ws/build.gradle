@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter() // only work after gradle 1.7
+        jcenter()
     }
 
     dependencies {
@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.springframework.boot' version '2.0.4.RELEASE'
+    id "org.springframework.boot" version "2.2.5.RELEASE"
 }
 
 apply plugin: 'scala'
@@ -18,7 +18,11 @@ apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-mainClassName = 'de.thm.ii.submissioncheck.Application'
+ext {
+    springVersion = '2.2.5.RELEASE'
+}
+
+mainClassName = 'de.thm.ii.fbs.Application'
 
 jar {
     enabled = true
@@ -37,7 +41,6 @@ bootRun {
             ]
     
 }
-
 
 repositories {
     jcenter()
@@ -64,6 +67,9 @@ scalaStyle {
     testSource = 'src/test/scala'
 }
 
+clean.doFirst {
+    delete "$projectDir/src/main/resources/static"
+}
 test.dependsOn scalaStyle
 
 // customize start scripts
@@ -80,17 +86,17 @@ dependencies {
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    compile 'org.scala-lang:scala-library:2.12.6'
-    compile 'mysql:mysql-connector-java:8.0.13'
-    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.9.7'
+    compile 'org.scala-lang:scala-library:2.13.1'
+    compile 'mysql:mysql-connector-java:8.0.19'
+    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.10.1'
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
-    compile 'org.springframework.kafka:spring-kafka:2.1.8.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '2.0.4.RELEASE'
+    compile "org.springframework.kafka:spring-kafka:2.4.3.RELEASE"
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     compile('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
-    compile group: 'org.springframework.security', name: 'spring-security-core', version: '2.0.2'
-    compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.0.9.RELEASE'
-    compile 'org.springframework.boot:spring-boot-starter-security:2.1.0.RELEASE'
+    //compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.2.1.RELEASE'
+    //compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.0.RELEASE'
+    //compile "org.springframework.boot:spring-boot-starter-security:$springVersion"
     compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'au.com.bytecode', name: 'opencsv', version: '2.4'

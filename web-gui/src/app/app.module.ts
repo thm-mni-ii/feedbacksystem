@@ -41,7 +41,7 @@ import {UpdateCourseDialogComponent} from './components/courses/detail-course/up
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
-import {MarkdownModule, MarkdownService, MarkedOptions} from 'ngx-markdown';
+import {MarkdownModule} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
 import { GrantTutorSnippComponent } from './components/courses/grant-tutor-snipp/grant-tutor-snipp.component';
@@ -58,7 +58,7 @@ import { ConnectedSystemsComponent } from './components/connected-systems/connec
 import { EditTestsystemsModalComponent } from './components/connected-systems/modals/edit-testsystems-modal/edit-testsystems-modal.component';
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
 import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
-import {MatSlideToggleModule} from "@angular/material";
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
 import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
 import { CourseResultDetailsComponent } from './components/courses/course-result-details/course-result-details.component';
@@ -72,13 +72,13 @@ import { CourseProfDetailsComponent } from './components/courses/detail-course/c
 import { AdminSettingsComponent } from './components/admin/admin-settings/admin-settings.component';
 import { CreateUpdateSettingDialogComponent } from './components/admin/admin-settings/create-update-setting-dialog/create-update-setting-dialog.component';
 import { DeleteSettingDialogComponent } from './components/admin/admin-settings/delete-setting-dialog/delete-setting-dialog.component';
-import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
+      url: (req.url.search('localhost') >= 0) ? req.url : 'http://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -152,7 +152,7 @@ export const httpInterceptorProviders = [
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
-    MarkdownModule,
+    MarkdownModule.forRoot(),
     OwlDateTimeModule,
     OwlNativeDateTimeModule,
     JwtModule.forRoot({
@@ -168,7 +168,7 @@ export const httpInterceptorProviders = [
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
     CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
-  providers: [CookieService, MarkdownService, MarkedOptions],
+  providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {

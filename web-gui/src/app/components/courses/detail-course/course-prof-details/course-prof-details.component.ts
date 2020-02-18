@@ -3,7 +3,6 @@ import {flatMap} from "rxjs/operators";
 import {
   CourseTask,
   CourseTaskEvaluation,
-  DetailedCourseInformation,
   Succeeded, TaskSubmission
 } from "../../../../interfaces/HttpInterfaces";
 import {DatabaseService} from "../../../../service/database.service";
@@ -106,7 +105,7 @@ export class CourseProfDetailsComponent implements OnInit {
     this.db.markTaskAsPassed(this.taskid, this.taskResults[0].submission_id).subscribe(
       (value: Succeeded) => {
         if (value.success) {
-          setTimeout(this.loadUsersSubmission(), 1000);
+          setTimeout(() => {this.loadUsersSubmission()}, 1000);
         }
       },
       error => {

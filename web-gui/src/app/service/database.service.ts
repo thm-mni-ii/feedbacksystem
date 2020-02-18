@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, empty, of} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {
   CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation,
@@ -9,12 +9,12 @@ import {
   RoleChanged,
   Succeeded, TaskLastSubmission, TaskSubmission,
   Testsystem,
-  TestsystemTestfile,
   TextType,
   User
 } from '../interfaces/HttpInterfaces';
 import {flatMap} from 'rxjs/operators';
 import {saveAs as importedSaveAs} from "file-saver";
+
 /**
  *  Service to communicate with db.
  *  Get submission result or submit for a given Task.
@@ -26,13 +26,8 @@ import {saveAs as importedSaveAs} from "file-saver";
 })
 export class DatabaseService {
 
-
   constructor(private http: HttpClient) {
   }
-
-
-  // GET REQUESTS
-
 
   getTestsystemTypes(): Observable<Testsystem[]> {
     return this.http.get<Testsystem[]>('/api/v1/testsystems');
@@ -62,9 +57,6 @@ export class DatabaseService {
   getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
     return this.http.get<{ markdown: string }>('/api/v1/settings/markdown/' + type.toString());
   }
-
-
-  // Routes for Settings Entries
 
   createNewSetting(key: string, value: string, typ: string){
     return this.http.post<Succeeded>('/api/v1/settings' , {
@@ -293,19 +285,15 @@ export class DatabaseService {
       load_external_description: load_external_description
     }).pipe(
       flatMap(result => {
-        console.log("files",files)
-        let upload_url: string;
+
         if (result.success) {
-          upload_url = result.upload_url;
-          console.log("upload_url",upload_url)
+          let upload_url: string = result.upload_url;
           let uploadRequests = []
 
           // New solution file
           Object.keys(files).forEach(pos => {
             const formData = new FormData();
-
             for(let j in files[pos]) {
-              console.log("pos", pos, files[pos], "J", j)
               formData.append("file", files[pos][j].item(0), j);
             }
 
@@ -431,10 +419,6 @@ export class DatabaseService {
     });
   }
 
-
-  // PUT REQUESTS
-
-
   /**
    * Update an existing course
    * @param id The id of course that will be updated
@@ -457,7 +441,6 @@ export class DatabaseService {
     });
   }
 
-
   /**
    * Returns a sql compatible timestamp string based on a given date
    * @param date
@@ -479,10 +462,9 @@ export class DatabaseService {
    * @param deadline The deadline when this task ends
    */
   updateTask(idTask: number, name: string,
-             description: string, files: {}, test_type: string, deadline: Date, load_external_description: boolean): Observable<Succeeded> {
+             description: string, files: {}, test_type: string, deadline: Date, load_external_description: boolean): Observable<any> {
 
     if (files) {
-
       return this.http.put<FileUpload>('/api/v1/tasks/' + idTask, {
         name: name,
         description: description,
@@ -491,11 +473,8 @@ export class DatabaseService {
         load_external_description: load_external_description
       }).pipe(
         flatMap(res => {
-          let uploadUrl: string;
           if (res.success && Object.keys(files).length > 0) {
-            uploadUrl = res.upload_url;
-
-
+            let uploadUrl: string = res.upload_url;
             let uploadRequests = []
 
             // New solution file
@@ -509,12 +488,9 @@ export class DatabaseService {
                 formData.append("file", files[pos][j].item(0), j);
               }
 
-
               uploadRequests.push(this.http.post<Succeeded>(uploadUrl[pos], formData, {
                 headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
               }).toPromise())
-
-
             }
 
             return new Promise((resolve, reject) => {
@@ -522,8 +498,8 @@ export class DatabaseService {
                 .then((success) => {
                   resolve(res)
                 }).catch((e) => {
-                reject(e)
-              })
+                  reject(e)
+                })
             })
 
 
@@ -631,7 +607,6 @@ export class DatabaseService {
    */
   getAllCourseParametersOfUser(courseid: number) {
     return this.http.get('/api/v1/courses/' + courseid + '/parameters/users').toPromise()
-
   }
 
   /**
@@ -649,8 +624,4 @@ export class DatabaseService {
     return this.http.post(`/api/v1/courses/${courseid}/run/tasks/${taskid}`,
     {"complete": true}).toPromise()
   }
-
-
-
-
 }

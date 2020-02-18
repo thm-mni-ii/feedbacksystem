@@ -1,13 +1,15 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {User} from '../../../interfaces/HttpInterfaces';
 import {DeleteUserModalComponent} from "../../modals/delete-user-modal/delete-user-modal.component";
-import {AbstractControl, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
-import {Observable, pipe, throwError} from "rxjs";
+import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {throwError} from "rxjs";
 
 export interface GuestUserAccount {
   gPrename: string;

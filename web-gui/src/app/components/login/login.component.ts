@@ -1,7 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
-import {MatDialog, MatSnackBar} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {DataprivacyDialogComponent} from '../dataprivacy-dialog/dataprivacy-dialog.component';
 import {DOCUMENT} from '@angular/common';
 import {CookieService} from 'ngx-cookie-service';
@@ -67,8 +68,7 @@ export class LoginComponent implements OnInit {
    */
   login() {
     this.auth.login(this.username, this.password).toPromise().then(response => {
-      if(response.body.success){
-
+      if(response.body.success) {
         this.auth.loginPrivacyCheck(this.username).subscribe(success => {
           if(!success.success){
             this.dialog.open(DataprivacyDialogComponent).afterClosed().subscribe((key) => {
@@ -78,10 +78,8 @@ export class LoginComponent implements OnInit {
                 }).catch((e) => {
                   this.snackbar.open('Leider gab es ein Problem beim Anmelden.', 'OK');
                 })
-
               }
             })
-
           } else {
             this.jwtParser(response)
           }
@@ -90,7 +88,6 @@ export class LoginComponent implements OnInit {
       else {
         this.snackbar.open('Username oder Passwort falsch', 'OK', {duration: 3000});
       }
-
     }).catch((e) => {
       this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK', {duration: 3000});
     })

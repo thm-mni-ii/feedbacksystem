@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   zoo1:
@@ -17,16 +17,17 @@ services:
     environment:
     - KAFKA_ZOOKEEPER_CONNECT=zoo1:2181
     - ALLOW_PLAINTEXT_LISTENER=yes
-    - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://:9092
-    - KAFKA_LISTENERS=PLAINTEXT://:9092
-    - KAFKA_ADVERTISED_HOST_NAME=kafka1
-    - KAFKA_ADVERTISED_PORT=9092
+    - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+    - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+    - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://localhost:29092
     depends_on:
     - zoo1
     volumes:
     - ./docker-config/kafka1:/bitnami/kafka
     ports:
     - 9092:9092
+    - 29092:29092
 
   mysql1:
     image: mysql:8.0

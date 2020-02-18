@@ -39,8 +39,6 @@ export class AdminSettingsComponent implements OnInit {
     });
   }
 
-
-
   deleteSetting(setting: GlobalSetting) {
     this.dialog.open(DeleteSettingDialogComponent, {
       data: setting

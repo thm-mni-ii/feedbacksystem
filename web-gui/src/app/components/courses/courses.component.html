@@ -1,15 +1,16 @@
 <div class="container">
   <mat-grid-list cols="12" rowHeight="60px">
     <span *ngFor="let course of userCourses$| async">
-    <mat-grid-tile colspan="{{(course.role_id <= 4) ? '11' : '12'}}"
-                   (click)="goToCourse(course.course_id)">
-      {{course.course_name}}
-    </mat-grid-tile>
+      <mat-grid-tile colspan="{{(course.role_id <= 4) ? '11' : '12'}}"
+                     (click)="goToCourse(course.course_id)">
+        {{course.course_name}}
+      </mat-grid-tile>
 
-    <mat-grid-tile (click)="deleteCourse(course.course_name, course.course_id)" *ngIf="course.role_id <= 4" colspan='1'>
-      <mat-icon style="color: red;">delete</mat-icon>
-    </mat-grid-tile>
-</span>
+      <mat-grid-tile (click)="deleteCourse(course.course_name, course.course_id)" *ngIf="course.role_id <= 4" colspan='1'>
+        <mat-icon style="color: red;">delete</mat-icon>
+      </mat-grid-tile>
+    </span>
+    <span class="noElements" *ngIf="(userCourses$ | async).length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
   </mat-grid-list>
 </div>
 

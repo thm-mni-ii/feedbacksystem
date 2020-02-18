@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {LoginComponent} from './components/login/login.component';
 import {AuthGuard} from './guards/auth.guard';
-import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-dashboard.component';
 import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
 import {StartComponent} from './components/start/start.component';
@@ -28,14 +27,12 @@ import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze
 import {AdminSettingsComponent} from "./components/admin/admin-settings/admin-settings.component";
 import {CourseProfDetailsComponent} from "./components/courses/detail-course/course-prof-details/course-prof-details.component";
 import {IsGeqDocentGuard} from "./guards/is-geq-docent";
-import {isGeneratedFile} from "@angular/compiler/src/aot/util";
 
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {
     path: '', component: StartComponent, canActivate: [AuthGuard], children: [
-
       {path: 'courses/user', component: CoursesComponent},
       {path: 'courses/docent', component: GrantDocentComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [DocentGuard]},
@@ -50,8 +47,8 @@ const routes: Routes = [
       {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
       {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
       {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
-      {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
-      {path: 'admin/settings', component: AdminSettingsComponent, canActivate: [AdminGuard]},
+      // {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
+      // {path: 'admin/settings', component: AdminSettingsComponent, canActivate: [AdminGuard]},
 
       // Users self settings
       {path: 'users/passwd', component: ChangePasswdComponent, canActivate: [GuestGuard]},
@@ -65,7 +62,6 @@ const routes: Routes = [
 
       //General Sites
       {path: '404', component: NotFound404Component},
-
     ]
   },
   { path: '**', redirectTo: '404' }

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MatDialog} from '@angular/material';
+import {MatDialog} from '@angular/material/dialog';
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 
@@ -12,25 +12,18 @@ import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-
-
   constructor(private dialog: MatDialog) {
   }
-
-
   /**
    * Show data privay dialog
    */
   showDataprivacy() {
     this.dialog.open(DataprivacyDialogComponent, {data: {onlyForShow: true}});
   }
-
   /**
    * Show impressum dialog
    */
   showImpressum() {
     this.dialog.open(ImpressumDialogComponent);
   }
-
-
 }

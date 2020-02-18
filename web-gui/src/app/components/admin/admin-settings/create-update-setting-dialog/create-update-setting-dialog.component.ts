@@ -1,7 +1,5 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
+import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
-import {GuestUserAccount} from "../../admin-user-management/admin-user-management.component";
 import {GlobalSetting} from "../../../../interfaces/HttpInterfaces";
 
 @Component({

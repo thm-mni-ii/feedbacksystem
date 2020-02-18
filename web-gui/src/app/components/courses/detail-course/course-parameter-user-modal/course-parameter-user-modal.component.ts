@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material";
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {DatabaseService} from "../../../../service/database.service";
-import {CourseParameter, CourseParameterUser, Succeeded} from "../../../../interfaces/HttpInterfaces";
+import {CourseParameter, CourseParameterUser} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-course-parameter-user-modal',

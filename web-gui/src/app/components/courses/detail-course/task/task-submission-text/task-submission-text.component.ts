@@ -1,7 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CourseTask} from "../../../../../interfaces/HttpInterfaces";
-import {Observable, of} from "rxjs";
-
 
 @Component({
   selector: 'app-task-submission-text',

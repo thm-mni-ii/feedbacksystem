@@ -1,23 +1,19 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from "../../../service/database.service";
-import {ActivatedRoute, Params, Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {TitlebarService} from "../../../service/titlebar.service";
 import {MatDialog} from "@angular/material/dialog";
 import {UserService} from "../../../service/user.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {DOCUMENT} from "@angular/common";
 import {flatMap, startWith, map} from "rxjs/operators";
 import {
   CourseTask,
-  CourseTaskEvaluation,
   DetailedCourseInformation,
   TaskSubmission,
   User
 } from "../../../interfaces/HttpInterfaces";
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {FormControl} from "@angular/forms";
 import {Observable} from "rxjs";
-import {MatTableDataSource} from "@angular/material/table";
 
 @Component({
   selector: 'app-course-result-details',

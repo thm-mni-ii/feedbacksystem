@@ -19,7 +19,7 @@ install:
   - sudo pip3 install requests_toolbelt
 
 jdk:
-  - oraclejdk9
+  - openjdk11
 
 script:
   - docker-compose down

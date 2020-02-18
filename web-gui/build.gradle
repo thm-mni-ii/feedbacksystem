@@ -1,5 +1,5 @@
 plugins {
-    id "com.moowork.node" version "1.2.0"
+  id "com.github.node-gradle.node" version "2.2.3"
 }
 
 apply plugin: 'distribution'
@@ -13,14 +13,12 @@ repositories {
 }
 
 node {
-    version = '11.1.0'
-    npmVersion = '6.4.0'
+    version = '13.8.0'
+    npmVersion = '6.13.7'
     download = true
 }
 
-
-clean.dependsOn(npm_run_clean)
-npm_build.dependsOn npm_install
+clean.dependsOn npm_run_clean
 assemble.dependsOn npm_run_build
 installDist.dependsOn npm_run_build
 
@@ -41,14 +39,11 @@ distributions {
 // After build the ng app, we copy the dist content to or spring boot webservice static resoorce path
 // It will work on evry system, because of relative paths (at leat I hope so)
 
-task copyWebToWS(type:Copy,dependsOn:[build]) {
+task copyWebToWS(type:Copy, dependsOn: [build]) {
   copy {
-    from "${projectDir}/dist/${project.name}" // path from distributed web-gui       
+    from "${projectDir}/dist/${project.name}" // path from distributed web-gui
     into "${projectDir}/../ws/src/main/resources/static"
   }
-  
-  println "${projectDir}/../ws/src/main/resources/static"
-  
 }
 
 copyWebToWS

@@ -1,6 +1,8 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatAutocomplete, MatSort, MatTableDataSource} from '@angular/material';
-import {GeneralCourseInformation, User} from '../../../interfaces/HttpInterfaces';
+import {MatAutocomplete} from '@angular/material/autocomplete';
+import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 
 /**

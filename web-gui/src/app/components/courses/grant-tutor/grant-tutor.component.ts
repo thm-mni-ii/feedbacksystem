@@ -1,12 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatAutocomplete, MatSnackBar, MatSort, MatTableDataSource} from '@angular/material';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {flatMap, map, startWith} from 'rxjs/operators';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatAutocomplete} from '@angular/material/autocomplete';
+import {MatTableDataSource} from '@angular/material/table';
 import {UserService} from '../../../service/user.service';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {DatabaseService} from '../../../service/database.service';
-import {GeneralCourseInformation, User} from '../../../interfaces/HttpInterfaces';
+import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 
 /**
  * Adding or removing tutor from course
