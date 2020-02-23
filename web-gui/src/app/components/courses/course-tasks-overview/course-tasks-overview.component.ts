@@ -8,6 +8,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {DomSanitizer} from "@angular/platform-browser";
 import {DOCUMENT} from "@angular/common";
 import {CourseTask, DetailedCourseInformation} from "../../../interfaces/HttpInterfaces";
+import {FormControl} from "@angular/forms";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -21,13 +22,21 @@ export class CourseTasksOverviewComponent implements OnInit {
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
-  tasks: CourseTask[];
+  filter = new FormControl();
+  tasks: CourseTask[] = [];
   courseID: number;
+  taskFilter: string = '';
   ngOnInit() {
     this.route.params.subscribe(
       param => {
-        this.courseID = param.id
+        this.courseID = param.id;
         this.loadTasksFromCourse(param.id)
+      }
+    );
+
+    this.filter.valueChanges.subscribe(
+      (value) => {
+        this.taskFilter = value
       }
     )
   }
@@ -38,6 +47,12 @@ export class CourseTasksOverviewComponent implements OnInit {
       })
   }
 
-
-
+  get tasksFiltered(){
+    let filterLower = this.taskFilter.toLowerCase();
+    return this.tasks.filter(t => {
+      return t.task_description.toLowerCase().indexOf(filterLower) >= 0
+              || t.task_id.toString().indexOf(filterLower) >= 0
+              || t.task_name.toLowerCase().indexOf(filterLower) >= 0
+    })
+  }
 }
