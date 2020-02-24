@@ -433,7 +433,7 @@ class SubmissionService {
     */
   def getSummarizedSubmissionEvaluationOfCourseOfUser(userid: Int, courseid: Int): (Boolean, List[Map[String, Any]]) = {
     var globalPassed: Int = 0
-    val list = DB.query("SELECT  u.prename, u.surname, t.task_name, t.task_id, min(s.plagiat_passed) plagiat_sum, " +
+    val list = DB.query("SELECT  u.prename, u.surname, t.task_name, t.deadline, t.task_id, min(s.plagiat_passed) plagiat_sum, " +
       "max(st.passed) as passed_sum, count(st.passed) as count_sum, st.result_date " +
       "from task t left join submission s on t.task_id = s.task_id and s.user_id = ? " +
       "                                              left join submission_testsystem st on s.submission_id = st.submission_id " +
@@ -456,10 +456,19 @@ class SubmissionService {
 
         Map(s"""A${rowNum}""" -> Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid), "trials" -> res.getInt("count_sum"), "passed" -> passed_string,
-          "passed_date" -> res.getDate("result_date"), SubmissionDBLabels.plagiat_passed -> taskPlagiatPassed))
+          "passed_date" -> res.getDate("result_date"), "deadline" -> stringOrNull(res.getString(TaskDBLabels.deadline)),
+          SubmissionDBLabels.plagiat_passed -> taskPlagiatPassed))
       }, userid, courseid)
 
     (list.length == globalPassed, list)
+  }
+
+  private def stringOrNull(any: Any): String = {
+    if (any == null) {
+      null
+    } else {
+      any.toString
+    }
   }
 
   /**
