@@ -25,7 +25,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
 
   private def submissionIdsOfUser(jsonMap: Map[String, Any], userid: Int) = {
     val token = jsonMap("jwt_token").asInstanceOf[String]
-    val taskid = jsonMap("taskid").toString.toInt
+    val taskid = jsonMap(LABEL_TASKID).toString.toInt
     val (code, msg, map) = apiCall(s"""${jsonMap("api_url")}/tasks/${taskid}/submissions/${userid}""", token, "GET")
     map.asInstanceOf[List[Map[String, Any]]].map(v => v("submission_id").toString)
   }
@@ -33,7 +33,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
   private def createFoldersForEachUser(jsonMap: Map[String, Any]) = {
     val token = jsonMap("jwt_token").asInstanceOf[String]
     val (code, msg, map) = apiCall(s"${jsonMap("api_url")}/courses/${jsonMap("courseid")}/submissions", token, "GET")
-    val taskid = jsonMap("taskid").toString.toInt
+    val taskid = jsonMap(LABEL_TASKID).toString.toInt
     val subUser = jsonMap("userid").toString.toInt // some
 
     val basepath: Path = Paths.get(ULDIR).resolve(taskid.toString).resolve("PLAGIAT_CHECK").resolve(Secrets.getSHAStringFromNow())
@@ -84,20 +84,20 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
            jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     // A submission a user does
     var plagiatExecPath = subBasePath.toAbsolutePath.toString
-    var output = s"The ${checkername} checker results: ${true}"
-    var exitcode = -1
-    similarity_limit = loadSIMConfig(taskid)
+    var output = s"The ${checkername} checker results: ${true}"; var exitcode = -1
+    similarity_limit = loadSIMConfig(taskid); val userid = jsonMap("userid").toString.toInt
     try {
       val (pathsToCompare, basepath) = createFoldersForEachUser(jsonMap)
       val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
 
-      var seq: Seq[String] = null
       val stdoutStream = new StringBuilder;
       val stderrStream = new StringBuilder
       val prozessLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
       val bashDockerImage = System.getenv("BASH_DOCKER")
       var summerizedPassed = true
 
+      val tmpDir = getTempFile("plagiatchecker_" + userid.toString)
+      FileOperations.copy(subBasePath.toFile, tmpDir.toFile)
       for (subInfo <- pathsToCompare) {
         val otherSubmissionsNotFromUser = subInfo._1
 
@@ -107,25 +107,25 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
             plagiatExecPath = dockerRelPath + __slash + plagiatExecPath.replace(ULDIR, "")
           }
           // That's how we use sim (https://manpages.ubuntu.com/manpages/trusty/man1/similarity-tester.1.html)
-          seq = Seq("run", "--rm", __option_v, s"$plagiatExecPath:/upload-dir/plagiat/new", __option_v, s"${oldPath}:/upload-dir/plagiat/old", bashDockerImage,
-            "bash", "/opt/sim/run_check.sh")
+          val seq = Seq("run", "--rm", __option_v, s"$plagiatExecPath:/upload-dir/plagiat/new", __option_v, s"${oldPath}:/upload-dir/plagiat/old",
+            bashDockerImage, "bash", "/opt/sim/run_check.sh")
 
           exitcode = Process("docker", seq).!(prozessLogger)
           val process = processSIMOutput(stdoutStream.toString() + "\n" + stderrStream.toString())
           summerizedPassed = (summerizedPassed && process._1)
           logger.warning(process._2.map(num => num.toString).reduce((a, b) => s"${a}, ${b}"))
-          // always needs to send also the paires submission, ONLY on failures!
-          if (!process._1) sendPlagiatAnswer(subInfo._2, process._1, taskid)
+          // do not sent to the single user who has the old path (the original submission)
+          if (!process._1) FileOperations.copy(Paths.get(oldPath).toFile, tmpDir.toFile) // add this old path to a zip, where docent can compare himself
       }
-      sendPlagiatAnswer(submissionid, summerizedPassed, taskid)
+      sendPlagiatAnswer(submissionid, summerizedPassed, taskid) // send detection on current main user, and then provide a downloadable zip
+      FileOperations.zip(subBasePath.resolve(s"plagiat_combined_hits_user_${userid}_task_${jsonMap("taskid")}.zip"), tmpDir.toString) // make and send zip File
 
       FileOperations.rmdir(basepath.toFile)
     } catch {
       case e: Exception => output = e.toString
     }
 
-    // Always return TRUE, not to inform the user about this plagirism, but to give feedback, all checks are done
-    // feedback is saved in another way
+    // Always return TRUE, not to inform the user about this plagirism, but to give feedback, all checks are done feedback is saved in another way
     (true, output, exitcode, ResultType.STRING)
   }
 
