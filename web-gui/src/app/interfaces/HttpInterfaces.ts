@@ -49,6 +49,24 @@ export interface DetailedCourseInformation {
   course_tutor: GeneralCourseDocent[];
 }
 
+export interface DetailedCourseInformationSingleTask {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+  role_name: string;
+  role_id: number;
+  creator: number;
+  task: CourseTask;
+  standard_task_typ: string;
+  course_module_id: string;
+  course_semester: string;
+  personalised_submission: boolean;
+  course_end_date: string;
+  plagiarism_script: boolean;
+  course_docent: GeneralCourseDocent[];
+  course_tutor: GeneralCourseDocent[];
+}
+
 
 export interface NewCourse{
   course_id: number;
@@ -76,6 +94,7 @@ export interface CourseTask {
   external_description: string;
   load_external_description: boolean;
 }
+
 
 export interface TaskLastSubmission {
   evaluation: CourseTaskEvaluation[];

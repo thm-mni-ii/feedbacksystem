@@ -161,6 +161,29 @@ class CourseController {
   }
 
   /**
+    * get course details but only one singel task (speed up access)
+    * @param courseid unique course identification
+    * @param taskid noly details for single task
+    * @param permitted force to only accept permitted users
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{courseid}/tasks/{taskid}"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getCourseOneTask(@PathVariable courseid: Integer, @PathVariable taskid: Integer,
+                @RequestParam(value = "permitted", required = false) permitted: Boolean = false,
+                request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if(permitted && !courseService.isPermittedForCourse(courseid, user.get)){
+      throw new UnauthorizedException
+    }
+    courseService.getCourseDetails(courseid, user.get, Some(taskid)).getOrElse(Map.empty)
+  }
+
+  /**
     * Generates a zip of one user submissions of one course
     * @author Benjamin Manns
     * @param courseid unique course identification

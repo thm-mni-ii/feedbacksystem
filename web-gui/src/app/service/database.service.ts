@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, empty, of} from 'rxjs';
 import {
   CourseTask, DashboardProf, DashboardStudent,
-  DetailedCourseInformation,
+  DetailedCourseInformation, DetailedCourseInformationSingleTask,
   FileUpload,
   GeneralCourseInformation, GlobalSetting, ReSubmissionResult,
   RoleChanged,
@@ -111,6 +111,11 @@ export class DatabaseService {
   getCourseDetail(courseID: number, permitted: boolean = false): Observable<DetailedCourseInformation> {
     return this.http.get<DetailedCourseInformation>(`/api/v1/courses/${courseID}?permitted=${permitted}`);
   }
+
+  getCourseDetailOfTask(courseID: number, taskid: number, permitted: boolean = false): Observable<DetailedCourseInformationSingleTask> {
+    return this.http.get<DetailedCourseInformationSingleTask>(`/api/v1/courses/${courseID}/tasks/${taskid}?permitted=${permitted}`);
+  }
+
 
   /**
    * First this are only students - can be extended in backend easily
