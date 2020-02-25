@@ -32,7 +32,6 @@ export class TaskSubmissionTextComponent implements OnInit {
     updateSubmission(event){
     // more worse is not possible
     setTimeout(() => {
-      console.log(this.toSubmitt)
       this.update.emit({taskid: this.task.task_id, content: this.toSubmitt})
     },1);
 
