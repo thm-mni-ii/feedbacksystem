@@ -541,11 +541,12 @@ class CourseController {
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer,
-                        @RequestParam(value = "offset", required = false) offset: Int,
-                        @RequestParam(value = "limit", required = false) limit: Int = LIMIT_MAX_20,
+                        @RequestParam(value = "offset", required = false) offset: Integer = 0,
+                        @RequestParam(value = "limit", required = false) limit: Integer = LIMIT_MAX_20,
                         @RequestParam(value = "filter", required = false) filter: String = "",
                         request: HttpServletRequest): List[Any] = {
-    if (limit > LIMIT_MAX_20 || limit < 0) throw new BadRequestException("choose a `limit` within 0 and 20")
+    if (limit == null && offset != null) throw new BadRequestException("if a 'offset' is set a 'limit' has to set as well")
+    if (limit != null && (limit > LIMIT_MAX_20 || limit < 0)) throw new BadRequestException("choose a `limit` within 0 and 20")
     val user = userService.verifyUserByHeaderToken(request)
     val testsystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (user.isEmpty && testsystem.isEmpty) {

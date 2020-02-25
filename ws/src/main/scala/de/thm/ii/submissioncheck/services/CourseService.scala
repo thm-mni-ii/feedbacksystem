@@ -241,7 +241,7 @@ class CourseService {
     * @param filter filter the user list
     * @return Scala List
     */
-  def getStudentsFromCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Map[String, Any]] = {
+  def getStudentsFromCourse(courseid: Int, offset: Integer, limit: Integer, filter: String): List[Map[String, Any]] = {
     var queryArgs: List[Any] = List(courseid)
     var filterQuery = ""
     if(filter != null && filter.length > 0) {
@@ -249,10 +249,20 @@ class CourseService {
       queryArgs = queryArgs ++ List(filterLike, filterLike, filterLike)
       filterQuery = " and (u.username like ? OR u.prename like ? OR u.surname like ?) "
     }
-    queryArgs = queryArgs ++ List(offset, limit)
 
+    val (qArgs, sqlAdd) = if (limit == null && offset != null){
+      (List(offset), "limit ?")
+    } else if (limit != null && offset == null){
+      (List(limit), "limit 0,?")
+    } else if (limit != null && offset != null){
+      (List(offset, limit), "limit ?,?")
+    } else {
+      (List(), "  ")
+    }
+
+    queryArgs = queryArgs ++ qArgs // List(offset, limit)
     val list = DB.query(s"select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and " +
-      s"uc.role_id = 16 ${filterQuery} order by u.surname asc limit ?,?",
+      s"uc.role_id = 16 ${filterQuery} order by u.surname asc " + sqlAdd,
       (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
         UserDBLabels.prename -> res.getString(UserDBLabels.prename),
         UserDBLabels.surname -> res.getString(UserDBLabels.surname),
@@ -714,12 +724,12 @@ class CourseService {
     * @param filter filter the user list
     * @return Scala List
     */
-  def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Any] = {
+  def getSubmissionsMatrixByCourse(courseid: Int, offset: Integer, limit: Integer, filter: String): List[Any] = {
     val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit, filter)
     var matrix: List[Any] = List()
     for(u <- subscribedStudents){
       logger.warn("[getSubmissionsMatrixByCourse]: " + u.toString())
-      val (passed_glob, processedTasks: List[Any]) = submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(
+      val (passed_glob, processedTasks: List[Map[String, Any]]) = submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(
         u(UserDBLabels.user_id).toString.toInt, courseid)
       val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
         UserDBLabels.user_id -> u(UserDBLabels.user_id),
@@ -740,46 +750,13 @@ class CourseService {
     var courseList = this.getSubscribedCoursesByUser(userid, true)
     var matrix: List[Any] = List()
     for (course <- courseList) {
-      val courseTasks = taskService.getTasksByCourse(course(CourseDBLabels.courseid).asInstanceOf[Int])
-      val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString)
+      val courseid = course(CourseDBLabels.courseid).toString.toInt
+      val (passed_glob, processedTasks: List[Map[String, Any]]) =
+        submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(userid, courseid)
 
-      var processedTasks: List[Any] = List()
-      var deadlines: List[String] = List()
-      for((task, i) <- courseTasks.zipWithIndex) {
-        val submissionRawData = this.submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
-        // process them
-        var passed_string: String = null
-        var passedDate: Any = null
-        var coll_result_date: Any = null
-        var plagiat_passed: List[String] = List()
-        if (submissionRawData.length == 0) {
-          passed_string = null
-        } else {
-          var passed: Boolean = false
-          for (submission <- submissionRawData) {
-            plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-            if (coll_result_date == null) {
-              coll_result_date = submission("result_date")
-            }
-            if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
-              passed = true
-              passedDate = submission("submit_date")
-            }
-          }
-          passed_string = if (!passed && coll_result_date == null) null else passed.toString
-        }
-        val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
-        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline), SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
-        deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
-        processedTasks = taskStudentCell :: processedTasks
-      }
-      var courseLine: Map[String, Any] = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
-
-      for(c <- course.keys){
-        courseLine = courseLine + (c -> course(c))
-      }
+      var courseLine: Map[String, Any] = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> processedTasks.map(task =>
+        task(task.keys.head).asInstanceOf[Map[String, Any]]("deadline")))
+      for(c <- course.keys) courseLine = courseLine + (c -> course(c))
 
       matrix = courseLine :: matrix
     }
