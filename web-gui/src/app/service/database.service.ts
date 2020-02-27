@@ -7,7 +7,7 @@ import {
   FileUpload,
   GeneralCourseInformation, GlobalSetting, ReSubmissionResult,
   RoleChanged,
-  Succeeded, TaskLastSubmission, TaskSubmission,
+  Succeeded, TaskExtension, TaskLastSubmission, TaskSubmission,
   Testsystem,
   TestsystemTestfile,
   TextType,
@@ -126,7 +126,7 @@ export class DatabaseService {
   }
 
   getSubmissionsOfUserOfTask(courseID: number, userid: number, taskid: number) {
-    return this.http.get<TaskSubmission[]>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
+    return this.http.get<Object>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
   }
   /**
    * Get all results of all users of all tasks
@@ -216,6 +216,15 @@ export class DatabaseService {
       personalised_submission: userDataAllowed,
       course_end_date: course_end_date
     });
+  }
+
+  public downloadExtendedTaskInfo(taskInfo: TaskExtension){
+    return this.http.get(`/api/v1/tasks/${taskInfo.taskid}/extended/${taskInfo.subject}/user/${taskInfo.userid}/file` , {responseType: 'arraybuffer'}).
+    subscribe(response => {
+      let blob = new Blob([response], {type: 'application/zip'});
+      let parts = taskInfo.data.split("/")
+      importedSaveAs(blob, parts[parts.length - 1]);
+    })
   }
 
   /**
