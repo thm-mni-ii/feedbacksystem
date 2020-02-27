@@ -22,3 +22,5 @@ secrettoken-checker/upload-dir/*
 sql-checker/upload-dir/*
 
 docker-config
+shared-messages
+

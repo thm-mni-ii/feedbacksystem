@@ -15,6 +15,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+
+
 --
 -- Table structure for table `course`
 --
@@ -438,4 +440,18 @@ CREATE TABLE `user_course` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-
+DROP TABLE IF EXISTS `task_extension`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `task_extension` (
+  `taskid` int NOT NULL,
+  `userid` int NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `data` text,
+  `info_typ` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`taskid`,`userid`,`subject`),
+  KEY `task_extension_user_user_id_fk` (`userid`),
+  CONSTRAINT `task_extension_task_task_id_fk` FOREIGN KEY (`taskid`) REFERENCES `task` (`task_id`),
+  CONSTRAINT `task_extension_user_user_id_fk` FOREIGN KEY (`userid`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;

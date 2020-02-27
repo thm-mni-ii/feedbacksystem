@@ -1,11 +1,10 @@
 package de.thm.ii.submissioncheck.checker
 import java.nio.file.{Path, Paths}
 
-import de.thm.ii.submissioncheck.{JsonHelper, ResultType}
-import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_ACCEPT, LABEL_TASKID, ULDIR, logger, sendMessage}
+import de.thm.ii.submissioncheck.SecretTokenChecker.{LABEL_TASKID, ULDIR, logger}
 import de.thm.ii.submissioncheck.security.Secrets
 import de.thm.ii.submissioncheck.services.FileOperations
-import org.apache.kafka.clients.producer.ProducerRecord
+import de.thm.ii.submissioncheck.{JsonHelper, ResultType}
 
 import scala.collection.mutable.ListBuffer
 import scala.sys.process.{Process, ProcessLogger}
@@ -22,6 +21,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
   override val configFiles: Map[String, Boolean] = Map("config.json" -> true)
   /** limit where a similarity between files is a plagism */
   var similarity_limit = 2*10
+  private val LABEL_USER_ID = "userid"
 
   private def submissionIdsOfUser(jsonMap: Map[String, Any], userid: Int) = {
     val token = jsonMap("jwt_token").asInstanceOf[String]
@@ -34,7 +34,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     val token = jsonMap("jwt_token").asInstanceOf[String]
     val (code, msg, map) = apiCall(s"${jsonMap("api_url")}/courses/${jsonMap("courseid")}/submissions", token, "GET")
     val taskid = jsonMap(LABEL_TASKID).toString.toInt
-    val subUser = jsonMap("userid").toString.toInt // some
+    val subUser = jsonMap(LABEL_USER_ID).toString.toInt // some
 
     val basepath: Path = Paths.get(ULDIR).resolve(taskid.toString).resolve("PLAGIAT_CHECK").resolve(Secrets.getSHAStringFromNow())
     basepath.toFile.mkdirs()
@@ -85,7 +85,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     // A submission a user does
     var plagiatExecPath = subBasePath.toAbsolutePath.toString
     var output = s"The ${checkername} checker results: ${true}"; var exitcode = -1
-    similarity_limit = loadSIMConfig(taskid); val userid = jsonMap("userid").toString.toInt
+    similarity_limit = loadSIMConfig(taskid); val userid = jsonMap(LABEL_USER_ID).toString.toInt
     try {
       val (pathsToCompare, basepath) = createFoldersForEachUser(jsonMap)
       val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
@@ -118,8 +118,7 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
           if (!process._1) FileOperations.copy(Paths.get(oldPath).toFile, tmpDir.toFile) // add this old path to a zip, where docent can compare himself
       }
       sendPlagiatAnswer(submissionid, summerizedPassed, taskid) // send detection on current main user, and then provide a downloadable zip
-      FileOperations.zip(subBasePath.resolve(s"plagiat_combined_hits_user_${userid}_task_${jsonMap("taskid")}.zip"), tmpDir.toString) // make and send zip File
-
+      sendPlagiatZip(jsonMap, userid, subBasePath, tmpDir, taskid)
       FileOperations.rmdir(basepath.toFile)
     } catch {
       case e: Exception => output = e.toString
@@ -129,13 +128,24 @@ class PlagiatCheckExec(override val compile_production: Boolean) extends BaseChe
     (true, output, exitcode, ResultType.STRING)
   }
 
+  private def sendPlagiatZip(jsonMap: Map[String, Any], userid: Int, subBasePath: Path, tmpDir: Path, taskid: String) = {
+    val filename = s"plagiat_combined_hits_user_${userid}_task_${jsonMap("taskid")}.zip"
+    val zip = subBasePath.resolve(filename)
+
+    // make and send zip File
+    FileOperations.zip(zip, tmpDir.toString)
+    additionalMessagetoWS("plagiatPackedZip", JsonHelper.mapToJsonStr(Map("filename" -> filename, LABEL_TASKID -> taskid,
+      LABEL_USER_ID -> userid)), zip.toFile)
+
+    // tidy up the packed zip
+    FileOperations.rmdir(zip.toFile)
+  }
+
   private def sendPlagiatAnswer(subid: Any, plagiatOK: Boolean, taskid: Any) = {
-    val topic = "plagiarismchecker_answer"
-    val msg = JsonHelper.mapToJsonStr(Map("success" -> true, LABEL_TASKID -> taskid.toString, "submissionlist" -> List(Map(
-      subid.toString -> plagiatOK
-    )), LABEL_ACCEPT -> false))
-    logger.warning(msg)
-    sendMessage(new ProducerRecord[String, String](topic, msg))
+    val topic = "plagiarismcheckerAnswer"
+
+    val msg = JsonHelper.mapToJsonStr(Map(LABEL_TASKID -> taskid.toString, "submissionlist" -> List(Map(subid -> plagiatOK))))
+    additionalMessagetoWS(topic, msg)
   }
 
   private def processSIMOutput(output: String): (Boolean, List[Int]) = {

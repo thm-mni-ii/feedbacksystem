@@ -140,6 +140,14 @@ export interface CourseTaskEvaluation {
   calculate_pre_result?: string;
 }
 
+export interface TaskExtension {
+  taskid:	number;
+  userid:	number;
+  subject: string;
+  data:	string
+  info_typ:	string;
+}
+
 /**
  * Information after user logged in.
  * Resend data comes when user needs to accept

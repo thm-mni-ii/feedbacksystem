@@ -48,7 +48,7 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
 
     val bashDockerImage = System.getenv("BASH_DOCKER")
     var seq: Seq[String] = null
-    val submittedFilePath = (if (true) getCorespondigHOSTTempDir(subFilename) else subFilename).toString
+    val submittedFilePath = (if (compile_production) getCorespondigHOSTTempDir(subFilename) else subFilename).toString
 
     val infoArgument = if (isInfo) "info" else ""
     val name = jsonMap("username").asInstanceOf[String]

@@ -1,24 +1,17 @@
 package de.thm.ii.submissioncheck.services
 
 import java.io
-import java.io.File
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
-import java.util.zip.{ZipEntry, ZipOutputStream}
 
-import de.thm.ii.submissioncheck.CourseParameterDBLabels
+import de.thm.ii.submissioncheck.controller.ClientService
 import de.thm.ii.submissioncheck.misc.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
 import de.thm.ii.submissioncheck.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.submissioncheck.security.Secrets
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-import java.util.Calendar
-
-import de.thm.ii.submissioncheck.controller.ClientService
-import org.slf4j.{Logger, LoggerFactory}
 /**
   * CourseService provides interaction with DB
   *
@@ -492,9 +485,12 @@ class CourseService {
         }
       }
     }
-    val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    FileOperations.complexZip(Paths.get(finishZipPath), allPath, getZIPDIR.resolve(tmp_folder).toString)
-    finishZipPath
+    val goalPath = Paths.get(s"/tmp/zip-dir/abgaben/")
+    goalPath.toFile.mkdirs()
+
+    val finishZipPath = goalPath.resolve("abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip")
+    FileOperations.complexZip(finishZipPath, allPath, getZIPDIR.resolve(tmp_folder).toString)
+    finishZipPath.toString
   }
 
   /**

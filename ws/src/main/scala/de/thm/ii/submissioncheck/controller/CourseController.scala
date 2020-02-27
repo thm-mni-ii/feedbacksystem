@@ -604,31 +604,6 @@ class CourseController {
   }
 
   /**
-    * get the detailed submission information of a student of a task for this one course
-    * @author Benjamin Manns
-    * @param courseid unique course identification
-    * @param userid unique identification for a user
-    * @param taskid unique identification for a task
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @RequestMapping(value = Array("{courseid}/submissions/user/{userid}/task/{taskid}"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def seeStudentTaskSubmissionsMatrixCell(@PathVariable courseid: Int, @PathVariable userid: Int, @PathVariable taskid: Int,
-                                          request: HttpServletRequest): List[Any] = {
-    // TODO courseid not needed
-    val user = userService.verifyUserByHeaderToken(request)
-    if (user.isEmpty) {
-      throw new UnauthorizedException
-    }
-    if (!taskService.isPermittedForTask(taskid, user.get) && user.get.roleid > 2 && user.get.userid != userid) {
-      throw new UnauthorizedException
-    }
-
-    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc", true)
-  }
-
-  /**
     * get a List of all submissions and information from which course
     * @author Benjamin Manns
     * @param request request Request Header containing Headers for Authorization
