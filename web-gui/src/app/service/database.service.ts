@@ -3,11 +3,11 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {
   CourseTask, DashboardProf, DashboardStudent,
-  DetailedCourseInformation,
+  DetailedCourseInformation, DetailedCourseInformationSingleTask,
   FileUpload,
   GeneralCourseInformation, GlobalSetting, ReSubmissionResult,
   RoleChanged,
-  Succeeded, TaskLastSubmission, TaskSubmission,
+  Succeeded, TaskExtension, TaskLastSubmission,
   Testsystem,
   TextType,
   User
@@ -32,7 +32,6 @@ export class DatabaseService {
   getTestsystemTypes(): Observable<Testsystem[]> {
     return this.http.get<Testsystem[]>('/api/v1/testsystems');
   }
-
 
   getTestsystemDetails(testsystem_id: string):  Promise<Testsystem> {
     return this.http.get<Testsystem>('/api/v1/testsystems/' + testsystem_id).toPromise();
@@ -104,16 +103,19 @@ export class DatabaseService {
     return this.http.get<DetailedCourseInformation>(`/api/v1/courses/${courseID}?permitted=${permitted}`);
   }
 
+  getCourseDetailOfTask(courseID: number, taskid: number, permitted: boolean = false): Observable<DetailedCourseInformationSingleTask> {
+    return this.http.get<DetailedCourseInformationSingleTask>(`/api/v1/courses/${courseID}/tasks/${taskid}?permitted=${permitted}`);
+  }
+
   /**
    * First this are only students - can be extended in backend easily
    */
   getSubscribedUsersOfCourse(courseID: number) {
     return this.http.get<User[]>(`/api/v1/courses/${courseID}/users`);
-
   }
 
   getSubmissionsOfUserOfTask(courseID: number, userid: number, taskid: number) {
-    return this.http.get<TaskSubmission[]>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
+    return this.http.get<Object>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
   }
   /**
    * Get all results of all users of all tasks
@@ -137,7 +139,6 @@ export class DatabaseService {
       })
     });
   }
-
 
   /**
    * Return submission list for this task
@@ -178,9 +179,7 @@ export class DatabaseService {
     return this.http.get<User[]>('/api/v1/users');
   }
 
-
   // POST REQUESTS
-
 
   /**
    * Create a new Course
@@ -203,6 +202,15 @@ export class DatabaseService {
       personalised_submission: userDataAllowed,
       course_end_date: course_end_date
     });
+  }
+
+  public downloadExtendedTaskInfo(taskInfo: TaskExtension){
+    return this.http.get(`/api/v1/tasks/${taskInfo.taskid}/extended/${taskInfo.subject}/user/${taskInfo.userid}/file` , {responseType: 'arraybuffer'}).
+    subscribe(response => {
+      let blob = new Blob([response], {type: 'application/zip'});
+      let parts = taskInfo.data.split("/")
+      importedSaveAs(blob, parts[parts.length - 1]);
+    })
   }
 
   /**

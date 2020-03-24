@@ -1,10 +1,8 @@
 package de.thm.ii.fbs.checker
 import java.io.File
 import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
-
 import de.thm.ii.fbs.ResultType
 import de.thm.ii.fbs.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
-
 import scala.sys.process.{Process, ProcessLogger}
 
 /**
@@ -48,7 +46,7 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
 
     val bashDockerImage = System.getenv("BASH_DOCKER")
     var seq: Seq[String] = null
-    val submittedFilePath = (if (true) getCorespondigHOSTTempDir(subFilename) else subFilename).toString
+    val submittedFilePath = (if (compile_production) getCorespondigHOSTTempDir(subFilename) else subFilename).toString
 
     val infoArgument = if (isInfo) "info" else ""
     val name = jsonMap("username").asInstanceOf[String]
@@ -70,7 +68,6 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
       __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter,
       absPath, name, submittedFilePath, infoArgument)
 
-    logger.warning(seq.toString())
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
     var exitCode = Process("docker", seq).!(procLogger)

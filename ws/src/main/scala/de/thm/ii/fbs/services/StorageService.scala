@@ -3,8 +3,6 @@ package de.thm.ii.fbs.services
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
 import java.net.MalformedURLException
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.nio.file._
 import org.springframework.web.multipart.MultipartFile
 import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
@@ -19,9 +17,6 @@ import de.thm.ii.fbs.security.Secrets
   * @author grokonez.com
   */
 class StorageService(compile_production: Boolean) {
-  /** StorageService logger*/
-  val log: Logger = LoggerFactory.getLogger(this.getClass.getName)
-
   private val __slash = "/"
   private val systemTempDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
   /** upload folder name */
@@ -33,13 +28,17 @@ class StorageService(compile_production: Boolean) {
   ZIP_IMPORT_FOLDER = ZIP_IMPORT_FOLDER.resolve("imports")
   ZIP_IMPORT_FOLDER.toFile.mkdir()
 
-  private val logger: Logger = LoggerFactory.getLogger(classOf[StorageService])
   private final val PLAGIAT_SCRIPT_NAME = "plagiatcheck.sh"
   private final val FILE_NOT_STORED_MSG = "File could not be stored on disk"
   private final val LABEL_RESOURCE_NOT_EXIST = "Resource does not exist."
   private final val LABEL_URL_MALFORMED = "File URL is Malformed."
-  private def getTaskTestFilePath(taskid: Int, testsystem_id: String): String
-    = UPLOAD_FOLDER.normalize().toString() + __slash + taskid.toString + __slash + testsystem_id
+  private def getTaskTestFilePath(taskid: Int, testsystem_id: String): String = UPLOAD_FOLDER + __slash + taskid.toString + __slash + testsystem_id
+
+  /**
+    * dynamically get path whether it is dev or production
+    * @return path to shared folder between testsystems and webservice (ws)
+    */
+  def sharedMessagedPath: Path = Paths.get((if (compile_production) __slash else "") + "shared-messages")
 
   /**
     * Delete a submission File
@@ -72,12 +71,12 @@ class StorageService(compile_production: Boolean) {
   def storeTaskTestFile(file: MultipartFile, taskid: Int, testsystem_id: String): Unit = {
     try {
       val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
-    try {
-      Files.createDirectories(storeLocation)
-    }
-    catch {
-      case _: FileAlreadyExistsException => {}
-    }
+      try {
+        Files.createDirectories(storeLocation)
+      }
+      catch {
+        case _: FileAlreadyExistsException => {}
+      }
       Files.copy(file.getInputStream, storeLocation.resolve(file.getOriginalFilename), StandardCopyOption.REPLACE_EXISTING)
     }
     catch {
@@ -87,7 +86,7 @@ class StorageService(compile_production: Boolean) {
   }
 
   private def storeLocation(taskid: Int, submission_id: Int): Path = {
-    Paths.get(UPLOAD_FOLDER.normalize().toString + "/" + taskid.toString + "/submits/" + submission_id.toString)
+    Paths.get(UPLOAD_FOLDER + __slash + taskid.toString + "/submits/" + submission_id.toString)
   }
 
   /**
@@ -154,17 +153,25 @@ class StorageService(compile_production: Boolean) {
     * @param courseid unique course id
     * @return File Resource
     */
-  def loadPlagiatScript(courseid: Int): Resource = try {
+  def loadPlagiatScript(courseid: Int): Resource = {
     val file = getPlagiatCheckerRootPath.resolve(courseid.toString).resolve(PLAGIAT_SCRIPT_NAME)
-    val resource = new UrlResource(file.toUri)
-    if (resource.exists || resource.isReadable) {resource}
-    else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
-  } catch {
-    case e: MalformedURLException =>
-      throw new RuntimeException(LABEL_URL_MALFORMED)
+    loadFileByPath(file)
   }
 
   private def getPlagiatCheckerRootPath = UPLOAD_FOLDER.resolve("PLAGIAT_CHECKER")
+
+  /**
+    * define path and create it, if not exists already of a tesk additional information / file by user
+    * @param userid user id
+    * @param extension extension name (i.e. "plagiat", ...)
+    * @param taskid task id
+    * @return path to folder, which exist
+    */
+  def getAndMakeTaskExtensionsPath(userid: Int, extension: String, taskid: Int): Path = {
+    val extensionPath = UPLOAD_FOLDER.resolve(taskid.toString).resolve("task_extension").resolve(extension).resolve(s"user_${userid}")
+    extensionPath.toFile.mkdirs
+    extensionPath
+  }
 
   /**
     * simply store a plagiat script
@@ -246,7 +253,7 @@ class StorageService(compile_production: Boolean) {
       }
       // this three lines by https://gist.github.com/tomer-ben-david/1f2611db1d0851a65d43
       val bos = new BufferedOutputStream(new FileOutputStream(storeLocation.resolve(filename).toAbsolutePath.toString))
-      LazyList.continually(bos.write(dataBytes))
+      Stream.continually(bos.write(dataBytes))
       bos.close() // You may end up with 0 bytes file if not calling close.
     }
     catch {
@@ -264,11 +271,19 @@ class StorageService(compile_production: Boolean) {
     * @param testsystem_id testsystem id
     * @return File Resource
     */
-  def loadFile(filename: String, taskid: Int, testsystem_id: String): Resource = try {
+  def loadFile(filename: String, taskid: Int, testsystem_id: String): Resource = {
     val storeLocation = Paths.get(getTaskTestFilePath(taskid, testsystem_id))
     val file = storeLocation.resolve(filename)
+    loadFileByPath(file)
+  }
+
+  /**
+    * load a file as (Uri-) Resource to handle it in web context
+    * @param file path of local file
+    * @return file as resource
+    */
+  def loadFileByPath(file: Path): Resource = try {
     val resource = new UrlResource(file.toUri)
-    logger.warn(s"loadFile from ${file.toUri.toString}")
     if (resource.exists || resource.isReadable) {resource}
     else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
   } catch {
@@ -295,15 +310,10 @@ class StorageService(compile_production: Boolean) {
     * @param submission_id unique identification for a submission
     * @return File Resource
     */
-  def loadFileBySubmission(filename: String, taskid: Int, submission_id: Int): Resource = try {
+  def loadFileBySubmission(filename: String, taskid: Int, submission_id: Int): Resource = {
     val storeLocation = UPLOAD_FOLDER.resolve(taskid.toString).resolve("submits").resolve(submission_id.toString)
     val file = storeLocation.resolve(filename)
-    val resource = new UrlResource(file.toUri)
-    if (resource.exists || resource.isReadable) {resource}
-    else {throw new RuntimeException(LABEL_RESOURCE_NOT_EXIST)}
-  } catch {
-    case e: MalformedURLException =>
-      throw new RuntimeException(LABEL_URL_MALFORMED)
+    loadFileByPath(file)
   }
 
   /**
@@ -315,7 +325,8 @@ class StorageService(compile_production: Boolean) {
     try {
       Files.createDirectory(UPLOAD_FOLDER)
       Files.createDirectory(ZIP_IMPORT_FOLDER)
-    } catch {
+    }
+    catch {
       case e: IOException =>
         throw new RuntimeException("Could not initialize storage!")
     }

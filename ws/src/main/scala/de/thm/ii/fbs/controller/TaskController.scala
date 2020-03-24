@@ -3,10 +3,14 @@ package de.thm.ii.fbs.controller
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
+
 import org.joda.time.format.DateTimeFormat
+
 import scala.jdk.CollectionConverters._
 import java.util.{Date, NoSuchElementException, Timer, TimerTask}
+
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.model.TaskExtension
 import de.thm.ii.fbs.services.{TestsystemService, _}
 import de.thm.ii.fbs.util.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException, Users}
 import javax.servlet.http.HttpServletRequest
@@ -19,6 +23,7 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Bean
 import org.springframework.core.io.{Resource, UrlResource}
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
+import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.{DefaultKafkaConsumerFactory, KafkaTemplate}
 import org.springframework.kafka.listener.{ContainerProperties, KafkaMessageListenerContainer, MessageListener}
 import org.springframework.web.bind.annotation._
@@ -42,9 +47,13 @@ class TaskController {
   @Autowired
   private val courseService: CourseService = null
   @Autowired
+  private val taskExtensionService: TaskExtensionService = null
+  @Autowired
   private val testsystemService: TestsystemService = null
   @Autowired
   private val notificationService: NotificationService = null
+  @Autowired
+  private val messageHandlers: TestsystemMessagesHandler = null
 
   @Value("${spring.kafka.bootstrap-servers}")
   private val kafkaURL: String = null
@@ -53,7 +62,6 @@ class TaskController {
   private val LABEL_SUCCESS = "success"
   private var container: KafkaMessageListenerContainer[String, String] = _
   private var newTaskAnswerContainer: KafkaMessageListenerContainer[String, String] = _
-  private var plagiatTaskCheckerContainer: KafkaMessageListenerContainer[String, String] = _
   private var plagiatScriptAnswerContainer: KafkaMessageListenerContainer[String, String] = _
   private def consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
 
@@ -63,7 +71,6 @@ class TaskController {
   @Value("${compile.production}")
   private val compile_production: Boolean = true
 
-  private val plagiatchecker_thread_interval = 60000
   /** Path variable Label ID*/
   final val LABEL_ID = "id"
   /** JSON variable taskid ID*/
@@ -95,8 +102,6 @@ class TaskController {
 
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
-  private val topicName: String = "check_request"
-
   private var storageService: StorageService = null
 
   /**
@@ -119,7 +124,6 @@ class TaskController {
         kafkaReloadService
         kafkaReloadNewTaskAnswerService
         configurateStorageService
-        kafkaLoadPlagiatCheckerService
         kafkaLoadPlagiatScriptAnswerService
       }
     }, bean_delay)
@@ -283,138 +287,6 @@ class TaskController {
     }
 
   /**
-    * re submit a task, i.e. its submission by the submission id
-    * @param taskid the task id
-    * @param subid submisison id
-    * @param jsonNode json object
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @ResponseStatus(HttpStatus.ACCEPTED)
-  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/resubmit"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  @ResponseBody
-  def reSubmitTask(@PathVariable taskid: Integer, @PathVariable subid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest):
-  Map[String, Any] = {
-    val user = Users.claimAuthorization(request)
-    if (!taskService.isPermittedForTask(taskid, user)) {
-      throw new UnauthorizedException
-    }
-    val taskDetailsOpt = taskService.getTaskDetails(taskid)
-    if (taskDetailsOpt.isEmpty) {
-      throw new ResourceNotFoundException
-    }
-
-    val systemList: List[String] = jsonNode.get("testsystems").asScala.toList.map(f => f.asText())
-    this.submissionService.reSubmitASubmission(subid, taskid, systemList)
-
-    Map(LABEL_SUCCESS -> true)
-  }
-
-  /**
-    * set a task as passed, i.e. its submission by the submission id
-    * @param taskid the task id
-    * @param subid submisison id
-    * @param jsonNode json object
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @ResponseStatus(HttpStatus.OK)
-  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/passed"), method = Array(RequestMethod.POST), consumes = Array(application_json_value))
-  @ResponseBody
-  def setTaskAsPassed(@PathVariable taskid: Integer, @PathVariable subid: Integer, @RequestBody jsonNode: JsonNode, request: HttpServletRequest):
-  Map[String, Any] = {
-    val user = Users.claimAuthorization(request)
-    if (!taskService.isPermittedForTask(taskid, user)) {
-      throw new UnauthorizedException
-    }
-    val taskDetailsOpt = taskService.getTaskDetails(taskid)
-    if(taskDetailsOpt.isEmpty) {
-      throw new ResourceNotFoundException
-    }
-
-    Map(LABEL_SUCCESS -> this.submissionService.setSubmissionAsPassed(subid, taskid))
-  }
-
-  /**
-    * return the re submission results
-    * @param taskid task id
-    * @param subid submission id
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @RequestMapping(value = Array("tasks/{taskid}/submissions/{subid}/resubmit"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def getReSubmittedResults(@PathVariable taskid: Integer, @PathVariable subid: Integer,
-                        request: HttpServletRequest): List[Map[String, Any]] = {
-    val user = Users.claimAuthorization(request)
-    if (!taskService.isPermittedForTask(taskid, user)) {
-      throw new UnauthorizedException
-    }
-
-    this.submissionService.getReSubmittedResults(subid)
-  }
-
-  /**
-    * serve a route to upload a submission file to a given submissionid
-    * @author grokonez.com, Benjamin Manns
-    * @param taskid unique identification for a task
-    * @param submissionid unique identification for a submission
-    * @param file multipart binary file in a form data format
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @RequestMapping(value = Array("tasks/{taskid}/submissions/{submissionid}/file/upload"), method = Array(RequestMethod.POST))
-  def handleSubmissionFileUpload(@PathVariable taskid: Int, @PathVariable submissionid: Int,
-                                 @RequestParam(LABEL_FILE) file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
-    val user = Users.claimAuthorization(request)
-    if (!taskService.hasSubscriptionForTask(taskid, user)) {
-      throw new UnauthorizedException
-    }
-
-    var message: Boolean = false
-    var filename: String = ""
-    try {
-      storageService.storeTaskSubmission(file, taskid, submissionid)
-      filename = file.getOriginalFilename
-      taskService.setSubmissionFilename(submissionid, filename)
-
-      if (this.taskService.getMultiTestModeOfTask(taskid) == LABEL_SEQ) {
-        taskService.sendSubmissionToTestsystem(submissionid, taskid, this.taskService.getTestsystemTopicsByTaskId(taskid).head,
-          user, LABEL_FILE, null)
-      } else {
-        this.taskService.getTestsystemTopicsByTaskId(taskid).foreach(tasksystem_id => {
-          taskService.sendSubmissionToTestsystem(submissionid, taskid, tasksystem_id,
-            user, LABEL_FILE, null)
-        })
-      }
-      message = true
-
-     } catch {
-       case e: Exception => throw new RuntimeException(e.getMessage)
-     }
-    Map(LABEL_SUCCESS -> message, LABEL_FILENAME -> filename)
-  }
-
-  /**
-    * implement REST route to get students task submission
-    *
-    * @author Benjamin Manns
-    * @param taskid unique task identification
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @RequestMapping(value = Array("tasks/{id}/submissions"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def seeAllSubmissions(@PathVariable(LABEL_ID) taskid: Integer,
-                        request: HttpServletRequest): List[Map[String, Any]] = {
-    val user = Users.claimAuthorization(request)
-    if (!this.taskService.isPermittedForTask(taskid, user)) {
-      throw new UnauthorizedException
-    }
-    this.taskService.getSubmissionsByTask(taskid)
-  }
-
-  /**
     * Print details for a given Task
     * @param taskid unique identification for a task
     * @param request Request Header containing Headers
@@ -422,11 +294,11 @@ class TaskController {
     */
   @RequestMapping(value = Array("tasks/{id}"), method = Array(RequestMethod.GET))
   def getTaskDetails(@PathVariable(LABEL_ID) taskid: Integer, request: HttpServletRequest): Map[String, Any] = {
-    val user = Users.claimAuthorization(request)
-    if (!taskService.hasSubscriptionForTask(taskid, user)) {
+    val requestingUser = userService.verifyUserByHeaderToken(request)
+    if (requestingUser.isEmpty || !taskService.hasSubscriptionForTask(taskid, requestingUser.get)) {
       throw new UnauthorizedException
     }
-    taskService.getTaskDetails(taskid, Some(user.userid)).getOrElse(Map.empty)
+    taskService.getTaskDetails(taskid, Some(requestingUser.get.userid)).getOrElse(Map.empty)
   }
 
   /**
@@ -606,47 +478,7 @@ class TaskController {
     }
   }
 
-  /**
-    * Get a zipfile of all submission user made for a task
-    * @author Benjamin Manns
-    * @param taskid unique identification for a task
-    * @param request contain request information
-    * @return File Ressource to download
-    */
-  @RequestMapping(value = Array("tasks/{taskid}/submission/users/zip"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def getZipOfSubmissionsOfUsersOfOneTask(@PathVariable taskid: Integer,
-                                          request: HttpServletRequest): ResponseEntity[UrlResource] = {
-    val user = Users.claimAuthorization(request)
-    if ((!taskService.isPermittedForTask(taskid, user)) && testsystemService.verfiyTestsystemByHeaderToken(request).isEmpty) {
-      throw new UnauthorizedException
-    }
-
-    val resource = new UrlResource(Paths.get(taskService.zipOfSubmissionsOfUsersFromTask(taskid)).toUri)
-
-    if (resource.exists || resource.isReadable) {
-      ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(resource)).body(resource)
-    } else {
-      throw new RuntimeException("Zip file could not be found.")
-    }
-  }
-
   private def httpResponseHeaderValue(resource: Resource) = "attachment; filename=\"" + resource.getFilename + "\""
-
-  /**
-    * plagiat checker background process will be started here
-    */
-  val plagiatCheckerThread = new Thread {
-    override def run: Unit = {
-      logger.debug("Hello, Thread is started and looks for some task to check")
-      for(i <- LazyList.from(1)) {
-        Thread.sleep(plagiatchecker_thread_interval)
-      }
-    }
-  }
-
-  // Uncomment to start plagiat checker. 2019-07-14: Checker is not ready implemented, yet
-  // plagiatCheckerThread.start
 
   /**
     * provide a GET URL to download testfiles for a task
@@ -675,41 +507,34 @@ class TaskController {
   }
 
   /**
-    * provide a GET URL to download submitted files for a submission
-    * @author Benjamin Manns
-    * @param taskid unique taskid identification
-    * @param subid unique subid identification
+    * download extended task info (plagiat zip, ...)
+    * @param taskid task ID
+    * @param subject subject / topic where data is saved as
+    * @param userid user id of user where data are saved, not requesting user.
     * @param request contain request information
     * @return HTTP Response contain file
     */
-  @GetMapping(Array("tasks/{id}/files/submissions/{subid}"))
-  @ResponseBody def getSubmitFileByTask(@PathVariable(LABEL_ID) taskid: Int, @PathVariable subid: Int,
-                                       request: HttpServletRequest): ResponseEntity[Resource] = {
-    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
-    if (testystem.isEmpty) {
-      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
+  @GetMapping(Array("tasks/{taskid}/extended/{subject}/user/{userid}/file"))
+  @ResponseBody def getSubmitFileByTask(@PathVariable taskid: Int, @PathVariable subject: String, @PathVariable userid: Int,
+                                        request: HttpServletRequest): ResponseEntity[Resource] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
     }
-    val filename = submissionService.getSubmittedFileBySubmission(subid)
-    val file = storageService.loadFileBySubmission(filename, taskid, subid)
-    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
-  }
 
-  /**
-    *
-    * get full submission list (mainly submisison ids) of a task and user
-    * @param taskid unique taskid identification
-    * @param userid unique user identification
-    * @param request contain request information
-    * @return list of submissions
-    */
-  @GetMapping(Array("tasks/{taskid}/submissions/{userid}"))
-  @ResponseBody def getFullSubmissionOfTaskByUser(@PathVariable taskid: Int, @PathVariable userid: Int,
-                                        request: HttpServletRequest): List[Map[String, Any]] = {
-    val testystem = testsystemService.verfiyTestsystemByHeaderToken(request)
-    if (testystem.isEmpty) {
-      throw new UnauthorizedException(LABEL_DOWNLOAD_NOT_PERMITTED)
+    if (!this.taskService.isPermittedForTask(taskid, user.get)) {
+      throw new UnauthorizedException("User can not get extended information, to less rights")
     }
-    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid)
+
+    val taskExtensionList = taskExtensionService.getAllExensionsByTask(taskid, userid)
+    val extInfos: List[TaskExtension] = taskExtensionList.filter((ext: TaskExtension) => ext.subject == subject)
+
+    if (extInfos.isEmpty) {
+      throw new BadRequestException("No data available under subject = " + subject)
+    }
+
+    val file = storageService.loadFileByPath(Paths.get(extInfos.head.data))
+    ResponseEntity.ok.header(HttpHeaders.CONTENT_DISPOSITION, httpResponseHeaderValue(file)).body(file)
   }
 
   /**
@@ -744,7 +569,6 @@ class TaskController {
     }
     this.kafkaReloadService
     this.kafkaReloadNewTaskAnswerService
-    this.kafkaLoadPlagiatCheckerService
   }
 
   private def sendNextTestJob(submission_id: Int) = {
@@ -863,54 +687,22 @@ class TaskController {
     Map(LABEL_RELOAD -> true)
   }
 
-  private def kafkaLoadPlagiatCheckerService: Map[String, AnyVal] = {
-    val consumerConfigJava = consumerConfigScala.asJava
-    val kafkaConsumerFactory: DefaultKafkaConsumerFactory[String, String] =
-      new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
+  /**
+    * handles messages initiated from the testsystem itself, registered handlers will be called
+    * @param cr kafka payload
+    * @throws Exception if data missing
+    */
+  @KafkaListener(topics = Array("testsystem_message_data"))
+  @throws[Exception]
+  def listen(cr: ConsumerRecord[Int, String]): Unit = {
+    val msgMap = JsonParser.jsonStrToMap(cr.value())
+    val data = msgMap("data").toString
+    val msgID = msgMap("msg_id").toString
+    val method = messageHandlers.getClass.getMethod(msgMap("subject").toString + "Handler", "".getClass, "".getClass, "".getClass)
+    method.invoke(messageHandlers, msgMap("testsystem_id").toString, data, msgID)
 
-    // TODO fire this method after updates on Testsystem!
-    val kafkaTopicNewTaskAnswer: List[String] = List("plagiarismchecker_answer")
-
-    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
-    val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
-    if (plagiatTaskCheckerContainer != null) {
-      plagiatTaskCheckerContainer.stop()
-    }
-    plagiatTaskCheckerContainer = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
-
-    plagiatTaskCheckerContainer.setupMessageListener(new MessageListener[Int, String]() {
-      /**
-        * onMessage process incoming kafka messages
-        * @author Benjamin Manns
-        * @param data kafka message
-        */
-      override def onMessage(data: ConsumerRecord[Int, String]): Unit = {
-        kafkaReceivedDebug(data)
-        val answeredMap = JsonParser.jsonStrToMap(data.value())
-        try {
-          logger.warn(answeredMap.toString())
-          val workedOut = answeredMap(LABEL_SUCCESS).asInstanceOf[Boolean]
-
-          if (workedOut) {
-            // TODO if not workedOut we need to protocoll this happending
-            val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
-
-            val submissionlist = answeredMap("submissionlist").asInstanceOf[List[Map[String, Boolean]]]
-            for (submission <- submissionlist) {
-              taskService.setPlagiatPassedForSubmission(submission.keys.head, submission.values.head)
-            }
-            // If every data is saved correctly
-            taskService.updateTask(taskId, null, null, null, true)
-          } else {
-            notifyDocentAfterPlagiarismCheck(Integer.parseInt(answeredMap(LABEL_COURSE_ID).toString), answeredMap("msg").asInstanceOf[String])
-          }
-        } catch {
-          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
-        }
-      }
-    })
-    plagiatTaskCheckerContainer.start
-    Map(LABEL_RELOAD -> true)
+    // tidy up message folder if exists
+    messageHandlers.tidyUpFile(msgID)
   }
 
   private def notifyDocentAfterPlagiarismCheck(courseid: Int, text: String) = {

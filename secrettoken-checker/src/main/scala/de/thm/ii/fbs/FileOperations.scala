@@ -13,7 +13,7 @@ object FileOperations {
     * copy a directoy
     *
     * @param from the from path
-    * @param to   the to path
+    * @param to   this is the folder where the file should copied in
     * @return boolean if it was successful
     */
   def copy(from: File, to: File): Boolean = {

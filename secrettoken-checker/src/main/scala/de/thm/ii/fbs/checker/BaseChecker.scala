@@ -1,23 +1,22 @@
 package de.thm.ii.fbs.checker
 
-import java.io.{BufferedReader, File, FileInputStream, FileOutputStream, InputStream, InputStreamReader}
+import java.io._
 import java.net.{HttpURLConnection, URLDecoder}
 import java.nio.charset.StandardCharsets
-import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths, StandardCopyOption}
+import java.nio.file._
+import java.util.Base64
 import java.util.zip.ZipInputStream
-
 import akka.Done
-import de.thm.ii.fbs.{JsonHelper, ResultType, SecretTokenChecker}
 import de.thm.ii.fbs.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO,
   LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import de.thm.ii.fbs.security.Secrets
 import de.thm.ii.fbs.services.FileOperations
+import de.thm.ii.fbs.{JsonHelper, ResultType}
+import org.apache.commons.io.FileUtils
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.LoggerFactory
 import org.apache.kafka.clients.producer.ProducerRecord
-
 import scala.concurrent.Future
-/** Excpetion wrapper for Base Checker purpose
+/** Exception wrapper for Base Checker purpose
   *
   * @param message an exception message
   */
@@ -50,7 +49,7 @@ class BaseChecker(val compile_production: Boolean) {
   val __option_v = "-v"
   /** LABEL "/" */
   val __slash = "/"
-    /** LABEL : */
+  /** LABEL : */
   val __colon = ":"
 
   /** define which configuration files the checker need - to be overwritten */
@@ -104,7 +103,7 @@ class BaseChecker(val compile_production: Boolean) {
   }
 
   private def sendCheckerTaskAcceptAnswer(taskid: Int): Future[Done] = {
-      sendCheckerTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid.toString)))
+    sendCheckerTaskAnswer(JsonHelper.mapToJsonStr(Map(LABEL_ACCEPT -> true, LABEL_ERROR -> "", LABEL_TASKID -> taskid.toString)))
   }
 
   private def sendCheckerSubmissionAnswer(message: String): Future[Done] = sendMessage(new ProducerRecord[String, String](checkerSubAnswerTopic, message))
@@ -139,6 +138,56 @@ class BaseChecker(val compile_production: Boolean) {
     val configfiles = configFiles.keys.map(f => baseFilePath.resolve(f)).toList.filter(f => f.toFile.exists())
     (baseFilePath, configfiles)
   }
+
+  /**
+    * encode file to base64 string
+    * @param filepath input file
+    * @return base64 encoding
+    */
+  def base64Encode(filepath: Path): String = {
+    val bis = new BufferedInputStream(new FileInputStream(filepath.toAbsolutePath.toString))
+    val bArray: Array[Byte] = Stream.continually(bis.read).takeWhile(-1 !=).map(_.toByte).toArray
+    val output: String = Base64.getEncoder.encodeToString(bArray)
+    output
+  }
+
+  /**
+    * send messages (indirectly) initated fromthe testsystem to the WebService (ws), which provides i.e. additional
+    * information of tasks (plagiat check) or similiar things.
+    * In WS for the provided subject a handles has to exists, which process the provided data as the encoding is known.
+    * Everything will be send as string, so a suitable format should be defined
+    * @param subject subject where handlers are registred at
+    * @param data encoded data as string
+    * @param file "send" / share a file to the WS
+    * @return future state of kafka message
+    */
+  def additionalMessagetoWS(subject: String, data: String = null, file: File = null): Future[Done] = {
+    val msgId = Secrets.getSHAStringFromNow()
+
+    var messageMap = Map(
+      "subject"-> subject,
+      "testsystem_id" -> checkername,
+      "msg_id" -> msgId
+    )
+
+    if (data != null) messageMap += ("data" -> data)
+
+    if (file != null) {
+      val folder = sharedMessagedPath.resolve(msgId)
+      FileUtils.copyFile(file, folder.resolve(file.getName).toFile)
+    }
+
+    val message = JsonHelper.mapToJsonStr(messageMap)
+
+    logger.warning("additionalMessagetoWS: " + message)
+    sendMessage(new ProducerRecord[String, String]("testsystem_message_data", message))
+  }
+
+  /**
+    * dynamically get path whether it is dev or production
+    * @return path to shared folder between testsystems and webservice (ws)
+    */
+  def sharedMessagedPath: Path = Paths.get((if (compile_production) __slash else "") + "shared-messages")
 
   /**
     * perform a check of request, will be executed after processing the kafka message
@@ -257,11 +306,11 @@ class BaseChecker(val compile_production: Boolean) {
     */
   def apiCall(download_url: String, authorization: String, method: String): (Int, String, Any) = {
     try {
-    val connection = createConnectionToFeedbacksystem(download_url, authorization)
-    val in: InputStream = connection.getInputStream
-    val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
-    val s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
-    (connection.getResponseCode, s, JsonHelper.jsonStrToAny(s))
+      val connection = createConnectionToFeedbacksystem(download_url, authorization)
+      val in: InputStream = connection.getInputStream
+      val br: BufferedReader = new BufferedReader(new InputStreamReader(in))
+      val s = Iterator.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
+      (connection.getResponseCode, s, JsonHelper.jsonStrToAny(s))
     } catch {
       case e: Exception => (400, e.toString, Map())
     }
@@ -281,7 +330,7 @@ class BaseChecker(val compile_production: Boolean) {
       File.createTempFile(s"submission_${placeholder}_tmp_${Secrets.getSHAStringFromNow()}", "").toPath
     }*/
     val dockertemp = if (!compile_production){
-      val localTmpPath = new File("/tmp").toPath.resolve("fb-dockertemp")
+      val localTmpPath = new File(  "/tmp").toPath.resolve("fb-dockertemp")
       localTmpPath.toFile.mkdirs()
       localTmpPath
     } else {

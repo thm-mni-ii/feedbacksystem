@@ -115,6 +115,32 @@ export interface CourseTaskEvaluation {
   calculate_pre_result?: string;
 }
 
+export interface DetailedCourseInformationSingleTask {
+  course_id: number;
+  course_name: string;
+  course_description: string;
+  role_name: string;
+  role_id: number;
+  creator: number;
+  task: CourseTask;
+  standard_task_typ: string;
+  course_module_id: string;
+  course_semester: string;
+  personalised_submission: boolean;
+  course_end_date: string;
+  plagiarism_script: boolean;
+  course_docent: GeneralCourseDocent[];
+  course_tutor: GeneralCourseDocent[];
+}
+
+export interface TaskExtension {
+  taskid:	number;
+  userid:	number;
+  subject: string;
+  data:	string
+  info_typ:	string;
+}
+
 /**
  * Information after user logged in.
  * Resend data comes when user needs to accept

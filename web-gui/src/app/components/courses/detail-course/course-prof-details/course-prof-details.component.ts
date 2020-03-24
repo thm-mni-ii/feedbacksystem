@@ -3,7 +3,7 @@ import {flatMap} from "rxjs/operators";
 import {
   CourseTask,
   CourseTaskEvaluation,
-  Succeeded, TaskSubmission
+  Succeeded, TaskExtension, TaskSubmission
 } from "../../../../interfaces/HttpInterfaces";
 import {DatabaseService} from "../../../../service/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -31,6 +31,7 @@ export class CourseProfDetailsComponent implements OnInit {
   taskPassed: string = null;
   taskDetails: CourseTask = {} as CourseTask;
   submissionExist: boolean = false;
+  taskExtensions: TaskExtension[];
 
   ngOnInit() {
     this.route.params.pipe(
@@ -63,14 +64,19 @@ export class CourseProfDetailsComponent implements OnInit {
     }
   }
 
+  public downloadExtendedTaskInfo(taskInfo: TaskExtension){
+    this.db.downloadExtendedTaskInfo(taskInfo)
+  }
 
   loadUsersSubmission() {
     this.db.getSubmissionsOfUserOfTask(parseInt(this.taskDetails.course_id), this.userid, this.taskid).subscribe(
-      (value: TaskSubmission[]) => {
+      (data: Object) => {
+        let value: TaskSubmission[] = data['submissions'];
+        this.taskExtensions = data['extended'];
+
         if (value.length > 0) {
           this.submissionExist = true;
-
-          let submission: TaskSubmission = null
+          let submission: TaskSubmission = null;
           value.forEach((sub, index) => {
             let summedPassed = this.combinedPassed(sub.evaluation.map((eva: CourseTaskEvaluation) => eva.passed));
             if ('true' === summedPassed) {
@@ -83,16 +89,13 @@ export class CourseProfDetailsComponent implements OnInit {
           }
 
           this.taskResults = submission.evaluation;
-
           let passedList = this.taskResults.map((eva: CourseTaskEvaluation) => eva.passed);
-
           this.taskPassed = this.combinedPassed(passedList)
 
         } else {
           this.submissionExist = false;
           this.taskPassed = '' + false;
         }
-
       }
     )
   }

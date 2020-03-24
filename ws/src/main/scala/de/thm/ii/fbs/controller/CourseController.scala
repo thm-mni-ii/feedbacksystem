@@ -142,6 +142,29 @@ class CourseController {
   }
 
   /**
+    * get course details but only one singel task (speed up access)
+    * @param courseid unique course identification
+    * @param taskid noly details for single task
+    * @param permitted force to only accept permitted users
+    * @param request Request Header containing Headers
+    * @return JSON
+    */
+  @RequestMapping(value = Array("{courseid}/tasks/{taskid}"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getCourseOneTask(@PathVariable courseid: Integer, @PathVariable taskid: Integer,
+                       @RequestParam(value = "permitted", required = false) permitted: Boolean = false,
+                       request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
+    val user = userService.verifyUserByHeaderToken(request)
+    if(user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    if(permitted && !courseService.isPermittedForCourse(courseid, user.get)){
+      throw new UnauthorizedException
+    }
+    courseService.getCourseDetails(courseid, user.get, Some(taskid)).getOrElse(Map.empty)
+  }
+
+  /**
     * Generates a zip of one user submissions of one course
     * @author Benjamin Manns
     * @param courseid unique course identification
@@ -490,11 +513,12 @@ class CourseController {
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
   @ResponseBody
   def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer,
-                        @RequestParam(value = "offset", required = false) offset: Int,
-                        @RequestParam(value = "limit", required = false) limit: Int = LIMIT_MAX_20,
+                        @RequestParam(value = "offset", required = false) offset: Integer = 0,
+                        @RequestParam(value = "limit", required = false) limit: Integer = LIMIT_MAX_20,
                         @RequestParam(value = "filter", required = false) filter: String = "",
                         request: HttpServletRequest): List[Any] = {
-    if (limit > LIMIT_MAX_20 || limit < 0) throw new BadRequestException("choose a `limit` within 0 and 20")
+    if (limit == null && offset != null) throw new BadRequestException("if a 'offset' is set a 'limit' has to set as well")
+    if (limit != null && (limit > LIMIT_MAX_20 || limit < 0)) throw new BadRequestException("choose a `limit` within 0 and 20")
     val user = userService.verifyUserByHeaderToken(request)
     val testsystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (user.isEmpty && testsystem.isEmpty) {
@@ -548,28 +572,6 @@ class CourseController {
     } catch {
       case _: NullPointerException => throw new BadRequestException("Please provide: typ")
     }
-  }
-
-  /**
-    * get the detailed submission information of a student of a task for this one course
-    * @author Benjamin Manns
-    * @param courseid unique course identification
-    * @param userid unique identification for a user
-    * @param taskid unique identification for a task
-    * @param request Request Header containing Headers
-    * @return JSON
-    */
-  @RequestMapping(value = Array("{courseid}/submissions/user/{userid}/task/{taskid}"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def seeStudentTaskSubmissionsMatrixCell(@PathVariable courseid: Int, @PathVariable userid: Int, @PathVariable taskid: Int,
-                                          request: HttpServletRequest): List[Any] = {
-    // TODO courseid not needed
-    val user = Users.claimAuthorization(request)
-    if (!taskService.isPermittedForTask(taskid, user) && user.roleid > 2 && user.userid != userid) {
-      throw new UnauthorizedException
-    }
-
-    submissionService.getSubmissionsByTaskAndUser(taskid.toString, userid, "desc", true)
   }
 
   /**

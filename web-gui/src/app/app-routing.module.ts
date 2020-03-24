@@ -18,15 +18,14 @@ import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
 import {IsDocentGuard} from './guards/is-docent.guard';
 import {NotFound404Component} from "./components/not-found404/not-found404.component";
-import {ConnectedSystemsComponent} from "./components/connected-systems/connected-systems.component";
 import {ImportCourseComponent} from "./components/courses/import-course/import-course.component";
 import {ChangePasswdComponent} from "./components/users/change-passwd/change-passwd.component";
 import {GuestGuard} from "./guards/guest.guard";
 import {CourseResultDetailsComponent} from "./components/courses/course-result-details/course-result-details.component";
 import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze-submissions/task-analyze-submissions.component";
-import {AdminSettingsComponent} from "./components/admin/admin-settings/admin-settings.component";
 import {CourseProfDetailsComponent} from "./components/courses/detail-course/course-prof-details/course-prof-details.component";
 import {IsGeqDocentGuard} from "./guards/is-geq-docent";
+import {CourseTasksOverviewComponent} from "./components/courses/course-tasks-overview/course-tasks-overview.component";
 
 
 const routes: Routes = [
@@ -39,7 +38,8 @@ const routes: Routes = [
       {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
-      {path: 'courses/:id', component: DetailCourseComponent},
+      {path: 'courses/:id', component: CourseTasksOverviewComponent},
+      {path: 'courses/:id/task/:taskid', component: DetailCourseComponent},
       {path: 'courses/:id/result', component: CourseResultDetailsComponent},
       {path: 'courses/:id/task/:taskid/analyze', component: TaskAnalyzeSubmissionsComponent},
 

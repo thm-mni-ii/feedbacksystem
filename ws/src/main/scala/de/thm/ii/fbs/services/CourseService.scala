@@ -3,11 +3,9 @@ package de.thm.ii.fbs.services
 import java.io
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
-
+import de.thm.ii.fbs.util.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.util.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
-import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -25,16 +23,12 @@ class CourseService {
   val LABEL_EDIT = "edit"
   /** holds label subscribe*/
   val LABEL_SUBSCRIBE = "subscribe"
-  private val LABEL_ZIPDIR = "zip-dir"
-  private val LABEL_UPLOADDIR = "upload-dir"
-  private final val LABEL_ZERO_STRING = "0"
-  private final val LABEL_ONE_STRING = "1"
+  private var LABEL_ZIPDIR = "zip-dir"
+  private var LABEL_UPLOADDIR = "upload-dir"
   private final val LABEL_TRUE = "true"
-  private final val LABEL_FALSE = "false"
   private final val LABEL_DESC = "desc"
   private final val LABEL_COURSE_JSON = "course.json"
   private final val LABEL_COURSE = "course"
-  private val logger: Logger = LoggerFactory.getLogger(classOf[CourseService])
   @Value("${compile.production}")
   private val compile_production: Boolean = true
 
@@ -66,16 +60,20 @@ class CourseService {
         Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
           CourseDBLabels.name -> res.getString(CourseDBLabels.name),
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-            CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+          CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
           CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date)
         )
       }, userid)
   }
 
-  private def getZIPDIR = Paths.get(System.getProperty("java.io.tmpdir")).resolve(LABEL_ZIPDIR)
+  private def getZIPDIR = {
+    Paths.get(System.getProperty("java.io.tmpdir")).resolve(LABEL_ZIPDIR)
+  }
 
-  private def getUPLOADDIR = (if (compile_production) "/" else "") + LABEL_UPLOADDIR
+  private def getUPLOADDIR = {
+    (if (compile_production) "/" else "") + LABEL_UPLOADDIR
+  }
 
   /**
     * get a list of student users which subscri
@@ -87,11 +85,11 @@ class CourseService {
     val sqlList = "(" + roleids.map(a => a.toString).reduce((a, b) => s"${a}, ${b}") + ")"
     DB.query("SELECT u.*, r.* FROM user_course hc join user u using(user_id) join role r on r.role_id = hc.role_id" +
       " where hc.course_id = ? and hc.role_id IN " + sqlList,
-    (res, _) => {
-      new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
-        res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email)
-      , res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id), res.getBoolean(UserDBLabels.privacy_checked))
-    }, courseid)
+      (res, _) => {
+        new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email)
+          , res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id), res.getBoolean(UserDBLabels.privacy_checked))
+      }, courseid)
   }
 
   /**
@@ -115,18 +113,18 @@ class CourseService {
     }) + hiddenCoursesSQL
 
     DB.query(sql, (res, _) => {
-        Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
-          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
-          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
-          RoleDBLabels.role_id  -> res.getInt(RoleDBLabels.role_id),
-          CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
-          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
-          CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
-          LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
-          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
-      }, user.userid)
+      Map(CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
+        CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
+        RoleDBLabels.role_id  -> res.getInt(RoleDBLabels.role_id),
+        CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+        CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+        CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
+        CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
+        LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+        LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
+    }, user.userid)
   }
 
   /**
@@ -170,8 +168,9 @@ class CourseService {
     */
   def isPermittedForCourse(courseid: Int, user: User): Boolean = {
     if (user.role == "admin" || user.roleid == 2) {
-        true
-    } else {
+      true
+    }
+    else {
       val list = DB.query("select count(*) as count from user_course where course_id = ? and user_id = ? and role_id IN (4,8)",
         (res, _) => res.getInt("count"), courseid, user.userid)
       list.nonEmpty && list.head == 1
@@ -186,9 +185,9 @@ class CourseService {
     * @return Boolean, if a user is permitted for the course
     */
   def isDocentForCourse(courseid: Int, user: User): Boolean = {
-      val list = DB.query("select count(*) as count from user_course where course_id = ? and user_id = ? and role_id = 4",
-        (res, _) => res.getInt("count"), courseid, user.userid)
-      list.nonEmpty && list.head == 1
+    val list = DB.query("select count(*) as count from user_course where course_id = ? and user_id = ? and role_id = 4",
+      (res, _) => res.getInt("count"), courseid, user.userid)
+    list.nonEmpty && list.head == 1
   }
 
   /**
@@ -228,7 +227,7 @@ class CourseService {
     * @param filter filter the user list
     * @return Scala List
     */
-  def getStudentsFromCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Map[String, Any]] = {
+  def getStudentsFromCourse(courseid: Int, offset: Integer, limit: Integer, filter: String): List[Map[String, Any]] = {
     var queryArgs: List[Any] = List(courseid)
     var filterQuery = ""
     if(filter != null && filter.length > 0) {
@@ -236,10 +235,20 @@ class CourseService {
       queryArgs = queryArgs ++ List(filterLike, filterLike, filterLike)
       filterQuery = " and (u.username like ? OR u.prename like ? OR u.surname like ?) "
     }
-    queryArgs = queryArgs ++ List(offset, limit)
 
+    val (qArgs, sqlAdd) = if (limit == null && offset != null){
+      (List(offset), "limit ?")
+    } else if (limit != null && offset == null){
+      (List(limit), "limit 0,?")
+    } else if (limit != null && offset != null){
+      (List(offset, limit), "limit ?,?")
+    } else {
+      (List(), "  ")
+    }
+
+    queryArgs = queryArgs ++ qArgs // List(offset, limit)
     val list = DB.query(s"select u.*, uc.* from user_course uc join user u using(user_id) where course_id = ? and " +
-      s"uc.role_id = 16 ${filterQuery} order by u.surname asc limit ?,?",
+      s"uc.role_id = 16 ${filterQuery} order by u.surname asc " + sqlAdd,
       (res, _) => {Map(UserDBLabels.user_id -> res.getInt(UserDBLabels.user_id),
         UserDBLabels.prename -> res.getString(UserDBLabels.prename),
         UserDBLabels.surname -> res.getString(UserDBLabels.surname),
@@ -258,7 +267,7 @@ class CourseService {
     * @throws BadRequestException If the grant type is invalid.
     */
   def grandUserAsTutorForACourse(courseid: Int, user: User): Map[String, Boolean] = {
-    DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,8) ON DUPLICATE KEY UPDATE role_id=8",
+    val num = DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,8) ON DUPLICATE KEY UPDATE role_id=8",
       user.userid, courseid)
     Map(LABEL_SUCCESS-> true)
   }
@@ -273,7 +282,7 @@ class CourseService {
     * @throws BadRequestException If the grant type is invalid.
     */
   def grandUserAsDocentForACourse(courseid: Int, user: User): Map[String, Boolean] = {
-    DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,4) ON DUPLICATE KEY UPDATE role_id=4",
+    val num = DB.update("insert into user_course (user_id,course_id,role_id) VALUES (?,?,4) ON DUPLICATE KEY UPDATE role_id=4",
       user.userid, courseid)
     Map(LABEL_SUCCESS-> true)
   }
@@ -358,9 +367,10 @@ class CourseService {
     * @author Benjamin Manns
     * @param courseid unique course identification
     * @param user User object
+    * @param taskid optional taskid information
     * @return Scala Map
     */
-  def getCourseDetails(courseid: Int, user: User): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
+  def getCourseDetails(courseid: Int, user: User, taskid: Option[Int] = None): Option[Map[_ <: String, _ >: io.Serializable with String]] = {
     val isPermitted = this.isPermittedForCourse(courseid, user)
 
     val selectPart = "c.course_id, c.standard_task_typ, c.course_name, c.course_end_date, c.course_description, c.course_modul_id, " +
@@ -370,7 +380,8 @@ class CourseService {
       ""
     })
 
-    val taskList = if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1 || user.roleid == 2) {
+    val taskList = if (taskid.isDefined) { this.taskService.getTaskDetails(taskid.get, Some(user.userid), true).getOrElse(Map.empty) }
+    else if (isPermitted || this.isSubscriberForCourse(courseid, user) || user.roleid == 1 || user.roleid == 2) {
       this.taskService.getTasksByCourse(courseid, Some(user.userid))
     } else {
       List.empty
@@ -383,30 +394,26 @@ class CourseService {
         "user_course join role using(role_id) where user_id = ?) t on t.course_id = c.course_id where c.course_id = ?"
     }
 
-    val list = DB.query(sql,
-      (res, _) => {
-        val courseMap = Map(
-          CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid),
-          CourseDBLabels.name -> res.getString(CourseDBLabels.name),
-          CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-          CourseDBLabels.course_end_date -> res.getTimestamp(CourseDBLabels.course_end_date),
-          CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
-          CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
-          CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
-          CourseDBLabels.plagiarism_script -> res.getBoolean(CourseDBLabels.plagiarism_script),
-          LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
-          LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)),
-          RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id),
-          RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name),
-          LABEL_TASKS -> taskList
-        )
-        if (isPermitted) {
-          courseMap + (CourseDBLabels.creator -> res.getInt(CourseDBLabels.creator))
-        } else {
-          courseMap
-        }
-      }, user.userid, courseid)
+    val label = if (taskid.isDefined) "task" else LABEL_TASKS
+    val list = DB.query(sql, (res, _) => {
+      val courseMap = Map(
+        CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid), CourseDBLabels.name -> res.getString(CourseDBLabels.name),
+        CourseDBLabels.description -> res.getString(CourseDBLabels.description),
+        CourseDBLabels.course_end_date -> res.getTimestamp(CourseDBLabels.course_end_date),
+        CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
+        CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
+        CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
+        CourseDBLabels.standard_task_typ -> res.getString(CourseDBLabels.standard_task_typ),
+        CourseDBLabels.plagiarism_script -> res.getBoolean(CourseDBLabels.plagiarism_script),
+        LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
+        LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)), label -> taskList,
+        RoleDBLabels.role_id -> res.getInt(RoleDBLabels.role_id), RoleDBLabels.role_name  -> res.getString(RoleDBLabels.role_name))
+      if (isPermitted) {
+        courseMap + (CourseDBLabels.creator -> res.getInt(CourseDBLabels.creator))
+      } else {
+        courseMap
+      }
+    }, user.userid, courseid)
 
     list.headOption
   }
@@ -459,22 +466,24 @@ class CourseService {
           // create path out of this
           val filePath = taskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
             .resolve(stringOrNull(submission(SubmissionDBLabels.filename)))
-          val goalPath = tmpZiptaskPath.resolve(
-            submission(SubmissionDBLabels.submissionid).toString + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename).toString
-          )
+          val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid) + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename))
           allPath = goalPath :: allPath
 
           try {
             Files.copy(filePath, Files.newOutputStream(goalPath))
-          } catch {
+          }
+          catch {
             case _: java.nio.file.NoSuchFileException => {}
           }
         }
       }
     }
-    val finishZipPath = "zip-dir/abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip"
-    FileOperations.complexZip(Paths.get(finishZipPath), allPath, getZIPDIR.resolve(tmp_folder).toString)
-    finishZipPath
+    val goalPath = Paths.get(s"/tmp/zip-dir/abgaben/")
+    goalPath.toFile.mkdirs()
+
+    val finishZipPath = goalPath.resolve("abgabe_course_" + courseid.toString + LABEL_UNDERLINE + tmp_folder + ".zip")
+    FileOperations.complexZip(finishZipPath, allPath, getZIPDIR.resolve(tmp_folder).toString)
+    finishZipPath.toString
   }
 
   /**
@@ -492,14 +501,14 @@ class CourseService {
 
     val studentList = getStudentsFromCourse(courseid)
 
-    val taskList = taskService.getTasksByCourse(courseid)
+    var taskList = taskService.getTasksByCourse(courseid)
     var subs: List[Any] = List()
     for (task <- taskList) {
       val taskid = task(TaskDBLabels.taskid).toString
       val success = FileOperations.copy(Paths.get(getUPLOADDIR).resolve(taskid).toString, tasksDir.resolve(taskid).toString)
 
       for(student <- studentList){
-        val studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(taskid, student(UserDBLabels.user_id), LABEL_DESC)
+        var studentSubmissionList = submissionService.getSubmissionsByTaskAndUser(taskid, student(UserDBLabels.user_id), LABEL_DESC)
         for(entry <- studentSubmissionList){
           val modEntry = entry + (SubmissionDBLabels.taskid -> taskid.toInt)
           subs = modEntry :: subs
@@ -555,8 +564,7 @@ class CourseService {
         // create path out of this
         val filePath = taskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[String])
           .resolve(stringOrNull(submission(SubmissionDBLabels.filename)))
-        val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid).asInstanceOf[Int].toString
-          + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename).asInstanceOf[String])
+        val goalPath = tmpZiptaskPath.resolve(submission(SubmissionDBLabels.submissionid) + LABEL_UNDERLINE + submission(SubmissionDBLabels.filename))
         allPath = goalPath :: allPath
 
         try{
@@ -577,6 +585,7 @@ class CourseService {
     *
     * @param courseid unique course identification
     * @param zipdir  the path where the zip is uploaded
+    * @return if import worked out
     */
   def recoverACourse(courseid: Int, zipdir: Path): Unit = {
     FileOperations.unzip(zipdir, zipdir.getParent)
@@ -704,12 +713,11 @@ class CourseService {
     * @param filter filter the user list
     * @return Scala List
     */
-  def getSubmissionsMatrixByCourse(courseid: Int, offset: Int, limit: Int, filter: String): List[Any] = {
+  def getSubmissionsMatrixByCourse(courseid: Int, offset: Integer, limit: Integer, filter: String): List[Any] = {
     val subscribedStudents = this.getStudentsFromCourse(courseid, offset, limit, filter)
     var matrix: List[Any] = List()
     for(u <- subscribedStudents){
-      logger.warn("[getSubmissionsMatrixByCourse]: " + u.toString())
-      val (passed_glob, processedTasks: List[Any]) = submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(
+      val (passed_glob, processedTasks: List[Map[String, Any]]) = submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(
         u(UserDBLabels.user_id).toString.toInt, courseid)
       val studentLine = Map(LABEL_TASKS  -> processedTasks, UserDBLabels.username -> u(UserDBLabels.username),
         UserDBLabels.user_id -> u(UserDBLabels.user_id),
@@ -727,49 +735,16 @@ class CourseService {
     * @return Big Scala Map
     */
   def getSubmissionsMatrixByUser(userid: Int): List[Any] = {
-    val courseList = this.getSubscribedCoursesByUser(userid, true)
+    var courseList = this.getSubscribedCoursesByUser(userid, true)
     var matrix: List[Any] = List()
     for (course <- courseList) {
-      val courseTasks = taskService.getTasksByCourse(course(CourseDBLabels.courseid).asInstanceOf[Int])
-      val taskShortLabels = List.range(1, courseTasks.length + 1, 1).map(f => "A" + f.toString)
+      val courseid = course(CourseDBLabels.courseid).toString.toInt
+      val (passed_glob, processedTasks: List[Map[String, Any]]) =
+        submissionService.getSummarizedSubmissionEvaluationOfCourseOfUser(userid, courseid)
 
-      var processedTasks: List[Any] = List()
-      var deadlines: List[String] = List()
-      for((task, i) <- courseTasks.zipWithIndex) {
-        val submissionRawData = this.submissionService.getSubmissionsByTaskAndUser(task(TaskDBLabels.taskid).toString, userid)
-        // process them
-        var passed_string: String = null
-        var passedDate: Any = null
-        var coll_result_date: Any = null
-        var plagiat_passed: List[String] = List()
-        if (submissionRawData.length == 0) {
-          passed_string = null
-        } else {
-          var passed: Boolean = false
-          for (submission <- submissionRawData) {
-            plagiat_passed = submission(SubmissionDBLabels.plagiat_passed).asInstanceOf[String] :: plagiat_passed
-            if (coll_result_date == null) {
-              coll_result_date = submission("result_date")
-            }
-            if (!passed && submission(LABEL_PASSED).asInstanceOf[Boolean]) {
-              passed = true
-              passedDate = submission("submit_date")
-            }
-          }
-          passed_string = if (!passed && coll_result_date == null) null else passed.toString
-        }
-        val taskedPlagiatPassed: Any = if (plagiat_passed.contains(LABEL_ZERO_STRING)) false else if (plagiat_passed.contains(LABEL_ONE_STRING)) true else null
-        val taskStudentCell = Map(taskShortLabels(i) -> Map(TaskDBLabels.name -> task(TaskDBLabels.name),
-          TaskDBLabels.taskid -> task(TaskDBLabels.taskid), "trials" -> submissionRawData.length, LABEL_PASSED -> passed_string,
-          "passed_date" -> passedDate, TaskDBLabels.deadline -> task(TaskDBLabels.deadline), SubmissionDBLabels.plagiat_passed -> taskedPlagiatPassed))
-        deadlines = stringOrNull(task(TaskDBLabels.deadline)) :: deadlines
-        processedTasks = taskStudentCell :: processedTasks
-      }
-      var courseLine: Map[String, Any] = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> deadlines)
-
-      for(c <- course.keys){
-        courseLine = courseLine + (c -> course(c))
-      }
+      var courseLine: Map[String, Any] = Map(LABEL_TASKS  -> processedTasks, "deadlines" -> processedTasks.map(task =>
+        task(task.keys.head).asInstanceOf[Map[String, Any]]("deadline")))
+      for(c <- course.keys) courseLine = courseLine + (c -> course(c))
 
       matrix = courseLine :: matrix
     }
@@ -830,14 +805,19 @@ class CourseService {
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, user.userid)
-      ps.setString(4, standard_task_typ)
-      ps.setString(5, course_modul_id)
-      ps.setString(6, course_semester)
-      ps.setInt(7, personalised_submission)
-      ps.setString(8, course_end_date)
+      val m4 = 4
+      val m5 = 5
+      val m6 = 6
+      val m7 = 7
+      val m8 = 8
+      ps.setString(m4, standard_task_typ)
+      ps.setString(m5, course_modul_id)
+      ps.setString(m6, course_semester)
+      ps.setInt(m7, personalised_submission)
+      ps.setString(m8, course_end_date)
       ps
     })
-    if (num == 0) {
+    if (num < 1) {
       throw new RuntimeException("Error creating course.")
     }
     Map("course_id" -> holder.getKey, "success" -> true)
@@ -850,7 +830,7 @@ class CourseService {
     * @return update success status
     */
   def setPlagiarismScriptStatus(courseid: Int, plagiarism_script: Boolean): Boolean = {
-    1 == DB.update("update course set plagiarism_script = ? where course_id = ?", plagiarism_script, courseid)
+    DB.update("update course set plagiarism_script = ? where course_id = ?", plagiarism_script, courseid) == 1
   }
 
   /**
@@ -886,5 +866,13 @@ class CourseService {
       updates += 1
     }
     Map(LABEL_SUCCESS -> (updates == suceeds))
+  }
+
+  private def getNullOrBoolean(boolDBString: String) = {
+    if (boolDBString == null) {
+      null
+    } else {
+      boolDBString.toInt > 0
+    }
   }
 }

@@ -65,6 +65,7 @@ services:
     volumes:
     - ./ws/upload-dir:/upload-dir
     - ./ws/zip-dir:/zip-dir
+    - ./ws/shared-messages:/shared-messages
     - ./docker-config/ws/application_dev.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
   secrettokenchecker:
@@ -83,6 +84,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
     - ./secrettoken-checker/upload-dir:/upload-dir
+    - ./ws/shared-messages:/shared-messages
     - ./docker-config/secrettoken/application_dev.conf:/usr/local/appconfig/application.config
   sqlchecker:
     build: sql-checker

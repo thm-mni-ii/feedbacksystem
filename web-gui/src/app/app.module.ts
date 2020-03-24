@@ -73,6 +73,7 @@ import { AdminSettingsComponent } from './components/admin/admin-settings/admin-
 import { CreateUpdateSettingDialogComponent } from './components/admin/admin-settings/create-update-setting-dialog/create-update-setting-dialog.component';
 import { DeleteSettingDialogComponent } from './components/admin/admin-settings/delete-setting-dialog/delete-setting-dialog.component';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { CourseTasksOverviewComponent } from './components/courses/course-tasks-overview/course-tasks-overview.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -141,7 +142,8 @@ export const httpInterceptorProviders = [
     CourseProfDetailsComponent,
     AdminSettingsComponent,
     CreateUpdateSettingDialogComponent,
-    DeleteSettingDialogComponent
+    DeleteSettingDialogComponent,
+    CourseTasksOverviewComponent
   ],
   imports: [
     BrowserModule,

@@ -1,7 +1,4 @@
-
-
 <div style="padding: 10px;">
-
   <h2>Detail Ansicht Task: <span style="font-style: italic;">{{taskDetails.task_name}}</span> von User: {{userid}}</h2>
 
   <span style="font-style: italic;" >Passed:
@@ -16,10 +13,28 @@
 
   <button [disabled]="!submissionExist" mat-flat-button color="accent" (click)="markAsPassed()">Abgabe als Bestanden markieren</button>
 
-
   <p *ngIf="!submissionExist">Der Benutzer hat keine Abgabe durchgeführt, es kann somit auch keine Auswertung betrachtet werden.</p>
 
-
-<app-task-result style="background:rgba(194,199,216,0.16);border-radius: 13px;"
-                 [taskResults]="taskResults" [taskPassed]="taskPassed"></app-task-result>
+  <app-task-result style="background:rgba(194,199,216,0.16);border-radius: 13px;"
+                   [taskResults]="taskResults" [taskPassed]="taskPassed"></app-task-result>
 </div>
+
+<mat-divider></mat-divider>
+
+<h2>Weitere Informationen</h2>
+
+<mat-card class="card" *ngFor="let taskInfo of taskExtensions">
+  <mat-card-header>
+    <mat-card-title>{{taskInfo.subject}}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-actions *ngIf="taskInfo.info_typ == 'file'">
+    <button (click)="downloadExtendedTaskInfo(taskInfo)"  mat-flat-button color="accent">
+      Download Info
+    </button>
+  </mat-card-actions>
+
+  <mat-card-content *ngIf="taskInfo.info_typ == 'string'">
+    {{taskInfo.data}}
+  </mat-card-content>
+</mat-card>
