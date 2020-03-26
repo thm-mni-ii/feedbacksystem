@@ -498,13 +498,11 @@ class TaskService {
         "INSERT INTO task (task_name, task_description, course_id, deadline, load_external_description) VALUES (?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
-      val magic4 = 4
-      val magic5 = 5
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
-      ps.setString(magic4, deadline)
-      ps.setBoolean(magic5, load_extern_info)
+      ps.setString(4, deadline)
+      ps.setBoolean(5, load_extern_info)
       ps
     })
 

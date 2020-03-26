@@ -4,30 +4,18 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
   </div>
-  <h2>{{'Aufgaben Übersicht'}}</h2>
-  <mat-form-field style="width: 80%;" appearance="fill"  class="filter-input">
-    <mat-label>Filter</mat-label>
-    <input matInput  [formControl]="filter"> <!-- (ngModelChange)="onFilterChange($event)" -->
-  </mat-form-field>
 
-  <!-- task list-->
-  <mat-card [routerLink]="'/courses/'+courseID+'/task/'+task.task_id" *ngFor="let task of tasksFiltered" class="task-container" id="{{task.task_id}}">
-    <mat-card-subtitle>
-      {{task.task_name}}
-    </mat-card-subtitle>
-    <mat-card-content>
-      <small>
-        <markdown [data]="task.task_description"></markdown>
-      </small> <small> <mat-icon class="material-icons" color="accent" >access_time</mat-icon> {{task.deadline | date:'medium'}}</small>
+  <h2>{{courseDetail?.course_name}}</h2>
+  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>
 
-      <button  mat-flat-button  style="margin-left: calc(100% - 59px);top: -69px;"  >
-        <mat-icon id="passed" *ngIf="['true',true].indexOf(task.combined_passed) >= 0">check_box</mat-icon>
-        <mat-icon id="failed" *ngIf="['false',false].indexOf(task.combined_passed) >= 0">clear</mat-icon>
-        <mat-icon id="not-done" *ngIf="task.combined_passed == null">check_box_outline_blank</mat-icon>
-      </button>
-
-      <button  mat-flat-button  style="margin-left: calc(100% - 59px);margin-top: -10px;" color="primary" matTooltip="{{ 'Zur Aufgabe: \'' + task.task_description + '\'' }}"><mat-icon >forward</mat-icon></button>
-
-    </mat-card-content>
+  <mat-card [routerLink]="'/courses/'+courseID+'/task/'+task.task_id" *ngFor="let task of tasks" class="task-container" id="{{task.task_id}}">
+    <span>{{task.task_name}}</span>
+    <span class="meta">
+      <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
+      <span class="tiny">{{task.deadline | date:'medium'}}</span>
+      <span class="state passed" *ngIf="['true',true].indexOf(task.combined_passed) >= 0"><mat-icon>check_circle</mat-icon></span>
+      <span class="state failed" *ngIf="['false',false].indexOf(task.combined_passed) >= 0"><mat-icon>add_circle</mat-icon></span>
+      <span class="state not-done" *ngIf="task.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
+    </span>
   </mat-card>
 </div>

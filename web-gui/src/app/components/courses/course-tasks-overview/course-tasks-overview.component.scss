@@ -1,22 +1,30 @@
-.task-container{
+.task-container {
   cursor: pointer;
   width: 80%;
   margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  .meta {
+    > * {
+      margin-left: 8px;
+    }
+    > .tiny {
+      font-size: small;
+    }
+    .state {
+      text-align: center;
+      line-height: 30px;
+    }
+  }
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 
-.task-container:hover{
+.task-container:hover {
   background: #819ca9;
 }
-
-
-.material-icons {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-}
-
-
 
 .container {
   width: 100%;
@@ -52,12 +60,15 @@
   }
 }
 
-
-
-#passed {
+.passed {
   color: green;
 }
 
-#failed {
+.failed {
   color: red;
+  transform: rotate(45deg);
+}
+
+.not-done {
+  color: darkorange;
 }

@@ -13,7 +13,6 @@ import {
   NewTaskInformation,
   Succeeded
 } from "../../../interfaces/HttpInterfaces";
-import {FormControl} from "@angular/forms";
 import {NewtaskDialogComponent} from "../detail-course/newtask-dialog/newtask-dialog.component";
 import {delay, flatMap, retryWhen, take} from "rxjs/operators";
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
@@ -32,10 +31,8 @@ export class CourseTasksOverviewComponent implements OnInit {
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
-  filter = new FormControl();
   tasks: CourseTask[] = [];
   courseID: number;
-  taskFilter: string = '';
   userRole: string;
   courseDetail: DetailedCourseInformation;
 
@@ -46,27 +43,19 @@ export class CourseTasksOverviewComponent implements OnInit {
         this.loadTasksFromCourse(param.id)
       }
     );
-
-    this.filter.valueChanges.subscribe(
-      (value) => {
-        this.taskFilter = value
-      }
-    )
   }
 
   loadTasksFromCourse(courseid: number) {
     this.db.getCourseDetail(courseid).subscribe((value: DetailedCourseInformation) => {
-      this.courseDetail = value
-      this.tasks = value.tasks
-      this.userRole = value.role_name
+      this.courseDetail = value;
+      this.tasks = value.tasks;
+      this.userRole = value.role_name;
     })
   }
 
   public isAuthorized(){
-    return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
+    return ["tutor", "docent", "moderator", "admin"].indexOf(this.userRole) >= 0;
   }
-
-
 
   /**
    * Opens dialog to update course information
@@ -105,7 +94,6 @@ export class CourseTasksOverviewComponent implements OnInit {
     });
   }
 
-
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
@@ -128,18 +116,7 @@ export class CourseTasksOverviewComponent implements OnInit {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
           }
         })
-        .catch((e) => {
-
-        })
+        .catch(console.error)
     }, 2000)
-  }
-
-  get tasksFiltered(){
-    let filterLower = this.taskFilter.toLowerCase();
-    return this.tasks.filter(t => {
-      return t.task_description.toLowerCase().indexOf(filterLower) >= 0
-        || t.task_id.toString().indexOf(filterLower) >= 0
-        || t.task_name.toLowerCase().indexOf(filterLower) >= 0
-    })
   }
 }

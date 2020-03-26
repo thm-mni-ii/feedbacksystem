@@ -40,12 +40,6 @@
           <p>Dozenten / Tutoren</p>
         </a>-->
 
-        <a mat-list-item *ngIf="false && (isAdmin || isDocent)" routerLink="/courses/tutor" routerLinkActive="selected">
-          <!-- Deprecated -->
-          <mat-icon>person</mat-icon>
-          <p>Tutor bestimmen</p>
-        </a>
-
         <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
           <mat-icon>supervised_user_circle</mat-icon>
           <p>Benutzer</p>

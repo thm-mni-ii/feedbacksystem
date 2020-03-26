@@ -457,7 +457,7 @@ export class DatabaseService {
     let curr_date = date.getDate();
     let curr_month = date.getMonth() + 1; //Months are zero based
     let curr_year = date.getFullYear();
-    return curr_year + '-' + curr_month + '-' + curr_date + " " + date.toLocaleTimeString()
+    return curr_year + '-' + curr_month + '-' + curr_date + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
   }
 
   /**

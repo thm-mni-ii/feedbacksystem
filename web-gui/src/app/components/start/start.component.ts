@@ -15,7 +15,6 @@ import {CookieService} from 'ngx-cookie-service';
   styleUrls: ['./start.component.scss']
 })
 export class StartComponent implements OnInit, OnDestroy {
-
   constructor(private user: UserService, private router: Router, private auth: AuthService,
               private titlebar: TitlebarService, private cookie: CookieService) {
   }

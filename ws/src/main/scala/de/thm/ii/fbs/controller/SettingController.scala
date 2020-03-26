@@ -39,8 +39,7 @@ class SettingController {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || user.get.roleid > 1) {
         throw new UnauthorizedException
-    }
-    try {
+    } try {
       val enable = jsonNode.get("enable").asBoolean()
       Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting("privacy.show", enable, "BOOL"))
       // TODO set or insert privacy set show on or off
@@ -62,14 +61,12 @@ class SettingController {
     val user = Users.claimAuthorization(request)
     if (user.roleid > 1) {
       throw new UnauthorizedException
-    }
-    try {
+    } try {
       val key = jsonNode.get("key").asText()
       val value = jsonNode.get("val").asText()
       val typ = jsonNode.get("typ").asText()
 
       Map(LABEL_SUCCESS -> settingService.insertOrUpdateSetting(key, value, typ))
-
     } catch {
       case _: NullPointerException => throw new BadRequestException("JSON Request need this three keys: (key, val, typ)")
       case e: Exception => throw new BadRequestException(e.toString)
@@ -89,8 +86,7 @@ class SettingController {
     val user = Users.claimAuthorization(request)
     if (user.roleid > 1) {
       throw new UnauthorizedException
-    }
-    try {
+    } try {
       val value = jsonNode.get("val").asText()
       val typ = jsonNode.get("typ").asText()
 
