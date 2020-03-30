@@ -14,6 +14,7 @@ import {
   Succeeded
 } from "../../../interfaces/HttpInterfaces";
 import {NewtaskDialogComponent} from "../detail-course/newtask-dialog/newtask-dialog.component";
+import {NewconferenceDialogComponent} from "../detail-course/newconference-dialog/newconference-dialog.component";
 import {delay, flatMap, retryWhen, take} from "rxjs/operators";
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 import {of, throwError} from "rxjs";
@@ -92,6 +93,14 @@ export class CourseTasksOverviewComponent implements OnInit {
     ).subscribe(course_detail => {
       this.router.navigate(['courses', this.courseID,'task',course_detail.task.task_id])
     });
+  }
+
+  createConference() {
+    this.dialog.open(NewconferenceDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    })
   }
 
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {

@@ -3,6 +3,7 @@
     <button mat-flat-button color="primary" [routerLink]="['/', 'courses', 'user']" matTooltip="Zurück zur Kursübersicht"><mat-icon >arrow_back</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenz erstellen"><mat-icon >duo</mat-icon></button>
   </div>
 
   <h2>{{courseDetail?.course_name}}</h2>

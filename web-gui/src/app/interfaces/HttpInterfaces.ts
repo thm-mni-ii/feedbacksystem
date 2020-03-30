@@ -313,3 +313,8 @@ export interface GlobalSetting {
   setting_val: string;
   setting_typ: string;
 }
+
+export interface ConferenceDetails {
+  course_id: number;
+  url: URL;
+}
