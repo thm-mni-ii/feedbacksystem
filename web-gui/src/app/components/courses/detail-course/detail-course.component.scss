@@ -46,21 +46,13 @@
   align-items: center;
 }
 
-.task-container {
+.details {
   width: 80%;
   margin-top: 12px;
 }
 
 .filler {
   flex-grow: 1;
-}
-
-#passed {
-  color: green;
-}
-
-#failed {
-  color: red;
 }
 
 #result {
@@ -117,4 +109,40 @@ mat-radio-button {
   margin-top: 1.25em;
   position: relative;
   margin-bottom: 1em;
+}
+
+.task-container {
+  width: 80%;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  .meta {
+    > * {
+      margin-left: 8px;
+    }
+    > .tiny {
+      font-size: small;
+    }
+    .state {
+      text-align: center;
+      line-height: 30px;
+    }
+  }
+  span {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.passed {
+  color: green;
+}
+
+.failed {
+  color: red;
+  transform: rotate(45deg);
+}
+
+.not-done {
+  color: darkorange;
 }

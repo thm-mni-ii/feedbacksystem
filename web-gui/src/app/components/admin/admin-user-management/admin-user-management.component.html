@@ -1,11 +1,13 @@
-<div class="flex-container">
-  <mat-form-field appearance="outline">
+<div class="container">
+  <mat-form-field class="search" appearance="outline">
     <mat-label>User filtern</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)">
     <mat-icon matSuffix>filter_list</mat-icon>
   </mat-form-field>
 
-  <button class="create-guest-user" mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person</mat-icon> Create Guest Account</button>
+  <div class="create-guest-user">
+    <button mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person</mat-icon> Create Guest Account</button>
+  </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
 

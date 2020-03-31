@@ -1,11 +1,6 @@
 .container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-mat-vertical-stepper {
-  width: 80%;
+  padding: 16px;
+  display: block;
 }
 
 .step-flex {
@@ -27,5 +22,3 @@ mat-vertical-stepper {
   margin-right: 12px;
   margin-top: 12px;
 }
-
-

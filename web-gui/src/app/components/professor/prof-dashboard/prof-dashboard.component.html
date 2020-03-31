@@ -1,119 +1,52 @@
-<mat-progress-bar *ngIf="loading" mode="query"></mat-progress-bar>
+<div class="container">
+
+  <mat-progress-bar *ngIf="loading" mode="query"></mat-progress-bar>
+
+  <mat-tab-group (selectedTabChange)="tabChanged($event)">
+    <mat-tab *ngFor="let course of courses" label="{{course.course_name}}" class="tab">
+
+      <mat-form-field appearance="outline"  class="filter">
+        <mat-label>Filter</mat-label>
+        <input matInput [formControl]="filter"> <!-- (ngModelChange)="onFilterChange($event)" -->
+        <mat-icon matSuffix>filter_list</mat-icon>
+      </mat-form-field>
 
 
-<mat-tab-group (selectedTabChange)="tabChanged($event)">
-  <mat-tab *ngFor="let course of courses" label="{{course.course_name}}" class="tab">
+        <mat-card class="card">
+          <button (click)="exportCourse(course.course_id)" mat-flat-button color="primary" [disabled]="csvLoading" matTooltip="Feedback exportieren"><mat-icon>table_chart</mat-icon></button>
 
+          <div *ngFor="let student of matrix" class="student-row">
+            <div class="name-container">
+              <span class="state passed" *ngIf="student.passed === 1"><mat-icon>check_circle</mat-icon></span>
+              <span class="state failed" *ngIf="student.passed === 0"><mat-icon>add_circle</mat-icon></span>
+              <span class="username">{{student.surname}}, {{student.prename}} ({{student.username}})</span>
+            </div>
 
-    <div class="container">
-
-      <mat-card class="card">
-        <button (click)="exportCourse(course.course_id)" mat-flat-button color="primary" [disabled]="csvLoading" matTooltip="Feedback exportieren"><mat-icon>table_chart</mat-icon></button>
-        <mat-form-field appearance="fill"  class="filter-input">
-          <mat-label>Filter</mat-label>
-          <input matInput  [formControl]="filter"> <!-- (ngModelChange)="onFilterChange($event)" -->
-        </mat-form-field>
-
-
-        <div *ngFor="let student of matrix " class="student-row">
-
-          <!-- Name -->
-          <div class="name-container">
-            <mat-icon *ngIf="student.passed === 1" class="student-passed" color="#00ffff">done</mat-icon>
-            <mat-icon *ngIf="student.passed === 0" class="student-failed" color="#ff0000">clear</mat-icon>
-            <h3 class="name">{{student.surname}}, {{student.prename}}</h3> <small>&nbsp;&nbsp;({{student.username}})</small>
-          </div>
-
-          <!-- Tasks-->
-          <div class="task-container">
-            <div *ngFor="let task of student.tasks" class="task-row">
-
-
+            <!-- Tasks-->
+            <div class="task-container">
+              <div *ngFor="let task of student.tasks" class="task-row">
                 <span class="cloumn_header_task" matTooltip="{{ task[keys(task)[0]].task_name }}">{{ task[keys(task)[0]].task_name }}</span>
 
-                <div *ngFor="let key of keys(task)" class="task " [routerLink]="'/docent/dashboard/task/' + task[key].task_id + '/user/' + student.user_id"
+                <div *ngFor="let key of keys(task)" class="task"
+                     [routerLink]="'/docent/dashboard/task/' + task[key].task_id + '/user/' + student.user_id"
                      matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
 
-                    <span class="sub_feedback {{task[key].passed}}">
-                      {{task[key].trials}}
-                    </span>
-                    <span class="sub_feedback {{plagiatColor(task[key])}}" >
-                      P
-                    </span>
-
-
-                </div>
-
-            </div>
-          </div>
-
-        </div>
-
-
-        <svg  *ngIf="loading" id="loadingIcon" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-             viewBox="0 0 100 100" enable-background="new 0 0 0 0" xml:space="preserve">
-            <circle fill="#000" stroke="none" cx="6" cy="50" r="6">
-              <animate
-                attributeName="opacity"
-                dur="1s"
-                values="0;1;0"
-                repeatCount="indefinite"
-                begin="0.1"/>
-            </circle>
-                    <circle fill="#000" stroke="none" cx="26" cy="50" r="6">
-              <animate
-                attributeName="opacity"
-                dur="1s"
-                values="0;1;0"
-                repeatCount="indefinite"
-                begin="0.2"/>
-            </circle>
-                    <circle fill="#000" stroke="none" cx="46" cy="50" r="6">
-              <animate
-                attributeName="opacity"
-                dur="1s"
-                values="0;1;0"
-                repeatCount="indefinite"
-                begin="0.3"/>
-            </circle>
-          </svg>
-        <!--<mat-grid-list cols="20">
-
-          <mat-grid-tile colspan="5">
-            <div class="name-container" *ngFor="let student of filteredMatrix$ | async">
-              <mat-icon *ngIf="student.passed === 1" class="student-passed" color="#00ffff">done</mat-icon>
-              <mat-icon *ngIf="student.passed === 0" class="student-failed" color="#ff0000">clear</mat-icon>
-              <h3 class="name">{{student.surname}} {{student.prename}}</h3>
-            </div>
-          </mat-grid-tile>
-
-
-          <mat-grid-tile colspan="15">
-            <div class="task-container" *ngFor="let student of filteredMatrix$ | async">
-              <div *ngFor="let task of student.tasks" class="task-row">
-                <div *ngFor="let key of keys(task)" class="task {{task[key].passed}}"
-                     matTooltipPosition="above" matTooltip="{{task[key].task_name}}">
-                  {{task[key].trials}}
+                  <span class="sub_feedback {{task[key].passed}}">{{task[key].trials}}</span>
+                  <span class="sub_feedback {{plagiatColor(task[key])}}">P</span>
                 </div>
               </div>
             </div>
+          </div>
 
 
-          </mat-grid-tile>
-        </mat-grid-list>-->
+          <mat-paginator [length]="userlength"
+                         [pageSize]="limit"
+                         [pageSizeOptions]="[5, 10, 20]"
+                         (page)="pageEvent($event)">
+          </mat-paginator>
 
+        </mat-card>
 
-        <mat-paginator [length]="userlength"
-                       [pageSize]="limit"
-                       [pageSizeOptions]="[5, 10, 20]"
-                       (page)="pageEvent($event)">
-        </mat-paginator>
-
-
-
-
-      </mat-card>
-    </div>
-
-  </mat-tab>
-</mat-tab-group>
+    </mat-tab>
+  </mat-tab-group>
+</div>

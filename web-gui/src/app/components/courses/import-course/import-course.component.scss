@@ -1,11 +1,19 @@
 .container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  display: block;
+  padding: 16px;
 
-#description {
-  width: 80%;
-  min-width: 180px;
+  .import {
+    display: block;
+    > *:not(:last-child) {
+      margin: 8px 0;
+    }
+  }
+
+  .choice {
+    display: flex;
+    flex-direction: column;
+    > * {
+      margin: 8px 0;
+    }
+  }
 }

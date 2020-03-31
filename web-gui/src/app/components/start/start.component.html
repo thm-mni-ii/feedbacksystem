@@ -13,7 +13,7 @@
         <p>Main</p>
         <a mat-list-item *ngIf="!isModerator" routerLink="/{{userRoleString}}/dashboard" routerLinkActive="selected">
           <mat-icon>dashboard</mat-icon>
-          <p>Dashboard {{isModerator}}</p>
+          <p>Dashboard</p>
         </a>
 
         <a mat-list-item routerLink="/courses/user" routerLinkActive="selected">
@@ -23,7 +23,7 @@
 
         <a mat-list-item routerLink="/courses/search" routerLinkActive="selected">
           <mat-icon>search</mat-icon>
-          <p>Kurs suchen</p>
+          <p>Kurs Suchen</p>
         </a>
       </mat-nav-list>
       <mat-divider></mat-divider>
@@ -32,7 +32,7 @@
         <p>Administration</p>
         <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/new" routerLinkActive="selected">
           <mat-icon>playlist_add</mat-icon>
-          <p>Kurs erstellen</p>
+          <p>Kurs Erstellen</p>
         </a>
 
         <!--<a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/docent" routerLinkActive="selected">
@@ -67,7 +67,7 @@
         <p>Einstellungen</p>
         <a mat-list-item routerLink="/users/passwd" routerLinkActive="selected">
           <mat-icon>settings</mat-icon>
-          <p>Profil</p>
+          <p>Password</p>
         </a>
       </mat-nav-list>
 

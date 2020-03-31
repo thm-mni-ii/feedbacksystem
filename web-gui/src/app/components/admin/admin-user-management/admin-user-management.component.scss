@@ -1,28 +1,23 @@
-.flex-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-table {
-  width: 80%;
-}
-
-mat-form-field {
-  width: 80%;
+.container {
+  display: block;
+  padding: 16px;
 }
 
 .mat-row:nth-child(even) {
   background-color: #EFFFFF;
 }
 
+.search, .mat-table {
+  width: 100%;
+}
+
 .e-panel {
-  width: 80%;
   margin-bottom: 12px;
 }
 
 .create-guest-user {
+  display: flex;
+  justify-content: center;
   margin-bottom: 30px;
-  background-color: green;
   color: #fff;
 }

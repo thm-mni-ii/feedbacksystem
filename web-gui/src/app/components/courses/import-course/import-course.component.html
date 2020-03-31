@@ -1,38 +1,21 @@
 <div class="container">
-  <mat-card id="description">
+  <mat-card class="import">
     <h3 id="example-radio-group-label">Auswahl des Import Modus:</h3>
-    <br>
-    <mat-radio-group
-      aria-labelledby="example-radio-group-label"
-      class="example-radio-group"
-      [(ngModel)]="importMode">
-      <mat-radio-button class="example-radio-button" [value]="'createCourse'">
-        {{'Neuen Kurs erstellen'}}
-      </mat-radio-button> <br><br>
-      <mat-radio-button class="example-radio-button" [value]="'recover'">
-        {{'Kurs zurückspielen'}}
-      </mat-radio-button>
+
+    <mat-radio-group class="choice" [(ngModel)]="importMode" [selected]="default">
+      <mat-radio-button #default [value]="'createCourse'">{{'Neuen Kurs erstellen'}}</mat-radio-button>
+      <mat-radio-button [value]="'recover'">{{'Kurs zurückspielen'}}</mat-radio-button>
     </mat-radio-group>
-    <br>
-    <mat-form-field *ngIf="importMode == 'recover'" class="user-input-text" appearance="outline">
+
+    <mat-form-field *ngIf="importMode == 'recover'" appearance="outline">
       <mat-label>Kurs ID</mat-label>
       <input type="text" matInput [(ngModel)]="courseId" />
     </mat-form-field>
 
-    <br>
-    <mat-divider></mat-divider>
-    <br>
-    <br>
-
     <ngx-dropzone (filesAdded)="onFilesAdded($event)" (filesRejected)="onFilesRejected($event)"
                   [showPreviews]="true" [multiple]="false"></ngx-dropzone>
-    <br>
-    <mat-card-actions>
-      <button mat-flat-button color="accent"
-              (click)="onSubmit()">Importieren
-      </button>
-
+    <mat-card-actions class="actions">
+      <button mat-flat-button color="accent" (click)="onSubmit()">Importieren</button>
     </mat-card-actions>
   </mat-card>
 </div>
-

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component} from '@angular/core';
 import {DatabaseService} from "../../../service/database.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Router} from "@angular/router";
@@ -8,17 +8,14 @@ import {Router} from "@angular/router";
   templateUrl: './import-course.component.html',
   styleUrls: ['./import-course.component.scss']
 })
-export class ImportCourseComponent implements OnInit {
-
-  constructor(private db: DatabaseService,  private snackbar: MatSnackBar, private router: Router) { }
-
-
-  importMode: string;
+export class ImportCourseComponent {
+  importMode: string = 'createCourse';
   courseId: number;
   filesToUpload: File[];
 
+  constructor(private db: DatabaseService,  private snackbar: MatSnackBar, private router: Router) { }
+
   onFilesAdded(files: File[]) {
-    console.log(files);
     this.filesToUpload = files;
   }
 
@@ -58,8 +55,4 @@ export class ImportCourseComponent implements OnInit {
     // Todo need to remove it somehow
     console.log(files);
   }
-
-  ngOnInit() {
-  }
-
 }

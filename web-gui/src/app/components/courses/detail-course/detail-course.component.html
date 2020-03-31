@@ -11,38 +11,26 @@
     <button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>
     <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>
     <button mat-flat-button color="primary"  *ngIf="isAuthorized()" [routerLink]="['/', 'courses', courseID, 'result']"  matTooltip="Open Course Results View"><mat-icon>insert_chart_outlined</mat-icon></button>
-
   </div>
-  <mat-card id="description" *ngIf="courseDetail?.course_description !== ''">
-    <h4>
-      <markdown [data]="courseDetail?.course_description"></markdown>
-    </h4>
+
+  <mat-card class="task-container">
+    <span>{{courseTask.task_name}}</span>
+    <span class="meta">
+      <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
+      <span class="tiny">{{courseTask.deadline | date:'medium'}}</span>
+      <span class="state passed" *ngIf="['true',true].indexOf(courseTask.combined_passed) >= 0"><mat-icon>check_circle</mat-icon></span>
+      <span class="state failed" *ngIf="['false',false].indexOf(courseTask.combined_passed) >= 0"><mat-icon>add_circle</mat-icon></span>
+      <span class="state not-done" *ngIf="courseTask.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
+      <span><mat-spinner *ngIf="processing && isInFetchingResultOfTasks(courseTask);" diameter="20"></mat-spinner></span>
+    </span>
   </mat-card>
-  <!-- task list-->
-  <mat-card class="task-container" id="{{courseTask.task_id}}">
-    <div class="title">
-      <h4>{{courseTask.task_name}}</h4>
-      <span class="filler"></span>
-      <div>{{courseTask.result_date | date: 'medium'}}</div>
-      <ng-template #result id="result">
-        <mat-icon id="passed" *ngIf="['true',true].indexOf(courseTask.combined_passed) >= 0">check_box</mat-icon>
-        <mat-icon id="failed" *ngIf="['false',false].indexOf(courseTask.combined_passed) >= 0">clear</mat-icon>
-        <mat-icon id="not-done" *ngIf="courseTask.combined_passed == null">check_box_outline_blank
-        </mat-icon>
-      </ng-template>
-      <mat-spinner *ngIf="processing && isInFetchingResultOfTasks(courseTask); else result"
-                   diameter="20"></mat-spinner>
-    </div>
-    <mat-card-subtitle>
+
+  <mat-card class="details" id="{{courseTask.task_id}}">
+  <mat-card-subtitle>
       <a *ngIf="isAuthorized()" [routerLink]="'/courses/'+courseID+'/task/'+courseTask.task_id+'/analyze'">Analyse</a>
     </mat-card-subtitle>
     <mat-card-content>
-      <h5>{{courseTask.deadline | date:'medium'}}</h5>
-      <markdown id="markOutput" [data]="courseTask.task_description"></markdown>
-      <mat-divider></mat-divider>
       <div class="user-input">
-
-
         <mat-tab-group animationDuration="0ms">
           <mat-tab *ngFor="let subTypes of submissionTypeOfTask(courseTask)" label="{{subTypes}}" class="tab">
 
@@ -54,21 +42,8 @@
             <app-task-submission-choice *ngIf="subTypes == 'choice'" [task]="courseTask" [deadlineTask]="deadlineTask"
                                         (update)="updateSubmissionContent($event)"
                                         (trigger)="triggerExternalDescriptionIfNeeded($event, true)"></app-task-submission-choice>
-
-
           </mat-tab>
         </mat-tab-group>
-
-
-
-
-        <!--<mat-radio-group class="solution-type" [(ngModel)]="submissionAsFile[task.task_id]">
-          <mat-radio-button *ngFor="let subtype of submissionTypeOfTask(task)" [value]="subtype.typ">{{subtype.text}}</mat-radio-button>
-        </mat-radio-group>-->
-
-
-
-
 
         <app-task-result style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="courseTask.evaluation" [taskPassed]="courseTask.passed"></app-task-result>
 
@@ -78,18 +53,10 @@
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="warn"
-                (click)="deleteTask(courseTask)">Löschen
-        </button>
-        <button *ngIf="userRole === 'moderator' || userRole === 'admin' || userRole === 'docent' || userRole === 'tutor'" mat-flat-button color="accent"
-                (click)="updateTask(courseTask)">Bearbeiten
-        </button>
-        <button [disabled]="deadlineTask" mat-flat-button color="accent"
-                (click)="submission(courseDetail.course_id, courseTask)">Abgeben
-        </button>
-        <button  *ngIf="isAuthorized()" mat-flat-button color="accent"
-                 (click)="displayTestsystemFeedback(courseTask)">Status
-        </button>
+        <button *ngIf="isInRole(['moderator', 'admin', 'docent', 'tutor'])" mat-flat-button color="warn" (click)="deleteTask(courseTask)">Löschen</button>
+        <button *ngIf="isInRole(['moderator', 'admin', 'docent', 'tutor'])" mat-flat-button color="accent" (click)="updateTask(courseTask)">Bearbeiten</button>
+        <button [disabled]="deadlineTask" mat-flat-button color="accent" (click)="submission(courseDetail.course_id, courseTask)">Abgeben</button>
+        <button  *ngIf="isAuthorized()" mat-flat-button color="accent" (click)="displayTestsystemFeedback(courseTask)">Status</button>
 
         <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers(courseTask.task_id)" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon></button>
       </mat-card-actions>

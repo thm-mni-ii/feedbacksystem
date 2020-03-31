@@ -520,6 +520,10 @@ export class DetailCourseComponent implements OnInit {
 
   }
 
+  isInRole(roles: string[]): Boolean {
+    return roles.indexOf(this.userRole) >= 0;
+  }
+
   get plagiarism_script_status(){
     return (this.courseDetail.plagiarism_script) ? "primary" : "warn";
   }
