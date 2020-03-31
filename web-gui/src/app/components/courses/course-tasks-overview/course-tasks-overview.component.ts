@@ -19,6 +19,8 @@ import {delay, flatMap, retryWhen, take} from "rxjs/operators";
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 import {of, throwError} from "rxjs";
 import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog/update-course-dialog.component";
+import {ConferenceService} from "../../../service/conference.service";
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -28,6 +30,7 @@ import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog
 export class CourseTasksOverviewComponent implements OnInit {
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
+              private conferenceService: ConferenceService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }
@@ -41,7 +44,8 @@ export class CourseTasksOverviewComponent implements OnInit {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.loadTasksFromCourse(param.id)
+        this.loadTasksFromCourse(param.id);
+        this.loadConferences();
       }
     );
   }
@@ -100,17 +104,32 @@ export class CourseTasksOverviewComponent implements OnInit {
       height: 'auto',
       width: 'auto',
       data: {courseID: this.courseID}
-    })
+    }).afterClosed()
+      .pipe(
+        flatMap(numberOfConference =>
+          this.conferenceService.createConferences(this.courseID, numberOfConference)
+        )
+      )
+      .subscribe(e => {this.loadConferences()}, throwError);
+  }
+
+  openConferences: Observable<string[]>;
+
+  private loadConferences() {
+    this.openConferences = this.conferenceService.getConferences(this.courseID)
+  }
+
+  openUrlInNewWindow(url: string) {
+    window.open(url,'_blank')
   }
 
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
-          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept))
-
+          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
           if (acceptance_flaggs.indexOf(null) < 0) {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
             return of({success: true})
           } else {
             return throwError('Not all results yet');

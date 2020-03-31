@@ -2,7 +2,11 @@ package de.thm.ii.fbs
 
 import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Paths}
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+
 import de.thm.ii.fbs.util.DB
+import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -16,6 +20,7 @@ import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import javax.servlet.MultipartConfigElement
 import org.springframework.util.unit.DataSize
+
 import scala.io.{Codec, Source}
 
 /**
@@ -66,6 +71,16 @@ class Application {
   * @author Andrej Sajenko
   */
 object Application extends App {
+  private val sc = SSLContext.getInstance("SSL")
+  private val managers: Array[TrustManager] = Array(new X509TrustManager {
+    override def checkClientTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
+    override def checkServerTrusted(x509Certificates: Array[X509Certificate], s: String): Unit = {}
+    override def getAcceptedIssuers: Array[X509Certificate] = Array()
+  })
+
+  sc.init(null, managers, new SecureRandom())
+  HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory)
+
   SpringApplication.run(classOf[Application])
 
   /**

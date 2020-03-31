@@ -3,6 +3,7 @@ package de.thm.ii.fbs.controller
 import java.io
 import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.services._
@@ -14,6 +15,8 @@ import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
+import scala.collection.mutable
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -34,6 +37,8 @@ class CourseController {
   private val testsystemService: TestsystemService = null
   @Autowired
   private val submissionService: SubmissionService = null
+  @Autowired
+  private val conferenceService: JitsiService = null
   private val LIMIT_MAX_20: Int = 20
 
   @Value("${compile.production}")
@@ -789,4 +794,51 @@ class CourseController {
     kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
     kafkaTemplate.flush()
   }*/
+
+  // TODO: Clean Up conferences that are removed over night
+  private val conferences: mutable.Map[Int, mutable.Set[String]] = mutable.Map()
+
+  /**
+    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
+    * @param courseid The course for that the conferences are created.
+    * @param body The body of the request.
+    * @param request The http request.
+    * @return Success
+    */
+  @RequestMapping(value = Array("{courseid}/conferences"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def createConferences(@PathVariable courseid: Int, @RequestBody body: JsonNode, request: HttpServletRequest): Unit = {
+    val user = Users.claimAuthorization(request)
+    if (!(user.isAdmin || user.isDocent || user.isModerator || user.isTutor)) {
+      throw new UnauthorizedException()
+    }
+
+    val count = body.get("count").asInt(1)
+
+    val uries = Range(0, count)
+    .map(_ => {
+      val id = UUID.randomUUID()
+      this.conferenceService.registerConference(s"$courseid-$id")
+    })
+    .map(_.toString)
+    .toList
+
+    val regConfs = this.conferences.getOrElse(courseid, mutable.Set.empty).addAll(uries)
+
+    this.conferences.put(courseid, regConfs)
+  }
+
+  /**
+    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
+    * @param courseid The course for that the conferences are created.
+    * @param request The http request
+    * @return Success
+    */
+  @RequestMapping(value = Array("{courseid}/conferences"), method = Array(RequestMethod.GET))
+  @ResponseBody
+  def getConferences(@PathVariable courseid: Int, request: HttpServletRequest): List[String] = {
+    Users.claimAuthorization(request)
+
+    this.conferences.getOrElse(courseid, mutable.Set.empty).toList
+  }
 }

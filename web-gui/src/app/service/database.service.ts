@@ -633,26 +633,4 @@ export class DatabaseService {
     return this.http.post(`/api/v1/courses/${courseid}/run/tasks/${taskid}`,
     {"complete": true}).toPromise()
   }
-
-
-//TODO:
-  // remove static conferences and add backend support for conferences.
-
-  static conferences:ConferenceDetails[] = []
-
-  getAllConferences(courseid:number): ConferenceDetails[] {
-    //this.http.get<ConferenceDetails[]>(`/api/v1/courses/${courseid}/conferences`);
-    return DatabaseService.conferences.filter((conference)=>{return conference.course_id == courseid});
-  }
-
-  addConferenceRooms(courseid:number,count:number) {
-    for(let i = 0; i < count; ++i){
-      DatabaseService.conferences.push({url:new URL("https://google.de/dummy_" + (Math.random()*1000).toFixed(0)),course_id:courseid});
-    }
-    return this.http.get<ConferenceDetails[]>(`https://google.de`)
-  }
-  deleteConferenceRoom(courseid:number,url:URL) {
-    DatabaseService.conferences = DatabaseService.conferences.filter((conf)=> conf.url != url);
-    return this.http.get<ConferenceDetails[]>(`https://google.de`)
-  }
 }

@@ -1,12 +1,10 @@
-mat-form-field mat-label {
-  font-size: 20px;
-}
-mat-form-field {
-  width: 100%;
-}
-mat-dialog-content {
-  min-height:19vh;
-}
-.mat-icon {
-  font-size: 30px;
+.container {
+  display: flex;
+  flex-direction: column;
+  .mat-dialog-actions {
+    display: block;
+    button {
+      min-width: 100px;
+    }
+  }
 }

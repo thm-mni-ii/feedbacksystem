@@ -37,6 +37,23 @@ class User(val userid: Int, val username: String, val prename: String, val surna
   override def toString: String = {
     asMap().toString()
   }
+
+  /**
+    * @return True if user has admin role
+    */
+  def isAdmin: Boolean = userid == 1
+  /**
+    * @return True if user has moderator role
+    */
+  def isModerator: Boolean = userid == 2
+  /**
+    * @return True if user has docent role in any course
+    */
+  def isDocent: Boolean = userid == 4
+  /**
+    * @return True if user has tutor role in any course
+    */
+  def isTutor: Boolean = userid == 8
 }
 
 /**
