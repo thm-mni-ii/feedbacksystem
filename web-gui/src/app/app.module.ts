@@ -78,6 +78,10 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { CourseTasksOverviewComponent } from './components/courses/course-tasks-overview/course-tasks-overview.component';
 import { NewconferenceDialogComponent } from './components/courses/detail-course/newconference-dialog/newconference-dialog.component';
 import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
+import {
+  CourseTicketsOverviewComponent,
+  TicketStatusFilter
+} from "./components/courses/course-tickets-overview/course-tickets-overview.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -150,7 +154,9 @@ export const httpInterceptorProviders = [
     DeleteSettingDialogComponent,
     CourseTasksOverviewComponent,
     NewconferenceDialogComponent,
-    ConferenceComponent
+    ConferenceComponent,
+    CourseTicketsOverviewComponent,
+    TicketStatusFilter
   ],
   imports: [
     BrowserModule,

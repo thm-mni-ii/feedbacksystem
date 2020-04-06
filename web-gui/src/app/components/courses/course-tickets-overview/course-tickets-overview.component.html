@@ -1,0 +1,37 @@
+<div class="container">
+  <div class="actions">
+    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', 'user']" matTooltip="Zurück zur Kursübersicht"><mat-icon >arrow_back</mat-icon></button>
+  </div>
+  <mat-grid-list cols="3">
+    <mat-grid-tile>
+      <mat-grid-tile-header>
+        Online Benutzer:
+      </mat-grid-tile-header>
+      <mat-list>
+        <mat-list-item *ngFor="let user of users">{{user.surname}},{{user.prename}}</mat-list-item>
+      </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <mat-grid-tile-header>
+       Offene Tickets:
+      </mat-grid-tile-header>
+      <mat-list>
+      <mat-list-item *ngFor="let ticket of tickets | ticketstatus:'open'">
+        <h5 matline>{{ticket.title}}</h5>
+        <p matline> {{ticket.desc}}</p>
+      </mat-list-item>
+      </mat-list>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <mat-grid-tile-header>
+        Offene Tickets:
+      </mat-grid-tile-header>
+    <mat-list>
+      <mat-list-item *ngFor="let ticket of tickets | ticketstatus:'inProgress'">
+        <h5 matline>{{ticket.title}}</h5>
+        <p matline> {{ticket.desc}}</p>
+      </mat-list-item>
+    </mat-list>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>

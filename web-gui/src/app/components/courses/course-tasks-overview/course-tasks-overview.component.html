@@ -4,6 +4,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenz erstellen"><mat-icon >duo</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" [routerLink]="['/','courses',courseID,'tickets']"  matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>
     <mat-menu #confMenu>
       <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>
