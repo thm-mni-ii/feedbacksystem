@@ -8,6 +8,7 @@ cas:
 compile:
   production: false
 jwt:
+  secret: 8D8sa92j3o41pdf0
   expiration:
     time: 999999
 ldap:

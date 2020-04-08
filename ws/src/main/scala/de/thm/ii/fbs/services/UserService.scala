@@ -4,7 +4,6 @@ import java.security.MessageDigest
 import java.util.Date
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.security.Secrets
 import de.thm.ii.fbs.util.DB
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Component
   * @author Benjamin Manns
   */
 @Component
-class UserService {
+class UserService{
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 
@@ -49,6 +48,8 @@ class UserService {
 
   @Value("${jwt.expiration.time}")
   private val jwtExpirationTime: String = null
+  @Autowired
+  private val jwtTokenService: JWTTokenService = null
   /**
     * getUsers is a admin function und just sends a list of all users
     *
@@ -134,7 +135,9 @@ class UserService {
         val jwtToken = authHeader.split(" ")(1)
         try {
           val currentDate = new Date()
-          val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(Secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+          val claims: Claims = Jwts.parser()
+            .setSigningKey(DatatypeConverter
+              .parseBase64Binary(jwtTokenService.jwtSecretEncoding())).parseClaimsJws(jwtToken).getBody
           val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
           // Token is expired
@@ -323,7 +326,7 @@ class UserService {
       role_id = RoleDBLabels.DOCENT_ROLE_ID
       role_name = "docent"
     }
-    val jwtToken = Jwts.builder.setSubject("client_authentication")
+    Jwts.builder.setSubject("client_authentication")
       .claim(UserDBLabels.user_id, user.userid)
       .claim(UserDBLabels.username, user.username)
       .claim(UserDBLabels.prename, user.prename)
@@ -335,9 +338,7 @@ class UserService {
       .claim("token_type", "user")
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
-      .signWith(SignatureAlgorithm.HS256, Secrets.getSuperSecretKey)
+      .signWith(SignatureAlgorithm.HS256, jwtTokenService.jwtSecretEncoding())
       .compact
-
-    jwtToken
   }
 }
