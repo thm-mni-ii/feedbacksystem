@@ -82,6 +82,14 @@ import {
   CourseTicketsOverviewComponent,
   TicketStatusFilter
 } from "./components/courses/course-tickets-overview/course-tickets-overview.component";
+import {MatGridListModule} from "@angular/material/grid-list";
+import {
+  AssignTicketDialogComponent,
+  UserTeacherFilter
+} from './components/courses/detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
+import { NewticketDialogComponent } from './components/courses/detail-course/newticket-dialog/newticket-dialog.component';
+import { IncomingCallDialogComponent } from './components/courses/detail-course/incoming-call-dialog/incoming-call-dialog.component';
+import { InvitetoConferenceDialogComponent } from './components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -156,7 +164,12 @@ export const httpInterceptorProviders = [
     NewconferenceDialogComponent,
     ConferenceComponent,
     CourseTicketsOverviewComponent,
-    TicketStatusFilter
+    TicketStatusFilter,
+    AssignTicketDialogComponent,
+    UserTeacherFilter,
+    NewticketDialogComponent,
+    IncomingCallDialogComponent,
+    InvitetoConferenceDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -180,7 +193,8 @@ export const httpInterceptorProviders = [
     NgxDropzoneModule,
     MatSlideToggleModule,
     MatDialogModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatGridListModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,

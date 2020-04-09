@@ -21,6 +21,7 @@ import {of, throwError} from "rxjs";
 import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog/update-course-dialog.component";
 import {ConferenceService} from "../../../service/conference.service";
 import {Observable} from 'rxjs';
+import {NewticketDialogComponent} from "../detail-course/newticket-dialog/newticket-dialog.component";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -58,7 +59,7 @@ export class CourseTasksOverviewComponent implements OnInit {
     })
   }
 
-  public isAuthorized(){
+  public isAuthorized() {
     return ["tutor", "docent", "moderator", "admin"].indexOf(this.userRole) >= 0;
   }
 
@@ -95,7 +96,7 @@ export class CourseTasksOverviewComponent implements OnInit {
         return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
       })
     ).subscribe(course_detail => {
-      this.router.navigate(['courses', this.courseID,'task',course_detail.task.task_id])
+      this.router.navigate(['courses', this.courseID, 'task', course_detail.task.task_id])
     });
   }
 
@@ -110,7 +111,9 @@ export class CourseTasksOverviewComponent implements OnInit {
           this.conferenceService.createConferences(this.courseID, numberOfConference)
         )
       )
-      .subscribe(e => {this.loadConferences()}, throwError);
+      .subscribe(e => {
+        this.loadConferences()
+      }, throwError);
   }
 
   openConferences: Observable<string[]>;
@@ -120,7 +123,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   }
 
   openUrlInNewWindow(url: string) {
-    window.open(url,'_blank')
+    window.open(url, '_blank')
   }
 
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
@@ -141,10 +144,19 @@ export class CourseTasksOverviewComponent implements OnInit {
       ).toPromise()
         .then(d => {
           if (typeof d == 'undefined') {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}})
           }
         })
         .catch(console.error)
     }, 2000)
+  }
+
+  createTicket() {
+    //todo: service anbindung
+    this.dialog.open(NewticketDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    })
   }
 }

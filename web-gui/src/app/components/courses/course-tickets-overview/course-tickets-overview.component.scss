@@ -4,7 +4,6 @@
   flex-direction: column;
   align-items: center;
 }
-
 .actions {
   display: flex;
   height: 40px;
@@ -29,5 +28,29 @@
   }
   .mat-icon {
     cursor: pointer;
+  }
+}
+#ticketOverview {
+  display:flex;
+  flex-direction:row;
+  .ticketColumn {
+    width:33%;
+    h3 {
+      text-align:center;
+    }
+  }
+
+}
+.mat-list {
+  width:100%;
+}
+.mat-card {
+  margin:5px;
+}
+.ticketMeta {
+  display:flex;
+  flex-direction:row;
+  p {
+    width:50%;
   }
 }
