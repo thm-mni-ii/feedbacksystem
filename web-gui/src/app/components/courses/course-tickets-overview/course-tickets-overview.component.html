@@ -7,7 +7,7 @@
     <div class="ticketColumn">
       <h3>Online Nutzer</h3>
       <mat-list>
-        <mat-card mat-list-item (click)="inviteToConference(user)" *ngFor="let user of users">
+        <mat-card mat-list-item (click)="inviteToConference(user)" *ngFor="let user of users | async">
           <mat-card-content >{{user.surname}}, {{user.prename}}</mat-card-content>
         </mat-card>
       </mat-list>

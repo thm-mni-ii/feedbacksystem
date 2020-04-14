@@ -9,25 +9,27 @@ import {MatSnackBar} from "@angular/material/snack-bar";
   styleUrls: ['./incoming-call-dialog.component.css']
 })
 export class IncomingCallDialogComponent implements OnInit {
-
-  teacherName: string;
-
+  participants:any[];
+  conferenceURL:string;
   constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, private db: DatabaseService,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
-    this.teacherName = this.data.teacherName;
-
-    this.teacherName = "Simon Schniedenharn"
+    this.participants = this.data.participants;
+    this.conferenceURL = this.data.conferenceURL;
   }
 
   public acceptCall(){
-    //todo: anruf annehmen
+    //todo notification api benutzen um auf invite hinzuweisen
+    this.openUrlInNewWindow(this.conferenceURL);
     this.dialogRef.close();
   }
 
   public declineCall(){
-    //todo: anruf ablehnen;
     this.dialogRef.close();
+  }
+
+  openUrlInNewWindow(url: string) {
+    window.open(url, '_blank');
   }
 }

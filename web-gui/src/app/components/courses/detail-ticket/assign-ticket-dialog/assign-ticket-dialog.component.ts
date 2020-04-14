@@ -45,4 +45,3 @@ export class UserTeacherFilter implements PipeTransform {
     return items.filter(item =>  item.role_id <= 8);
   }
 }
-

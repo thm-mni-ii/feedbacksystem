@@ -11,11 +11,11 @@ import {DomSanitizer} from "@angular/platform-browser";
 import {DOCUMENT} from "@angular/common";
 import {User} from "../../../interfaces/HttpInterfaces";
 import { Pipe, PipeTransform } from '@angular/core';
-import {NewconferenceDialogComponent} from "../detail-course/newconference-dialog/newconference-dialog.component";
-import {flatMap} from "rxjs/operators";
-import {throwError} from "rxjs";
 import {AssignTicketDialogComponent} from "../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component";
 import {InvitetoConferenceDialogComponent} from "../detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component";
+import {RxStompClient} from "../../../util/rx-stomp";
+import {Observable} from 'rxjs';
+
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -23,51 +23,29 @@ import {InvitetoConferenceDialogComponent} from "../detail-ticket/inviteto-confe
   styleUrls: ['./course-tickets-overview.component.scss']
 })
 export class CourseTicketsOverviewComponent implements OnInit {
-
+  private stompRx: RxStompClient = null;
+  connected:boolean;
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
+    this.users = this.router.getCurrentNavigation().extras.state.users;
   }
 
   courseID: number;
   userRole: string;
-  users: User[];
+  users: Observable<User[]>;
   tickets: any[];
 
   ngOnInit(): void {
-    this.users = [new class implements User {
-      email: string = "";
-      last_login: Date;
-      prename: string = "Simon";
-      role_id: number = 1;
-      surname: string = "Schniedenharn";
-      user_id: number = 1;
-      username: string;
-    }, new class implements User {
-      email: string = "";
-      last_login: Date;
-      prename: string = "John";
-      role_id: number = 5;
-      surname: string = "Doe";
-      user_id: number = 2;
-      username: string;
-    }, new class implements User {
-        email: string = "";
-        last_login: Date;
-        prename: string = "Joanna";
-        role_id: number = 16;
-        surname: string = "Doe";
-        user_id: number = 5;
-        username: string;
-      }]
+    //console.log(this.stompRx.send("/websocket/classroom/users",{courseId:this.courseID}))
     this.tickets = [{title: "Riesenproblem",
       desc: "Bitte hilfe bei dem Problem",
       status: "open",
       creator: "Simon, S",
       timestamp:1586340000,
-      priority:5
+      priority:6
     },
       {title: "Riesenproblem",
         desc: "Bitte hilfe bei dem Problem, komme alleine nicht mehr weiter. Warte auf Konferenzanfrage.",
@@ -86,6 +64,9 @@ export class CourseTicketsOverviewComponent implements OnInit {
         this.courseID = param.id;
       }
     );
+  }
+  private constructHeaders() {
+    return {'Auth-Token': this.user.getPlainToken()};
   }
 
   public isAuthorized() {

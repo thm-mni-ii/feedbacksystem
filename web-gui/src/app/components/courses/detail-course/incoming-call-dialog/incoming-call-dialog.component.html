@@ -1,8 +1,12 @@
 <div matDialogTitle>Sie werden in eine Konferenz eingeladen</div>
 
 <mat-dialog-content class="container">
-  <p>{{this.teacherName}} läd sie zu einem Konferenzanruf ein.</p>
-
+  <p>Sie werden zu einem Konferenzanruf eingeladen.</p>
+  <mat-list *ngIf="participants.length > 0">Teilnehmer:
+    <mat-list-item *ngfor="let participant of participants">
+      {{participant}}
+    </mat-list-item>
+  </mat-list>
   <mat-dialog-actions>
     <button mat-flat-button color="warn" (click)="acceptCall()">Annehmen</button>
     <button mat-flat-button color="accent" (click)="declineCall()">Ablehnen</button>

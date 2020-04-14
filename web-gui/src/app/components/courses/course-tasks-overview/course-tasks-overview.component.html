@@ -6,7 +6,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenz erstellen"><mat-icon >duo</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="goOnline()" matTooltip="Konferenz erstellen"><mat-icon>login</mat-icon></button>
     <button mat-flat-button color="primary" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
-    <button mat-flat-button color="primary" *ngIf="isAuthorized()" [routerLink]="['/','courses',courseID,'tickets']"  matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" [routerLink]="['/','courses',courseID,'tickets']" [state]="{users:users.asObservable()}" matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>
     <mat-menu #confMenu>
       <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>

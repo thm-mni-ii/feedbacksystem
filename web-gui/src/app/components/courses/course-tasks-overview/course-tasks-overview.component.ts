@@ -11,7 +11,7 @@ import {
   CourseTask,
   DetailedCourseInformation,
   NewTaskInformation,
-  Succeeded
+  Succeeded, User
 } from "../../../interfaces/HttpInterfaces";
 import {NewtaskDialogComponent} from "../detail-course/newtask-dialog/newtask-dialog.component";
 import {NewconferenceDialogComponent} from "../detail-course/newconference-dialog/newconference-dialog.component";
@@ -20,9 +20,11 @@ import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsys
 import {of, throwError} from "rxjs";
 import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog/update-course-dialog.component";
 import {ConferenceService} from "../../../service/conference.service";
-import {Observable} from 'rxjs';
+import {Observable,Subject} from 'rxjs';
 import {NewticketDialogComponent} from "../detail-course/newticket-dialog/newticket-dialog.component";
 import {RxStompClient} from "../../../util/rx-stomp";
+import {AssignTicketDialogComponent} from "../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component";
+import {IncomingCallDialogComponent} from "../detail-course/incoming-call-dialog/incoming-call-dialog.component";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -44,6 +46,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   courseID: number;
   userRole: string;
   courseDetail: DetailedCourseInformation;
+  users: Subject<User[]> = new Subject<User[]>();
 
   ngOnInit() {
     this.route.params.subscribe(
@@ -53,6 +56,7 @@ export class CourseTasksOverviewComponent implements OnInit {
         this.loadConferences();
       }
     );
+
   }
 
   loadTasksFromCourse(courseid: number) {
@@ -168,12 +172,23 @@ export class CourseTasksOverviewComponent implements OnInit {
           .map(u => u.prename + ' ' + u.surname)
           .push(invite.user.prename + ' ' + invite.user.surname);
 
-        // TODO: replace the following by an angular dialog where the button action opens a
-        // new link, otherwise the new window will be blocked by a strict ad-blocker.
-        if (confirm('You are invited to take part in a webconference with ' + JSON.stringify(participants))) {
-          this.openUrlInNewWindow(invite.href);
-        }
+        this.dialog.open(IncomingCallDialogComponent, {
+          height: 'auto',
+          width: 'auto',
+          data: {courseID: this.courseID, participants: participants,conferenceURL:invite.href}
+        })
       });
+      this.stompRx.subscribeToTopic('/user/' + this.user.getUsername() + '/classroom/users', this.constructHeaders()).subscribe(msg => {
+        this.users.next(JSON.parse(msg.body))
+      });
+      this.stompRx.subscribeToTopic( "/topic/classroom/" + this.courseID + '/left', this.constructHeaders()).subscribe(msg => {
+        this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
+      })
+      this.stompRx.subscribeToTopic( "/topic/classroom/" + this.courseID + '/join', this.constructHeaders()).subscribe(msg => {
+        this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
+      })
+      this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
+
     });
   }
 
