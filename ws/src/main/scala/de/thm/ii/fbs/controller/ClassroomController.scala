@@ -43,9 +43,9 @@ class ClassroomController {
       courseId <- Classroom.leave(user)
     } yield (courseId, user)
 
-    courseUser.foreach((course, user) => {
-      smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
-    })
+    courseUser.foreach {
+      case (course, user) => smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
+    }
   })
 
   /**
