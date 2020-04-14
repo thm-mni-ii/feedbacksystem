@@ -18,17 +18,20 @@ object Tickets {
     * Creates and stores an issue ticket
     * @param courseId The course id
     * @param title Title of a ticket
-    * @param msg The message
+    * @param desc The message
+    * @param status The status of the ticket
     * @param creator The user who created the ticket
-    * @param simple An optional flag that states if the ticket is simple or difficult
+    * @param assignee The user who should handle the ticket
+    * @param timestamp The creation of the ticket
+    * @param priority The priority of the ticket
     * @return A ticket with a unique id
     */
-  def create(courseId: Int, title: String, msg: String, creator: User, simple: Boolean = true): Ticket = {
+  def create(courseId: Int, title: String, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
     val id = UUID.randomUUID().getMostSignificantBits() & Long.MaxValue
     if (ticketToCourse.contains(id)) {
-      create(courseId, title, msg, creator, simple)
+      create(courseId, title, desc, status, creator, assignee, timestamp, priority)
     } else {
-      val ticket = Ticket(courseId, title, msg, creator, id, simple)
+      val ticket = Ticket(courseId, title, desc, status, creator, assignee, timestamp, priority, id)
       add(ticket)
       ticket
     }
@@ -109,12 +112,16 @@ object Tickets {
   * An issue ticket
   * @param courseId The course id
   * @param title Title of a ticket
-  * @param msg The message
+  * @param desc The message
+  * @param status The ticket status
   * @param creator The user who created the ticket
+  * @param assignee The user to that the ticket is assigned to
+  * @param timestamp The timestamp of the creation
+  * @param priority The priority of the issue ticket
   * @param id the unique ticket id
-  * @param simple A flag that states if the ticket is simple or difficult
   */
-case class Ticket(courseId: Int, title: String, msg: String, creator: User, id: Long = 0, simple: Boolean = true) {
+case class Ticket(courseId: Int, title: String, desc: String, status: String, creator: User,
+                  assignee: User, timestamp: Long, priority: Int, id: Long = 0) {
   /**
     * @return The hash code -- using id
     */

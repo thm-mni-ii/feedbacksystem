@@ -20,6 +20,13 @@ export class RxStompClient {
   }
 
   /**
+   * @return True if client is connected.
+   */
+  public isConnected() {
+    return this.client.connected;
+  }
+
+  /**
    * Establish a connection to a stomp protocol server.
    * @param headers Optional headers to send with the connection frame.
    */

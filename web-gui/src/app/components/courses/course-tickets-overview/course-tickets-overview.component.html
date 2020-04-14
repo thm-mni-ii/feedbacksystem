@@ -15,7 +15,7 @@
    <div class="ticketColumn">
      <h3>Offene Tickets</h3>
       <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | ticketstatus:'open'">
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus:'open'">
         <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content >
           <p>{{ticket.desc}}</p>
@@ -30,7 +30,7 @@
     <div class="ticketColumn">
       <h3>Tickets in Bearbeitung</h3>
     <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | ticketstatus:'inProgress' ">
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus:'inProgress' ">
         <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content  >
           <p>{{ticket.desc}}</p>

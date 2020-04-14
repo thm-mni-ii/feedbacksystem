@@ -78,7 +78,7 @@ class ClassroomController {
     val principal = headerAccessor.getUser
     val userOpt = this.userService.loadUserFromDB(principal.getName)
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR)) {
-      throw new MessagingException(s"User: ${userOpt.get.username} tried to access the stream at 'handleTicketMsg' without authorization")
+      throw new MessagingException(s"User: ${userOpt.get.username} tried to access the stream at 'allUser' without authorization")
     }
 
     val response = Classroom.getParticipants(courseId)
@@ -100,7 +100,7 @@ class ClassroomController {
     val userOpt = this.userService.loadUserFromDB(principal.getName)
 
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR)) {
-      logger.warn(s"User: ${userOpt.get.username} tried to access the stream at 'handleTicketMsg' without authorization")
+      logger.warn(s"User: ${userOpt.get.username} tried to access the stream at 'handleInviteMsg' without authorization")
     } else {
       val users = invite.get("users").asInstanceOf[ArrayNode]
 
@@ -170,8 +170,11 @@ class ClassroomController {
       user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
       courseId <- m.retrive("courseId").asInt()
       title <- m.retrive("title").asText()
-      msg <- m.retrive("msg").asText()
-    } yield Tickets.create(courseId, title, msg, user)
+      desc <- m.retrive("desc").asText()
+      status <- m.retrive("status").asText()
+      timestamp <- m.retrive("timestamp").asLong()
+      priority <- m.retrive("priority").asInt()
+    } yield Tickets.create(courseId, title, desc, status, user, user, timestamp, priority)
 
     if (ticketOpt.isEmpty) {
       throw new MessagingException("Invalid msg: " + m)
@@ -190,12 +193,17 @@ class ClassroomController {
       id <- m.retrive("id").asLong()
       courseId <- m.retrive("courseId").asInt()
       title <- m.retrive("title").asText()
-      msg <- m.retrive("msg").asText()
-      simple <- m.retrive("simple").asBool()
+      desc <- m.retrive("desc").asText()
       creator <- m.retrive("creator").asObject()
+      assignee <- m.retrive("assignee").asObject()
       creatorName <- creator.retrive("username").asText()
+      assigneeName <- assignee.retrive("username").asText()
       creatorAsUser <- userService.loadUserFromDB(creatorName)
-    } yield (Ticket(courseId, title, msg, creatorAsUser, id, simple), user)
+      assigneAsUser <- userService.loadUserFromDB(assigneeName)
+      status <- m.retrive("status").asText()
+      timestamp <- m.retrive("timestamp").asLong()
+      priority <- m.retrive("priority").asInt()
+    } yield (Ticket(courseId, title, desc, status, creatorAsUser, assigneAsUser, timestamp, priority), user)
 
     ticketAndUser match {
       case Some(v) => {
@@ -235,7 +243,15 @@ class ClassroomController {
     }
   }
 
-  // TODO: do it
   private def ticketToJson(ticket: Ticket): JSONObject = new JSONObject()
+    .put("id", ticket.id)
+    .put("title", ticket.title)
+    .put("desc", ticket.desc)
+    .put("creator", userToJson(ticket.creator))
+    .put("assignee", userToJson(ticket.assignee))
+    .put("priority", ticket.priority)
+    .put("status", ticket.status)
+    .put("courseId", ticket.courseId)
+    .put("timestamp", ticket.timestamp)
 
 }

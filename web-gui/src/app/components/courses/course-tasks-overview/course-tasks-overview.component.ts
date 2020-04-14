@@ -1,30 +1,31 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {DatabaseService} from "../../../service/database.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import {TitlebarService} from "../../../service/titlebar.service";
-import {MatDialog} from "@angular/material/dialog";
-import {UserService} from "../../../service/user.service";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {DomSanitizer} from "@angular/platform-browser";
-import {DOCUMENT} from "@angular/common";
+import {DatabaseService} from '../../../service/database.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {TitlebarService} from '../../../service/titlebar.service';
+import {MatDialog} from '@angular/material/dialog';
+import {UserService} from '../../../service/user.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DomSanitizer} from '@angular/platform-browser';
+import {DOCUMENT} from '@angular/common';
 import {
   CourseTask,
   DetailedCourseInformation,
   NewTaskInformation,
   Succeeded, User
-} from "../../../interfaces/HttpInterfaces";
-import {NewtaskDialogComponent} from "../detail-course/newtask-dialog/newtask-dialog.component";
-import {NewconferenceDialogComponent} from "../detail-course/newconference-dialog/newconference-dialog.component";
-import {delay, flatMap, retryWhen, take} from "rxjs/operators";
-import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
-import {of, throwError} from "rxjs";
-import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog/update-course-dialog.component";
-import {ConferenceService} from "../../../service/conference.service";
-import {Observable,Subject} from 'rxjs';
-import {NewticketDialogComponent} from "../detail-course/newticket-dialog/newticket-dialog.component";
-import {RxStompClient} from "../../../util/rx-stomp";
-import {AssignTicketDialogComponent} from "../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component";
-import {IncomingCallDialogComponent} from "../detail-course/incoming-call-dialog/incoming-call-dialog.component";
+} from '../../../interfaces/HttpInterfaces';
+import {NewtaskDialogComponent} from '../detail-course/newtask-dialog/newtask-dialog.component';
+import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
+import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
+import {AnswerFromTestsystemDialogComponent} from '../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
+import {of, throwError} from 'rxjs';
+import {UpdateCourseDialogComponent} from '../detail-course/update-course-dialog/update-course-dialog.component';
+import {ConferenceService} from '../../../service/conference.service';
+import {Observable, Subject} from 'rxjs';
+import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
+import {RxStompClient} from '../../../util/rx-stomp';
+import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
+import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
+import {ClassroomService} from '../../../service/classroom.service';
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -33,11 +34,8 @@ import {IncomingCallDialogComponent} from "../detail-course/incoming-call-dialog
 })
 export class CourseTasksOverviewComponent implements OnInit {
 
-  private stompRx: RxStompClient = null;
-  private connected = false;
-
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ConferenceService,
+              private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }
@@ -46,7 +44,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   courseID: number;
   userRole: string;
   courseDetail: DetailedCourseInformation;
-  users: Subject<User[]> = new Subject<User[]>();
+  openConferences: Observable<string[]>;
 
   ngOnInit() {
     this.route.params.subscribe(
@@ -56,7 +54,6 @@ export class CourseTasksOverviewComponent implements OnInit {
         this.loadConferences();
       }
     );
-
   }
 
   loadTasksFromCourse(courseid: number) {
@@ -64,11 +61,11 @@ export class CourseTasksOverviewComponent implements OnInit {
       this.courseDetail = value;
       this.tasks = value.tasks;
       this.userRole = value.role_name;
-    })
+    });
   }
 
   public isAuthorized() {
-    return ["tutor", "docent", "moderator", "admin"].indexOf(this.userRole) >= 0;
+    return ['tutor', 'docent', 'moderator', 'admin'].indexOf(this.userRole) >= 0;
   }
 
   /**
@@ -99,12 +96,12 @@ export class CourseTasksOverviewComponent implements OnInit {
       flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid)
+          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid);
         }
         return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
       })
     ).subscribe(course_detail => {
-      this.router.navigate(['courses', this.courseID, 'task', course_detail.task.task_id])
+      this.router.navigate(['courses', this.courseID, 'task', course_detail.task.task_id]);
     });
   }
 
@@ -124,10 +121,8 @@ export class CourseTasksOverviewComponent implements OnInit {
       }, throwError);
   }
 
-  openConferences: Observable<string[]>;
-
   private loadConferences() {
-    this.openConferences = this.conferenceService.getConferences(this.courseID)
+    this.openConferences = this.conferenceService.getConferences(this.courseID);
   }
 
   openUrlInNewWindow(url: string) {
@@ -138,7 +133,7 @@ export class CourseTasksOverviewComponent implements OnInit {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
-          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
+          const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
           if (acceptance_flaggs.indexOf(null) < 0) {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
             return of({success: true});
@@ -152,7 +147,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       ).toPromise()
         .then(d => {
           if (typeof d == 'undefined') {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}})
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
           }
         })
         .catch(console.error);
@@ -160,46 +155,27 @@ export class CourseTasksOverviewComponent implements OnInit {
   }
 
   goOnline() {
-    this.stompRx = new RxStompClient('https://localhost:8080/websocket');
+    this.classroomService.getInvitations().subscribe(invite => {
+      const participants = invite.users
+        .map(u => u.prename + ' ' + u.surname)
+        .push(invite.user.prename + ' ' + invite.user.surname);
 
-    this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
-      this.connected = true;
-
-      // Handles invitation from tutors / docents to take part in a webconference
-      this.stompRx.subscribeToTopic('/user/' + this.user.getUsername() + '/classroom/invite', this.constructHeaders()).subscribe(msg => {
-        let invite = JSON.parse(msg.body);
-        let participants = invite.users
-          .map(u => u.prename + ' ' + u.surname)
-          .push(invite.user.prename + ' ' + invite.user.surname);
-
-        this.dialog.open(IncomingCallDialogComponent, {
-          height: 'auto',
-          width: 'auto',
-          data: {courseID: this.courseID, participants: participants,conferenceURL:invite.href}
-        })
+      this.dialog.open(IncomingCallDialogComponent, {
+        height: 'auto',
+        width: 'auto',
+        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href}
       });
-      this.stompRx.subscribeToTopic('/user/' + this.user.getUsername() + '/classroom/users', this.constructHeaders()).subscribe(msg => {
-        this.users.next(JSON.parse(msg.body))
-      });
-      this.stompRx.subscribeToTopic( "/topic/classroom/" + this.courseID + '/left', this.constructHeaders()).subscribe(msg => {
-        this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
-      })
-      this.stompRx.subscribeToTopic( "/topic/classroom/" + this.courseID + '/join', this.constructHeaders()).subscribe(msg => {
-        this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
-      })
-      this.stompRx.send('/websocket/classroom/users',{courseId:this.courseID},this.constructHeaders())
-
     });
+
+    this.classroomService.join(this.courseID).subscribe();
   }
 
   goOffline() {
-    this.stompRx.disconnect(this.constructHeaders()).subscribe(() => {
-      this.connected = false;
-    });
+    this.classroomService.leave().subscribe();
   }
 
   testAction() {
-    this.sendInvite('https://fk-conf.mni.thm.de/andrej.html', [
+    this.classroomService.inviteToConference('https://fk-conf.mni.thm.de/andrej.html', [
       {
         'username': 'la19',
         'prename': 'Lena',
@@ -208,20 +184,15 @@ export class CourseTasksOverviewComponent implements OnInit {
     ]);
   }
 
-  sendInvite(href: string, users: {'username': string, 'prename': string, 'surname': string}[]) {
-    this.stompRx.send('/websocket/classroom/invite', {'href': href, 'users': users}, this.constructHeaders());
-  }
-
-  private constructHeaders() {
-    return {'Auth-Token': this.user.getPlainToken()};
-  }
-
   createTicket() {
-    //todo: service anbindung
     this.dialog.open(NewticketDialogComponent, {
       height: 'auto',
       width: 'auto',
       data: {courseID: this.courseID}
-    })
+    }).afterClosed().subscribe(ticket => {
+      if (ticket) {
+        this.classroomService.createTicket(ticket);
+      }
+    });
   }
 }

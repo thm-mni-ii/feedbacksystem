@@ -232,6 +232,32 @@ export interface User {
   last_login?: Date;
 }
 
+export interface Ticket {
+  title: string;
+  msg: string;
+  courseId: number;
+  creator: {
+    username: string;
+    prename: string;
+    surname: string
+    role: number;
+  };
+}
+
+export interface ConfInvite {
+  href: string;
+  user: {
+    username: string;
+    prename: string;
+    surname: string;
+  };
+  users: {
+    username: string;
+    prename: string;
+    surname: string;
+  }[];
+}
+
 
 export interface TaskTestsystem{
   name:	string;
