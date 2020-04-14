@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.model
 
-import java.security.Principal
-
 import scala.collection.mutable
 
 /**
@@ -18,7 +16,8 @@ object Classroom {
     * @param user The user to add
     */
   def join(courseId: Int, user: User): Unit = {
-    roomsToUsers.getOrElse(courseId, mutable.Set()).add(user)
+    roomsToUsers.getOrElseUpdate(courseId, mutable.Set()).add(user)
+
     userToRoom.put(user, courseId)
   }
 

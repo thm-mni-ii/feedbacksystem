@@ -9,18 +9,26 @@ import com.fasterxml.jackson.databind.JsonNode
   */
 class JsonWrapper(jsonNode: JsonNode) {
   /**
-    * @return Return textual representation of the node or null
+    * @return Return textual representation of the node or none
     */
   def asText(): Option[String] = if (jsonNode != null) Option(jsonNode.asText()) else Option.empty
   /**
-    * @return Return integer representation of the node or null
+    * @return Return integer representation of the node or none
     */
   def asInt(): Option[Int] = if (jsonNode != null) Option(jsonNode.asInt()) else Option.empty
   /**
-    * @return Return boolean representation of the node or null
+    * @return Return boolean representation of the node or none
     */
   def asBool(): Option[Boolean] = if (jsonNode != null) Option(jsonNode.asBoolean()) else Option.empty
+  /**
+    * @return Return long representation of the node or none
+    */
+  def asLong(): Option[Long] = if (jsonNode != null) Option(jsonNode.asLong()) else Option.empty
 
+  /**
+    * @return Return a json object or none
+    */
+  def asObject(): Option[JsonNode] = if (jsonNode != null) Option(jsonNode) else Option.empty
   /**
     * Retrive a key from json object if the json object is not null
     * @param key Key to access

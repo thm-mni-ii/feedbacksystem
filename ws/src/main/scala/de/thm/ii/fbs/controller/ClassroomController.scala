@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.controller
 
 import java.security.Principal
+
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import de.thm.ii.fbs.model.{Classroom, Role, User, UserSessionMap}
+import de.thm.ii.fbs.model.{Classroom, Role, Ticket, Tickets, User, UserSessionMap}
 import de.thm.ii.fbs.services.UserService
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
@@ -13,6 +14,7 @@ import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessag
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
 import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.stereotype.Controller
+import de.thm.ii.fbs.util.JsonWrapper._
 
 /**
   * WebSocket controller that allows users to appear as logged in user.
@@ -69,21 +71,22 @@ class ClassroomController {
     * Retrives all users messages
     * @param m Message
     * @param headerAccessor Header information
-    * @return Invite URL to conference
     */
   @MessageMapping(value = Array("/classroom/users"))
-  def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): String = {
-    val courseId = m.get("course").asInt()
+  def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val courseId = m.get("courseId").asInt()
     val principal = headerAccessor.getUser
     val userOpt = this.userService.loadUserFromDB(principal.getName)
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR)) {
       throw new MessagingException(s"User: ${userOpt.get.username} tried to access the stream at 'handleTicketMsg' without authorization")
     }
 
-    Classroom.getParticipants(courseId)
+    val response = Classroom.getParticipants(courseId)
       .map(userToJson)
       .foldLeft(new JSONArray())((a, u) => a.put(u))
       .toString()
+
+    smt.convertAndSendToUser(userOpt.get.getName(), "/classroom/users", response)
   }
 
   /**
@@ -116,4 +119,123 @@ class ClassroomController {
       })
     }
   }
+
+  // Tickets
+  Tickets.onCreate((ticket) => {
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/create", ticketToJson(ticket))
+  })
+  Tickets.onUpdate((ticket) => {
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/update", ticketToJson(ticket))
+  })
+  Tickets.onRemove((ticket) => {
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/remove", ticketToJson(ticket))
+  })
+
+  /**
+    * Returns all tickets for a course
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/tickets"))
+  def getAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val courseIdAndUser = for {
+      user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
+      courseId <- m.retrive("courseId").asInt()
+    } yield (courseId, user)
+
+    courseIdAndUser match {
+      case Some(v) => {
+        val (courseId, user) = v
+        if (!user.isAtLeastInRole(Role.TUTOR)) {
+          throw new MessagingException("User is not allowed to push on this topic")
+        } else {
+          val response = Tickets.get(courseId)
+            .map(ticketToJson)
+            .foldLeft(new JSONArray())((a, t) => a.put(t)).toString
+          smt.convertAndSendToUser(user.getName(), "/classroom/tickets", response)
+        }
+      }
+      case None => throw new MessagingException("Invalid content " + m)
+    }
+  }
+
+  /**
+    * Handles the creation of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/ticket/create"))
+  def createTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val ticketOpt = for {
+      user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
+      courseId <- m.retrive("courseId").asInt()
+      title <- m.retrive("title").asText()
+      msg <- m.retrive("msg").asText()
+    } yield Tickets.create(courseId, title, msg, user)
+
+    if (ticketOpt.isEmpty) {
+      throw new MessagingException("Invalid msg: " + m)
+    }
+  }
+
+  /**
+    * Handles the update of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/ticket/update"))
+  def updateTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val ticketAndUser = for {
+      user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
+      id <- m.retrive("id").asLong()
+      courseId <- m.retrive("courseId").asInt()
+      title <- m.retrive("title").asText()
+      msg <- m.retrive("msg").asText()
+      simple <- m.retrive("simple").asBool()
+      creator <- m.retrive("creator").asObject()
+      creatorName <- creator.retrive("username").asText()
+      creatorAsUser <- userService.loadUserFromDB(creatorName)
+    } yield (Ticket(courseId, title, msg, creatorAsUser, id, simple), user)
+
+    ticketAndUser match {
+      case Some(v) => {
+        val (ticket, user) = v
+        if (!(ticket.creator.username == user.username || user.isAtLeastInRole(Role.TUTOR))) {
+          throw new MessagingException("User is not allowed to edit this ticket")
+        } else {
+          Tickets.update(ticket)
+        }
+      }
+      case None => throw new MessagingException("Invalid content: " + m)
+    }
+  }
+
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/ticket/remove"))
+  def removeTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val ticketAndUser = for {
+      user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
+      id <- m.retrive("id").asLong()
+      ticket <- Tickets.getTicket(id)
+    } yield (ticket, user)
+
+    ticketAndUser match {
+      case Some(v) =>
+        val (ticket, user) = v
+        if (!(ticket.creator.username == user.username || user.isAtLeastInRole(Role.TUTOR))) {
+          throw new MessagingException("User is not allowed to remove this ticket")
+        } else {
+          Tickets.remove(ticket)
+        }
+      case None => throw new MessagingException("Invalid message: " + m)
+    }
+  }
+
+  // TODO: do it
+  private def ticketToJson(ticket: Ticket): JSONObject = new JSONObject()
+
 }
