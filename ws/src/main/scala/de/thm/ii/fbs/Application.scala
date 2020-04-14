@@ -29,7 +29,9 @@ import scala.io.{Codec, Source}
   * @author Andrej Sajenko
   */
 @SpringBootApplication
-@PropertySource(value = Array("file:${confdir}/ws/application_dev.properties", "file:/usr/local/appconfig/application.properties"),
+@PropertySource(value = Array("file:/usr/local/ws/application.yml",
+  "file:${confdir}/ws/application_dev.properties",
+  "file:/usr/local/appconfig/application.properties"),
   ignoreResourceNotFound = true)
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)

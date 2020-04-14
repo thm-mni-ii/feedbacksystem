@@ -1,3 +1,61 @@
-// java -jar myproject.jar --spring.config.name=myproject
-// --spring.config.location=classpath:/default.properties,classpath:/override.properties
-// file:./config/
+cas:
+  authentication-url-patterns: /api/v1/login
+  client-host-url: https://localhost:8080/
+  server-login-url: https://cas.thm.de/cas/login
+  server-url-prefix: https://cas.thm.de/cas/
+  validation-type: CAS3
+  validation-url-patterns: /api/v1/login
+compile:
+  production: false
+jwt:
+  secret: 8D8sa92j3o41pdf0
+  expiration:
+    time: 999999
+ldap:
+  basedn: dc=fh-giessen-friedberg,dc=de
+  url: ldaps://ldap.fh-giessen.de
+logging:
+  level:
+    root: INFO
+markdown:
+  base-path: /Users/andrej/Desktop/Apps/feedbacksystem/docker-config/ws/markdown/
+message:
+  topic:
+    name: java
+security:
+  basic:
+    enabled: false
+server:
+  port: 8080
+  ssl:
+    enabled: true
+    key-alias: tomcat
+    key-store: classpath:keystore.p12
+    key-store-password: passwd
+    key-store-type: PKCS12
+services:
+  jitsi:
+    service-url: https://fk-conf.mni.thm.de/newConf/rooms.php
+    shared-secret: ZjUyMTBjNTEtOGUxNC00YWU1LWEyY2UtZTE3MTUyZTQ4MmJk
+    user: fbs
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: twRuvi2ejllDdA4nnQLa08O
+    tomcat:
+      max-active: 50
+      max-wait: 10000
+      test-on-borrow: true
+    url: jdbc:mysql://localhost:3308/submissionchecker?autoReconnect=true&failOverReadOnly=false&maxReconnects=10&useSSL=false
+    username: root
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+    open-in-view: false
+  kafka:
+    auto-offset-reset: earliest
+    bootstrap-servers: localhost:29092
+    consumer:
+      group-id: jcg-group
+url:
+  expiration:
+    time: 300

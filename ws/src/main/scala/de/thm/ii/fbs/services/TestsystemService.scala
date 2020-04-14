@@ -2,11 +2,11 @@ package de.thm.ii.fbs.services
 
 import java.util
 import java.util.Date
+
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import de.thm.ii.fbs.TestsystemTestfileLabels
 import de.thm.ii.fbs.model.Testsystem
-import de.thm.ii.fbs.security.Secrets
 import de.thm.ii.fbs.util.{BadRequestException, DB}
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
@@ -25,9 +25,10 @@ import scala.reflect.Manifest
 class TestsystemService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-
   @Value("${jwt.expiration.time}")
   private val jwtExpirationTime: String = null
+  @Autowired
+  private val jwtTokenService: JWTTokenService = null
 
   /**
     * create and insert a testsystem information
@@ -249,7 +250,7 @@ class TestsystemService {
       .claim("testsystem_id", id_string)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
-      .signWith(SignatureAlgorithm.HS256, Secrets.getSuperSecretKey)
+      .signWith(SignatureAlgorithm.HS256, jwtTokenService.jwtSecretEncoding())
       .compact
 
     jwtToken
@@ -270,7 +271,9 @@ class TestsystemService {
         val jwtToken = authHeader.split(" ")(1)
         try {
           val currentDate = new Date()
-          val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(Secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+          val claims: Claims = Jwts.parser()
+            .setSigningKey(DatatypeConverter
+              .parseBase64Binary(jwtTokenService.jwtSecretEncoding())).parseClaimsJws(jwtToken).getBody
           val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
 
           // Token is expired

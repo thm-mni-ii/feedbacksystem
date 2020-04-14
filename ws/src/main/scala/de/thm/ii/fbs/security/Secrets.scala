@@ -1,8 +1,6 @@
 package de.thm.ii.fbs.security
-
 import java.text.SimpleDateFormat
-import java.util.{Calendar, UUID}
-import javax.xml.bind.DatatypeConverter
+import java.util.Calendar
 import scala.util.Random
 
 /**
@@ -10,19 +8,6 @@ import scala.util.Random
   * @author Benjamin Manns
   */
 object Secrets {
-  private val SUPER_SECRET_KEY_PLAIN: String = UUID.randomUUID().toString
-
-  /** Base64 Binary Key */
-  private val SUPER_SECRET_KEY: String = DatatypeConverter.printBase64Binary(SUPER_SECRET_KEY_PLAIN.getBytes)
-
-  /**
-    * getSuperSecretKey delivers a secure key. This is only valid for a defined time
-    *
-    * @author Benjamin Manns
-    * @return Secure Key as String
-    */
-  def getSuperSecretKey: String = SUPER_SECRET_KEY
-
   /**
     * creates a random String based contain current time and random String
     * @author Benjamin Manns
