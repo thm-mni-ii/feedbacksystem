@@ -133,16 +133,7 @@ class UserService {
       try {
         val jwtToken = authHeader.split(" ")(1)
         try {
-          val currentDate = new Date()
-          val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(Secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
-          val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
-
-          // Token is expired
-          if (tokenDate * 1000L - currentDate.getTime <= 0) {
-            None
-          } else {
-            this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String], true)
-          }
+          verifyUserByTocken(jwtToken)
         } catch {
           case _: JwtException | _: IllegalArgumentException => None
         }
@@ -152,6 +143,24 @@ class UserService {
       }
     } else {
       None
+    }
+  }
+
+  /**
+    * Maps JWT Token to its user object after checking its validity.
+    * @param jwtToken The provided jwt token.
+    * @return The user object or None if jwt token was invalid.
+    */
+  def verifyUserByTocken(jwtToken: String): Option[User] = {
+    val currentDate = new Date()
+    val claims: Claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(Secrets.getSuperSecretKey)).parseClaimsJws(jwtToken).getBody
+    val tokenDate: Integer = claims.get("exp").asInstanceOf[Integer]
+
+    // Token is expired
+    if (tokenDate * 1000L - currentDate.getTime <= 0) {
+      None
+    } else {
+      this.loadUserFromDB(claims.get(dbLabels.username).asInstanceOf[String], true)
     }
   }
 

@@ -68,6 +68,8 @@
  */
 // (window as any).__Zone_enable_cross_context_check = true;
 
+(window as any).global = window; // required for stomp js (websocket)
+
 /***************************************************************************************************
  * Zone JS is required by default for Angular itself.
  */

@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.model
 
+import java.security.Principal
+
 import de.thm.ii.fbs.services.{RoleDBLabels, UserDBLabels}
 
 /**
@@ -17,7 +19,7 @@ import de.thm.ii.fbs.services.{RoleDBLabels, UserDBLabels}
   * @param password the DB password hash
   */
 class User(val userid: Int, val username: String, val prename: String, val surname: String, val email: String, val role: String,
-           val roleid: Int, val privacy_checked: Boolean = false, val password: String = null) {
+           val roleid: Int, val privacy_checked: Boolean = false, val password: String = null) extends Principal {
   /**
     * Return User as Map. Simply answer in HTTPResonses
     *
@@ -29,6 +31,11 @@ class User(val userid: Int, val username: String, val prename: String, val surna
       UserDBLabels.role_id -> this.roleid, UserDBLabels.prename -> this.prename, UserDBLabels.surname -> this.surname, UserDBLabels.email -> email,
       UserDBLabels.privacy_checked -> this.privacy_checked)
   }
+
+  /**
+    * @return The username of the user
+    */
+  def getName(): String = username
 
   /**
     * Print User infomation
@@ -54,6 +61,35 @@ class User(val userid: Int, val username: String, val prename: String, val surna
     * @return True if user has tutor role in any course
     */
   def isTutor: Boolean = userid == 8
+
+  /**
+    * Checks if the user has at least the provided role, i.e., the user role may admit more rights than the one provided
+    * @param role The provided role
+    * @return True if the condition above is met.
+    */
+  def isAtLeastInRole(role: Role.Value): Boolean = this.roleid <= role.id
+
+  private def canEqual(other: Any): Boolean = other.isInstanceOf[User]
+
+  /**
+    * Compares objects instances: two users are equal if they have the same username
+    * @param other Other user
+    * @return true, if they have the same username.
+    */
+  override def equals(other: Any): Boolean = other match {
+    case that: User =>
+      (that canEqual this) &&
+        username == that.username
+    case _ => false
+  }
+
+  /**
+    * @return Hashcode of a user object
+    */
+  override def hashCode(): Int = {
+    val state = Seq(username)
+    state.map(_.hashCode()).foldLeft(0)((a, b) => 31 * a + b)
+  }
 }
 
 /**
@@ -91,3 +127,29 @@ class AdminUser(override val userid: Int = 1, override val username: String = "a
                  override val email: String = "", override val role: String = RoleDBLabels.ADMIN,
                  override val roleid: Int = RoleDBLabels.ADMIN_ROLE_ID, override val privacy_checked: Boolean = false) extends
   User(userid, username, prename, surname, email, role, roleid, privacy_checked)
+
+/**
+  * The roles of a user.
+  */
+object Role extends Enumeration {
+  /**
+    * Admin manages everything.
+    */
+  val ADMIN = Value(1)
+  /**
+    * Moderator manages courses, docents and tutors.
+    */
+  val MODERATOR = Value(2)
+  /**
+    * Docent manages his own courses and his own tutors.
+    */
+  val DOCENT = Value(4)
+  /**
+    * Manages a course where he is a tutor.
+    */
+  val TUTOR = Value(8)
+  /**
+    * Usual user.
+    */
+  val USER = Value(16)
+}

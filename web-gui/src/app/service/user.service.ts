@@ -21,6 +21,13 @@ export class UserService {
   }
 
   /**
+   * Return the used token
+   */
+  getPlainToken(): string {
+    return localStorage.getItem('token');
+  }
+
+  /**
    * Get username from an
    * user that is logged in.
    */

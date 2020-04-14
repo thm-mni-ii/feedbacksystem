@@ -4,6 +4,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenz erstellen"><mat-icon >duo</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="goOnline()" matTooltip="Konferenz erstellen"><mat-icon>login</mat-icon></button>
     <mat-menu #confMenu>
       <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>
@@ -11,6 +12,10 @@
     <button *ngIf="(openConferences | async)?.length != 0" mat-flat-button color="accent" [matMenuTriggerFor]="confMenu">
       Join Conference Room
     </button>
+    <button mat-flat-button class="green" *ngIf="!connected" (click)="goOnline()">Go Online</button>
+    <button mat-flat-button class="red" *ngIf="connected" (click)="goOffline()">Go Offline</button>
+
+    <button mat-flat-button class="red" *ngIf="connected" (click)="testAction()">Test Invite</button>
   </div>
 
   <h2>{{courseDetail?.course_name}}</h2>

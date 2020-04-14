@@ -21,6 +21,7 @@ import {of, throwError} from "rxjs";
 import {UpdateCourseDialogComponent} from "../detail-course/update-course-dialog/update-course-dialog.component";
 import {ConferenceService} from "../../../service/conference.service";
 import {Observable} from 'rxjs';
+import {RxStompClient} from "../../../util/rx-stomp";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -28,6 +29,9 @@ import {Observable} from 'rxjs';
   styleUrls: ['./course-tasks-overview.component.scss']
 })
 export class CourseTasksOverviewComponent implements OnInit {
+
+  private stompRx: RxStompClient = null;
+  private connected = false;
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService,
@@ -71,7 +75,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       width: '800px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
-      location.hash = ''
+      location.hash = '';
       if (value.success) {
         this.db.getCourseDetail(this.courseID).subscribe(courses => {
           this.courseDetail = courses;
@@ -120,7 +124,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   }
 
   openUrlInNewWindow(url: string) {
-    window.open(url,'_blank')
+    window.open(url,'_blank');
   }
 
   private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
@@ -130,7 +134,7 @@ export class CourseTasksOverviewComponent implements OnInit {
           let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
           if (acceptance_flaggs.indexOf(null) < 0) {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
-            return of({success: true})
+            return of({success: true});
           } else {
             return throwError('Not all results yet');
           }
@@ -144,7 +148,53 @@ export class CourseTasksOverviewComponent implements OnInit {
             this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
           }
         })
-        .catch(console.error)
-    }, 2000)
+        .catch(console.error);
+    }, 2000);
+  }
+
+  goOnline() {
+    this.stompRx = new RxStompClient('https://localhost:8080/websocket');
+
+    this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
+      this.connected = true;
+
+      // Handles invitation from tutors / docents to take part in a webconference
+      this.stompRx.subscribeToTopic('/user/' + this.user.getUsername() + '/classroom/invite', this.constructHeaders()).subscribe(msg => {
+        let invite = JSON.parse(msg.body);
+        let participants = invite.users
+          .map(u => u.prename + ' ' + u.surname)
+          .push(invite.user.prename + ' ' + invite.user.surname);
+
+        // TODO: replace the following by an angular dialog where the button action opens a
+        // new link, otherwise the new window will be blocked by a strict ad-blocker.
+        if (confirm('You are invited to take part in a webconference with ' + JSON.stringify(participants))) {
+          this.openUrlInNewWindow(invite.href);
+        }
+      });
+    });
+  }
+
+  goOffline() {
+    this.stompRx.disconnect(this.constructHeaders()).subscribe(() => {
+      this.connected = false;
+    });
+  }
+
+  testAction() {
+    this.sendInvite('https://fk-conf.mni.thm.de/andrej.html', [
+      {
+        'username': 'la19',
+        'prename': 'Lena',
+        'surname': 'Apfel'
+      }
+    ]);
+  }
+
+  sendInvite(href: string, users: {'username': string, 'prename': string, 'surname': string}[]) {
+    this.stompRx.send('/websocket/classroom/invite', {'href': href, 'users': users}, this.constructHeaders());
+  }
+
+  private constructHeaders() {
+    return {'Auth-Token': this.user.getPlainToken()};
   }
 }

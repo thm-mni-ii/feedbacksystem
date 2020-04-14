@@ -23,4 +23,18 @@ object Users {
     }
     user.get
   }
+
+  /**
+    * Authorize a user and return it.
+    * @param token The jwt token
+    * @param userService User service
+    * @return A user
+    */
+  def claimAuthorization(token: String)(implicit userService: UserService): User = {
+    val user = userService.verifyUserByTocken(token)
+    if (user.isEmpty) {
+      throw new UnauthorizedException
+    }
+    user.get
+  }
 }
