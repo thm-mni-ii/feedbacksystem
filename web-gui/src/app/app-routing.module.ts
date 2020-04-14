@@ -26,6 +26,7 @@ import {TaskAnalyzeSubmissionsComponent} from "./components/courses/task-analyze
 import {CourseProfDetailsComponent} from "./components/courses/detail-course/course-prof-details/course-prof-details.component";
 import {IsGeqDocentGuard} from "./guards/is-geq-docent";
 import {CourseTasksOverviewComponent} from "./components/courses/course-tasks-overview/course-tasks-overview.component";
+import {CourseTicketsOverviewComponent} from "./components/courses/course-tickets-overview/course-tickets-overview.component";
 
 
 const routes: Routes = [
@@ -39,6 +40,7 @@ const routes: Routes = [
       {path: 'courses/search', component: SearchCourseComponent},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: CourseTasksOverviewComponent},
+      {path: 'courses/:id/tickets', component: CourseTicketsOverviewComponent},
       {path: 'courses/:id/task/:taskid', component: DetailCourseComponent},
       {path: 'courses/:id/result', component: CourseResultDetailsComponent},
       {path: 'courses/:id/task/:taskid/analyze', component: TaskAnalyzeSubmissionsComponent},
