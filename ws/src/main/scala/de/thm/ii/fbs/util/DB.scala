@@ -14,6 +14,9 @@ import scala.jdk.CollectionConverters._
   * @author Andrej Sajenko
   */
 object DB {
+  // The timout to terminate a query after TIMEOUT_IN_SEC seconds.
+  private val TIMEOUT_IN_SEC = 5;
+
   /**
     * See @JdbcTemplate::query
     *
@@ -27,6 +30,7 @@ object DB {
     */
   @throws[DataAccessException]
   def query[T](sql: String, rowMapper: RowMapper[T], args: Any*)(implicit jdbc: JdbcTemplate): List[T] = {
+    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     jdbc.query(sql, rowMapper, args.asJava.toArray: _*).asScala.toList
   }
 
@@ -39,6 +43,7 @@ object DB {
     */
   @throws[DataAccessException]
   def update(psc: PreparedStatementCreator)(implicit jdbc: JdbcTemplate): (Int, KeyHolder) = {
+    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     val keyHolder = new GeneratedKeyHolder
     (jdbc.update(psc, keyHolder), keyHolder)
   }
@@ -53,6 +58,7 @@ object DB {
     */
   @throws[DataAccessException]
   def update(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Int = {
+    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     jdbc.update(sql, args.asJava.toArray: _*)
   }
 
@@ -65,6 +71,7 @@ object DB {
     */
   @throws[DataAccessException]
   def batchUpdate (sql: String*)(implicit jdbc: JdbcTemplate): Boolean = {
+    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     jdbc.execute((conn: Connection) => {
       conn.setAutoCommit(false)
       val stmt = conn.createStatement
