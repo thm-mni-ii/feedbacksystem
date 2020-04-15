@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {Observable, Subject, BehaviorSubject} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
 
 /**
@@ -11,7 +11,11 @@ import {flatMap} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ConferenceService {
+  private personalConferenceLink: Subject<string>;
+  private retrived = false;
+
   public constructor(private http: HttpClient) {
+    this.personalConferenceLink = new BehaviorSubject<string>(null);
   }
 
   /**
@@ -36,13 +40,18 @@ export class ConferenceService {
   }
 
   /**
-   * Creates a single conference that will not be registered, i.e., it is not retrivable by this.getConferences().
-   * @return Observable that contains the URI to to follow to get to the conference.
+   * @return Returns a personal conference link.
    */
-  public createSingleConference(): Observable<string> {
-    return this.http.post<any>('/api/v1/courses/meeting', {})
-      .pipe(flatMap<any, string>(res => {
-        return res.header.get('Location');
-      }));
+  public getSingleConferenceLink(): Observable<string> {
+    if (this.retrived) {
+      return this.personalConferenceLink.asObservable();
+    } else {
+      return this.http.post<any>('/api/v1/courses/meeting', {})
+        .pipe(flatMap(res => {
+          this.retrived = true;
+          this.personalConferenceLink.next(res.header.get('Location'));
+          return this.personalConferenceLink.asObservable();
+        }));
+    }
   }
 }

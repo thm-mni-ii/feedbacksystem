@@ -174,16 +174,6 @@ export class CourseTasksOverviewComponent implements OnInit {
     this.classroomService.leave().subscribe();
   }
 
-  testAction() {
-    this.classroomService.inviteToConference('https://fk-conf.mni.thm.de/andrej.html', [
-      {
-        'username': 'la19',
-        'prename': 'Lena',
-        'surname': 'Apfel'
-      }
-    ]);
-  }
-
   createTicket() {
     this.dialog.open(NewticketDialogComponent, {
       height: 'auto',
