@@ -1,12 +1,12 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
-import {MatSort} from "@angular/material/sort";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {User} from "../../../interfaces/HttpInterfaces";
-import {flatMap, map, startWith} from "rxjs/operators";
-import {DatabaseService} from "../../../service/database.service";
-import {UserService} from "../../../service/user.service";
-import {FormControl} from "@angular/forms";
-import {Observable} from "rxjs";
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {MatSort} from '@angular/material/sort';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {User} from '../../../interfaces/HttpInterfaces';
+import {flatMap, map, startWith} from 'rxjs/operators';
+import {DatabaseService} from '../../../service/database.service';
+import {UserService} from '../../../service/user.service';
+import {FormControl} from '@angular/forms';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-grant-docent-snipp',
@@ -17,19 +17,19 @@ export class GrantDocentSnippComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input() course;
   @Input() docent_list: User[];
-  @Input() liveUpdate:boolean;
+  @Input() liveUpdate: boolean;
   @Output() loadAllCourses: EventEmitter<void>;
 
   docentFormControl = new FormControl();
   filteredOptions: Observable<User[]>;
 
-  //dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
-  dataSourceUsers : User[];
+  // dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
+  dataSourceUsers: User[];
   showInputForDocent: boolean;
   docentInputCourseID: number;
 
   constructor(private db: DatabaseService, private user: UserService, private snackBar: MatSnackBar) {
-    this.loadAllCourses = new EventEmitter<void>()
+    this.loadAllCourses = new EventEmitter<void>();
   }
 
   ngOnInit() {
@@ -68,22 +68,22 @@ export class GrantDocentSnippComponent implements OnInit {
       const selectedUser: User = this.docentFormControl.value;
       this.docentFormControl.setValue('');
       this.showInputForDocent = false;
-      if(this.liveUpdate) {
+      if (this.liveUpdate) {
         this.db.addDocentToCourse(courseID, selectedUser.user_id).subscribe(res => {
           this.loadAllCourses.emit();
-        })
+        });
       } else {
-        this.docent_list.push(selectedUser)
-        console.log(this.docent_list)
+        this.docent_list.push(selectedUser);
+        console.log(this.docent_list);
       }
     }
   }
 
-  get correctCourseDocent(){
-    if(this.liveUpdate) {
-      return this.course.course_docent
+  get correctCourseDocent() {
+    if (this.liveUpdate) {
+      return this.course.course_docent;
     } else {
-      return this.docent_list
+      return this.docent_list;
     }
   }
 
@@ -93,20 +93,18 @@ export class GrantDocentSnippComponent implements OnInit {
    * @param userID The docent id
    */
   removeDocent(courseID: number, userID: number) {
-    if(this.liveUpdate){
+    if (this.liveUpdate) {
       this.db.removeDocentFromCourse(courseID, userID).subscribe(courses => {
         this.loadAllCourses.emit();
       });
     } else {
-      let hiddenUser = this.docent_list.filter((u: User) => {
-        return u.user_id == userID
-      })
-      console.log("here",hiddenUser )
-      let i = this.docent_list.indexOf(hiddenUser[0])
-      this.docent_list.splice(i,1)
-
+      const hiddenUser = this.docent_list.filter((u: User) => {
+        return u.user_id == userID;
+      });
+      console.log('here', hiddenUser );
+      const i = this.docent_list.indexOf(hiddenUser[0]);
+      this.docent_list.splice(i, 1);
     }
-
   }
 
   /**

@@ -15,7 +15,6 @@
     <i>Vorschau:</i>
     <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
-
     <mat-form-field>
       <mat-label>Standart aufgaben typ</mat-label>
       <mat-select [(value)]="standardTaskType">
@@ -44,10 +43,12 @@
 
     <div class="choose_docent_tutor_area">
       <mat-label>Dozenten auswählen</mat-label>
-      <app-grant-docent-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true" (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-docent-snipp>
+      <app-grant-docent-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
+                              (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-docent-snipp>
 
       <mat-label>Tutor auswählen</mat-label>
-      <app-grant-tutor-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true" (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-tutor-snipp>
+      <app-grant-tutor-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
+                             (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-tutor-snipp>
     </div>
 
   </mat-dialog-content>

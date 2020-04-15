@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {FormControl} from "@angular/forms";
-import {DatabaseService} from "../../../service/database.service";
-import {UserService} from "../../../service/user.service";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {MatSort} from "@angular/material/sort";
-import {flatMap, map, startWith} from "rxjs/operators";
-import {User} from "../../../interfaces/HttpInterfaces";
-import {Observable} from "rxjs";
+import {FormControl} from '@angular/forms';
+import {DatabaseService} from '../../../service/database.service';
+import {UserService} from '../../../service/user.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSort} from '@angular/material/sort';
+import {flatMap, map, startWith} from 'rxjs/operators';
+import {User} from '../../../interfaces/HttpInterfaces';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-grant-tutor-snipp',
@@ -16,20 +16,20 @@ import {Observable} from "rxjs";
 export class GrantTutorSnippComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @Input() course;
-  @Input() liveUpdate:boolean;
+  @Input() liveUpdate: boolean;
   @Output() loadAllCourses: EventEmitter<void>;
   @Input() tutor_list: User[];
 
   tutorFormControl = new FormControl();
   filteredOptions: Observable<User[]>;
 
-  //dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
-  dataSourceUsers : User[];
+  // dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
+  dataSourceUsers: User[];
   showInputForTutor: boolean;
   tutorInputCourseID: number;
 
   constructor(private db: DatabaseService, private user: UserService, private snackBar: MatSnackBar) {
-    this.loadAllCourses = new EventEmitter<void>()
+    this.loadAllCourses = new EventEmitter<void>();
   }
 
   ngOnInit() {
@@ -69,14 +69,13 @@ export class GrantTutorSnippComponent implements OnInit {
       this.tutorFormControl.setValue('');
       this.showInputForTutor = false;
 
-      if(this.liveUpdate){
+      if (this.liveUpdate) {
         this.db.addTutorToCourse(courseID, selectedUser.user_id).subscribe(res => {
           this.loadAllCourses.emit();
-        })
+        });
       } else {
-        this.tutor_list.push(selectedUser)
+        this.tutor_list.push(selectedUser);
       }
-
     }
   }
 
@@ -86,25 +85,25 @@ export class GrantTutorSnippComponent implements OnInit {
    * @param userID The tutor id
    */
   removeTutor(courseID: number, userID: number) {
-    if(this.liveUpdate) {
+    if (this.liveUpdate) {
       this.db.removeTutorFromCourse(courseID, userID).subscribe(courses => {
         this.loadAllCourses.emit();
       });
     } else {
-      let hiddenUser = this.tutor_list.filter((u: User) => {
-        return u.user_id == userID
-      })
-      console.log("here",hiddenUser )
-      let i = this.tutor_list.indexOf(hiddenUser[0])
-      this.tutor_list.splice(i,1)
+      const hiddenUser = this.tutor_list.filter((u: User) => {
+        return u.user_id == userID;
+      });
+      console.log('here', hiddenUser );
+      const i = this.tutor_list.indexOf(hiddenUser[0]);
+      this.tutor_list.splice(i, 1);
     }
   }
 
-  get correctCourseTutor(){
-    if(this.liveUpdate) {
-      return this.course.course_tutor
+  get correctCourseTutor() {
+    if (this.liveUpdate) {
+      return this.course.course_tutor;
     } else {
-      return this.tutor_list
+      return this.tutor_list;
     }
   }
 
