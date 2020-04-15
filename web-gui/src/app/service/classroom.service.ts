@@ -69,7 +69,7 @@ export class ClassroomService {
         this.listen( '/topic/classroom/' + this.courseId + '/left').subscribe(m => this.requestUsersUpdate());
         this.listen( '/topic/classroom/' + this.courseId + '/joined').subscribe(m => this.requestUsersUpdate());
         this.requestUsersUpdate();
-        this.listen('/topic/classroom/' + this.courseId + '/tickets').subscribe(m => this.handleTicketsMsg(m));
+        this.listen('/user/' + this.user.getUsername() + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
         this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());

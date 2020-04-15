@@ -15,13 +15,13 @@
    <div class="ticketColumn">
      <h3>Offene Tickets</h3>
       <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus:'open'">
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus">
         <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content >
           <p>{{ticket.desc}}</p>
           <div class="ticketMeta">
           <p>Priorität: <b>{{ticket.priority}}</b></p>
-          <p>{{ticket.timestamp * 1000 | date:"MM/dd/yyyy 'um' h:mma"}}<br>{{ticket.creator}}</p>
+            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
           </div>
         </mat-card-content>
       </mat-card>
@@ -30,13 +30,13 @@
     <div class="ticketColumn">
       <h3>Tickets in Bearbeitung</h3>
     <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus:'inProgress' ">
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus ">
         <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content  >
           <p>{{ticket.desc}}</p>
           <div class="ticketMeta">
-            <p>Priorität: <b>{{ticket.priority}}</b><br>Zugewiesen: {{ticket.assignee}}</p>
-            <p>{{ticket.timestamp * 1000 | date:"MM/dd/yyyy 'um' h:mma"}}<br>{{ticket.creator}}</p>
+            <p>Priorität: <b>{{ticket.priority}}</b><br>Zugewiesen: {{ticket.assignee.prename}},{{ticket.assignee.surname}}</p>
+            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
           </div>
         </mat-card-content>
       </mat-card>

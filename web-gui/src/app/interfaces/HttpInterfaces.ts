@@ -234,8 +234,12 @@ export interface User {
 
 export interface Ticket {
   title: string;
-  msg: string;
+  desc: string;
   courseId: number;
+  priority: number;
+  status: string;
+  timestamp: number;
+  assignee: null;
   creator: {
     username: string;
     prename: string;

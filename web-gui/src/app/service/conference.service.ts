@@ -46,7 +46,7 @@ export class ConferenceService {
     if (this.retrived) {
       return this.personalConferenceLink.asObservable();
     } else {
-      return this.http.post<any>('/api/v1/courses/meeting', {})
+      return this.http.post<any>('/api/v1/courses/meeting', {test: 'test'})
         .pipe(flatMap(res => {
           this.retrived = true;
           this.personalConferenceLink.next(res.href);

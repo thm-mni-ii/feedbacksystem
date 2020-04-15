@@ -35,31 +35,10 @@ export class CourseTicketsOverviewComponent implements OnInit {
   ngOnInit(): void {
     this.users = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
-
-    // this.tickets = [{title: 'Riesenproblem',
-    //   desc: 'Bitte hilfe bei dem Problem',
-    //   status: 'open',
-    //   creator: 'Simon, S',
-    //   timestamp: 1586340000,
-    //   priority: 6
-    // },
-    //   {title: 'Riesenproblem',
-    //     desc: 'Bitte hilfe bei dem Problem, komme alleine nicht mehr weiter. Warte auf Konferenzanfrage.',
-    //     status: 'open',
-    //     creator: 'Simon, S',
-    //     timestamp: 1586340000,
-    //     priority: 5},
-    //   {title: 'Riesenproblem',
-    //     desc: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut',
-    //     status: 'inProgress', creator: 'Stefan, B',
-    //     timestamp: 1586340000,
-    //     assignee: 'Tutor1',
-    //     priority: 5}];
-    // this.route.params.subscribe(
-    //   param => {
-    //     this.courseID = param.id;
-    //   }
-    // );
+     this.route.params.subscribe(
+       param => {
+         this.courseID = param.id;
+       });
   }
 
   public isAuthorized() {
@@ -94,7 +73,7 @@ export class TicketStatusFilter implements PipeTransform {
     }
     // filter items array, items which match and return true will be
     // kept, false will be filtered out
-    return items.filter(item => item.status == filter);
+    return items.filter(item => item.creator.username !== item.assignee.username);
   }
 }
 

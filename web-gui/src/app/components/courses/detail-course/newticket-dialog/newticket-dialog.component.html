@@ -1,42 +1,22 @@
-<div class="container">
-  <mat-vertical-stepper linear #stepper>
-    <!-- Step 1-->
-    <mat-step [stepControl]="ticketTitle" label="Gib einen Ticket Titel ein">
-      <form [formGroup]="ticketTitle" class="step-flex">
-        <mat-form-field appearance="outline">
-          <mat-label>Ticket Titel</mat-label>
-          <input matInput formControlName="firstCtrl" required>
-        </mat-form-field>
-        <div class="button-row">
-          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
-        </div>
-      </form>
-    </mat-step>
-    <!-- Step 2-->
-    <mat-step [stepControl]="ticketDesc" label="Gib eine Ticket Beschreibung ein">
-      <form [formGroup]="ticketDesc" class="step-flex">
-        <mat-form-field appearance="outline">
-          <mat-label>Ticket Beschreibung</mat-label>
-          <input matInput formControlName="secondCtrl" required>
-        </mat-form-field>
-        <div class="button-row">
-          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
-          <button mat-flat-button color="accent" matStepperNext>Weiter</button>
-        </div>
-      </form>
-    </mat-step>
-    <!-- Step 3-->
-    <mat-step [stepControl]="ticketPriority" label="Gib dem Ticket eine Priorität">
-      <form [formGroup]="ticketPriority" class="step-flex">
-        <mat-form-field appearance="outline">
-          <mat-label>Ticket Priorität</mat-label>
-          <input matInput type="number" min="0" max="10" formControlName="thirdCtrl" required>
-        </mat-form-field>
-        <div class="button-row">
-          <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
-          <button mat-flat-button color="accent" (click)="createTicket()" >Ticket erstellen</button>
-        </div>
-      </form>
-    </mat-step>
-  </mat-vertical-stepper>
-</div>
+<h2 mat-dialog-title>Neues Ticket erstellen</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="standard">
+    <mat-label>Titel</mat-label>
+    <input formControlName="title" required matInput>
+  </mat-form-field>
+  <br>
+  <mat-form-field appearance="standard">
+    <mat-label>Beschreibung</mat-label>
+    <textarea formControlName="desc" matInput required cdkTextareaAutosize></textarea>
+  </mat-form-field>
+  <br>
+  <mat-form-field appearance="standard">
+    <mat-label>Priorität</mat-label>
+    <input type="number" formControlName="priority" matInput required>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button class="mat-raised-button"(click)="close()">Close</button>
+  <button class="mat-raised-button mat-primary"(click)="createTicket()">Save</button>
+</mat-dialog-actions>

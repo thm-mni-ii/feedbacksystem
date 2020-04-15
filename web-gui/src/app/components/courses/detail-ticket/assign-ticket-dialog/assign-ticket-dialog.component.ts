@@ -1,8 +1,11 @@
 import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
-import {User} from "../../../../interfaces/HttpInterfaces";
+import {Ticket, User} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {UpdateCourseDialogComponent} from "../../detail-course/update-course-dialog/update-course-dialog.component";
-import {MatSnackBar} from "@angular/material/snack-bar";
+import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Observable, Subject, BehaviorSubject} from 'rxjs';
+import {UserService} from '../../../../service/user.service';
+import {ClassroomService} from '../../../../service/classroom.service';
 
 @Component({
   selector: 'app-assign-ticket-dialog',
@@ -10,20 +13,25 @@ import {MatSnackBar} from "@angular/material/snack-bar";
   styleUrls: ['./assign-ticket-dialog.component.scss']
 })
 export class AssignTicketDialogComponent implements OnInit {
-  users:User[];
-  ticket:any;
-  courseID:number;
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,private snackBar: MatSnackBar) {
-  }
-  ngOnInit(): void {
+  users: Observable<User[]>;
+  ticket: Ticket;
+  courseID: number;
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
+              private snackBar: MatSnackBar, private classroomService: ClassroomService) {
     this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
   }
-  public assignTicket(teacher){
-    console.log(teacher)
-    this.snackBar.open(`${teacher.prename} ${teacher.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000})
-    this.dialogRef.close()
+
+  ngOnInit(): void {
+  }
+
+  public assignTicket(assignee) {
+    this.ticket.assignee = assignee;
+    this.classroomService.updateTicket(this.ticket);
+    this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
+    this.dialogRef.close();
   }
 }
 
@@ -36,12 +44,6 @@ export class UserTeacherFilter implements PipeTransform {
     if (!items) {
       return items;
     }
-    //role_ids
-    //admin = 1
-    //mod = 2
-    //docent = 4
-    //tutor = 8
-    //todo: role identification function
-    return items.filter(item =>  item.role_id <= 8);
+    return items.filter(item => item.role <= 8);
   }
 }

@@ -30,10 +30,10 @@ class ClassroomController {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
 
   private def userToJson(user: User): JSONObject = new JSONObject()
-    .append("username", user.username)
-    .append("prename", user.prename)
-    .append("surname", user.surname)
-    .append("role", user.roleid)
+    .put("username", user.username)
+    .put("prename", user.prename)
+    .put("surname", user.surname)
+    .put("role", user.roleid)
 
   /**
     * Removes users that loose connections
@@ -150,7 +150,8 @@ class ClassroomController {
         } else {
           val response = Tickets.get(courseId)
             .map(ticketToJson)
-            .foldLeft(new JSONArray())((a, t) => a.put(t)).toString
+            .foldLeft(new JSONArray())((a, t) => a.put(t))
+            .toString
           smt.convertAndSendToUser(user.getName(), "/classroom/tickets", response)
         }
       }

@@ -1,8 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {UpdateCourseDialogComponent} from "../../detail-course/update-course-dialog/update-course-dialog.component";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {User} from "../../../../interfaces/HttpInterfaces";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {User} from '../../../../interfaces/HttpInterfaces';
+import {ConferenceService} from '../../../../service/conference.service';
+import {ClassroomService} from '../../../../service/classroom.service';
 
 @Component({
   selector: 'app-inviteto-conference-dialog',
@@ -10,20 +12,26 @@ import {User} from "../../../../interfaces/HttpInterfaces";
   styleUrls: ['./inviteto-conference-dialog.component.scss']
 })
 export class InvitetoConferenceDialogComponent implements OnInit {
-  invitee:User;
+  invitee: User;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,private snackBar: MatSnackBar) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any,
+              public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
+              private snackBar: MatSnackBar, private conferenceService: ConferenceService,
+              private classroomService: ClassroomService) {
   }
 
   ngOnInit(): void {
     this.invitee = this.data.user;
   }
 
-  public startCall(invitee){
-
+  public startCall(invitee) {
+    this.conferenceService.getSingleConferenceLink().subscribe(m => {
+      this.classroomService.inviteToConference(m, [invitee]);
+      window.open(m, '_blank');
+    });
   }
 
-  public cancelCall(){
+  public cancelCall() {
     this.dialogRef.close();
   }
 
