@@ -35,9 +35,6 @@ export class CourseTicketsOverviewComponent implements OnInit {
   ngOnInit(): void {
     this.users = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
-    if (!this.classroomService.isJoined()) {
-      this.classroomService.join(this.courseID);
-    }
 
     // this.tickets = [{title: 'Riesenproblem',
     //   desc: 'Bitte hilfe bei dem Problem',
