@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Subject, BehaviorSubject} from 'rxjs';
 import {ConfInvite, Ticket, User} from '../interfaces/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
 import {UserService} from './user.service';
@@ -21,8 +21,8 @@ export class ClassroomService {
   private stompRx: RxStompClient = null;
 
   public constructor(private user: UserService) {
-    this.users = new Subject<User[]>();
-    this.tickets = new Subject<Ticket[]>();
+    this.users = new BehaviorSubject<User[]>([]);
+    this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.invitations = new Subject<ConfInvite>();
   }
 
