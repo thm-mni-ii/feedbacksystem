@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.model
 
 import java.util.{Objects, UUID}
-
 import scala.collection.mutable
 
 /**
@@ -97,7 +96,6 @@ object Tickets {
     * @param cb Called on ticket removal.
     */
   def onRemove(cb: (Ticket) => Unit): Unit = onRemoveCb.add(cb)
-
 
   private def add(t: Ticket): Unit = {
     courseToTickets.getOrElseUpdate(t.courseId, mutable.Set.empty).add(t)

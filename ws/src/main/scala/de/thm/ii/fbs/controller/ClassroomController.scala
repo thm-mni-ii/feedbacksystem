@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.controller
 
 import java.security.Principal
-
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.model.{Classroom, Role, Ticket, Tickets, User, UserSessionMap}
@@ -253,5 +252,4 @@ class ClassroomController {
     .put("status", ticket.status)
     .put("courseId", ticket.courseId)
     .put("timestamp", ticket.timestamp)
-
 }
