@@ -6,10 +6,11 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.model.Role
 import de.thm.ii.fbs.services._
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.util.{BadRequestException, DateParser, ResourceNotFoundException, UnauthorizedException, Users}
-import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
@@ -826,6 +827,25 @@ class CourseController {
     val regConfs = this.conferences.getOrElse(courseid, mutable.Set.empty).addAll(uries)
 
     this.conferences.put(courseid, regConfs)
+  }
+
+  /**
+    * Creates a single unique conference link.
+    * @param request The request object
+    * @param response The response object
+    */
+  @RequestMapping(value = Array("/meeting"), method = Array(RequestMethod.POST))
+  def createConference(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+    val user = Users.claimAuthorization(request)
+    if (!user.isAtLeastInRole(Role.TUTOR)) {
+      throw new UnauthorizedException()
+    }
+
+    val id = UUID.randomUUID()
+    val uri = this.conferenceService.registerConference(id.toString)
+
+    response.setHeader("Location", uri.toString);
+    response.setStatus(302);
   }
 
   /**
