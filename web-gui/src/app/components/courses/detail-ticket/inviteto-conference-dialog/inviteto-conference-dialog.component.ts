@@ -27,7 +27,7 @@ export class InvitetoConferenceDialogComponent implements OnInit {
   public startCall(invitee) {
     this.conferenceService.getSingleConferenceLink().subscribe(m => {
       this.classroomService.inviteToConference(m, [invitee]);
-      window.open(m, '_blank');
+      // window.open(m, '_blank');
     });
   }
 

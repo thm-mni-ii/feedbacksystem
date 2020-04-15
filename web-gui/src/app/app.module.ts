@@ -41,8 +41,8 @@ import {UpdateCourseDialogComponent} from './components/courses/detail-course/up
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
-import {MatDatepickerModule} from "@angular/material/datepicker";
-import {MatNativeDateModule} from '@angular/material/core'
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MarkdownModule} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
@@ -53,9 +53,9 @@ import { DeleteUserModalComponent } from './components/modals/delete-user-modal/
 import { AnswerFromTestsystemDialogComponent } from './components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
 import { NotFound404Component } from './components/not-found404/not-found404.component';
 import { UploadPlagiatScriptComponent } from './components/courses/modals/upload-plagiat-script/upload-plagiat-script.component';
-import {CourseParameterModalComponent} from "./components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
-import {CourseParameterUserModalComponent} from "./components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
-import {NgxDropzoneModule} from "ngx-dropzone";
+import {CourseParameterModalComponent} from './components/courses/detail-course/course-parameter-modal/course-parameter-modal.component';
+import {CourseParameterUserModalComponent} from './components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component';
+import {NgxDropzoneModule} from 'ngx-dropzone';
 import { ConnectedSystemsComponent } from './components/connected-systems/connected-systems.component';
 import { EditTestsystemsModalComponent } from './components/connected-systems/modals/edit-testsystems-modal/edit-testsystems-modal.component';
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
@@ -79,24 +79,24 @@ import { CourseTasksOverviewComponent } from './components/courses/course-tasks-
 import { NewconferenceDialogComponent } from './components/courses/detail-course/newconference-dialog/newconference-dialog.component';
 import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
 import {
-  CourseTicketsOverviewComponent,
+  CourseTicketsOverviewComponent, SafePipe,
   TicketStatusFilter
-} from "./components/courses/course-tickets-overview/course-tickets-overview.component";
-import {MatGridListModule} from "@angular/material/grid-list";
+} from './components/courses/course-tickets-overview/course-tickets-overview.component';
+import {MatGridListModule} from '@angular/material/grid-list';
 import {
   AssignTicketDialogComponent,
   UserTeacherFilter
 } from './components/courses/detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import { NewticketDialogComponent } from './components/courses/detail-course/newticket-dialog/newticket-dialog.component';
 import { IncomingCallDialogComponent } from './components/courses/detail-course/incoming-call-dialog/incoming-call-dialog.component';
-import { InvitetoConferenceDialogComponent } from './components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
+import { InvitetoConferenceDialogComponent} from './components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
        url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
-      //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -165,6 +165,7 @@ export const httpInterceptorProviders = [
     ConferenceComponent,
     CourseTicketsOverviewComponent,
     TicketStatusFilter,
+    SafePipe,
     AssignTicketDialogComponent,
     UserTeacherFilter,
     NewticketDialogComponent,
@@ -196,9 +197,12 @@ export const httpInterceptorProviders = [
     MatProgressBarModule,
     MatGridListModule
   ],
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
-    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent, DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
-    CourseParameterModalComponent,CourseParameterUserModalComponent, UploadPlagiatScriptComponent, EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
+  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent,
+    DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
+    ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent,
+    DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
+    CourseParameterModalComponent, CourseParameterUserModalComponent, UploadPlagiatScriptComponent,
+    EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
   providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })

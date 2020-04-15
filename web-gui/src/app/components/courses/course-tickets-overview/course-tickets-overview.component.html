@@ -1,45 +1,54 @@
 <div class="container">
   <div class="actions">
-    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', courseID]" matTooltip="Zurück zur Kursübersicht"><mat-icon >arrow_back</mat-icon></button>
+    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', courseID]"
+            matTooltip="Zurück zur Kursübersicht">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
   </div>
 </div>
- <div id="ticketOverview">
-    <div class="ticketColumn">
-      <h3>Online Nutzer</h3>
-      <mat-list>
-        <mat-card mat-list-item (click)="inviteToConference(user)" *ngFor="let user of users | async">
-          <mat-card-content >{{user.surname}}, {{user.prename}}</mat-card-content>
-        </mat-card>
-      </mat-list>
-    </div>
-   <div class="ticketColumn">
-     <h3>Offene Tickets</h3>
-      <mat-list>
+<div class="ticketOverview">
+  <div class="ticketColumn users">
+    <h3>Online Nutzer</h3>
+    <mat-list>
+      <mat-card class="user" mat-list-item *ngFor="let user of users | async">
+        <span>{{user.surname}}, {{user.prename}}</span>
+        <span class="meta">
+          <mat-icon class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
+        </span>
+      </mat-card>
+    </mat-list>
+  </div>
+
+  <iframe class="conf" [src]="confUrl | async | safe">
+  </iframe>
+
+  <div class="ticketColumn tickets">
+    <h3>Offene Tickets</h3>
+    <mat-list>
       <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus">
         <mat-card-title>{{ticket.title}}</mat-card-title>
-        <mat-card-content >
+        <mat-card-content>
           <p>{{ticket.desc}}</p>
           <div class="ticketMeta">
-          <p>Priorität: <b>{{ticket.priority}}</b></p>
-            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
+            <p>Priorität: <b>{{ticket.priority}}</b></p>
+            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}
+              , {{ticket.creator.surname}}</p>
           </div>
         </mat-card-content>
       </mat-card>
-      </mat-list>
-   </div>
-    <div class="ticketColumn">
-      <h3>Tickets in Bearbeitung</h3>
-    <mat-list>
+
       <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus ">
         <mat-card-title>{{ticket.title}}</mat-card-title>
-        <mat-card-content  >
+        <mat-card-content>
           <p>{{ticket.desc}}</p>
           <div class="ticketMeta">
-            <p>Priorität: <b>{{ticket.priority}}</b><br>Zugewiesen: {{ticket.assignee.prename}},{{ticket.assignee.surname}}</p>
-            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
+            <p>Priorität: <b>{{ticket.priority}}</b><br>Zugewiesen: {{ticket.assignee.prename}}
+              ,{{ticket.assignee.surname}}</p>
+            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}
+              , {{ticket.creator.surname}}</p>
           </div>
         </mat-card-content>
       </mat-card>
     </mat-list>
-    </div>
   </div>
+</div>

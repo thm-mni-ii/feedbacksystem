@@ -25,12 +25,14 @@ export class CourseTicketsOverviewComponent implements OnInit {
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
+    this.confUrl = this.conferenceService.getSingleConferenceLink();
   }
 
   courseID: number;
   userRole: string;
   users: Observable<User[]>;
   tickets: Observable<Ticket[]>;
+  confUrl: Observable<string>;
 
   ngOnInit(): void {
     this.users = this.classroomService.getUsers();
@@ -77,3 +79,10 @@ export class TicketStatusFilter implements PipeTransform {
   }
 }
 
+@Pipe({ name: 'safe' })
+export class SafePipe implements PipeTransform {
+  constructor(private sanitizer: DomSanitizer) { }
+  transform(url) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+}
