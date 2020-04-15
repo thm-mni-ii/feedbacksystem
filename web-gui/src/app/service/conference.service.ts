@@ -49,7 +49,7 @@ export class ConferenceService {
       return this.http.post<any>('/api/v1/courses/meeting', {})
         .pipe(flatMap(res => {
           this.retrived = true;
-          this.personalConferenceLink.next(res.header.get('Location'));
+          this.personalConferenceLink.next(res.href);
           return this.personalConferenceLink.asObservable();
         }));
     }

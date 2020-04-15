@@ -833,9 +833,10 @@ class CourseController {
     * Creates a single unique conference link.
     * @param request The request object
     * @param response The response object
+    * @return The conference link
     */
   @RequestMapping(value = Array("/meeting"), method = Array(RequestMethod.POST))
-  def createConference(request: HttpServletRequest, response: HttpServletResponse): Unit = {
+  def createConference(request: HttpServletRequest, response: HttpServletResponse): Map[String, String] = {
     val user = Users.claimAuthorization(request)
     if (!user.isAtLeastInRole(Role.TUTOR)) {
       throw new UnauthorizedException()
@@ -844,8 +845,7 @@ class CourseController {
     val id = UUID.randomUUID()
     val uri = this.conferenceService.registerConference(id.toString)
 
-    response.setHeader("Location", uri.toString);
-    response.setStatus(302);
+    Map("href" -> uri.toString)
   }
 
   /**
