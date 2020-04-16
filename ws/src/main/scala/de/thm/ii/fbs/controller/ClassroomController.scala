@@ -190,7 +190,7 @@ class ClassroomController {
   def updateTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
       user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-      id <- m.retrive("id").asLong()
+      id <- m.retrive("id").asText()
       courseId <- m.retrive("courseId").asInt()
       title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
@@ -199,11 +199,11 @@ class ClassroomController {
       creatorName <- creator.retrive("username").asText()
       assigneeName <- assignee.retrive("username").asText()
       creatorAsUser <- userService.loadUserFromDB(creatorName)
-      assigneAsUser <- userService.loadUserFromDB(assigneeName)
+      assigneeAsUser <- userService.loadUserFromDB(assigneeName)
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
-    } yield (Ticket(courseId, title, desc, status, creatorAsUser, assigneAsUser, timestamp, priority), user)
+    } yield (Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
 
     ticketAndUser match {
       case Some(v) => {
@@ -227,7 +227,7 @@ class ClassroomController {
   def removeTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
       user <- this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-      id <- m.retrive("id").asLong()
+      id <- m.retrive("id").asText()
       ticket <- Tickets.getTicket(id)
     } yield (ticket, user)
 
