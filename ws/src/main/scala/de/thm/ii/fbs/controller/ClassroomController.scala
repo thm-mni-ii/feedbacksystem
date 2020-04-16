@@ -145,8 +145,14 @@ class ClassroomController {
     courseIdAndUser match {
       case Some(v) => {
         val (courseId, user) = v
+
         if (!user.isAtLeastInRole(Role.TUTOR)) {
-          throw new MessagingException("User is not allowed to push on this topic")
+          val response = Tickets.get(courseId)
+            .map(ticketToJson)
+            .filter(t => t.getJSONObject("creator").get("username").toString == user.getName())
+            .foldLeft(new JSONArray())((a, t) => a.put(t))
+            .toString
+          smt.convertAndSendToUser(user.getName(), "/classroom/tickets", response)
         } else {
           val response = Tickets.get(courseId)
             .map(ticketToJson)
