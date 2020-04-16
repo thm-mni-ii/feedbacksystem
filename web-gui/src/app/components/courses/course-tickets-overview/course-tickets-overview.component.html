@@ -27,7 +27,7 @@
   <div class="ticketColumn tickets">
     <h3>Offene Tickets</h3>
     <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async"
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of sortTickets(tickets | async)"
                 [ngClass]="{'selfassigned': ticket.assignee.username == this.user.getUsername(),
                 'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != this.user.getUsername(),
                 'unassigned': ticket.assignee.username == ticket.creator.username}">

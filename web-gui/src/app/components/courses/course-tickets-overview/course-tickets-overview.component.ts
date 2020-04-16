@@ -64,6 +64,20 @@ export class CourseTicketsOverviewComponent implements OnInit {
       data: {courseID: this.courseID, users: this.users, ticket: ticket}
     });
   }
+
+  public sortTickets(tickets) {
+    return tickets.sort( (a, b) => {
+      const username: String = this.user.getUsername();
+      if (a.assignee.username === username && b.assignee.username === username) {
+        return a.timestamp > b.timestamp ? 1 : -1;
+      } else if (a.assignee.username === username) {
+        return -1;
+      } else if (b.assignee.username === username) {
+        return 1;
+      }
+      return a.timestamp > b.timestamp ? 1 : -1;
+    });
+  }
 }
 
 @Pipe({

@@ -6,6 +6,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {Observable, Subject, BehaviorSubject} from 'rxjs';
 import {UserService} from '../../../../service/user.service';
 import {ClassroomService} from '../../../../service/classroom.service';
+import {ConferenceService} from '../../../../service/conference.service';
 
 @Component({
   selector: 'app-assign-ticket-dialog',
@@ -18,7 +19,8 @@ export class AssignTicketDialogComponent implements OnInit {
   courseID: number;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
-              private snackBar: MatSnackBar, private classroomService: ClassroomService) {
+              private snackBar: MatSnackBar, private classroomService: ClassroomService,
+              private conferenceService: ConferenceService) {
     this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
@@ -33,6 +35,23 @@ export class AssignTicketDialogComponent implements OnInit {
     this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
     this.dialogRef.close();
   }
+
+  public closeTicket(ticket) {
+    this.classroomService.removeTicket(ticket);
+    this.snackBar.open(`Das Ticket wurde geschlossen`, 'OK', {duration: 3000});
+    this.dialogRef.close();
+  }
+  public inviteToConference(invitee) {
+    this.conferenceService.getSingleConferenceLink().subscribe(m => {
+      this.classroomService.inviteToConference(m, [invitee]);
+      // window.open(m, '_blank');
+
+      this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+      this.dialogRef.close();
+    });
+  }
+
+
 }
 
 @Pipe({

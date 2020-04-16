@@ -28,6 +28,7 @@ export class InvitetoConferenceDialogComponent implements OnInit {
     this.conferenceService.getSingleConferenceLink().subscribe(m => {
       this.classroomService.inviteToConference(m, [invitee]);
       // window.open(m, '_blank');
+
       this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
       this.dialogRef.close();
     });
