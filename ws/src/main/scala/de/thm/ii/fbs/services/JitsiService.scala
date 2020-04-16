@@ -35,7 +35,7 @@ class JitsiService(templateBuilder: RestTemplateBuilder) {
     */
   def registerConference(name: String): URI = {
     val cal = Calendar.getInstance()
-    cal.add(Calendar.SECOND, 30)
+    cal.add(Calendar.HOUR, 24)
 
     val token = Jwts.builder()
       .claim("username", JITSI_USER)
