@@ -14,6 +14,7 @@ import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog
 import {InvitetoConferenceDialogComponent} from '../detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
 import {Observable} from 'rxjs';
 import {ClassroomService} from '../../../service/classroom.service';
+import {UserRoles} from '../../../util/UserRoles';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -33,6 +34,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
   users: Observable<User[]>;
   tickets: Observable<Ticket[]>;
   confUrl: Observable<string>;
+  roles = UserRoles;
 
   ngOnInit(): void {
     this.users = this.classroomService.getUsers();

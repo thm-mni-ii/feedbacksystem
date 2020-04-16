@@ -5,6 +5,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Ticket} from '../../../../interfaces/HttpInterfaces';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {UserService} from '../../../../service/user.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-newticket-dialog',
@@ -16,8 +17,8 @@ export class NewticketDialogComponent implements OnInit {
 
 
   constructor(private _formBuilder: FormBuilder,@Inject(MAT_DIALOG_DATA) public data: any,
-              public dialogRef: MatDialogRef<NewticketDialogComponent>, private classroomService: ClassroomService,
-              private userService: UserService) { }
+              private snackBar: MatSnackBar, public dialogRef: MatDialogRef<NewticketDialogComponent>,
+              private classroomService: ClassroomService, private userService: UserService) { }
 
   ngOnInit(): void {
     this.form = this._formBuilder.group({
@@ -29,6 +30,7 @@ export class NewticketDialogComponent implements OnInit {
 
   createTicket() {
      const ticket: Ticket = {
+       id: null,
        title: this.form.get('title').value,
        desc: this.form.get('desc').value,
        priority: this.form.get('priority').value,
@@ -39,6 +41,8 @@ export class NewticketDialogComponent implements OnInit {
        assignee: null,
      };
      this.classroomService.createTicket(ticket);
+     this.snackBar.open(`Das Ticket wurde erfolgreich erstellt.`, 'OK', {duration: 3000});
+    this.dialogRef.close();
   }
   close() {
     this.dialogRef.close();

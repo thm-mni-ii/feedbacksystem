@@ -10,7 +10,9 @@
   <div class="ticketColumn users">
     <h3>Online Nutzer</h3>
     <mat-list>
-      <mat-card class="user" mat-list-item *ngFor="let user of users | async">
+      <mat-card class="user" mat-list-item *ngFor="let user of users | async"
+                [ngClass]="{'docentBG': user.role_id == roles.Docent}"
+                [ngClass]="{'tutorBG': user.role_id == roles.Tutor}">
         <span>{{user.surname}}, {{user.prename}}</span>
         <span class="meta">
           <mat-icon class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
@@ -25,27 +27,20 @@
   <div class="ticketColumn tickets">
     <h3>Offene Tickets</h3>
     <mat-list>
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus">
+      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async"
+                [ngClass]="{'selfassigned': ticket.assignee.username == this.user.getUsername(),
+                'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != this.user.getUsername(),
+                'unassigned': ticket.assignee.username == ticket.creator.username}">
         <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content>
           <p>{{ticket.desc}}</p>
           <div class="ticketMeta">
-            <p>Priorität: <b>{{ticket.priority}}</b></p>
-            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}
-              , {{ticket.creator.surname}}</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of tickets | async | ticketstatus ">
-        <mat-card-title>{{ticket.title}}</mat-card-title>
-        <mat-card-content>
-          <p>{{ticket.desc}}</p>
-          <div class="ticketMeta">
-            <p>Priorität: <b>{{ticket.priority}}</b><br>Zugewiesen: {{ticket.assignee.prename}}
-              ,{{ticket.assignee.surname}}</p>
-            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' h:mma"}}<br>{{ticket.creator.prename}}
-              , {{ticket.creator.surname}}</p>
+            <p>Priorität: <b>{{ticket.priority}}</b><br><span *ngIf="ticket.assignee.username != ticket.creator.username">
+              Zugewiesen: {{ticket.assignee.prename}}, {{ticket.assignee.surname}}</span>
+            </p>
+            <p>{{ticket.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}<br>
+              {{ticket.creator.prename}}, {{ticket.creator.surname}}
+            </p>
           </div>
         </mat-card-content>
       </mat-card>

@@ -233,6 +233,7 @@ export interface User {
 }
 
 export interface Ticket {
+  id: number;
   title: string;
   desc: string;
   courseId: number;
