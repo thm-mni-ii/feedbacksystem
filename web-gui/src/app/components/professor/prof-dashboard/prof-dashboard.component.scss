@@ -12,61 +12,83 @@
   .username {
     margin-left: 8px;
   }
+}
 
+.card {
+  display: flex;
+  flex-direction: row;
+
+  .name-column {
+    flex-grow: 1;
+    display: block;
+  }
+  .title {
+    width: 100%;
+    text-align: center;
+  }
+  .task-column {
+    flex-grow: 8;
+  }
+  .task-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    .task-result {
+      width: 30px;
+      min-height: 30px;
+      text-align: right;
+    }
+  }
+  .name-container, .task-container {
+    height: 30px;
+  }
+  .task-result, .title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .task-result > .title {
+    transform: rotate(270deg);
+    overflow: visible;
+    text-overflow: ellipsis;
+    white-space: nowrap
+  }
+  .header {
+    height: 130px;
+    font-size: small;
+    .task-result {
+    }
+  }
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.state {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
 }
 
 .passed {
-  color: green;
+  color: $green;
 }
 
 .failed {
-  color: red;
+  color: $red;
   transform: rotate(45deg);
-}
-
-// TODD: Stopped Here
-
-.center-box {
-  width: 80%;
-  background-color: $cPrimary-light;
-  border-radius: 3px;
-  margin-top: 24px;
-  margin-bottom: 24px;
-}
-
-.student-row {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  border-bottom: 1px solid grey;
 }
 
 .name-container {
   color: rgba(0, 0, 0, 0.87);
-  min-width: 25%;
-  max-width: 25%;
   display: flex;
   align-items: center;
   overflow: hidden;
   padding-left: 12px;
 }
-
-.name {
-  margin-left: 4px;
-}
-
-.student-passed {
-  color: mediumseagreen;
-  align-self: center;
-}
-
-.student-failed {
-  color: indianred;
-  align-self: center;
-}
-
 
 .task-container {
   width: 100%;
@@ -74,69 +96,36 @@
   overflow-x: auto;
 }
 
-// Task
-.task-row {
+.task-result-backpane {
   width: 100%;
-  display: flex;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.sub_feedback{
-  width: 25px;
-  height: 50px;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 3px;
-  margin: 1px;
-}
-
-.task {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
-  width: 50px;
-  border-radius: 3px;
-  margin: 4px;
   cursor: pointer;
+  border: 3px solid white;
+  box-sizing: border-box;
+  border-radius: 20px;
 }
 
-.sub_feedback.true {
-  background-color: green;
+.task-result .failed-task {
+  background-color: $orange;
+}
+.task-result .not-tried {
+  background-color: $grey;
+}
+.task-result-backpane.plagiat {
+  border-color: $red;
 }
 
-.sub_feedback.false {
-  background-color: red;
-}
-
-.sub_feedback.null {
-  background-color: grey;
-}
-
-::ng-deep .custom-tooltip {
-  color: black !important;
-  background-color: white !important;
-  white-space: pre-line !important;
-}
-
-.cloumn_header_task{
-  width: 50px;
+.card-options {
   display: flex;
-  background-color: #f2f2f1;
-  height: 38px;
-  overflow: hidden;
-  font-size: 12px;
-  word-wrap: anywhere;
-  border-radius: 5px;
-  padding: 2px 0 0 4px;
+  justify-content: space-between;
 }
 
-
-#loadingIcon{
-  margin-left: 50%;
-  margin-top: 10px;
-  width: 7em;
-  height: 7em;
+.lb {
+  margin-left: 16px;
+  color: rgba(0, 0, 0, 0.54);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-size: 12px;
 }

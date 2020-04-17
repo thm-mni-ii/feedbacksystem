@@ -14,7 +14,7 @@ import {
   User
 } from '../interfaces/HttpInterfaces';
 import {flatMap} from 'rxjs/operators';
-import {saveAs as importedSaveAs} from "file-saver";
+import {saveAs as importedSaveAs} from 'file-saver';
 
 /**
  *  Service to communicate with db.
@@ -58,7 +58,7 @@ export class DatabaseService {
     return this.http.get<{ markdown: string }>('/api/v1/settings/markdown/' + type.toString());
   }
 
-  createNewSetting(key: string, value: string, typ: string){
+  createNewSetting(key: string, value: string, typ: string) {
     return this.http.post<Succeeded>('/api/v1/settings' , {
         key: key,
         val: value,
@@ -67,7 +67,7 @@ export class DatabaseService {
     });
   }
 
-  updateSetting(key: string, value: string, typ: string){
+  updateSetting(key: string, value: string, typ: string) {
     return this.http.put<Succeeded>(`/api/v1/settings/${encodeURI(key)}` , {
       val: value,
       typ: typ
@@ -116,7 +116,7 @@ export class DatabaseService {
   }
 
   getSubmissionsOfUserOfTask(courseID: number, userid: number, taskid: number) {
-    return this.http.get<Object>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`)
+    return this.http.get<Object>(`/api/v1/courses/${courseID}/submissions/user/${userid}/task/${taskid}`);
   }
   /**
    * Get all results of all users of all tasks
@@ -128,16 +128,16 @@ export class DatabaseService {
     return this.http.get<DashboardProf[]>(`/api/v1/courses/${courseID}/submissions?offset=${offset}&limit=${limit}&filter=${encodeURI(filter)}`);
   }
 
-  getAllUserSubmissionsAsCSV(courseID: number){
+  getAllUserSubmissionsAsCSV(courseID: number) {
     return new Promise((resolve, reject) => {
-      this.http.get('/api/v1/courses/' + courseID + '/submissions/csv',{responseType: 'arraybuffer'}).
+      this.http.get('/api/v1/courses/' + courseID + '/submissions/csv', {responseType: 'arraybuffer'}).
       subscribe(response => {
-        let blob = new Blob([response], {type: 'application/zip'});
+        const blob = new Blob([response], {type: 'application/zip'});
         importedSaveAs(blob, `${courseID}_submission_csv.csv`);
-        resolve("done")
-      },error => {
-        reject(error)
-      })
+        resolve('done');
+      }, error => {
+        reject(error);
+      });
     });
   }
 
@@ -159,14 +159,14 @@ export class DatabaseService {
     return this.http.get<TaskLastSubmission[]>('/api/v1/tasks/' + idTask + '/submissions');
   }
 
-  reSubmitASubmission(taskid: number, subid: number, testsystems: string[]){
+  reSubmitASubmission(taskid: number, subid: number, testsystems: string[]) {
     return this.http.post(`/api/v1/tasks/${taskid}/submissions/${subid}/resubmit`, {
       'testsystems': testsystems
-    })
+    });
   }
 
-  getReSubmissionResults(taskid: number, subid: number){
-    return this.http.get<ReSubmissionResult[]>(`/api/v1/tasks/${taskid}/submissions/${subid}/resubmit`)
+  getReSubmissionResults(taskid: number, subid: number) {
+    return this.http.get<ReSubmissionResult[]>(`/api/v1/tasks/${taskid}/submissions/${subid}/resubmit`);
   }
 
   getOverview(): Observable<DashboardStudent[]> {
@@ -205,13 +205,13 @@ export class DatabaseService {
     });
   }
 
-  public downloadExtendedTaskInfo(taskInfo: TaskExtension){
+  public downloadExtendedTaskInfo(taskInfo: TaskExtension) {
     return this.http.get(`/api/v1/tasks/${taskInfo.taskid}/extended/${taskInfo.subject}/user/${taskInfo.userid}/file` , {responseType: 'arraybuffer'}).
     subscribe(response => {
-      let blob = new Blob([response], {type: 'application/zip'});
-      let parts = taskInfo.data.split("/")
+      const blob = new Blob([response], {type: 'application/zip'});
+      const parts = taskInfo.data.split('/');
       importedSaveAs(blob, parts[parts.length - 1]);
-    })
+    });
   }
 
   /**
@@ -265,10 +265,10 @@ export class DatabaseService {
    * @param data File
    * @param courseid unqie course id
    */
-  submitPlagiatScript(data: File, courseid: number): Observable<Succeeded>{
+  submitPlagiatScript(data: File, courseid: number): Observable<Succeeded> {
     const formDataFile = new FormData();
     formDataFile.append('file', data, data.name);
-    let upload_url = `/api/v1/courses/${courseid}/plagiatchecker/upload`
+    const upload_url = `/api/v1/courses/${courseid}/plagiatchecker/upload`;
     return this.http.post<Succeeded>(upload_url, formDataFile, {
       headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
     });
@@ -284,7 +284,7 @@ export class DatabaseService {
    * @param deadline The deadline when this tasks ends
    */
   createTask(idCourse: number, name: string, description: string,
-             files: {}, testsystems: string[], deadline: Date, load_external_description: Boolean){
+             files: {}, testsystems: string[], deadline: Date, load_external_description: Boolean) {
 
     return this.http.post<FileUpload>('/api/v1/courses/' + idCourse + '/tasks', {
       name: name,
@@ -296,29 +296,29 @@ export class DatabaseService {
       flatMap(result => {
 
         if (result.success) {
-          let upload_url: string = result.upload_url;
-          let uploadRequests = []
+          const upload_url: string = result.upload_url;
+          const uploadRequests = [];
 
           // New solution file
           Object.keys(files).forEach(pos => {
             const formData = new FormData();
-            for(let j in files[pos]) {
-              formData.append("file", files[pos][j].item(0), j);
+            for (const j in files[pos]) {
+              formData.append('file', files[pos][j].item(0), j);
             }
 
             uploadRequests.push(this.http.post<Succeeded>(upload_url[pos], formData, {
               headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-            }).toPromise())
-          })
+            }).toPromise());
+          });
 
           return new Promise((resolve, reject) => {
             Promise.all(uploadRequests)
               .then((success) => {
-                resolve(result)
+                resolve(result);
               }).catch((e) => {
-                reject(e)
-            })
-          })
+                reject(e);
+            });
+          });
         }
       })
     );
@@ -367,34 +367,34 @@ export class DatabaseService {
    * @param courseName
    */
   exportCourseSubmissions(courseID: number, courseName: string) {
-    let name = courseName.replace(/ /g, '').replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '').substr(0, 10);
+    const name = courseName.replace(/ /g, '').replace(/[^A-Za-z 0-9 \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~]*/g, '').substr(0, 10);
     return this.http.get(`/api/v1/courses/${courseID}/export/zip`, {responseType: 'arraybuffer'}).
     subscribe(response => {
-      let blob = new Blob([response], {type: 'application/zip'});
+      const blob = new Blob([response], {type: 'application/zip'});
       importedSaveAs(blob, `course_export_${courseID}_${name}.zip`);
-    })
+    });
   }
 
-  importCompleteCourse(files: File[]){
-    let file = files[0]
+  importCompleteCourse(files: File[]) {
+    const file = files[0];
     const formDataFile = new FormData();
     formDataFile.append('file', file, file.name);
     return this.http.post<Succeeded>(`/api/v1/courses/import`, formDataFile, {
       headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-    }).toPromise()
+    }).toPromise();
 
   }
 
-  recoverCourse(courseID: number, files: File[]){
-    let file = files[0]
+  recoverCourse(courseID: number, files: File[]) {
+    const file = files[0];
     const formDataFile = new FormData();
     formDataFile.append('file', file, file.name);
     return this.http.post<Succeeded>(`/api/v1/courses/${courseID}/recover`, formDataFile, {
       headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-    }).toPromise()
+    }).toPromise();
   }
 
-  setNewPWOfGuestAccount(userid: number, password: string, password_repeat){
+  setNewPWOfGuestAccount(userid: number, password: string, password_repeat) {
     return this.http.put<Succeeded>(`/api/v1/users/${userid}/passwd`, {passwd: password, passwd_repeat: password_repeat});
   }
 
@@ -454,11 +454,11 @@ export class DatabaseService {
    * Returns a sql compatible timestamp string based on a given date
    * @param date
    */
-  private formatDate(date: Date): string{
-    let curr_date = date.getDate();
-    let curr_month = date.getMonth() + 1; //Months are zero based
-    let curr_year = date.getFullYear();
-    return curr_year + '-' + curr_month + '-' + curr_date + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+  private formatDate(date: Date): string {
+    const curr_date = date.getDate();
+    const curr_month = date.getMonth() + 1; // Months are zero based
+    const curr_year = date.getFullYear();
+    return curr_year + '-' + curr_month + '-' + curr_date + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
   }
 
   /**
@@ -483,33 +483,33 @@ export class DatabaseService {
       }).pipe(
         flatMap(res => {
           if (res.success && Object.keys(files).length > 0) {
-            let uploadUrl: string = res.upload_url;
-            let uploadRequests = []
+            const uploadUrl: string = res.upload_url;
+            const uploadRequests = [];
 
             // New solution file
-            let filesKeys = Object.keys(files)
+            const filesKeys = Object.keys(files);
 
-            for(let filesKeyPos in filesKeys){
-              let pos = filesKeys[filesKeyPos]
+            for (const filesKeyPos in filesKeys) {
+              const pos = filesKeys[filesKeyPos];
               const formData = new FormData();
-              if(typeof files[pos] == 'undefined') continue;
-              for(let j in files[pos]) {
-                formData.append("file", files[pos][j].item(0), j);
+              if (typeof files[pos] == 'undefined') { continue; }
+              for (const j in files[pos]) {
+                formData.append('file', files[pos][j].item(0), j);
               }
 
               uploadRequests.push(this.http.post<Succeeded>(uploadUrl[pos], formData, {
                 headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
-              }).toPromise())
+              }).toPromise());
             }
 
             return new Promise((resolve, reject) => {
               Promise.all(uploadRequests)
                 .then((success) => {
-                  resolve(res)
+                  resolve(res);
                 }).catch((e) => {
-                  reject(e)
-                })
-            })
+                  reject(e);
+                });
+            });
 
 
             /*return this.http.post<Succeeded>(uploadUrl, formData, {
@@ -521,7 +521,7 @@ export class DatabaseService {
             ))*/
 
           } else {
-            return of({success: true, fileupload: false})
+            return of({success: true, fileupload: false});
           }
         }));
     } else {
@@ -534,18 +534,18 @@ export class DatabaseService {
     }
   }
 
-  triggerExternalInfo(task_id: number,testsystem: string): Observable<Succeeded>{
+  triggerExternalInfo(task_id: number, testsystem: string): Observable<Succeeded> {
     return this.http.post<Succeeded>(`/api/v1/tasks/${task_id}/info/${testsystem}/trigger`, {});
   }
 
-  ///**
+  /// **
   // * Admin updated impressum or data privacy
-  //* @param type What should be updated
-  //* @param text The updated Text
-  //*/
-  //updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
+  // * @param type What should be updated
+  // * @param text The updated Text
+  // */
+  // updatePrivacyOrImpressum(type: TextType, text: string): Observable<Succeeded> {
   //  return this.http.put<Succeeded>('/api/v1/settings/privacy/text', {which: type.toString(), content: text});
-  //}
+  // }
 
 
   // DELETE REQUESTS
@@ -583,7 +583,7 @@ export class DatabaseService {
    * @param courseid
    */
   getAllCourseParameters(courseid: number) {
-    return this.http.get('/api/v1/courses/' + courseid + '/parameters').toPromise()
+    return this.http.get('/api/v1/courses/' + courseid + '/parameters').toPromise();
   }
 
   /**
@@ -592,11 +592,11 @@ export class DatabaseService {
    * @param key parameter key
    */
   deleteCourseParameter(courseid: number, key: string) {
-    return this.http.delete('/api/v1/courses/' + courseid + '/parameters/'+key).toPromise()
+    return this.http.delete('/api/v1/courses/' + courseid + '/parameters/' + key).toPromise();
   }
 
   markTaskAsPassed(taskid: number, subid: number) {
-    return this.http.post<Succeeded>(`/api/v1/tasks/${taskid}/submissions/${subid}/passed`, {})
+    return this.http.post<Succeeded>(`/api/v1/tasks/${taskid}/submissions/${subid}/passed`, {});
   }
 
   /**
@@ -607,7 +607,7 @@ export class DatabaseService {
    */
   addUpdateCourseParameter(courseid: number, key: string, description: string) {
     return this.http.post('/api/v1/courses/' + courseid + '/parameters',
-      {"description": description, "key": key}).toPromise()
+      {'description': description, 'key': key}).toPromise();
   }
 
   /**
@@ -615,7 +615,7 @@ export class DatabaseService {
    * @param courseid
    */
   getAllCourseParametersOfUser(courseid: number) {
-    return this.http.get('/api/v1/courses/' + courseid + '/parameters/users').toPromise()
+    return this.http.get('/api/v1/courses/' + courseid + '/parameters/users').toPromise();
   }
 
   /**
@@ -626,11 +626,11 @@ export class DatabaseService {
    */
   addUpdateCourseParameterUser(courseid: number, key: string, value: string) {
     return this.http.post('/api/v1/courses/' + courseid + '/parameters/users',
-      {"value": value, "key": key}).toPromise()
+      {'value': value, 'key': key}).toPromise();
   }
 
   runAllCourseTaskByDocent(courseid: number, taskid: number) {
     return this.http.post(`/api/v1/courses/${courseid}/run/tasks/${taskid}`,
-    {"complete": true}).toPromise()
+    {'complete': true}).toPromise();
   }
 }

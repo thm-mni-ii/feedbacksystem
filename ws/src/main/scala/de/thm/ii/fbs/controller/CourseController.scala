@@ -40,7 +40,7 @@ class CourseController {
   private val submissionService: SubmissionService = null
   @Autowired
   private val conferenceService: JitsiService = null
-  private val LIMIT_MAX_20: Int = 20
+  private val MAX_PAGE_LIMIT: Int = 100
 
   @Value("${compile.production}")
   private val compile_production: Boolean = true
@@ -520,11 +520,11 @@ class CourseController {
   @ResponseBody
   def seeAllSubmissions(@PathVariable(PATH_LABEL_ID) courseid: Integer,
                         @RequestParam(value = "offset", required = false) offset: Integer = 0,
-                        @RequestParam(value = "limit", required = false) limit: Integer = LIMIT_MAX_20,
+                        @RequestParam(value = "limit", required = false) limit: Integer = MAX_PAGE_LIMIT,
                         @RequestParam(value = "filter", required = false) filter: String = "",
                         request: HttpServletRequest): List[Any] = {
     if (limit == null && offset != null) throw new BadRequestException("if a 'offset' is set a 'limit' has to set as well")
-    if (limit != null && (limit > LIMIT_MAX_20 || limit < 0)) throw new BadRequestException("choose a `limit` within 0 and 20")
+    if (limit != null && (limit > MAX_PAGE_LIMIT || limit < 0)) throw new BadRequestException("choose a `limit` within 0 and " + MAX_PAGE_LIMIT)
     val user = userService.verifyUserByHeaderToken(request)
     val testsystem = testsystemService.verfiyTestsystemByHeaderToken(request)
     if (user.isEmpty && testsystem.isEmpty) {
