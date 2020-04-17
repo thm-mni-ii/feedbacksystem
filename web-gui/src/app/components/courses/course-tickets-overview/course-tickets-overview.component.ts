@@ -14,6 +14,7 @@ import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog
 import {InvitetoConferenceDialogComponent} from '../detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
 import {Observable} from 'rxjs';
 import {ClassroomService} from '../../../service/classroom.service';
+import {UserRoles} from '../../../util/UserRoles';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -33,6 +34,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
   users: Observable<User[]>;
   tickets: Observable<Ticket[]>;
   confUrl: Observable<string>;
+  roles = UserRoles;
 
   ngOnInit(): void {
     this.users = this.classroomService.getUsers();
@@ -60,6 +62,20 @@ export class CourseTicketsOverviewComponent implements OnInit {
       height: 'auto',
       width: 'auto',
       data: {courseID: this.courseID, users: this.users, ticket: ticket}
+    });
+  }
+
+  public sortTickets(tickets) {
+    return tickets.sort( (a, b) => {
+      const username: String = this.user.getUsername();
+      if (a.assignee.username === username && b.assignee.username === username) {
+        return a.timestamp > b.timestamp ? 1 : -1;
+      } else if (a.assignee.username === username) {
+        return -1;
+      } else if (b.assignee.username === username) {
+        return 1;
+      }
+      return a.timestamp > b.timestamp ? 1 : -1;
     });
   }
 }

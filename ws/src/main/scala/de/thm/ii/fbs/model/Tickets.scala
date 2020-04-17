@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model
 
-import java.util.{Objects, UUID}
+import java.util.Objects
+
 import scala.collection.mutable
 
 /**
@@ -10,8 +11,8 @@ import scala.collection.mutable
   */
 object Tickets {
   private val courseToTickets = mutable.Map[Int, mutable.Set[Ticket]]()
-  private val ticketToCourse = mutable.Map[Long, Int]()
-  private val idToTicket = mutable.Map[Long, Ticket]()
+  private val ticketToCourse = mutable.Map[String, Int]()
+  private val idToTicket = mutable.Map[String, Ticket]()
 
   /**
     * Creates and stores an issue ticket
@@ -26,7 +27,7 @@ object Tickets {
     * @return A ticket with a unique id
     */
   def create(courseId: Int, title: String, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
-    val id = UUID.randomUUID().getMostSignificantBits() & Long.MaxValue
+    val id = ((System.currentTimeMillis << 20) | (System.nanoTime & ~9223372036854251520L)).toString()
     if (ticketToCourse.contains(id)) {
       create(courseId, title, desc, status, creator, assignee, timestamp, priority)
     } else {
@@ -41,6 +42,7 @@ object Tickets {
     * @param ticket Ticket
     */
   def update(ticket: Ticket): Unit = {
+    courseToTickets.get(ticket.courseId).foreach(_.remove(ticket))
     courseToTickets.get(ticket.courseId).foreach(_.add(ticket))
     idToTicket.put(ticket.id, ticket)
 
@@ -51,7 +53,7 @@ object Tickets {
     * Remove ticket by id
     * @param id The ticket id
     */
-  def remove(id: Long): Unit = idToTicket.get(id).foreach(remove)
+  def remove(id: String): Unit = idToTicket.get(id).foreach(remove)
 
   /**
     * Remove ticket
@@ -71,7 +73,7 @@ object Tickets {
     * @param id The id
     * @return The ticket
     */
-  def getTicket(id: Long): Option[Ticket] = idToTicket.get(id)
+  def getTicket(id: String): Option[Ticket] = idToTicket.get(id)
 
   /**
     * Get all tickets in course
@@ -119,7 +121,7 @@ object Tickets {
   * @param id the unique ticket id
   */
 case class Ticket(courseId: Int, title: String, desc: String, status: String, creator: User,
-                  assignee: User, timestamp: Long, priority: Int, id: Long = 0) {
+                  assignee: User, timestamp: Long, priority: Int, id: String = "0") {
   /**
     * @return The hash code -- using id
     */

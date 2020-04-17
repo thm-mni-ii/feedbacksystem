@@ -19,14 +19,14 @@ import {of, throwError} from 'rxjs';
 
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';
 import {DOCUMENT} from '@angular/common';
-import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
-import {DeleteTaskModalComponent} from "../modals/delete-task-modal/delete-task-modal.component";
-import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
-import {CourseParameterModalComponent} from "./course-parameter-modal/course-parameter-modal.component";
-import {CourseParameterUserModalComponent} from "./course-parameter-user-modal/course-parameter-user-modal.component";
-import {UploadPlagiatScriptComponent} from "../modals/upload-plagiat-script/upload-plagiat-script.component";
-import {MatTabChangeEvent} from "@angular/material/tabs";
-import {DomSanitizer} from "@angular/platform-browser";
+import {DeleteCourseModalComponent} from '../modals/delete-course-modal/delete-course-modal.component';
+import {DeleteTaskModalComponent} from '../modals/delete-task-modal/delete-task-modal.component';
+import {AnswerFromTestsystemDialogComponent} from '../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
+import {CourseParameterModalComponent} from './course-parameter-modal/course-parameter-modal.component';
+import {CourseParameterUserModalComponent} from './course-parameter-user-modal/course-parameter-user-modal.component';
+import {UploadPlagiatScriptComponent} from '../modals/upload-plagiat-script/upload-plagiat-script.component';
+import {MatTabChangeEvent} from '@angular/material/tabs';
+import {DomSanitizer} from '@angular/platform-browser';
 
 /**
  * Shows a course in detail
@@ -52,7 +52,7 @@ export class DetailCourseComponent implements OnInit {
   deadlineTask: boolean;
   courseID: number;
   breakpoint: number;
-  //multipleChoices: { [task: number]: boolean };
+  // multipleChoices: { [task: number]: boolean };
   taskID: number;
 
 
@@ -60,24 +60,24 @@ export class DetailCourseComponent implements OnInit {
     return now > deadline;
   }
 
-  public submissionTypeOfTask(task: CourseTask): any[]{
-    let accepted = [];
-    if (typeof task.testsystems === 'undefined') return [];
+  public submissionTypeOfTask(task: CourseTask): any[] {
+    const accepted = [];
+    if (typeof task.testsystems === 'undefined') { return []; }
 
-    let flagg = task.testsystems[0].accepted_input;
+    const flagg = task.testsystems[0].accepted_input;
 
-    if(flagg & 1){
-      accepted.push({typ: "text", text: "Text"})
+    if (flagg & 1) {
+      accepted.push({typ: 'text', text: 'Text'});
     }
-    if((flagg >> 1) & 1){
-      accepted.push({typ: "file", text: "Datei"})
+    if ((flagg >> 1) & 1) {
+      accepted.push({typ: 'file', text: 'Datei'});
     }
-    if((flagg >> 2) & 1){
-      accepted.push({typ: "choice", text: "Multiple Choice"})
+    if ((flagg >> 2) & 1) {
+      accepted.push({typ: 'choice', text: 'Multiple Choice'});
     }
 
-    return ['text','file','choice'].filter(v => {
-      return accepted.map(v => v.typ).indexOf(v) >= 0
+    return ['text', 'file', 'choice'].filter(v => {
+      return accepted.map(v => v.typ).indexOf(v) >= 0;
     });
   }
 
@@ -91,35 +91,35 @@ export class DetailCourseComponent implements OnInit {
     this.route.params.pipe(
       flatMap(params => {
         this.courseID = +params['id'];
-        this.taskID = params.taskid
+        this.taskID = params.taskid;
         return this.db.getCourseDetailOfTask(this.courseID, this.taskID);
       })
     ).subscribe(course_detail => {
 
-      if(Object.keys(course_detail).length == 0) {
-        this.router.navigate(['404'])
+      if (Object.keys(course_detail).length == 0) {
+        this.router.navigate(['404']);
       }
 
       this.courseDetail = course_detail;
-      this.courseTask = course_detail.task
+      this.courseTask = course_detail.task;
       this.userRole = course_detail.role_name;
       this.submissionAsFile = 'task';
       this.processing = false;
-      this.triggerExternalDescriptionIfNeeded(this.courseTask, false)
+      this.triggerExternalDescriptionIfNeeded(this.courseTask, false);
       this.titlebar.emitTitle(course_detail.course_name);
 
       setTimeout(() => {
-        if(location.hash === '#edit'){
+        if (location.hash === '#edit') {
           this.updateCourse();
         }
-      },100)
+      }, 100);
 
-    }, error => this.router.navigate(['404']))
+    }, error => this.router.navigate(['404']));
 
     // Check if task reached deadline
     setInterval(() => {
       if (this.courseTask) {
-        if(this.courseTask){
+        if (this.courseTask) {
           this.deadlineTask = this.reachedDeadline(new Date(), new Date(this.courseTask.deadline));
         }
       }
@@ -128,48 +128,48 @@ export class DetailCourseComponent implements OnInit {
     this.breakpoint = (window.innerWidth <= 400) ? 1 : 3;
   }
 
-  private externalInfoPoller(task: CourseTask, step: number){
+  private externalInfoPoller(task: CourseTask, step: number) {
     if (step > 10) {
       this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
-      return
+      return;
     }
     this.db.getTaskResult(task.task_id).toPromise()
       .then((loadedTask: CourseTask) => {
-        if (loadedTask.external_description != null){
+        if (loadedTask.external_description != null) {
           this.courseTask = loadedTask;
-          if(this.externalInfoIsForm(loadedTask)) this.submissionAsFile = 'choice'
+          if (this.externalInfoIsForm(loadedTask)) { this.submissionAsFile = 'choice'; }
         } else {
           setTimeout(() => {
-            this.externalInfoPoller(task, step+1)
-          }, 5000)
+            this.externalInfoPoller(task, step + 1);
+          }, 5000);
         }
-      })
+      });
   }
 
   externalInfoIsForm(task: CourseTask) {
-    if(!task.load_external_description || !task.external_description) {
-      return false
+    if (!task.load_external_description || !task.external_description) {
+      return false;
     } else {
-      try{
-        return JSON.parse(task.external_description)
+      try {
+        return JSON.parse(task.external_description);
       } catch (e) {
-        return false
+        return false;
       }
 
     }
 
   }
 
-  public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean){
+  public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean) {
     if (force) {
-      task.external_description = ""
+      task.external_description = '';
     }
-    if (task.load_external_description && task.external_description == null || force){
+    if (task.load_external_description && task.external_description == null || force) {
       this.db.triggerExternalInfo(task.task_id, task.testsystems[0].testsystem_id).toPromise().then(() => {
-        this.externalInfoPoller(task, 0)
+        this.externalInfoPoller(task, 0);
       }).catch(() => {
         this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
-      })
+      });
     }
 
   }
@@ -178,57 +178,58 @@ export class DetailCourseComponent implements OnInit {
     this.breakpoint = (event.target.innerWidth <= 400) ? 1 : 3;
   }
 
-  private loadCourseDetailsTasks(){
+  private loadCourseDetailsTasks() {
     this.db.getCourseDetailOfTask(this.courseID, this.taskID).toPromise()
       .then(course_detail => {
-        this.courseTask = course_detail.task
-      })
+        this.courseTask = course_detail.task;
+      });
   }
 
-  private loadCourseDetails(){
+  private loadCourseDetails() {
     this.db.getCourseDetailOfTask(this.courseID, this.taskID).toPromise()
       .then(course_detail => {
-        this.courseDetail = course_detail
-      })
+        this.courseDetail = course_detail;
+      });
   }
 
-  public openSettings(){
-    if(this.isAuthorized())
-      this.dialog.open(CourseParameterModalComponent, {data:{courseid:this.courseID}})
-    else
-      this.dialog.open(CourseParameterUserModalComponent, {data:{courseid:this.courseID}})
+  public openSettings() {
+    if (this.isAuthorized()) {
+      this.dialog.open(CourseParameterModalComponent, {data: {courseid: this.courseID}});
+    } else {
+      this.dialog.open(CourseParameterUserModalComponent, {data: {courseid: this.courseID}});
+    }
   }
 
-  public exportSubmissions(){
-    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name)
+  public exportSubmissions() {
+    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name);
   }
 
-  public plagiatModule(courseDetail: DetailedCourseInformation){
+  public plagiatModule(courseDetail: DetailedCourseInformation) {
     this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
       .then((close) => {
-        if(close){
-          this.loadCourseDetails()
+        if (close) {
+          this.loadCourseDetails();
         }
-      })
+      });
   }
 
-  public deleteCourse(courseDetail: DetailedCourseInformation){
+  public deleteCourse(courseDetail: DetailedCourseInformation) {
     this.dialog.open(DeleteCourseModalComponent, {
       data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
     }).afterClosed().pipe(
       flatMap(value => {
         if (value.exit) {
-          return this.db.deleteCourse(courseDetail.course_id)
+          return this.db.deleteCourse(courseDetail.course_id);
         }
       })
     )
       .toPromise()
       .then( (value: Succeeded) => {
-        if(typeof value == "undefined"){
+        if (typeof value == 'undefined') {
           return ;
         }
-        if(value.success){
+        if (value.success) {
           this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
         } else {
           this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.', 'OK', {duration: 5000});
@@ -238,39 +239,39 @@ export class DetailCourseComponent implements OnInit {
         this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung', 'OK', {duration: 5000});
       })
       .then(() => {
-        this.router.navigate(['courses'])
-      })
+        this.router.navigate(['courses']);
+      });
   }
 
-  public isAuthorized(){
-    return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor'
+  public isAuthorized() {
+    return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor';
   }
 
-  public runAllTaskAllUsers(taskid: number){
-    this.db.runAllCourseTaskByDocent(this.courseID, taskid)
+  public runAllTaskAllUsers(taskid: number) {
+    this.db.runAllCourseTaskByDocent(this.courseID, taskid);
   }
 
-  reRunTask(task: CourseTask){
-    this.submissionData = task.submission_data
-    this.submitTask(task)
+  reRunTask(task: CourseTask) {
+    this.submissionData = task.submission_data;
+    this.submitTask(task);
   }
 
-  public isInFetchingResultOfTasks(task: CourseTask){
-    let tasksystemPassed = task.evaluation
-      .map( (eva:CourseTaskEvaluation) => eva.passed )
-     let tasksystemNulls = tasksystemPassed.filter(passed => {
-                              return (passed == null || typeof passed === undefined)
+  public isInFetchingResultOfTasks(task: CourseTask) {
+    const tasksystemPassed = task.evaluation
+      .map( (eva: CourseTaskEvaluation) => eva.passed );
+     const tasksystemNulls = tasksystemPassed.filter(passed => {
+                              return (passed == null || typeof passed === undefined);
                             });
-    if(tasksystemPassed.indexOf(false) >= 0){
-      return false
+    if (tasksystemPassed.indexOf(false) >= 0) {
+      return false;
     } else {
-      return tasksystemNulls.length > 0
+      return tasksystemNulls.length > 0;
     }
   }
 
   private submitTask(currentTask: CourseTask) {
     this.processing = true;
-    this.courseTask.submission_data = ''
+    this.courseTask.submission_data = '';
     this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
       this.submissionData = '';
 
@@ -310,18 +311,19 @@ export class DetailCourseComponent implements OnInit {
       flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid)
+          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid);
         }
         return this.db.getCourseDetailOfTask(course.course_id, this.taskID);
       })
     ).subscribe(course_detail => {
       this.courseTask = course_detail.task;
 
-      if(typeof this.submissionAsFile == 'undefined'){
-        if(this.externalInfoIsForm(this.courseTask))
+      if (typeof this.submissionAsFile == 'undefined') {
+        if (this.externalInfoIsForm(this.courseTask)) {
           this.submissionAsFile = 'choice';
-        else
+        } else {
           this.submissionAsFile = 'text';
+        }
       }
 
 
@@ -334,11 +336,11 @@ export class DetailCourseComponent implements OnInit {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
-          let acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept))
+          const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
 
           if (acceptance_flaggs.indexOf(null) < 0) {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult})
-            return of({success: true})
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
+            return of({success: true});
           } else {
             return throwError('Not all results yet');
           }
@@ -349,22 +351,22 @@ export class DetailCourseComponent implements OnInit {
       ).toPromise()
         .then(d => {
           if (typeof d == 'undefined') {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data:{no_reaction:true}})
+            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
           }
         })
         .catch((e) => {
 
-        })
-    }, 2000)
+        });
+    }, 2000);
   }
 
-  displayTestsystemFeedback(task){
+  displayTestsystemFeedback(task) {
     this.db.getTaskResult(task.task_id).toPromise()
       .then((data: NewTaskInformation) => {
-        this.dialog.open(AnswerFromTestsystemDialogComponent, {data:data})
+        this.dialog.open(AnswerFromTestsystemDialogComponent, {data: data});
       }).catch(() => {
 
-    })
+    });
   }
 
   /**
@@ -382,7 +384,7 @@ export class DetailCourseComponent implements OnInit {
       flatMap((value: SucceededUpdateTask) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id)
+          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id);
 
         }
         return this.db.getCourseDetailOfTask(this.courseDetail.course_id, this.taskID);
@@ -404,21 +406,21 @@ export class DetailCourseComponent implements OnInit {
     }).afterClosed().pipe(
       flatMap(value => {
         if (value.exit) {
-          return this.db.deleteTask(task.task_id)
+          return this.db.deleteTask(task.task_id);
         }
       })
     ).toPromise()
       .then( (value: Succeeded) => {
-        if(value.success){
+        if (value.success) {
           this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-          this.loadCourseDetailsTasks()
+          this.loadCourseDetailsTasks();
         } else {
           this.snackbar.open('Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
         }
       })
       .catch((e) => {
         this.snackbar.open('Es gab ein Datenbankfehler, Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
-      })
+      });
   }
 
   /**
@@ -430,7 +432,7 @@ export class DetailCourseComponent implements OnInit {
     this.submissionData = file;
   }
 
-  updateSubmissionContent(payload: any){
+  updateSubmissionContent(payload: any) {
     this.submissionData = payload['content'];
   }
 
@@ -489,7 +491,7 @@ export class DetailCourseComponent implements OnInit {
       width: '800px',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
-      location.hash = ''
+      location.hash = '';
       if (value.success) {
         this.db.getCourseDetailOfTask(this.courseID, this.taskID).subscribe(courses => {
           this.courseDetail = courses;
@@ -524,7 +526,7 @@ export class DetailCourseComponent implements OnInit {
     return roles.indexOf(this.userRole) >= 0;
   }
 
-  get plagiarism_script_status(){
-    return (this.courseDetail.plagiarism_script) ? "primary" : "warn";
+  get plagiarism_script_status() {
+    return (this.courseDetail.plagiarism_script) ? 'primary' : 'warn';
   }
 }

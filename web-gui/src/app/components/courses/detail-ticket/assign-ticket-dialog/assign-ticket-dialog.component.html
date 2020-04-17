@@ -7,5 +7,9 @@
       </mat-list-item>
     </mat-action-list>
    </mat-dialog-content>
+  <mat-dialog-actions>
+    <button mat-flat-button color="accent" (click)="inviteToConference(ticket.creator)">Zu Konferenz einladen</button>
+    <button mat-flat-button color="warn" (click)="closeTicket(ticket)">Ticket Schliessen</button>
+  </mat-dialog-actions>
 </div>
 

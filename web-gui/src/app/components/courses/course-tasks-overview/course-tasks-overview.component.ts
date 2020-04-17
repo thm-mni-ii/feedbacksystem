@@ -154,7 +154,9 @@ export class CourseTasksOverviewComponent implements OnInit {
     }, 2000);
   }
 
+    //todo: Bug, bei anruf werden 2 nachrichten geschrieben und so 2 mal der dialog geoeffnet.
   goOnline() {
+    Notification.requestPermission();
     this.classroomService.getInvitations().subscribe(invite => {
       const participants = invite.users
         .map(u => u.prename + ' ' + u.surname)
