@@ -26,6 +26,7 @@ import {RxStompClient} from '../../../util/rx-stomp';
 import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
 import {ClassroomService} from '../../../service/classroom.service';
+import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -186,5 +187,35 @@ export class CourseTasksOverviewComponent implements OnInit {
         this.classroomService.createTicket(ticket);
       }
     });
+  }
+
+  /**
+   * Delete a course by its ID, if the user not permitted to do that, nothing happens
+   */
+  deleteCourse() {
+    this.dialog.open(DeleteCourseModalComponent, {
+      data: {coursename: this.courseDetail.course_name, courseID: this.courseID}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.deleteCourse(this.courseID);
+        }
+      })
+    )
+      .toPromise()
+      .then( (value: Succeeded) => {
+        if (value.success) {
+          this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde ausgetragen', 'OK', {duration: 5000});
+        } else {
+          this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+            + ' nicht ausgetragen werden. Dieser Kurs scheint nicht zu existieren.',
+            'OK', {duration: 5000});
+        }
+      })
+      .catch(() => {
+        this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+          + ' nicht ausgetragen werden. Wahrscheinlich hast du keine Berechtigung',
+          'OK', {duration: 5000});
+      });
   }
 }

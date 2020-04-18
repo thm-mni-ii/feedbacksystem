@@ -2,13 +2,6 @@
 
   <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
     <span>{{course.course_name}}</span>
-    <span>
-        <button mat-icon-button (click)="deleteCourse(course.course_name, course.course_id)"
-                *ngIf="course.role_id <= 4"
-                matTooltip="leave module">
-          <mat-icon>exit_to_app</mat-icon>
-        </button>
-    </span>
   </mat-card>
 
   <span class="noElements" *ngIf="(userCourses$ | async)?.length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>

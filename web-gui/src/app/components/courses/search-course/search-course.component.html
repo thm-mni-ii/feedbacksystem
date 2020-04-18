@@ -14,15 +14,10 @@
   <mat-card class="card" *ngFor="let course of cardCourses" (click)="goToCourse(course.course_id)">
     <span>{{course.course_name}}</span>
     <span>
-          <button mat-icon-button color="primary" matTooltip="Zum Kurs"
-                  *ngIf="hasSubbed(course.course_id)"
-                  (click)="goToCourse(course.course_id)">
-            <mat-icon color="primary">forward</mat-icon>
-          </button>
           <button mat-icon-button color="accent" matTooltip="Kurs beitreten"
                   *ngIf="!hasSubbed(course.course_id)"
                   (click)="joinCourse(course.course_name,course.course_id)">
-            <mat-icon color="accent">add_box</mat-icon>
+            <mat-icon color="accent">star_outline</mat-icon>
           </button>
     </span>
   </mat-card>

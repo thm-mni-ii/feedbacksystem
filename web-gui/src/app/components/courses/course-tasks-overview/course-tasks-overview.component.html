@@ -30,4 +30,15 @@
       <span class="state not-done" *ngIf="task.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
     </span>
   </mat-card>
+
+  <mat-card *ngIf="isAuthorized()" class="danger-zone">
+    <h3>Danger Zone</h3>
+    <mat-card-actions>
+      <button mat-raised-button (click)="deleteCourse()"
+              color="warn"
+              matTooltip="Delete module">
+        Delete this Module
+      </button>
+    </mat-card-actions>
+  </mat-card>
 </div>

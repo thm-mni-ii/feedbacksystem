@@ -27,7 +27,7 @@ import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
 import {StartComponent} from './components/start/start.component';
 import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
-import {CoursesComponent} from './components/courses/courses.component';
+import {CoursesComponent} from './components/courses/my-courses/courses.component';
 import {GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
 import {NewCourseComponent} from './components/courses/new-course/new-course.component';

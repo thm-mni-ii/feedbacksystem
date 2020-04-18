@@ -13,4 +13,8 @@
     align-items: center;
     justify-content: space-between;
   }
+  .card:hover {
+    background-color: #819ca9;
+    cursor: pointer;
+  }
 }

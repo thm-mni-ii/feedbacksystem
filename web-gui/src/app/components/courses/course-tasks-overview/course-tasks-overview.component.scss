@@ -1,3 +1,5 @@
+@import "src/colors";
+
 .task-container {
   cursor: pointer;
   margin-top: 12px;
@@ -75,4 +77,11 @@
 }
 .red {
   background-color: red;
+}
+
+.danger-zone {
+  margin-top: 16px;
+  h3 {
+    color: $red;
+  }
 }
