@@ -28,7 +28,7 @@ import {StudentDashboardComponent} from './components/student/student-dashboard/
 import {StartComponent} from './components/start/start.component';
 import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
 import {CoursesComponent} from './components/courses/my-courses/courses.component';
-import {GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
+import {FilterPipe, GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
 import {NewCourseComponent} from './components/courses/new-course/new-course.component';
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
@@ -95,8 +95,8 @@ import { InvitetoConferenceDialogComponent} from './components/courses/detail-ti
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-       // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
-      url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost:8080'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -165,7 +165,7 @@ export const httpInterceptorProviders = [
     ConferenceComponent,
     CourseTicketsOverviewComponent,
     TicketStatusFilter,
-    SafePipe,
+    SafePipe, FilterPipe,
     AssignTicketDialogComponent,
     UserTeacherFilter,
     NewticketDialogComponent,

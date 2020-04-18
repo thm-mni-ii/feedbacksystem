@@ -1,9 +1,8 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {MatAutocomplete} from '@angular/material/autocomplete';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
+import {Component, OnInit} from '@angular/core';
 import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
+import {Observable} from 'rxjs';
+import {Pipe, PipeTransform} from '@angular/core';
 
 /**
  * Adding and removing docents from courses
@@ -14,30 +13,39 @@ import {DatabaseService} from '../../../service/database.service';
   styleUrls: ['./grant-docent.component.scss']
 })
 export class GrantDocentComponent implements OnInit {
+  courses: Observable<GeneralCourseInformation[]>;
+  filterValue = '';
 
   constructor(private db: DatabaseService) {
   }
 
-  @ViewChild(MatSort) sort: MatSort;
-  @ViewChild('auto') matAutocomplete: MatAutocomplete;
-
-  dataSourceCourses = new MatTableDataSource<GeneralCourseInformation>();
-  columns = ['course_name'];
-
   public loadAllCourses() {
-    this.db.getAllCourses().subscribe(courses => this.dataSourceCourses.data = courses);
+    this.courses = this.db.getAllCourses();
   }
 
-  ngOnInit() {
+  public setFilterValue(filterV: string) {
+    this.filterValue = filterV;
+  }
+
+  public ngOnInit() {
     this.loadAllCourses();
-    this.dataSourceCourses.sort = this.sort;
   }
+}
 
-  /**
-   * Filters all courses
-   * @param filterValue The value to filter with
-   */
-  filterCourses(filterValue: string) {
-    this.dataSourceCourses.filter = filterValue;
+@Pipe({
+  name: 'filter'
+})
+export class FilterPipe implements PipeTransform {
+  transform(items: any[], searchText: string, fieldName: string): any[] {
+    if (!items) { return []; }
+    if (!searchText || searchText.length === 0) { return items; }
+    searchText = searchText.toLowerCase();
+
+    return items.filter(item => {
+      if (item && item[fieldName]) {
+        return item[fieldName].toLowerCase().includes(searchText);
+      }
+      return false;
+    });
   }
 }
