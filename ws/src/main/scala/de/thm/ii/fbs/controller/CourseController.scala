@@ -743,8 +743,6 @@ class CourseController {
     } else {
       throw new UnauthorizedException;
     }
-
-
   }
 
   /**
