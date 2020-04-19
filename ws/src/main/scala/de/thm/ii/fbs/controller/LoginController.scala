@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 
 /**
-  * LoginController simply perfoem login request. In future it might send also a COOKIE
+  * LoginController simply perform login request. In future it might send also a COOKIE
   *
   * @author Benjamin Manns
   */

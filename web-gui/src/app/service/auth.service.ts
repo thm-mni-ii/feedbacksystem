@@ -5,6 +5,7 @@ import {Observable} from 'rxjs';
 import {DOCUMENT} from '@angular/common';
 import {Succeeded} from '../interfaces/HttpInterfaces';
 import {CookieService} from 'ngx-cookie-service';
+
 const TOKEN_ID = 'token';
 
 /**
@@ -18,7 +19,6 @@ export class AuthService {
   constructor(private http: HttpClient, private jwtHelper: JwtHelperService,
               @Inject(DOCUMENT) private document: Document, private cookie: CookieService) {
   }
-
 
   /**
    * Get user Token
@@ -37,16 +37,15 @@ export class AuthService {
       {observe: 'response'});
   }
 
-  acceptPrivacyForUser(username: string){
+  acceptPrivacyForUser(username: string) {
     return new Promise((resolve) => {
       this.http.post('/api/v1/login/privacy/accept', {username: username}).toPromise()
-        .then( (success: Succeeded) => {
-            resolve(success.success)
+        .then((success: Succeeded) => {
+          resolve(success.success);
         }).catch(() => {
-        resolve(false)
-      })
-    })
-
+        resolve(false);
+      });
+    });
   }
 
   /**
@@ -57,7 +56,6 @@ export class AuthService {
     return this.http.post<Succeeded>('/api/v1/login/privacy/check', {username: username});
   }
 
-
   /**
    * Deletes token from localstorage
    * and terminates session for user.
@@ -67,14 +65,10 @@ export class AuthService {
     this.cookie.delete('jwt');
   }
 
-
   /**
    * Checks if the user token is expired
    */
   isAuthenticated(): boolean {
     return !this.jwtHelper.isTokenExpired(this.getToken());
   }
-
-
 }
-

@@ -203,7 +203,7 @@ export const httpInterceptorProviders = [
     DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
     CourseParameterModalComponent, CourseParameterUserModalComponent, UploadPlagiatScriptComponent,
     EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
-  providers: [CookieService, httpInterceptorProviders],
+  providers: [CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
