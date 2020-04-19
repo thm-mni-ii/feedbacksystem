@@ -4,27 +4,34 @@
             matTooltip="Zurück zur Kursübersicht">
       <mat-icon>arrow_back</mat-icon>
     </button>
+    <button  mat-flat-button color="primary" (click)="toggleTheatre()"
+            matTooltip="Theatre Modus starten" *ngIf="isAuthorized() && !inTheatreMode" >
+      <mat-icon>fullscreen</mat-icon>
+    </button>
+      <button mat-flat-button color="primary" (click)="toggleTheatre()"
+              matTooltip="Theatre Modus verlassen" *ngIf="isAuthorized() && inTheatreMode" >
+        <mat-icon>fullscreen_exit</mat-icon>
+    </button>
   </div>
 </div>
 <div class="ticketOverview">
-  <div class="ticketColumn users">
-    <h3>Online Nutzer</h3>
+  <div class="ticketColumn users" *ngIf="!inTheatreMode">
+    <h3 *ngIf="isAuthorized()">Online Nutzer</h3>
+    <h3 *ngIf="!isAuthorized()">Online Lehrende</h3>
     <mat-list>
-      <mat-card class="user" mat-list-item *ngFor="let user of users | async"
-                [ngClass]="{'docentBG': user.role_id == roles.Docent}"
-                [ngClass]="{'tutorBG': user.role_id == roles.Tutor}">
-        <span>{{user.surname}}, {{user.prename}}</span>
+      <mat-card class="user" mat-list-item *ngFor="let user of sortUsersByRole(onlineUsers | async)">
+        <p class="user-item">{{user.surname}}, {{user.prename}}<span class="subtext-role"><sub>{{getRoleName(user.role)}}</sub></span></p>
         <span class="meta">
-          <mat-icon class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
+          <mat-icon *ngIf="isAuthorized()" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
         </span>
       </mat-card>
     </mat-list>
   </div>
 
-  <iframe class="conf" [src]="confUrl | async | safe">
+  <iframe class="conf" [src]="confUrl | async | safe" *ngIf="isAuthorized()">
   </iframe>
 
-  <div class="ticketColumn tickets">
+  <div class="ticketColumn tickets" *ngIf="!inTheatreMode">
     <h3>Offene Tickets</h3>
     <mat-list>
       <mat-card mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of sortTickets(tickets | async)"

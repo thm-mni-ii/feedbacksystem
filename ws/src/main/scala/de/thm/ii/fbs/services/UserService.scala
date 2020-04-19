@@ -26,6 +26,10 @@ class UserService {
   private val compile_production: Boolean = true
   /** holds connection to storageService*/
   val storageService = new StorageService(compile_production)
+
+  /** courseService holds utilities for course management*/
+  val courseService = new CourseService()
+
   /**
     * Class holds all DB labels
     */
@@ -341,6 +345,8 @@ class UserService {
       .claim(UserDBLabels.role_id, role_id)
       .claim(UserDBLabels.role_name, role_name)
       .claim(UserDBLabels.email, user.email)
+      .claim(UserDBLabels.docent_in_course, courseService.getCoursesAsDocent(user))
+      .claim(UserDBLabels.tutor_in_course, courseService.getCoursesAsTutor(user))
       .claim("guest", user.password != null)
       .claim("token_type", "user")
       .setIssuedAt(new Date())

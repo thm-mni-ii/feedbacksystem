@@ -25,28 +25,38 @@ export class CourseTicketsOverviewComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
-              private router: Router, @Inject(DOCUMENT) document) {
+              private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
     this.confUrl = this.conferenceService.getSingleConferenceLink();
   }
 
   courseID: number;
-  userRole: string;
-  users: Observable<User[]>;
+  onlineUsers: Observable<User[]>;
   tickets: Observable<Ticket[]>;
   confUrl: Observable<string>;
-  roles = UserRoles;
+
+  inTheatreMode: boolean;
+  userRole: number;
 
   ngOnInit(): void {
-    this.users = this.classroomService.getUsers();
+    this.inTheatreMode = false;
+    this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
-     this.route.params.subscribe(
+    this.route.params.subscribe(
        param => {
          this.courseID = param.id;
        });
+    this.databaseService.getSubscribedUsersOfCourse(this.courseID)
+      .subscribe(users => {
+        if (users.length > 0) {
+          this.userRole = users.find(u => u.username == this.user.getUsername()).role_id;
+        } else {
+          this.userRole = UserRoles.Student;
+        }
+      });
   }
 
   public isAuthorized() {
-    return ['tutor', 'docent', 'moderator', 'admin'].indexOf(this.userRole) >= 0;
+    return this.user.isDocentInCourse(this.courseID) || this.user.isTutorInCourse(this.courseID);
   }
 
   public inviteToConference(user) {
@@ -61,7 +71,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
     this.dialog.open(AssignTicketDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseID, users: this.users, ticket: ticket}
+      data: {courseID: this.courseID, users: this.onlineUsers, ticket: ticket}
     });
   }
 
@@ -77,6 +87,31 @@ export class CourseTicketsOverviewComponent implements OnInit {
       }
       return a.timestamp > b.timestamp ? 1 : -1;
     });
+  }
+
+  public sortUsersByRole(users) {
+    return users.sort( (a, b) => {
+      return a.role > b.role ? -1 : 1;
+    });
+  }
+
+  public toggleTheatre() {
+    this.inTheatreMode = !this.inTheatreMode;
+  }
+
+  public getRoleName(roleid) {
+    switch (roleid) {
+      case UserRoles.Admin:
+        return 'Admin';
+      case UserRoles.Moderator:
+        return 'Moderator';
+      case UserRoles.Docent:
+        return 'Docent';
+      case UserRoles.Tutor:
+        return 'Tutor';
+      case UserRoles.Student:
+        return 'Student';
+    }
   }
 }
 
