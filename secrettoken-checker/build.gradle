@@ -12,7 +12,7 @@ apply plugin: 'scala'
 apply plugin: 'scalaStyle'
 apply plugin: 'application'
 
-mainClassName = 'de.thm.ii.submissioncheck.SecretTokenChecker'
+mainClassName = 'de.thm.ii.fbs.SecretTokenChecker'
 
 jar {
     enabled = true
