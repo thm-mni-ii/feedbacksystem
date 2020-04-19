@@ -38,6 +38,8 @@ services:
     shared-secret: ZjUyMTBjNTEtOGUxNC00YWU1LWEyY2UtZTE3MTUyZTQ4MmJk
     user: fbs
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     password: twRuvi2ejllDdA4nnQLa08O

@@ -4,7 +4,6 @@ import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
 import de.thm.ii.fbs.util.DB
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
@@ -13,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.SpringApplication
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.annotation.PropertySource
 import org.springframework.context.event.EventListener
 import org.springframework.util.ResourceUtils
 import org.springframework.boot.web.servlet.MultipartConfigFactory
@@ -29,8 +27,6 @@ import scala.io.{Codec, Source}
   * @author Andrej Sajenko
   */
 @SpringBootApplication
-@PropertySource(value = Array("file:/usr/local/ws/conf/application.yml"),
-  ignoreResourceNotFound = true)
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
@@ -81,7 +77,13 @@ object Application extends App {
   sc.init(null, managers, new SecureRandom())
   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory)
 
-  SpringApplication.run(classOf[Application])
+  private val config = if (Files.exists(Paths.get("/usr/local/ws/conf/application.yml"))) {
+    "--spring.config.location=file:/usr/local/ws/conf/application.yml" +: args
+  } else {
+    args
+  }
+
+  SpringApplication.run(classOf[Application], config: _*)
 
   /**
     * configure upload and request size

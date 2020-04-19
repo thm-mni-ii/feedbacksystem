@@ -95,6 +95,7 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: springVersion
     compile('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     compile('org.json:json:20190722')
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.26'
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
     //compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.2.1.RELEASE'
     //compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.0.RELEASE'
