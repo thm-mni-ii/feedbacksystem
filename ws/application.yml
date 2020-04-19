@@ -1,12 +1,12 @@
 cas:
   authentication-url-patterns: /api/v1/login
-  client-host-url: https://localhost:8080/
+  client-host-url: https://feedback.mni.thm.de
   server-login-url: https://cas.thm.de/cas/login
   server-url-prefix: https://cas.thm.de/cas/
   validation-type: CAS3
   validation-url-patterns: /api/v1/login
 compile:
-  production: false
+  production: true
 jwt:
   secret: 8D8sa92j3o41pdf0
   expiration:
@@ -18,7 +18,7 @@ logging:
   level:
     root: INFO
 markdown:
-  base-path: /usr/local/ws/markdown
+  base-path: /usr/local/ws/conf/markdown
 message:
   topic:
     name: java
@@ -29,8 +29,7 @@ server:
   port: 8080
   ssl:
     enabled: true
-    key-alias: tomcat
-    key-store: classpath:keystore.p12
+    key-store: file:/usr/local/ws/conf/feedback.cert_v2.p12
     key-store-password: passwd
     key-store-type: PKCS12
 services:
@@ -46,14 +45,14 @@ spring:
       max-active: 50
       max-wait: 10000
       test-on-borrow: true
-    url: jdbc:mysql://localhost:3308/submissionchecker?autoReconnect=true&failOverReadOnly=false&maxReconnects=10&useSSL=false
+    url: jdbc:mysql://mysql1:3306/submissionchecker?autoReconnect=true&failOverReadOnly=false&maxReconnects=10&useSSL=false
     username: root
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
     open-in-view: false
   kafka:
     auto-offset-reset: earliest
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: kafka1:9092
     consumer:
       group-id: jcg-group
 url:
