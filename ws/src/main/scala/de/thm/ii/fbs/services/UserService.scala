@@ -27,8 +27,8 @@ class UserService {
   /** holds connection to storageService*/
   val storageService = new StorageService(compile_production)
 
-  /** courseService holds utilities for course management*/
-  val courseService = new CourseService()
+  @Autowired
+  private val courseService: CourseService = null
 
   /**
     * Class holds all DB labels
