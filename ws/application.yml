@@ -18,7 +18,7 @@ logging:
   level:
     root: INFO
 markdown:
-  base-path: /Users/andrej/Desktop/Apps/feedbacksystem/docker-config/ws/markdown/
+  base-path: /usr/local/ws/markdown
 message:
   topic:
     name: java
