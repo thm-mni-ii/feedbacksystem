@@ -3,9 +3,10 @@ package de.thm.ii.fbs.services
 import java.io
 import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
-import de.thm.ii.fbs.util.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
+
 import de.thm.ii.fbs.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.fbs.security.Secrets
+import de.thm.ii.fbs.util.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -83,7 +84,10 @@ class CourseService {
     */
   def getSubscribedUserByCourse(courseid: Int, roleids: List[Int]): List[User] = {
     val sqlList = "(" + roleids.map(a => a.toString).reduce((a, b) => s"${a}, ${b}") + ")"
-    DB.query("SELECT u.*, r.* FROM user_course hc join user u using(user_id) join role r on r.role_id = hc.role_id" +
+    DB.query("SELECT u.user_id, u.username, u.prename, u.surname, u.email, r.role_name, hc.role_id, u.privacy_checked " +
+      "FROM user_course hc " +
+      "join user u using(user_id) " +
+      "join role r on r.role_id = hc.role_id" +
       " where hc.course_id = ? and hc.role_id IN " + sqlList,
       (res, _) => {
         new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
@@ -159,6 +163,32 @@ class CourseService {
   }
 
   /**
+    * get list of all courses where user is a docent
+    * @author Simon Schniedenharn
+    * @param user unique identification for a user
+    * @return Scala List
+    */
+  def getCoursesAsDocent(user: User): List[String] = {
+    DB.query("SELECT uc.course_id FROM user_course uc join user using(user_id) where uc.user_id = ? and uc.role_id = 4",
+      (res, _) => {
+        res.getString(CourseDBLabels.courseid)
+      }, user.userid)
+  }
+
+  /**
+    * get list of all courses where user is a tutor
+    * @author Simon Schniedenharn
+    * @param user unique identification for a user
+    * @return Scala List
+    */
+  def getCoursesAsTutor(user: User): List[String] = {
+    DB.query("SELECT uc.course_id FROM user_course uc join user using(user_id) where uc.user_id = ? and uc.role_id = 8",
+      (res, _) => {
+        res.getString(CourseDBLabels.courseid)
+      }, user.userid)
+  }
+
+  /**
     * Check if a given user is permitted to change course information, add task, grant rights are not checked here.
     * A Tutor and Docent are permitted or courses and admins of course.
     * @author Benjamin Manns
@@ -176,6 +206,7 @@ class CourseService {
       list.nonEmpty && list.head == 1
     }
   }
+
   /**
     * Check if a given user is a course docent
     *

@@ -28,6 +28,12 @@ object UserDBLabels {
   /** DB Label "password" */
   val password: String = "password"
 
+  /** DB label "tutorInCourse" */
+  val docent_in_course = "docent_in_course"
+
+  /** DB label "tutorInCourse" */
+  val tutor_in_course = "tutor_in_course"
+
   /** DB Label "privacy_checked" */
   val privacy_checked: String = "privacy_checked"
 }

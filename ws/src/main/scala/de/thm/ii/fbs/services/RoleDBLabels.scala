@@ -14,12 +14,18 @@ object RoleDBLabels {
   var MODERATOR: String = "MODERATOR"
   /** ROLE LABEL "ADMIN" */
   var ADMIN: String = "ADMIN"
+  /** ROLE LABEL "DOCENT" */
+  var DOCENT: String = "DOCENT"
+  /** ROLE LABEL "TUTOR" */
+  var TUTOR: String = "TUTOR"
   /** ROLE LABEL "ADMIN" */
   var STUDENT: String = "STUDENT"
   /** ROLE ID "ADMIN" */
   val ADMIN_ROLE_ID = 1
   /** ROLE ID "DOCENT" */
   val DOCENT_ROLE_ID = 4
+  /** ROLE ID "STUDENT" */
+  val TUTOR_ROLE_ID = 8
   /** ROLE ID "STUDENT" */
   val USER_ROLE_ID = 16
 }

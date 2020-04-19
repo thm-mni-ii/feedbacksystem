@@ -725,13 +725,26 @@ class CourseController {
   @ResponseBody
   def getAllSubscribedUsersOfCourse(@PathVariable courseid: Int, request: HttpServletRequest): List[Map[String, Any]] = {
     val user = Users.claimAuthorization(request)
-    if (!courseService.isPermittedForCourse(courseid, user)) {
-      throw new UnauthorizedException
+    if (courseService.isPermittedForCourse(courseid, user)) {
+      this.courseService.getSubscribedUserByCourse(courseid,
+      List(RoleDBLabels.USER_ROLE_ID,
+          RoleDBLabels.TUTOR_ROLE_ID,
+          RoleDBLabels.DOCENT_ROLE_ID))
+        .map(user => {
+          user.asMap()
+        })
+    } else if (courseService.isSubscriberForCourse(courseid, user)){
+      this.courseService.getSubscribedUserByCourse(courseid,
+        List(RoleDBLabels.TUTOR_ROLE_ID,
+          RoleDBLabels.DOCENT_ROLE_ID))
+        .map(user => {
+          user.asMap()
+        })
+    } else {
+      throw new UnauthorizedException;
     }
 
-    this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID)).map(user => {
-      user.asMap()
-    })
+
   }
 
   /**
