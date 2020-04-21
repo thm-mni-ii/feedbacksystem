@@ -94,7 +94,6 @@ class ClassroomController {
         .foldLeft(new JSONArray())((a, u) => a.put(u))
         .toString()
       smt.convertAndSendToUser(userOpt.getName(), "/classroom/users", response)
-
     }
   }
 
@@ -149,11 +148,10 @@ class ClassroomController {
   def getAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get);
     val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-    var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt;
+    var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
     localUserOpt match {
       case Some(v) => userOpt = localUserOpt;
       case None => userOpt = globalUserOpt;
-
     }
 
     val courseIdAndUser = for {
