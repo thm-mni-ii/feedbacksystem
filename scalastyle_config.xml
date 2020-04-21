@@ -136,7 +136,7 @@
     </check>
     <check level="error" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="false"></check>
     <check level="error" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="true"></check>
-    <check level="error" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="true">
+    <check level="warn" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="true">
         <parameters>
             <parameter name="allowed"><![CDATA[8]]></parameter>
             <parameter name="ignoreRegex"><![CDATA[^""$]]></parameter>
