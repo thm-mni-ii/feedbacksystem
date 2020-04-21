@@ -58,6 +58,7 @@ export class ClassroomService {
    */
   public join(courseId: number): Observable<void> {
     this.courseId = courseId;
+    //todo: change domain for live system
     this.stompRx = new RxStompClient('https://localhost:8080/websocket');
 
     return new Observable<void>(c => {
@@ -95,7 +96,7 @@ export class ClassroomService {
    * @param users The users to invite
    */
   public inviteToConference(href: string, users: {username: string; prename: string; surname: string}[]) {
-    this.send('/websocket/classroom/invite', {'href': href, 'users': users});
+    this.send('/websocket/classroom/invite', {'href': href, 'users': users, 'courseid': this.courseId});
   }
   /**
    * Creates a new ticket.

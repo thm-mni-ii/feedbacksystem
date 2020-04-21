@@ -35,7 +35,6 @@ export class CourseTicketsOverviewComponent implements OnInit {
   confUrl: Observable<string>;
 
   inTheatreMode: boolean;
-  userRole: number;
 
   ngOnInit(): void {
     this.inTheatreMode = false;
@@ -45,18 +44,11 @@ export class CourseTicketsOverviewComponent implements OnInit {
        param => {
          this.courseID = param.id;
        });
-    this.databaseService.getSubscribedUsersOfCourse(this.courseID)
-      .subscribe(users => {
-        if (users.length > 0) {
-          this.userRole = users.find(u => u.username == this.user.getUsername()).role_id;
-        } else {
-          this.userRole = UserRoles.Student;
-        }
-      });
+    console.log(this.user.getUsername());
   }
 
   public isAuthorized() {
-    return this.user.isDocentInCourse(this.courseID) || this.user.isTutorInCourse(this.courseID);
+    return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
   }
 
   public inviteToConference(user) {
@@ -91,7 +83,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
 
   public sortUsersByRole(users) {
     return users.sort( (a, b) => {
-      return a.role > b.role ? -1 : 1;
+      return a.role > b.role ? 1 : -1;
     });
   }
 
