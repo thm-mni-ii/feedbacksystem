@@ -168,10 +168,10 @@ class CourseService {
     * @param user unique identification for a user
     * @return Scala List
     */
-  def getCoursesAsDocent(user: User): List[String] = {
+  def getCoursesAsDocent(user: User): List[Int] = {
     DB.query("SELECT uc.course_id FROM user_course uc join user using(user_id) where uc.user_id = ? and uc.role_id = 4",
       (res, _) => {
-        res.getString(CourseDBLabels.courseid)
+        res.getInt(CourseDBLabels.courseid)
       }, user.userid)
   }
 
@@ -181,10 +181,11 @@ class CourseService {
     * @param user unique identification for a user
     * @return Scala List
     */
-  def getCoursesAsTutor(user: User): List[String] = {
+  def getCoursesAsTutor(user: User): List[Int] = {
     DB.query("SELECT uc.course_id FROM user_course uc join user using(user_id) where uc.user_id = ? and uc.role_id = 8",
       (res, _) => {
-        res.getString(CourseDBLabels.courseid)
+        def test = res;
+        res.getInt(CourseDBLabels.courseid)
       }, user.userid)
   }
 

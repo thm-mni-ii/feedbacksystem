@@ -8,6 +8,8 @@ import de.thm.ii.fbs.util.DB
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
+import org.json.JSONArray
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -30,6 +32,7 @@ class UserService {
   @Autowired
   private val courseService: CourseService = null
 
+  private val logger: Logger = LoggerFactory.getLogger(classOf[UserService])
   /**
     * Class holds all DB labels
     */
@@ -228,6 +231,29 @@ class UserService {
   }
 
   /**
+    * Load user by a given username with permission for a specific course.
+    * @param username a unique identification for a user
+    * @param courseId a unique identification for a course
+    * @param loadPW load DB pw hash, otherwise NULL
+    * @return The user having the given username if such one  in the specified course.
+    */
+  def loadCourseUserFromDB(username: String, courseId: Int, loadPW: Boolean = false): Option[User] = {
+    val users = DB.query("SELECT u.user_id, u.username, u.prename, u.surname, u.email, r.role_name as role_name, uc.role_id, u.privacy_checked " +
+      "FROM user u " +
+      "join user_course uc using(user_id) " +
+      "join role r on uc.role_id = r.role_id " +
+      "where username = ? and uc.course_id = ? LIMIT 1",
+      (res, _) => {
+        val pw = if (loadPW) res.getString(UserDBLabels.password) else null
+        new User(res.getInt(UserDBLabels.user_id), res.getString(UserDBLabels.username), res.getString(UserDBLabels.prename),
+          res.getString(UserDBLabels.surname), res.getString(UserDBLabels.email), res.getString(UserDBLabels.role_name), res.getInt(UserDBLabels.role_id),
+          res.getBoolean(UserDBLabels.privacy_checked), pw)
+      }, username, courseId)
+
+    users.headOption
+  }
+
+  /**
     * User can accept the privacy policy
     * @author Benjamin Manns
     * @param username accepting user
@@ -321,6 +347,18 @@ class UserService {
       (res, _) => res.getInt("docent"), userid)
     list.nonEmpty && list.head == 1
   }
+
+  /**
+    * Calculates if given user is at least for one course a docent, so he has access to see all testsystem.
+    * @param userid unique User identification
+    * @return if User is a docent or not
+    */
+  def checkIfUserAtLeastOneTutor(userid: Int): Boolean = {
+    val list = DB.query("select count(*) > 0 as tutor from user_course where user_id = ? and role_id IN (8)",
+      (res, _) => res.getInt("tutor"), userid)
+    list.nonEmpty && list.head == 1
+  }
+
   /**
     * generateTokenFromUser simply uses JWT technologies
     *
@@ -332,7 +370,7 @@ class UserService {
     var role_id = user.roleid
     var role_name = user.role
 
-    // sometimes a user is a temporaly docent, he will also have more access rights!
+    // sometimes a user is a temporarily docent, he will also have more access rights!
     if (role_id > RoleDBLabels.DOCENT_ROLE_ID && checkIfUserAtLeastOneDocent(user.userid)) {
       role_id = RoleDBLabels.DOCENT_ROLE_ID
       role_name = "docent"
@@ -345,8 +383,8 @@ class UserService {
       .claim(UserDBLabels.role_id, role_id)
       .claim(UserDBLabels.role_name, role_name)
       .claim(UserDBLabels.email, user.email)
-      .claim(UserDBLabels.docent_in_course, courseService.getCoursesAsDocent(user))
-      .claim(UserDBLabels.tutor_in_course, courseService.getCoursesAsTutor(user))
+      .claim(UserDBLabels.tutor_in_course, courseService.getCoursesAsTutor(user).mkString(","))
+      .claim(UserDBLabels.docent_in_course, courseService.getCoursesAsDocent(user).mkString(","))
       .claim("guest", user.password != null)
       .claim("token_type", "user")
       .setIssuedAt(new Date())

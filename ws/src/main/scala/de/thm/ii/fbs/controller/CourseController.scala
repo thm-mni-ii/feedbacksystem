@@ -821,7 +821,7 @@ class CourseController {
   @ResponseBody
   def createConferences(@PathVariable courseid: Int, @RequestBody body: JsonNode, request: HttpServletRequest): Unit = {
     val user = Users.claimAuthorization(request)
-    if (!(user.isAdmin || user.isDocent || user.isModerator || user.isTutor)) {
+    if (!user.isAtLeastInRole(Role.TUTOR)) {
       throw new UnauthorizedException()
     }
 
@@ -849,7 +849,8 @@ class CourseController {
   @RequestMapping(value = Array("/meeting"), method = Array(RequestMethod.POST))
   def createConference(request: HttpServletRequest, response: HttpServletResponse): Map[String, String] = {
     val user = Users.claimAuthorization(request)
-    if (!user.isAtLeastInRole(Role.TUTOR)) {
+
+    if (!user.isAtLeastInRole(Role.TUTOR) && !userService.checkIfUserAtLeastOneTutor(user.userid)) {
       throw new UnauthorizedException()
     }
 
