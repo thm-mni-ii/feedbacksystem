@@ -95,7 +95,7 @@ export class ClassroomService {
    * @param users The users to invite
    */
   public inviteToConference(href: string, users: {username: string; prename: string; surname: string}[]) {
-    this.send('/websocket/classroom/invite', {'href': href, 'users': users});
+    this.send('/websocket/classroom/invite', {'href': href, 'users': users, 'courseid': this.courseId});
   }
   /**
    * Creates a new ticket.
