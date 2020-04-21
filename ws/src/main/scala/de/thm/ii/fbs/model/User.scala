@@ -69,6 +69,13 @@ class User(val userid: Int, val username: String, val prename: String, val surna
     */
   def isAtLeastInRole(role: Role.Value): Boolean = this.roleid <= role.id
 
+  /**
+    * Checks if the user has at most the provided role, i.e., the user role may admit more rights than the one provided
+    * @param role The provided role
+    * @return True if the condition above is met.
+    */
+  def isAtMostInRole(role: Role.Value): Boolean = this.roleid >= role.id
+
   private def canEqual(other: Any): Boolean = other.isInstanceOf[User]
 
   /**

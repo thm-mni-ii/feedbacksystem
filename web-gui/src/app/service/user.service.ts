@@ -73,12 +73,12 @@ export class UserService {
     return this.getDecodedToken().user_id;
   }
 
-  isDocentInCourse(courseid: number): number {
-    return this.getDecodedToken().docent_in_course.find(d => d == courseid);
+  isDocentInCourse(courseid: number): boolean {
+    return this.getDecodedToken().docent_in_course.split(',').indexOf(courseid.toString(10)) >= 0;
   }
 
-  isTutorInCourse(courseid: number): number {
-    return this.getDecodedToken().tutor_in_course.find(d => d == courseid);
+  isTutorInCourse(courseid: number): boolean {
+    return this.getDecodedToken().tutor_in_course.split(',').indexOf(courseid.toString(10)) >= 0;
   }
 }
 
@@ -98,6 +98,6 @@ export interface JWTToken {
   readonly iat: number;
   readonly exp: number;
   readonly guest: boolean;
-  readonly docent_in_course: number[];
-  readonly tutor_in_course: number[];
+  readonly docent_in_course: string;
+  readonly tutor_in_course: string;
 }
