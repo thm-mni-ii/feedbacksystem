@@ -58,7 +58,7 @@ export class ClassroomService {
    */
   public join(courseId: number): Observable<void> {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('https://localhost:8080/websocket');
+    this.stompRx = new RxStompClient('https://feedback.mni.thm.de/websocket');
 
     return new Observable<void>(c => {
       this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
