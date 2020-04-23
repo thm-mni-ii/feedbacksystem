@@ -19,6 +19,8 @@ export class IncomingCallDialogComponent implements OnInit {
     this.conferenceURL = this.data.conferenceURL;
 
     const notification = new Notification('Konferenzeinladung Feedbacksystem', {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
+    notification.onclick = () => {window.focus(); };
+    notification.onclose = () => {window.focus(); };
     this.audio = new Audio();
     this.audio.src = '../../../../assets/classic_phone.mp3';
     this.audio.load();
