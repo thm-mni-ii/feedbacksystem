@@ -66,7 +66,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   }
 
   public isAuthorized() {
-    return ['tutor', 'docent', 'moderator', 'admin'].indexOf(this.userRole) >= 0;
+    return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
   }
 
   /**
@@ -166,11 +166,12 @@ export class CourseTasksOverviewComponent implements OnInit {
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
-        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href}
+        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href},
+        disableClose: true
       });
     });
-
     this.classroomService.join(this.courseID).subscribe();
+    this.router.navigate(['courses', this.courseID, 'tickets']);
   }
 
   goOffline() {
