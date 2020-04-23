@@ -15,6 +15,7 @@ import {InvitetoConferenceDialogComponent} from '../detail-ticket/inviteto-confe
 import {Observable} from 'rxjs';
 import {ClassroomService} from '../../../service/classroom.service';
 import {UserRoles} from '../../../util/UserRoles';
+import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -104,6 +105,17 @@ export class CourseTicketsOverviewComponent implements OnInit {
       case UserRoles.Student:
         return 'Student';
     }
+  }
+  public createTicket() {
+    this.dialog.open(NewticketDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    }).afterClosed().subscribe(ticket => {
+      if (ticket) {
+        this.classroomService.createTicket(ticket);
+      }
+    });
   }
 }
 
