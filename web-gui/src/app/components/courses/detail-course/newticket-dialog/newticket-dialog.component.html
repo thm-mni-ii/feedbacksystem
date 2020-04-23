@@ -3,12 +3,12 @@
 <mat-dialog-content [formGroup]="form">
   <mat-form-field appearance="standard">
     <mat-label>Titel</mat-label>
-    <input formControlName="title" required matInput>
+    <input maxlength="30" formControlName="title" required matInput>
   </mat-form-field>
   <br>
   <mat-form-field appearance="standard">
     <mat-label>Beschreibung</mat-label>
-    <textarea formControlName="desc" matInput required cdkTextareaAutosize></textarea>
+    <textarea maxlength="160" formControlName="desc" matInput required cdkTextareaAutosize></textarea>
   </mat-form-field>
   <br>
   <mat-form-field appearance="standard">

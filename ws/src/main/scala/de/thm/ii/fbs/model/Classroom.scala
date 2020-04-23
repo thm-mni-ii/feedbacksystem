@@ -17,7 +17,6 @@ object Classroom {
     */
   def join(courseId: Int, user: User): Unit = {
     roomsToUsers.getOrElseUpdate(courseId, mutable.Set()).add(user)
-
     userToRoom.put(user, courseId)
   }
 
