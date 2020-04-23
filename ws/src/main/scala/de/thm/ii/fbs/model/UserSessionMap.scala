@@ -19,6 +19,10 @@ object UserSessionMap {
     * @param p principal
     */
   def map(id: String, p: Principal): Unit = {
+    if (userToSession.contains(p)) {
+      sessionToUser.remove(userToSession(p))
+    }
+
     sessionToUser.put(id, p)
     userToSession.put(p, id)
     onMapListeners.foreach(_(id, p))
