@@ -20,7 +20,7 @@ export class AssignTicketDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
-              private conferenceService: ConferenceService) {
+              private conferenceService: ConferenceService, private user: UserService) {
     this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
@@ -51,7 +51,9 @@ export class AssignTicketDialogComponent implements OnInit {
     });
   }
 
-
+  public isAuthorized() {
+    return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
+  }
 }
 
 @Pipe({
