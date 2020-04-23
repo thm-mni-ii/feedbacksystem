@@ -166,7 +166,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
-        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href},
+        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href, caller: invite.user},
         disableClose: true
       });
     });

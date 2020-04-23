@@ -2,6 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DatabaseService} from '../../../../service/database.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {User} from '../../../../interfaces/HttpInterfaces';
 
 @Component({
   selector: 'app-incoming-call-dialog',
@@ -11,16 +12,19 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 export class IncomingCallDialogComponent implements OnInit {
   participants: any[];
   conferenceURL: string;
+  audio: HTMLAudioElement;
+  caller: User;
   constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, private db: DatabaseService,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) { }
-  audio;
+
   ngOnInit(): void {
     this.participants = this.data.participants;
     this.conferenceURL = this.data.conferenceURL;
-
-    const notification = new Notification('Konferenzeinladung Feedbacksystem', {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
-    notification.onclick = () => {window.focus(); };
-    notification.onclose = () => {window.focus(); };
+    this.caller = this.data.caller;
+    const notification = new Notification('Konferenzeinladung Feedbacksystem',
+      {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
+    notification.onclick = () => window.focus();
+    notification.onclose = () => window.focus();
     this.audio = new Audio();
     this.audio.src = '../../../../assets/classic_phone.mp3';
     this.audio.load();
@@ -38,7 +42,6 @@ export class IncomingCallDialogComponent implements OnInit {
   }
 
   public acceptCall() {
-    // todo notification api benutzen um auf invite hinzuweisen
     this.openUrlInNewWindow(this.conferenceURL);
     this.dialogRef.close();
   }
@@ -47,7 +50,7 @@ export class IncomingCallDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  openUrlInNewWindow(url: string) {
+  public openUrlInNewWindow(url: string) {
     window.open(url, '_blank');
   }
 }
