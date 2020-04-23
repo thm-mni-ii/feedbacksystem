@@ -13,12 +13,26 @@ export class IncomingCallDialogComponent implements OnInit {
   conferenceURL: string;
   constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, private db: DatabaseService,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) { }
-
+  audio;
   ngOnInit(): void {
     this.participants = this.data.participants;
     this.conferenceURL = this.data.conferenceURL;
 
     const notification = new Notification('Konferenzeinladung Feedbacksystem', {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
+    this.audio = new Audio();
+    this.audio.src = '../../../../assets/classic_phone.mp3';
+    this.audio.load();
+    this.audio.play();
+    this.dialogRef.afterClosed().subscribe(next => {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+    });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        // The tab has become visible so clear the now-stale Notification.
+        notification.close();
+      }
+    });
   }
 
   public acceptCall() {
