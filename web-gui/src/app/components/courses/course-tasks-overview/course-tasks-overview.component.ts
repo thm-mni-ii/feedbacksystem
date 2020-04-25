@@ -20,7 +20,7 @@ import {AnswerFromTestsystemDialogComponent} from '../modals/answer-from-testsys
 import {of, throwError} from 'rxjs';
 import {UpdateCourseDialogComponent} from '../detail-course/update-course-dialog/update-course-dialog.component';
 import {ConferenceService} from '../../../service/conference.service';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
 import {RxStompClient} from '../../../util/rx-stomp';
 import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
@@ -155,14 +155,13 @@ export class CourseTasksOverviewComponent implements OnInit {
     }, 2000);
   }
 
-    //todo: Bug, bei anruf werden 2 nachrichten geschrieben und so 2 mal der dialog geoeffnet.
   goOnline() {
     Notification.requestPermission();
-    this.classroomService.getInvitations().subscribe(invite => {
+    const subscription: Subscription = this.classroomService.getInvitations().subscribe(invite => {
       const participants = invite.users
         .map(u => u.prename + ' ' + u.surname)
         .push(invite.user.prename + ' ' + invite.user.surname);
-
+      console.log('test123');
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
@@ -170,6 +169,7 @@ export class CourseTasksOverviewComponent implements OnInit {
         disableClose: true
       });
     });
+    this.classroomService.putSubscription(subscription);
     this.classroomService.join(this.courseID).subscribe();
     this.router.navigate(['courses', this.courseID, 'tickets']);
   }

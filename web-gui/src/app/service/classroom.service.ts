@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject, BehaviorSubject} from 'rxjs';
+import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
 import {ConfInvite, Ticket, User} from '../interfaces/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
 import {UserService} from './user.service';
@@ -16,7 +16,7 @@ export class ClassroomService {
   private users: Subject<User[]>;
   private tickets: Subject<Ticket[]>;
   private invitations: Subject<ConfInvite>;
-
+  private invitationSubscriptions: Subscription[] = [];
   private courseId = 0;
   private stompRx: RxStompClient = null;
 
@@ -29,6 +29,11 @@ export class ClassroomService {
   /**
    * @return Users of the connected course.
    */
+
+  public putSubscription(sub: Subscription) {
+    this.invitationSubscriptions.push(sub);
+  }
+
   public getUsers(): Observable<User[]> {
     return this.users.asObservable();
   }
@@ -42,6 +47,8 @@ export class ClassroomService {
    * @return Get invitations to take part in a conference
    */
   public getInvitations(): Observable<ConfInvite> {
+    this.invitationSubscriptions.forEach(s => s.unsubscribe());
+    this.invitationSubscriptions = [];
     return this.invitations.asObservable();
   }
 
@@ -58,7 +65,7 @@ export class ClassroomService {
    */
   public join(courseId: number): Observable<void> {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('https://feedback.mni.thm.de/websocket');
+    this.stompRx = new RxStompClient('https://localhost:8080/websocket');
 
     return new Observable<void>(c => {
       this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
