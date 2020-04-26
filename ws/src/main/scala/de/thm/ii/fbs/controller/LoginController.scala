@@ -93,7 +93,7 @@ class LoginController extends CasClientConfigurerAdapter {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-        response.setHeader("Location", CLIENT_HOST_URL + "/login")
+        response.setHeader("Location", CLIENT_HOST_URL + "/")
         "error"
       }
     }
