@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import java.io
+import java.net.URI
 import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -9,15 +10,13 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.Role
 import de.thm.ii.fbs.services._
 import de.thm.ii.fbs.util.JsonWrapper._
-import de.thm.ii.fbs.util.{BadRequestException, DateParser, ResourceNotFoundException, UnauthorizedException, Users}
+import de.thm.ii.fbs.util._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.core.io.UrlResource
 import org.springframework.http.{HttpHeaders, MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
-
-import scala.collection.mutable
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -39,7 +38,9 @@ class CourseController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val conferenceService: JitsiService = null
+  private val jitsiService: JitsiService = null
+  @Autowired
+  private val bbbService: BBBService = null
   private val MAX_PAGE_LIMIT: Int = 100
 
   @Value("${compile.production}")
@@ -807,70 +808,41 @@ class CourseController {
     kafkaTemplate.flush()
   }*/
 
-  // TODO: Clean Up conferences that are removed over night
-  private val conferences: mutable.Map[Int, mutable.Set[String]] = mutable.Map()
-
-  /**
-    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-    * @param courseid The course for that the conferences are created.
-    * @param body The body of the request.
-    * @param request The http request.
-    * @return Success
-    */
-  @RequestMapping(value = Array("{courseid}/conferences"), method = Array(RequestMethod.POST))
-  @ResponseBody
-  def createConferences(@PathVariable courseid: Int, @RequestBody body: JsonNode, request: HttpServletRequest): Unit = {
-    val user = Users.claimAuthorization(request)
-    if (!user.isAtLeastInRole(Role.TUTOR)) {
-      throw new UnauthorizedException()
-    }
-
-    val count = body.get("count").asInt(1)
-
-    val uries = Range(0, count)
-    .map(_ => {
-      val id = UUID.randomUUID()
-      this.conferenceService.registerConference(s"$courseid-$id")
-    })
-    .map(_.toString)
-    .toList
-
-    val regConfs = this.conferences.getOrElse(courseid, mutable.Set.empty).addAll(uries)
-
-    this.conferences.put(courseid, regConfs)
-  }
 
   /**
     * Creates a single unique conference link.
+    *
     * @param request The request object
     * @param response The response object
+    * @param body The body of the request.
     * @return The conference link
     */
   @RequestMapping(value = Array("/meeting"), method = Array(RequestMethod.POST))
-  def createConference(request: HttpServletRequest, response: HttpServletResponse): Map[String, String] = {
+  @ResponseBody
+  def createConference(request: HttpServletRequest, response: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = Users.claimAuthorization(request)
 
     if (!user.isAtLeastInRole(Role.TUTOR) && !userService.checkIfUserAtLeastOneTutor(user.userid)) {
       throw new UnauthorizedException()
     }
-
     val id = UUID.randomUUID()
-    val uri = this.conferenceService.registerConference(id.toString)
+    body.get("service").asText() match {
+      case "jitsi" => {
+        val uri: URI = this.jitsiService.registerJitsiConference(id.toString)
+        Map("href" -> uri.toString)
+      }
+      case "bigbluebutton" => {
+        val meetingName = UUID.randomUUID().toString
+        val meetingPassword = UUID.randomUUID().toString
+        val moderatorPassword = UUID.randomUUID().toString
 
-    Map("href" -> uri.toString)
+        this.bbbService.registerBBBConference(id.toString, meetingName, meetingPassword, moderatorPassword)
+        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, user, meetingPassword)
+        val modUri: String = this.bbbService.joinBBBConference(id.toString, user, moderatorPassword)
+        Map("href" -> inviteeUri, "mod_href" -> modUri)
+      }
+    }
   }
 
-  /**
-    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-    * @param courseid The course for that the conferences are created.
-    * @param request The http request
-    * @return Success
-    */
-  @RequestMapping(value = Array("{courseid}/conferences"), method = Array(RequestMethod.GET))
-  @ResponseBody
-  def getConferences(@PathVariable courseid: Int, request: HttpServletRequest): List[String] = {
-    Users.claimAuthorization(request)
 
-    this.conferences.getOrElse(courseid, mutable.Set.empty).toList
-  }
 }

@@ -27,7 +27,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
-    this.confUrl = this.conferenceService.getSingleConferenceLink();
+    this.confUrl = this.conferenceService.getSingleConferenceLink('jitsi');
   }
 
   courseID: number;

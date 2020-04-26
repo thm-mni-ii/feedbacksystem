@@ -37,6 +37,8 @@ services:
     service-url: https://fk-conf.mni.thm.de/newConf/rooms.php
     shared-secret: ZjUyMTBjNTEtOGUxNC00YWU1LWEyY2UtZTE3MTUyZTQ4MmJk
     user: fbs
+  bbb:
+    apikey: YVXodgCkymuGAUHBAspiwXq8BjUebwLrvwr3D5AP0
 spring:
   main:
     allow-bean-definition-overriding: true

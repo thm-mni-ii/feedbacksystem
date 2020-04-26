@@ -16,7 +16,7 @@ export class NewticketDialogComponent implements OnInit {
   form: FormGroup;
 
 
-  constructor(private _formBuilder: FormBuilder,@Inject(MAT_DIALOG_DATA) public data: any,
+  constructor(private _formBuilder: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any,
               private snackBar: MatSnackBar, public dialogRef: MatDialogRef<NewticketDialogComponent>,
               private classroomService: ClassroomService, private userService: UserService) { }
 
