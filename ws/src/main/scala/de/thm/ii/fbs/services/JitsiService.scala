@@ -33,7 +33,7 @@ class JitsiService(templateBuilder: RestTemplateBuilder) {
     * @param name Conference name to register.
     * @return The uri of the registered conference
     */
-  def registerConference(name: String): URI = {
+  def registerJitsiConference(name: String): URI = {
     val cal = Calendar.getInstance()
     cal.add(Calendar.HOUR, 24)
 

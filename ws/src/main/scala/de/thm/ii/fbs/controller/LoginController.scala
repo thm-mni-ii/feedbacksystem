@@ -72,6 +72,7 @@ class LoginController extends CasClientConfigurerAdapter {
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
 
+
       val cookieMaxAge = 30
       val co = new Cookie("jwt", jwtToken)
       co.setPath("/")
