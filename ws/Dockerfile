@@ -8,6 +8,7 @@ VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
 VOLUME /shared-messages
 EXPOSE 8080
+RUN sudo apt-get install python
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
 ENTRYPOINT ["./wsd"]
