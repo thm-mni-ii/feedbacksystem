@@ -81,14 +81,14 @@ class LoginController extends CasClientConfigurerAdapter {
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
-      response.setHeader("Location", CLIENT_HOST_URL + "/login")
+      response.setHeader("Location", CLIENT_HOST_URL + "/test123")
       "jwt"
     }
     catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-        response.setHeader("Location", CLIENT_HOST_URL + "/login")
+        response.setHeader("Location", CLIENT_HOST_URL + "/test456")
         "error"
       }
     }
