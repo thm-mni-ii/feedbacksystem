@@ -72,6 +72,12 @@ class LoginController extends CasClientConfigurerAdapter {
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
 
+      logger.info("____ LOGIN URL Information ____")
+      logger.info(request.getRequestURI)
+      logger.info(request.getQueryString)
+      logger.info(request.getPathInfo)
+      logger.info(request.getRequestURL.toString)
+
       val cookieMaxAge = 30
       val co = new Cookie("jwt", jwtToken)
       co.setPath("/")
@@ -81,14 +87,14 @@ class LoginController extends CasClientConfigurerAdapter {
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
-      response.setHeader("Location", CLIENT_HOST_URL + "/test123")
+      response.setHeader("Location", CLIENT_HOST_URL + "/")
       "jwt"
     }
     catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-        response.setHeader("Location", CLIENT_HOST_URL + "/test456")
+        response.setHeader("Location", CLIENT_HOST_URL + "/login")
         "error"
       }
     }
