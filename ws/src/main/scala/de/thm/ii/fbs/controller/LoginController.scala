@@ -87,7 +87,6 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         response.setHeader("Location", CLIENT_HOST_URL + "/")
       }
-
       "jwt"
     }
     catch {
