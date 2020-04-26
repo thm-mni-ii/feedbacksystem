@@ -111,15 +111,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       height: 'auto',
       width: 'auto',
       data: {courseID: this.courseID}
-    }).afterClosed()
-      .pipe(
-        flatMap(numberOfConference =>
-          this.conferenceService.createConferences(this.courseID, numberOfConference)
-        )
-      )
-      .subscribe(e => {
-        this.loadConferences();
-      }, throwError);
+    });
   }
 
   private loadConferences() {
