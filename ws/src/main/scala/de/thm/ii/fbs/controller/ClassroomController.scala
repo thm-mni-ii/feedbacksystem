@@ -278,7 +278,6 @@ class ClassroomController {
     .put("courseId", ticket.courseId)
     .put("timestamp", ticket.timestamp)
 
-
   // TODO: Clean Up conferences that are removed over night
   private val conferences: mutable.Map[Int, Map[String, String]] = mutable.Map()
 
@@ -346,7 +345,6 @@ class ClassroomController {
       case None => userOpt = globalUserOpt;
     }
     val courseId = m.retrive("courseId").asInt().get
-
     smt.convertAndSend("/topic/classroom/conferences", conferences)
   }
 
@@ -357,5 +355,4 @@ class ClassroomController {
   * @return JSONObject
   */
   def hrefToJson(name: String, href: String): JSONObject = new JSONObject().put("href", href).put("username", name)
-
 }

@@ -807,8 +807,6 @@ class CourseController {
     kafkaTemplate.send(taskService.connectKafkaTopic(tasksystem_id, topicName), jsonResult)
     kafkaTemplate.flush()
   }*/
-
-
   /**
     * Creates a single unique conference link.
     *
@@ -843,6 +841,4 @@ class CourseController {
       }
     }
   }
-
-
 }

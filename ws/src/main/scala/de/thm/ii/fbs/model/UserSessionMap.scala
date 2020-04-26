@@ -36,7 +36,6 @@ object UserSessionMap {
     */
   def get(id: String): Option[Principal] = sessionToUser.get(id)
 
-
   /**
     * @param p The principal
     * @return The session id for the given principal
