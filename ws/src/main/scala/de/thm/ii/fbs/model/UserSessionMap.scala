@@ -23,6 +23,8 @@ object UserSessionMap {
       sessionToUser.remove(userToSession(p))
     }
 
+    // todo:
+
     sessionToUser.put(id, p)
     userToSession.put(p, id)
     onMapListeners.foreach(_(id, p))
@@ -33,6 +35,7 @@ object UserSessionMap {
     * @return The principal for the given session id
     */
   def get(id: String): Option[Principal] = sessionToUser.get(id)
+
 
   /**
     * @param p The principal

@@ -42,7 +42,7 @@ export class AssignTicketDialogComponent implements OnInit {
     this.dialogRef.close();
   }
   public inviteToConference(invitee) {
-    this.conferenceService.getSingleConferenceLink().subscribe(m => {
+    this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
       this.classroomService.inviteToConference(m, [invitee]);
       // window.open(m, '_blank');
 

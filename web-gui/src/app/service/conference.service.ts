@@ -11,13 +11,32 @@ import {flatMap} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ConferenceService {
-  private personalConferenceLink: Subject<string>;
-  private retrived = false;
+  private personalConferenceLink: BehaviorSubject<string>;
+  private sessionConferenceLinks: BehaviorSubject<Map<string, string>>;
 
+  private personalLinksRecieved = false;
+  private conferenceLinksRecieved = false;
+  public selectedConferenceSystem: BehaviorSubject<String> = new BehaviorSubject<String>('jitsi');
   public constructor(private http: HttpClient) {
     this.personalConferenceLink = new BehaviorSubject<string>(null);
+    this.sessionConferenceLinks = new BehaviorSubject<Map<string, string>>(null);
   }
 
+  public getSelectedConferenceSystem(): Observable<String> {
+    return this.selectedConferenceSystem.asObservable();
+  }
+
+  public setSelectedConferenceSystem(service: String) {
+    return this.selectedConferenceSystem.next(service);
+  }
+
+  public getConferenceInviteHref() {
+    if (this.selectedConferenceSystem.value == 'jitsi') {
+      return this.personalConferenceLink.value;
+    } else if (this.selectedConferenceSystem.value == 'bigbluebutton') {
+      return this.sessionConferenceLinks.value.get('href');
+    }
+  }
   /**
    * Get all created open conferences of a course.
    * @param courseId The course id.
@@ -33,24 +52,50 @@ export class ConferenceService {
    * @param countOfConferences The amount of conference links that must be created.
    * @return Observable that completes if the request is done.
    */
-  public createConferences(courseId: number, countOfConferences: number): Observable<any> {
-    return this.http.post('/api/v1/courses/' + courseId + '/conferences', {
-      count: countOfConferences
-    });
+  public openConference(courseId): Observable<any> {
+    return this.http.post('/api/v1/courses/' + courseId + '/conference/open', {href: this.getConferenceInviteHref()});
+  }
+
+  /**
+   * Creates multiple conference links for a course. These conferences can be later retrived by this.getConferences().
+   * @param courseId The course id
+   * @param countOfConferences The amount of conference links that must be created.
+   * @return Observable that completes if the request is done.
+   */
+  public closeConference(courseId): Observable<any> {
+    return this.http.post('/api/v1/courses/' + courseId + '/conference/close', {href: this.getConferenceInviteHref()});
   }
 
   /**
    * @return Returns a personal conference link.
    */
-  public getSingleConferenceLink(): Observable<string> {
-    if (this.retrived) {
+  public getSingleConferenceLink(service: String): Observable<string> {
+    if (this.personalLinksRecieved) {
       return this.personalConferenceLink.asObservable();
     } else {
-      return this.http.post<any>('/api/v1/courses/meeting', {test: 'test'})
+      return this.http.post<any>('/api/v1/courses/meeting', {service: service})
         .pipe(flatMap(res => {
-          this.retrived = true;
+          this.personalLinksRecieved = true;
           this.personalConferenceLink.next(res.href);
           return this.personalConferenceLink.asObservable();
+        }));
+    }
+  }
+  /**
+   * @return Returns a personal conference link.
+   */
+  public getConferenceInvitationLinks(service: String): Observable<Map<string, string>> {
+    if (this.conferenceLinksRecieved) {
+      return this.sessionConferenceLinks.asObservable();
+    } else {
+      return this.http.post<any>('/api/v1/courses/meeting', {service: service})
+        .pipe(flatMap(res => {
+          this.conferenceLinksRecieved = true;
+          const links: Map<string, string> = new Map<string, string>();
+          links.set('href', res.href);
+          links.set('mod_href', res.mod_href);
+          this.sessionConferenceLinks.next(links);
+          return this.sessionConferenceLinks.asObservable();
         }));
     }
   }

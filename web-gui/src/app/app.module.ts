@@ -89,7 +89,9 @@ import {
 } from './components/courses/detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import { NewticketDialogComponent } from './components/courses/detail-course/newticket-dialog/newticket-dialog.component';
 import { IncomingCallDialogComponent } from './components/courses/detail-course/incoming-call-dialog/incoming-call-dialog.component';
+// tslint:disable-next-line:max-line-length
 import { InvitetoConferenceDialogComponent} from './components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
+import {MatSelectModule} from '@angular/material/select';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -195,7 +197,8 @@ export const httpInterceptorProviders = [
     MatSlideToggleModule,
     MatDialogModule,
     MatProgressBarModule,
-    MatGridListModule
+    MatGridListModule,
+    MatSelectModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent,
     DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
