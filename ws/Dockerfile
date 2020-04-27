@@ -10,10 +10,10 @@ VOLUME /upload-dir
 VOLUME /shared-messages
 EXPOSE 8080
 RUN apt-get update && apt-get -y install python3 apt-transport-https
-RUN apt-get install software-properties-common
-RUN apt-add-repository universe
-RUN apt-get update
-RUN apt-get install python-pip
+RUN apt-get -y install software-properties-common
+RUN apt-add-repository -y universe
+RUN apt-get -y update
+RUN apt-get -y install python-pip
 RUN pip install requests
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
