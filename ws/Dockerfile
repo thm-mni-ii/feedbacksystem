@@ -9,7 +9,7 @@ VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
 VOLUME /shared-messages
 EXPOSE 8080
-RUN apt-get update && apt-get -y install python3
+RUN apt-get update && apt-get -y install python3 && apt-transport-https
 RUN apt-get -y install python-pip
 RUN pip install requests
 WORKDIR /usr/local/ws/bin
