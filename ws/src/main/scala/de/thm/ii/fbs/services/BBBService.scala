@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services
 
 import de.thm.ii.fbs.model.User
-import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.stereotype.Service
 
@@ -18,9 +18,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
   @Autowired
   private implicit val userService: UserService = null
 
-  @Value("${services.bbb.apikey}")
-  private val BBB_APIKEY: String = null;
-
   /**
     * Register a new conference.
     * @param id Conference id to register.
@@ -31,7 +28,7 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     */
   def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Int = {
     // todo: fix path for live system
-    Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword} ${BBB_APIKEY}")!
+    Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword}")!
   }
   /**
     * Get join Link for conference users conference.
@@ -41,6 +38,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return The uri of the registered conference
     */
   def joinBBBConference(id: String, user: User, password: String): String = {
-    s"join_room.py ${user.prename},${user.prename} ${id} ${password} ${BBB_APIKEY}"!!
+    s"join_room.py ${user.prename},${user.prename} ${id} ${password}"!!
   }
 }

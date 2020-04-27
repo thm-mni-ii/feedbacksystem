@@ -12,4 +12,5 @@ EXPOSE 8080
 RUN apt-get update && apt-get -y install python3
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
+ENV BBB_SECRET=YVXodgCkymuGAUHBAspiwXq8BjUebwLrvwr3D5AP0
 ENTRYPOINT ["./wsd"]
