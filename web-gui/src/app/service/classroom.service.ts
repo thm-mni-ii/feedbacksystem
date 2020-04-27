@@ -19,6 +19,7 @@ export class ClassroomService {
   private tickets: Subject<Ticket[]>;
   private invitations: Subject<ConfInvite>;
   private invitationSubscriptions: Subscription[] = [];
+
   private courseId = 0;
   private stompRx: RxStompClient = null;
   private conferenceHref: String = '';
@@ -75,7 +76,6 @@ export class ClassroomService {
   public join(courseId: number): Observable<void> {
     this.courseId = courseId;
     this.stompRx = new RxStompClient('https://localhost:8080/websocket');
-
     return new Observable<void>(c => {
       this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
 
