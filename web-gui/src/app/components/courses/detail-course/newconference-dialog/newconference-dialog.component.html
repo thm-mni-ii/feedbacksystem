@@ -8,8 +8,8 @@
   <mat-form-field>
     <mat-label>Konferenzsysteme</mat-label>
     <select matNativeControl required [(ngModel)]="selectedOption">
-      <option selected value="jitsi">Jitsi</option>
-      <option value="bigbluebutton">BigBlueButton</option>
+      <option  [ngValue]="'jitsi'">Jitsi</option>
+      <option [ngValue]="'bigbluebutton'">BigBlueButton</option>
     </select>
   </mat-form-field>
 
