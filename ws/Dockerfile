@@ -11,7 +11,7 @@ VOLUME /shared-messages
 EXPOSE 8080
 RUN apt-get update && apt-get -y install python3 apt-transport-https
 RUN apt-get -y install software-properties-common
-RUN apt-add-repository -y universe
+RUN add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
 RUN apt-get -y update
 RUN apt-get -y install python-pip
 RUN pip install requests
