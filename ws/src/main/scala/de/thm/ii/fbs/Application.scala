@@ -77,8 +77,7 @@ object Application extends App {
   sc.init(null, managers, new SecureRandom())
   HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory)
 
-  private val config = if (Files.exists(Paths.get("/usr/local/ws/conf/application.yml",
-    "/usr/local/ws/resources/main/static/application.properties"))) {
+  private val config = if (Files.exists(Paths.get("/usr/local/ws/conf/application.yml"))) {
     "--spring.config.location=file:/usr/local/ws/conf/application.yml" +: args
   } else {
     args
