@@ -89,7 +89,6 @@ export class ClassroomService {
         this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
 
         this.listen('/topic/classroom/' + this.courseId + '/conference/open').subscribe(m => this.requestConferenceUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/conference/close').subscribe(m => this.requestConferenceUpdate());
@@ -165,7 +164,7 @@ export class ClassroomService {
   }
 
   private joinCourse() {
-    this.send('/websocket/classroom/join', {courseId: this.courseId, href: this.conferenceHref});
+    this.send('/websocket/classroom/join', {courseId: this.courseId});
   }
 
   private constructHeaders() {
