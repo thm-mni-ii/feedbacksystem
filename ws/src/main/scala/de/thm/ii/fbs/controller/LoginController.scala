@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.services.{SettingService, UserService}
+import de.thm.ii.fbs.services.{CourseService, SettingService, UserService}
 import de.thm.ii.fbs.util.{BadRequestException, LDAPConnector, UnauthorizedException, Users}
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -24,6 +24,8 @@ class LoginController extends CasClientConfigurerAdapter {
   private implicit val userService: UserService = null
   @Autowired
   private val settingService: SettingService = null
+  @Autowired
+  private val courseService: CourseService = null
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -82,6 +84,11 @@ class LoginController extends CasClientConfigurerAdapter {
       //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
       if (request.getQueryString.indexOf("courses=") >= 0) {
         val coursepath: String = request.getQueryString.replace('=', '/')
+        val numPattern = "/[0-9]+$".r
+        val courseId = numPattern.findFirstIn(coursepath).get.toInt
+        if(this.courseService.isSubscriberForCourse(courseId, existingUser.get)){
+          this.courseService.subscribeCourse(courseId, existingUser.get)
+        }
         response.setHeader("Location", CLIENT_HOST_URL + "/" + coursepath)
       } else {
         response.setHeader("Location", CLIENT_HOST_URL + "/")
