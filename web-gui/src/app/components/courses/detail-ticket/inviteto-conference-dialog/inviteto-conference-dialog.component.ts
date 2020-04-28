@@ -38,14 +38,14 @@ export class InvitetoConferenceDialogComponent implements OnInit {
     if (this.conferenceSystem == 'jitsi') {
       this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
         this.classroomService.inviteToConference(m, [invitee]);
-        window.open(m, '_blank');
+        this.conferenceService.openWindowIfClosed(m);
         this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
         this.dialogRef.close();
       });
     } else if (this.conferenceSystem == 'bigbluebutton') {
       this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(m => {
         this.classroomService.inviteToConference(m.get('mod_href'), [invitee]);
-        window.open(m.get('mod_href'), '_blank');
+        this.conferenceService.openWindowIfClosed(m.get('mod_href'));
         this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
         this.dialogRef.close();
       });
