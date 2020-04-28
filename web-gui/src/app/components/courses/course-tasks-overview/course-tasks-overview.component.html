@@ -10,9 +10,6 @@
       <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>
     </mat-menu>
-    <button *ngIf="(openConferences | async)?.length != 0" mat-flat-button color="accent" [matMenuTriggerFor]="confMenu">
-      Join Conference Room
-    </button>
     <button mat-flat-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()">Go Online</button>
     <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
