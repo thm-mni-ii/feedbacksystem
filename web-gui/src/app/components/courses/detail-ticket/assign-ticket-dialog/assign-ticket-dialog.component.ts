@@ -17,7 +17,8 @@ export class AssignTicketDialogComponent implements OnInit {
   users: Observable<User[]>;
   ticket: Ticket;
   courseID: number;
-
+  conferenceSystemObs: Observable<String>;
+  conferenceSystem: String;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
               private conferenceService: ConferenceService, private user: UserService) {
@@ -27,6 +28,10 @@ export class AssignTicketDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.conferenceSystemObs = this.conferenceService.getSelectedConferenceSystem();
+    this.conferenceSystemObs.subscribe(n => {
+      this.conferenceSystem = n;
+    });
   }
 
   public assignTicket(assignee) {
@@ -41,15 +46,24 @@ export class AssignTicketDialogComponent implements OnInit {
     this.snackBar.open(`Das Ticket wurde geschlossen`, 'OK', {duration: 3000});
     this.dialogRef.close();
   }
-  public inviteToConference(invitee) {
-    this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
-      this.classroomService.inviteToConference(m, [invitee]);
-      // window.open(m, '_blank');
 
-      this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-      this.dialogRef.close();
-    });
-  }
+  public startCall(invitee) {
+      if (this.conferenceSystem == 'jitsi') {
+        this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
+          this.classroomService.inviteToConference(m, [invitee]);
+          window.open(m, '_blank');
+          this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+          this.dialogRef.close();
+        });
+      } else if (this.conferenceSystem == 'bigbluebutton') {
+        this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(m => {
+          this.classroomService.inviteToConference(m.get('mod_href'), [invitee]);
+          window.open(m.get('mod_href'), '_blank');
+          this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+          this.dialogRef.close();
+        });
+      }
+    }
 
   public isAuthorized() {
     return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);

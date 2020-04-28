@@ -8,7 +8,7 @@
     </mat-action-list>
    </mat-dialog-content>
   <mat-dialog-actions>
-    <button *ngIf="isAuthorized()" color="accent" (click)="inviteToConference(ticket.creator)">Zu Konferenz einladen</button>
+    <button *ngIf="isAuthorized()" color="accent" (click)="startCall(ticket.creator)">Zu Konferenz einladen</button>
     <button mat-flat-button color="warn" (click)="closeTicket(ticket)">Ticket Schliessen</button>
   </mat-dialog-actions>
 </div>
