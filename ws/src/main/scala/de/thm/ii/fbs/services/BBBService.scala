@@ -38,6 +38,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return The uri of the registered conference
     */
   def joinBBBConference(id: String, user: User, password: String): String = {
-    Process("join_room.py '${user.prename} ${user.prename}' ${id} ${password}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!!
+    Process(s"join_room.py '${user.prename} ${user.prename}' ${id} ${password}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!!
   }
 }
