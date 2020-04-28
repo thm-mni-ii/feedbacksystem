@@ -28,7 +28,7 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     */
   def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Int = {
     // todo: fix path for live system
-    Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword}")!
+    Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!
   }
   /**
     * Get join Link for conference users conference.
@@ -38,6 +38,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return The uri of the registered conference
     */
   def joinBBBConference(id: String, user: User, password: String): String = {
-    s"join_room.py ${user.prename},${user.prename} ${id} ${password}"!!
+    Process("join_room.py '${user.prename} ${user.prename}' ${id} ${password}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!!
   }
 }
