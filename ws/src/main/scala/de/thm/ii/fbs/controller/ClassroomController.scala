@@ -16,8 +16,6 @@ import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.stereotype.Controller
 import de.thm.ii.fbs.util.JsonWrapper._
 
-import scala.collection.mutable
-
 /**
   * WebSocket controller that allows users to appear as logged in user.
   * @author Andrej Sajenko
@@ -277,82 +275,4 @@ class ClassroomController {
     .put("status", ticket.status)
     .put("courseId", ticket.courseId)
     .put("timestamp", ticket.timestamp)
-
-  // TODO: Clean Up conferences that are removed over night
-  private val conferences: mutable.Map[Int, Map[String, String]] = mutable.Map()
-
-  /**
-    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-    * @param m The body of the request.
-    * @param headerAccessor The http request.
-    * @return Success
-    */
-  @MessageMapping(value = Array("/classroom/conference/open"))
-  def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get);
-    val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-    var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
-    localUserOpt match {
-      case Some(v) => userOpt = localUserOpt;
-      case None => userOpt = globalUserOpt;
-    }
-
-    val courseIdAndUser = for {
-      user <- userOpt
-      courseId <- m.retrive("courseId").asInt()
-    } yield (courseId, user)
-    val href = m.get("href").asText()
-    this.conferences.put(courseIdAndUser.get._1, Map(courseIdAndUser.get._2.username -> href))
-    smt.convertAndSend("/topic/classroom/conferences/" + courseIdAndUser.get._1 + "/opened", userToJson(courseIdAndUser.get._2))
-  }
-
-  /**
-    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-    * @param m The course for that the conferences are created.
-    * @param headerAccessor The body of the request.
-    * @return Success
-    */
-  @MessageMapping(value = Array("/classroom/conference/close"))
-  def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get);
-    val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-    var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
-    localUserOpt match {
-      case Some(v) => userOpt = localUserOpt;
-      case None => userOpt = globalUserOpt;
-    }
-    val courseIdAndUser = for {
-      user <- userOpt
-      courseId <- m.retrive("courseId").asInt()
-    } yield (courseId, user)
-    this.conferences.flatMap(map => map._2).update(userOpt.get.username, "")
-    smt.convertAndSend("/topic/classroom/conferences/" + courseIdAndUser.get._1 + "/closed", userToJson(courseIdAndUser.get._2))
-  }
-
-  /**
-    * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-    * @param m The course for that the conferences are created.
-    * @param headerAccessor The http request
-    * @return Success
-    */
-  @MessageMapping(value = Array("/classroom/conferences"))
-  def getConferences(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get);
-    val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
-    var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
-    localUserOpt match {
-      case Some(v) => userOpt = localUserOpt;
-      case None => userOpt = globalUserOpt;
-    }
-    val courseId = m.retrive("courseId").asInt().get
-    smt.convertAndSend("/topic/classroom/conferences", conferences)
-  }
-
-/**
-  * Create a set of conferences. The amount that must be created is named in the request body as 'count'.
-  * @param name The course for that the conferences are created.
-  * @param href The http request
-  * @return JSONObject
-  */
-  def hrefToJson(name: String, href: String): JSONObject = new JSONObject().put("href", href).put("username", name)
 }

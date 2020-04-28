@@ -153,7 +153,6 @@ export class CourseTasksOverviewComponent implements OnInit {
       const participants = invite.users
         .map(u => u.prename + ' ' + u.surname)
         .push(invite.user.prename + ' ' + invite.user.surname);
-      console.log('test123');
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',

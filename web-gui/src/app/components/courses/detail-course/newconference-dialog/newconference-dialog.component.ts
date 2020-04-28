@@ -15,7 +15,8 @@ import {ClassroomService} from '../../../../service/classroom.service';
 })
 export class NewconferenceDialogComponent implements OnInit {
   conferenceURL = '';
-  selectedOption = '';
+  serviceid = 0;
+  services = [ {'id': 0, 'name': 'bigbluebutton'}, {'id': 1, 'name': 'jitsi'}];
   constructor(public dialogRef: MatDialogRef<NewconferenceDialogComponent>,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar,
               private _formBuilder: FormBuilder, public conferenceService: ConferenceService, public classroomService: ClassroomService) {
@@ -28,7 +29,7 @@ export class NewconferenceDialogComponent implements OnInit {
   }
 
   okBtn() {
-    this.conferenceService.setSelectedConferenceSystem(this.selectedOption);
+    this.conferenceService.setSelectedConferenceSystem(this.services.find(service => service.id == this.serviceid));
     this.dialogRef.close(this.conferenceURL);
   }
 }

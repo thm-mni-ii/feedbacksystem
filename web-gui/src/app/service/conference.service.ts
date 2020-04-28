@@ -26,8 +26,8 @@ export class ConferenceService {
     return this.selectedConferenceSystem.asObservable();
   }
 
-  public setSelectedConferenceSystem(service: String) {
-    return this.selectedConferenceSystem.next(service);
+  public setSelectedConferenceSystem(service) {
+    return this.selectedConferenceSystem.next(service.conferenceSystem);
   }
 
   public getConferenceInviteHref() {

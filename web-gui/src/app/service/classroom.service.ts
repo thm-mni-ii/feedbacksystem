@@ -74,8 +74,7 @@ export class ClassroomService {
    */
   public join(courseId: number): Observable<void> {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('https://feedback.mni.thm.de/websocket');
-
+    this.stompRx = new RxStompClient('https://localhost:8080/websocket');
     return new Observable<void>(c => {
       this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
 
@@ -88,7 +87,6 @@ export class ClassroomService {
         this.listen('/user/' + this.user.getUsername() + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
         this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
 
         this.listen('/topic/classroom/' + this.courseId + '/conference/open').subscribe(m => this.requestConferenceUpdate());
@@ -165,7 +163,7 @@ export class ClassroomService {
   }
 
   private joinCourse() {
-    this.send('/websocket/classroom/join', {courseId: this.courseId, href: this.conferenceHref});
+    this.send('/websocket/classroom/join', {courseId: this.courseId});
   }
 
   private constructHeaders() {
