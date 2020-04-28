@@ -9,14 +9,9 @@ VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
 VOLUME /shared-messages
 EXPOSE 8080
-RUN apt-get update && apt-get -y install python3 apt-transport-https
-RUN apt-get -y install software-properties-common
-RUN add-apt-repository "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) universe"
-RUN sed -i -e 's|disco|eoan|g' /etc/apt/sources.list
-RUN apt-get -y update
-RUN apt-get -y install python-pip
-RUN pip install requests
+RUN apt-get update && apt-get -y install python3 \
+    python3-pip
+RUN pip3 install requests
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
-ENV BBB_SECRET=YVXodgCkymuGAUHBAspiwXq8BjUebwLrvwr3D5AP0
 ENTRYPOINT ["./wsd"]

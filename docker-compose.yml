@@ -68,6 +68,8 @@ services:
     - ./ws/shared-messages:/shared-messages
     - ./docker-config/ws/application_dev.properties:/usr/local/appconfig/application.properties
     - ./docker-config/ws/markdown/:/usr/local/appconfig/markdown/
+    environment:
+      - BBB_SECRET
   secrettokenchecker:
     build: secrettoken-checker
     depends_on:
