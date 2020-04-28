@@ -80,20 +80,20 @@ class ClassroomController {
     val principal = headerAccessor.getUser
     val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
-    val userOpt = localUserOpt.getOrElse(globalUserOpt.get)
-    if (userOpt.isAtLeastInRole(Role.TUTOR)){
+    val user = localUserOpt.getOrElse(globalUserOpt.get)
+    if (user.isAtLeastInRole(Role.TUTOR) || globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)){
       val response = Classroom.getParticipants(courseId)
         .map(userToJson)
         .foldLeft(new JSONArray())((a, u) => a.put(u))
         .toString()
-      smt.convertAndSendToUser(userOpt.getName(), "/classroom/users", response)
+      smt.convertAndSendToUser(user.getName(), "/classroom/users", response)
     } else {
       val response = Classroom.getParticipants(courseId)
-        .filter(u => u.isAtLeastInRole(Role.TUTOR) && u.isAtMostInRole(Role.DOCENT))
+        .filter(u => u.isAtLeastInRole(Role.TUTOR))
         .map(userToJson)
         .foldLeft(new JSONArray())((a, u) => a.put(u))
         .toString()
-      smt.convertAndSendToUser(userOpt.getName(), "/classroom/users", response)
+      smt.convertAndSendToUser(user.getName(), "/classroom/users", response)
     }
   }
 
@@ -106,8 +106,9 @@ class ClassroomController {
   def handleInviteMsg(@Payload invite: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val principal = headerAccessor.getUser
     val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get("courseid").asInt());
+    val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
 
-    if (!userOpt.get.isAtLeastInRole(Role.TUTOR)) {
+    if (!userOpt.get.isAtLeastInRole(Role.TUTOR) && !globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)) {
       logger.warn(s"User: ${userOpt.get.username} tried to access the stream at 'handleInviteMsg' without authorization")
     } else {
       val users = invite.get("users").asInstanceOf[ArrayNode]
