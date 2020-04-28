@@ -16,6 +16,7 @@ import {Observable} from 'rxjs';
 import {ClassroomService} from '../../../service/classroom.service';
 import {UserRoles} from '../../../util/UserRoles';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
+import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -60,6 +61,14 @@ export class CourseTicketsOverviewComponent implements OnInit {
     });
   }
 
+  createConference() {
+    this.dialog.open(NewconferenceDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    });
+  }
+
   public assignTeacher(ticket) {
     this.dialog.open(AssignTicketDialogComponent, {
       height: 'auto',
@@ -88,18 +97,14 @@ export class CourseTicketsOverviewComponent implements OnInit {
     });
   }
 
-  public toggleTheatre() {
-    this.inTheatreMode = !this.inTheatreMode;
-  }
-
   public getRoleName(roleid) {
     switch (roleid) {
       case UserRoles.Admin:
         return 'Admin';
       case UserRoles.Moderator:
         return 'Moderator';
-      case UserRoles.Docent:
-        return 'Docent';
+      case UserRoles.Dozent:
+        return 'Dozent';
       case UserRoles.Tutor:
         return 'Tutor';
       case UserRoles.Student:

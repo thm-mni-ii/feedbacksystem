@@ -20,13 +20,11 @@ import {AnswerFromTestsystemDialogComponent} from '../modals/answer-from-testsys
 import {of, throwError} from 'rxjs';
 import {UpdateCourseDialogComponent} from '../detail-course/update-course-dialog/update-course-dialog.component';
 import {ConferenceService} from '../../../service/conference.service';
-import {Observable, Subject, Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
-import {RxStompClient} from '../../../util/rx-stomp';
-import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
 import {ClassroomService} from '../../../service/classroom.service';
-import {DeleteCourseModalComponent} from "../modals/delete-course-modal/delete-course-modal.component";
+import {DeleteCourseModalComponent} from '../modals/delete-course-modal/delete-course-modal.component';
 
 @Component({
   selector: 'app-course-tasks-overview',

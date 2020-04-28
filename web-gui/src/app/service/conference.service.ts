@@ -13,15 +13,20 @@ import {flatMap} from 'rxjs/operators';
 export class ConferenceService {
   private personalConferenceLink: BehaviorSubject<string>;
   private sessionConferenceLinks: BehaviorSubject<Map<string, string>>;
-
   private personalLinksRecieved = false;
   private conferenceLinksRecieved = false;
   public selectedConferenceSystem: BehaviorSubject<String> = new BehaviorSubject<String>('bigbluebutton');
+  private conferenceWindowHandle: Window;
   public constructor(private http: HttpClient) {
     this.personalConferenceLink = new BehaviorSubject<string>(null);
     this.sessionConferenceLinks = new BehaviorSubject<Map<string, string>>(null);
   }
 
+  public openWindowIfClosed(href: string) {
+    if (!this.conferenceWindowHandle || this.conferenceWindowHandle.closed) {
+      this.conferenceWindowHandle = window.open(href, '_blank');
+    }
+  }
   public getSelectedConferenceSystem(): Observable<String> {
     return this.selectedConferenceSystem.asObservable();
   }

@@ -5,6 +5,7 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
    <!-- <button  mat-flat-button color="primary" (click)="toggleTheatre()"
             matTooltip="Theatre Modus starten" *ngIf="isAuthorized() && !inTheatreMode" >
       <mat-icon>fullscreen</mat-icon>

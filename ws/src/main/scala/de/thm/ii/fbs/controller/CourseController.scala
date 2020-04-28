@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.model.Role
+import de.thm.ii.fbs.model.{Role, User}
 import de.thm.ii.fbs.services._
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.util._
@@ -835,9 +835,10 @@ class CourseController {
         val moderatorPassword = UUID.randomUUID().toString
 
         this.bbbService.registerBBBConference(id.toString, meetingName, meetingPassword, moderatorPassword)
-        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, user, meetingPassword)
-        val modUri: String = this.bbbService.joinBBBConference(id.toString, user, moderatorPassword)
-        Map("href" -> inviteeUri, "mod_href" -> modUri)
+        //todo: have users generate their own links. this hack gives every user the name Student.
+        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, new User(null,
+          null, "Student", "", null, null, null), moderatorPassword)
+        Map("href" -> inviteeUri, "mod_href" -> inviteeUri)
       }
     }
   }
