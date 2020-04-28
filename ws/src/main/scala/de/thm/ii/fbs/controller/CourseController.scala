@@ -836,8 +836,8 @@ class CourseController {
 
         this.bbbService.registerBBBConference(id.toString, meetingName, meetingPassword, moderatorPassword)
         //todo: have users generate their own links. this hack gives every user the name Student.
-        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, new User(null,
-          null, "Student", "", null, null, null), moderatorPassword)
+        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, new User(0,
+          "", "Student", "", "", "", 0), moderatorPassword)
         Map("href" -> inviteeUri, "mod_href" -> inviteeUri)
       }
     }

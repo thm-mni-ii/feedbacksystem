@@ -20,16 +20,13 @@ export class ClassroomService {
   private invitations: Subject<ConfInvite>;
   private invitationSubscriptions: Subscription[] = [];
   private courseId = 0;
+
   private stompRx: RxStompClient = null;
-  private conferenceHref: String = '';
 
   public constructor(private user: UserService, private conferenceService: ConferenceService) {
     this.users = new BehaviorSubject<User[]>([]);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.invitations = new Subject<ConfInvite>();
-    this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(n => {
-      this.conferenceHref = n.get('mod_href');
-    });
   }
 
   /**
