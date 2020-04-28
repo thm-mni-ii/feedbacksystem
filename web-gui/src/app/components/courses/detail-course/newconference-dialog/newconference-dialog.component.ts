@@ -29,7 +29,7 @@ export class NewconferenceDialogComponent implements OnInit {
   }
 
   okBtn() {
-    this.conferenceService.setSelectedConferenceSystem(this.services.find(service => service.id == this.serviceid));
+    this.conferenceService.setSelectedConferenceSystem(this.services.find(service => service.id == this.serviceid).name);
     this.dialogRef.close(this.conferenceURL);
   }
 }

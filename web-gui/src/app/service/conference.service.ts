@@ -16,7 +16,7 @@ export class ConferenceService {
 
   private personalLinksRecieved = false;
   private conferenceLinksRecieved = false;
-  public selectedConferenceSystem: BehaviorSubject<String> = new BehaviorSubject<String>('jitsi');
+  public selectedConferenceSystem: BehaviorSubject<String> = new BehaviorSubject<String>('bigbluebutton');
   public constructor(private http: HttpClient) {
     this.personalConferenceLink = new BehaviorSubject<string>(null);
     this.sessionConferenceLinks = new BehaviorSubject<Map<string, string>>(null);
@@ -26,8 +26,8 @@ export class ConferenceService {
     return this.selectedConferenceSystem.asObservable();
   }
 
-  public setSelectedConferenceSystem(service) {
-    return this.selectedConferenceSystem.next(service.conferenceSystem);
+  public setSelectedConferenceSystem(serviceName: String) {
+    return this.selectedConferenceSystem.next(serviceName);
   }
 
   public getConferenceInviteHref() {

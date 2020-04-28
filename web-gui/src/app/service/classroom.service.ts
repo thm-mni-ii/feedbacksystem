@@ -27,8 +27,8 @@ export class ClassroomService {
     this.users = new BehaviorSubject<User[]>([]);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.invitations = new Subject<ConfInvite>();
-    this.conferenceService.getSingleConferenceLink('bigbluebutton').subscribe(n => {
-      this.conferenceHref = n;
+    this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(n => {
+      this.conferenceHref = n.get('mod_href');
     });
   }
 
