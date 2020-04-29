@@ -85,7 +85,7 @@ class LoginController extends CasClientConfigurerAdapter {
       if (request.getQueryString.indexOf("courses=") >= 0) {
         val coursepath: String = request.getQueryString.replace('=', '/')
         val numPattern = "/[0-9]+$".r
-        val courseId = numPattern.findFirstIn(coursepath).get.toInt
+        val courseId = numPattern.findFirstIn(coursepath).get.substring(1).toInt
         if(this.courseService.isSubscriberForCourse(courseId, existingUser.get)){
           this.courseService.subscribeCourse(courseId, existingUser.get)
         }
