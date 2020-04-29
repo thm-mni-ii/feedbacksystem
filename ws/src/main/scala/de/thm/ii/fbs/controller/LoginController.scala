@@ -82,11 +82,11 @@ class LoginController extends CasClientConfigurerAdapter {
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
-      if (request.getQueryString.indexOf("courses=") >= 0) {
+      if (request.getQueryString != null && request.getQueryString.indexOf("courses=") >= 0) {
         val coursepath: String = request.getQueryString.replace('=', '/')
         val numPattern = "/[0-9]+$".r
         val courseId = numPattern.findFirstIn(coursepath).get.substring(1).toInt
-        if(this.courseService.isSubscriberForCourse(courseId, existingUser.get)){
+        if (this.courseService.isSubscriberForCourse(courseId, existingUser.get)) {
           this.courseService.subscribeCourse(courseId, existingUser.get)
         }
         response.setHeader("Location", CLIENT_HOST_URL + "/" + coursepath)
