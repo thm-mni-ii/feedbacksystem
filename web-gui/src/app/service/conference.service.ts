@@ -90,7 +90,7 @@ export class ConferenceService {
    * @return Returns a personal conference link.
    */
   public getConferenceInvitationLinks(service: String): Observable<Map<string, string>> {
-    if (this.conferenceLinksRecieved) {
+    if (this.conferenceLinksRecieved && this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
       return this.sessionConferenceLinks.asObservable();
     } else {
       return this.http.post<any>('/api/v1/courses/meeting', {service: service})
