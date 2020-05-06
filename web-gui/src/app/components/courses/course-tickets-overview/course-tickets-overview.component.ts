@@ -129,8 +129,9 @@ export class CourseTicketsOverviewComponent implements OnInit {
   joinConference(user: User) {
     const invitation = this.classroomService.getInvitationFromUser(user);
     if (invitation.service == 'bigbluebutton') {
-      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId,
-        invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
+      // @ts-ignore
+      // tslint:disable-next-line:max-line-length
+      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
     } else if (invitation.service == 'jitsi') {
       this.openUrlInNewWindow(invitation.href);
     }
