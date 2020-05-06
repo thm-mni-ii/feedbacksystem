@@ -50,7 +50,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       param => {
         this.courseID = param.id;
         this.loadTasksFromCourse(param.id);
-        this.loadConferences();
+
       }
     );
   }
@@ -112,10 +112,6 @@ export class CourseTasksOverviewComponent implements OnInit {
     });
   }
 
-  private loadConferences() {
-    this.openConferences = this.conferenceService.getConferences(this.courseID);
-  }
-
   openUrlInNewWindow(url: string) {
     window.open(url, '_blank');
   }
@@ -147,14 +143,11 @@ export class CourseTasksOverviewComponent implements OnInit {
 
   goOnline() {
     Notification.requestPermission();
-    const subscription: Subscription = this.classroomService.getInvitations().subscribe(invite => {
-      const participants = invite.users
-        .map(u => u.prename + ' ' + u.surname)
-        .push(invite.user.prename + ' ' + invite.user.surname);
+    const subscription: Subscription = this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
-        data: {courseID: this.courseID, participants: participants, conferenceURL: invite.href, caller: invite.user},
+        data: {courseID: this.courseID, invitation: n},
         disableClose: true
       });
     });

@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.model.{Role, User}
+import de.thm.ii.fbs.ConferenceSystemLabels
+import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services._
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.util._
@@ -58,30 +59,32 @@ class CourseController {
 
   /**
     * getAllCourses is a route for all courses
+    *
     * @param hiddenCourses returns also hidden courses if set true
-    * @param request Request Header containing Headers
+    * @param request       Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def getAllCourses(@RequestParam(value = "hiddenCourses", required = false) hiddenCourses: Boolean,
-                     request: HttpServletRequest): List[Map[String, Any]] = {
+                    request: HttpServletRequest): List[Map[String, Any]] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty) {
-        throw new UnauthorizedException
+      throw new UnauthorizedException
     }
     courseService.getAllKindOfCoursesByUser(user.get, hiddenCourses)
   }
 
   /**
     * createCourse is a route to create a course
-    * @param request contain request information
+    *
+    * @param request  contain request information
     * @param jsonNode contains JSON request
     * @return JSON
     */
   @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def createCourse(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if(user.isEmpty || user.get.roleid > 2) { // only ADMIN or MODERATOR can create a course
+    if (user.isEmpty || user.get.roleid > 2) { // only ADMIN or MODERATOR can create a course
       throw new UnauthorizedException
     }
     try {
@@ -96,7 +99,7 @@ class CourseController {
       }
       val personalised_submission = jsonNode.get(CourseDBLabels.personalised_submission).asInt()
       try {
-        if (course_end_date != null){
+        if (course_end_date != null) {
           val dateParsed = DateParser.dateParser(course_end_date)
           if (dateParsed != null) {
             course_end_date = dateParsed.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -118,7 +121,7 @@ class CourseController {
     *
     * @author Benjamin Manns
     * @param hiddenCourses returns also hidden courses if set true
-    * @param request Request Header containing Headers
+    * @param request       Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("all"), method = Array(RequestMethod.GET))
@@ -131,9 +134,10 @@ class CourseController {
 
   /**
     * getCourse provides course details for a specific course by given id
-    * @param courseid unique course identification
+    *
+    * @param courseid  unique course identification
     * @param permitted force to only accept permitted users
-    * @param request Request Header containing Headers
+    * @param request   Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.GET))
@@ -142,7 +146,7 @@ class CourseController {
                 @RequestParam(value = "permitted", required = false) permitted: Boolean = false,
                 request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     val user = Users.claimAuthorization(request)
-    if(permitted && !courseService.isPermittedForCourse(courseid, user)){
+    if (permitted && !courseService.isPermittedForCourse(courseid, user)) {
       throw new UnauthorizedException
     }
     courseService.getCourseDetails(courseid, user).getOrElse(Map.empty)
@@ -150,10 +154,11 @@ class CourseController {
 
   /**
     * get course details but only one singel task (speed up access)
-    * @param courseid unique course identification
-    * @param taskid noly details for single task
+    *
+    * @param courseid  unique course identification
+    * @param taskid    noly details for single task
     * @param permitted force to only accept permitted users
-    * @param request Request Header containing Headers
+    * @param request   Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("{courseid}/tasks/{taskid}"), method = Array(RequestMethod.GET))
@@ -162,10 +167,10 @@ class CourseController {
                        @RequestParam(value = "permitted", required = false) permitted: Boolean = false,
                        request: HttpServletRequest): Map[_ <: String, _ >: io.Serializable with String] = {
     val user = userService.verifyUserByHeaderToken(request)
-    if(user.isEmpty) {
+    if (user.isEmpty) {
       throw new UnauthorizedException
     }
-    if(permitted && !courseService.isPermittedForCourse(courseid, user.get)){
+    if (permitted && !courseService.isPermittedForCourse(courseid, user.get)) {
       throw new UnauthorizedException
     }
     courseService.getCourseDetails(courseid, user.get, Some(taskid)).getOrElse(Map.empty)
@@ -173,18 +178,19 @@ class CourseController {
 
   /**
     * Generates a zip of one user submissions of one course
+    *
     * @author Benjamin Manns
-    * @param courseid unique course identification
-    * @param userid unique user identification
+    * @param courseid      unique course identification
+    * @param userid        unique user identification
     * @param only_last_try if enabled, we only inlcude the last submission of the user
-    * @param request Request Header containing Headers
+    * @param request       Request Header containing Headers
     * @return Zip File
     */
   @RequestMapping(value = Array("{courseid}/submission/users/{userid}/zip"), method = Array(RequestMethod.GET))
   @ResponseBody
   def getZipOfSubmissionsOfOneUserFromAllCourses(@PathVariable courseid: Integer, @PathVariable userid: Int,
-                                          @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
-                                          request: HttpServletRequest): ResponseEntity[UrlResource] = {
+                                                 @RequestParam(value = "only_last_try", required = false) only_last_try: Boolean = true,
+                                                 request: HttpServletRequest): ResponseEntity[UrlResource] = {
     val user = userService.verifyUserByHeaderToken(request)
     if (user.isEmpty || (!courseService.isDocentForCourse(courseid, user.get) && user.get.userid != userid)) {
       throw new UnauthorizedException
@@ -208,10 +214,11 @@ class CourseController {
 
   /**
     * Generates a zip of all user submissions  of one course
+    *
     * @author Benjamin Manns
-    * @param courseid unique course identification
+    * @param courseid      unique course identification
     * @param only_last_try if enabled, we only inlcude the last submission of the user
-    * @param request Request Header containing Headers
+    * @param request       Request Header containing Headers
     * @return Zip File
     */
   @RequestMapping(value = Array("{courseid}/submission/users/zip"), method = Array(RequestMethod.GET))
@@ -237,10 +244,10 @@ class CourseController {
 
   /**
     * Generates a zip of all course data
-    * @author Benjamin Manns
     *
+    * @author Benjamin Manns
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return Zip File
     */
   @RequestMapping(value = Array("{courseid}/export/zip"), method = Array(RequestMethod.GET))
@@ -264,14 +271,15 @@ class CourseController {
 
   /**
     * recover a course based by uploading a zip file
+    *
     * @param courseid unique course identification
-    * @param file multipart binary file in a form data format
-    * @param request Request Header containing Headers
+    * @param file     multipart binary file in a form data format
+    * @param request  Request Header containing Headers
     * @return if recover worked out
     */
   @RequestMapping(value = Array("{courseid}/recover"), method = Array(RequestMethod.POST))
   def recoverACourse(@PathVariable courseid: Int,
-                                    @RequestParam file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
+                     @RequestParam file: MultipartFile, request: HttpServletRequest): Map[String, Any] = {
     val user = Users.claimAuthorization(request)
 
     if (!courseService.isPermittedForCourse(courseid, user)) {
@@ -285,7 +293,8 @@ class CourseController {
 
   /**
     * import and create a new course based by uploading a zip file
-    * @param file multipart binary file in a form data format
+    *
+    * @param file    multipart binary file in a form data format
     * @param request Request Header containing Headers
     * @return if import worked out
     */
@@ -306,8 +315,9 @@ class CourseController {
 
   /**
     * deleteCourse provides course details for a specific course by given id
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array(PATH_REST_LABEL_ID), method = Array(RequestMethod.DELETE), consumes = Array())
@@ -320,7 +330,7 @@ class CourseController {
     courseService.deleteCourse(courseid)
   }
 
-  /** hack to fix scalas strange cyclomatic behaviour*/
+  /** hack to fix scalas strange cyclomatic behaviour */
   private def updateCourseParser(jsonNode: JsonNode) = {
     val name = jsonNode.retrive(LABEL_NAME).asText().orNull
     val description = jsonNode.retrive(LABEL_DESCRIPTION).asText().orNull
@@ -344,7 +354,7 @@ class CourseController {
     *
     * @author Benjamin Manns
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode Request Body
     * @return JSON
     */
@@ -353,7 +363,7 @@ class CourseController {
   def updateCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     val user = Users.claimAuthorization(request)
 
-    if(!this.courseService.isPermittedForCourse(courseid, user)) {
+    if (!this.courseService.isPermittedForCourse(courseid, user)) {
       throw new UnauthorizedException
     }
     try {
@@ -371,12 +381,13 @@ class CourseController {
       case _: Exception => throw new BadRequestException("Please provide a valid course_end_date")
     }
   }
+
   /**
     * subscribe a user to a course
     *
     * @author Benjamin Manns
     * @param courseid unique identification for a course
-    * @param request contain request information
+    * @param request  contain request information
     * @return JSON
     */
   @RequestMapping(value = Array("{id}/subscribe"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -391,7 +402,7 @@ class CourseController {
     *
     * @author Benjamin Manns
     * @param courseid unique identification for a course
-    * @param request contain request information
+    * @param request  contain request information
     * @return JSON
     */
   @RequestMapping(value = Array("{id}/unsubscribe"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -402,8 +413,9 @@ class CourseController {
 
   /**
     * grantTutorToCourse allows a course docent to give access as tutor
+    *
     * @param courseid unique identification for a course
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON
     */
@@ -428,8 +440,9 @@ class CourseController {
 
   /**
     * grantDocentToCourse allows a moderator to grand user as a docent for a course
+    *
     * @param courseid unique identification for a course
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON
     */
@@ -455,8 +468,9 @@ class CourseController {
 
   /**
     * denyTutorToCourse allows a course docent (and moderator) to give access as tutor
+    *
     * @param courseid unique identification for a course
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON
     */
@@ -481,8 +495,9 @@ class CourseController {
 
   /**
     * denyDocentForCourse allows moderator to deny a course docent
+    *
     * @param courseid unique identification for a course
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON
     */
@@ -511,10 +526,10 @@ class CourseController {
     *
     * @author Benjamin Manns
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
-    * @param offset offset of user list
-    * @param limit limit the user list
-    * @param filter filter the user list
+    * @param request  Request Header containing Headers
+    * @param offset   offset of user list
+    * @param limit    limit the user list
+    * @param filter   filter the user list
     * @return JSON
     */
   @RequestMapping(value = Array("{id}/submissions"), method = Array(RequestMethod.GET))
@@ -541,8 +556,9 @@ class CourseController {
 
   /**
     * Docents who want to get all results of all users of all tasks as CSV
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return FILE
     */
   @RequestMapping(value = Array("{id}/submissions/csv"), method = Array(RequestMethod.GET))
@@ -560,14 +576,14 @@ class CourseController {
   /**
     * @author Benjamin Manns
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return Success JSON
     */
   @RequestMapping(value = Array("{id}/visibility"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def setVisibilityForCourse(@PathVariable(PATH_LABEL_ID) courseid: Integer, request: HttpServletRequest,
-                          @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+                             @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val visibilityType = jsonNode.get("typ").asText()
       val user = Users.claimAuthorization(request)
@@ -583,6 +599,7 @@ class CourseController {
 
   /**
     * get a List of all submissions and information from which course
+    *
     * @author Benjamin Manns
     * @param request request Request Header containing Headers for Authorization
     * @return JSON of all submissions
@@ -600,8 +617,9 @@ class CourseController {
 
   /**
     * get all course parameter
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/parameters"), method = Array(RequestMethod.GET))
@@ -616,8 +634,9 @@ class CourseController {
 
   /**
     * set  / update a course parameter (for docent and so on)
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON Map
     */
@@ -641,9 +660,10 @@ class CourseController {
 
   /**
     * delete a course parameter
+    *
     * @param courseid unique course identification
-    * @param key parameter key
-    * @param request Request Header containing Headers
+    * @param key      parameter key
+    * @param request  Request Header containing Headers
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/parameters/{key}"), method = Array(RequestMethod.DELETE))
@@ -659,15 +679,16 @@ class CourseController {
 
   /**
     * set course parameters of user
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @param jsonNode contains JSON request
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/parameters/users"), method = Array(RequestMethod.POST))
   @ResponseBody
   def addNewCourseParameterForUser(@PathVariable courseid: Int, request: HttpServletRequest,
-                            @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
+                                   @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     val user = Users.claimAuthorization(request)
     if (!courseService.isSubscriberForCourse(courseid, user)) {
       throw new UnauthorizedException
@@ -684,9 +705,10 @@ class CourseController {
 
   /**
     * delete a course parameter of user
+    *
     * @param courseid unique course identification
-    * @param key parameter key
-    * @param request Request Header containing Headers
+    * @param key      parameter key
+    * @param request  Request Header containing Headers
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/parameters/users/{key}"), method = Array(RequestMethod.DELETE))
@@ -702,8 +724,9 @@ class CourseController {
 
   /**
     * get all course paramters of user
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/parameters/users"), method = Array(RequestMethod.GET))
@@ -718,8 +741,9 @@ class CourseController {
 
   /**
     * get all subscribed users of course
+    *
     * @param courseid unique course identification
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return JSON Map
     */
   @RequestMapping(value = Array("{courseid}/users"), method = Array(RequestMethod.GET))
@@ -728,13 +752,13 @@ class CourseController {
     val user = Users.claimAuthorization(request)
     if (courseService.isPermittedForCourse(courseid, user)) {
       this.courseService.getSubscribedUserByCourse(courseid,
-      List(RoleDBLabels.USER_ROLE_ID,
+        List(RoleDBLabels.USER_ROLE_ID,
           RoleDBLabels.TUTOR_ROLE_ID,
           RoleDBLabels.DOCENT_ROLE_ID))
         .map(user => {
           user.asMap()
         })
-    } else if (courseService.isSubscriberForCourse(courseid, user)){
+    } else if (courseService.isSubscriberForCourse(courseid, user)) {
       this.courseService.getSubscribedUserByCourse(courseid,
         List(RoleDBLabels.TUTOR_ROLE_ID,
           RoleDBLabels.DOCENT_ROLE_ID))
@@ -749,9 +773,9 @@ class CourseController {
   /**
     *
     * @param courseid unique course identification
-    * @param taskid unique identification for a task
+    * @param taskid   unique identification for a task
     * @param jsonNode contains JSON request
-    * @param request Request Header containing Headers
+    * @param request  Request Header containing Headers
     * @return JSON
     */
   @RequestMapping(value = Array("{courseid}/run/tasks/{taskid}"), method = Array(RequestMethod.POST))
@@ -766,7 +790,7 @@ class CourseController {
 
     val taskDetailsOpt = taskService.getTaskDetails(taskid)
 
-    if(taskDetailsOpt.isEmpty){
+    if (taskDetailsOpt.isEmpty) {
       throw new ResourceNotFoundException
     }
 
@@ -776,7 +800,7 @@ class CourseController {
       runComplete = jsonNode.get("complete").asBoolean()
     }
 
-    for(user <- this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID))) {
+    for (user <- this.courseService.getSubscribedUserByCourse(courseid, List(RoleDBLabels.USER_ROLE_ID))) {
       val submissionID = taskService.submitTaskWithData(taskid, user, "")
 
       if (this.taskService.getMultiTestModeOfTask(taskid) == "SEQ") {
@@ -810,9 +834,9 @@ class CourseController {
   /**
     * Creates a single unique conference link.
     *
-    * @param request The request object
+    * @param request  The request object
     * @param response The response object
-    * @param body The body of the request.
+    * @param body     The body of the request.
     * @return The conference link
     */
   @RequestMapping(value = Array("/meeting"), method = Array(RequestMethod.POST))
@@ -820,26 +844,41 @@ class CourseController {
   def createConference(request: HttpServletRequest, response: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = Users.claimAuthorization(request)
 
-    if (!user.isAtLeastInRole(Role.TUTOR) && !userService.checkIfUserAtLeastOneTutor(user.userid)) {
-      throw new UnauthorizedException()
-    }
-    val id = UUID.randomUUID()
     body.get("service").asText() match {
-      case "jitsi" => {
+      case ConferenceSystemLabels.jitsi => {
+        val id = UUID.randomUUID()
         val uri: URI = this.jitsiService.registerJitsiConference(id.toString)
-        Map("href" -> uri.toString)
+        Map("href" -> uri.toString,
+        "service" -> ConferenceSystemLabels.jitsi)
       }
-      case "bigbluebutton" => {
-        val meetingName = UUID.randomUUID().toString
+      case ConferenceSystemLabels.bigbluebutton => {
+        val meetingId = UUID.randomUUID().toString
         val meetingPassword = UUID.randomUUID().toString
         val moderatorPassword = UUID.randomUUID().toString
-
-        this.bbbService.registerBBBConference(id.toString, meetingName, meetingPassword, moderatorPassword)
-        //todo: have users generate their own links. this hack gives every user the name Student.
-        val inviteeUri: String = this.bbbService.joinBBBConference(id.toString, new User(0,
-          "", "Student", "", "", "", 0), moderatorPassword)
-        Map("href" -> inviteeUri, "mod_href" -> inviteeUri)
+        this.bbbService.registerBBBConference(meetingId, meetingId, meetingPassword, moderatorPassword)
+        val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, meetingId, moderatorPassword)
+        Map("href" -> inviteeUri,
+          "meetingId" -> meetingId,
+          "meetingPassword" -> meetingPassword,
+          "moderatorPassword" -> moderatorPassword,
+          "service" -> ConferenceSystemLabels.bigbluebutton)
       }
     }
   }
+
+  /**
+    * Creates a single unique conference link for bbb.
+    * @param request  The request object
+    * @param response The response object
+    * @param body     The body of the request.
+    * @return The conference link
+    */
+  @RequestMapping(value = Array("/meeting/bbb/invite"), method = Array(RequestMethod.POST))
+  @ResponseBody
+  def getBBBConferenceLink(request: HttpServletRequest, response: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
+    val user: User = Users.claimAuthorization(request)
+    val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, body.get("meetingId").asText(), body.get("meetingPassword").asText())
+    Map("href" -> inviteeUri)
+  }
 }
+

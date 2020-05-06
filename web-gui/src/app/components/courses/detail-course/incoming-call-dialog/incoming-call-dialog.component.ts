@@ -2,7 +2,9 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {DatabaseService} from '../../../../service/database.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {User} from '../../../../interfaces/HttpInterfaces';
+import {ConferenceInvitation, User} from '../../../../interfaces/HttpInterfaces';
+import {ConferenceSystems} from '../../../../util/ConferenceSystems';
+import {ConferenceService} from '../../../../service/conference.service';
 
 @Component({
   selector: 'app-incoming-call-dialog',
@@ -10,17 +12,14 @@ import {User} from '../../../../interfaces/HttpInterfaces';
   styleUrls: ['./incoming-call-dialog.component.scss']
 })
 export class IncomingCallDialogComponent implements OnInit {
-  participants: any[];
-  conferenceURL: string;
+  invitation: ConferenceInvitation;
   audio: HTMLAudioElement;
-  caller: User;
-  constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, private db: DatabaseService,
-              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) { }
+  conferenceURL: string;
+  constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, public conferenceService: ConferenceService,
+              @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   ngOnInit(): void {
-    this.participants = this.data.participants;
-    this.conferenceURL = this.data.conferenceURL;
-    this.caller = this.data.caller;
+    this.invitation = this.data.invitation.invitation;
     const notification = new Notification('Konferenzeinladung Feedbacksystem',
       {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
     notification.onclick = () => window.focus();
@@ -39,10 +38,19 @@ export class IncomingCallDialogComponent implements OnInit {
         notification.close();
       }
     });
-  }
 
+
+  }
+  // todo: fix string constants ( enum didnt work)
   public acceptCall() {
-    this.openUrlInNewWindow(this.conferenceURL);
+    if (this.invitation.service == 'bigbluebutton') {
+      this.conferenceService.getBBBConferenceInvitationLink(this.invitation.meetingId,
+        // @ts-ignore
+        this.invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
+    } else if (this.invitation.service == 'jitsi') {
+      this.conferenceURL = this.invitation.href;
+    }
+
     this.dialogRef.close();
   }
 

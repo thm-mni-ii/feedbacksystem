@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {
-  ConferenceDetails,
   CourseTask, DashboardProf, DashboardStudent,
   DetailedCourseInformation, DetailedCourseInformationSingleTask,
   FileUpload,
@@ -125,6 +124,7 @@ export class DatabaseService {
    * @param limit
    */
   getAllUserSubmissions(courseID: number, offset: number, limit: number, filter: string): Observable<DashboardProf[]> {
+    // tslint:disable-next-line:max-line-length
     return this.http.get<DashboardProf[]>(`/api/v1/courses/${courseID}/submissions?offset=${offset}&limit=${limit}&filter=${encodeURI(filter)}`);
   }
 
@@ -206,6 +206,7 @@ export class DatabaseService {
   }
 
   public downloadExtendedTaskInfo(taskInfo: TaskExtension) {
+    // tslint:disable-next-line:max-line-length
     return this.http.get(`/api/v1/tasks/${taskInfo.taskid}/extended/${taskInfo.subject}/user/${taskInfo.userid}/file` , {responseType: 'arraybuffer'}).
     subscribe(response => {
       const blob = new Blob([response], {type: 'application/zip'});

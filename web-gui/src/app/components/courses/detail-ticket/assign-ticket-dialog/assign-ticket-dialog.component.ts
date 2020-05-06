@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
-import {Ticket, User} from '../../../../interfaces/HttpInterfaces';
+import {ConferenceInvitation, Ticket, User} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -19,18 +19,22 @@ export class AssignTicketDialogComponent implements OnInit {
   courseID: number;
   conferenceSystemObs: Observable<String>;
   conferenceSystem: String;
+  conferenceInvitation: ConferenceInvitation;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
               private conferenceService: ConferenceService, private user: UserService) {
     this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
+
   }
 
   ngOnInit(): void {
-    this.conferenceSystemObs = this.conferenceService.getSelectedConferenceSystem();
-    this.conferenceSystemObs.subscribe(n => {
+    this.conferenceService.getSelectedConferenceSystem().subscribe(n => {
       this.conferenceSystem = n;
+    });
+    this.conferenceService.getConferenceInvitation().subscribe(n => {
+      this.conferenceInvitation = n;
     });
   }
 
@@ -48,22 +52,13 @@ export class AssignTicketDialogComponent implements OnInit {
   }
 
   public startCall(invitee) {
-      if (this.conferenceSystem == 'jitsi') {
-        this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
-          this.classroomService.inviteToConference(m, [invitee]);
-          this.conferenceService.openWindowIfClosed(m);
-          this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-          this.dialogRef.close();
-        });
-      } else if (this.conferenceSystem == 'bigbluebutton') {
-        this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(m => {
-          this.classroomService.inviteToConference(m.get('mod_href'), [invitee]);
-          this.conferenceService.openWindowIfClosed(m.get('mod_href'));
-          this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-          this.dialogRef.close();
-        });
-      }
-    }
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+      this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
+      this.conferenceService.openWindowIfClosed(m);
+      this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+      this.dialogRef.close();
+    });
+  }
 
   public isAuthorized() {
     return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
