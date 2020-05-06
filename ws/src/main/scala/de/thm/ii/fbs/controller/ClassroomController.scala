@@ -31,7 +31,7 @@ class ClassroomController {
   @Autowired
   implicit private val userService: UserService = null
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
-
+  private val courseIdLiteral = "courseId";
   private def userToJson(user: User): JSONObject = new JSONObject()
     .put("username", user.username)
     .put("prename", user.prename)
@@ -74,7 +74,7 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/join"))
   def userJoined(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseId = m.get("courseId").asInt();
+    val courseId = m.get(courseIdLiteral).asInt();
     val principal = headerAccessor.getUser
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName);
     val userOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId)
@@ -90,7 +90,7 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/users"))
   def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseId = m.get("courseId").asInt()
+    val courseId = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
     val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
@@ -119,7 +119,7 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/invite"))
   def handleInviteMsg(@Payload invite: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val principal = headerAccessor.getUser
-    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get("courseid").asInt());
+    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get(courseIdLiteral).asInt());
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
 
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR) && !globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)) {
@@ -161,7 +161,7 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/tickets"))
   def getAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get);
+    val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get);
     val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
     var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
     localUserOpt match {
@@ -171,7 +171,7 @@ class ClassroomController {
 
     val courseIdAndUser = for {
       user <- userOpt
-      courseId <- m.retrive("courseId").asInt()
+      courseId <- m.retrive(courseIdLiteral).asInt()
     } yield (courseId, user)
 
     courseIdAndUser match {
@@ -204,8 +204,8 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/ticket/create"))
   def createTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketOpt = for {
-      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get)
-      courseId <- m.retrive("courseId").asInt()
+      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
+      courseId <- m.retrive(courseIdLiteral).asInt()
       title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
       status <- m.retrive("status").asText()
@@ -226,9 +226,9 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/ticket/update"))
   def updateTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
-      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get)
+      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
       id <- m.retrive("id").asText()
-      courseId <- m.retrive("courseId").asInt()
+      courseId <- m.retrive(courseIdLiteral).asInt()
       title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
       creator <- m.retrive("creator").asObject()
@@ -263,7 +263,7 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/ticket/remove"))
   def removeTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
-      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get)
+      user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
       id <- m.retrive("id").asText()
       ticket <- Tickets.getTicket(id)
     } yield (ticket, user)
@@ -288,7 +288,7 @@ class ClassroomController {
     .put("assignee", userToJson(ticket.assignee))
     .put("priority", ticket.priority)
     .put("status", ticket.status)
-    .put("courseId", ticket.courseId)
+    .put(courseIdLiteral, ticket.courseId)
     .put("timestamp", ticket.timestamp)
 
   /**
@@ -298,8 +298,8 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/conference/opened"))
   def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseId = m.retrive("courseId").asInt().get
-    val user = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get)
+    val courseId = m.retrive(courseIdLiteral).asInt().get
+    val user = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get, courseId,
         m.retrive("invitation").retrive("service").asText().get,
@@ -328,7 +328,7 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/conferences"))
   def getConferences(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseId = m.get("courseId").asInt()
+    val courseId = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
     val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
@@ -347,18 +347,17 @@ class ClassroomController {
     smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/closed", invitationToJson(invitation).toString)
   })
 
-
   private def invitationToJson(invitation: Invitation): JSONObject = {
     invitation match {
       case BBBInvitation(creator, courseId, service, meetingId, meetingPasswort) =>
         new JSONObject().put("creator", userToJson(creator))
           .put("meetingId", meetingId)
-          .put("courseId", courseId)
+          .put(courseIdLiteral, courseId)
           .put("service", service)
           .put("meetingPassword", meetingPasswort)
       case JitsiInvitation(creator, courseId, service, href) => {
         new JSONObject().put("creator", userToJson(creator))
-          .put("courseId", courseId)
+          .put(courseIdLiteral, courseId)
           .put("service", service)
           .put("href", href)
       }

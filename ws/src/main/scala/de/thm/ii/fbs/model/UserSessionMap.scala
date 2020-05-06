@@ -79,5 +79,4 @@ object UserSessionMap {
   def onDelete(cb: (String, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
   }
-
 }
