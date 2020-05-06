@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.model
 
 import java.security.Principal
-
 import scala.collection.mutable
 
 /**

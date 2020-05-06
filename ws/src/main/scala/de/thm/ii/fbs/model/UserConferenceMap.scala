@@ -114,7 +114,6 @@ object UserConferenceMap {
       *  @return courseId the scope of the Invitation
       */
     def service: String
-
   }
   /**
     * An Conference System Invitation
