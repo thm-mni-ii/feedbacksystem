@@ -44,7 +44,7 @@ export interface DetailedCourseInformation {
 }
 
 
-export interface NewCourse{
+export interface NewCourse {
   course_id: number;
   success: boolean;
 }
@@ -77,12 +77,12 @@ export interface TaskLastSubmission {
   combined_passed: boolean;
   submission_id: number;
   prename: string;
-  ​​surname: string;
-  ​​username: string;
+  surname: string;
+  username: string;
   user_id: number;
 }
 
-export interface ReSubmissionResult{
+export interface ReSubmissionResult {
   subid: string;
   ordnr: string;
   testsystem_id: string;
@@ -137,7 +137,7 @@ export interface TaskExtension {
   taskid:	number;
   userid:	number;
   subject: string;
-  data:	string
+  data:	string;
   info_typ:	string;
 }
 
@@ -166,7 +166,7 @@ export interface Succeeded {
 /**
  * Gives back if Update Task succeeded
  */
-export interface SucceededUpdateTask extends Succeeded{
+export interface SucceededUpdateTask extends Succeeded {
   fileupload: boolean;
   success: boolean;
 }
@@ -264,7 +264,7 @@ export interface ConfInvite {
 }
 
 
-export interface TaskTestsystem{
+export interface TaskTestsystem {
   name:	string;
   test_file_accept: boolean;
   test_file_accept_error: string;
@@ -274,8 +274,8 @@ export interface TaskTestsystem{
   machine_ip: string;
   supported_formats: string;
   test_file_name: string;
-  task_id	: number;
-  ordnr	: number;
+  task_id: number;
+  ordnr: number;
   accepted_input: number; // needs a calculation of what the input is accepted
 }
 
@@ -345,7 +345,10 @@ export interface GlobalSetting {
   setting_typ: string;
 }
 
-export interface ConferenceDetails {
-  course_id: number;
-  url: URL;
+export interface ConferenceInvitation {
+  service: string;
+  href?: string;
+  meetingId?: string;
+  meetingPassword?: string;
+  creator: User;
 }

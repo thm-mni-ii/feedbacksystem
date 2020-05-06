@@ -2,14 +2,12 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {User} from '../../../../interfaces/HttpInterfaces';
+import {ConferenceInvitation, User} from '../../../../interfaces/HttpInterfaces';
 import {ConferenceService} from '../../../../service/conference.service';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {MatSelectModule} from '@angular/material/select';
-import {serialize} from 'v8';
-import {ObserversModule} from '@angular/cdk/observers';
 import {Observable} from 'rxjs';
+import {ConferenceSystems} from '../../../../util/ConferenceSystems';
 @Component({
   selector: 'app-inviteto-conference-dialog',
   templateUrl: './inviteto-conference-dialog.component.html',
@@ -18,8 +16,9 @@ import {Observable} from 'rxjs';
 export class InvitetoConferenceDialogComponent implements OnInit {
   invitee: User;
   form: FormGroup;
-  conferenceSystemObs: Observable<String>;
-  conferenceSystem: String;
+
+  conferenceSystem: string;
+  conferenceInvitation: ConferenceInvitation;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private conferenceService: ConferenceService,
@@ -28,29 +27,23 @@ export class InvitetoConferenceDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.invitee = this.data.user;
-    this.conferenceSystemObs = this.conferenceService.getSelectedConferenceSystem();
-    this.conferenceSystemObs.subscribe(n => {
+    this.conferenceService.getSelectedConferenceSystem().subscribe(n => {
       this.conferenceSystem = n;
+    });
+    this.conferenceService.getConferenceInvitation().subscribe(n => {
+      this.conferenceInvitation = n;
     });
   }
 
   public startCall(invitee) {
-    if (this.conferenceSystem == 'jitsi') {
-      this.conferenceService.getSingleConferenceLink('jitsi').subscribe(m => {
-        this.classroomService.inviteToConference(m, [invitee]);
-        this.conferenceService.openWindowIfClosed(m);
-        this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-        this.dialogRef.close();
-      });
-    } else if (this.conferenceSystem == 'bigbluebutton') {
-      this.conferenceService.getConferenceInvitationLinks('bigbluebutton').subscribe(m => {
-        this.classroomService.inviteToConference(m.get('mod_href'), [invitee]);
-        this.conferenceService.openWindowIfClosed(m.get('mod_href'));
-        this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-        this.dialogRef.close();
-      });
-    }
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+      this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
+      this.conferenceService.openWindowIfClosed(m);
+      this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+      this.dialogRef.close();
+    });
   }
+
   public cancelCall() {
     this.dialogRef.close();
   }

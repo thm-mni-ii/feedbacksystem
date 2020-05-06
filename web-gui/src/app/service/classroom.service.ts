@@ -1,10 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
-import {ConfInvite, Ticket, User} from '../interfaces/HttpInterfaces';
+import {ConferenceInvitation, ConfInvite, Ticket, User} from '../interfaces/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
 import {UserService} from './user.service';
 import {Message} from 'stompjs';
-import {JwtHelperService} from '@auth0/angular-jwt';
 import {ConferenceService} from './conference.service';
 
 /**
@@ -17,16 +16,20 @@ import {ConferenceService} from './conference.service';
 export class ClassroomService {
   private users: Subject<User[]>;
   private tickets: Subject<Ticket[]>;
-  private invitations: Subject<ConfInvite>;
+  private invitations: Subject<ConferenceInvitation>;
+  private openConferences: BehaviorSubject<ConferenceInvitation[]>;
   private invitationSubscriptions: Subscription[] = [];
   private courseId = 0;
+  private invitation: ConferenceInvitation;
 
   private stompRx: RxStompClient = null;
 
   public constructor(private user: UserService, private conferenceService: ConferenceService) {
     this.users = new BehaviorSubject<User[]>([]);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
-    this.invitations = new Subject<ConfInvite>();
+    this.invitations = new Subject<ConferenceInvitation>();
+    this.openConferences = new BehaviorSubject<ConferenceInvitation[]>([]);
+    this.conferenceService.getConferenceInvitation().subscribe(n => this.invitation = n);
   }
 
   /**
@@ -41,6 +44,12 @@ export class ClassroomService {
     return this.users.asObservable();
   }
 
+  public getInvitationFromUser(user: User): ConferenceInvitation {
+    return this.openConferences.value.find((invitation) => invitation.creator.username == user.username);
+  }
+  public hasOpenConference(user: User) {
+   return this.openConferences.value.findIndex((invitation) => invitation.creator.username == user.username) != -1;
+  }
   /**
    * @return Tickets of the connected course.
    */
@@ -51,7 +60,7 @@ export class ClassroomService {
   /**
    * @return Get invitations to take part in a conference
    */
-  public getInvitations(): Observable<ConfInvite> {
+  public getInvitations(): Observable<ConferenceInvitation> {
     this.invitationSubscriptions.forEach(s => s.unsubscribe());
     this.invitationSubscriptions = [];
     return this.invitations.asObservable();
@@ -86,8 +95,9 @@ export class ClassroomService {
         this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
 
-        this.listen('/topic/classroom/' + this.courseId + '/conference/open').subscribe(m => this.requestConferenceUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/conference/close').subscribe(m => this.requestConferenceUpdate());
+        this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(m => this.requestConferenceUpdate());
+        this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
+        this.listen('/user/' + this.user.getUsername() + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
         this.requestTicketsUpdate();
         this.joinCourse();
 
@@ -110,8 +120,8 @@ export class ClassroomService {
    * @param href The link of the conference server
    * @param users The users to invite
    */
-  public inviteToConference(href: string, users: { username: string; prename: string; surname: string }[]) {
-    this.send('/websocket/classroom/invite', {'href': href, 'users': users, 'courseid': this.courseId});
+  public inviteToConference(invitation: ConferenceInvitation, users: { username: string; prename: string; surname: string }[]) {
+    this.send('/websocket/classroom/invite', {invitation: invitation, users, 'courseid': this.courseId});
   }
 
   /**
@@ -175,19 +185,20 @@ export class ClassroomService {
     return this.stompRx.subscribeToTopic(topic, this.constructHeaders());
   }
 
-  public getConferences(courseId: number) {
-    this.send('/websocket/courses/conferences', {courseId: courseId});
-  }
-
   public openConference(courseId) {
-    this.send('/websocket/courses/conference/open', {href: this.conferenceService.getConferenceInviteHref(), courseId: courseId});
+    this.send('/websocket/classroom/conference/opened', {invitation: this.invitation, courseId: courseId});
   }
 
-  public closeConference() {
-    this.send('/websocket/courses/conference/close', {href: this.conferenceService.getConferenceInviteHref()});
+  public closeConference(courseId) {
+    this.send('/websocket/classroom/conference/closed', {invitation: this.invitation, courseId: courseId});
   }
 
   private requestConferenceUpdate() {
+    this.requestUsersUpdate();
     this.send('/websocket/classroom/conferences', {courseId: this.courseId});
+  }
+
+  private handleConferenceMsg(msg: Message) {
+    this.openConferences.next(JSON.parse(msg.body));
   }
 }

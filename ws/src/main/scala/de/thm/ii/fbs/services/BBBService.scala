@@ -27,7 +27,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return boolean showing if creation of room was successful
     */
   def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Int = {
-    // todo: fix path for live system
     Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!
   }
   /**
@@ -37,7 +36,7 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @param password password to register.
     * @return The uri of the registered conference
     */
-  def joinBBBConference(id: String, user: User, password: String): String = {
+  def getBBBConferenceLink(user: User, id: String, password: String): String = {
     Process(s"join_room.py '${user.prename} ${user.surname}' ${id} ${password}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!!
   }
 }

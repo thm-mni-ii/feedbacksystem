@@ -21,9 +21,8 @@ object UserSessionMap {
   def map(id: String, p: Principal): Unit = {
     if (userToSession.contains(p)) {
       sessionToUser.remove(userToSession(p))
+      userToSession.remove(p)
     }
-
-    // todo:
 
     sessionToUser.put(id, p)
     userToSession.put(p, id)
@@ -80,4 +79,5 @@ object UserSessionMap {
   def onDelete(cb: (String, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
   }
+
 }

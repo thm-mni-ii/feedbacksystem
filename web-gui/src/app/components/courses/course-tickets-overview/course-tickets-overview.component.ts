@@ -28,25 +28,19 @@ export class CourseTicketsOverviewComponent implements OnInit {
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
-    this.confUrl = this.conferenceService.getSingleConferenceLink('jitsi');
   }
 
   courseID: number;
   onlineUsers: Observable<User[]>;
   tickets: Observable<Ticket[]>;
-  confUrl: Observable<string>;
-
-  inTheatreMode: boolean;
 
   ngOnInit(): void {
-    this.inTheatreMode = false;
     this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
     this.route.params.subscribe(
        param => {
          this.courseID = param.id;
        });
-    console.log(this.user.getUsername());
   }
 
   public isAuthorized() {
@@ -61,7 +55,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
     });
   }
 
-  createConference() {
+  public createConference() {
     this.dialog.open(NewconferenceDialogComponent, {
       height: 'auto',
       width: 'auto',
@@ -121,6 +115,29 @@ export class CourseTicketsOverviewComponent implements OnInit {
         this.classroomService.createTicket(ticket);
       }
     });
+  }
+  openConference() {
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+      this.conferenceService.openWindowIfClosed(m);
+      this.classroomService.openConference(this.courseID);
+    });
+  }
+  closeConference() {
+    this.classroomService.closeConference(this.courseID);
+  }
+
+  joinConference(user: User) {
+    const invitation = this.classroomService.getInvitationFromUser(user);
+    if (invitation.service == 'bigbluebutton') {
+      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId,
+        invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
+    } else if (invitation.service == 'jitsi') {
+      this.openUrlInNewWindow(invitation.href);
+    }
+  }
+
+  public openUrlInNewWindow(url: string) {
+    window.open(url, '_blank');
   }
 }
 

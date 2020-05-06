@@ -4,17 +4,19 @@ import java.security.Principal
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import de.thm.ii.fbs.model.{Classroom, Role, Ticket, Tickets, User, UserSessionMap}
-import de.thm.ii.fbs.services.{CourseService, UserService}
+import de.thm.ii.fbs.ConferenceSystemLabels
+import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
+import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.MessagingException
-import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
 import org.springframework.messaging.simp.user.SimpUserRegistry
+import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.stereotype.Controller
-import de.thm.ii.fbs.util.JsonWrapper._
 
 /**
   * WebSocket controller that allows users to appear as logged in user.
@@ -28,8 +30,6 @@ class ClassroomController {
   private val smt: SimpMessagingTemplate = null
   @Autowired
   implicit private val userService: UserService = null
-  @Autowired
-  private val courseService: CourseService = null
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
 
   private def userToJson(user: User): JSONObject = new JSONObject()
@@ -42,6 +42,20 @@ class ClassroomController {
     * Removes users that loose connections
     */
   UserSessionMap.onDelete((id: String, p: Principal) => {
+    val courseUser = for {
+      user <- this.userService.loadUserFromDB(p.getName)
+      courseId <- Classroom.leave(user)
+    } yield (courseId, user)
+
+    courseUser.foreach {
+      case (course, user) => smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
+    }
+  })
+
+  /**
+    * Removes users that loose connections
+    */
+  UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
     val courseUser = for {
       user <- this.userService.loadUserFromDB(p.getName)
       courseId <- Classroom.leave(user)
@@ -89,7 +103,7 @@ class ClassroomController {
       smt.convertAndSendToUser(user.getName(), "/classroom/users", response)
     } else {
       val response = Classroom.getParticipants(courseId)
-        .filter(u => u.isAtLeastInRole(Role.TUTOR))
+        .filter(u => u.isAtLeastInRole(Role.TUTOR) || UserConferenceMap.exists(u))
         .map(userToJson)
         .foldLeft(new JSONArray())((a, u) => a.put(u))
         .toString()
@@ -276,4 +290,78 @@ class ClassroomController {
     .put("status", ticket.status)
     .put("courseId", ticket.courseId)
     .put("timestamp", ticket.timestamp)
+
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/opened"))
+  def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val courseId = m.retrive("courseId").asInt().get
+    val user = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive("courseId").asInt().get)
+    val invitation = m.retrive("invitation").retrive("service").asText() match {
+      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get, courseId,
+        m.retrive("invitation").retrive("service").asText().get,
+        m.retrive("invitation").retrive("meetingId").asText().get,
+        m.retrive("invitation").retrive("meetingPassword").asText().get)
+      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get, courseId,
+        m.retrive("invitation").retrive("service").asText().get,
+        m.retrive("invitation").retrive("href").asText().get)
+    }
+    UserConferenceMap.map(invitation, headerAccessor.getUser)
+  }
+
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/closed"))
+  def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    UserConferenceMap.delete(headerAccessor.getUser)
+  }
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conferences"))
+  def getConferences(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val courseId = m.get("courseId").asInt()
+    val principal = headerAccessor.getUser
+    val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
+    val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
+    val user = localUserOpt.getOrElse(globalUserOpt.get)
+    smt.convertAndSendToUser(user.username, "/classroom/conferences",
+      UserConferenceMap.getInvitations(courseId).map(invitationToJson)
+        .foldLeft(new JSONArray())((a, u) => a.put(u))
+        .toString)
+  }
+
+  UserConferenceMap.onMap((invitation: Invitation, p: Principal) => {
+    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/opened", invitationToJson(invitation).toString)
+  })
+
+  UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
+    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/closed", invitationToJson(invitation).toString)
+  })
+
+
+  private def invitationToJson(invitation: Invitation): JSONObject = {
+    invitation match {
+      case BBBInvitation(creator, courseId, service, meetingId, meetingPasswort) =>
+        new JSONObject().put("creator", userToJson(creator))
+          .put("meetingId", meetingId)
+          .put("courseId", courseId)
+          .put("service", service)
+          .put("meetingPassword", meetingPasswort)
+      case JitsiInvitation(creator, courseId, service, href) => {
+        new JSONObject().put("creator", userToJson(creator))
+          .put("courseId", courseId)
+          .put("service", service)
+          .put("href", href)
+      }
+    }
+  }
 }
