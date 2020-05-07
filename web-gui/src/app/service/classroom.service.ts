@@ -35,11 +35,6 @@ export class ClassroomService {
   /**
    * @return Users of the connected course.
    */
-
-  public putSubscription(sub: Subscription) {
-    this.invitationSubscriptions.push(sub);
-  }
-
   public getUsers(): Observable<User[]> {
     return this.users.asObservable();
   }
@@ -61,8 +56,6 @@ export class ClassroomService {
    * @return Get invitations to take part in a conference
    */
   public getInvitations(): Observable<ConferenceInvitation> {
-    this.invitationSubscriptions.forEach(s => s.unsubscribe());
-    this.invitationSubscriptions = [];
     return this.invitations.asObservable();
   }
 

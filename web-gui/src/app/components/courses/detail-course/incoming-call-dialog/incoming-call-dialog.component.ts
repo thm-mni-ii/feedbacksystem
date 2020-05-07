@@ -5,6 +5,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConferenceInvitation, User} from '../../../../interfaces/HttpInterfaces';
 import {ConferenceSystems} from '../../../../util/ConferenceSystems';
 import {ConferenceService} from '../../../../service/conference.service';
+import {first} from 'rxjs/operators';
 
 @Component({
   selector: 'app-incoming-call-dialog',
@@ -46,7 +47,7 @@ export class IncomingCallDialogComponent implements OnInit {
     if (this.invitation.service == 'bigbluebutton') {
       this.conferenceService.getBBBConferenceInvitationLink(this.invitation.meetingId,
         // @ts-ignore
-        this.invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
+        this.invitation.meetingPassword).pipe(first()).subscribe(n => this.openUrlInNewWindow(n.href));
     } else if (this.invitation.service == 'jitsi') {
       this.conferenceURL = this.invitation.href;
     }

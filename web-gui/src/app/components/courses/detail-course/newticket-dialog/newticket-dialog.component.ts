@@ -6,6 +6,7 @@ import {Ticket} from '../../../../interfaces/HttpInterfaces';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {UserService} from '../../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSliderModule} from '@angular/material/slider';
 
 @Component({
   selector: 'app-newticket-dialog',
@@ -14,11 +15,13 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 })
 export class NewticketDialogComponent implements OnInit {
   form: FormGroup;
+  priority: number;
 
 
   constructor(private _formBuilder: FormBuilder, @Inject(MAT_DIALOG_DATA) public data: any,
               private snackBar: MatSnackBar, public dialogRef: MatDialogRef<NewticketDialogComponent>,
-              private classroomService: ClassroomService, private userService: UserService) { }
+              private classroomService: ClassroomService, private userService: UserService,
+              private matSliderModule: MatSliderModule) { }
 
   ngOnInit(): void {
     this.form = this._formBuilder.group({

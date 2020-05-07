@@ -44,6 +44,8 @@ export class ConferenceService {
   }
 
   /**
+   * This function recieves a conference link to the choosen Conference system.
+   * It also sets the invitation to send to other users.
    * @param service Conference system to use
    * @return Returns a personal conference link.
    */

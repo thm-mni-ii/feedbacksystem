@@ -4,6 +4,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Observable, Subject, BehaviorSubject} from 'rxjs';
+import { first } from 'rxjs/operators';
 import {UserService} from '../../../../service/user.service';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {ConferenceService} from '../../../../service/conference.service';
@@ -17,7 +18,6 @@ export class AssignTicketDialogComponent implements OnInit {
   users: Observable<User[]>;
   ticket: Ticket;
   courseID: number;
-  conferenceSystemObs: Observable<String>;
   conferenceSystem: String;
   conferenceInvitation: ConferenceInvitation;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
@@ -26,7 +26,6 @@ export class AssignTicketDialogComponent implements OnInit {
     this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
-
   }
 
   ngOnInit(): void {
@@ -52,6 +51,15 @@ export class AssignTicketDialogComponent implements OnInit {
   }
 
   public startCall(invitee) {
+    this.users.pipe(first()).subscribe(n => {
+      const self: User = n.find(u => {
+      return u.username == this.user.getUsername();
+      });
+      if (self) {
+        this.assignTicket(self);
+      }
+    });
+
     this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
       this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
       this.conferenceService.openWindowIfClosed(m);

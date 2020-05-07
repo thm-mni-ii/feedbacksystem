@@ -7,6 +7,7 @@ import {UserService} from '../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
+import { first } from 'rxjs/operators'
 import {
   CourseTask,
   DetailedCourseInformation,
@@ -151,7 +152,6 @@ export class CourseTasksOverviewComponent implements OnInit {
         disableClose: true
       });
     });
-    this.classroomService.putSubscription(subscription);
     this.classroomService.join(this.courseID).subscribe();
     this.router.navigate(['courses', this.courseID, 'tickets']);
   }

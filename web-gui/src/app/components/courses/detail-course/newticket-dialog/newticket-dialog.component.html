@@ -11,10 +11,10 @@
     <textarea maxlength="160" formControlName="desc" matInput required cdkTextareaAutosize></textarea>
   </mat-form-field>
   <br>
-  <mat-form-field appearance="standard">
-    <mat-label>Priorität</mat-label>
-    <input type="number" formControlName="priority" matInput required>
-  </mat-form-field>
+  <mat-label>Priorität: <span>{{this.form.get("priority").value}}</span></mat-label>
+  <br>
+  <mat-slider matInput required min="1" style="width: 95%;" max="10" step="1" value="5" formControlName="priority"></mat-slider>
+
 </mat-dialog-content>
 <mat-dialog-actions>
   <button class="mat-raised-button"(click)="close()">Close</button>

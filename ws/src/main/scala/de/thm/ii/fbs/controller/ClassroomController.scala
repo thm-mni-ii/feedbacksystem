@@ -53,20 +53,6 @@ class ClassroomController {
   })
 
   /**
-    * Removes users that loose connections
-    */
-  UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
-    val courseUser = for {
-      user <- this.userService.loadUserFromDB(p.getName)
-      courseId <- Classroom.leave(user)
-    } yield (courseId, user)
-
-    courseUser.foreach {
-      case (course, user) => smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
-    }
-  })
-
-  /**
     * Handle user enters classroom messages
     * @param m Message
     * @param headerAccessor Header information
@@ -119,7 +105,7 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/invite"))
   def handleInviteMsg(@Payload invite: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val principal = headerAccessor.getUser
-    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get(courseIdLiteral).asInt());
+    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get("courseid").asInt());
     val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
 
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR) && !globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)) {
