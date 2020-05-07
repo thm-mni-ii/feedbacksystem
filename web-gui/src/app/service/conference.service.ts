@@ -26,9 +26,10 @@ export class ConferenceService {
      this.conferenceInvitation = new BehaviorSubject<ConferenceInvitation>(null);
   }
 
-  public openWindowIfClosed(href: string) {
+  public openWindowIfClosed(href: string): Window {
     if (!this.conferenceWindowHandle || this.conferenceWindowHandle.closed) {
       this.conferenceWindowHandle = window.open(href, '_blank');
+      return this.conferenceWindowHandle;
     }
   }
   public getSelectedConferenceSystem(): Observable<string> {

@@ -17,6 +17,7 @@ import {ClassroomService} from '../../../service/classroom.service';
 import {UserRoles} from '../../../util/UserRoles';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
 import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
+import {first} from 'rxjs/operators';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -26,21 +27,26 @@ import {NewconferenceDialogComponent} from '../detail-course/newconference-dialo
 export class CourseTicketsOverviewComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
-              private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
+              private dialog: MatDialog, public user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
   }
 
   courseID: number;
   onlineUsers: Observable<User[]>;
   tickets: Observable<Ticket[]>;
-
+  self: User;
   ngOnInit(): void {
     this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
     this.route.params.subscribe(
-       param => {
-         this.courseID = param.id;
-       });
+      param => {
+        this.courseID = param.id;
+      });
+    this.onlineUsers.subscribe(n => {
+      this.self = n.find(u => {
+        return u.username == this.user.getUsername();
+      });
+    });
   }
 
   public isAuthorized() {
@@ -118,7 +124,14 @@ export class CourseTicketsOverviewComponent implements OnInit {
   }
   openConference() {
     this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
-      this.conferenceService.openWindowIfClosed(m);
+      const conferenceWindowHandle: Window = this.conferenceService.openWindowIfClosed(m);
+      const closetimer = setInterval(() => {
+        if (conferenceWindowHandle.closed) {
+          this.closeConference();
+          console.log('test');
+          clearInterval(closetimer);
+        }
+      }, 1000);
       this.classroomService.openConference(this.courseID);
     });
   }

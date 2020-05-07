@@ -12,7 +12,8 @@ import {ConferenceService} from '../../../../service/conference.service';
 @Component({
   selector: 'app-assign-ticket-dialog',
   templateUrl: './assign-ticket-dialog.component.html',
-  styleUrls: ['./assign-ticket-dialog.component.scss']
+  styleUrls: ['./assign-ticket-dialog.component.scss'],
+  providers: [UserService]
 })
 export class AssignTicketDialogComponent implements OnInit {
   users: Observable<User[]>;
