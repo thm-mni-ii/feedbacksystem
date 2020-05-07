@@ -6,7 +6,7 @@ import {ConferenceInvitation, User} from '../../../../interfaces/HttpInterfaces'
 import {ConferenceService} from '../../../../service/conference.service';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {FormBuilder, FormGroup} from '@angular/forms';
-import {Observable} from 'rxjs';
+import { first } from 'rxjs/operators';
 import {ConferenceSystems} from '../../../../util/ConferenceSystems';
 @Component({
   selector: 'app-inviteto-conference-dialog',
@@ -36,7 +36,7 @@ export class InvitetoConferenceDialogComponent implements OnInit {
   }
 
   public startCall(invitee) {
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
       this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
       this.conferenceService.openWindowIfClosed(m);
       this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});

@@ -128,7 +128,6 @@ export class CourseTicketsOverviewComponent implements OnInit {
       const closetimer = setInterval(() => {
         if (conferenceWindowHandle.closed) {
           this.closeConference();
-          console.log('test');
           clearInterval(closetimer);
         }
       }, 1000);
