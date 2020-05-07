@@ -62,7 +62,6 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = principal.getName
       }
-
       var existingUser = userService.loadUserFromDB(name, true)
       if (existingUser.isEmpty) {
         // Load more Infos from LDAP
@@ -103,8 +102,7 @@ class LoginController extends CasClientConfigurerAdapter {
         response.setHeader("Location", CLIENT_HOST_URL + "/")
         "error"
       }
-    }
-  }
+    }}
 
   /**
     * Authentication starts here. We can load data directly from LDAP. Until now this is not possible
