@@ -63,10 +63,12 @@ class LoginController extends CasClientConfigurerAdapter {
         name = principal.getName
       }
       var existingUser = userService.loadUserFromDB(name, true)
+      logger.info(LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN).toString)
       if (existingUser.isEmpty) {
         // Load more Infos from LDAP
         val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
         logger.info(entry.toString)
+        logger.info(entry.getAttribute("uid").getStringValue)
         userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
           entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
         existingUser = userService.loadUserFromDB(name)
