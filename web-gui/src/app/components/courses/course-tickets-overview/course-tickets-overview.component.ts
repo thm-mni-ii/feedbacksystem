@@ -125,13 +125,15 @@ export class CourseTicketsOverviewComponent implements OnInit {
   openConference() {
     this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
       const conferenceWindowHandle: Window = this.conferenceService.openWindowIfClosed(m);
-      const closetimer = setInterval(() => {
-        if (conferenceWindowHandle && conferenceWindowHandle.closed || !conferenceWindowHandle) {
-          this.closeConference();
-          clearInterval(closetimer);
-        }
-      }, 1000);
-      this.classroomService.openConference(this.courseID);
+      if (conferenceWindowHandle) {
+        const closetimer = setInterval(() => {
+          if (conferenceWindowHandle.closed || !conferenceWindowHandle) {
+            this.closeConference();
+            clearInterval(closetimer);
+          }
+        }, 1000);
+        this.classroomService.openConference(this.courseID);
+      }
     });
   }
   closeConference() {

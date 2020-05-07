@@ -877,7 +877,7 @@ class CourseController {
   @ResponseBody
   def getBBBConferenceLink(request: HttpServletRequest, response: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user: User = Users.claimAuthorization(request)
-    val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, body.get("meetingId").asText(), body.get("meetingPassword").asText())
+    val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, body.get("meetingId").asText(), body.get("moderatorPassword").asText())
     Map("href" -> inviteeUri)
   }
 }
