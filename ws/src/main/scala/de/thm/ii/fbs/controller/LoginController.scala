@@ -65,9 +65,7 @@ class LoginController extends CasClientConfigurerAdapter {
       var existingUser = userService.loadUserFromDB(name, true)
       logger.info(LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN).toString)
       if (existingUser.isEmpty) {
-        // Load more Infos from LDAP
         val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
-        logger.info(entry.toString)
         logger.info(entry.getAttribute("uid").getStringValue)
         userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
           entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
@@ -83,7 +81,6 @@ class LoginController extends CasClientConfigurerAdapter {
       logger.info("route = " + route)
       response.addCookie(co)
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-      //response.setHeader("Location", CLIENT_HOST_URL + "/login?route=" + (if (route != null) route else ""))
       if (request.getQueryString != null && request.getQueryString.indexOf("courses=") >= 0) {
         val coursepath: String = request.getQueryString.replace('=', '/')
         val numPattern = "/[0-9]+$".r
