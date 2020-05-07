@@ -26,9 +26,11 @@ export class ConferenceService {
      this.conferenceInvitation = new BehaviorSubject<ConferenceInvitation>(null);
   }
 
-  public openWindowIfClosed(href: string): Window {
+  public openWindowIfClosed(href: string): Window | undefined {
     if (!this.conferenceWindowHandle || this.conferenceWindowHandle.closed) {
       this.conferenceWindowHandle = window.open(href, '_blank');
+      return this.conferenceWindowHandle;
+    } else if (this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
       return this.conferenceWindowHandle;
     }
   }
@@ -76,7 +78,7 @@ export class ConferenceService {
    */
   public getBBBConferenceInvitationLink(meetingId: String, meetingPassword: String): Observable<object> {
     return this.http.post<object>('/api/v1/courses/meeting/bbb/invite',
-      {meetingId: meetingId, meetingPassword: meetingPassword})
+      {meetingId: meetingId, moderatorPassword: meetingPassword})
       .pipe(flatMap(res => {
         this.bbbInvitationLink.next(res);
         return this.bbbInvitationLink.asObservable();
