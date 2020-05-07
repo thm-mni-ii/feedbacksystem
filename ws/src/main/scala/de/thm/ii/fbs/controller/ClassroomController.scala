@@ -290,7 +290,7 @@ class ClassroomController {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get, courseId,
         m.retrive("invitation").retrive("service").asText().get,
         m.retrive("invitation").retrive("meetingId").asText().get,
-        m.retrive("invitation").retrive("meetingPassword").asText().get)
+        m.retrive("invitation").retrive("moderatorPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get, courseId,
         m.retrive("invitation").retrive("service").asText().get,
         m.retrive("invitation").retrive("href").asText().get)

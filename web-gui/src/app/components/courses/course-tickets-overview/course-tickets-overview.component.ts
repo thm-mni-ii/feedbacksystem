@@ -123,10 +123,10 @@ export class CourseTicketsOverviewComponent implements OnInit {
     });
   }
   openConference() {
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
       const conferenceWindowHandle: Window = this.conferenceService.openWindowIfClosed(m);
       const closetimer = setInterval(() => {
-        if (conferenceWindowHandle.closed) {
+        if (conferenceWindowHandle && conferenceWindowHandle.closed || !conferenceWindowHandle) {
           this.closeConference();
           clearInterval(closetimer);
         }
@@ -143,7 +143,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
     if (invitation.service == 'bigbluebutton') {
       // @ts-ignore
       // tslint:disable-next-line:max-line-length
-      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.meetingPassword).subscribe(n => this.openUrlInNewWindow(n.href));
+      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.meetingPassword).pipe(first()).subscribe(n => this.openUrlInNewWindow(n.href));
     } else if (invitation.service == 'jitsi') {
       this.openUrlInNewWindow(invitation.href);
     }

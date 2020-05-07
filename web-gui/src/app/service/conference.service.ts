@@ -61,7 +61,6 @@ export class ConferenceService {
           // remove mod href and mod password from invitation
           if (res.service == ConferenceSystems.BigBlueButton) {
             res.href = undefined;
-            res.moderatorPassword = undefined;
           }
           this.conferenceInvitation.next(res);
           return this.personalConferenceLink.asObservable();

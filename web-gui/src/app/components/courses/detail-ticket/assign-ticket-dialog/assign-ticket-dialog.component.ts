@@ -61,7 +61,7 @@ export class AssignTicketDialogComponent implements OnInit {
       }
     });
 
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).subscribe(m => {
+    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
       this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
       this.conferenceService.openWindowIfClosed(m);
       this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
