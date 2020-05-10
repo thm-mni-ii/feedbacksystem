@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
 import {ConferenceInvitation, Ticket, User} from '../../../../interfaces/HttpInterfaces';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Observable, Subject, BehaviorSubject} from 'rxjs';
@@ -8,6 +8,8 @@ import { first } from 'rxjs/operators';
 import {UserService} from '../../../../service/user.service';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {ConferenceService} from '../../../../service/conference.service';
+import {InvitetoConferenceDialogComponent} from '../inviteto-conference-dialog/inviteto-conference-dialog.component';
+import {CloseTicketDialogComponent} from '../close-ticket-dialog/close-ticket-dialog.component';
 
 @Component({
   selector: 'app-assign-ticket-dialog',
@@ -16,18 +18,44 @@ import {ConferenceService} from '../../../../service/conference.service';
   providers: [UserService]
 })
 export class AssignTicketDialogComponent implements OnInit {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
+              private snackBar: MatSnackBar, private classroomService: ClassroomService,
+              private conferenceService: ConferenceService, private user: UserService, private dialog: MatDialog) {
+    this.users = this.data.users;
+    this.ticket = this.data.ticket;
+    this.courseID = this.data.courseID;
+  }
   users: Observable<User[]>;
   ticket: Ticket;
   courseID: number;
   conferenceSystem: String;
   conferenceInvitation: ConferenceInvitation;
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
-              private snackBar: MatSnackBar, private classroomService: ClassroomService,
-              private conferenceService: ConferenceService, private user: UserService) {
-    this.users = this.data.users;
-    this.ticket = this.data.ticket;
-    this.courseID = this.data.courseID;
-  }
+
+  public assignTicket = (function(assignee) {
+    this.classroomService.getTickets().pipe(first()).subscribe(t => {
+      this.ticket.assignee = assignee;
+      this.classroomService.updateTicket(this.ticket);
+      this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
+      this.dialogRef.close();
+    });
+  }).bind(this);
+
+  public startCall = (function(invitee) {
+    this.users.pipe(first()).subscribe(n => {
+      const self = n.find(u => u.username == this.user.getUsername());
+      if (self) {
+        this.assignTicket(self);
+      }
+    });
+    this.classroomService.getTickets().pipe(first()).subscribe(t => {
+      this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
+        this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
+        this.conferenceService.openWindowIfClosed(m);
+        this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+        this.dialogRef.close();
+      });
+    });
+  }).bind(this);
 
   ngOnInit(): void {
     this.conferenceService.getSelectedConferenceSystem().subscribe(n => {
@@ -37,36 +65,30 @@ export class AssignTicketDialogComponent implements OnInit {
       this.conferenceInvitation = n;
     });
   }
-
-  public assignTicket(assignee) {
-    this.ticket.assignee = assignee;
-    this.classroomService.updateTicket(this.ticket);
-    this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
-    this.dialogRef.close();
+  public deleteAssignedDialog(user, cb) {
+    this.classroomService.getTickets().pipe(first()).subscribe(t => {
+      const hasAssignedTicket = t.find(ticket => {
+        // @ts-ignore
+        if (ticket.assignee && ticket.assignee.username) {
+          // @ts-ignore
+          return ticket.assignee.username == this.user.getUsername() && ticket.id != this.ticket.id;
+        }
+      });
+      if (hasAssignedTicket) {
+        this.dialog.open(CloseTicketDialogComponent, {
+          height: 'auto',
+          width: 'auto',
+          data: {user: user},
+        }).afterClosed().pipe(first()).subscribe( _ => cb(user));
+      } else {
+        cb(user);
+      }
+    });
   }
-
   public closeTicket(ticket) {
     this.classroomService.removeTicket(ticket);
     this.snackBar.open(`Das Ticket wurde geschlossen`, 'OK', {duration: 3000});
     this.dialogRef.close();
-  }
-
-  public startCall(invitee) {
-    this.users.pipe(first()).subscribe(n => {
-      const self: User = n.find(u => {
-      return u.username == this.user.getUsername();
-      });
-      if (self) {
-        this.assignTicket(self);
-      }
-    });
-
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
-      this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
-      this.conferenceService.openWindowIfClosed(m);
-      this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-      this.dialogRef.close();
-    });
   }
 
   public isAuthorized() {
