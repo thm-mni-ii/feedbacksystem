@@ -95,9 +95,19 @@ export class CourseTicketsOverviewComponent implements OnInit {
     });
   }
 
-  public sortUsersByRole(users) {
-    return users.sort( (a, b) => {
-      return a.role > b.role ? 1 : -1;
+  public sortUsers(users) {
+    return users.sort((a, b) => {
+      if (a.role > b.role) {
+        return 1;
+      } else if ( a.role < b.role) {
+        return -1;
+      } else {
+        if (a.surname > b.surname) {
+          return 1;
+        } else {
+          return -1;
+        }
+      }
     });
   }
 
