@@ -12,12 +12,13 @@ import {Ticket, User} from '../../../interfaces/HttpInterfaces';
 import { Pipe, PipeTransform } from '@angular/core';
 import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import {InvitetoConferenceDialogComponent} from '../detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {ClassroomService} from '../../../service/classroom.service';
 import {UserRoles} from '../../../util/UserRoles';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
 import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
 import {first} from 'rxjs/operators';
+import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
 
 @Component({
   selector: 'app-course-tickets-overview',
@@ -47,6 +48,9 @@ export class CourseTicketsOverviewComponent implements OnInit {
         return u.username == this.user.getUsername();
       });
     });
+    if (!this.classroomService.isJoined()) {
+      this.goOnline();
+    }
   }
 
   public isAuthorized() {
@@ -95,6 +99,24 @@ export class CourseTicketsOverviewComponent implements OnInit {
     return users.sort( (a, b) => {
       return a.role > b.role ? 1 : -1;
     });
+  }
+
+  goOnline() {
+    Notification.requestPermission();
+    const subscription: Subscription = this.classroomService.getInvitations().subscribe(n => {
+      this.dialog.open(IncomingCallDialogComponent, {
+        height: 'auto',
+        width: 'auto',
+        data: {courseID: this.courseID, invitation: n},
+        disableClose: true
+      });
+    });
+    this.classroomService.join(this.courseID).subscribe();
+  }
+
+  goOffline() {
+    this.classroomService.leave().subscribe();
+    this.router.navigate(['courses', this.courseID]);
   }
 
   public getRoleName(roleid) {

@@ -8,6 +8,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
     <button mat-flat-button color="primary" (click)="openConference()" matTooltip="Konferenz öffnen"><mat-icon >lock_open</mat-icon></button>
     <button mat-flat-button color="primary" (click)="closeConference()" matTooltip="Konferenz schliessen"><mat-icon >lock</mat-icon></button>
+    <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
 </div>
 <div class="ticketOverview">
