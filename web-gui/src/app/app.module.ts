@@ -94,6 +94,7 @@ import { InvitetoConferenceDialogComponent} from './components/courses/detail-ti
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
+import {CloseTicketDialogComponent} from './components/courses/detail-ticket/close-ticket-dialog/close-ticket-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -174,7 +175,8 @@ export const httpInterceptorProviders = [
     UserTeacherFilter,
     NewticketDialogComponent,
     IncomingCallDialogComponent,
-    InvitetoConferenceDialogComponent
+    InvitetoConferenceDialogComponent,
+    CloseTicketDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -202,7 +204,7 @@ export const httpInterceptorProviders = [
     MatGridListModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatSliderModule
+    MatSliderModule,
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent,
     DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,

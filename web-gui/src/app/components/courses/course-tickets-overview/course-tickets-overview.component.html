@@ -18,8 +18,8 @@
       <mat-card class="user" mat-list-item *ngFor="let user of sortUsers(onlineUsers | async)">
         <p class="user-item">{{user.surname}}, {{user.prename}}<span class="subtext-role"><sub>{{getRoleName(user.role)}}</sub></span></p>
         <span class="meta">
-          <mat-icon *ngIf="isAuthorized() && this.self.username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
-          <mat-icon *ngIf="this.classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(user)">phone_callback</mat-icon>
+          <mat-icon *ngIf="isAuthorized() && self.username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
+          <mat-icon *ngIf="classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(user)">phone_callback</mat-icon>
         </span>
       </mat-card>
     </mat-list>
@@ -28,12 +28,12 @@
     <h3>Offene Tickets</h3>
     <mat-list>
       <mat-card class="ticket-mat-card" mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of sortTickets(tickets | async)"
-                [ngClass]="{'selfassigned': ticket.assignee.username == this.user.getUsername(),
-                'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != this.user.getUsername(),
+                [ngClass]="{'selfassigned': ticket.assignee.username == user.getUsername(),
+                'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != user.getUsername(),
                 'unassigned': ticket.assignee.username == ticket.creator.username}">
         <mat-card-content>
           <div class="grid-container">
-            <div class="grid-item ticket-desc">{{ticket.desc}}</div>
+            <div class="grid-item ticket-desc"><p>{{ticket.desc}}</p></div>
             <div class="grid-item ticket-prio"><p>Priorität: <b>{{ticket.priority}}</b></p></div>
             <div class="grid-item ticket-assignee"><p *ngIf="ticket.assignee.username != ticket.creator.username">Zugewiesen an: {{ticket.assignee.prename}}, {{ticket.assignee.surname}}</p>
             </div>

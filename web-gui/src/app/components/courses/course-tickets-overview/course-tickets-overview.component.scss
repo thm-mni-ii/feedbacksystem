@@ -51,6 +51,7 @@
 }
 .user {
   margin-top: 12px;
+  padding:5px;
   display: flex;
   justify-content: space-between;
   .meta {
@@ -89,6 +90,8 @@
   grid-row: 1;
   font-size: medium;
   border-bottom: solid 1px black;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 .ticket-creator {
   grid-column: 1;
@@ -112,6 +115,9 @@
 .user-item {
   width:100%;
   margin:0px;
+  p {
+    margin:0px;
+  }
 }
 .selfassigned {
   background-color: #43A047;
