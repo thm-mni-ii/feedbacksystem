@@ -13,12 +13,14 @@ import {ConferenceInvitation} from '../interfaces/HttpInterfaces';
   providedIn: 'root'
 })
 export class ConferenceService {
+  private timoutTime = 600000; // 10 minutes
   private personalConferenceLink: BehaviorSubject<string>;
   private bbbInvitationLink: BehaviorSubject<object>;
   private conferenceInvitation: BehaviorSubject<ConferenceInvitation>;
   public selectedConferenceSystem: BehaviorSubject<string>;
   private personalLinksRecieved = false;
   private conferenceWindowHandle: Window;
+  public conferenceTimeoutTimer: number;
   public constructor(private http: HttpClient) {
      this.personalConferenceLink = new BehaviorSubject<string>(null);
      this.bbbInvitationLink = new  BehaviorSubject<object>(null);
@@ -83,5 +85,17 @@ export class ConferenceService {
         this.bbbInvitationLink.next(res);
         return this.bbbInvitationLink.asObservable();
       }));
+  }
+
+  public clearConferenceRoom() {
+    this.personalLinksRecieved = false;
+  }
+
+  public startTimeout() {
+    this.conferenceTimeoutTimer = window.setTimeout(this.clearConferenceRoom, this.timoutTime);
+  }
+
+  public stopTimeout() {
+    clearInterval(this.conferenceTimeoutTimer);
   }
 }

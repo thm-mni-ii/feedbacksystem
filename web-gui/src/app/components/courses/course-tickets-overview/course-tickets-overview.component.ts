@@ -126,8 +126,10 @@ export class CourseTicketsOverviewComponent implements OnInit {
     this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
       const conferenceWindowHandle: Window = this.conferenceService.openWindowIfClosed(m);
       if (conferenceWindowHandle) {
+        this.conferenceService.stopTimeout();
         const closetimer = setInterval(() => {
           if (conferenceWindowHandle.closed || !conferenceWindowHandle) {
+            this.conferenceService.startTimeout();
             this.closeConference();
             clearInterval(closetimer);
           }
