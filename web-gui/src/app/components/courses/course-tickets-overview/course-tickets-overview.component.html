@@ -30,16 +30,15 @@
                 [ngClass]="{'selfassigned': ticket.assignee.username == this.user.getUsername(),
                 'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != this.user.getUsername(),
                 'unassigned': ticket.assignee.username == ticket.creator.username}">
-        <mat-card-title>{{ticket.title}}</mat-card-title>
         <mat-card-content>
           <div class="grid-container">
             <div class="grid-item ticket-desc">{{ticket.desc}}</div>
-            <div class="grid-item">Priorität: <b>{{ticket.priority}}</b></div>
-            <div class="grid-item"><p *ngIf="ticket.assignee.username != ticket.creator.username">Zugewiesen an: {{ticket.assignee.prename}}, {{ticket.assignee.surname}}</p>
+            <div class="grid-item ticket-prio"><p>Priorität: <b>{{ticket.priority}}</b></p></div>
+            <div class="grid-item ticket-assignee"><p *ngIf="ticket.assignee.username != ticket.creator.username">Zugewiesen an: {{ticket.assignee.prename}}, {{ticket.assignee.surname}}</p>
             </div>
-            <div class="grid-item"><p>Erstellt: {{ticket.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</p>
+            <div class="grid-item ticket-date"><p>Erstellt: {{ticket.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</p>
             </div>
-            <div class="grid-item"> <p>Ersteller: {{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
+            <div class="grid-item ticket-creator"> <p>Ersteller: {{ticket.creator.prename}}, {{ticket.creator.surname}}</p>
             </div>
           </div>
         </mat-card-content>
