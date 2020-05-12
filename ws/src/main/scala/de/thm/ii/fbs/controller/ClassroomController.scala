@@ -2,7 +2,7 @@ package de.thm.ii.fbs.controller
 
 import java.security.Principal
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.ConferenceSystemLabels
 import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
@@ -284,17 +284,30 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/conference/opened"))
   def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val invLit: String = "invitation";
     val courseId = m.retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
+    val mapper: ObjectMapper = new ObjectMapper();
+    val attendees = m.retrive(invLit).retrive("attendees").asText() match {
+     case Some(v) => mapper.readValue(v, classOf[Set[String]])
+     case None => Set();
+    }
+
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get, courseId,
-        m.retrive("invitation").retrive("service").asText().get,
-        m.retrive("invitation").retrive("meetingId").asText().get,
-        m.retrive("invitation").retrive("moderatorPassword").asText().get)
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees.toSet,
+        m.retrive(invLit).retrive("meetingId").asText().get,
+        m.retrive(invLit).retrive("moderatorPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get, courseId,
-        m.retrive("invitation").retrive("service").asText().get,
-        m.retrive("invitation").retrive("href").asText().get)
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees.toSet,
+        m.retrive(invLit).retrive("href").asText().get)
+
     }
+    logger.info(invitation.toString)
     UserConferenceMap.map(invitation, headerAccessor.getUser)
   }
 
@@ -329,23 +342,35 @@ class ClassroomController {
     smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/opened", invitationToJson(invitation).toString)
   })
 
+  UserConferenceMap.onAttend((invitation: Invitation, p: Principal) => {
+    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/attend", invitationToJson(invitation).toString)
+  })
+
+  UserConferenceMap.onDepart((invitation: Invitation, p: Principal) => {
+    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/depart", invitationToJson(invitation).toString)
+  })
+
   UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
     smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/closed", invitationToJson(invitation).toString)
   })
 
   private def invitationToJson(invitation: Invitation): JSONObject = {
     invitation match {
-      case BBBInvitation(creator, courseId, service, meetingId, meetingPasswort) =>
+      case BBBInvitation(creator, courseId, service, visibility, attendees, meetingId, meetingPasswort) =>
         new JSONObject().put("creator", userToJson(creator))
           .put("meetingId", meetingId)
           .put(courseIdLiteral, courseId)
           .put("service", service)
           .put("meetingPassword", meetingPasswort)
-      case JitsiInvitation(creator, courseId, service, href) => {
+          .put("visibility", visibility)
+          .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
+      case JitsiInvitation(creator, courseId, service, visibility, attendees, href) => {
         new JSONObject().put("creator", userToJson(creator))
           .put(courseIdLiteral, courseId)
           .put("service", service)
           .put("href", href)
+          .put("visibility", visibility)
+          .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
       }
     }
   }

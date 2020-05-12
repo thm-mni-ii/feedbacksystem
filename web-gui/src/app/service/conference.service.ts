@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Observable, BehaviorSubject} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {Observable, BehaviorSubject,  timer, Subscription} from 'rxjs';
+import {flatMap, first} from 'rxjs/operators';
 import {ConferenceSystems} from '../util/ConferenceSystems';
 import {ConferenceInvitation} from '../interfaces/HttpInterfaces';
 
@@ -20,7 +20,7 @@ export class ConferenceService {
   public selectedConferenceSystem: BehaviorSubject<string>;
   private personalLinksRecieved = false;
   private conferenceWindowHandle: Window;
-  public conferenceTimeoutTimer: number;
+  public conferenceTimeoutTimer: Subscription;
   public constructor(private http: HttpClient) {
      this.personalConferenceLink = new BehaviorSubject<string>(null);
      this.bbbInvitationLink = new  BehaviorSubject<object>(null);
@@ -55,7 +55,7 @@ export class ConferenceService {
    * @return Returns a personal conference link.
    */
   public getSingleConferenceLink(service: string): Observable<string> {
-    if (this.personalLinksRecieved && this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
+    if (this.personalLinksRecieved) {
       return this.personalConferenceLink.asObservable();
     } else {
       return this.http.post<any>('/api/v1/courses/meeting', {service: service})
@@ -92,10 +92,12 @@ export class ConferenceService {
   }
 
   public startTimeout() {
-    this.conferenceTimeoutTimer = window.setTimeout(this.clearConferenceRoom, this.timoutTime);
+    this.conferenceTimeoutTimer = timer(this.timoutTime).pipe(first()).subscribe(_ => this.clearConferenceRoom());
   }
 
   public stopTimeout() {
-    clearInterval(this.conferenceTimeoutTimer);
+    if (this.conferenceTimeoutTimer) {
+      this.conferenceTimeoutTimer.unsubscribe();
+    }
   }
 }

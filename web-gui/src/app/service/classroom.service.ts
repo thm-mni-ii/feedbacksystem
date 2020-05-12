@@ -90,6 +90,8 @@ export class ClassroomService {
 
         this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(m => this.requestConferenceUpdate());
         this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
+        this.listen('/topic/classroom/' + this.courseId + '/conference/attend').subscribe(m => this.requestConferenceUpdate());
+        this.listen('/topic/classroom/' + this.courseId + '/conference/depart').subscribe(m => this.requestConferenceUpdate());
         this.listen('/user/' + this.user.getUsername() + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
         this.requestTicketsUpdate();
         this.joinCourse();
@@ -178,8 +180,10 @@ export class ClassroomService {
     return this.stompRx.subscribeToTopic(topic, this.constructHeaders());
   }
 
-  public openConference(courseId) {
-    this.send('/websocket/classroom/conference/opened', {invitation: this.invitation, courseId: courseId});
+  public openConference(courseId, visibility) {
+    const inv = this.invitation;
+    inv.visibility = visibility;
+    this.send('/websocket/classroom/conference/opened', {invitation: inv, courseId: courseId});
   }
 
   public closeConference(courseId) {
@@ -193,5 +197,13 @@ export class ClassroomService {
 
   private handleConferenceMsg(msg: Message) {
     this.openConferences.next(JSON.parse(msg.body));
+  }
+
+  public attendConference(invitation) {
+    this.send('/websocket/classroom/conference/attend', {invitation: invitation});
+  }
+
+  public departConference(invitation) {
+    this.send('/websocket/classroom/conference/depart', {invitation: invitation});
   }
 }

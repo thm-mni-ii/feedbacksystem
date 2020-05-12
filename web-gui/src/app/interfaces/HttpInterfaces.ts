@@ -347,6 +347,8 @@ export interface GlobalSetting {
 
 export interface ConferenceInvitation {
   service: string;
+  visibility: string;
+  attendees: string[];
   href?: string;
   meetingId?: string;
   meetingPassword?: string;
