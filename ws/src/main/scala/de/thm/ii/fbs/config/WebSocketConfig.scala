@@ -48,7 +48,7 @@ class WebSocketConfig extends WebSocketMessageBrokerConfigurer {
     registry.addEndpoint("/websocket")
       .setAllowedOrigins("*")
       .withSockJS()
-      .setWebSocketEnabled(false)
+      .setWebSocketEnabled(true)
       .setSessionCookieNeeded(false)
   }
 
