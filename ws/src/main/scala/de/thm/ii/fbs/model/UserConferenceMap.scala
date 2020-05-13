@@ -63,6 +63,7 @@ object UserConferenceMap {
       }
       case None =>
     }
+    onAttendListeners.foreach(_(invitation, principal))
   }
 
   /**
@@ -79,6 +80,7 @@ object UserConferenceMap {
       }
       case None =>
     }
+    onDepartListeners.foreach(_(invitation, principal))
   }
   /**
     * Removes both, the user and its session by using its principal
@@ -146,36 +148,30 @@ object UserConferenceMap {
     * @param creator creator of the invitation
     * @param visibility set of users who attend the conference
     * @param attendees set of users who attend the conference
+    * @param service set of users who attend the conference
+    * @param courseId set of users who attend the conference
     */
-    abstract class Invitation(val creator: User, var visibility: String, var attendees: Set[String]) {
-    /**
-      *  @return courseId the scope of the Invitation
-      */
-      def courseId: Int
-    /**
-      *  @return courseId the scope of the Invitation
-      */
-    def service: String
-    /**
-      *  @return visibility of this Invitation
-      */
-
-
-  }
+     abstract class Invitation(val creator: User, val courseId: Int, val visibility: String,
+                               val attendees: scala.collection.mutable.Set[String], val service: String)
   /**
     * An Conference System Invitation
     *
-    * @param meetingId       meetingId for users to generate their own invitation link
+    * @param meetingId meetingId for users to generate their own invitation link
     * @param meetingPasswort meetingPassword for users to generate their own invitation link
     * @param creator Issuer for the Invitation
     * @param courseId courseId for the Invitation
     * @param service  courseId for the Invitation
-    * @param inv_visibility courseId for the Invitation
-    * @param inv_attendees courseId for the Invitation
+    * @param visibility courseId for the Invitation
+    * @param attendees courseId for the Invitation
     */
-  case class BBBInvitation(override val creator: User, override val courseId: Int, override val service: String,
-                           var inv_visibility: String, var inv_attendees: Set[String],
-                           meetingId: String, meetingPasswort: String) extends Invitation(creator: User, inv_visibility: String, inv_attendees: Set[String])
+  case class BBBInvitation(override val creator: User, override val courseId: Int, override val visibility: String,
+                      override val attendees: scala.collection.mutable.Set[String], override val service: String,
+                      meetingId: String, meetingPasswort: String) extends Invitation(creator: User,
+    courseId: Int,
+    visibility: String,
+    attendees: scala.collection.mutable.Set[String],
+    service: String
+    )
 
   /**
     * An Conference System Invitation
@@ -184,10 +180,14 @@ object UserConferenceMap {
     * @param creator Issuer for the Invitation
     * @param courseId courseId for the Invitation
     * @param service courseId for the Invitation
-    * @param inv_visibility courseId for the Invitation
-    * @param inv_attendees courseId for the Invitation
+    * @param visibility courseId for the Invitation
+    * @param attendees courseId for the Invitation
     * */
-  case class JitsiInvitation(override val creator: User, override val courseId: Int, override val service: String,
-                             var inv_visibility: String, var inv_attendees: Set[String],
-                             href: String) extends Invitation(creator: User, inv_visibility: String, inv_attendees: Set[String])
+  case class JitsiInvitation(override val creator: User, override val courseId: Int, override val visibility: String,
+                             override val attendees: scala.collection.mutable.Set[String], override val service: String,
+                        href: String) extends Invitation(creator: User,
+    courseId: Int,
+    visibility: String,
+    attendees: scala.collection.mutable.Set[String],
+    service: String)
 }

@@ -2,8 +2,8 @@ package de.thm.ii.fbs.controller
 
 import java.security.Principal
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.ConferenceSystemLabels
 import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model._
@@ -17,6 +17,8 @@ import org.springframework.messaging.handler.annotation.{MessageMapping, Payload
 import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.stereotype.Controller
+
+import scala.collection.mutable
 
 /**
   * WebSocket controller that allows users to appear as logged in user.
@@ -288,22 +290,24 @@ class ClassroomController {
     val courseId = m.retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
     val mapper: ObjectMapper = new ObjectMapper();
-    val attendees = m.retrive(invLit).retrive("attendees").asText() match {
-     case Some(v) => mapper.readValue(v, classOf[Set[String]])
-     case None => Set();
+    val attendees: scala.collection.mutable.Set[String] = m.retrive(invLit).retrive("attendees").asText() match {
+     case Some(v) => mapper.readValue(v, classOf[mutable.Set[String]])
+     case None => mutable.Set();
     }
 
     val invitation = m.retrive("invitation").retrive("service").asText() match {
-      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get, courseId,
-        m.retrive(invLit).retrive("service").asText().get,
+      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+        courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
-        attendees.toSet,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
         m.retrive(invLit).retrive("moderatorPassword").asText().get)
-      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get, courseId,
-        m.retrive(invLit).retrive("service").asText().get,
+      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+        courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
-        attendees.toSet,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("href").asText().get)
 
     }
@@ -319,6 +323,70 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/conference/closed"))
   def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     UserConferenceMap.delete(headerAccessor.getUser)
+  }
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/attend"))
+  def attendConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val invLit: String = "invitation";
+    var attendees: mutable.Set[String] = mutable.Set[String]();
+    val attendeesNode: ArrayNode = m.get(invLit).get("attendees").asInstanceOf[ArrayNode]
+    for (i <- 1 until attendeesNode.size()) {
+      attendees += attendeesNode.get(i).asText()
+    }
+    val courseId = m.retrive(courseIdLiteral).asInt().get
+    val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
+    val invitation = m.retrive("invitation").retrive("service").asText() match {
+      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+        courseId,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("meetingId").asText().get,
+        m.retrive(invLit).retrive("moderatorPassword").asText().get)
+      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+        courseId,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("href").asText().get)
+    }
+    UserConferenceMap.attend(invitation, headerAccessor.getUser)
+  }
+  /**
+    * Handles the removal of tickets
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/depart"))
+  def departConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val invLit: String = "invitation";
+    var attendees: mutable.Set[String] = mutable.Set[String]();
+    val attendeesNode: ArrayNode = m.get(invLit).get("attendees").asInstanceOf[ArrayNode]
+    for (i <- 1 until attendeesNode.size()) {
+      attendees += attendeesNode.get(i).asText()
+    }
+    val courseId = m.retrive(courseIdLiteral).asInt().get
+    val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
+    val invitation = m.retrive("invitation").retrive("service").asText() match {
+      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+        courseId,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("meetingId").asText().get,
+        m.retrive(invLit).retrive("moderatorPassword").asText().get)
+      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+        courseId,
+        m.retrive(invLit).retrive("visibility").asText().get,
+        attendees,
+        m.retrive(invLit).retrive("service").asText().get,
+        m.retrive(invLit).retrive("href").asText().get)
+    }
+    UserConferenceMap.depart(invitation, headerAccessor.getUser)
   }
   /**
     * Handles the removal of tickets
