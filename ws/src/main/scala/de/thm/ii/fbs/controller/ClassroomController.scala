@@ -312,7 +312,6 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("href").asText().get)
-
     }
     UserConferenceMap.map(invitation, headerAccessor.getUser)
   }
