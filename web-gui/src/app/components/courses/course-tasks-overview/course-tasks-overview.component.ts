@@ -143,6 +143,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   }
 
   goOnline() {
+    this.db.subscribeCourse(this.courseID).subscribe();
     Notification.requestPermission();
     this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
