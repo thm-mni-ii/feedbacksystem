@@ -4,10 +4,10 @@
             matTooltip="Zurück zur Kursübersicht">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
-    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
-    <button mat-flat-button color="primary" (click)="openConference()" matTooltip="Konferenz öffnen"><mat-icon >lock_open</mat-icon></button>
-    <button mat-flat-button color="primary" (click)="closeConference()" matTooltip="Konferenz schliessen"><mat-icon >lock</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined() " (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="isAuthorized() && classroomService.isJoined()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="openConference()" matTooltip="Konferenz öffnen"><mat-icon >lock_open</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="closeConference()" matTooltip="Konferenz schliessen"><mat-icon >lock</mat-icon></button>
     <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
 </div>
@@ -18,8 +18,9 @@
       <mat-card class="user" mat-list-item *ngFor="let user of sortUsers(onlineUsers | async)">
         <p class="user-item">{{user.surname}}, {{user.prename}}<span class="subtext-role"><sub>{{getRoleName(user.role)}}</sub></span></p>
         <span class="meta">
-          <mat-icon *ngIf="isAuthorized() && self.username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
+          <mat-icon *ngIf="isAuthorized() && self && self.username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
           <mat-icon *ngIf="classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(user)">phone_callback</mat-icon>
+          <mat-icon *ngIf="classroomService.isInConference(user)" class="material-icons call" color="accent" (click)="joinConference(classroomService.isInConference(user).creator)">meeting_room</mat-icon>
         </span>
       </mat-card>
     </mat-list>

@@ -18,9 +18,11 @@ export class ClassroomService {
   private tickets: Subject<Ticket[]>;
   private invitations: Subject<ConferenceInvitation>;
   private openConferences: BehaviorSubject<ConferenceInvitation[]>;
-  private invitationSubscriptions: Subscription[] = [];
+
   private courseId = 0;
-  private invitation: ConferenceInvitation;
+  private myInvitation: ConferenceInvitation;
+  private otherInvitation: ConferenceInvitation;
+
 
   private stompRx: RxStompClient = null;
 
@@ -29,7 +31,7 @@ export class ClassroomService {
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.invitations = new Subject<ConferenceInvitation>();
     this.openConferences = new BehaviorSubject<ConferenceInvitation[]>([]);
-    this.conferenceService.getConferenceInvitation().subscribe(n => this.invitation = n);
+    this.conferenceService.getConferenceInvitation().subscribe(n => this.myInvitation = n);
   }
 
   /**
@@ -44,6 +46,13 @@ export class ClassroomService {
   }
   public hasOpenConference(user: User) {
    return this.openConferences.value.findIndex((invitation) => invitation.creator.username == user.username) != -1;
+  }
+
+  public isInConference(user: User): ConferenceInvitation {
+    return this.openConferences.value
+      .find((invitation) => {
+        return invitation.attendees.find((username) => username == user.username);
+      });
   }
   /**
    * @return Tickets of the connected course.
@@ -181,13 +190,18 @@ export class ClassroomService {
   }
 
   public openConference(courseId, visibility) {
-    const inv = this.invitation;
+    const inv = this.myInvitation;
+    inv.visibility = visibility;
+    this.send('/websocket/classroom/conference/opened', {invitation: inv, courseId: courseId});
+  }
+
+  public shareConference(inv, courseId, visibility) {
     inv.visibility = visibility;
     this.send('/websocket/classroom/conference/opened', {invitation: inv, courseId: courseId});
   }
 
   public closeConference(courseId) {
-    this.send('/websocket/classroom/conference/closed', {invitation: this.invitation, courseId: courseId});
+    this.send('/websocket/classroom/conference/closed', {invitation: this.myInvitation, courseId: courseId});
   }
 
   private requestConferenceUpdate() {
@@ -200,10 +214,12 @@ export class ClassroomService {
   }
 
   public attendConference(invitation) {
+    this.otherInvitation = invitation;
     this.send('/websocket/classroom/conference/attend', {invitation: invitation});
   }
 
   public departConference(invitation) {
+    this.otherInvitation = undefined;
     this.send('/websocket/classroom/conference/depart', {invitation: invitation});
   }
 }

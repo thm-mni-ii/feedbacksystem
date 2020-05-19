@@ -50,7 +50,10 @@ class ClassroomController {
     } yield (courseId, user)
 
     courseUser.foreach {
-      case (course, user) => smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
+      case (course, user) => {
+        UserConferenceMap.departAll(user)
+        smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
+      }
     }
   })
 
@@ -311,7 +314,6 @@ class ClassroomController {
         m.retrive(invLit).retrive("href").asText().get)
 
     }
-    logger.info(invitation.toString)
     UserConferenceMap.map(invitation, headerAccessor.getUser)
   }
 
@@ -337,7 +339,7 @@ class ClassroomController {
     for (i <- 1 until attendeesNode.size()) {
       attendees += attendeesNode.get(i).asText()
     }
-    val courseId = m.retrive(courseIdLiteral).asInt().get
+    val courseId = m.retrive(invLit).retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
@@ -346,7 +348,7 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
-        m.retrive(invLit).retrive("moderatorPassword").asText().get)
+        m.retrive(invLit).retrive("meetingPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
@@ -369,7 +371,7 @@ class ClassroomController {
     for (i <- 1 until attendeesNode.size()) {
       attendees += attendeesNode.get(i).asText()
     }
-    val courseId = m.retrive(courseIdLiteral).asInt().get
+    val courseId = m.retrive(invLit).retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
@@ -378,7 +380,7 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
-        m.retrive(invLit).retrive("moderatorPassword").asText().get)
+        m.retrive(invLit).retrive("meetingPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
@@ -424,7 +426,7 @@ class ClassroomController {
 
   private def invitationToJson(invitation: Invitation): JSONObject = {
     invitation match {
-      case BBBInvitation(creator, courseId, service, visibility, attendees, meetingId, meetingPasswort) =>
+      case BBBInvitation(creator, courseId, visibility, attendees, service, meetingId, meetingPasswort) =>
         new JSONObject().put("creator", userToJson(creator))
           .put("meetingId", meetingId)
           .put(courseIdLiteral, courseId)
@@ -432,7 +434,7 @@ class ClassroomController {
           .put("meetingPassword", meetingPasswort)
           .put("visibility", visibility)
           .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
-      case JitsiInvitation(creator, courseId, service, visibility, attendees, href) => {
+      case JitsiInvitation(creator, courseId, visibility, attendees, service, href) => {
         new JSONObject().put("creator", userToJson(creator))
           .put(courseIdLiteral, courseId)
           .put("service", service)

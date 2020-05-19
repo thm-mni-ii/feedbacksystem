@@ -73,15 +73,27 @@ object UserConferenceMap {
     * @param principal user that wants to depart
     */
   def depart(invitation: Invitation, principal: Principal): Unit = {
-    this.conferenceToUser.get(invitation) match {
-      case Some(p) => userToConference.get(p) match {
-        case Some(v) => v.attendees -= principal.getName;
+     userToConference.get(invitation.creator) match {
+        case Some(v) => {
+          v.attendees -= principal.getName
+          onDepartListeners.foreach(_(invitation, principal))
+        }
         case None =>
-      }
-      case None =>
     }
-    onDepartListeners.foreach(_(invitation, principal))
   }
+
+  /**
+    * Lets a user depart from a conference if he attends any
+    * @param principal user that departs from conferences
+    */
+  def departAll(principal: Principal): Unit = {
+    conferenceToUser.keys.foreach((invitation) => {
+      if (invitation.attendees.contains(principal.getName)) {
+        this.depart(invitation, principal);
+      }
+    })
+  }
+
   /**
     * Removes both, the user and its session by using its principal
     *

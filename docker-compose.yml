@@ -4,6 +4,7 @@ services:
   zoo1:
     image: 'bitnami/zookeeper:3.4.13-r62'
     hostname: zoo1
+    restart: always
     environment:
     - ALLOW_ANONYMOUS_LOGIN=yes
     volumes:
@@ -14,6 +15,7 @@ services:
   kafka1:
     image: 'bitnami/kafka:latest'
     hostname: kafka1
+    restart: always
     environment:
     - KAFKA_ZOOKEEPER_CONNECT=zoo1:2181
     - ALLOW_PLAINTEXT_LISTENER=yes
@@ -56,6 +58,7 @@ services:
     - 3309:3306
   ws:
     build: ws
+    restart: always
     depends_on:
     - mysql1
     - kafka1
