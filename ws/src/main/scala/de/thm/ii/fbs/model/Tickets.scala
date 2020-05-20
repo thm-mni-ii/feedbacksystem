@@ -119,9 +119,10 @@ object Tickets {
   * @param timestamp The timestamp of the creation
   * @param priority The priority of the issue ticket
   * @param id the unique ticket id
+  * @param queuePosition the unique ticket id
   */
 case class Ticket(courseId: Int, title: String, desc: String, status: String, creator: User,
-                  assignee: User, timestamp: Long, priority: Int, id: String = "0") {
+                  assignee: User, timestamp: Long, priority: Int, id: String = "0", var queuePosition: Int = 0) {
   /**
     * @return The hash code -- using id
     */
