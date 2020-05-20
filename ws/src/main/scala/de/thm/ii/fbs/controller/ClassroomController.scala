@@ -170,14 +170,18 @@ class ClassroomController {
         val (courseId, user) = v
         if (!user.isAtLeastInRole(Role.TUTOR)) {
           val response = Tickets.get(courseId)
-            .map(ticketToJson)
+            .sortWith((a, b) => a.timestamp < b.timestamp)
+            .zipWithIndex.map { case (t: Ticket, i: Int) => {t.queuePosition = i + 1;t}}
+            .map { case(t: Ticket) => ticketToJson(t)}
             .filter(t => t.getJSONObject("creator").get("username").toString == user.getName())
             .foldLeft(new JSONArray())((a, t) => a.put(t))
             .toString
           smt.convertAndSendToUser(user.getName(), "/classroom/tickets", response)
         } else {
           val response = Tickets.get(courseId)
-            .map(ticketToJson)
+            .sortWith((a, b) => a.timestamp < b.timestamp)
+            .zipWithIndex.map { case (t: Ticket, i: Int) => {t.queuePosition = i + 1;t}}
+            .map { case(t: Ticket) => ticketToJson(t)}
             .foldLeft(new JSONArray())((a, t) => a.put(t))
             .toString
           smt.convertAndSendToUser(user.getName(), "/classroom/tickets", response)
@@ -281,6 +285,7 @@ class ClassroomController {
     .put("status", ticket.status)
     .put(courseIdLiteral, ticket.courseId)
     .put("timestamp", ticket.timestamp)
+    .put("queuePosition", ticket.queuePosition)
 
   /**
     * Handles the removal of tickets
