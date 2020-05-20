@@ -150,6 +150,7 @@ export class ClassroomService {
    * @param ticket The ticket to remove.
    */
   public removeTicket(ticket: Ticket) {
+    ticket.queuePosition = null;
     this.send('/websocket/classroom/ticket/remove', ticket);
   }
 

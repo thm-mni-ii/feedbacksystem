@@ -242,6 +242,7 @@ export interface Ticket {
   timestamp: number;
   assignee: User;
   creator: User;
+  queuePosition?: number;
 }
 
 export interface ConfInvite {
