@@ -3,7 +3,7 @@
    <mat-dialog-content *ngIf="isAuthorized()" style="max-height: 100%; overflow: hidden;">
     <mat-action-list  *ngFor="let user of users | async | isTeacher">
       <mat-list-item>
-        <button mat-flat-button (click)="deleteAssignedDialog(user, assignTicket)">{{user.prename}}, {{user.surname}}</button>
+        <button mat-flat-button (click)="deleteAssignedDialog(user, assignTicket)">{{user.surname}}, {{user.prename}}</button>
       </mat-list-item>
     </mat-action-list>
    </mat-dialog-content>
