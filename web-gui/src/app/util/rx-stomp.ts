@@ -1,6 +1,7 @@
-import * as SockJS from 'sockjs-client';
-import * as Stomp from 'stompjs';
+import {CompatClient, Frame, IMessage, Stomp} from '@stomp/stompjs';
 import {Observable} from 'rxjs';
+import * as SockJS from 'sockjs-client';
+
 
 /**
  * A brief wrapper that wraps the stomp client into observables.
@@ -8,17 +9,18 @@ import {Observable} from 'rxjs';
  * @author Andrej Sajenko
  */
 export class RxStompClient {
-  private client: Stomp.Client;
+  private client: CompatClient;
 
   /**
    * Create a stomp client over a sockjs websocket.
    * @param uri The Endpoint of the websocket server.
    */
-  public constructor(uri: string) {
-    const socket = new SockJS(uri);
-    this.client = Stomp.over(socket);
+  public constructor(uri: string, connectHeaders) {
+    this.client = Stomp.over(new WebSocket(uri));
+    this.client.webSocketFactory = () => new WebSocket(uri);
+    this.client.connectHeaders = connectHeaders;
+    this.client.reconnect_delay = 200;
   }
-
   /**
    * @return True if client is connected.
    */
@@ -30,23 +32,27 @@ export class RxStompClient {
    * Establish a connection to a stomp protocol server.
    * @param headers Optional headers to send with the connection frame.
    */
-  public connect(headers: {} = {}): Observable<Stomp.Frame> {
-    return new Observable((subj) => {
-      this.client.connect(headers, frame => {
-        subj.next(frame);
-        subj.complete();
-      }, error => subj.error(error));
-    });
+  public connect() {
+    this.client.activate();
+    this.client.onWebSocketError = e => console.log(e);
+    this.client.onStompError = e => console.log(e);
   }
 
+  /**
+   * On Connect Callabck
+   * @param cb Callback to be called when the client is connected
+   */
+  public onConnect(cb) {
+    this.client.onConnect = cb;
+  }
   /**
    * Subscribe to a topic to listen to messages over this topic.
    * @param topic The topic to listen to.
    * @param headers Optional headers.
    */
-  public subscribeToTopic(topic: string, headers: {} = {}): Observable<Stomp.Message> {
+  public subscribeToTopic(topic: string, headers: {} = {}): Observable<IMessage> {
     return new Observable((subj) => {
-      this.client.subscribe(topic, (msg: Stomp.Message) => {
+      this.client.subscribe(topic, (msg: IMessage) => {
         subj.next(msg);
       }, headers);
     });
@@ -66,12 +72,7 @@ export class RxStompClient {
    * Diconnects from the websocket stream.
    * @param headers Optional headers
    */
-  public disconnect(headers: {} = {}): Observable<any> {
-    return new Observable((subj) => {
-      this.client.disconnect(() => {
-        subj.next();
-        subj.complete();
-      }, headers);
-    });
+  public disconnect() {
+    this.client.deactivate();
   }
 }

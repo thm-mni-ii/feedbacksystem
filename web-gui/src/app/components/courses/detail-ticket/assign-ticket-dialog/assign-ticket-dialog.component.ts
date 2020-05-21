@@ -99,7 +99,7 @@ export class AssignTicketDialogComponent implements OnInit {
     let windowHandle: Window;
     if (invitation.service == 'bigbluebutton') {
       // tslint:disable-next-line:max-line-length
-      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.meetingPassword)
+      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.moderatorPassword)
         .pipe(first())
         .subscribe(n => {
           // @ts-ignore

@@ -80,7 +80,7 @@ export class ConferenceService {
    */
   public getBBBConferenceInvitationLink(meetingId: String, meetingPassword: String): Observable<object> {
     return this.http.post<object>('/api/v1/courses/meeting/bbb/invite',
-      {meetingId: meetingId, moderatorPassword: meetingPassword})
+      {meetingId: meetingId, meetingPassword: meetingPassword})
       .pipe(flatMap(res => {
         this.bbbInvitationLink.next(res);
         return this.bbbInvitationLink.asObservable();

@@ -47,7 +47,7 @@ export class IncomingCallDialogComponent implements OnInit {
     if (this.invitation.service == 'bigbluebutton') {
       this.conferenceService.getBBBConferenceInvitationLink(this.invitation.meetingId,
         // @ts-ignore
-        this.invitation.meetingPassword).pipe(first()).subscribe(n => this.openUrlInNewWindow(n.href));
+        this.invitation.moderatorPassword).pipe(first()).subscribe(n => this.openUrlInNewWindow(n.href));
     } else if (this.invitation.service == 'jitsi') {
       this.conferenceURL = this.invitation.href;
     }

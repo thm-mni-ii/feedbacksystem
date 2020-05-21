@@ -155,12 +155,12 @@ export class CourseTasksOverviewComponent implements OnInit {
 
       });
     });
-    this.classroomService.join(this.courseID).subscribe();
+    this.classroomService.join(this.courseID);
     this.router.navigate(['courses', this.courseID, 'tickets']);
   }
 
   goOffline() {
-    this.classroomService.leave().subscribe();
+    this.classroomService.leave();
   }
 
   createTicket() {

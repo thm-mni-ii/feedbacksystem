@@ -47,9 +47,6 @@ class WebSocketConfig extends WebSocketMessageBrokerConfigurer {
   override def registerStompEndpoints(registry: StompEndpointRegistry): Unit = {
     registry.addEndpoint("/websocket")
       .setAllowedOrigins("*")
-      .withSockJS()
-      .setWebSocketEnabled(true)
-      .setSessionCookieNeeded(false)
   }
 
   /**

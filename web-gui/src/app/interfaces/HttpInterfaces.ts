@@ -348,5 +348,6 @@ export interface ConferenceInvitation {
   href?: string;
   meetingId?: string;
   meetingPassword?: string;
+  moderatorPassword?: string;
   creator: User;
 }

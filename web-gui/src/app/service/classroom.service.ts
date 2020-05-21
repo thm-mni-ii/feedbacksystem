@@ -80,43 +80,38 @@ export class ClassroomService {
    * @param courseId The course, e.g., classroom id
    * @return Observable that completes if connected.
    */
-  public join(courseId: number): Observable<void> {
+  public join(courseId: number) {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('https://feedback.mni.thm.de/websocket');
-    return new Observable<void>(c => {
-      this.stompRx.connect(this.constructHeaders()).subscribe(_ => {
+    this.stompRx = new RxStompClient('wss://feedback.mni.thm.de/websocket', this.constructHeaders());
+    this.stompRx.onConnect(_ => {
+      // Handles invitation from tutors / docents to take part in a webconference
+      this.listen('/user/' + this.user.getUsername() + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
+      this.listen('/user/' + this.user.getUsername() + '/classroom/users').subscribe(m => this.handleUsersMsg(m));
+      this.listen('/topic/classroom/' + this.courseId + '/left').subscribe(m => this.requestUsersUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/joined').subscribe(m => this.requestUsersUpdate());
+      this.requestUsersUpdate();
+      this.listen('/user/' + this.user.getUsername() + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
 
-        // Handles invitation from tutors / docents to take part in a webconference
-        this.listen('/user/' + this.user.getUsername() + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
-        this.listen('/user/' + this.user.getUsername() + '/classroom/users').subscribe(m => this.handleUsersMsg(m));
-        this.listen('/topic/classroom/' + this.courseId + '/left').subscribe(m => this.requestUsersUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/joined').subscribe(m => this.requestUsersUpdate());
-        this.requestUsersUpdate();
-        this.listen('/user/' + this.user.getUsername() + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
-        this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
-
-        this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(m => this.requestConferenceUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/conference/attend').subscribe(m => this.requestConferenceUpdate());
-        this.listen('/topic/classroom/' + this.courseId + '/conference/depart').subscribe(m => this.requestConferenceUpdate());
-        this.listen('/user/' + this.user.getUsername() + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
-        this.requestTicketsUpdate();
-        this.joinCourse();
-
-        c.next();
-        c.complete();
-      }, c.error);
+      this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(m => this.requestConferenceUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/conference/attend').subscribe(m => this.requestConferenceUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/conference/depart').subscribe(m => this.requestConferenceUpdate());
+      this.listen('/user/' + this.user.getUsername() + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
+      this.requestTicketsUpdate();
+      this.joinCourse();
     });
+    this.stompRx.connect();
   }
 
   /**
    * Disconnects from the endpoint.
    * @return Observable that completes when disconnected.
    */
-  public leave(): Observable<void> {
-    return this.stompRx.disconnect(this.constructHeaders());
+  public leave() {
+    return this.stompRx.disconnect();
   }
 
   /**
