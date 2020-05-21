@@ -19,7 +19,7 @@ install:
   - sudo pip3 install requests_toolbelt
 
 jdk:
-  - openjdk11
+  - openjdk14
 
 script:
   - docker-compose down
@@ -39,8 +39,7 @@ cache:
 
 deploy:
   provider: script
-  script: bash ci/docker-deploy.sh $TRAVIS_TAG $TRAVIS_BRANCH
+  script: bash ci/docker-deploy.sh $TRAVIS_TAG
   skip_cleanup: true
   on:
-    tags: true
     branch: master

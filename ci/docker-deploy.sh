@@ -1,7 +1,6 @@
 #!/bin/bash
 
 tag=$1
-branch=$2
 
 function dockerPush(){
     tag=$1
@@ -20,7 +19,6 @@ function dockerPush(){
     docker push thmmniii/nodeenv:$tag
 }
 
-
 echo "START DOCKER DEPLOY"
 docker-compose build
 
@@ -29,16 +27,9 @@ docker login --password $DOCKER_PWD  --username $DOCKER_LOGIN
 echo "DOCKER IMAGES"
 docker images
 
-dockerPush $tag
-
-if [[ $tag == *"dev"* ]]
+if [[ -z "$tag" ]]
     then
       dockerPush dev-latest
     else
-      dockerPush latest
+      dockerPush $tag
     fi
-
-
-
-
-
