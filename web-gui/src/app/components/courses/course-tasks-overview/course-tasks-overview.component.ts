@@ -7,7 +7,7 @@ import {UserService} from '../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
-import { first } from 'rxjs/operators'
+import { first, share} from 'rxjs/operators';
 import {
   CourseTask,
   DetailedCourseInformation,
@@ -45,6 +45,7 @@ export class CourseTasksOverviewComponent implements OnInit {
   userRole: string;
   courseDetail: DetailedCourseInformation;
   openConferences: Observable<string[]>;
+  subscriptions: Subscription[] = [];
 
   ngOnInit() {
     this.route.params.subscribe(
@@ -141,11 +142,10 @@ export class CourseTasksOverviewComponent implements OnInit {
         .catch(console.error);
     }, 2000);
   }
-
   goOnline() {
     this.db.subscribeCourse(this.courseID).subscribe();
     Notification.requestPermission();
-    this.classroomService.getInvitations().subscribe(n => {
+    this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
@@ -154,7 +154,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       }).afterClosed().subscribe(hasAccepted => {
 
       });
-    });
+    }));
     this.classroomService.join(this.courseID);
     this.router.navigate(['courses', this.courseID, 'tickets']);
   }

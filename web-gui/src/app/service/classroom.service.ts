@@ -22,7 +22,7 @@ export class ClassroomService {
   private courseId = 0;
   private myInvitation: ConferenceInvitation;
   private otherInvitation: ConferenceInvitation;
-
+  incomingCallSubscriptions: Subscription[] = [];
 
   private stompRx: RxStompClient = null;
 
@@ -41,6 +41,11 @@ export class ClassroomService {
     return this.users.asObservable();
   }
 
+  public subscribeIncomingCalls(subscription) {
+    this.incomingCallSubscriptions.forEach(s => s.unsubscribe());
+    this.incomingCallSubscriptions = [];
+    this.incomingCallSubscriptions.push(subscription);
+  }
   public getInvitationFromUser(user: User): ConferenceInvitation {
     return this.openConferences.value.find((invitation) => invitation.creator.username == user.username);
   }
@@ -82,7 +87,7 @@ export class ClassroomService {
    */
   public join(courseId: number) {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('wss://feedback.mni.thm.de/websocket', this.constructHeaders());
+    this.stompRx = new RxStompClient('wss://localhost:8080/websocket', this.constructHeaders());
     this.stompRx.onConnect(_ => {
       // Handles invitation from tutors / docents to take part in a webconference
       this.listen('/user/' + this.user.getUsername() + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));

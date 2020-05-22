@@ -17,7 +17,7 @@ import {ClassroomService} from '../../../service/classroom.service';
 import {UserRoles} from '../../../util/UserRoles';
 import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
 import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
-import {first} from 'rxjs/operators';
+import {first, share} from 'rxjs/operators';
 import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
 
 @Component({
@@ -37,6 +37,7 @@ export class CourseTicketsOverviewComponent implements OnInit {
   tickets: Observable<Ticket[]>;
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  subscriptions: Subscription[] = [];
   ngOnInit(): void {
     this.db.subscribeCourse(this.courseID);
     this.onlineUsers = this.classroomService.getUsers();
@@ -120,17 +121,17 @@ export class CourseTicketsOverviewComponent implements OnInit {
       }
     });
   }
-
   goOnline() {
     Notification.requestPermission();
-    const subscription: Subscription = this.classroomService.getInvitations().subscribe(n => {
+    this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
         data: {courseID: this.courseID, invitation: n},
         disableClose: true
       });
-    });
+    }));
+    console.log(this.subscriptions);
     this.classroomService.join(this.courseID);
   }
 
