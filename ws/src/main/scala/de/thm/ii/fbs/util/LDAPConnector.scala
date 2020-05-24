@@ -6,6 +6,8 @@ import java.util.Properties
 import javax.naming.Context
 import javax.naming.directory.InitialDirContext
 import org.ldaptive._
+import collection.JavaConverters._
+
 /**
   * Using ldaptive to simple register to THM LDAP Service
   *
@@ -27,9 +29,9 @@ object LDAPConnector {
     executor.setBaseDn(LDAP_BASE_DN)
     val TIME_OUT = 5
     executor.setTimeLimit(Duration.ofSeconds(TIME_OUT))
-    val result = executor.search(cf, "(uid=" + uid + ")").getResult()
-    val entry: LdapEntry = result.getEntry()
-    entry
+    val entries = executor.search(cf, "(uid=" + uid + ")").getResult.getEntries
+
+    entries.asScala.find(e => e.getAttribute("cn") != null).get
   }
 
   /**
