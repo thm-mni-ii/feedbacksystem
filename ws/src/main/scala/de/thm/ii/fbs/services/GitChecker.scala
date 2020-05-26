@@ -5,6 +5,71 @@ package de.thm.ii.fbs.services
   * @author Andrej Sajenko
   */
 object GitChecker {
+  private def system(name: String, id: String, acceptedInput: Int,
+                     desc: String = null, port: String = null, ip: String = null, formats: String = null,
+                     testfiles: List[Map[String, Any]] = List()): Map[String, Any] = Map(
+    "name" -> name,
+    "testsystem_id" -> id,
+    "description" -> desc,
+    "machine_port" -> port,
+    "machine_ip" -> ip,
+    "supported_formats" -> formats,
+    "testfiles" -> testfiles,
+    "accepted_input" -> acceptedInput
+  )
+
+  private def testfile(id: String, name: String, required: Boolean = false): Map[String, Any] = Map(
+    "testsystem_id" -> id,
+    "filename" -> name,
+    "required" -> required
+  )
+
+  /**
+    * Registered checker configurations
+    */
+  val CHECKERS = Map[String, Map[String, Any]](
+    "gitchecker" -> system(name = "gitchecker", id = "gitchecker", acceptedInput = 1, testfiles = List(
+      testfile("gitchecker", "config.json"),
+      testfile("gitchecker", "structurecheck", required = true)
+    )),
+    "gitstatschecker" -> system(name = "gitstatschecker", id = "gitstatschecker", acceptedInput = 4, testfiles = List()),
+    "multiplechoicechecker"-> system(name = " Multiple Choice Checker ", id = "multiplechoicechecker", acceptedInput = 4, port = "0", testfiles = List(
+      testfile("multiplechoicechecker", "exercise.csv", required = true)
+    )),
+    "nodechecker"-> system(name = "Node Checker", id = "nodechecker",
+      desc = "Provides Node Docker with Pupeteer for Testing JavaScript", acceptedInput = 2, testfiles = List(
+      testfile("nodechecker", "nodetest.zip", required = true)
+    )),
+    "plagiarismchecker"-> system(name = "plagiarismchecker", id = "plagiarismchecker", acceptedInput = 0, testfiles = List(
+      testfile("plagiarismchecker", "config.json", required = true)
+    )),
+    "sapabapchecker"-> system(name = "ABAP Testsystem", id = "sapabapchecker", desc = "ABAP code will be executed in a real SAP system",
+      acceptedInput = 3, testfiles = List()),
+    "secrettokenchecker"-> system(name = "Secretoken Checker", id = "secrettokenchecker", desc = "Secrettoken", port = "8080",
+      ip = "000.000.000.000", acceptedInput = 3, testfiles = List(
+        testfile("secrettokenchecker", "scriptfile", required = true),
+        testfile("secrettokenchecker", "testfile")
+      )),
+    "sqlchecker" -> system(name = "SQL Checker", id = "sqlchecker", desc = "SQL Checker", port = "1234",
+      ip = "000.000.000.000", acceptedInput = 3, formats = ".sql, ", testfiles = List(
+        testfile("sqlchecker", "sections.json", required = true),
+        testfile("sqlchecker", "db.sql", required = true)
+      ))
+  )
+
+  private def setting(typ: String, value: String, key: String): Map[String, String] = Map(
+    "setting_key" -> key,
+    "setting_typ" -> typ,
+    "setting_val" -> value
+  )
+
+  /**
+    * The settings for a testsystem.
+    */
+  val SETTINGS: Map[String, Map[String, String]] = Map(
+    "gitchecker" -> setting("TEXT", "8g1Ejpjh3N2oQKfpTNok", "GITLAB_API_KEY")
+  )
+
   /**
     * Registered checker configurations
     */
