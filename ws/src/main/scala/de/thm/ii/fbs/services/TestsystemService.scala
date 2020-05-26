@@ -56,7 +56,7 @@ class TestsystemService {
     * @return Scala Map of Testfiles Specifications
     */
   def loadTestfilesByTestsystem(id_string: String): List[Map[String, Any]] =
-    GitChecker.CHECKERS.get(id_string).getOrElse("testfiles", List()).asInstanceOf[List[Map[String, Any]]]
+    GitChecker.CHECKERS.get(id_string).flatMap(_.get("testfiles")).toList.asInstanceOf[List[Map[String, Any]]]
 
   /**
     * get all testsystems

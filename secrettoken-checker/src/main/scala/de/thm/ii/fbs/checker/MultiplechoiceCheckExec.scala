@@ -1,13 +1,10 @@
 package de.thm.ii.fbs.checker
 
-import java.io.{BufferedReader, BufferedWriter, FileReader}
+import java.io.FileReader
 import java.nio.file.Path
-
-import de.thm.ii.fbs.{JsonHelper, ResultType}
+import au.com.bytecode.opencsv.CSVReader
 import de.thm.ii.fbs.SecretTokenChecker.logger
-import au.com.bytecode.opencsv.{CSVReader, CSVWriter}
-
-import scala.collection.JavaConverters._
+import de.thm.ii.fbs.{JsonHelper, ResultType}
 import scala.util.Random
 
 /**

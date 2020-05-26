@@ -10,7 +10,7 @@ import akka.Done
 import de.thm.ii.fbs.SecretTokenChecker.{DATA, LABEL_ACCEPT, LABEL_ERROR, LABEL_ERROR_DOWNLOAD, LABEL_ISINFO,
   LABEL_SUBMISSIONID, LABEL_TASKID, LABEL_TOKEN, LABEL_USE_EXTERN, ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.services.FileOperations
+import de.thm.ii.fbs.FileOperations
 import de.thm.ii.fbs.{JsonHelper, ResultType}
 import org.apache.commons.io.FileUtils
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -146,7 +146,7 @@ class BaseChecker(val compile_production: Boolean) {
     */
   def base64Encode(filepath: Path): String = {
     val bis = new BufferedInputStream(new FileInputStream(filepath.toAbsolutePath.toString))
-    val bArray: Array[Byte] = Stream.continually(bis.read).takeWhile(-1 !=).map(_.toByte).toArray
+    val bArray: Array[Byte] = LazyList.continually(bis.read).takeWhile(_ != -1).map(_.toByte).toArray
     val output: String = Base64.getEncoder.encodeToString(bArray)
     output
   }
@@ -218,6 +218,7 @@ class BaseChecker(val compile_production: Boolean) {
   /**
     * on kafka new submission message receive
     * @param record a kafka message
+    * @return Future done
     */
   def submissionReceiver(record: ConsumerRecord[String, String]): Unit = {
     logger.warning(s"${checkername} Checker Received Task Message")
@@ -392,7 +393,6 @@ class BaseChecker(val compile_production: Boolean) {
       if (use_extern) {
         val path = Paths.get(ULDIR).resolve(task_id.toString).resolve(submission_id.toString).resolve(externSubmissionFilename)
         submittedFilePath = path
-
       } else if (submit_type.equals("file")) {
         val url: String = jsonMap("fileurl").asInstanceOf[String]
         val jwt_token: String = jsonMap(LABEL_TOKEN).asInstanceOf[String]
@@ -467,7 +467,7 @@ class BaseChecker(val compile_production: Boolean) {
     val one_K_size = 1024
     val fis = new FileInputStream(zipFile)
     val zis = new ZipInputStream(fis)
-    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
+    LazyList.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
       val fullFilePath = outputFolder.resolve(file.getName)
       if (file.isDirectory) {
         try {
@@ -479,7 +479,7 @@ class BaseChecker(val compile_production: Boolean) {
       } else {
         val fout = new FileOutputStream(fullFilePath.toString)
         val buffer = new Array[Byte](one_K_size)
-        Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+        LazyList.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
       }
     }
   }

@@ -2,6 +2,7 @@ package de.thm.ii.fbs.config
 
 import java.util
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.http.converter.HttpMessageConverter
@@ -23,6 +24,7 @@ class WebConfig extends WebMvcConfigurer {
   def customJackson2HttpMessageConverter: MappingJackson2HttpMessageConverter = {
     val jsonConverter = new MappingJackson2HttpMessageConverter
     val objectMapper = new ScalaObjectMapper
+    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
     jsonConverter.setObjectMapper(objectMapper)
     jsonConverter
   }

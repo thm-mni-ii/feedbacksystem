@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.checker
-import java.nio.file.Path
 
+import java.nio.file.Path
 import de.thm.ii.fbs.ResultType
 import de.thm.ii.fbs.SecretTokenChecker.logger
 /**

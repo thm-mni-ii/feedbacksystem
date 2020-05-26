@@ -200,10 +200,6 @@ export class DetailCourseComponent implements OnInit {
     }
   }
 
-  public exportSubmissions() {
-    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name);
-  }
-
   public plagiatModule(courseDetail: DetailedCourseInformation) {
     this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
       .toPromise()
@@ -460,27 +456,7 @@ export class DetailCourseComponent implements OnInit {
     }
   }
 
-  /**
-   * Unsubscribe course
-   * @param courseName The name to show user
-   * @param courseID The id of current course
-   */
-  exitCourse(courseName: string, courseID: number) {
-    this.dialog.open(ExitCourseComponent, {
-      data: {coursename: courseName}
-    }).afterClosed().pipe(
-      flatMap(value => {
-        if (value.exit) {
-          return this.db.unsubscribeCourse(courseID);
-        }
-      })
-    ).subscribe(res => {
-      if (res.success) {
-        this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
-        this.router.navigate(['courses', 'user']);
-      }
-    });
-  }
+
 
   /**
    * Opens dialog to update course information

@@ -1,12 +1,9 @@
 package de.thm.ii.fbs
 
-import akka.japi.Option
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import org.json4s.jackson.JsonMethods.parse
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-
-import scala.concurrent.Future
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import org.json4s.jackson.JsonMethods.parse
 
 /**
   * Provides functions to transform json to map and map to json.

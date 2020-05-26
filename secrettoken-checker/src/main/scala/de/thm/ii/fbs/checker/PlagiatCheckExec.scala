@@ -1,8 +1,9 @@
 package de.thm.ii.fbs.checker
+
 import java.nio.file.{Path, Paths}
 import de.thm.ii.fbs.SecretTokenChecker.{LABEL_TASKID, ULDIR, logger}
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.services.FileOperations
+import de.thm.ii.fbs.FileOperations
 import de.thm.ii.fbs.{JsonHelper, ResultType}
 import scala.collection.mutable.ListBuffer
 import scala.sys.process.{Process, ProcessLogger}
