@@ -3,11 +3,9 @@ package de.thm.ii.fbs.checker
 import java.io.{ByteArrayOutputStream, File}
 import java.net.{HttpURLConnection, URL, URLEncoder}
 import java.nio.file.{Files, Path, Paths}
-
 import de.thm.ii.fbs.SecretTokenChecker.ULDIR
-import de.thm.ii.fbs.services.FileOperations
-import de.thm.ii.fbs.{JsonHelper, ResultType, SecretTokenChecker}
-
+import de.thm.ii.fbs.FileOperations
+import de.thm.ii.fbs.{JsonHelper, ResultType}
 import scala.io.Source
 import scala.sys.process.{Process, ProcessLogger}
 
@@ -106,8 +104,7 @@ class GitCheckExec(override val compile_production: Boolean) extends BaseChecker
         val base_url = docentSettingMap("base_url")
         val projectID = URLEncoder.encode(git_url.replaceFirst("^git.*:", "").replaceFirst(".git", ""), "UTF-8")
 
-        val projectInfo: Map[String, Any] = JsonHelper.jsonStrToMap(gitlabGet(base_url + projectID, API_TOKEN))
-        val projectMaintainer: List[Map[String, Any]] = JsonHelper.jsonStrToList(gitlabGet(base_url + projectID + "/members",
+        val projectMaintainer: List[Map[String, Any]] = JsonHelper.jsonStrToList(gitlabGet(base_url.toString + projectID + "/members",
           API_TOKEN)).asInstanceOf[List[Map[String, Any]]]
         val pNames = gitGetContributorList(target_dir)
 

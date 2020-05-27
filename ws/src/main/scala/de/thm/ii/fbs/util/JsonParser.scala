@@ -31,6 +31,7 @@ object JsonParser {
   def mapToJsonStr(jsonMap: Map[String, Any]): String = {
     val objectMapper = new ScalaObjectMapper
     objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
     val jsonResult = objectMapper.writeValueAsString(jsonMap)
     jsonResult
   }

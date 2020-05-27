@@ -80,9 +80,7 @@ startScripts {
 
 dependencies {
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
-    compile group: 'org.json4s', name: 'json4s-jackson_2.12', version: '3.6.2'
-    // https://mvnrepository.com/artifact/org.json4s/json4s
-    compile group: 'org.json4s', name: 'json4s_2.11', version: '3.2.11'
+    compile group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'

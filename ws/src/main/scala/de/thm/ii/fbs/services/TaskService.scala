@@ -127,8 +127,8 @@ class TaskService {
     kafkaMap += ("course_parameter" -> courseParameterService.getAllCourseParamsForUser(
       taskDetailsOpt.get(TaskDBLabels.courseid).asInstanceOf[Int], user))
     val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-    logger.warn(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST))
-    logger.warn(jsonResult)
+    logger.info(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST))
+    logger.info(jsonResult)
     kafkaTemplate.send(connectKafkaTopic(testsystem_id, LABEL_CHECK_REQUEST), jsonResult)
     kafkaTemplate.flush()
   }
@@ -145,9 +145,7 @@ class TaskService {
       LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(testsystem_id))
 
     val jsonStringMsg = JsonParser.mapToJsonStr(jsonMsg)
-    logger.warn(jsonStringMsg)
     kafkaTemplate.send(connectKafkaTopic(testsystem_id, topicTaskRequest), jsonStringMsg)
-    logger.warn(connectKafkaTopic(testsystem_id, topicTaskRequest))
     kafkaTemplate.flush()
   }
 

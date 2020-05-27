@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs
 
 import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream}
 import java.nio.file.{FileAlreadyExistsException, Files, Path, StandardCopyOption}
@@ -44,7 +44,7 @@ object FileOperations {
     * @return true if the dir was successfully deleted
     */
   def rmdir(dir: File): Boolean = {
-    if (!dir.exists() || !dir.isDirectory()) {
+    if (!dir.exists() || !dir.isDirectory) {
       false
     } else {
       val files = dir.list()
@@ -74,9 +74,7 @@ object FileOperations {
       true
     }
     catch {
-      case _: FileAlreadyExistsException => {
-        false
-      }
+      case _: FileAlreadyExistsException => false
     }
   }
 
@@ -124,15 +122,15 @@ object FileOperations {
     * @param skipHidden skipp hidden files like . or ..
     * @return a stream of files
     */
-  def tree(root: File, skipHidden: Boolean = false): Stream[File] = {
+  def tree(root: File, skipHidden: Boolean = false): LazyList[File] = {
     if (!root.exists || (skipHidden && root.isHidden)) {
-      Stream.empty
+      LazyList.empty
     }
     else {
       root #:: (
         root.listFiles match {
-          case null => Stream.empty
-          case files: Any => files.toStream.flatMap(tree(_, skipHidden))
+          case null => LazyList.empty
+          case files: Any => LazyList.from(files).flatMap(tree(_, skipHidden))
         })
     }
   }
@@ -148,7 +146,7 @@ object FileOperations {
     val one_K_size = 1024
     val fis = new FileInputStream(zipFile)
     val zis = new ZipInputStream(fis)
-    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
+    LazyList.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
       var filename = file.getName
       if (filename.charAt(0) == '/') filename = filename.substring(1)
       val fullFilePath = outputFolder.toAbsolutePath.resolve(filename)
@@ -158,7 +156,7 @@ object FileOperations {
         if (!Files.exists(fullFilePath.getParent)) mkdir(fullFilePath.getParent)
         val fout = new FileOutputStream(fullFilePath.toString)
         val buffer = new Array[Byte](one_K_size)
-        Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+        LazyList.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
       }
     }
   }

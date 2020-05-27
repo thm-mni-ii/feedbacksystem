@@ -1,18 +1,15 @@
 package de.thm.ii.fbs.checker
 
-import java.io.{BufferedInputStream, BufferedReader, BufferedWriter, FileInputStream, FileReader}
+import java.io.{BufferedInputStream, FileInputStream}
 import java.nio.file.{Path, Paths}
 import java.util.Base64
 
-import de.thm.ii.fbs.{JsonHelper, ResultType}
-import de.thm.ii.fbs.SecretTokenChecker.{ULDIR, logger}
-import au.com.bytecode.opencsv.{CSVReader, CSVWriter}
+import de.thm.ii.fbs.ResultType
+import de.thm.ii.fbs.SecretTokenChecker.logger
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.services.FileOperations
 
 import scala.collection.JavaConverters._
 import scala.sys.process.{Process, ProcessLogger}
-import scala.util.Random
 
 /**
   * Check submissions with javascript / node, like express servers, but check also frontend with "puppeteer"
@@ -89,7 +86,7 @@ class GitstatsCheckExec(override val compile_production: Boolean) extends BaseCh
       logger.warning(output)
 
       val bis = new BufferedInputStream(new FileInputStream(gitStatOut.resolve(selectedStatMethod + ".png").toAbsolutePath.toString))
-      val bArray: Array[Byte] = Stream.continually(bis.read).takeWhile(-1 !=).map(_.toByte).toArray
+      val bArray: Array[Byte] = LazyList.continually(bis.read).takeWhile(_ != -1).map(_.toByte).toArray
       output = Base64.getEncoder.encodeToString(bArray)
 
       (passed, output, if (passed) 0 else 1, ResultType.BASE64)

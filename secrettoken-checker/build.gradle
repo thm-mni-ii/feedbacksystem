@@ -48,14 +48,14 @@ scalaStyle {
 test.dependsOn scalaStyle
 
 dependencies {
-    compile 'org.json4s:json4s-jackson_2.12:3.6.2'
-    compile 'org.json4s:json4s_2.11:3.2.11'
-    compile 'org.scala-lang:scala-library:2.12.6'
-    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.12:2.9.7'
-    compile 'com.typesafe.akka:akka-stream-kafka_2.12:1.0-M1'
+    compile 'org.json4s:json4s-jackson_2.13:3.6.7'
+    compile 'org.scala-lang:scala-library:2.13.1'
+    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.10.1'
+    compile 'com.typesafe.akka:akka-stream-kafka_2.13:2.0.3'
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'au.com.bytecode', name: 'opencsv', version: '2.4'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
     testCompile 'junit:junit:4.12'
 }
 

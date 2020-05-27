@@ -4,32 +4,21 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.stream.{ActorMaterializer, Materializer}
-import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.kafka.scaladsl.{Consumer, Producer}
-import akka.kafka.scaladsl.Consumer.DrainingControl
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
-
-import scala.io.Source
-import sys.process._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 import java.io._
-import java.lang.System.Logger
-import java.lang.module.Configuration
-import java.util.NoSuchElementException
-import java.net.{HttpURLConnection, URL, URLDecoder}
+import java.net.{HttpURLConnection, URLDecoder}
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 import java.security.cert.X509Certificate
-import java.util.zip.{ZipEntry, ZipInputStream}
-
+import java.util.zip.ZipInputStream
 import javax.net.ssl._
-import JsonHelper._
-import com.typesafe.config.{Config, ConfigFactory}
-import de.thm.ii.fbs.checker.{GitCheckExec, GitstatsCheckExec, HelloworldCheckExec, MultiplechoiceCheckExec, NodeCheckExec, PlagiatCheckExec,
-  SecrettokenCheckExec}
+import com.typesafe.config.ConfigFactory
+import de.thm.ii.fbs.checker.{GitCheckExec, GitstatsCheckExec, HelloworldCheckExec, MultiplechoiceCheckExec,
+  NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec}
 
 /**
   * Bypasses both client and server validation.
@@ -100,7 +89,7 @@ object SecretTokenChecker extends App {
 
   private val __slash = "/"
 
-  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
+  private val appConfig = ConfigFactory.parseFile(loadFactoryConfigFile())
   private val config = ConfigFactory.load(appConfig)
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
@@ -145,152 +134,125 @@ object SecretTokenChecker extends App {
 
   private val control_submission = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(secrettokenCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(secrettokenCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(secrettokenCheckExec.submissionReceiver)
 
   private val control_task = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(secrettokenCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(secrettokenCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(secrettokenCheckExec.taskReceiver)
 
   private val control_plagiarismchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(plagiatCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(plagiatCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(plagiatCheckExec.submissionReceiver)
 
   private val control_plagiarismtaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(plagiatCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(plagiatCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(plagiatCheckExec.taskReceiver)
 
   // Listen on git
   private val control_gitchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(gitCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(gitCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(gitCheckExec.submissionReceiver)
 
   private val control_gittaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(gitCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(gitCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(gitCheckExec.taskReceiver)
 
   // Listen on nodechecker
   private val control_nodechecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(nodeCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(nodeCheckExec.submissionReceiver)
 
   private val control_nodetaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(nodeCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(nodeCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(nodeCheckExec.taskReceiver)
 
   private val control_helloworldchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(helloworldCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(helloworldCheckExec.submissionReceiver)
 
   private val control_helloworldtaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(helloworldCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(helloworldCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(helloworldCheckExec.taskReceiver)
 
   private val control_multiplechoicechecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(multiplechoiceCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(multiplechoiceCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(multiplechoiceCheckExec.submissionReceiver)
 
   private val control_multiplechoicetaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(multiplechoiceCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(multiplechoiceCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(multiplechoiceCheckExec.taskReceiver)
 
   private val control_gitstatschecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(gitstatsCheckExec.checkerSubmissionRequestTopic))
-    .toMat(Sink.foreach(gitstatsCheckExec.submissionReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(gitstatsCheckExec.submissionReceiver)
 
   private val control_gitstatstaskchecker = Consumer
     .plainSource(consumerSettings, Subscriptions.topics(gitstatsCheckExec.checkerTaskRequestTopic))
-    .toMat(Sink.foreach(gitstatsCheckExec.taskReceiver))(Keep.both)
-    .mapMaterializedValue(DrainingControl.apply)
-    .run()
+    .runForeach(gitstatsCheckExec.taskReceiver)
 
   // Correctly handle Ctrl+C and docker container stop
+  control_submission.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_task.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_plagiarismchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_plagiarismchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_plagiarismtaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_gitchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_gittaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_multiplechoicechecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_multiplechoicetaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_nodechecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_nodetaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_helloworldchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_helloworldtaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_gitstatschecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
+  control_gitstatstaskchecker.onComplete {
+    case Success(_) => logger.info(EXITING_MSG)
+    case Failure(err) => logger.warning(err.getMessage)
+  }
   sys.addShutdownHook({
-    control_submission.shutdown().onComplete {
-        case Success(_) => logger.info(EXITING_MSG)
-        case Failure(err) => logger.warning(err.getMessage)
-      }
-    control_task.shutdown().onComplete {
-        case Success(_) => logger.info(EXITING_MSG)
-        case Failure(err) => logger.warning(err.getMessage)
-      }
-    control_plagiarismchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_plagiarismchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_plagiarismtaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_gitchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_gittaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_multiplechoicechecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_multiplechoicetaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_nodechecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_nodetaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_helloworldchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_helloworldtaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_gitstatschecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
-    control_gitstatstaskchecker.shutdown().onComplete {
-      case Success(_) => logger.info(EXITING_MSG)
-      case Failure(err) => logger.warning(err.getMessage)
-    }
+    logger.info("Checker is shutting down!")
   })
 
   /**
@@ -310,17 +272,15 @@ object SecretTokenChecker extends App {
   HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
   HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
 
-  private def loadFactoryConfigPath() = {
-    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/secrettoken/application_dev.conf"
+  private def loadFactoryConfigFile(): File = {
+    val dev_config_file_path = "application.conf"
     val prod_config_file_path = "/usr/local/appconfig/application.config"
 
-    var config_factory_path = ""
     if (Files.exists(Paths.get(prod_config_file_path))) {
-      config_factory_path = prod_config_file_path
+      new File(prod_config_file_path)
     } else {
-      config_factory_path = dev_config_file_path
+      new File(getClass.getClassLoader.getResource(dev_config_file_path).getFile)
     }
-    config_factory_path
   }
   /**
     * simply convert data submissions to a file and return its path
@@ -453,7 +413,7 @@ object SecretTokenChecker extends App {
     val one_K_size = 1024
     val fis = new FileInputStream(zipFile)
     val zis = new ZipInputStream(fis)
-    Stream.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
+    LazyList.continually(zis.getNextEntry).takeWhile(_ != null).foreach { file =>
       val fullFilePath = outputFolder + file.getName
       val parentFolder = Paths.get(fullFilePath).getParent.toAbsolutePath
 
@@ -466,7 +426,7 @@ object SecretTokenChecker extends App {
       }
       val fout = new FileOutputStream(fullFilePath)
       val buffer = new Array[Byte](one_K_size)
-      Stream.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
+      LazyList.continually(zis.read(buffer)).takeWhile(_ != -1).foreach(fout.write(buffer, 0, _))
     }
   }
 }

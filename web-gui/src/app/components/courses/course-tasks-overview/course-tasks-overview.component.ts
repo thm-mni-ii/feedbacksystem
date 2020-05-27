@@ -26,6 +26,7 @@ import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newtic
 import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
 import {ClassroomService} from '../../../service/classroom.service';
 import {DeleteCourseModalComponent} from '../modals/delete-course-modal/delete-course-modal.component';
+import {ExitCourseComponent} from "../detail-course/exit-course/exit-course.component";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -203,5 +204,31 @@ export class CourseTasksOverviewComponent implements OnInit {
           + ' nicht ausgetragen werden. Wahrscheinlich hast du keine Berechtigung',
           'OK', {duration: 5000});
       });
+  }
+
+  /**
+   * Unsubscribe course
+   * @param courseName The name to show user
+   * @param courseID The id of current course
+   */
+  exitCourse(courseName: string, courseID: number) {
+    this.dialog.open(ExitCourseComponent, {
+      data: {coursename: courseName}
+    }).afterClosed().pipe(
+      flatMap(value => {
+        if (value.exit) {
+          return this.db.unsubscribeCourse(courseID);
+        }
+      })
+    ).subscribe(res => {
+      if (res.success) {
+        this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
+        this.router.navigate(['courses', 'user']);
+      }
+    });
+  }
+
+  public exportSubmissions() {
+    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name);
   }
 }

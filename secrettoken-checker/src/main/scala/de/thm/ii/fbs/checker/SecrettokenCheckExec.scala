@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.checker
-import java.io.File
-import java.nio.file.{FileAlreadyExistsException, Files, Path, Paths}
+
+import java.nio.file.Path
 import de.thm.ii.fbs.ResultType
-import de.thm.ii.fbs.SecretTokenChecker.{ULDIR, downloadSubmittedFileToFS, logger, saveStringToFile, sendMessage}
+import de.thm.ii.fbs.SecretTokenChecker.ULDIR
 import scala.sys.process.{Process, ProcessLogger}
 
 /**
