@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.util.ResourceNotFoundException
-import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -12,13 +11,19 @@ import org.springframework.web.bind.annotation.RequestMapping
   */
 @Controller
 class HomeController {
-  private val logger: Logger = LoggerFactory.getLogger(classOf[HomeController])
   /**
     * Return home page index page.
     * @return index page.
     */
   @RequestMapping(Array ("/"))
   def homePage: String = "index.html"
+
+  /**
+    * Return login index page.
+    * @return index page.
+    */
+  @RequestMapping(Array ("/login"))
+  def loginPage: String = "forward:/"
 
   /**
     * Handles rest api access.
@@ -31,7 +36,6 @@ class HomeController {
     * Forward every access that is not defined to the index page.
     * @return Forward undefined access to index.
     */
-
   @RequestMapping(value = Array("/{head:[^w][^e][^b].*}/**/{tail:[^\\.]*}"))
   def redirect: String = "forward:/"
 }

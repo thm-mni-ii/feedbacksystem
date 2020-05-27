@@ -19,7 +19,7 @@ export class RxStompClient {
     this.client = Stomp.over(new WebSocket(uri));
     this.client.webSocketFactory = () => new WebSocket(uri);
     this.client.connectHeaders = connectHeaders;
-    this.client.reconnect_delay = 200;
+    this.client.reconnectDelay = 2000; // 2 seconds
   }
   /**
    * @return True if client is connected.
