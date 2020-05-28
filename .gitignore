@@ -17,6 +17,7 @@ ws/src/main/resources/static/*
 
 ws/upload-dir/*
 ws/zip-dir/*
+data/
 
 secrettoken-checker/upload-dir/*
 sql-checker/upload-dir/*

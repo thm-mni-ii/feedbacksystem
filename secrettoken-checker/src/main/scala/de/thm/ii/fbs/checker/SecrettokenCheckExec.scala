@@ -4,7 +4,7 @@ import java.nio.file.Path
 import de.thm.ii.fbs.ResultType
 import de.thm.ii.fbs.SecretTokenChecker.ULDIR
 import scala.sys.process.{Process, ProcessLogger}
-
+import de.thm.ii.fbs.SecretTokenChecker.logger
 /**
   * Check submissions wich can handle php and bash tests
   * @param compile_production flagg which compiles the path corresponding if app runs in docker or not
@@ -33,6 +33,7 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
                     jsonMap: Map[String, Any]): (Boolean, String, Int, String) = {
     val dockerRelPath = System.getenv("HOST_UPLOAD_DIR")
     val (basepath, checkerfiles) = loadCheckerConfig(taskid)
+    logger.warning("Processing files: " + basepath + " " + checkerfiles)
 
     val scriptFile = checkerfiles(0).toFile
     val scriptpath = scriptFile.getPath
@@ -67,6 +68,8 @@ class SecrettokenCheckExec(override val compile_production: Boolean) extends Bas
     seq = Seq("run", "--rm", __option_v, mountingOrgScriptPath + ":" + absPath, __option_v, mountingTestfilePath + ":" + mountingTestfilePath,
       __option_v, submittedFilePath + __colon + submittedFilePath, "--env", "TESTFILE_PATH=" + testfileEnvParam, bashDockerImage, interpreter,
       absPath, name, submittedFilePath, infoArgument)
+
+    logger.warning("Using arguments: " + seq)
 
     val stdoutStream = new StringBuilder; val stderrStream = new StringBuilder
     val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))

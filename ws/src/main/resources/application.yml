@@ -1,0 +1,62 @@
+cas:
+  authentication-url-patterns: /api/v1/login
+  client-host-url: ${SERVER_HOST:https://localhost}
+  server-login-url: https://cas.thm.de/cas/login
+  server-url-prefix: https://cas.thm.de/cas/
+  validation-type: CAS3
+  validation-url-patterns: /api/v1/login
+compile:
+  production: true
+jwt:
+  secret: ${JWT_SECRET:8Dsupersecurekeydf0}
+  expiration:
+    time: 999999
+ldap:
+  basedn: dc=fh-giessen-friedberg,dc=de
+  url: ldaps://ldap.fh-giessen.de
+logging:
+  level:
+    root: INFO
+message:
+  topic:
+    name: java
+security:
+  basic:
+    enabled: false
+server:
+  host: ${SERVER_HOST:https://localhost}
+  port: 443
+  ssl:
+    enabled: true
+    key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
+    key-store-password: passwd
+    key-store-type: PKCS12
+    key-alias: tomcat
+services:
+  jitsi:
+    service-url: ${JITSI_URI:https://fk-conf.mni.thm.de/newConf/rooms.php}
+    shared-secret: ${JITSI_SECRET:8Dsupersecurekeydf0}
+    user: ${JITSI_USER:fbs}
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: ${MYSQL_PASSWORD:twRuvi2ejllDdA4nnQLa08O}
+    tomcat:
+      max-active: 50
+      max-wait: 10000
+      test-on-borrow: true
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/submissionchecker?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false
+    username: ${MYSQL_USER:root}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+    open-in-view: false
+  kafka:
+    auto-offset-reset: earliest
+    bootstrap-servers: ${KAFKA_ADDRESS:localhost:29092}
+    consumer:
+      group-id: jcg-group
+url:
+  expiration:
+    time: 300

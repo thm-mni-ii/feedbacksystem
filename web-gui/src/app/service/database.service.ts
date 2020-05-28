@@ -54,7 +54,7 @@ export class DatabaseService {
    * @param type The type of text
    */
   getPrivacyOrImpressumText(type: TextType): Observable<{ markdown: string }> {
-    return this.http.get<{ markdown: string }>('/api/v1/settings/markdown/' + type.toString());
+    return this.http.get<{ markdown: string }>('/api/v1/legal/' + type.toString());
   }
 
   createNewSetting(key: string, value: string, typ: string) {
@@ -457,9 +457,9 @@ export class DatabaseService {
    */
   private formatDate(date: Date): string {
     const curr_date = date.getDate();
-    const curr_month = date.getMonth() + 1; // Months are zero based
+    const curr_month = date.getMonth();
     const curr_year = date.getFullYear();
-    return curr_year + '-' + curr_month + '-' + curr_date + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+    return curr_year + '-' + ((curr_month < 10) ? "0" : "") + curr_month + '-' + ((curr_date < 10) ? "0" : "") + curr_date + ' 23:59:59';
   }
 
   /**

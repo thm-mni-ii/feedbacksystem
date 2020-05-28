@@ -34,7 +34,7 @@ class LegalController {
     }
 
     if (filePath.isDefined) {
-      val text = Using(Source.fromFile(ResourceUtils.getFile("classpath:" + filePath))) {s => s.mkString}
+      val text = Using(Source.fromResource(filePath.get)) {s => s.mkString}
       if (text.isFailure) {
         throw new Exception(s"Could not read $filePath")
       } else {

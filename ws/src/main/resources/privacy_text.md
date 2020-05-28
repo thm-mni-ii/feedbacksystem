@@ -34,7 +34,7 @@ Wir benutzen nach Ihrer Anmeldung (mit Benutzernamen und Passwort) sogenannte �
 
 ## 5. Links zu anderen Webseiten
 
-Gelegentlich enthält die Lernplattform "www.evolution.uni-giessen.de" interaktive Verweise (sog. Links) auf Internetauftritte Dritter, für die "www.evolution.uni-giessen.de" nicht verantwortlich ist. Insbesondere hat "www.evolution.uni-giessen.de" keinerlei Einfluss auf Inhalt und Gestaltung der verlinkten externen Seiten bzw. den Internetauftritten, auf die Sie über diese Seiten gelangen. Für Inhalt und Gestaltung dieser Internetauftritte sowie die Einhaltung datenschutzrechtlicher Bestimmungen sind ausschließlich die jeweiligen Anbieter verantwortlich.
+Gelegentlich enthält die Lernplattform interaktive Verweise (sog. Links) auf Internetauftritte Dritter, für die wir nicht verantwortlich sind. Insbesondere haben wir keinerlei Einfluss auf Inhalt und Gestaltung der verlinkten externen Seiten bzw. den Internetauftritten, auf die Sie über diese Seiten gelangen. Für Inhalt und Gestaltung dieser Internetauftritte sowie die Einhaltung datenschutzrechtlicher Bestimmungen sind ausschließlich die jeweiligen Anbieter verantwortlich.
 
 ## 6. Änderungen
 

@@ -1,4 +1,4 @@
-FROM openjdk:10-jre
+FROM openjdk:14.0.1-slim
 MAINTAINER Andrej Sajenko <Andrej.Sajenko@mni.thm.de>
 
 ADD build/install/ws /usr/local/ws
