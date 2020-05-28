@@ -23,7 +23,7 @@
 
     <mat-form-field>
       <mat-label>Deadline</mat-label>
-      <input matInput [matDatepicker]="picker" [value]="deadline.value" (click)="picker.open()">
+      <input matInput [matDatepicker]="picker" [formControl]="deadline" (click)="picker.open()">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>

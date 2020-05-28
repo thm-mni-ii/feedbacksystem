@@ -170,13 +170,13 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
 
         this.snackBar.open('Bitte alle erforderlichen Dateien angeben: ' + noticeMsg, 'OK', {duration: 3000});
       } else {
+        const formatedDeadline = new Date(this.deadline.value)
         this.db.createTask(this.data.courseID, this.newTaskName,
-          this.newTaskDescription, this.testFilesSubmissionList, this.testsystemList, this.deadline.value, this.load_external_description)
+          this.newTaskDescription, this.testFilesSubmissionList, this.testsystemList, formatedDeadline, this.load_external_description)
           .subscribe(success => this.dialogRef.close(success));
       }
     }
   }
-
 
   private checkAllNeededFilesAreSet(): boolean {
     // Check if all required files are set
@@ -200,9 +200,9 @@ export class NewtaskDialogComponent implements OnInit, OnDestroy {
    * and close dialog
    */
   updateTask() {
-    const formatedDeadline = this.deadline + '23:59:59';
+    const formatedDeadline = new Date(this.deadline.value)
     this.db.updateTask(this.data.task.task_id, this.newTaskName,
-      this.newTaskDescription, this.testFilesSubmissionList, this.taskType, this.deadline.value, this.load_external_description)
+      this.newTaskDescription, this.testFilesSubmissionList, this.taskType, formatedDeadline, this.load_external_description)
       .subscribe(success => this.dialogRef.close(success));
   }
 }

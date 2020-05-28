@@ -81,7 +81,7 @@ object SQLChecker extends App {
   private val LABEL_BEST_FIT = "choice_best_result_fit"
   private val LABEL_PRE_RESULT = "calculate_pre_result"
 
-  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
+  private val appConfig = ConfigFactory.parseResources("application.conf")
   private val config = ConfigFactory.load(appConfig)
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
@@ -153,19 +153,6 @@ object SQLChecker extends App {
         case Failure(err) => logger.warning(err.getMessage)
       }
   })
-
-  private def loadFactoryConfigPath() = {
-    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/sqlchecker/application_dev.conf"
-    val prod_config_file_path = "/usr/local/appconfig/application.config"
-
-    var config_factory_path = ""
-    if (Files.exists(Paths.get(prod_config_file_path))) {
-      config_factory_path = prod_config_file_path
-    } else {
-      config_factory_path = dev_config_file_path
-    }
-    config_factory_path
-  }
 
   private def sendMessage(record: ProducerRecord[String, String]): Future[Done] =
     akka.stream.scaladsl.Source.single(record).runWith(Producer.plainSink(producerSettings))

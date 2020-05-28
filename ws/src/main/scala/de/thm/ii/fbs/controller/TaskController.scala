@@ -65,7 +65,7 @@ class TaskController {
   private var plagiatScriptAnswerContainer: KafkaMessageListenerContainer[String, String] = _
   private def consumerConfigScala: Map[String, Object] = Map("bootstrap.servers" -> kafkaURL, "group.id" -> "jcg-group")
 
-  @Value("${cas.client-host-url}")
+  @Value("${server.host}")
   private val CLIENT_HOST_URL: String = null
 
   @Value("${compile.production}")
@@ -193,10 +193,8 @@ class TaskController {
         LABEL_SUBMIT_TYP -> LABEL_FILE, LABEL_JWT_TOKEN -> testsystemService.generateTokenFromTestsystem(tasksystem_id)
       )
       val jsonResult = JsonParser.mapToJsonStr(kafkaMap)
-      logger.info(jsonResult)
       val topic = taskService.connectKafkaTopic(tasksystem_id, "script_request")
       kafkaTemplate.send(topic, jsonResult)
-      logger.info(topic)
       kafkaTemplate.flush()
       message = true
 
@@ -333,6 +331,7 @@ class TaskController {
                        request: HttpServletRequest): Map[String, Any] = {
     val user = Users.claimAuthorization(request)
     if (!taskService.isPermittedForTask(taskid, user)) {
+      logger.warn(s"User ${user.username} tried to create a task without having permissions.")
       throw new UnauthorizedException
     }
 
@@ -598,7 +597,6 @@ class TaskController {
     // TODO fire this method after updates on Testsystem!
     val kafkaTopicCheckAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic("check_answer")
 
-    kafkaTopicCheckAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicCheckAnswer: _*)
     if (container != null) container.stop()
     container = new KafkaMessageListenerContainer(kafkaConsumerFactory, containerProperties)
@@ -615,7 +613,6 @@ class TaskController {
         try {
           val testsystem = data.topic.replace("_check_answer", "")
           val submissionID = Integer.parseInt(answeredMap(LABEL_SUBMISSION_ID).asInstanceOf[String])
-          logger.warn(answeredMap.toString())
           if (answeredMap.contains("isinfo") && answeredMap("isinfo").asInstanceOf[Boolean]){
             taskService.setExternalAnswerOfTaskByTestsytem(Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String]),
               answeredMap(LABEL_DATA).asInstanceOf[String], answeredMap("username").toString, testsystem)
@@ -634,7 +631,8 @@ class TaskController {
             }
           }
         } catch {
-          case _: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER)
+          case e: NoSuchElementException => logger.warn(LABEL_CHECKER_SERVICE_NOT_ALL_PARAMETER
+            + "Error: " + e.getStackTrace.toString + "Data: " + data.toString)
         }
       }
     })
@@ -649,8 +647,6 @@ class TaskController {
 
     // TODO fire this method after updates on Testsystem!
     val kafkaTopicNewTaskAnswer: List[String] = testsystemService.getTestsystemsTopicLabelsByTopic(LABEL_NEW_TASK_ASNWER)
-
-    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
     if (newTaskAnswerContainer != null) {
       newTaskAnswerContainer.stop()
@@ -669,7 +665,6 @@ class TaskController {
 
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
-          logger.warn(answeredMap.toString())
           val taskId = Integer.parseInt(answeredMap(LABEL_TASK_ID).asInstanceOf[String])
           val accept = answeredMap("accept").asInstanceOf[Boolean]
           val error = answeredMap("error").asInstanceOf[String]
@@ -717,8 +712,6 @@ class TaskController {
       new DefaultKafkaConsumerFactory[String, String](consumerConfigJava, new StringDeserializer, new StringDeserializer)
 
     val kafkaTopicNewTaskAnswer: List[String] = List("plagiarismchecker_script_answer")
-
-    kafkaTopicNewTaskAnswer.foreach(s => logger.warn(s))
     val containerProperties: ContainerProperties = new ContainerProperties(kafkaTopicNewTaskAnswer: _*)
     if (plagiatScriptAnswerContainer != null) {
       plagiatScriptAnswerContainer.stop()
@@ -735,7 +728,6 @@ class TaskController {
         kafkaReceivedDebug(data)
         val answeredMap = JsonParser.jsonStrToMap(data.value())
         try {
-          logger.warn(answeredMap.toString())
           val workedOut = answeredMap(LABEL_SUCCESS).asInstanceOf[Boolean]
           val courseid = answeredMap(LABEL_COURSE_ID).asInstanceOf[BigInt]
 

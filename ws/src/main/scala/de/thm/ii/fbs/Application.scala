@@ -80,7 +80,7 @@ object Application extends App {
   private val config = if (Files.exists(Paths.get("/usr/local/ws/conf/application.yml"))) {
     "--spring.config.location=file:/usr/local/ws/conf/application.yml" +: args
   } else {
-    args
+    "--spring.config.location=classpath:/application.yml" +:args
   }
 
   SpringApplication.run(classOf[Application], config: _*)

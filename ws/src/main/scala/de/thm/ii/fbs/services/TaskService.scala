@@ -6,6 +6,7 @@ import java.nio.file.{Files, Path, Paths}
 import java.sql.{Connection, Statement}
 
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.Role
 import de.thm.ii.fbs.security.Secrets
 import de.thm.ii.fbs.util.{DB, JsonParser, ResourceNotFoundException}
 import org.slf4j.{Logger, LoggerFactory}
@@ -314,7 +315,7 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
+          TaskDBLabels.deadline -> res.getDate(TaskDBLabels.deadline).getTime,
           TaskTestsystemDBLabels.testsystems -> getTestsystemsByTask(res.getInt(TaskDBLabels.taskid)),
           TaskDBLabels.external_description -> res.getString(TaskDBLabels.external_description),
           TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description),
@@ -651,7 +652,7 @@ class TaskService {
     * @return Boolean if user is permitted
     */
   def hasSubscriptionForTask(taskid: Int, user: User): Boolean = {
-    if (user.role == "admin" || user.roleid == 2) {
+    if (user.isAtLeastInRole(Role.MODERATOR)) {
       true
     } else {
       val list = DB.query("SELECT count(*) as c FROM  user_course join task using (course_id) where task_id = ? and user_id = ?",
@@ -669,7 +670,7 @@ class TaskService {
     * @return Boolean if user is permitted
     */
   def isPermittedForTask(taskid: Int, user: User): Boolean = {
-    if (user.role == "admin" || user.roleid == 2) {
+    if (user.isAtLeastInRole(Role.MODERATOR)) {
         true
     } else {
        val list = DB.query("SELECT ? IN (select c.creator from task t join course c using (course_id) where " +

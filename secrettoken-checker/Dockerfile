@@ -5,7 +5,7 @@ RUN apk add --no-cache openssh
 RUN ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
 RUN ssh-keyscan git.thm.de >> ~/.ssh/known_hosts
 
-RUN apk add --no-cache openjdk10
+RUN apk add --no-cache openjdk11
 RUN ssh-keyscan git.thm.de >> ~/.ssh/known_hosts
 ADD build/install/secrettoken-checker /usr/local/secrettoken-checker
 

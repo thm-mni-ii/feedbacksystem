@@ -7,18 +7,22 @@ import akka.stream.{ActorMaterializer, Materializer}
 import akka.kafka.scaladsl.{Consumer, Producer}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import java.io._
 import java.net.{HttpURLConnection, URLDecoder}
 import java.nio.charset.StandardCharsets
 import java.nio.file._
 import java.security.cert.X509Certificate
 import java.util.zip.ZipInputStream
+
 import javax.net.ssl._
 import com.typesafe.config.ConfigFactory
 import de.thm.ii.fbs.checker.{GitCheckExec, GitstatsCheckExec, HelloworldCheckExec, MultiplechoiceCheckExec,
   NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec}
+
+import scala.io.Source
 
 /**
   * Bypasses both client and server validation.
@@ -89,7 +93,7 @@ object SecretTokenChecker extends App {
 
   private val __slash = "/"
 
-  private val appConfig = ConfigFactory.parseFile(loadFactoryConfigFile())
+  private val appConfig = ConfigFactory.parseResources("application.conf")
   private val config = ConfigFactory.load(appConfig)
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
@@ -272,16 +276,6 @@ object SecretTokenChecker extends App {
   HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory)
   HttpsURLConnection.setDefaultHostnameVerifier(VerifiesAllHostNames)
 
-  private def loadFactoryConfigFile(): File = {
-    val dev_config_file_path = "application.conf"
-    val prod_config_file_path = "/usr/local/appconfig/application.config"
-
-    if (Files.exists(Paths.get(prod_config_file_path))) {
-      new File(prod_config_file_path)
-    } else {
-      new File(getClass.getClassLoader.getResource(dev_config_file_path).getFile)
-    }
-  }
   /**
     * simply convert data submissions to a file and return its path
     * @param content submitted data
