@@ -67,7 +67,7 @@ services:
       - ./data/shared-messages:/shared-messages
       - ./conf/ws:/usr/local/ws/conf
     environment:
-      - KEYSTORE_PATH=file:/usr/local/ws/conf/keystore.p12
+      #- KEYSTORE_PATH=file:/usr/local/ws/conf/feedback.p12
       - SERVER_HOST=https://localhost
       - KAFKA_ADDRESS=kafka1:9092
       - MYSQL_URI=jdbc:mysql://mysql1:3306
