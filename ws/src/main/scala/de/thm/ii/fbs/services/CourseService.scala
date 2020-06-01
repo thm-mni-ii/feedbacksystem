@@ -2,7 +2,9 @@ package de.thm.ii.fbs.services
 
 import java.io
 import java.nio.file.{Files, Path, Paths}
-import java.sql.{Connection, Statement}
+import java.sql.{Connection, Statement, Timestamp}
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import de.thm.ii.fbs.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.fbs.security.Secrets
@@ -32,6 +34,8 @@ class CourseService {
   private final val LABEL_COURSE = "course"
   @Value("${compile.production}")
   private val compile_production: Boolean = true
+
+  private val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
   private val LABEL_PASSED = "passed"
   private val LABEL_TASKS = "tasks"
@@ -63,7 +67,7 @@ class CourseService {
           CourseDBLabels.description -> res.getString(CourseDBLabels.description),
           CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
           CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-          CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date)
+          CourseDBLabels.course_end_date-> nullSafeTime(res.getTimestamp(CourseDBLabels.course_end_date))
         )
       }, userid)
   }
@@ -124,12 +128,14 @@ class CourseService {
         RoleDBLabels.role_id  -> res.getInt(RoleDBLabels.role_id),
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
-        CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
+        CourseDBLabels.course_end_date-> nullSafeTime(res.getTimestamp(CourseDBLabels.course_end_date)),
         CourseDBLabels.personalised_submission-> res.getString(CourseDBLabels.personalised_submission),
         LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
         LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
     }, user.userid)
   }
+
+  private def nullSafeTime(t: Timestamp): java.lang.Long = if (t == null) null else t.getTime
 
   /**
     * get list of all docent belonging to one course
@@ -386,7 +392,7 @@ class CourseService {
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         RoleDBLabels.role_name -> res.getString(RoleDBLabels.role_name),
-        CourseDBLabels.course_end_date-> res.getTimestamp(CourseDBLabels.course_end_date),
+        CourseDBLabels.course_end_date-> nullSafeTime(res.getTimestamp(CourseDBLabels.course_end_date)),
         CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
         LABEL_COURSE_DOCENT -> getCourseDocent(res.getInt(CourseDBLabels.courseid)),
         LABEL_COURSE_TUTOR -> getCourseTutor(res.getInt(CourseDBLabels.courseid)))
@@ -431,7 +437,7 @@ class CourseService {
       val courseMap = Map(
         CourseDBLabels.courseid -> res.getInt(CourseDBLabels.courseid), CourseDBLabels.name -> res.getString(CourseDBLabels.name),
         CourseDBLabels.description -> res.getString(CourseDBLabels.description),
-        CourseDBLabels.course_end_date -> res.getTimestamp(CourseDBLabels.course_end_date),
+        CourseDBLabels.course_end_date -> nullSafeTime(res.getTimestamp(CourseDBLabels.course_end_date)),
         CourseDBLabels.course_modul_id -> res.getString(CourseDBLabels.course_modul_id),
         CourseDBLabels.course_semester -> res.getString(CourseDBLabels.course_semester),
         CourseDBLabels.personalised_submission-> res.getBoolean(CourseDBLabels.personalised_submission),
@@ -635,7 +641,7 @@ class CourseService {
     }
     val semester = if (courseConfig(CourseDBLabels.course_semester) == null) null else courseConfig(CourseDBLabels.course_semester).toString
     val module = if (courseConfig(CourseDBLabels.course_modul_id) == null) null else courseConfig(CourseDBLabels.course_modul_id).toString
-    val c_end = if (courseConfig(CourseDBLabels.course_end_date) == null) null else courseConfig(CourseDBLabels.course_end_date).toString
+    val c_end = if (courseConfig(CourseDBLabels.course_end_date) == null) null else new Date(courseConfig(CourseDBLabels.course_end_date).asInstanceOf[Long])
     updateCourse(courseid, courseConfig(CourseDBLabels.name).toString, courseConfig(CourseDBLabels.description).toString,
       courseConfig(CourseDBLabels.standard_task_typ).toString, module,
       semester, c_end, courseConfig(CourseDBLabels.personalised_submission).toString)
@@ -643,7 +649,7 @@ class CourseService {
     var taskIDMap: Map[Int, Int] = Map() // (original -> new id)
     for (task <- completeConfig(LABEL_TASKS).asInstanceOf[List[Map[String, Any]]]) {
       val taskID = task(TaskDBLabels.taskid).toString.toInt
-      val datime = DateTimeOperation.fromTimestamp(task(TaskDBLabels.deadline).toString)
+      val datime = new Date(task(TaskDBLabels.deadline).asInstanceOf[Long])
       var newTaskId = taskID
       val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
       val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
@@ -690,11 +696,11 @@ class CourseService {
       val testsystemConfig = task("testsystems").asInstanceOf[List[Map[String, Any]]]
       val testsystems = testsystemConfig.map(elem => elem("testsystem_id").toString)
 
-      val taskDeadline = task(TaskDBLabels.deadline).toString
+      val taskDeadline = new Date(task(TaskDBLabels.deadline).asInstanceOf[Long])
       val oldTaskId = Integer.parseInt(task(TaskDBLabels.taskid).toString)
 
       val createdTask = taskService.createTask(task(TaskDBLabels.name).toString, task(TaskDBLabels.description).toString, courseID,
-        DateTimeOperation.fromTimestamp(taskDeadline), testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
+        taskDeadline, testsystems, task(TaskDBLabels.load_external_description).asInstanceOf[Boolean])
       val taskid: Int = Integer.parseInt(createdTask("taskid").toString)
 
       for ((testsystem, j) <- testsystems.zipWithIndex) {
@@ -827,7 +833,7 @@ class CourseService {
     * @throws RuntimeException
     */
   def createCourseByUser(user: User, name: String, description: String, standard_task_typ: String,
-                         course_modul_id: String, course_semester: String, course_end_date: String, personalised_submission: Int = 0): Map[String, Any] = {
+                         course_modul_id: String, course_semester: String, course_end_date: Date, personalised_submission: Int = 0): Map[String, Any] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
         "insert into course (course_name, course_description, creator, standard_task_typ, course_modul_id, " +
@@ -837,16 +843,11 @@ class CourseService {
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, user.userid)
-      val m4 = 4
-      val m5 = 5
-      val m6 = 6
-      val m7 = 7
-      val m8 = 8
-      ps.setString(m4, standard_task_typ)
-      ps.setString(m5, course_modul_id)
-      ps.setString(m6, course_semester)
-      ps.setInt(m7, personalised_submission)
-      ps.setString(m8, course_end_date)
+      ps.setString(4, standard_task_typ)
+      ps.setString(5, course_modul_id)
+      ps.setString(6, course_semester)
+      ps.setInt(7, personalised_submission)
+      ps.setString(8, sdf.format(course_end_date))
       ps
     })
     if (num < 1) {
@@ -881,7 +882,7 @@ class CourseService {
     * @throws ResourceNotFoundException
     */
   def updateCourse(courseid: Int, name: String = null, description: String = null, standard_task_typ: String = null,
-                   course_modul_id: String = null, course_semester: String = null, course_end_date: String = null,
+                   course_modul_id: String = null, course_semester: String = null, course_end_date: Date = null,
                    personalised_submission: String = null): Map[String, Boolean] = {
     var updates = 0
     var suceeds = 0
@@ -891,20 +892,14 @@ class CourseService {
       standard_task_typ, courseid); updates += 1 }
     if (course_modul_id != null) { suceeds += DB.update("update course set course_modul_id = ? where course_id = ?", course_modul_id, courseid); updates += 1 }
     if (course_semester != null) { suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1 }
-    if (course_end_date != null) { suceeds += DB.update("update course set course_end_date = ? where course_id = ?", course_end_date, courseid); updates += 1 }
+    if (course_end_date != null) {
+      suceeds += DB.update("update course set course_end_date = ? where course_id = ?", sdf.format(course_end_date), courseid); updates += 1
+    }
     if (personalised_submission != null) {
       val dbBool = if (personalised_submission == LABEL_TRUE) 1 else 0
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1
     }
     Map(LABEL_SUCCESS -> (updates == suceeds))
-  }
-
-  private def getNullOrBoolean(boolDBString: String) = {
-    if (boolDBString == null) {
-      null
-    } else {
-      boolDBString.toInt > 0
-    }
   }
 }

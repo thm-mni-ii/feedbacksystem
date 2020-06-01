@@ -4,8 +4,6 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 
-import org.joda.time.format.DateTimeFormat
-
 import scala.jdk.CollectionConverters._
 import java.util.{Date, NoSuchElementException, Timer, TimerTask}
 
@@ -16,7 +14,6 @@ import de.thm.ii.fbs.util.{BadRequestException, JsonParser, ResourceNotFoundExce
 import javax.servlet.http.HttpServletRequest
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
-import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -28,6 +25,7 @@ import org.springframework.kafka.core.{DefaultKafkaConsumerFactory, KafkaTemplat
 import org.springframework.kafka.listener.{ContainerProperties, KafkaMessageListenerContainer, MessageListener}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+import de.thm.ii.fbs.util.JsonWrapper._
 
 /**
   * TaskController implement routes for submitting task and receiving results
@@ -243,12 +241,11 @@ class TaskController {
     var upload_url: String = null
 
     if (taskDetails(TaskDBLabels.deadline) != null) {
-      val taskDeadline = taskDetails(TaskDBLabels.deadline).toString
-      val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S")
-      val dt: DateTime = formatter.parseDateTime(taskDeadline)
+      val taskDeadline = taskDetails(TaskDBLabels.deadline).asInstanceOf[Long]
+      val dt = new Date(taskDeadline)
       val currTimestamp = new Date().getTime
       // Calculate overdue time
-      val diff = (dt.getMillis) - currTimestamp
+      val diff = dt.getTime - currTimestamp
       if (diff < 0) {
         throw new BadRequestException("Deadline for task " + taskid.toString + " is overdue since " + (diff/1000*(-1)).toString + " seconds.")
       }
@@ -275,8 +272,7 @@ class TaskController {
               user, LABEL_DATA, data)
           })
         }
-      }
-      else {
+      } else {
         submissionId = submissionService.submitTaskWithFile(taskid, user)
         upload_url = CLIENT_HOST_URL + "/api/v1/" + "tasks/" + taskid.toString + "/submissions/" + submissionId.toString + "/file/upload"
       }
@@ -372,7 +368,7 @@ class TaskController {
     try {
       val name = jsonNode.get(LABEL_NAME).asText()
       val description = jsonNode.get(LABEL_DESCRIPTION).asText()
-      val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
+      val deadline = jsonNode.retrive(TaskDBLabels.deadline).asLong().map(new Date(_)).orNull
       val load_external_description = jsonNode.get(TaskDBLabels.load_external_description).asBoolean()
 
       // Test if testsystem exists
@@ -437,7 +433,7 @@ class TaskController {
 
     val name = if (jsonNode.get(LABEL_NAME) != null) jsonNode.get(LABEL_NAME).asText() else null
     val description = if (jsonNode.get(LABEL_DESCRIPTION) != null) jsonNode.get(LABEL_DESCRIPTION).asText() else null
-    val deadline = if (jsonNode.get(TaskDBLabels.deadline) != null) jsonNode.get(TaskDBLabels.deadline).asText() else null
+    val deadline = jsonNode.retrive(TaskDBLabels.deadline).asLong().map(new Date(_)).orNull
     val load_external_description = if (jsonNode.get(TaskDBLabels.load_external_description) != null) {
       jsonNode.get(TaskDBLabels.load_external_description).asBoolean()
     } else {

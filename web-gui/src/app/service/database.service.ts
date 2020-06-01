@@ -452,14 +452,12 @@ export class DatabaseService {
   }
 
   /**
-   * Returns a sql compatible timestamp string based on a given date
-   * @param date
+   * Transforms date to milliseconds since Unix epoch.
+   * @param date to transform.
+   * @return milliseconds since Unix epoch.
    */
-  private formatDate(date: Date): string {
-    const curr_date = date.getDate();
-    const curr_month = date.getMonth();
-    const curr_year = date.getFullYear();
-    return curr_year + '-' + ((curr_month < 10) ? "0" : "") + curr_month + '-' + ((curr_date < 10) ? "0" : "") + curr_date + ' 23:59:59';
+  private formatDate(date: Date): number {
+    return date.getTime()
   }
 
   /**

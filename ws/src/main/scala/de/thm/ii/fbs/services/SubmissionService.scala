@@ -1,8 +1,9 @@
 package de.thm.ii.fbs.services
 
 import java.io.BufferedWriter
-import java.sql.{Connection, Statement}
-import java.util.{Timer, TimerTask}
+import java.sql.{Connection, Statement, Timestamp}
+import java.text.SimpleDateFormat
+import java.util.{Date, Timer, TimerTask}
 
 import scala.jdk.CollectionConverters._
 import au.com.bytecode.opencsv.CSVWriter
@@ -41,6 +42,8 @@ class SubmissionService {
   private var storageService: StorageService = null
   private final val LABEL_ZERO_STRING = "0"
   private final val LABEL_ONE_STRING = "1"
+
+  private val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   /**
     * Using autowired configuration, they will be loaded after self initialization
@@ -130,7 +133,7 @@ class SubmissionService {
       (res, _) => {
         Map(SubmissionDBLabels.submissionid -> res.getInt(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.plagiat_passed -> res.getInt(SubmissionDBLabels.plagiat_passed),
-          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.submit_date -> nullSafeTime(res.getTimestamp(SubmissionDBLabels.submit_date)),
           SubmissionDBLabels.filename -> res.getString(SubmissionDBLabels.filename),
           SubmissionDBLabels.taskid -> res.getInt(SubmissionDBLabels.taskid),
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
@@ -163,7 +166,7 @@ class SubmissionService {
     num > 0
   }
 
-  private def insertReplaceSubmission(subid: Any, submit_date: String, user_id: Int, task_id: Int, filename: String, sub_data: String,
+  private def insertReplaceSubmission(subid: Any, submit_date: Date, user_id: Int, task_id: Int, filename: String, sub_data: String,
                                       plagiat_passed: Any): Int = {
       val (num, holder) = DB.update((con: Connection) => {
         val ps = con.prepareStatement("REPLACE INTO submission (submission_id, submit_date, user_id, task_id, filename, submission_data," +
@@ -177,7 +180,7 @@ class SubmissionService {
           ps.setInt(paramIndex, subid.toString.toInt)
         }
         paramIndex+=1
-        ps.setString(paramIndex, submit_date); paramIndex+=1
+        ps.setString(paramIndex, sdf.format(submit_date)); paramIndex+=1
         ps.setInt(paramIndex, user_id); paramIndex+=1
         ps.setInt(paramIndex, task_id); paramIndex+=1
         ps.setString(paramIndex, filename); paramIndex+=1
@@ -207,7 +210,7 @@ class SubmissionService {
     for (submission <- data){
       var subID = submission(SubmissionDBLabels.submissionid).toString.toInt
       val insertSubId = if (getSubmissionDetails(subID).nonEmpty) subID else null
-      val s_date = DateTimeOperation.fromTimestamp(submission(SubmissionDBLabels.submit_date).toString)
+      val s_date = new Date(submission(SubmissionDBLabels.submit_date).asInstanceOf[Long])
 
       var corTaskID = submission(SubmissionDBLabels.taskid).toString.toInt
       if (taskIDMap.contains(corTaskID)) corTaskID = taskIDMap(corTaskID) // if there is a mapping used this
@@ -218,8 +221,11 @@ class SubmissionService {
 
       val evaList = submission("evaluation").asInstanceOf[List[Map[String, Any]]]
       for (eva <- evaList) { //then insert update replace evaluation list
-        val resDateRaw = eva(SubmissionTestsystemDBLabels.result_date)
-        val res_date = if (resDateRaw == null) null else DateTimeOperation.fromTimestamp(resDateRaw.toString)
+        val res_date = if (eva(SubmissionTestsystemDBLabels.result_date) == null) {
+          null
+        } else {
+          new Date(eva(SubmissionTestsystemDBLabels.result_date).asInstanceOf[Long])
+        }
         replaceSubmissionTestsystem(eva(SubmissionDBLabels.submissionid).toString.toInt, eva(SubmissionTestsystemDBLabels.result),
           eva(SubmissionTestsystemDBLabels.passed), res_date, eva(SubmissionTestsystemDBLabels.exitcode).toString.toInt,
           eva(SubmissionTestsystemDBLabels.testsystem_id).toString, eva("ordnr").toString.toInt)
@@ -347,7 +353,7 @@ class SubmissionService {
           SubmissionTestsystemDBLabels.exitcode -> res.getInt(SubmissionTestsystemDBLabels.exitcode),
           SubmissionTestsystemDBLabels.passed -> getNullOrBoolean(res.getString(SubmissionTestsystemDBLabels.passed)),
           SubmissionTestsystemDBLabels.result -> res.getString(SubmissionTestsystemDBLabels.result),
-          SubmissionTestsystemDBLabels.result_date -> res.getTimestamp(SubmissionTestsystemDBLabels.result_date))
+          SubmissionTestsystemDBLabels.result_date -> nullSafeTime(res.getTimestamp(SubmissionTestsystemDBLabels.result_date)))
       }, task_id)
   }
 
@@ -371,7 +377,7 @@ class SubmissionService {
           SubmissionTestsystemDBLabels.passed -> getNullOrBoolean(res.getString(SubmissionTestsystemDBLabels.passed)),
           SubmissionTestsystemDBLabels.result -> res.getString(SubmissionTestsystemDBLabels.result),
           SubmissionTestsystemDBLabels.result_type -> res.getString(SubmissionTestsystemDBLabels.result_type),
-          SubmissionTestsystemDBLabels.result_date -> res.getTimestamp(SubmissionTestsystemDBLabels.result_date))
+          SubmissionTestsystemDBLabels.result_date -> nullSafeTime(res.getTimestamp(SubmissionTestsystemDBLabels.result_date)))
 
           if(with_result_fit) {
             m += (SubmissionTestsystemDBLabels.choice_best_result_fit -> res.getString(SubmissionTestsystemDBLabels.choice_best_result_fit))
@@ -442,7 +448,7 @@ class SubmissionService {
 
         Map(s"""A${rowNum}""" -> Map(TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.taskid -> res.getString(TaskDBLabels.taskid), "trials" -> res.getInt("count_sum"), "passed" -> passed_string,
-          "passed_date" -> res.getDate("result_date"), "deadline" -> stringOrNull(res.getString(TaskDBLabels.deadline)),
+          "passed_date" -> nullSafeTime(res.getDate("result_date")), "deadline" -> stringOrNull(res.getString(TaskDBLabels.deadline)),
           SubmissionDBLabels.plagiat_passed -> taskPlagiatPassed))
       }, userid, courseid)
 
@@ -476,12 +482,15 @@ class SubmissionService {
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getInt(SubmissionDBLabels.userid),
-          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.submit_date -> nullSafeTime(res.getTimestamp(SubmissionDBLabels.submit_date)),
           SubmissionDBLabels.plagiat_passed -> res.getString(SubmissionDBLabels.plagiat_passed),
           "evaluation" -> getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid), with_result_fit)
         )
       }, taskid, userid)
   }
+
+  private def nullSafeTime(t: Timestamp): java.lang.Long = if (t == null) null else t.getTime
+  private def nullSafeTime(t: Date): java.lang.Long = if (t == null) null else t.getTime
 
   /**
     * generate a Submission CSV based on the submission matrix

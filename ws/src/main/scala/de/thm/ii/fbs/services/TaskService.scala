@@ -3,7 +3,9 @@ package de.thm.ii.fbs.services
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
-import java.sql.{Connection, Statement}
+import java.sql.{Connection, Statement, Timestamp}
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.Role
@@ -43,6 +45,8 @@ class TaskService {
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
   private val logger: Logger = LoggerFactory.getLogger(classOf[TaskService])
+
+  private val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
   /**
    * Load base upload URL
@@ -212,7 +216,7 @@ class TaskService {
           SubmissionDBLabels.submission_data -> res.getString(SubmissionDBLabels.submission_data),
           SubmissionDBLabels.submissionid -> res.getString(SubmissionDBLabels.submissionid),
           SubmissionDBLabels.userid -> res.getString(SubmissionDBLabels.userid),
-          SubmissionDBLabels.submit_date -> res.getTimestamp(SubmissionDBLabels.submit_date),
+          SubmissionDBLabels.submit_date -> nullSafeTime(res.getTimestamp(SubmissionDBLabels.submit_date)),
           SubmissionDBLabels.evaluation -> submissionService.getTestsystemSubmissionEvaluationList(res.getInt(SubmissionDBLabels.submissionid)))
       }, taskid, user.userid)
   }
@@ -315,7 +319,7 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> res.getDate(TaskDBLabels.deadline).getTime,
+          TaskDBLabels.deadline -> nullSafeTime(res.getTimestamp(TaskDBLabels.deadline)),
           TaskTestsystemDBLabels.testsystems -> getTestsystemsByTask(res.getInt(TaskDBLabels.taskid)),
           TaskDBLabels.external_description -> res.getString(TaskDBLabels.external_description),
           TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description),
@@ -458,7 +462,7 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
+          TaskDBLabels.deadline -> nullSafeTime(res.getTimestamp(TaskDBLabels.deadline)),
           TaskDBLabels.load_external_description -> res.getBoolean(TaskDBLabels.load_external_description),
           TaskDBLabels.external_description -> res.getString(TaskDBLabels.external_description),
           "testsystems" -> getTestsystemsByTask(res.getInt(TaskDBLabels.taskid)))
@@ -490,17 +494,18 @@ class TaskService {
     * @param load_extern_info: load external description of task by testsytsem
     * @return Scala Map
     */
-  def createTask(name: String, description: String, courseid: Int, deadline: String, testsystems: List[String],
+  def createTask(name: String, description: String, courseid: Int, deadline: Date, testsystems: List[String],
                  load_extern_info: Boolean): Map[String, AnyVal] = {
     val (num, holder) = DB.update((con: Connection) => {
       val ps = con.prepareStatement(
         "INSERT INTO task (task_name, task_description, course_id, deadline, load_external_description) VALUES (?,?,?,?,?)",
         Statement.RETURN_GENERATED_KEYS
       )
+
       ps.setString(1, name)
       ps.setString(2, description)
       ps.setInt(3, courseid)
-      ps.setString(4, deadline)
+      ps.setString(4, sdf.format(deadline))
       ps.setBoolean(5, load_extern_info)
       ps
     })
@@ -555,7 +560,7 @@ class TaskService {
     * @param load_extern_info: load external description of task by testsytsem
     * @return result if update works
     */
-  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: String = null,
+  def updateTask(taskid: Int, name: String = null, description: String = null, deadline: Date = null,
                  plagiat_check: Any = null, load_extern_info: Any = null): Boolean = {
     var updates = 0
     var successfulUpdates = 0
@@ -570,7 +575,7 @@ class TaskService {
     }
 
     if (deadline != null) {
-      successfulUpdates += DB.update("UPDATE task set deadline = ? where task_id = ? ", deadline, taskid)
+      successfulUpdates += DB.update("UPDATE task set deadline = ? where task_id = ? ", sdf.format(deadline), taskid)
       updates += 1
     }
 
@@ -768,9 +773,12 @@ class TaskService {
           TaskDBLabels.taskid -> res.getInt(TaskDBLabels.taskid),
           TaskDBLabels.name -> res.getString(TaskDBLabels.name),
           TaskDBLabels.description -> res.getString(TaskDBLabels.description),
-          TaskDBLabels.deadline -> res.getTimestamp(TaskDBLabels.deadline),
+          TaskDBLabels.deadline -> nullSafeTime(res.getTimestamp(TaskDBLabels.deadline)),
           TaskTestsystemDBLabels.testsystems -> getTestsystemsByTask(res.getInt(TaskDBLabels.taskid)))
       })
     list
   }
+
+  private def nullSafeTime(t: Timestamp): java.lang.Long = if (t == null) null else t.getTime
+  private def nullSafeTime(t: Date): java.lang.Long = if (t == null) null else t.getTime
 }

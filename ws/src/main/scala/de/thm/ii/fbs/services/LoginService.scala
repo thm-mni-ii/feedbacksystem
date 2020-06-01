@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.services
 
+import java.sql.Timestamp
+
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.util.{DB, DateParser}
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,7 +75,9 @@ class LoginService {
           UserDBLabels.prename -> res.getString(UserDBLabels.prename),
           UserDBLabels.surname -> res.getString(UserDBLabels.surname),
           UserDBLabels.email -> res.getString(UserDBLabels.email),
-          "last_login" -> res.getTimestamp("last_login"))
+          "last_login" -> nullSafeTime(res.getTimestamp("last_login")))
       }, before_std, after_std)
   }
+
+  private def nullSafeTime(t: Timestamp): java.lang.Long = if (t == null) null else t.getTime
 }

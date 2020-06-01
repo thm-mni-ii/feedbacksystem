@@ -31,8 +31,6 @@ class UserService {
 
   @Autowired
   private val courseService: CourseService = null
-
-  private val logger: Logger = LoggerFactory.getLogger(classOf[UserService])
   /**
     * Class holds all DB labels
     */
