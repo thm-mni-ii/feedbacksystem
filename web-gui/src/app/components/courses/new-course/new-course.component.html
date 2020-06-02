@@ -6,7 +6,7 @@
       <form [formGroup]="courseNameFG" class="step-flex">
 
         <mat-form-field appearance="outline">
-          <mat-label>Kurs name</mat-label>
+          <mat-label>Kursname</mat-label>
           <input matInput formControlName="firstCtrl" required>
         </mat-form-field>
         <div class="button-row">
@@ -16,10 +16,10 @@
     </mat-step>
 
     <!-- Step 2-->
-    <mat-step [stepControl]="courseDescriptionFG" label="Beschreibung des Kurses" >
+    <mat-step [stepControl]="courseDescriptionFG" label="Beschreibung des Kurses" optional>
       <form [formGroup]="courseDescriptionFG" class="step-flex">
       <mat-form-field appearance="outline">
-          <mat-label>Kurs beschreibung</mat-label>
+          <mat-label>Kursbeschreibung</mat-label>
           <textarea matInput matTextareaAutosize matAutosizeMinRows="1"
                     matAutosizeMaxRows="25"
                     formControlName="secondCtrl"></textarea>
@@ -36,7 +36,7 @@
     <!-- Step 3-->
     <mat-step [stepControl]="courseTaskTypeFG" label="Standart Aufgabentyp auswählen">
       <form [formGroup]="courseTaskTypeFG" class="step-flex">
-        <mat-select class="select" placeholder="Aufgabentyp" formControlName="thirdCtrl" required>
+        <mat-select class="select" placeholder="Aufgabentyp*" formControlName="thirdCtrl" required>
           <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
         </mat-select>
         <div class="button-row">
@@ -78,8 +78,10 @@
     <mat-step [stepControl]="courseEndFG" label="Ende des Moduls" optional>
       <form [formGroup]="courseEndFG" class="step-flex">
         <mat-form-field>
-          <mat-label>Modul ende</mat-label>
-          <input matInput placeholder="01.01.2019" formControlName="sixthCtrl">
+          <mat-label>Modul-Ende</mat-label>
+          <input matInput [matDatepicker]="picker1" [formControl]="date" formControlName="sixthCtrl">
+          <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+          <mat-datepicker #picker1 color="primary"></mat-datepicker>
         </mat-form-field>
         <div class="button-row">
           <button mat-flat-button color="accent" matStepperPrevious>Zurück</button>
@@ -89,12 +91,12 @@
     </mat-step>
 
     <!-- Step 7-->
-    <mat-step label="Privatisierte Informationen des Users">
+    <mat-step label="Privatisierte Informationen des Benutzers" >
       <form class="step-flex">
-        <p>Der User
+        <p>Der Benutzer
           <mat-select [(value)]="newCoursePrivatUserData" class="select" placeholder="Auswahl" required>
-            <mat-option value="true">kann</mat-option>
-            <mat-option value="false">sollte keine</mat-option>
+            <mat-option value="Ja">kann</mat-option>
+            <mat-option value="Nein">sollte keine</mat-option>
           </mat-select>
           Abgaben mit privaten Daten machen.
         </p>
@@ -128,8 +130,8 @@
         </mat-card-header>
         <mat-card-content>
           <markdown [data]="newCourseDescription"></markdown>
-          <p>Abgabe mit user Daten: {{newCoursePrivatUserData}}</p>
-          <p>Standart aufgaben Typ:  {{newCourseType}}</p>
+          <p>Abgabe mit Benutzer Daten: <b>{{newCoursePrivatUserData}}</b></p>
+          <p>Standart-Aufgaben-Typ:  <b>{{newCourseType}}</b></p>
         </mat-card-content>
         <mat-card-actions>
           <button mat-flat-button color="accent" (click)="createCourse()">Kurs erstellen</button>
