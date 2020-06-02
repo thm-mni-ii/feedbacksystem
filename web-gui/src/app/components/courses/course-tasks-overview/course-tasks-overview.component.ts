@@ -192,10 +192,11 @@ export class CourseTasksOverviewComponent implements OnInit {
       .toPromise()
       .then( (value: Succeeded) => {
         if (value.success) {
-          this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde ausgetragen', 'OK', {duration: 5000});
+          this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
+          this.router.navigate(['courses', 'user']);
         } else {
           this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-            + ' nicht ausgetragen werden. Dieser Kurs scheint nicht zu existieren.',
+            + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
             'OK', {duration: 5000});
         }
       })
