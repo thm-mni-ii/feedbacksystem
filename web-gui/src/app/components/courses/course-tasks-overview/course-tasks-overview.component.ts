@@ -202,7 +202,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       })
       .catch(() => {
         this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-          + ' nicht ausgetragen werden. Wahrscheinlich hast du keine Berechtigung',
+          + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
           'OK', {duration: 5000});
       });
   }
@@ -225,6 +225,7 @@ export class CourseTasksOverviewComponent implements OnInit {
       if (res.success) {
         this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
         this.router.navigate(['courses', 'user']);
+
       }
     });
   }
