@@ -52,6 +52,7 @@ class ClassroomController {
     courseUser.foreach {
       case (course, user) => {
         UserConferenceMap.departAll(user)
+        UserConferenceMap.delete(user)
         smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
       }
     }
@@ -302,6 +303,7 @@ class ClassroomController {
      case Some(v) => mapper.readValue(v, classOf[mutable.Set[String]])
      case None => mutable.Set();
     }
+    attendees.add(headerAccessor.getUser.getName)
 
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
