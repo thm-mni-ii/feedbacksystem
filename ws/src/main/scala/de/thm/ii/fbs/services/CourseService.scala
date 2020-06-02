@@ -895,7 +895,7 @@ class CourseService {
     if (course_end_date != null) {
       suceeds += DB.update("update course set course_end_date = ? where course_id = ?", sdf.format(course_end_date), courseid); updates += 1
     }
-    if (personalised_submission != null) {
+    if (personalised_submission != null & !personalised_submission.isBlank) {
       val dbBool = if (personalised_submission == LABEL_TRUE) 1 else 0
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1

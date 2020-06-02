@@ -3,6 +3,7 @@ import {DatabaseService} from '../../../../service/database.service';
 import {Observable} from 'rxjs';
 import {DetailedCourseInformation, Testsystem} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {FormControl, Validators} from "@angular/forms";
 
 /**
  * Updates course information in dialog
@@ -20,6 +21,12 @@ export class UpdateCourseDialogComponent implements OnInit {
   course_module_id: string;
   userDataAllowed: boolean;
   courseDetails: DetailedCourseInformation;
+  coursename = new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(100)])
+  courseDescription = new FormControl('', [Validators.maxLength(8000)]);
+  courseDefaultTaskTyp = new FormControl('', [Validators.required]);
+  courseUserDataAllowed = new FormControl('', [Validators.required]);
+  errorFieldIsEmpty = 'Das Feld darf nicht leer sein!';
+
   constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>) {
     this.name = "";
@@ -27,13 +34,13 @@ export class UpdateCourseDialogComponent implements OnInit {
     this.standardTaskType = "";
     this.semester = "";
     this.course_module_id = "";
-    this.userDataAllowed = false;
   }
 
   testsystems$: Observable<Testsystem[]>;
 
   ngOnInit() {
     this.courseDetails = this.data.data;
+    this.userDataAllowed = false;
     this.testsystems$ = this.db.getTestsystemTypes();
     console.log(this.courseDetails);
 
@@ -60,10 +67,37 @@ export class UpdateCourseDialogComponent implements OnInit {
       this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
   }
 
-  loadDocentTutorForCourse(){
+  loadDocentTutorForCourse() {
     this.db.getCourseDetail(this.courseDetails.course_id).subscribe((value: DetailedCourseInformation) => {
       this.courseDetails.course_docent = value.course_docent
       this.courseDetails.course_tutor = value.course_tutor
     })
+  }
+  //Error messages if validation failed
+  getErrorMessageCourseName() {
+    if (this.coursename.hasError('required')) {
+      return this.errorFieldIsEmpty;
+    } else if (this.coursename.hasError('minlength')) {
+      return 'Der Kursname ist zu kurz!';
+    } else if (this.coursename.hasError('maxlength')) {
+      return 'Der Kursname ist zu lang!';
+    }
+  }
+
+  getErrorMessageCourseDescription() {
+    if (this.courseDescription.hasError('maxlenght'))
+      return this.errorFieldIsEmpty;
+  }
+
+  getErrorMessageCourseDefaultTaskTyp() {
+    if (this.courseDefaultTaskTyp.hasError('required')) {
+      return this.errorFieldIsEmpty;
+    }
+  }
+
+  getErrorMessageCourseUserDataAllowed() {
+    if (this.courseUserDataAllowed.hasError('required')) {
+      return this.errorFieldIsEmpty;
+    }
   }
 }
