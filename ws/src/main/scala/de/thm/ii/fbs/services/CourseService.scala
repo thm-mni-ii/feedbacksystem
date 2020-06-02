@@ -886,16 +886,16 @@ class CourseService {
                    personalised_submission: String = null): Map[String, Boolean] = {
     var updates = 0
     var suceeds = 0
-    if (name != null) { suceeds += DB.update("update course set course_name = ? where course_id = ?", name, courseid); updates += 1 }
+    if (name != null & !name.isBlank) { suceeds += DB.update("update course set course_name = ? where course_id = ?", name, courseid); updates += 1 }
     if (description != null) { suceeds += DB.update("update course set course_description = ? where course_id = ?", description, courseid); updates += 1 }
-    if (standard_task_typ != null) { suceeds += DB.update("update course set standard_task_typ = ? where course_id = ?",
+    if (standard_task_typ != null & !standard_task_typ.isBlank) { suceeds += DB.update("update course set standard_task_typ = ? where course_id = ?",
       standard_task_typ, courseid); updates += 1 }
     if (course_modul_id != null) { suceeds += DB.update("update course set course_modul_id = ? where course_id = ?", course_modul_id, courseid); updates += 1 }
     if (course_semester != null) { suceeds += DB.update("update course set course_semester = ? where course_id = ?", course_semester, courseid); updates += 1 }
     if (course_end_date != null) {
       suceeds += DB.update("update course set course_end_date = ? where course_id = ?", sdf.format(course_end_date), courseid); updates += 1
     }
-    if (personalised_submission != null) {
+    if (personalised_submission != null & !personalised_submission.isBlank) {
       val dbBool = if (personalised_submission == LABEL_TRUE) 1 else 0
       suceeds += DB.update("update course set personalised_submission = ? where course_id = ?", dbBool, courseid)
       updates += 1

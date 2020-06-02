@@ -30,7 +30,7 @@
     </span>
   </mat-card>
 
-  <mat-card *ngIf="isAuthorized()" class="danger-zone">
+  <mat-card *ngIf="userRole === 'admin' || userRole === 'moderator'" class="danger-zone">
     <h3>Danger Zone</h3>
     <mat-card-actions>
       <button mat-raised-button (click)="deleteCourse()"

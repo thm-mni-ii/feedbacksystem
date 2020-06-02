@@ -2,51 +2,56 @@
   <div matDialogTitle>Kurs bearbeiten</div>
   <mat-dialog-content style="max-height: 100%; overflow: hidden;">
     <mat-form-field>
-      <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="name">
+      <mat-label>Kursame:</mat-label>
+      <input matInput [(ngModel)]="name" required minlength="5" maxlength="100">
+      <mat-error *ngIf="coursename.invalid">{{getErrorMessageCourseName()}}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-        <mat-label>Beschreibung</mat-label>
-        <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10" matInput
-                  [(ngModel)]="description" placeholder="(Optional)"></textarea>
+      <mat-label>Beschreibung:</mat-label>
+      <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10"
+                matInput
+                [(ngModel)]="description" placeholder="(Optional)" maxlength="8000"></textarea>
+      <mat-error *ngIf="courseDescription.invalid">{{getErrorMessageCourseDescription()}}</mat-error>
     </mat-form-field>
 
     <i>Vorschau:</i>
     <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
     <mat-form-field>
-      <mat-label>Standart aufgaben typ</mat-label>
-      <mat-select [(value)]="standardTaskType">
+      <mat-label>Standart Aufgabentyp:</mat-label>
+      <mat-select [(value)]="standardTaskType" required>
         <mat-option *ngFor="let testsystem of testsystems$ | async"
                     [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
+        <mat-error *ngIf="courseDefaultTaskTyp.invalid">{{getErrorMessageCourseDefaultTaskTyp()}}</mat-error>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Semester</mat-label>
+      <mat-label>Semester:</mat-label>
       <input matInput placeholder="WS18/19 (Optional)" [(ngModel)]="semester">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Modul-ID</mat-label>
+      <mat-label>Modul-ID:</mat-label>
       <input matInput placeholder="CSxxxx (Optional)" [(ngModel)]="course_module_id">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Abgaben mit Userdaten erlaubt</mat-label>
-      <mat-select [(value)]="userDataAllowed">
+      <mat-label>Abgaben mit Userdaten erlaubt:</mat-label>
+      <mat-select [(value)]="userDataAllowed" required>
         <mat-option value="true">Ja</mat-option>
         <mat-option value="false">Nein</mat-option>
       </mat-select>
+      <mat-error *ngIf="courseUserDataAllowed.invalid">{{getErrorMessageCourseUserDataAllowed()}}</mat-error>
     </mat-form-field>
 
     <div class="choose_docent_tutor_area">
-      <mat-label>Dozenten auswählen</mat-label>
+      <mat-label>Dozenten/in auswählen:</mat-label>
       <app-grant-docent-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
                               (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-docent-snipp>
 
-      <mat-label>Tutor auswählen</mat-label>
+      <mat-label>Tutor/in auswählen:</mat-label>
       <app-grant-tutor-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
                              (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-tutor-snipp>
     </div>
@@ -54,6 +59,6 @@
   </mat-dialog-content>
   <mat-action-list class="action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button mat-flat-button color="accent" (click)="udpateCourse()">Speichern</button>
+    <button mat-flat-button color="accent" (click)="updateCourse()">Speichern</button>
   </mat-action-list>
 </div>

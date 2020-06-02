@@ -14,7 +14,7 @@ import {Router} from "@angular/router";
 @Component({
   selector: 'app-new-course',
   templateUrl: './new-course.component.html',
-  styleUrls: ['./new-course.component.scss']
+  styleUrls: ['./new-course.component.scss'],
 })
 export class NewCourseComponent implements OnInit, OnDestroy {
 
@@ -57,7 +57,7 @@ export class NewCourseComponent implements OnInit, OnDestroy {
 
     this.testTypes$ = this.db.getTestsystemTypes();
     this.titlebar.emitTitle('Neuen Kurs erstellen');
-    this.newCoursePrivatUserData = 'false';
+    this.newCoursePrivatUserData = 'Nein';
 
 
     // Check if step is done
@@ -143,10 +143,11 @@ export class NewCourseComponent implements OnInit, OnDestroy {
     }
 
     let privateUserData: boolean;
-    privateUserData = this.newCoursePrivatUserData === 'true';
-
+    privateUserData = this.newCoursePrivatUserData === 'Ja';
+    let date = new Date(this.newCourseDate)
+    let formatedDate:string = date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear();
     this.db.createCourse(this.newCourseName, this.newCourseDescription, this.newCourseType, this.newCourseSemester,
-      this.newCourseModuleID, this.newCourseDate, privateUserData).subscribe((data: NewCourse) => {
+      this.newCourseModuleID, formatedDate, privateUserData).subscribe((data: NewCourse) => {
       this.snackBar.open('Kurs ' + this.newCourseName + ' wurde erstellt', 'OK',
         {duration: 5000});
       this.stepper.reset();
