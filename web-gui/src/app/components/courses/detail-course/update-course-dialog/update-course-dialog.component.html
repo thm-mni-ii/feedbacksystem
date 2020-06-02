@@ -3,7 +3,7 @@
   <mat-dialog-content style="max-height: 100%; overflow: hidden;">
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="name">
+      <input matInput [(ngModel)]="name" required>
     </mat-form-field>
 
     <mat-form-field>
@@ -17,7 +17,7 @@
 
     <mat-form-field>
       <mat-label>Standart aufgaben typ</mat-label>
-      <mat-select [(value)]="standardTaskType">
+      <mat-select [(value)]="standardTaskType" required>
         <mat-option *ngFor="let testsystem of testsystems$ | async"
                     [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
       </mat-select>
@@ -35,7 +35,7 @@
 
     <mat-form-field>
       <mat-label>Abgaben mit Userdaten erlaubt</mat-label>
-      <mat-select [(value)]="userDataAllowed">
+      <mat-select [(value)]="userDataAllowed" required>
         <mat-option value="true">Ja</mat-option>
         <mat-option value="false">Nein</mat-option>
       </mat-select>
@@ -54,6 +54,6 @@
   </mat-dialog-content>
   <mat-action-list class="action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button mat-flat-button color="accent" (click)="udpateCourse()">Speichern</button>
+    <button mat-flat-button color="accent" (click)="updateCourse()">Speichern</button>
   </mat-action-list>
 </div>

@@ -13,20 +13,24 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
   styleUrls: ['./update-course-dialog.component.scss']
 })
 export class UpdateCourseDialogComponent implements OnInit {
-
-  constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
-              public dialogRef: MatDialogRef<UpdateCourseDialogComponent>) {
-  }
-
-  testsystems$: Observable<Testsystem[]>;
-
   name: string;
   description: string;
   standardTaskType: string;
   semester: string;
   course_module_id: string;
-  userDataAllowed: string = "false";
+  userDataAllowed: boolean;
   courseDetails: DetailedCourseInformation;
+  constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
+              public dialogRef: MatDialogRef<UpdateCourseDialogComponent>) {
+    this.name = "";
+    this.description = "";
+    this.standardTaskType = "";
+    this.semester = "";
+    this.course_module_id = "";
+    this.userDataAllowed = false;
+  }
+
+  testsystems$: Observable<Testsystem[]>;
 
   ngOnInit() {
     this.courseDetails = this.data.data;
@@ -38,7 +42,7 @@ export class UpdateCourseDialogComponent implements OnInit {
     this.standardTaskType = this.courseDetails.standard_task_typ;
     this.semester = this.courseDetails.course_semester;
     this.course_module_id = this.courseDetails.course_module_id;
-    this.userDataAllowed = this.courseDetails.personalised_submission.toString();
+    this.userDataAllowed = this.courseDetails.personalised_submission;
   }
 
   /**
@@ -51,9 +55,9 @@ export class UpdateCourseDialogComponent implements OnInit {
   /**
    * Update course information and close dialog
    */
-  udpateCourse() {
+  updateCourse() {
     this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
-      this.course_module_id, this.userDataAllowed === "true").subscribe(success => this.dialogRef.close(success));
+      this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
   }
 
   loadDocentTutorForCourse(){
