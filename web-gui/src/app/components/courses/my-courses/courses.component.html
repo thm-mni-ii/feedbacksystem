@@ -2,6 +2,16 @@
 
   <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
     <span>{{course.course_name}}</span>
+    <span>
+      <b>
+        <mat-icon role="img">admin_panel_settings</mat-icon>
+        <span *ngIf="course.role_name == 'admin'">Admin</span>
+        <span *ngIf="course.role_name == 'moderator'">Moderator</span>
+        <span *ngIf="course.role_name == 'docent'">Dozent</span>
+        <span *ngIf="course.role_name == 'tutor'">Tutor</span>
+        <span *ngIf="course.role_name == 'student'">Student</span>
+        </b>
+    </span>
   </mat-card>
 
   <span class="noElements" *ngIf="(userCourses$ | async)?.length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
