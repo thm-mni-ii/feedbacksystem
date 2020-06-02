@@ -310,6 +310,7 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
+        m.retrive(invLit).retrive("meetingPassword").asText().get,
         m.retrive(invLit).retrive("moderatorPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
         courseId,
@@ -337,7 +338,7 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/conference/attend"))
   def attendConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val invLit: String = "invitation";
+    val invLit: String = "invitation"
     var attendees: mutable.Set[String] = mutable.Set[String]();
     val attendeesNode: ArrayNode = m.get(invLit).get("attendees").asInstanceOf[ArrayNode]
     for (i <- 1 until attendeesNode.size()) {
@@ -352,7 +353,8 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
-        m.retrive(invLit).retrive("meetingPassword").asText().get)
+        m.retrive(invLit).retrive("meetingPassword").asText().get,
+        m.retrive(invLit).retrive("moderatorPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
@@ -384,7 +386,8 @@ class ClassroomController {
         attendees,
         m.retrive(invLit).retrive("service").asText().get,
         m.retrive(invLit).retrive("meetingId").asText().get,
-        m.retrive(invLit).retrive("meetingPassword").asText().get)
+        m.retrive(invLit).retrive("meetingPassword").asText().get,
+        m.retrive(invLit).retrive("moderatorPassword").asText().get)
       case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
@@ -430,12 +433,13 @@ class ClassroomController {
 
   private def invitationToJson(invitation: Invitation): JSONObject = {
     invitation match {
-      case BBBInvitation(creator, courseId, visibility, attendees, service, meetingId, meetingPasswort) =>
+      case BBBInvitation(creator, courseId, visibility, attendees, service, meetingId, meetingPasswort, moderatorPassword) =>
         new JSONObject().put("creator", userToJson(creator))
           .put("meetingId", meetingId)
           .put(courseIdLiteral, courseId)
           .put("service", service)
           .put("meetingPassword", meetingPasswort)
+          .put("moderatorPassword", moderatorPassword)
           .put("visibility", visibility)
           .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
       case JitsiInvitation(creator, courseId, visibility, attendees, service, href) => {
