@@ -303,7 +303,6 @@ class ClassroomController {
      case Some(v) => mapper.readValue(v, classOf[mutable.Set[String]])
      case None => mutable.Set();
     }
-    attendees.add(headerAccessor.getUser.getName)
 
     val invitation = m.retrive("invitation").retrive("service").asText() match {
       case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
