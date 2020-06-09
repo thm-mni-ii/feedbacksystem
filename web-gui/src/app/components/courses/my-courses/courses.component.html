@@ -1,5 +1,9 @@
 <div class="container">
-
+  <mat-toolbar>
+    <span style="flex: 1 1 auto">Kursname</span>
+    <span style="flex: 1 1 auto">Dozent/in</span>
+    <span>Rolle</span>
+  </mat-toolbar>
   <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
     <span>{{course.course_name}}</span>
     <i><span *ngFor="let docent of course.course_docent">{{docent.prename}} {{docent.surname}}<br></span></i>
