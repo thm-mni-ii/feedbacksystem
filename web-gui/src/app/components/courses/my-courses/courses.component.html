@@ -2,7 +2,7 @@
 
   <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
     <span>{{course.course_name}}</span>
-    <i><span>{{course.course_description}}</span></i>
+    <i><span *ngFor="let docent of course.course_docent">{{docent.prename}} {{docent.surname}}<br></span></i>
     <span>
       <b>
         <mat-icon role="img">admin_panel_settings</mat-icon>
