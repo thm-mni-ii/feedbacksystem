@@ -57,14 +57,6 @@
       </td>
     </ng-container>
 
-    <!-- Last login-->
-    <ng-container matColumnDef="last_login">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Letzter login</th>
-      <td mat-cell *matCellDef="let user">
-        {{user.last_login | date}}
-      </td>
-    </ng-container>
-
     <tr mat-header-row *matHeaderRowDef="columns"></tr>
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
   </table>

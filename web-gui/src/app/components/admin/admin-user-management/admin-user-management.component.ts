@@ -38,7 +38,7 @@ export class AdminUserManagementComponent implements OnInit {
               private dialog: MatDialog) {
   }
 
-  columns = ['surname', 'prename', 'email', 'username', 'last_login', 'role_id', 'action'];
+  columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];
   dataSource = new MatTableDataSource<User>();
 
   // Guest Account
