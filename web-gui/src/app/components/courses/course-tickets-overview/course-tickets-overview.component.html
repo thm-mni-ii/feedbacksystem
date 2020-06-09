@@ -16,7 +16,7 @@
     <h3 >Online Nutzer</h3>
     <mat-list>
       <mat-card class="user" mat-list-item *ngFor="let user of sortUsers(onlineUsers | async)">
-        <p class="user-item">{{user.surname}}, {{user.prename}}<span class="subtext-role"><sub>{{getRoleName(user.role)}}</sub></span></p>
+        <p class="user-item">{{user.prename}}, {{user.surname}}<span class="subtext-role"><sub>{{getRoleName(user.role)}}</sub></span></p>
         <span class="meta">
           <mat-icon *ngIf="isAuthorized() && self && self.username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
           <mat-icon *ngIf="classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(user)">phone_callback</mat-icon>

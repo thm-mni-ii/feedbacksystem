@@ -199,6 +199,18 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/ticket/create"))
   def createTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val title = m.retrive("title").toString.trim;
+    val desc = m.retrive("desc").toString.trim;
+    val priority = (m.retrive("priority").asInt()).asInstanceOf[Int];
+    if (title.isBlank){
+      throw new Exception("Title can not be empty");
+    }
+    if (desc.isBlank) {
+      throw new Exception("Description can not be empty")
+    };
+    if (priority > 0 && priority <= 10){
+      throw  new Exception("Priority must be between 0 and 11")
+    }
     val ticketOpt = for {
       user <- this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get)
       courseId <- m.retrive(courseIdLiteral).asInt()

@@ -34,8 +34,8 @@ export class NewticketDialogComponent implements OnInit {
   createTicket() {
      const ticket: Ticket = {
        id: null,
-       title: this.form.get('title').value,
-       desc: this.form.get('desc').value,
+       title: this.form.get('title').value.trim(),
+       desc: this.form.get('desc').value.trim(),
        priority: this.form.get('priority').value,
        courseId: null,
        timestamp: Date.now(),
@@ -43,9 +43,14 @@ export class NewticketDialogComponent implements OnInit {
        creator: null,
        assignee: null,
      };
-     this.classroomService.createTicket(ticket);
-     this.snackBar.open(`Das Ticket wurde erfolgreich erstellt.`, 'OK', {duration: 3000});
-    this.dialogRef.close();
+     if (ticket.title !== "" && ticket.desc !== "" && ticket.priority > 0 && ticket.priority <= 10){
+       this.classroomService.createTicket(ticket);
+       this.snackBar.open(`Das Ticket wurde erfolgreich erstellt.`, 'OK', {duration: 3000});
+       this.dialogRef.close();
+     }else {
+       this.snackBar.open(`Das Ticket konnte nicht erstellt werden!`, 'OK', {duration: 3000});
+     }
+
   }
   close() {
     this.dialogRef.close();
