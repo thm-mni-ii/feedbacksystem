@@ -442,11 +442,11 @@ export class DatabaseService {
   updateCourse(id: number, name: string, description: string, standard_task_typ: string, course_semester: string,
                course_module_id: string, userDataAllowed: boolean): Observable<Succeeded> {
     return this.http.put<Succeeded>('/api/v1/courses/' + id, {
-      name: name.trim(),
-      description: description.trim(),
-      standard_task_typ: standard_task_typ.trim(),
-      course_semester: course_semester.trim(),
-      course_modul_id: course_module_id.trim(),
+      name: name.trim() || '',
+      description:description.trim() || '',
+      standard_task_typ: standard_task_typ.trim() || '',
+      course_semester: course_semester.trim() || '',
+      course_modul_id: (course_module_id !== undefined) ? course_module_id.trim() : '',
       personalised_submission: userDataAllowed
     });
   }
