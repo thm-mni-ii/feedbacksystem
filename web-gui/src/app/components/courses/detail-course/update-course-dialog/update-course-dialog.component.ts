@@ -4,6 +4,8 @@ import {Observable} from 'rxjs';
 import {DetailedCourseInformation, Testsystem} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from "@angular/forms";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {templateJitUrl} from "@angular/compiler";
 
 /**
  * Updates course information in dialog
@@ -21,14 +23,17 @@ export class UpdateCourseDialogComponent implements OnInit {
   course_module_id: string;
   userDataAllowed: boolean;
   courseDetails: DetailedCourseInformation;
-  coursename = new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(100)])
-  courseDescription = new FormControl('', [Validators.maxLength(8000)]);
+  coursenameMinLength: number = 5;
+  courseNameMaxLength: number = 100;
+  courseDescriptionMaxLength: number = 8000;
+  coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength), Validators.maxLength(this.courseNameMaxLength)])
+  courseDescription = new FormControl('', [Validators.maxLength(this.courseDescriptionMaxLength)]);
   courseDefaultTaskTyp = new FormControl('', [Validators.required]);
   courseUserDataAllowed = new FormControl('', [Validators.required]);
   errorFieldIsEmpty = 'Das Feld darf nicht leer sein!';
 
   constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
-              public dialogRef: MatDialogRef<UpdateCourseDialogComponent>) {
+              public dialogRef: MatDialogRef<UpdateCourseDialogComponent>, private snackbar: MatSnackBar) {
     this.name = "";
     this.description = "";
     this.standardTaskType = "";
@@ -63,8 +68,18 @@ export class UpdateCourseDialogComponent implements OnInit {
    * Update course information and close dialog
    */
   updateCourse() {
-    this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
-      this.course_module_id, this.userDataAllowed).subscribe(success => this.dialogRef.close(success));
+    if (this.checkRequiredFields(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.userDataAllowed)){
+      this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
+        this.course_module_id, this.userDataAllowed).subscribe(success => {
+        this.dialogRef.close(success);
+        this.snackbar.open('Kurseigenschaften erfolgreich geändert!', 'OK', {duration: 3000});
+      }, error => {
+          this.snackbar.open(error.error.message, 'OK', {duration: 3000});
+      });
+    }else {
+      this.snackbar.open('Fehler: Nicht alle erforderlichen Felder wurden ausgefüllt!', 'OK', {duration: 3000});
+    }
+
   }
 
   loadDocentTutorForCourse() {
@@ -99,5 +114,23 @@ export class UpdateCourseDialogComponent implements OnInit {
     if (this.courseUserDataAllowed.hasError('required')) {
       return this.errorFieldIsEmpty;
     }
+  }
+  /**
+   * Checks whether the properties meet the requirements
+   * @param couseID
+   * @param name Coursename
+   * @param description Coursedescription
+   * @param standardTaskType Course standartTaskType
+   * @param userDateAllowed Course userDataAllowed
+   */
+  checkRequiredFields(couseID: number, name: string, description: string, standardTaskType:string, userDateAllowed: boolean):boolean{
+    return true
+    if (couseID !== null && couseID !== undefined)
+      if (name !== undefined && name != null && name.trim() !== "" && name.length <= this.courseNameMaxLength && name.length >= this.coursenameMinLength)
+        if (standardTaskType !== undefined && standardTaskType !== null && standardTaskType.trim() !== "")
+          if (userDateAllowed !== undefined && userDateAllowed !== null)
+            if (description.length <= this.courseDescriptionMaxLength)
+              return true
+    return false
   }
 }
