@@ -6,7 +6,7 @@ import {flatMap, map, startWith} from 'rxjs/operators';
 import {DatabaseService} from '../../../service/database.service';
 import {UserService} from '../../../service/user.service';
 import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
+import {Observable} from 'rxjs';"Failed to send message to ExecutorSubscribableChannel[clientInboundChannel]; nested exception is io.jsonwebtoken.SignatureException\c JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted."
 
 @Component({
   selector: 'app-grant-docent-snipp',
