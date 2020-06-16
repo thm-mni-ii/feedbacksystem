@@ -3,6 +3,7 @@ import {UserService} from "../../../service/user.service";
 import {DatabaseService} from "../../../service/database.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Succeeded} from "../../../interfaces/HttpInterfaces";
+import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 
 @Component({
   selector: 'app-change-passwd',
@@ -12,6 +13,9 @@ import {Succeeded} from "../../../interfaces/HttpInterfaces";
 export class ChangePasswdComponent implements OnInit {
   passwd_repeat: string;
   passwd: string;
+
+
+  passwordMatcher = new FormControl('', [Validators.required]);
 
   constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
 
