@@ -10,6 +10,7 @@ import {User} from '../../../interfaces/HttpInterfaces';
 import {DeleteUserModalComponent} from "../../modals/delete-user-modal/delete-user-modal.component";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {throwError} from "rxjs";
+import {MatPaginator} from "@angular/material/paginator";
 
 export interface GuestUserAccount {
   gPrename: string;
@@ -33,7 +34,7 @@ export interface GuestUserAccount {
 export class AdminUserManagementComponent implements OnInit {
 
   @ViewChild(MatSort) sort: MatSort;
-
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
               private dialog: MatDialog) {
   }
@@ -54,7 +55,7 @@ export class AdminUserManagementComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.titlebar.emitTitle('User Management');
+    this.titlebar.emitTitle('Benutzer Verwaltung');
     this.loadAllUsers();
   }
 
@@ -62,6 +63,7 @@ export class AdminUserManagementComponent implements OnInit {
     this.db.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
+      this.dataSource.paginator = this.paginator;
     });
   }
 
