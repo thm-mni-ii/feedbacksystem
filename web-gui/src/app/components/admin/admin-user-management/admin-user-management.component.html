@@ -6,7 +6,7 @@
   </mat-form-field>
 
   <div class="create-guest-user">
-    <button mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person</mat-icon> Create Guest Account</button>
+    <button mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person_add</mat-icon>Neuen Benutzer erstellen</button>
   </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
@@ -49,7 +49,7 @@
 
     <!-- Action buttons-->
     <ng-container matColumnDef="action">
-      <th mat-header-cell *matHeaderCellDef>Action</th>
+      <th mat-header-cell *matHeaderCellDef>Aktionen</th>
       <td mat-cell *matCellDef="let user">
         <button mat-icon-button matTooltip="Benutzer Löschen" color="warn" (click)="deleteUser(user)">
           <mat-icon>delete</mat-icon>

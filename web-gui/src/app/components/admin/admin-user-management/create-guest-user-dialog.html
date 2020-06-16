@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Create Guest User Account</h1>
+<h1 mat-dialog-title>Neuen Gast-Benutzer erstellen</h1>
 <div class="guest-account" mat-dialog-content>
   <p>
     Note: All users of the Central Authentication Service (CAS) can log in into the system.
@@ -9,49 +9,49 @@
   <mat-form-field>
     <mat-label>Vorname</mat-label>
     <input matInput required [(ngModel)]="data.gPrename" name="firstname">
-    <mat-error>Field is <strong>required</strong></mat-error>
+    <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Nachname</mat-label>
     <input matInput required [(ngModel)]="data.gSurname" name="surname">
-    <mat-error>Field is <strong>required</strong></mat-error>
+    <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>E-Mail</mat-label>
     <input matInput required email [(ngModel)]="data.gEmail" name="email">
-    <mat-error>Valid email is <strong>required</strong></mat-error>
+    <mat-error>Eine gültige E-Mail-Adresse ist <strong>erforderlich!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Username</mat-label>
     <input matInput required [(ngModel)]="data.gUsername" name="username">
-    <mat-error>Username is <strong>required</strong></mat-error>
+    <mat-error>Der Benutzername ist <strong>erforderlich!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Passwort</mat-label>
     <input type="password" required matInput [(ngModel)]="data.gPassword" name="pass">
-    <mat-error>Password is <strong>required</strong></mat-error>
+    <mat-error>Das Passwort ist <strong>erforderlich!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Repeat Passwort</mat-label>
+    <mat-label>Passwort wiederholen</mat-label>
     <input type="password" required matInput [formControl]="passwordMatcher" [(ngModel)]="data.gPasswordRepeat" name="passRepeat">
-    <mat-error *ngIf="passwordMatcher.hasError('required')">Passwords <strong>required</strong></mat-error>
-    <mat-error *ngIf="passwordMatcher.hasError('notMatch')">Passwords <strong>do not match</strong></mat-error>
+    <mat-error *ngIf="passwordMatcher.hasError('required')">Das Passwort ist <strong>erforderlich!</strong></mat-error>
+    <mat-error *ngIf="passwordMatcher.hasError('notMatch')">Die Passwörter <strong>müssen übereinstimmen!</strong></mat-error>
   </mat-form-field>
 
   <mat-form-field>
-    <mat-select required [(value)]="data.gRole" placeholder="Rolle" name="role">
+    <mat-select [(value)]="data.gRole" placeholder="Rolle" name="role">
       <mat-option value="1">Admin</mat-option>
       <mat-option value="2">Moderator</mat-option>
       <mat-option value="16">User</mat-option>
     </mat-select>
   </mat-form-field>
     <div class="actions" mat-dialog-actions>
-      <button mat-raised-button (click)="onCancel()">Cancel</button>
+      <button mat-raised-button (click)="onCancel()">Abbrechen</button>
       <button mat-raised-button color="accent" [disabled]="guestUserForm.form.invalid" (click)="onSubmit()">Hinzufügen</button>
     </div>
   </form>
