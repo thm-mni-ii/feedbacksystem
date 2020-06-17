@@ -42,7 +42,7 @@ import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/datapr
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MatNativeDateModule} from '@angular/material/core';
+import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {MarkdownModule} from 'ngx-markdown';
 import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import { DeleteCourseModalComponent } from './components/courses/modals/delete-course-modal/delete-course-modal.component';
@@ -204,7 +204,7 @@ export const httpInterceptorProviders = [
     MatGridListModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatSliderModule,
+    MatSliderModule
   ],
   entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent,
     DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,

@@ -3,22 +3,12 @@
   display: block;
 }
 
-.step-flex {
+mat-card-content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
 }
 
-.step-flex > mat-form-field {
-  width: 100%;
-}
-
-.button-row {
+mat-card-actions {
   display: flex;
-  flex-direction: row;
-}
-
-.button-row > button {
-  margin-right: 12px;
-  margin-top: 12px;
+  flex-direction: row-reverse;
 }
