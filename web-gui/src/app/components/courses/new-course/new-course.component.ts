@@ -5,7 +5,7 @@ import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {NewCourse, Testsystem, User} from '../../../interfaces/HttpInterfaces';
-import {Router} from "@angular/router";
+import {Router} from '@angular/router';
 
 /**
  * Create a new course
@@ -47,8 +47,8 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.docent_list = []
-    this.tutor_list = []
+    this.docent_list = [];
+    this.tutor_list = [];
 
     this.testTypes$ = this.db.getTestsystemTypes();
     this.titlebar.emitTitle('Neuen Kurs erstellen');
@@ -64,7 +64,7 @@ export class NewCourseComponent implements OnInit, OnDestroy {
    */
   createCourse() {
     if (!this.isInputValid) {
-      return
+      return;
     }
 
     let privateUserData: boolean;
@@ -79,20 +79,20 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       privateUserData).subscribe((data: NewCourse) => {
       let updateDocentTutorList = []
       this.tutor_list.forEach(u => {
-        updateDocentTutorList.push(this.db.addTutorToCourse(data.course_id, u.user_id).toPromise())
-      })
+        updateDocentTutorList.push(this.db.addTutorToCourse(data.course_id, u.user_id).toPromise());
+      });
 
       this.docent_list.forEach(u => {
         updateDocentTutorList.push(this.db.addDocentToCourse(data.course_id, u.user_id).toPromise())
-      })
+      });
 
       Promise.all(updateDocentTutorList).then(() => {
-        setTimeout( () => {this.router.navigate(['courses', data.course_id])},100)
-      })
+        setTimeout( () => {this.router.navigate(['courses', data.course_id])},100);
+      });
     });
   }
 
   isInputValid(): boolean {
-    return this.newCourseName.valid && this.newCourseType.valid
+    return this.newCourseName.valid && this.newCourseType.valid;
   }
 }
