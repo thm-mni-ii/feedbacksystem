@@ -15,7 +15,7 @@
       <mat-error *ngIf="courseDescription.invalid">{{getErrorMessageCourseDescription()}}</mat-error>
     </mat-form-field>
 
-    <i>Vorschau:</i>
+    <i *ngIf="description !== '' ">Vorschau:</i>
     <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
     <mat-form-field>
@@ -28,22 +28,8 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Semester:</mat-label>
-      <input matInput placeholder="WS18/19 (Optional)" [(ngModel)]="semester">
-    </mat-form-field>
-
-    <mat-form-field>
       <mat-label>Modul-ID:</mat-label>
       <input matInput placeholder="CSxxxx (Optional)" [(ngModel)]="course_module_id">
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Abgaben mit Userdaten erlaubt:</mat-label>
-      <mat-select [(value)]="userDataAllowed" required>
-        <mat-option value="true">Ja</mat-option>
-        <mat-option value="false">Nein</mat-option>
-      </mat-select>
-      <mat-error *ngIf="courseUserDataAllowed.invalid">{{getErrorMessageCourseUserDataAllowed()}}</mat-error>
     </mat-form-field>
 
     <div class="choose_docent_tutor_area">
