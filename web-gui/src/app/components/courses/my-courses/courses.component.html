@@ -1,21 +1,21 @@
 <div class="container">
   <mat-toolbar>
-    <span style="flex: 1 1 auto">Kursname</span>
-    <span style="flex: 1 1 auto">Dozent/in</span>
+    <span style="flex: 1 1 auto">Kurs/e</span>
+    <span style="flex: 1 1 auto"></span>
     <span>Rolle</span>
   </mat-toolbar>
   <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
-    <span>{{course.course_name}}</span>
-    <i><span *ngFor="let docent of course.course_docent">{{docent.prename}} {{docent.surname}}<br></span></i>
+    <span>{{course.course_name}}<br>
+     <span class="docent" *ngIf="course.course_docent.length>1">Dozenten: </span> <span class="docent" *ngIf="course.course_docent.length==1">Dozent/in: </span><i><span class="docent" *ngFor="let docent of course.course_docent; let isLast=last">{{docent.prename}} {{docent.surname}}{{isLast ? '' : ', '}}</span></i>
+    </span>
+
     <span>
-      <b>
         <mat-icon role="img">admin_panel_settings</mat-icon>
         <span *ngIf="course.role_name == 'admin'">Admin</span>
         <span *ngIf="course.role_name == 'moderator'">Moderator</span>
         <span *ngIf="course.role_name == 'docent'">Dozent</span>
         <span *ngIf="course.role_name == 'tutor'">Tutor</span>
         <span *ngIf="course.role_name == 'student'">Student</span>
-        </b>
     </span>
   </mat-card>
 
