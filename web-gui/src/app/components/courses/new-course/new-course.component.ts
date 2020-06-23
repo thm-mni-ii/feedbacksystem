@@ -42,10 +42,6 @@ export class NewCourseComponent implements OnInit, OnDestroy {
   docent_list: User[];
   tutor_list: User[];
 
-  getErrorMessage() {
-    return this.newCourseSemester.hasError('pattern') ? 'Beispiel WS18/19' : '';
-  }
-
   ngOnInit() {
     this.docent_list = [];
     this.tutor_list = [];
@@ -77,17 +73,17 @@ export class NewCourseComponent implements OnInit, OnDestroy {
       this.newCourseModuleID.value,
       this.newCourseDate.value,
       privateUserData).subscribe((data: NewCourse) => {
-      let updateDocentTutorList = []
+      let updateDocentTutorList = [];
       this.tutor_list.forEach(u => {
         updateDocentTutorList.push(this.db.addTutorToCourse(data.course_id, u.user_id).toPromise());
       });
 
       this.docent_list.forEach(u => {
-        updateDocentTutorList.push(this.db.addDocentToCourse(data.course_id, u.user_id).toPromise())
+        updateDocentTutorList.push(this.db.addDocentToCourse(data.course_id, u.user_id).toPromise());
       });
 
       Promise.all(updateDocentTutorList).then(() => {
-        setTimeout( () => {this.router.navigate(['courses', data.course_id])},100);
+        setTimeout( () => {this.router.navigate(['courses', data.course_id]); }, 100);
       });
     });
   }
