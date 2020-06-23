@@ -27,10 +27,7 @@ export class UpdateCourseDialogComponent implements OnInit {
   courseDescriptionMaxLength: number = 8000;
   // tslint:disable-next-line:max-line-length
   coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength), Validators.maxLength(this.courseNameMaxLength)]);
-  courseDescription = new FormControl('', [Validators.maxLength(this.courseDescriptionMaxLength)]);
   courseDefaultTaskTyp = new FormControl('', [Validators.required]);
-  courseUserDataAllowed = new FormControl('', [Validators.required]);
-  errorFieldIsEmpty = 'Das Feld darf nicht leer sein!';
 
   constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>, private snackbar: MatSnackBar) {
@@ -87,28 +84,6 @@ export class UpdateCourseDialogComponent implements OnInit {
       this.courseDetails.course_docent = value.course_docent;
       this.courseDetails.course_tutor = value.course_tutor;
     });
-  }
-  // Error messages if validation failed
-  getErrorMessageCourseName() {
-    if (this.coursename.hasError('required')) {
-      return this.errorFieldIsEmpty;
-    } else if (this.coursename.hasError('minlength')) {
-      return 'Der Kursname ist zu kurz!';
-    } else if (this.coursename.hasError('maxlength')) {
-      return 'Der Kursname ist zu lang!';
-    }
-  }
-
-  getErrorMessageCourseDescription() {
-    if (this.courseDescription.hasError('maxlenght')) {
-      return this.errorFieldIsEmpty;
-    }
-  }
-
-  getErrorMessageCourseDefaultTaskTyp() {
-    if (this.courseDefaultTaskTyp.hasError('required')) {
-      return this.errorFieldIsEmpty;
-    }
   }
   /**
    * Checks whether the properties meet the requirements

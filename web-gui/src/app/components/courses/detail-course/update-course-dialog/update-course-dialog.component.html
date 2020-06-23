@@ -3,8 +3,8 @@
   <mat-dialog-content style="max-height: 100%; overflow: hidden;">
     <mat-form-field>
       <mat-label>Kursame:</mat-label>
-      <input matInput [(ngModel)]="name" required minlength="5" maxlength="100">
-      <mat-error *ngIf="coursename.invalid">{{getErrorMessageCourseName()}}</mat-error>
+      <input matInput [(ngModel)]="name"  minlength="5" maxlength="100">
+      <mat-error *ngIf="coursename.errors">Der Kursname ist erforderlich!</mat-error>
     </mat-form-field>
 
     <mat-form-field>
@@ -12,7 +12,6 @@
       <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10"
                 matInput
                 [(ngModel)]="description" placeholder="(Optional)" maxlength="8000"></textarea>
-      <mat-error *ngIf="courseDescription.invalid">{{getErrorMessageCourseDescription()}}</mat-error>
     </mat-form-field>
 
     <i *ngIf="description !== '' ">Vorschau:</i>
@@ -23,8 +22,8 @@
       <mat-select [(value)]="standardTaskType" required>
         <mat-option *ngFor="let testsystem of testsystems$ | async"
                     [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
-        <mat-error *ngIf="courseDefaultTaskTyp.invalid">{{getErrorMessageCourseDefaultTaskTyp()}}</mat-error>
       </mat-select>
+      <mat-error *ngIf="courseDefaultTaskTyp.errors.required">Der Aufgabentyp, ist erforderlich!</mat-error>
     </mat-form-field>
 
     <mat-form-field>
