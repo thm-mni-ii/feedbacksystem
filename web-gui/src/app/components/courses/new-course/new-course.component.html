@@ -4,7 +4,8 @@
     <mat-card-content>
       <mat-form-field>
         <mat-label>Kursname</mat-label>
-        <input [formControl]="newCourseName" name="newCourseName" type="text" matInput required>
+        <input [formControl]="newCourseName" name="newCourseName" type="text" matInput required minlength="5" maxlength="100">
+        <mat-error *ngIf="newCourseName.errors">Der Kursname ist erforderlich! Und muss mindestens 5 Zeichen besitzen</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Kursbeschreibung</mat-label>
@@ -15,6 +16,7 @@
         <mat-select [formControl]="newCourseType" class="select" placeholder="Aufgabentyp" required>
           <mat-option *ngFor="let type of testTypes$| async" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
         </mat-select>
+        <mat-error *ngIf="newCourseType.errors">Das Feld ist erforderlich!</mat-error>
       </mat-form-field>
 <!--      <mat-form-field>-->
 <!--        <mat-label>Semester</mat-label>-->
