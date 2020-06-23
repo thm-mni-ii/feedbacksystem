@@ -28,6 +28,7 @@ export class UpdateCourseDialogComponent implements OnInit {
   // tslint:disable-next-line:max-line-length
   coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength), Validators.maxLength(this.courseNameMaxLength)]);
   courseDefaultTaskTyp = new FormControl('', [Validators.required]);
+  courseDescription = new FormControl('', Validators.maxLength(this.courseDescriptionMaxLength));
 
   constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>, private snackbar: MatSnackBar) {
@@ -107,5 +108,9 @@ export class UpdateCourseDialogComponent implements OnInit {
       }
     }
     return false;
+  }
+  isInputValid(): boolean {
+    return this.coursename.valid && this.courseDescription.valid;
+
   }
 }

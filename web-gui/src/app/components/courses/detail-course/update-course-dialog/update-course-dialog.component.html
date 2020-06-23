@@ -3,17 +3,27 @@
   <mat-dialog-content style="max-height: 100%; overflow: hidden;">
     <mat-form-field>
       <mat-label>Kursame:</mat-label>
-      <input matInput [(ngModel)]="name"  minlength="5" maxlength="100">
-      <mat-error *ngIf="coursename.errors">Der Kursname ist erforderlich!</mat-error>
+      <input name="coursename" ngDefaultControl matInput [formControl]="coursename" [(ngModel)]="name" required
+             minlength="5" maxlength="100">
+      <mat-error *ngIf="!coursename.valid && coursename.errors.minlength">Der Kursname muss
+        mindestens {{coursename.errors.minlength.requiredLength}} Zeichen lang sein!
+      </mat-error>
+      <mat-error *ngIf="!coursename.valid && coursename.errors.maxlength">Der Kursname darf
+        maximal {{coursename.errors.maxlength.requiredLength}} Zeichen lang sein!
+      </mat-error>
+      <mat-error *ngIf="!coursename.valid && coursename.errors.required">Der Kursname ist erforderlich!</mat-error>
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Beschreibung:</mat-label>
-      <textarea name="update_course_description" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="10"
+      <textarea [formControl]="courseDescription" name="update_course_description" matTextareaAutosize
+                matAutosizeMinRows="1" matAutosizeMaxRows="10"
                 matInput
                 [(ngModel)]="description" placeholder="(Optional)" maxlength="8000"></textarea>
     </mat-form-field>
-
+    <mat-error *ngIf="!courseDescription.valid && courseDescription.errors.maxlength">Die Beschreibung darf
+      maximal {{courseDescription.errors.maxlength.requiredLength}} Zeichen lang sein!
+    </mat-error>
     <i *ngIf="description !== '' ">Vorschau:</i>
     <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
@@ -44,6 +54,6 @@
   </mat-dialog-content>
   <mat-action-list class="action-buttons">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button mat-flat-button color="accent" (click)="updateCourse()">Speichern</button>
+    <button mat-flat-button color="accent" [disabled]="!isInputValid()" (click)="updateCourse()">Speichern</button>
   </mat-action-list>
 </div>
