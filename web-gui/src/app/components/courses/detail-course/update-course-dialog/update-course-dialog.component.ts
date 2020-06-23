@@ -25,8 +25,8 @@ export class UpdateCourseDialogComponent implements OnInit {
   coursenameMinLength: number = 5;
   courseNameMaxLength: number = 100;
   courseDescriptionMaxLength: number = 8000;
-  // tslint:disable-next-line:max-line-length
-  coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength), Validators.maxLength(this.courseNameMaxLength)]);
+  coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength),
+    Validators.maxLength(this.courseNameMaxLength)]);
   courseDefaultTaskTyp = new FormControl('', [Validators.required]);
   courseDescription = new FormControl('', Validators.maxLength(this.courseDescriptionMaxLength));
 
@@ -66,17 +66,13 @@ export class UpdateCourseDialogComponent implements OnInit {
    * Update course information and close dialog
    */
   updateCourse() {
-    if (this.checkRequiredFields(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.userDataAllowed)) {
-      this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
-        this.course_module_id, this.userDataAllowed).subscribe(success => {
-        this.dialogRef.close(success);
-        this.snackbar.open('Kurseigenschaften erfolgreich geändert!', 'OK', {duration: 3000});
-      }, error => {
-          this.snackbar.open(error.error.message, 'OK', {duration: 3000});
-      });
-    } else {
-      this.snackbar.open('Fehler: Nicht alle erforderlichen Felder wurden ausgefüllt!', 'OK', {duration: 3000});
-    }
+    this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
+      this.course_module_id, this.userDataAllowed).subscribe(success => {
+      this.dialogRef.close(success);
+      this.snackbar.open('Kurseigenschaften erfolgreich geändert!', 'OK', {duration: 3000});
+    }, error => {
+      this.snackbar.open(error.error.message, 'OK', {duration: 3000});
+    });
 
   }
 
@@ -86,29 +82,7 @@ export class UpdateCourseDialogComponent implements OnInit {
       this.courseDetails.course_tutor = value.course_tutor;
     });
   }
-  /**
-   * Checks whether the properties meet the requirements
-   * @param couseID
-   * @param name Coursename
-   * @param description Coursedescription
-   * @param standardTaskType Course standartTaskType
-   * @param userDateAllowed Course userDataAllowed
-   */
-  checkRequiredFields(couseID: number, name: string, description: string, standardTaskType: string, userDateAllowed: boolean): boolean {
-    if (couseID !== null && couseID !== undefined) {
-      // tslint:disable-next-line:max-line-length
-      if (name !== undefined && name != null && name.trim() !== '' && name.length <= this.courseNameMaxLength && name.length >= this.coursenameMinLength) {
-        if (standardTaskType !== undefined && standardTaskType !== null && standardTaskType.trim() !== '') {
-          if (userDateAllowed !== undefined && userDateAllowed !== null) {
-            if (description.length <= this.courseDescriptionMaxLength) {
-              return true;
-            }
-          }
-        }
-      }
-    }
-    return false;
-  }
+
   isInputValid(): boolean {
     return this.coursename.valid && this.courseDescription.valid;
 
