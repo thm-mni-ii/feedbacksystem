@@ -1,16 +1,15 @@
 package de.thm.ii.fbs
 
-import java.sql._
 import java.io._
-import java.nio.file.{Files, Paths}
+import java.sql._
 import java.util.regex.Pattern
 
-import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
-
-import scala.util.control.Breaks._
+import com.typesafe.config.ConfigFactory
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+
+import scala.util.control.Breaks._
 
 /**
   * This class represents a task for an SQL assignment
@@ -24,9 +23,9 @@ import org.json4s.jackson.JsonMethods._
   * @author Vlad Soykrskyy
   */
 class SQLTask(val filepath: String, val taskId: String){
-  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
+  logger.info(filepath)
+  private val appConfig = ConfigFactory.parseResources("application.conf")
   private val config = ConfigFactory.load(appConfig)
-
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
 
   private val logger = system.log
@@ -38,30 +37,17 @@ class SQLTask(val filepath: String, val taskId: String){
   /**
     * Class instance JDBCDriver
     */
-  final var JDBCDriver: String = config.getString("sql.driver")
+  final var JDBCDriver: String = "com.mysql.jdbc.Driver"
   /**
     * Class instance connection
     */
-  private val URL: String = config.getString("sql.connectionUri")
-  private val user: String = config.getString("sql.user")
-  private val password: String = config.getString("sql.password")
+  private val URL: String = "jdbc:mysql://mysql2:3306"
+  private val user: String = "root"
+  private val password: String = "SqfyBWhiFGr7FK60cVR2rel"
 
   private var connection: Connection = DriverManager.getConnection(URL, user, password)
   private val s = connection.createStatement()
   private val timeoutsec = 10
-
-  private def loadFactoryConfigPath() = {
-    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/sqlchecker/application_dev.conf"
-    val prod_config_file_path = "/usr/local/appconfig/application.config"
-
-    var config_factory_path = ""
-    if (Files.exists(Paths.get(prod_config_file_path))) {
-      config_factory_path = prod_config_file_path
-    } else {
-      config_factory_path = dev_config_file_path
-    }
-    config_factory_path
-  }
 
   /**
     * used in queries
@@ -117,7 +103,6 @@ class SQLTask(val filepath: String, val taskId: String){
   }
   deleteDatabase("little_test")
   logger.warning("sqltask-constructor ended")
-
   private def toList(res: scala.Array[scala.Array[String]]) = {
     val liste = res.toList
     if (liste.isEmpty){
