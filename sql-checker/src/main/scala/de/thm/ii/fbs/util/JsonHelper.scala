@@ -1,9 +1,9 @@
-package de.thm.ii.fbs
+package de.thm.ii.fbs.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.json4s.jackson.JsonMethods.parse
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import org.json4s.jackson.JsonMethods.parse
 
 /**
   * Provides functions to transform json to map and map to json.

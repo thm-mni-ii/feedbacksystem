@@ -2,11 +2,10 @@ package de.thm.ii.fbs
 
 import java.sql._
 import java.io._
-import java.nio.file.{Files, Paths}
 import java.util.regex.Pattern
 
-import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
+import de.thm.ii.fbs.util.{Configs, JsonHelper}
 
 import scala.util.control.Breaks._
 import org.json4s._
@@ -24,9 +23,7 @@ import org.json4s.jackson.JsonMethods._
   * @author Vlad Soykrskyy
   */
 class SQLTask(val filepath: String, val taskId: String){
-  private val appConfig = ConfigFactory.parseFile(new File(loadFactoryConfigPath()))
-  private val config = ConfigFactory.load(appConfig)
-
+  private val config = Configs.load()
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
 
   private val logger = system.log
@@ -49,19 +46,6 @@ class SQLTask(val filepath: String, val taskId: String){
   private var connection: Connection = DriverManager.getConnection(URL, user, password)
   private val s = connection.createStatement()
   private val timeoutsec = 10
-
-  private def loadFactoryConfigPath() = {
-    val dev_config_file_path = System.getenv("CONFDIR") + "/../docker-config/sqlchecker/application_dev.conf"
-    val prod_config_file_path = "/usr/local/appconfig/application.config"
-
-    var config_factory_path = ""
-    if (Files.exists(Paths.get(prod_config_file_path))) {
-      config_factory_path = prod_config_file_path
-    } else {
-      config_factory_path = dev_config_file_path
-    }
-    config_factory_path
-  }
 
   /**
     * used in queries

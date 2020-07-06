@@ -24,8 +24,8 @@ import javax.net.ssl._
 import java.sql.SQLException
 import java.sql.SQLTimeoutException
 
-import JsonHelper._
-import com.typesafe.config.ConfigFactory
+import de.thm.ii.fbs.util.JsonHelper._
+import de.thm.ii.fbs.util.{Configs, JsonHelper}
 
 /**
   * Bypasses both client and server validation.
@@ -81,8 +81,7 @@ object SQLChecker extends App {
   private val LABEL_BEST_FIT = "choice_best_result_fit"
   private val LABEL_PRE_RESULT = "calculate_pre_result"
 
-  private val appConfig = ConfigFactory.parseResources("application.conf")
-  private val config = ConfigFactory.load(appConfig)
+  private val config = Configs.load()
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher

@@ -18,9 +18,9 @@ import java.security.cert.X509Certificate
 import java.util.zip.ZipInputStream
 
 import javax.net.ssl._
-import com.typesafe.config.ConfigFactory
 import de.thm.ii.fbs.checker.{GitCheckExec, GitstatsCheckExec, HelloworldCheckExec, MultiplechoiceCheckExec,
   NodeCheckExec, PlagiatCheckExec, SecrettokenCheckExec}
+import de.thm.ii.fbs.util.Configs
 
 import scala.io.Source
 
@@ -93,8 +93,7 @@ object SecretTokenChecker extends App {
 
   private val __slash = "/"
 
-  private val appConfig = ConfigFactory.parseResources("application.conf")
-  private val config = ConfigFactory.load(appConfig)
+  private val config = Configs.load()
   private implicit val system: ActorSystem = ActorSystem("akka-system", config)
   private implicit val materializer: Materializer = ActorMaterializer()
   private implicit val ec: ExecutionContextExecutor = system.dispatcher
