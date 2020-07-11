@@ -218,10 +218,32 @@ class UserController {
     if (!userService.checkIfUserAtLeastOneDocent(user.userid) && user.roleid > 4){
       throw new UnauthorizedException
     }
+    System.out.print("ALIAS TEST")
     try {
       loginService.getLastLoginList(before, after, sort, showDeleted)
     } catch {
       case e: IllegalArgumentException => throw new BadRequestException(e.getMessage)
     }
+  }
+
+  /**
+    * set a new password for a guest account
+    * @param request http request contains all headers
+    * @param jsonNode http request contains all headers
+    * @return success state
+    */
+  @RequestMapping(value = Array("users/alias"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  def setUserAlias(request: HttpServletRequest, @RequestBody jsonNode: JsonNode): Map[String, Any] = {
+    val user = Users.claimAuthorization(request)
+    if (!jsonNode.hasNonNull("alias")) {
+      throw new BadRequestException("Please provide: alias")
+    }
+
+    val alias = jsonNode.get("alias").asText()
+
+    if (alias.isBlank) {
+      throw new BadRequestException("alias is invalid because it is blank")
+    }
+    Map(LABEL_SUCCESS -> userService.setUserAlias(user.userid, alias))
   }
 }
