@@ -358,6 +358,16 @@ class UserService {
   }
 
   /**
+    * Calculates if given user is at least for one course a docent, so he has access to see all testsystem.
+    * @param userid unique User identification
+    * @param alias alias used for anonymous tasks
+    * @return if User is a docent or not
+    */
+  def setUserAlias(userid: Int, alias: String): Boolean = {
+    1 == DB.update("UPDATE user SET alias = ? where user_id = ? ", alias, userid)
+  }
+
+  /**
     * generateTokenFromUser simply uses JWT technologies
     *
     * @author Benjamin Manns
