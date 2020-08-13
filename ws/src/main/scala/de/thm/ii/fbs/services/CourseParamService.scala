@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services
 
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.util.DB
-import de.thm.ii.fbs.{CourseParameterDBLabels, CourseParameterUserDBLabels}
+import de.thm.ii.fbs.services.labels.{CourseParameterDBLabels, CourseParameterUserDBLabels}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component

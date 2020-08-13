@@ -7,8 +7,9 @@ import java.util.{Date, Timer, TimerTask}
 
 import scala.jdk.CollectionConverters._
 import au.com.bytecode.opencsv.CSVWriter
-import de.thm.ii.fbs.ReSubmissionDBLabels
 import de.thm.ii.fbs.model.{AdminUser, User}
+import de.thm.ii.fbs.services.labels.{ReSubmissionDBLabels, SubmissionDBLabels, SubmissionTestsystemDBLabels,
+  TaskDBLabels, TaskTestsystemDBLabels, UserDBLabels}
 import de.thm.ii.fbs.util.{DB, ResourceNotFoundException}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}

@@ -93,8 +93,7 @@ class LoginController extends CasClientConfigurerAdapter {
         response.setHeader("Location", CLIENT_HOST_URL + "/")
       }
       "jwt"
-    }
-    catch {
+    } catch {
       case e: Throwable => {
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
@@ -183,8 +182,7 @@ class LoginController extends CasClientConfigurerAdapter {
     try {
       val username = jsonNode.get(LABEL_USERNAME).asText()
       Map(LABEL_SUCCESS -> userService.acceptPrivacyForUser(username))
-    }
-    catch {
+    } catch {
       case e: NullPointerException => {
         throw new BadRequestException("Please provide: username")
       }

@@ -1,4 +1,4 @@
-package de.thm.ii.fbs
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class contains all DB labels

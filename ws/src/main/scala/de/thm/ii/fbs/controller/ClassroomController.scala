@@ -4,10 +4,10 @@ import java.security.Principal
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.ConferenceSystemLabels
 import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.services.labels.ConferenceSystemLabels
 import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
@@ -317,7 +317,7 @@ class ClassroomController {
     }
 
     val invitation = m.retrive("invitation").retrive("service").asText() match {
-      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+      case Some(ConferenceSystemLabels.BIGBLUEBUTTON) => BBBInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,
@@ -325,7 +325,7 @@ class ClassroomController {
         m.retrive(invLit).retrive("meetingId").asText().get,
         m.retrive(invLit).retrive("meetingPassword").asText().get,
         m.retrive(invLit).retrive("moderatorPassword").asText().get)
-      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+      case Some(ConferenceSystemLabels.JITSI) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,
@@ -360,7 +360,7 @@ class ClassroomController {
     val courseId = m.retrive(invLit).retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
     val invitation = m.retrive("invitation").retrive("service").asText() match {
-      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+      case Some(ConferenceSystemLabels.BIGBLUEBUTTON) => BBBInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,
@@ -368,7 +368,7 @@ class ClassroomController {
         m.retrive(invLit).retrive("meetingId").asText().get,
         m.retrive(invLit).retrive("meetingPassword").asText().get,
         m.retrive(invLit).retrive("moderatorPassword").asText().get)
-      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+      case Some(ConferenceSystemLabels.JITSI) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,
@@ -393,7 +393,7 @@ class ClassroomController {
     val courseId = m.retrive(invLit).retrive(courseIdLiteral).asInt().get
     val user = this.userService.loadCourseUserFromDB(m.at("/invitation/creator/username").asText(), m.at("/invitation/courseId").asInt())
     val invitation = m.retrive("invitation").retrive("service").asText() match {
-      case Some(ConferenceSystemLabels.bigbluebutton) => BBBInvitation(user.get,
+      case Some(ConferenceSystemLabels.BIGBLUEBUTTON) => BBBInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,
@@ -401,7 +401,7 @@ class ClassroomController {
         m.retrive(invLit).retrive("meetingId").asText().get,
         m.retrive(invLit).retrive("meetingPassword").asText().get,
         m.retrive(invLit).retrive("moderatorPassword").asText().get)
-      case Some(ConferenceSystemLabels.jitsi) => JitsiInvitation(user.get,
+      case Some(ConferenceSystemLabels.JITSI) => JitsiInvitation(user.get,
         courseId,
         m.retrive(invLit).retrive("visibility").asText().get,
         attendees,

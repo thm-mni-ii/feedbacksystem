@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class holds all DB labels of table `setting`
@@ -11,4 +11,3 @@ object SettingDBLabels {
   /** DB Label "setting_key" */
   var setting_key: String = "setting_key"
 }
-

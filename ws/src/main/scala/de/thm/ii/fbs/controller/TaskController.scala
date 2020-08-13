@@ -9,6 +9,7 @@ import java.util.{Date, NoSuchElementException, Timer, TimerTask}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.TaskExtension
+import de.thm.ii.fbs.services.labels.{SubmissionDBLabels, TaskDBLabels, TaskTestsystemDBLabels, TestsystemLabels, UserDBLabels}
 import de.thm.ii.fbs.services.{TestsystemService, _}
 import de.thm.ii.fbs.util.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException, Users}
 import javax.servlet.http.HttpServletRequest

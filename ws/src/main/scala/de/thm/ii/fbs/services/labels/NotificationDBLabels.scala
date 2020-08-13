@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class holds all DB labels
@@ -15,4 +15,3 @@ object NotificationDBLabels {
   /** DB Label "testsystem_id" */
   var testsystem_id: String = "testsystem_id"
 }
-

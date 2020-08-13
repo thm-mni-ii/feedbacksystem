@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.model
 
-import de.thm.ii.fbs.services.TestsystemLabels
+import de.thm.ii.fbs.services.labels.TestsystemLabels
 
 /**
   * Class Testsystem holds all data from the testsystem table
+ *
   * @author Benjamin Manns
-  *
   * @param testsystem_id unique testsystem identification
   * @param name human readable testsystem name
   * @param description a description what admin wants to know about this system

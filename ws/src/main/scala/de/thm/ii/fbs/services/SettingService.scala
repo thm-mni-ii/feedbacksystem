@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services
 
+import de.thm.ii.fbs.services.labels.SettingDBLabels
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate

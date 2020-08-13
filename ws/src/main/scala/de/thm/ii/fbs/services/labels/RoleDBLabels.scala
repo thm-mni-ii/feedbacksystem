@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class holds all DB labels
@@ -29,4 +29,3 @@ object RoleDBLabels {
   /** ROLE ID "STUDENT" */
   val USER_ROLE_ID = 16
 }
-

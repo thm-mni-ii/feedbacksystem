@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.util
 
 import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream}
 import java.nio.file.{FileAlreadyExistsException, Files, Path, StandardCopyOption}
@@ -7,8 +7,9 @@ import java.util.zip.{ZipEntry, ZipInputStream, ZipOutputStream}
 import org.apache.commons.io.FileUtils
 
 import scala.io.Source
+
 /**
-  * simply handles file operation to access them easily
+  * Handles file and folder operation.
   */
 object FileOperations {
   /**
@@ -34,6 +35,7 @@ object FileOperations {
 
   /**
     * read from a file by its path
+    *
     * @param where where the file is stored
     * @return content of file
     */
@@ -102,7 +104,6 @@ object FileOperations {
           zip.putNextEntry(new ZipEntry(file.toString.replace(replacePath, "")))
           Files.copy(file, zip)
         }
-
       } catch {
         case _: java.nio.file.NoSuchFileException => {}
       }
@@ -123,7 +124,8 @@ object FileOperations {
   }
 
   /**
-    * tree works like scan_dir in php, thanksfull copied from https://stackoverflow.com/a/8340937/5885054
+    * Recursively searches for all files and directories in root and returns them.
+    * Thanksfully copied from https://stackoverflow.com/a/8340937/5885054
     *
     * @param root       the staring point to scan the dir
     * @param skipHidden skipp hidden files like . or ..
@@ -132,8 +134,7 @@ object FileOperations {
   def tree(root: File, skipHidden: Boolean = false): LazyList[File] = {
     if (!root.exists || (skipHidden && root.isHidden)) {
       LazyList.empty
-    }
-    else {
+    } else {
       LazyList.cons(root, (
         root.listFiles match {
           case null => LazyList.empty
@@ -145,7 +146,7 @@ object FileOperations {
   /** a bit based on https://stackoverflow.com/a/30642526
     * It is more a JAVA way
     *
-    * @param zip      downloaded zip path
+    * @param zip          downloaded zip path
     * @param outputFolder where to extract
     */
   def unzip(zip: Path, outputFolder: Path): Unit = {
@@ -171,6 +172,7 @@ object FileOperations {
 
   /**
     * simple make dir method
+    *
     * @param dir path where the dir should created
     * @return if mkdir worked out
     */
@@ -178,8 +180,7 @@ object FileOperations {
     try {
       Files.createDirectories(dir)
       true
-    }
-    catch {
+    } catch {
       case e: FileAlreadyExistsException => {
         false
       }

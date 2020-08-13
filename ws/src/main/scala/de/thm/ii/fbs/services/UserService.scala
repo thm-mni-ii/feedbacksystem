@@ -4,12 +4,11 @@ import java.security.MessageDigest
 import java.util.Date
 
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.services.labels.{RoleDBLabels, SubmissionDBLabels, TaskDBLabels, UserDBLabels}
 import de.thm.ii.fbs.util.DB
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
-import org.json.JSONArray
-import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
