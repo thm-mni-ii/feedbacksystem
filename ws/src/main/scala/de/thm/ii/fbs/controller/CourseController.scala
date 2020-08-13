@@ -8,9 +8,10 @@ import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.ConferenceSystemLabels
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services._
+import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
+import de.thm.ii.fbs.services.labels.{ConferenceSystemLabels, CourseDBLabels, RoleDBLabels}
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.util._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -836,13 +837,13 @@ class CourseController {
     val user = Users.claimAuthorization(request)
 
     body.get("service").asText() match {
-      case ConferenceSystemLabels.jitsi => {
+      case ConferenceSystemLabels.JITSI => {
         val id = UUID.randomUUID()
         val uri: URI = this.jitsiService.registerJitsiConference(id.toString)
         Map("href" -> uri.toString,
-        "service" -> ConferenceSystemLabels.jitsi)
+        "service" -> ConferenceSystemLabels.JITSI)
       }
-      case ConferenceSystemLabels.bigbluebutton => {
+      case ConferenceSystemLabels.BIGBLUEBUTTON => {
         val meetingId = UUID.randomUUID().toString
         val meetingPassword = UUID.randomUUID().toString
         val moderatorPassword = UUID.randomUUID().toString
@@ -852,7 +853,7 @@ class CourseController {
           "meetingId" -> meetingId,
           "meetingPassword" -> meetingPassword,
           "moderatorPassword" -> moderatorPassword,
-          "service" -> ConferenceSystemLabels.bigbluebutton)
+          "service" -> ConferenceSystemLabels.BIGBLUEBUTTON)
       }
     }
   }

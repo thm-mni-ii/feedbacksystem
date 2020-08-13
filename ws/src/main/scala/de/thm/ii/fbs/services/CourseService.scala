@@ -8,7 +8,8 @@ import java.util.Date
 
 import de.thm.ii.fbs.model.{AdminUser, SimpleUser, User}
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.util.{BadRequestException, DB, JsonParser, ResourceNotFoundException}
+import de.thm.ii.fbs.services.labels.{CourseDBLabels, RoleDBLabels, SubmissionDBLabels, TaskDBLabels, UserDBLabels}
+import de.thm.ii.fbs.util.{BadRequestException, DB, FileOperations, JsonParser, ResourceNotFoundException}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component

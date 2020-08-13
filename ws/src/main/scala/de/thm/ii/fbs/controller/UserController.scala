@@ -2,8 +2,9 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import de.thm.ii.fbs.services.labels.RoleDBLabels
 import org.springframework.web.bind.annotation._
-import de.thm.ii.fbs.services.{LoginService, RoleDBLabels, UserService}
+import de.thm.ii.fbs.services.{LoginService, UserService}
 import de.thm.ii.fbs.util.{BadRequestException, ResourceNotFoundException, UnauthorizedException, Users}
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired

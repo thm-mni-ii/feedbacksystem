@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class holds all DB labels
@@ -37,4 +37,3 @@ object UserDBLabels {
   /** DB Label "privacy_checked" */
   val privacy_checked: String = "privacy_checked"
 }
-

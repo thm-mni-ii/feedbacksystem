@@ -1,20 +1,13 @@
 package de.thm.ii.fbs.services
 
-import java.util
 import java.util.Date
-
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import de.thm.ii.fbs.TestsystemTestfileLabels
 import de.thm.ii.fbs.model.Testsystem
-import de.thm.ii.fbs.util.{BadRequestException, DB}
+import de.thm.ii.fbs.services.labels.TestsystemLabels
 import io.jsonwebtoken.{Claims, JwtException, Jwts, SignatureAlgorithm}
 import javax.servlet.http.HttpServletRequest
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-import scala.reflect.Manifest
 
 /**
   * TestsystemService provides interaction with DB table testsystem

@@ -2,7 +2,7 @@ package de.thm.ii.fbs.model
 
 import java.security.Principal
 
-import de.thm.ii.fbs.services.{RoleDBLabels, UserDBLabels}
+import de.thm.ii.fbs.services.labels.{RoleDBLabels, UserDBLabels}
 
 /**
   * Class User holds all data from the user table

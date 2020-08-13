@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.labels
 
 /**
   * Class holds all DB labels
@@ -31,4 +31,3 @@ object TaskDBLabels {
   /** DB Label "testsystem_modus" */
   var testsystem_modus = "testsystem_modus"
 }
-

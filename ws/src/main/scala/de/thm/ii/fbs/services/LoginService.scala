@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services
 import java.sql.Timestamp
 
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.services.labels.{RoleDBLabels, UserDBLabels}
 import de.thm.ii.fbs.util.{DB, DateParser}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate

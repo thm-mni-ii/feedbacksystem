@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.services
 import java.io.{File, FileOutputStream}
 import java.util.Base64
-import de.thm.ii.fbs.util.JsonParser
+
+import de.thm.ii.fbs.util.{FileOperations, JsonParser}
 import org.apache.commons.io.FileUtils
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}

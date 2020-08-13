@@ -6,7 +6,7 @@ import java.util.Properties
 import javax.naming.Context
 import javax.naming.directory.InitialDirContext
 import org.ldaptive._
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
   * Using ldaptive to simple register to THM LDAP Service
@@ -15,10 +15,10 @@ import collection.JavaConverters._
   */
 object LDAPConnector {
   /**
-    * A very simple, still in development, methd to access THMs LDAP Service
+    * A very simple, still in development, method to access THMs LDAP Service
     *
     * @author Benjamin Manns
-    * @param uid user Id where we want to get more informations /attributes of
+    * @param uid user Id where we want to get more information /attributes of
     * @param LDAP_URL ldap URL is the ldap server we we want to connect us and this has to be loaded from config file
     * @param LDAP_BASE_DN ldap base distinguish name, has to be loaded from config file
     * @return Attribute Set

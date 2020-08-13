@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.conferences
 
 import java.net.URI
 import java.util.Calendar
