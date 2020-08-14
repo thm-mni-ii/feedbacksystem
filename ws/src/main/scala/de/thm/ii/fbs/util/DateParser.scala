@@ -10,15 +10,11 @@ object DateParser {
   /**
     * Parse string to date
     * @author Benjamin Manns
-    * @param text a string containing a date
-    * @return parsed Date (LocalDate)
+    * @param text an ISO formatted date represented as a string
+    * @return An object of LocalDate
     */
   def dateParser(text: String): LocalDate = {
-    val patterns = List("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "HH:mm:ss,", "dd/MM/uuuu",
-      "MMM dd, uuuu",
-      "dd MMMM uuuu",
-      "dd MMM uuuu",
-      "dd-MM-uuuu", "dd.MM.yyyy")
+    val patterns = List("yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "dd/MM/uuuu", "dd-MM-uuuu", "dd.MM.yyyy")
     val trimmedText = text.trim
     var date: LocalDate = null
     for (pattern <- patterns) {
