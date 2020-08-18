@@ -10,4 +10,10 @@
   <span class="filler"></span>
   <p>{{task.submit_date| date:'medium'}}</p>
 </div>
-<input type="file" (change)="updateSubmissionFile($event.target.files[0])">
+
+<ngx-dropzone [multiple]="false" (change)="updateSubmissionFile($event)">
+  <ngx-dropzone-label>Abgabe hochladen</ngx-dropzone-label>
+  <ngx-dropzone-preview *ngFor="let f of submissionFile">
+    <ngx-dropzone-label>{{ f.name }}</ngx-dropzone-label>
+  </ngx-dropzone-preview>
+</ngx-dropzone>
