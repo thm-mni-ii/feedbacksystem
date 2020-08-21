@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model._
-import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.services.core.UserService
 import de.thm.ii.fbs.services.labels.ConferenceSystemLabels
 import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
@@ -38,14 +38,14 @@ class ClassroomController {
     .put("username", user.username)
     .put("prename", user.prename)
     .put("surname", user.surname)
-    .put("role", user.roleid)
+    .put("role", user.globalRole.id)
 
   /**
     * Removes users that loose connections
     */
   UserSessionMap.onDelete((id: String, p: Principal) => {
     val courseUser = for {
-      user <- this.userService.loadUserFromDB(p.getName)
+      user <- this.userService.find(p.getName)
       courseId <- Classroom.leave(user)
     } yield (courseId, user)
 
@@ -68,7 +68,7 @@ class ClassroomController {
   def userJoined(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val courseId = m.get(courseIdLiteral).asInt();
     val principal = headerAccessor.getUser
-    val globalUserOpt = this.userService.loadUserFromDB(principal.getName);
+    val globalUserOpt = this.userService.find(principal.getName);
     val userOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId)
     val user = userToJson(userOpt.getOrElse(globalUserOpt.get))
     Classroom.join(courseId, userOpt.getOrElse(globalUserOpt.get))
@@ -85,7 +85,7 @@ class ClassroomController {
     val courseId = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
     val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
-    val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
+    val globalUserOpt = this.userService.find(principal.getName)
     val user = localUserOpt.getOrElse(globalUserOpt.get)
     if (user.isAtLeastInRole(Role.TUTOR) || globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)){
       val response = Classroom.getParticipants(courseId)
@@ -112,7 +112,7 @@ class ClassroomController {
   def handleInviteMsg(@Payload invite: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val principal = headerAccessor.getUser
     val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get("courseid").asInt());
-    val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
+    val globalUserOpt = this.userService.find(principal.getName)
 
     if (!userOpt.get.isAtLeastInRole(Role.TUTOR) && !globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)) {
       logger.warn(s"User: ${userOpt.get.username} tried to access the stream at 'handleInviteMsg' without authorization")
@@ -154,7 +154,7 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/tickets"))
   def getAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val localUserOpt = this.userService.loadCourseUserFromDB(headerAccessor.getUser.getName, m.retrive(courseIdLiteral).asInt().get);
-    val globalUserOpt = this.userService.loadUserFromDB(headerAccessor.getUser.getName)
+    val globalUserOpt = this.userService.find(headerAccessor.getUser.getName)
     var userOpt = if (globalUserOpt.get.isAtLeastInRole(Role.TUTOR)) globalUserOpt else localUserOpt
     localUserOpt match {
       case Some(v) => userOpt = localUserOpt;
@@ -243,8 +243,8 @@ class ClassroomController {
       assignee <- m.retrive("assignee").asObject()
       creatorName <- creator.retrive("username").asText()
       assigneeName <- assignee.retrive("username").asText()
-      creatorAsUser <- userService.loadUserFromDB(creatorName)
-      assigneeAsUser <- userService.loadUserFromDB(assigneeName)
+      creatorAsUser <- userService.find(creatorName)
+      assigneeAsUser <- userService.find(assigneeName)
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
@@ -420,7 +420,7 @@ class ClassroomController {
     val courseId = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
     val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
-    val globalUserOpt = this.userService.loadUserFromDB(principal.getName)
+    val globalUserOpt = this.userService.find(principal.getName)
     val user = localUserOpt.getOrElse(globalUserOpt.get)
     smt.convertAndSendToUser(user.username, "/classroom/conferences",
       UserConferenceMap.getInvitations(courseId).map(invitationToJson)

@@ -10,6 +10,7 @@ import java.util.Date
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.Role
 import de.thm.ii.fbs.security.Secrets
+import de.thm.ii.fbs.services.core.CourseService
 import de.thm.ii.fbs.services.labels.{SubmissionDBLabels, TaskDBLabels, TaskTestsystemDBLabels, TestsystemLabels, UserDBLabels}
 import de.thm.ii.fbs.util.{DB, FileOperations, JsonParser, ResourceNotFoundException}
 import org.slf4j.{Logger, LoggerFactory}
@@ -89,7 +90,7 @@ class TaskService {
     * @return boolean if update worked
     */
   def setSubmissionFilename(submissionid: Int, filename: String): Boolean = {
-    0 == DB.update("UPDATE submission set filename = ? where submission_id = ?;", filename, submissionid)
+    1 == DB.update("UPDATE submission set filename = ? where submission_id = ?;", filename, submissionid)
   }
 
   /**

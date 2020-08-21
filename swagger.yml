@@ -28,6 +28,8 @@ tags:
     description: "Checker configuration api"
   - name: "Submission"
     description: "Task submission api"
+  - name: "Legal"
+    description: "Legally obligatory documents and checks"
 
 paths:
   /login/cas:
@@ -186,7 +188,7 @@ paths:
         403:
           description: "Forbidden"
 
-  /users/{id}/passwd:
+  /users/{uid}/passwd:
     put:
       security:
         - JWT: []
@@ -197,7 +199,7 @@ paths:
       consumes:
         - "application/json"
       parameters:
-        - name: "id"
+        - name: "uid"
           in: "path"
           description: "user id"
           required: true
@@ -309,6 +311,40 @@ paths:
         404:
           description: "Not found"
 
+  /courses/{cid}/participants:
+    get:
+      security:
+        - JWT: []
+      tags:
+        - "Course Registration"
+      summary: "Get all participants of a course"
+      description: ""
+      produces:
+        - "application/json"
+      parameters:
+        - name: "cid"
+          in: "path"
+          description: "course id"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Participant'
+          headers:
+            Authorization:
+              type: string
+              description: "Bearer <JWT-Token>"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not found"
+
   /users/{uid}/courses/{cid}:
     put:
       security:
@@ -331,7 +367,7 @@ paths:
           type: integer
         - in: "body"
           name: "body"
-          description: "Course role id 0: Docent, 1: Turor, 2: Student, default is 2"
+          description: "Course role id 0: Docent, 1: Tutor, 2: Student, default is 2"
           required: false
           schema:
             type: object
@@ -1095,6 +1131,159 @@ paths:
         404:
           description: "Not Found"
 
+  /courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file:
+    get:
+      security:
+        - JWT: []
+      tags:
+        - "Checker Configuration"
+      summary: "Get a the main file of the configuration"
+      produces:
+        - text/*
+        - application/*
+      parameters:
+        - name: "cid"
+          in: "path"
+          description: "course id"
+          required: true
+          type: integer
+        - name: "tid"
+          in: "path"
+          description: "task id"
+          required: true
+          type: integer
+        - name: "ccid"
+          in: "path"
+          description: "configuration id"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: file
+          headers:
+            Authorization:
+              type: string
+              description: "Bearer <JWT-Token>"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+  /courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file:
+    get:
+      security:
+        - JWT: []
+      tags:
+        - "Checker Configuration"
+      summary: "Get a list of configured checkers"
+      produces:
+        - text/*
+        - application/*
+      parameters:
+        - name: "cid"
+          in: "path"
+          description: "course id"
+          required: true
+          type: integer
+        - name: "tid"
+          in: "path"
+          description: "task id"
+          required: true
+          type: integer
+        - name: "ccid"
+          in: "path"
+          description: "configuration id"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: file
+          headers:
+            Authorization:
+              type: string
+              description: "Bearer <JWT-Token>"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+
+  /legal/impressum:
+    get:
+      tags:
+        - "Legal"
+      summary: "Returns the imprint"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: file
+  /legal/privacy-text:
+    get:
+      tags:
+        - "Legal"
+      summary: "Returns the information how user data is treated in the system"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: file
+  /legal/termsofuse/{uid}:
+    get:
+      tags:
+        - "Legal"
+      summary: "Get the information if a user accepted the terms of usage"
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: "User id"
+          type: integer
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              accepted:
+                type: boolean
+                description: "True if accepted, false otherwise"
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+    put:
+      tags:
+        - "Legal"
+      summary: "Accept the terms of usage"
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: "User id"
+          type: integer
+      responses:
+        200:
+          description: "OK"
+        400:
+          description: "Bad Request"
+        401:
+          description: "Unauthorized"
+        403:
+          description: "Forbidden"
+        404:
+          description: "Not Found"
+
 definitions:
   User:
     type: object
@@ -1176,7 +1365,7 @@ definitions:
     type: object
     required:
       - checkerType
-      - mainFile
+      - ord
     properties:
       id:
         type: integer
@@ -1191,6 +1380,36 @@ definitions:
       ord:
         type: string
         description: "Defines in which order the checker are executed"
+  Participant:
+    type: object
+    properties:
+      user:
+        $ref: '#/definitions/User'
+      role:
+        type: integer
+        description: "Users course role id"
+  JWTToken:
+    type: object
+    properties:
+      id:
+        type: integer
+        description: "The users id"
+      username:
+        type: string
+        description: "The users username"
+      globalRole:
+        type: integer
+        description: "The users global role id"
+      courseRoles:
+        type: object
+        description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 0: User)"
+        properties:
+          key:
+            type: integer
+            description: The course id
+          value:
+            type: integer
+            description: "The course role "
 
 securityDefinitions:
   JWT:
