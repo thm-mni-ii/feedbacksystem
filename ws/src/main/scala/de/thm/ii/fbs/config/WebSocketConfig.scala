@@ -2,8 +2,8 @@ package de.thm.ii.fbs.config
 
 import java.security.Principal
 
-import de.thm.ii.fbs.model.UserSessionMap
-import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.model.practiceroom.UserSessionMap
+import de.thm.ii.fbs.services.core.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.{Bean, Configuration, Primary}
 import org.springframework.messaging.simp.SimpMessageType

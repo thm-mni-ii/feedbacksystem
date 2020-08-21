@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.old
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -8,10 +8,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.Role
 import de.thm.ii.fbs.security.Secrets
-import de.thm.ii.fbs.services.core.CourseService
-import de.thm.ii.fbs.services.labels.{SubmissionDBLabels, TaskDBLabels, TaskTestsystemDBLabels, TestsystemLabels, UserDBLabels}
+import de.thm.ii.fbs.services.core.{CourseService, StorageService}
+import de.thm.ii.fbs.services.labels._
+import de.thm.ii.fbs.services.{CourseParamService, SubmissionService, TestsystemService}
 import de.thm.ii.fbs.util.{DB, FileOperations, JsonParser, ResourceNotFoundException}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component
   * @author Benjamin Manns
   */
 @Component
-class TaskService {
+class TaskServiceOld {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 
@@ -46,7 +46,7 @@ class TaskService {
   val storageService = new StorageService(compile_production)
   @Autowired
   private val kafkaTemplate: KafkaTemplate[String, String] = null
-  private val logger: Logger = LoggerFactory.getLogger(classOf[TaskService])
+  private val logger: Logger = LoggerFactory.getLogger(classOf[TaskServiceOld])
 
   private val sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

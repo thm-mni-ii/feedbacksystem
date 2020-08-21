@@ -1,13 +1,13 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.core
 
-import org.springframework.core.io.Resource
-import org.springframework.core.io.UrlResource
+import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
 import java.net.MalformedURLException
 import java.nio.file._
-import org.springframework.web.multipart.MultipartFile
-import java.io.{BufferedOutputStream, ByteArrayInputStream, FileOutputStream, IOException}
+
 import de.thm.ii.fbs.model.TemporaryFileWriter
 import de.thm.ii.fbs.security.Secrets
+import org.springframework.core.io.{Resource, UrlResource}
+import org.springframework.web.multipart.MultipartFile
 
 /**
   * More or less copy paste from https://grokonez.com/frontend/angular/angular-4-uploadget-multipartfile-tofrom-spring-boot-server
@@ -325,10 +325,8 @@ class StorageService(compile_production: Boolean) {
     try {
       Files.createDirectory(UPLOAD_FOLDER)
       Files.createDirectory(ZIP_IMPORT_FOLDER)
-    }
-    catch {
-      case e: IOException =>
-        throw new RuntimeException("Could not initialize storage!")
+    } catch {
+      case e: IOException => throw new RuntimeException("Could not initialize storage!")
     }
   }
 }

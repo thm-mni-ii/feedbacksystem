@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services
+package de.thm.ii.fbs.services.old
 
 import java.io
 import java.nio.file.{Files, Path, Paths}
@@ -6,8 +6,9 @@ import java.sql._
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import de.thm.ii.fbs.model.{Course, User}
+import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.security.Secrets
+import de.thm.ii.fbs.services.SubmissionService
 import de.thm.ii.fbs.services.labels._
 import de.thm.ii.fbs.util._
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -50,7 +51,7 @@ class CourseServiceOld {
 
   /** all interactions with tasks are done via a taskService*/
   @Autowired
-  val taskService: TaskService = null
+  val taskService: TaskServiceOld = null
   @Autowired
   private val submissionService: SubmissionService = null
   /**

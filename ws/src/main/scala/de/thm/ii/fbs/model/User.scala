@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.nmodel
+package de.thm.ii.fbs.model
 
 import java.security.Principal
 

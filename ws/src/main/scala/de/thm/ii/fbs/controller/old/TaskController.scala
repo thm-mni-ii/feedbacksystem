@@ -1,18 +1,18 @@
-package de.thm.ii.fbs.controller
+package de.thm.ii.fbs.controller.old
 
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
-
-import scala.jdk.CollectionConverters._
 import java.util.{Date, NoSuchElementException, Timer, TimerTask}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.TaskExtension
-import de.thm.ii.fbs.services.core.{CourseService, UserService}
-import de.thm.ii.fbs.services.labels.{SubmissionDBLabels, TaskDBLabels, TaskTestsystemDBLabels, TestsystemLabels, UserDBLabels}
+import de.thm.ii.fbs.services.core.{CourseService, StorageService, UserService}
+import de.thm.ii.fbs.services.labels._
+import de.thm.ii.fbs.services.old.TaskServiceOld
 import de.thm.ii.fbs.services.{TestsystemService, _}
-import de.thm.ii.fbs.util.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException, Users}
+import de.thm.ii.fbs.util.JsonWrapper._
+import de.thm.ii.fbs.util.{BadRequestException, JsonParser, ResourceNotFoundException, UnauthorizedException}
 import javax.servlet.http.HttpServletRequest
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -20,14 +20,15 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Bean
-import org.springframework.core.io.{Resource, UrlResource}
+import org.springframework.core.io.Resource
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.{DefaultKafkaConsumerFactory, KafkaTemplate}
 import org.springframework.kafka.listener.{ContainerProperties, KafkaMessageListenerContainer, MessageListener}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
-import de.thm.ii.fbs.util.JsonWrapper._
+
+import scala.jdk.CollectionConverters._
 
 /**
   * TaskController implement routes for submitting task and receiving results
@@ -39,7 +40,7 @@ import de.thm.ii.fbs.util.JsonWrapper._
 @RequestMapping(path = Array("/api/v1"))
 class TaskController {
   @Autowired
-  private val taskService: TaskService = null
+  private val taskService: TaskServiceOld = null
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired

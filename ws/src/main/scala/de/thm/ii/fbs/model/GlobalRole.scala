@@ -16,4 +16,16 @@ object GlobalRole extends Enumeration {
     * Usual user.
     */
   val USER = Value(2)
+
+  /**
+    * Parse an int to a global role.
+    * @param roleId The role id
+    * @return Global role, where the id is mapped to its assigned enum type, if no enum type
+    *         is assigned to the roleId provided, then the USER type is returned.
+    */
+  def parse(roleId: Int): GlobalRole.Value = roleId match {
+    case 0 => GlobalRole.ADMIN
+    case 1 => GlobalRole.MODERATOR
+    case _ => GlobalRole.USER
+  }
 }

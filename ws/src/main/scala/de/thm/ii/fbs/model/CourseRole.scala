@@ -1,31 +1,31 @@
 package de.thm.ii.fbs.model
 
 /**
-  * The global roles of users
+  * The course roles of a user
   */
-object GlobalRole extends Enumeration {
+object CourseRole extends Enumeration {
   /**
-    * Admin manages everything.
+    * Admin of the course.
     */
-  val ADMIN = Value(0)
+  val DOCENT = Value(0)
   /**
-    * Moderator manages courses, docents and tutors.
+    * Moderator of the course
     */
-  val MODERATOR = Value(1)
+  val TUTOR = Value(1)
   /**
-    * Usual user.
+    * Participant in the course.
     */
-  val USER = Value(2)
+  val STUDENT = Value(2)
 
   /**
-    * Parse an int to a global role.
+    * Parse an int to a course role.
     * @param roleId The role id
-    * @return Global role, where the id is mapped to its assigned enum type, if no enum type
-    *         is assigned to the roleId provided, then the USER type is returned.
+    * @return Course role, where the id is mapped to its assigned enum type, if no enum type
+    *         is assigned to the roleId provided, then the STUDENT type is returned.
     */
-  def parse(roleId: Int): GlobalRole.Value = roleId match {
-    case 0 => GlobalRole.ADMIN
-    case 1 => GlobalRole.MODERATOR
-    case _ => GlobalRole.USER
+  def parse(roleId: Int): CourseRole.Value = roleId match {
+    case 0 => CourseRole.DOCENT
+    case 1 => CourseRole.TUTOR
+    case _ => CourseRole.STUDENT
   }
 }

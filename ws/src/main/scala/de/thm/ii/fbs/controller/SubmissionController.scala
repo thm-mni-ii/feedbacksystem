@@ -1,9 +1,12 @@
 package de.thm.ii.fbs.controller
 
 import java.nio.file.Paths
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.util.{ResourceNotFoundException, UnauthorizedException}
 import de.thm.ii.fbs.services._
+import de.thm.ii.fbs.services.core.{StorageService, UserService}
+import de.thm.ii.fbs.services.old.TaskServiceOld
 import javax.servlet.http.HttpServletRequest
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -11,6 +14,7 @@ import org.springframework.core.io.{Resource, UrlResource}
 import org.springframework.http.{HttpHeaders, HttpStatus, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
 import scala.jdk.CollectionConverters._
 
 /**
@@ -22,7 +26,7 @@ import scala.jdk.CollectionConverters._
 @RequestMapping(path = Array("/api/v1"))
 class SubmissionController {
   @Autowired
-  private val taskService: TaskService = null
+  private val taskService: TaskServiceOld = null
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired

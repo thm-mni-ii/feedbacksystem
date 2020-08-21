@@ -5,9 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
 /**
-  * HomeController serve the Angular App and force every non registered "api" route to be a error 404
-  *
-  * @author Allan Karlson
+  * HomeController serve the Angular App and force every non registered "api" route to be an 404 error
   */
 @Controller
 class HomeController {

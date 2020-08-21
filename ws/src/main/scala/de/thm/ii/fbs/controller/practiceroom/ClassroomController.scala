@@ -1,11 +1,12 @@
-package de.thm.ii.fbs.controller
+package de.thm.ii.fbs.controller.practiceroom
 
 import java.security.Principal
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
-import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.practiceroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
+import de.thm.ii.fbs.model.{practiceroom, _}
+import de.thm.ii.fbs.model.practiceroom.{Classroom, Ticket, Tickets, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.core.UserService
 import de.thm.ii.fbs.services.labels.ConferenceSystemLabels
 import de.thm.ii.fbs.util.JsonWrapper._
@@ -248,7 +249,7 @@ class ClassroomController {
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
-    } yield (Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
+    } yield (practiceroom.Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
 
     ticketAndUser match {
       case Some(v) => {

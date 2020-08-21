@@ -1,7 +1,8 @@
-package de.thm.ii.fbs.controller
+package de.thm.ii.fbs.controller.practiceroom
 
 import java.net.URI
 import java.util.UUID
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
 import de.thm.ii.fbs.services.labels.ConferenceSystemLabels

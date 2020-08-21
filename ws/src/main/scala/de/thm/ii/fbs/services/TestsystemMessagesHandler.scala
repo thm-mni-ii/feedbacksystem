@@ -2,6 +2,8 @@ package de.thm.ii.fbs.services
 import java.io.{File, FileOutputStream}
 import java.util.Base64
 
+import de.thm.ii.fbs.services.core.StorageService
+import de.thm.ii.fbs.services.old.TaskServiceOld
 import de.thm.ii.fbs.util.{FileOperations, JsonParser}
 import org.apache.commons.io.FileUtils
 import org.slf4j.{Logger, LoggerFactory}
@@ -16,7 +18,7 @@ class TestsystemMessagesHandler {
   @Value("${compile.production}")
   private val compile_production: Boolean = true
   @Autowired
-  private val taskService: TaskService = null
+  private val taskService: TaskServiceOld = null
   @Autowired
   private val taskExtensionService: TaskExtensionService = null
   private val LABEL_TASK_ID = "taskid"

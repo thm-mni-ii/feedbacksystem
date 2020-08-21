@@ -1,18 +1,18 @@
-package de.thm.ii.fbs.controller
+package de.thm.ii.fbs.controller.old
 
 import java.io
 import java.net.URI
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services._
 import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
-import de.thm.ii.fbs.services.core.{CourseService, UserService}
+import de.thm.ii.fbs.services.core.{CourseService, StorageService, UserService}
 import de.thm.ii.fbs.services.labels.{ConferenceSystemLabels, CourseDBLabels, RoleDBLabels}
+import de.thm.ii.fbs.services.old.TaskServiceOld
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.util._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -36,7 +36,7 @@ class CourseController {
   @Autowired
   private val courseParamService: CourseParamService = null
   @Autowired
-  private val taskService: TaskService = null
+  private val taskService: TaskServiceOld = null
   @Autowired
   private val testsystemService: TestsystemService = null
   @Autowired

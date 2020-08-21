@@ -8,8 +8,9 @@ import java.util.{Date, Timer, TimerTask}
 import scala.jdk.CollectionConverters._
 import au.com.bytecode.opencsv.CSVWriter
 import de.thm.ii.fbs.model.{AdminUser, User}
-import de.thm.ii.fbs.services.labels.{ReSubmissionDBLabels, SubmissionDBLabels, SubmissionTestsystemDBLabels,
-  TaskDBLabels, TaskTestsystemDBLabels, UserDBLabels}
+import de.thm.ii.fbs.services.core.{CourseService, StorageService}
+import de.thm.ii.fbs.services.labels.{ReSubmissionDBLabels, SubmissionDBLabels, SubmissionTestsystemDBLabels, TaskDBLabels, TaskTestsystemDBLabels, UserDBLabels}
+import de.thm.ii.fbs.services.old.TaskServiceOld
 import de.thm.ii.fbs.util.{DB, ResourceNotFoundException}
 import org.springframework.beans.factory.SmartInitializingSingleton
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -36,7 +37,7 @@ class SubmissionService {
   @Autowired
   private val tokenService: TokenService = null
   @Autowired
-  private val taskService: TaskService = null
+  private val taskService: TaskServiceOld = null
   private final val ERROR_CREATING_ADMIN_MSG = "Error creating submission. Please contact administrator."
   @Value("${compile.production}")
   private val compile_production: Boolean = true

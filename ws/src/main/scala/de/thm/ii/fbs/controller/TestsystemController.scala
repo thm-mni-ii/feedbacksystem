@@ -2,6 +2,7 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.services._
+import de.thm.ii.fbs.services.core.UserService
 import de.thm.ii.fbs.util.{BadRequestException, ResourceNotFoundException, UnauthorizedException, Users}
 import javax.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
