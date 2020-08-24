@@ -75,9 +75,10 @@ class TaskController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("name").asText(),
         body.retrive("deadline").asLong(),
+        body.retrive("mediaType").asText(),
         body.retrive("description").asText()
       ) match {
-        case (Some(name), Some(deadline), desc) => taskService.create(cid, Task(name, new Date(deadline), desc.getOrElse("")))
+        case (Some(name), Some(deadline), Some(mediaType), desc) => taskService.create(cid, Task(name, new Date(deadline), mediaType, desc.getOrElse("")))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -104,9 +105,10 @@ class TaskController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("name").asText(),
         body.retrive("deadline").asLong(),
+        body.retrive("mediaType").asText(),
         body.retrive("description").asText()
       ) match {
-        case (Some(name), Some(deadline), desc) => taskService.update(cid, tid, Task(name, new Date(deadline), desc.getOrElse("")))
+        case (Some(name), Some(deadline), Some(mediaType), desc) => taskService.update(cid, tid, Task(name, new Date(deadline), mediaType, desc.getOrElse("")))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {

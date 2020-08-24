@@ -25,7 +25,7 @@ class CheckerConfigurationService {
     * @return List of configurations
     */
   def getAll(cid: Int, tid: Int): List[CheckrunnerConfiguration] =
-    DB.query("SELECT configuration_id, check_type, main_file, secondary_file, ord FROM checkrunner_configuration " +
+    DB.query("SELECT configuration_id, check_type, main_file_uploaded, secondary_file_uploaded, ord FROM checkrunner_configuration " +
       "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ?",
       (res, _) => parseResult(res), cid, tid)
 
@@ -39,8 +39,8 @@ class CheckerConfigurationService {
   def create(cid: Int, tid: Int, cc: CheckrunnerConfiguration): List[CheckrunnerConfiguration] =
     DB.query("SELECT DISTINCT task_id FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
       "WHERE course_id = ? AND task_id = ?", (res, _) => res.getInt("task_id"), cid, tid)
-      .flatMap(_ => DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file, secondary_file, ord) VALUES (?,?,?,?,?);",
-          tid, cc.checkerType, cc.mainFile, cc.secondaryFile.orNull, cc.ord))
+      .flatMap(_ => DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord) VALUES (?,?,?,?,?);",
+          tid, cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord))
       .flatMap(_ => getAll(cid, tid))
     match {
       case Nil => throw new SQLException("Configuration could not be created")
@@ -56,10 +56,10 @@ class CheckerConfigurationService {
     * @return True if successful
     */
   def update(cid: Int, tid: Int, ccid: Int, cc: CheckrunnerConfiguration): Boolean = {
-    1 == DB.update("UPDATE checker_configuration SET checker_type = ?, main_file = ?, secondary_file = ?, ord = ?" +
+    1 == DB.update("UPDATE checker_configuration SET checker_type = ?, main_file_uploaded = ?, secondary_file_uploaded = ?, ord = ?" +
       " WHERE configuration_id IN (SELECT configuration_id FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
     "WHERE course_id = ? AND task_id = ? AND configuration_id = ?)",
-    cc.checkerType, cc.mainFile, cc.secondaryFile.orNull, cid, tid, ccid)
+    cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cid, tid, ccid)
   }
 
   /**
@@ -76,8 +76,8 @@ class CheckerConfigurationService {
 
   private def parseResult(res: ResultSet): CheckrunnerConfiguration = CheckrunnerConfiguration(
     checkerType = res.getString("checker_type"),
-    mainFile = res.getString("main_file"),
-    secondaryFile = Option(res.getString("secondary_file")),
+    mainFileUploaded = res.getBoolean("main_file_uploaded"),
+    secondaryFileUploaded = res.getBoolean("secondary_file_uploaded"),
     ord = res.getInt("ord")
   )
 }

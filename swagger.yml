@@ -784,6 +784,95 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/courses/{cid}/tasks/{tid}/main-file":
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Upload the main file for the task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          "*/*":
+            schema:
+              type: string
+              format: binary
+        description: A file
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks/{tid}/secondary-file":
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Upload the secondary file for the task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          "*/*":
+            schema:
+              type: string
+              format: binary
+        description: A file
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
       security:
@@ -1201,6 +1290,53 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Update / upload a new file
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        description: new file
+        content:
+          "*/*":
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file":
     get:
       security:
@@ -1244,6 +1380,53 @@ paths:
               schema:
                 type: string
                 format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Update / upload a new file
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        description: new file
+        content:
+          "*/*":
+            schema:
+              type: string
+              format: binary
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
         "401":
           description: Unauthorized
         "403":
@@ -1413,13 +1596,17 @@ components:
         deadline:
           type: number
           description: Unix time as long
+        mediaType:
+          type: string
+          description: The media type for the submissions according to RFC 4288
     Submission:
       type: object
       properties:
         id:
           type: integer
-        fileName:
-          type: string
+        fileUploaded:
+          type: boolean
+          description: Only reading posible; information provided by server
         submissionTime:
           type: integer
           description: Unit time as long
@@ -1442,12 +1629,12 @@ components:
           type: integer
         checkerType:
           type: string
-        mainFile:
-          type: string
-          description: The main file points at the checker script
-        secondaryFile:
-          type: string
-          description: Points at a additional file
+        mainFileUploaded:
+          type: boolean
+          description:  True if main file was provided
+        secondaryFileUploaded:
+          type: boolean
+          description: True if secondary file was provided
         ord:
           type: string
           description: Defines in which order the checker are executed
