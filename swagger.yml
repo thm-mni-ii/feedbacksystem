@@ -1,1419 +1,1484 @@
-swagger: "2.0"
+openapi: 3.0.0
 info:
-  title: "Feedbacksystem"
-  description: "Feedbacksystem API"
-  version: "1.0.0"
+  title: Feedbacksystem
+  description: Feedbacksystem API
+  version: 1.0.0
   contact:
-    email: "Andrej.Sajenko@mni.thm.de"
+    email: Andrej.Sajenko@mni.thm.de
   license:
-    name: "CC BY-NC-SA 4.0"
-    url: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
-
-host: "feedback.mni.thm.de"
-basePath: "/api/v1"
-schemes:
-  - "https"
+    name: CC BY-NC-SA 4.0
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
 tags:
-  - name: "Login"
-    description: "Login api"
-  - name: "User"
-    description: "The user api"
-  - name: "Course"
-    description: "The course api"
-  - name: "Course Registration"
-    description: "The course registration api"
-  - name: "Task"
-    description: "The task api"
-  - name: "Checker Configuration"
-    description: "Checker configuration api"
-  - name: "Submission"
-    description: "Task submission api"
-  - name: "Legal"
-    description: "Legally obligatory documents and checks"
-
+  - name: Login
+    description: Login api
+  - name: User
+    description: The user api
+  - name: Course
+    description: The course api
+  - name: Course Registration
+    description: The course registration api
+  - name: Task
+    description: The task api
+  - name: Checker Configuration
+    description: Checker configuration api
+  - name: Submission
+    description: Task submission api
+  - name: Legal
+    description: Legally obligatory documents and checks
 paths:
   /login/cas:
     post:
       tags:
-        - "Login"
-      summary: "Login into system via the cas protocol"
+        - Login
+      summary: Login into system via the cas protocol
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
   /login/password:
     post:
       tags:
-        - "Login"
-      summary: "Login into system via username and password"
-      parameters:
-        - in: body
-          name: body
-          schema:
-            type: object
-            required:
-              - username
-              - password
-            properties:
-              username:
-                type: string
-              password:
-                type: string
+        - Login
+      summary: Login into system via username and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
   /users:
     get:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Get user list"
+        - User
+      summary: Get user list
       description: ""
-      produces:
-        - "application/json"
       responses:
-        200:
-          description: "OK"
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/User"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
     post:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Create a new user"
+        - User
+      summary: Create a new user
       description: ""
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "User object to create"
-          required: true
-          schema:
-            $ref: "#/definitions/User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        description: User object to create
+        required: true
       responses:
-        201:
-          description: "Created"
+        "201":
+          description: Created
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Invalid Format"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Invalid Format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
         "409":
-          description: "Already Existing"
-
-  /users/{uid}:
+          description: Already Existing
+  "/users/{uid}":
     get:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Find user by ID"
-      description: "Returns a single user"
-      produces:
-        - "application/json"
+        - User
+      summary: Find user by ID
+      description: Returns a single user
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: uid
+          in: path
+          description: user id
           required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            $ref: "#/definitions/User"
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
     delete:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Delete user by ID"
+        - User
+      summary: Delete user by ID
       description: ""
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: uid
+          in: path
+          description: user id
           required: true
-          type: integer
+          schema:
+            type: integer
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-
-  /users/{uid}/passwd:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/users/{uid}/passwd":
     put:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Change password of a local user"
+        - User
+      summary: Change password of a local user
       description: ""
-      consumes:
-        - "application/json"
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "The new password"
+        - name: uid
+          in: path
+          description: user id
           required: true
           schema:
-            type: object
-            required:
-              - "passwd"
-              - "passwdRepeat"
-            properties:
-              passwd:
-                type: string
-              passwdRepeat:
-                type: string
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - passwd
+                - passwdRepeat
+              properties:
+                passwd:
+                  type: string
+                passwdRepeat:
+                  type: string
+        description: The new password
+        required: true
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Invalid Format"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /users/{uid}/global-role:
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Invalid Format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/users/{uid}/global-role":
     put:
       security:
         - JWT: []
       tags:
-        - "User"
-      summary: "Change global role of a user"
+        - User
+      summary: Change global role of a user
       description: ""
-      consumes:
-        - "application/json"
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "The global role id"
+        - name: uid
+          in: path
+          description: user id
           required: true
           schema:
-            type: object
-            required:
-              - "roleId"
-            properties:
-              roleId:
-                type: integer
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleId
+              properties:
+                roleId:
+                  type: integer
+        description: The global role id
+        required: true
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Invalid Format"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /users/{uid}/courses:
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Invalid Format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/users/{uid}/courses":
     get:
       security:
         - JWT: []
       tags:
-        - "Course Registration"
-      summary: "Get all registered courses"
+        - Course Registration
+      summary: Get all registered courses
       description: ""
-      produces:
-        - "application/json"
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: uid
+          in: path
+          description: user id
           required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Course"
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /courses/{cid}/participants:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/participants":
     get:
       security:
         - JWT: []
       tags:
-        - "Course Registration"
-      summary: "Get all participants of a course"
+        - Course Registration
+      summary: Get all participants of a course
       description: ""
-      produces:
-        - "application/json"
       parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Participant'
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /users/{uid}/courses/{cid}:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Participant"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/users/{uid}/courses/{cid}":
     put:
       security:
         - JWT: []
       tags:
-        - "Course Registration"
-      summary: "Register a user into a course"
-      consumes:
-        - application/json
+        - Course Registration
+      summary: Register a user into a course
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: uid
+          in: path
+          description: user id
           required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "Course role id 0: Docent, 1: Tutor, 2: Student, default is 2"
-          required: false
           schema:
-            type: object
-            required:
-              - "roleId"
-            properties:
-              roleId:
-                type: integer
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleId
+              properties:
+                roleId:
+                  type: integer
+        description: "Course role id 0: Docent, 1: Tutor, 2: Student, default is 2"
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
     delete:
       security:
         - JWT: []
       tags:
-        - "Course Registration"
-      summary: "De-register a user from a course"
+        - Course Registration
+      summary: De-register a user from a course
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: uid
+          in: path
+          description: user id
           required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
+          schema:
+            type: integer
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   /courses:
     get:
       security:
         - JWT: []
       tags:
-        - "Course"
-      summary: "Get a list of all courses"
+        - Course
+      summary: Get a list of all courses
       description: ""
-      produces:
-        - "application/json"
       parameters:
         - name: visible
           in: query
-          type: boolean
-          description: "Returns all courses that satisfy the visibility value [true, false]"
-      responses:
-        200:
-          description: "OK"
+          description: Returns all courses that satisfy the visibility value [true, false]
           schema:
-            type: array
-            items:
-              $ref: "#/definitions/Course"
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-    post:
-      security:
-        - JWT: []
-      tags:
-        - "Course"
-      summary: "Create a new course"
-      description: ""
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Course object to create"
-          required: true
-          schema:
-            $ref: "#/definitions/Course"
-      responses:
-        "201":
-          description: "Created"
-          headers:
-            Authorization:
-              description: "Bearer <JWT-Token>"
-              type: string
-          schema:
-            type: array
-            items:
-              $ref: "#/definitions/Course"
-        400:
-          description: "Invalid Format"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-
-  /courses/{cid}:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Course"
-      summary: "Get a course"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Course'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-    put:
-      security:
-        - JWT: []
-      tags:
-        - "Course"
-      summary: "Update course"
-      description: ""
-      consumes:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "Course object to update"
-          required: true
-          schema:
-            $ref: "#/definitions/Course"
-      responses:
-        200:
-          description: "OK"
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Invalid format"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-    delete:
-      security:
-        - JWT: []
-      tags:
-        - "Course"
-      summary: "Delete course by ID"
-      description: ""
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-
-  /courses/{cid}/export:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Course"
-      summary: "Get a Zip-Archive of the course"
-      description: "Get a Zip containing an archive of the course and tasks without user data"
-      produces:
-        - "application/zip"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          schema:
-            type: file
-            format: binary
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /courses/{cid}/tasks:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Task"
-      summary: "Get all tasks of a course"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Task'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-    post:
-      security:
-        - JWT: []
-      tags:
-        - "Task"
-      summary: "Create a new task for this course"
-      consumes:
-        - "application/json"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "Task object to create"
-          required: true
-          schema:
-            $ref: "#/definitions/Task"
-      responses:
-        "201":
-          description: "Created"
-          schema:
-            $ref: '#/definitions/Task'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-
-  /courses/{cid}/tasks/{tid}:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Task"
-      summary: "Get a task by id"
-      produces:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Task'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-    put:
-      security:
-        - JWT: []
-      tags:
-        - "Task"
-      summary: "Update an existing task for this course"
-      consumes:
-        - "application/json"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - in: "body"
-          name: "body"
-          description: "Task object to create"
-          required: true
-          schema:
-            $ref: "#/definitions/Task"
+            type: boolean
       responses:
         "200":
-          description: "OK"
-          schema:
-            $ref: '#/definitions/Task'
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not found"
-    delete:
-      security:
-        - JWT: []
-      tags:
-        - "Task"
-      summary: "Delete a task by id"
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-
-  /users/{uid}/courses/{cid}/tasks/{tid}/submissions:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Submission"
-      summary: "Get all submissions for a task"
-      parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
-          required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - in: query
-          name: passed
-          description: "Filters only the passed submissions"
-          type: boolean
-      responses:
-        200:
-          description: "OK"
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Submission'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
     post:
       security:
         - JWT: []
       tags:
-        - "Submission"
-      summary: "Submit a solution for a task"
-      parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
-          required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - in: body
-          name: body
-          description: "The solution for the task"
-          schema:
-            format: binary
-          required: true
-      consumes:
-        - '*/*'
-      produces:
-        - "application/json"
+        - Course
+      summary: Create a new course
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Course"
+        description: Course object to create
+        required: true
       responses:
-        201:
-          description: "Created"
-          schema:
-            $ref: '#/definitions/Submission'
+        "201":
+          description: Created
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
-  /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}:
-    post:
-      security:
-        - JWT: []
-      tags:
-        - "Submission"
-      summary: "Restart the submission process"
-      parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
-          required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "sid"
-          in: "path"
-          description: "ID of submission"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "400":
+          description: Invalid Format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/courses/{cid}":
     get:
       security:
         - JWT: []
       tags:
-        - "Submission"
-      summary: "Get the current submission state"
-      produces:
-        - application/json
+        - Course
+      summary: Get a course
       parameters:
-        - name: "uid"
-          in: "path"
-          description: "user id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "sid"
-          in: "path"
-          description: "ID of submission"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            $ref: '#/definitions/Submission'
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
-  /courses/{cid}/tasks/{tid}/checker-configurations:
-    get:
-      security:
-        - JWT: []
-      tags:
-        - "Checker Configuration"
-      summary: "Get a list of configured checkers"
-      produces:
-        - application/json
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
-          schema:
-            $ref: '#/definitions/CheckerConfig'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-      
-    post:
-      security:
-        - JWT: []
-      tags:
-        - "Checker Configuration"
-      summary: "Create a new checker configuration"
-      produces:
-        - application/json
-      consumes:
-        - multipart/form-data
-      parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
-          required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - in: formData
-          name: upfile
-          type: file
-          description: The file to upload.
-        - in: body
-          name: "object"
-          schema:
-            $ref: '#/definitions/CheckerConfig'
-      responses:
-        201:
-          description: "Created"
-          schema:
-            $ref: '#/definitions/CheckerConfig'
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Bad Request"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
-  /courses/{cid}/tasks/{tid}/checker-configurations/{ccid}:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
     put:
       security:
         - JWT: []
       tags:
-        - "Checker Configuration"
-      summary: "Update an existing checker configuration"
-      produces:
-        - application/json
-      consumes:
-        - multipart/form-data
+        - Course
+      summary: Update course
+      description: ""
       parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "ccid"
-          in: "path"
-          description: "ID of checker configuration"
-          required: true
-          type: integer
-        - in: formData
-          name: upfile
-          type: file
-          description: The file to upload.
-        - in: body
-          name: "object"
           schema:
-            $ref: '#/definitions/CheckerConfig'
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Course"
+        description: Course object to update
+        required: true
       responses:
-        200:
-          description: "OK"
-          schema:
-            $ref: '#/definitions/CheckerConfig'
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Bad Request"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Invalid format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
     delete:
       security:
         - JWT: []
       tags:
-        - "Checker Configuration"
-      summary: "Delete an existing checker configuration"
+        - Course
+      summary: Delete course by ID
+      description: ""
       parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "ccid"
-          in: "path"
-          description: "ID of checker configuration"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            $ref: '#/definitions/CheckerConfig'
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        400:
-          description: "Bad Request"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
-  /courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/courses/{cid}/export":
     get:
       security:
         - JWT: []
       tags:
-        - "Checker Configuration"
-      summary: "Get a the main file of the configuration"
-      produces:
-        - text/*
-        - application/*
+        - Course
+      summary: Get a Zip-Archive of the course
+      description: Get a Zip containing an archive of the course and tasks without user data
       parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "ccid"
-          in: "path"
-          description: "configuration id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: file
-          headers:
-            Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-  /courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks":
     get:
       security:
         - JWT: []
       tags:
-        - "Checker Configuration"
-      summary: "Get a list of configured checkers"
-      produces:
-        - text/*
-        - application/*
+        - Task
+      summary: Get all tasks of a course
       parameters:
-        - name: "cid"
-          in: "path"
-          description: "course id"
+        - name: cid
+          in: path
+          description: course id
           required: true
-          type: integer
-        - name: "tid"
-          in: "path"
-          description: "task id"
-          required: true
-          type: integer
-        - name: "ccid"
-          in: "path"
-          description: "configuration id"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "OK"
           schema:
-            type: file
+            type: integer
+      responses:
+        "200":
+          description: OK
           headers:
             Authorization:
-              type: string
-              description: "Bearer <JWT-Token>"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Create a new task for this course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/Task"
+      responses:
+        "201":
+          description: Created
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks/{tid}":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Get a task by id
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Update an existing task for this course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/Task"
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Task"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    delete:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Delete a task by id
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Get all submissions for a task
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: passed
+          description: Filters only the passed submissions
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Submission"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Submit a solution for a task
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          "*/*":
+            schema:
+              format: binary
+        description: The solution for the task
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Restart the submission process
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: sid
+          in: path
+          description: ID of submission
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Get the current submission state
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: sid
+          in: path
+          description: ID of submission
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/tasks/{tid}/checker-configurations":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Get a list of configured checkers
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckerConfig"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Create a new checker configuration
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/postCourses_cid_tasks_tid_checkerConfigurations"
+      responses:
+        "201":
+          description: Created
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckerConfig"
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}":
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Update an existing checker configuration
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: ID of checker configuration
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: "#/components/requestBodies/postCourses_cid_tasks_tid_checkerConfigurations"
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckerConfig"
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    delete:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Delete an existing checker configuration
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: ID of checker configuration
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/CheckerConfig"
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Get a the main file of the configuration
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            text/*:
+              schema:
+                type: string
+                format: binary
+            application/*:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Checker Configuration
+      summary: Get a list of configured checkers
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: configuration id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            text/*:
+              schema:
+                type: string
+                format: binary
+            application/*:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   /legal/impressum:
     get:
       tags:
-        - "Legal"
-      summary: "Returns the imprint"
+        - Legal
+      summary: Returns the imprint
       responses:
-        200:
-          description: "OK"
-          schema:
-            type: file
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
   /legal/privacy-text:
     get:
       tags:
-        - "Legal"
-      summary: "Returns the information how user data is treated in the system"
+        - Legal
+      summary: Returns the information how user data is treated in the system
       responses:
-        200:
-          description: "OK"
-          schema:
-            type: file
-  /legal/termsofuse/{uid}:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+  "/legal/termsofuse/{uid}":
     get:
       tags:
-        - "Legal"
-      summary: "Get the information if a user accepted the terms of usage"
+        - Legal
+      summary: Get the information if a user accepted the terms of usage
       parameters:
         - in: path
           name: uid
           required: true
-          description: "User id"
-          type: integer
+          description: User id
+          schema:
+            type: integer
       responses:
-        200:
-          description: "OK"
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: object
+                properties:
+                  accepted:
+                    type: boolean
+                    description: True if accepted, false otherwise
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    put:
+      tags:
+        - Legal
+      summary: Accept the terms of usage
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          description: User id
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+servers:
+  - url: https://feedback.mni.thm.de/api/v1
+components:
+  requestBodies:
+    postCourses_cid_tasks_tid_checkerConfigurations:
+      content:
+        multipart/form-data:
           schema:
             type: object
             properties:
-              accepted:
-                type: boolean
-                description: "True if accepted, false otherwise"
-        400:
-          description: "Bad Request"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-    put:
-      tags:
-        - "Legal"
-      summary: "Accept the terms of usage"
-      parameters:
-        - in: path
-          name: uid
-          required: true
-          description: "User id"
+              upfile:
+                description: The file to upload.
+                type: string
+                format: binary
+    Task:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Task"
+      description: Task object to create
+      required: true
+  securitySchemes:
+    JWT:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Bearer
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - prename
+        - surname
+        - postname
+        - email
+        - password
+      properties:
+        id:
           type: integer
-      responses:
-        200:
-          description: "OK"
-        400:
-          description: "Bad Request"
-        401:
-          description: "Unauthorized"
-        403:
-          description: "Forbidden"
-        404:
-          description: "Not Found"
-
-definitions:
-  User:
-    type: object
-    required:
-      - username
-      - prename
-      - surname
-      - postname
-      - email
-      - password
-    properties:
-      id:
-        type: integer
-      prename:
-        type: string
-      surname:
-        type: string
-      email:
-        type: string
-      password:
-        type: string
-        description: "Only for creation"
-      username:
-        type: string
-      alias:
-        type: string
-      globalRole:
-        type: integer
-        description: "0: Admin, 1: Moderator, 2: User, Default is 2"
-  Course:
-    type: object
-    required:
-      - name
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      description:
-        type: string
-      visible:
-        type: boolean
-  Task:
-    type: object
-    required:
-      - name
-      - deadline
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      description:
-        type: string
-      deadline:
-        type: number
-        description: "Unix time as long"
-  Submission:
-    type: object
-    properties:
-      id:
-        type: integer
-      fileName:
-        type: string
-      submissionTime:
-        type: integer
-        format: 'date-time'
-        description: "Unit time as long"
-      exitCode:
-        type: integer
-        description: "Indicates if the solution was valid"
-      resultText:
-        type: string
-        description: "The result of the automated check"
-      checked:
-        type: boolean
-        description: "Indicates if the solution was checked"
-  CheckerConfig:
-    type: object
-    required:
-      - checkerType
-      - ord
-    properties:
-      id:
-        type: integer
-      checkerType:
-        type: string
-      mainFile:
-        type: string
-        description: "The main file points at the checker script"
-      secondaryFile:
-        type: string
-        description: "Points at a additional file"
-      ord:
-        type: string
-        description: "Defines in which order the checker are executed"
-  Participant:
-    type: object
-    properties:
-      user:
-        $ref: '#/definitions/User'
-      role:
-        type: integer
-        description: "Users course role id"
-  JWTToken:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: "The users id"
-      username:
-        type: string
-        description: "The users username"
-      globalRole:
-        type: integer
-        description: "The users global role id"
-      courseRoles:
-        type: object
-        description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 0: User)"
-        properties:
-          key:
-            type: integer
-            description: The course id
-          value:
-            type: integer
-            description: "The course role "
-
-securityDefinitions:
-  JWT:
-    type: apiKey
-    in: header
-    name: Authorization
-    description: "Bearer <JWT-Token>"
+        prename:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+          description: Only for creation
+        username:
+          type: string
+        alias:
+          type: string
+        globalRole:
+          type: integer
+          description: "0: Admin, 1: Moderator, 2: User, Default is 2"
+    Course:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        visible:
+          type: boolean
+    Task:
+      type: object
+      required:
+        - name
+        - deadline
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: number
+          description: Unix time as long
+    Submission:
+      type: object
+      properties:
+        id:
+          type: integer
+        fileName:
+          type: string
+        submissionTime:
+          type: integer
+          description: Unit time as long
+        exitCode:
+          type: integer
+          description: Indicates if the solution was valid
+        resultText:
+          type: string
+          description: The result of the automated check
+        checked:
+          type: boolean
+          description: Indicates if the solution was checked
+    CheckerConfig:
+      type: object
+      required:
+        - checkerType
+        - ord
+      properties:
+        id:
+          type: integer
+        checkerType:
+          type: string
+        mainFile:
+          type: string
+          description: The main file points at the checker script
+        secondaryFile:
+          type: string
+          description: Points at a additional file
+        ord:
+          type: string
+          description: Defines in which order the checker are executed
+    Participant:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        role:
+          type: integer
+          description: Users course role id
+    JWTToken:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The users id
+        username:
+          type: string
+          description: The users username
+        globalRole:
+          type: integer
+          description: The users global role id
+        courseRoles:
+          type: object
+          description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 0:
+            User)"
+          properties:
+            key:
+              type: integer
+              description: The course id
+            value:
+              type: integer
+              description: "The course role "
