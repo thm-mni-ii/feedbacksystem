@@ -7,15 +7,15 @@ object GlobalRole extends Enumeration {
   /**
     * Admin manages everything.
     */
-  val ADMIN = Value(0)
+  val ADMIN: GlobalRole.Value = Value(0)
   /**
     * Moderator manages courses, docents and tutors.
     */
-  val MODERATOR = Value(1)
+  val MODERATOR: GlobalRole.Value = Value(1)
   /**
     * Usual user.
     */
-  val USER = Value(2)
+  val USER: GlobalRole.Value = Value(2)
 
   /**
     * Parse an int to a global role.

@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.practiceroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model.{practiceroom, _}
 import de.thm.ii.fbs.model.practiceroom.{Classroom, Ticket, Tickets, UserConferenceMap, UserSessionMap}
-import de.thm.ii.fbs.services.core.UserService
 import de.thm.ii.fbs.services.labels.ConferenceSystemLabels
+import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}

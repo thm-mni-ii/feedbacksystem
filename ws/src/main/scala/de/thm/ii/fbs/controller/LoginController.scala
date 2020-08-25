@@ -1,9 +1,11 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.services.core.{CourseService, UserService}
-import de.thm.ii.fbs.services.SettingService
-import de.thm.ii.fbs.util.{BadRequestException, LDAPConnector, UnauthorizedException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, UnauthorizedException}
+import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.services.persistance.{CourseService, UserService}
+import de.thm.ii.fbs.util.LDAPConnector
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.ldaptive.LdapEntry
@@ -13,8 +15,6 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 
 /**
   * LoginController simply perform login request. In future it might send also a COOKIE
-  *
-  * @author Benjamin Manns
   */
 @RestController
 @EnableCasClient
@@ -198,7 +198,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode Request Body contains json
     * @return simple answer if user need to accept privacy policy
     */
-  @RequestMapping(value = Array("/privacy/check"), method = Array(RequestMethod.POST))
+  @PostMapping(value = Array("/privacy/check"))
   def checkUsersPrivacyAcceptance(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val settingsPrivacyShow = settingService.loadSetting("privacy.show")

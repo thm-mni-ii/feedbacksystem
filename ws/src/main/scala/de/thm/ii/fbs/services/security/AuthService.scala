@@ -1,15 +1,17 @@
 package de.thm.ii.fbs.services.security
 
 import java.util.Date
+
+import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.core.UserService
-import de.thm.ii.fbs.util.UnauthorizedException
+import de.thm.ii.fbs.services.persistance.UserService
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
 import org.springframework.http.HttpHeaders
+
 import scala.util.Try
 
 /**

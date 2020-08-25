@@ -7,15 +7,15 @@ object CourseRole extends Enumeration {
   /**
     * Admin of the course.
     */
-  val DOCENT = Value(0)
+  val DOCENT: CourseRole.Value = Value(0)
   /**
     * Moderator of the course
     */
-  val TUTOR = Value(1)
+  val TUTOR: CourseRole.Value = Value(1)
   /**
     * Participant in the course.
     */
-  val STUDENT = Value(2)
+  val STUDENT: CourseRole.Value = Value(2)
 
   /**
     * Parse an int to a course role.

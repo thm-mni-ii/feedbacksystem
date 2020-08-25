@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.core
+package de.thm.ii.fbs.services.persistance
 
 import java.sql
 import java.sql.{ResultSet, SQLException}
@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
 /**
-  * Handes the persistant task state
+  * Handles the persistant task state
   */
 @Component
 class TaskService {

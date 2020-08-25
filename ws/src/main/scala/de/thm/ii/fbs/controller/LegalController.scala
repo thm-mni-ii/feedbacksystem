@@ -1,11 +1,12 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.controller.exception.{ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.{ForbiddenException, ResourceNotFoundException}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
+
 import scala.io.Source
 import scala.util.{Success, Using}
 
@@ -27,7 +28,8 @@ class LegalController {
     * @param request contain request information
     * @return markdown file content
     */
-  @RequestMapping(value = Array("/{filename}"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{filename}"))
+  @ResponseBody
   def legalTexts(@PathVariable filename: String, request: HttpServletRequest): Map[String, String] = {
     val filePath = filename match {
       case "impressum" => Some("impressum.md")
@@ -51,7 +53,8 @@ class LegalController {
     * @param res response
     * @return response content
     */
-  @RequestMapping(value = Array("/termsofuse/{uid}"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/termsofuse/{uid}"))
+  @ResponseBody
   def getTermsOfUseAcceptanceStatus(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Map[String, Boolean] = {
     val user = authService.authorize(req, res)
     user.id match {
@@ -66,7 +69,7 @@ class LegalController {
     * @param req request
     * @param res response
     */
-  @RequestMapping(value = Array("/termsofuse/{uid}"), method = Array(RequestMethod.PUT))
+  @PutMapping(value = Array("/termsofuse/{uid}"))
   def acceptTermsOfUse(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     user.id match {

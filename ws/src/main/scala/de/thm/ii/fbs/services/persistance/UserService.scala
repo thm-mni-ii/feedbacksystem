@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.core
+package de.thm.ii.fbs.services.persistance
 
 import java.sql.{ResultSet, SQLException}
 
@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component
 
 /**
   * Handles the creation, deletion and modifications of user persistant state.
-  * @author Benjamin Manns
-  * @author Andrej Sajenko
   */
 @Component
 class UserService {

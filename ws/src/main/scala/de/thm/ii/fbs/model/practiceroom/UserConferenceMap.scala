@@ -1,15 +1,11 @@
 package de.thm.ii.fbs.model.practiceroom
 
 import java.security.Principal
-
 import de.thm.ii.fbs.model.User
-
 import scala.collection.mutable
 
 /**
   * Maps session ids to principals.
-  *
-  * @author Andrej Sajenko
   */
 object UserConferenceMap {
   private val conferenceToUser = mutable.Map[Invitation, Principal]()

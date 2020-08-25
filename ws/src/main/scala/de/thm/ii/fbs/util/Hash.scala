@@ -4,7 +4,6 @@ import java.security.MessageDigest
 
 /**
   * Contains hashing algorithms.
-  * @author Andrej Sajenko
   */
 object Hash {
   /**

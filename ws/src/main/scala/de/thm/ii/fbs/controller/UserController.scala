@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
-import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import de.thm.ii.fbs.util.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -13,13 +13,10 @@ import org.springframework.web.bind.annotation._
 
 /**
   * UserController defines all routes for /users (insert, delete, update)
-  *
-  * @author Benjamin Manns
-  * @author Andrej Sajenko
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1"))
+@RequestMapping(path = Array("/api/v1"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
 class UserController {
   @Autowired
   private val userService: UserService = null
@@ -32,7 +29,8 @@ class UserController {
     * @param res http response
     * @return A list of users
     */
-  @RequestMapping(value = Array("users"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("users"))
+  @ResponseBody
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] = {
     val user = authService.authorize(req, res)
     user.globalRole match {
@@ -49,7 +47,8 @@ class UserController {
     * @param res http response
     * @return A single user
     */
-  @RequestMapping(value = Array("users/{uid}"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("users/{uid}"))
+  @ResponseBody
   def getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User = {
     val user = authService.authorize(req, res)
     ((user.globalRole, user.id) match {
@@ -69,7 +68,7 @@ class UserController {
     * @param res http response
     * @param body Content
     */
-  @RequestMapping(value = Array("users/{uid}/passwd"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PutMapping(value = Array("users/{uid}/passwd"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updatePassword(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
     val password = body.retrive("passwd").asText()
@@ -93,7 +92,7 @@ class UserController {
     * @param res http response
     * @param body Content
     */
-  @RequestMapping(value = Array("users/{uid}/global-role"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PutMapping(value = Array("users/{uid}/global-role"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updateGlobalRole(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
     val someRoleId = body.retrive("roleId").asInt()
@@ -113,7 +112,9 @@ class UserController {
     * @param body Content
     * @return The created user
     */
-  @RequestMapping(value = Array("users"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PostMapping(value = Array("users"), consumes = Array(MediaType.APPLICATION_JSON_VALUE),
+    produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User = {
     val user = authService.authorize(req, res)
     if (user.globalRole != GlobalRole.ADMIN) {
@@ -139,7 +140,7 @@ class UserController {
     * @param req http request
     * @param res http response
     */
-  @RequestMapping(value = Array("users/{uid}"), method = Array(RequestMethod.DELETE))
+  @DeleteMapping(value = Array("users/{uid}"))
   def delete(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
     authService.authorize(req, res).globalRole match {
       case GlobalRole.ADMIN => userService.delete(uid)

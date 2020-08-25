@@ -3,11 +3,13 @@ package de.thm.ii.fbs.controller
 import java.util.Date
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
-import de.thm.ii.fbs.services.core.{CourseRegistrationService, TaskService}
+import de.thm.ii.fbs.services.TaskService
+import de.thm.ii.fbs.services.core.TaskService
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import de.thm.ii.fbs.util.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -18,7 +20,7 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1/courses"))
+@RequestMapping(path = Array("/api/v1/courses"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
 class TaskController {
   @Autowired
   private val authService: AuthService = null
@@ -34,7 +36,8 @@ class TaskController {
     * @param res http response
     * @return course list
     */
-  @RequestMapping(value = Array("/{cid}/tasks"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{cid}/tasks"))
+  @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     authService.authorize(req, res)
     taskService.getAll(cid)
@@ -48,7 +51,7 @@ class TaskController {
     * @param res http response
     * @return A course
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{cid}/tasks/{tid}"))
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     authService.authorize(req, res)
@@ -66,7 +69,8 @@ class TaskController {
     * @param body contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array("/{cid}/tasks"), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PostMapping(value = Array("/{cid}/tasks"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
   def create(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Task = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
@@ -94,8 +98,7 @@ class TaskController {
     * @param res http response
     * @param body Request Body
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}"), method = Array(RequestMethod.PUT), consumes = Array())
-  @ResponseBody
+  @PutMapping(value = Array("/{cid}/tasks/{tid}"), consumes = Array())
   def update(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
@@ -123,8 +126,7 @@ class TaskController {
     * @param req http request
     * @param res http response
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}"), method = Array(RequestMethod.DELETE))
-  @ResponseBody
+  @DeleteMapping(value = Array("/{cid}/tasks/{tid}"))
   def delete(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)

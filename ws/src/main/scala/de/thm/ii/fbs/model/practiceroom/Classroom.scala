@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.model.practiceroom
 
 import de.thm.ii.fbs.model.User
-
 import scala.collection.mutable
 
 /**

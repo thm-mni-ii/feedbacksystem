@@ -5,8 +5,6 @@ import scala.collection.mutable
 
 /**
   * Maps session ids to principals.
-  *
-  * @author Andrej Sajenko
   */
 object UserSessionMap {
   private val sessionToUser = mutable.Map[String, Principal]()

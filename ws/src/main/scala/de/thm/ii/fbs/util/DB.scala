@@ -1,18 +1,14 @@
 package de.thm.ii.fbs.util
 
-import java.sql.{Connection, PreparedStatement, ResultSet, SQLException}
-
+import java.sql.{Connection, ResultSet}
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._
 import org.springframework.jdbc.support.{GeneratedKeyHolder, KeyHolder}
-import org.springframework.util.Assert
 
 import scala.jdk.CollectionConverters._
 
 /**
   * Wraps the evil java spring jdbc template api into a scala conform api.
-  *
-  * @author Andrej Sajenko
   */
 object DB {
   // The timout to terminate a query after TIMEOUT_IN_SEC seconds.

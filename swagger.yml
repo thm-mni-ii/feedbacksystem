@@ -25,6 +25,8 @@ tags:
     description: Task submission api
   - name: Legal
     description: Legally obligatory documents and checks
+  - name: Result
+    description: Incomming checker results
 paths:
   /login/cas:
     post:
@@ -975,7 +977,7 @@ paths:
         "404":
           description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
-    post:
+    put:
       security:
         - JWT: []
       tags:
@@ -1512,6 +1514,35 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/results/{sid}/{cid}":
+    put:
+      tags:
+        - Result
+      summary: Incomming checker results
+      parameters:
+        - in: path
+          name: sid
+          required: true
+          description: Submission id
+          schema:
+            type: integer
+        - in: path
+          name: cid
+          required: true
+          description: Configuration id
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -1601,24 +1632,46 @@ components:
           description: The media type for the submissions according to RFC 4288
     Submission:
       type: object
+      required:
+        - submissionTime
+        - done
+        - id
+        - results
       properties:
-        id:
-          type: integer
-        fileUploaded:
-          type: boolean
-          description: Only reading posible; information provided by server
         submissionTime:
           type: integer
-          description: Unit time as long
+          description: Unix time as long
+        done:
+          type: boolean
+          description: True if all checkers have checked the submissions
+        id:
+          type: integer
+          description: The submission id
+        results:
+          type: array
+          description: The check results of each configured checker, may be empty
+          items:
+            $ref: '#/components/schemas/CheckResult'
+    CheckResult:
+      type: object
+      required:
+        - exitCode
+        - resultText
+        - checkerType
+        - configurationId
+      properties:
         exitCode:
           type: integer
-          description: Indicates if the solution was valid
+          description: Exit code of the check result 0 is okay
         resultText:
           type: string
-          description: The result of the automated check
-        checked:
-          type: boolean
-          description: Indicates if the solution was checked
+          description: The output the check
+        checkerType:
+          type: string
+          description: The type of the checker that checked the submission
+        configurationId:
+          type: integer
+          description: The configuration id of the checker configuration
     CheckerConfig:
       type: object
       required:

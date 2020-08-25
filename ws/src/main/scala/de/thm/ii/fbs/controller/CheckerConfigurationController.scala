@@ -3,11 +3,13 @@ package de.thm.ii.fbs.controller
 import java.nio.file.Files
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.core.{CheckerConfigurationService, CourseRegistrationService, StorageService}
+import de.thm.ii.fbs.services.StorageService
+import de.thm.ii.fbs.services.core.StorageService
+import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CourseRegistrationService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import de.thm.ii.fbs.util.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -38,7 +40,8 @@ class CheckerConfigurationController {
     * @param res Http response
     * @return List of configurations
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations"))
+  @ResponseBody
   def getAll(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CheckrunnerConfiguration] = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
@@ -60,8 +63,9 @@ class CheckerConfigurationController {
     * @param body Content
     * @return List of configurations
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations"), method = Array(RequestMethod.POST),
+  @PostMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations"),
     consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
   def create(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest,
              res: HttpServletResponse, @RequestBody body: JsonNode): List[CheckrunnerConfiguration] = {
     val user = authService.authorize(req, res)
@@ -89,7 +93,7 @@ class CheckerConfigurationController {
     * @param res Http response
     * @param body Content
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"), method = Array(RequestMethod.PUT),
+  @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"),
     consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def update(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest,
              res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
@@ -117,7 +121,7 @@ class CheckerConfigurationController {
     * @param req Http request
     * @param res Http response
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"), method = Array(RequestMethod.DELETE))
+  @DeleteMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"))
   def delete(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
@@ -139,7 +143,7 @@ class CheckerConfigurationController {
     * @param res Http response
     * @param file File content
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"), method = Array(RequestMethod.PUT))
+  @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse,
                     @RequestBody file: MultipartFile): Unit = {
     val user = authService.authorize(req, res)
@@ -169,7 +173,7 @@ class CheckerConfigurationController {
     * @param res Http response
     * @param file File content
     */
-  @RequestMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"), method = Array(RequestMethod.PUT))
+  @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def updateSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse,
                      @RequestBody file: MultipartFile): Unit = {
     val user = authService.authorize(req, res)

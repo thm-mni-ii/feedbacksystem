@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.conferences
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.services.persistance.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.stereotype.Service

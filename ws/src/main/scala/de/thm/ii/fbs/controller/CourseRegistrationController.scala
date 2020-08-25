@@ -1,10 +1,10 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole, Participant}
-import de.thm.ii.fbs.services.core.CourseRegistrationService
+import de.thm.ii.fbs.services.persistance.CourseRegistrationService
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.ForbiddenException
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1/"))
+@RequestMapping(path = Array("/api/v1/"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
 class CourseRegistrationController {
   @Autowired
   private val authService: AuthService = null
@@ -30,7 +30,7 @@ class CourseRegistrationController {
     * @param res http response
     * @return List of courses
     */
-  @RequestMapping(value = Array("/users/{uid}/courses"), method = Array(RequestMethod.GET), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @GetMapping(value = Array("/users/{uid}/courses"))
   @ResponseBody
   def getRegisteredCourses(@PathVariable("uid") uid: Integer, req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     val user = authService.authorize(req, res)
@@ -50,7 +50,7 @@ class CourseRegistrationController {
     * @param res http response
     * @return List of courses
     */
-  @RequestMapping(value = Array("/courses/{cid}/participants"), method = Array(RequestMethod.GET), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @GetMapping(value = Array("/courses/{cid}/participants"))
   @ResponseBody
   def getParticipants(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): List[Participant] = {
     val user = authService.authorize(req, res)
@@ -76,8 +76,7 @@ class CourseRegistrationController {
     * @param res http response
     * @param body Content
     */
-  @RequestMapping(value = Array("/users/{uid}/courses/{cid}"), method = Array(RequestMethod.PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  @ResponseBody
+  @PutMapping(value = Array("/users/{uid}/courses/{cid}"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def register(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse,
                @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
@@ -97,8 +96,7 @@ class CourseRegistrationController {
     * @param req http request
     * @param res http response
     */
-  @RequestMapping(value = Array("/users/{uid}/courses/{cid}"), method = Array(RequestMethod.DELETE))
-  @ResponseBody
+  @DeleteMapping(value = Array("/users/{uid}/courses/{cid}"))
   def deregister(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
 

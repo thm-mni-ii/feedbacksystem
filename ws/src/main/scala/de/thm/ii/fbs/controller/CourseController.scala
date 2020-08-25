@@ -1,11 +1,13 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.core.{CourseRegistrationService, CourseService}
+import de.thm.ii.fbs.services.CourseService
+import de.thm.ii.fbs.services.core.CourseService
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
-import de.thm.ii.fbs.util._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1/courses"))
+@RequestMapping(path = Array("/api/v1/courses"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
 class CourseController {
   @Autowired
   private val courseService: CourseService = null
@@ -32,7 +34,8 @@ class CourseController {
     * @param res http response
     * @return course list
     */
-  @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array(""))
+  @ResponseBody
   def getAll(@RequestParam(value = "visible", required = false) visible: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     authService.authorize(req, res)
@@ -46,7 +49,8 @@ class CourseController {
     * @param body contains JSON request
     * @return JSON
     */
-  @RequestMapping(value = Array(""), method = Array(RequestMethod.POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PostMapping(value = Array(""), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Course = {
     if (authService.authorize(req, res).globalRole == GlobalRole.USER) {
       throw new ForbiddenException()
@@ -68,7 +72,7 @@ class CourseController {
     * @param res http response
     * @return A course
     */
-  @RequestMapping(value = Array("/{cid}"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{cid}"))
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course = {
     val user = authService.authorize(req, res)
@@ -89,8 +93,7 @@ class CourseController {
     * @param res http response
     * @param body Request Body
     */
-  @RequestMapping(value = Array("/{cid}"), method = Array(RequestMethod.PUT), consumes = Array())
-  @ResponseBody
+  @PutMapping(value = Array("/{cid}"))
   def update(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
                    @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
@@ -116,8 +119,7 @@ class CourseController {
     * @param req http request
     * @param res http response
     */
-  @RequestMapping(value = Array("/{cid}"), method = Array(RequestMethod.DELETE))
-  @ResponseBody
+  @DeleteMapping(value = Array("/{cid}"))
   def delete(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
@@ -134,7 +136,7 @@ class CourseController {
     * @param req http request
     * @param res http response
     */
-  @RequestMapping(value = Array("/{cid}/export"), method = Array(RequestMethod.GET))
+  @GetMapping(value = Array("/{cid}/export"))
   @ResponseBody
   def export(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = ??? // TODO: Impl
 }

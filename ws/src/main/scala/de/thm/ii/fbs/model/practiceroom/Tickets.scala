@@ -1,9 +1,6 @@
 package de.thm.ii.fbs.model.practiceroom
 
-import java.util.Objects
-
 import de.thm.ii.fbs.model.User
-
 import scala.collection.mutable
 
 /**
@@ -29,7 +26,7 @@ object Tickets {
     * @return A ticket with a unique id
     */
   def create(courseId: Int, title: String, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
-    val id = ((System.currentTimeMillis << 20) | (System.nanoTime & ~9223372036854251520L)).toString()
+    val id = ((System.currentTimeMillis << 20) | (System.nanoTime & ~9223372036854251520L)).toString
     if (ticketToCourse.contains(id)) {
       create(courseId, title, desc, status, creator, assignee, timestamp, priority)
     } else {
@@ -107,35 +104,5 @@ object Tickets {
     idToTicket.put(t.id, t)
 
     onCreateCb.foreach(_(t))
-  }
-}
-
-/**
-  * An issue ticket
-  * @param courseId The course id
-  * @param title Title of a ticket
-  * @param desc The message
-  * @param status The ticket status
-  * @param creator The user who created the ticket
-  * @param assignee The user to that the ticket is assigned to
-  * @param timestamp The timestamp of the creation
-  * @param priority The priority of the issue ticket
-  * @param id the unique ticket id
-  * @param queuePosition the unique ticket id
-  */
-case class Ticket(courseId: Int, title: String, desc: String, status: String, creator: User,
-                  assignee: User, timestamp: Long, priority: Int, id: String = "0", var queuePosition: Int = 0) {
-  /**
-    * @return The hash code -- using id
-    */
-  override def hashCode(): Int = Objects.hash(id)
-
-  /**
-    * @param other The other object
-    * @return True if id is the same
-    */
-  override def equals(other: Any): Boolean = other match {
-    case that: Ticket => that.canEqual(this) && this.id == that.id
-    case _ => false
   }
 }

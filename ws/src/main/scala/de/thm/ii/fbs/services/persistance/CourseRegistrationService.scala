@@ -1,8 +1,8 @@
-package de.thm.ii.fbs.services.core
+package de.thm.ii.fbs.services.persistance
 
 import java.sql.ResultSet
 
-import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole, Participant, User}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate

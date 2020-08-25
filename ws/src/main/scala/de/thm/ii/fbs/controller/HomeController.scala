@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.util.ResourceNotFoundException
+import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 

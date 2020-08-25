@@ -1,6 +1,7 @@
-package de.thm.ii.fbs.services.core
+package de.thm.ii.fbs.services.persistance
 
 import java.sql.{ResultSet, SQLException}
+
 import de.thm.ii.fbs.model.Course
 import de.thm.ii.fbs.util._
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,9 +10,6 @@ import org.springframework.stereotype.Component
 
 /**
   * CourseService provides interaction with DB
-  *
-  * @author Benjamin Manns
-  * @author Andrej Sajenko
   */
 @Component
 class CourseService {

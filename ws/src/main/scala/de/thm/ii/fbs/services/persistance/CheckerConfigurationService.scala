@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.core
+package de.thm.ii.fbs.services.persistance
 
 import java.sql.{ResultSet, SQLException}
 
@@ -19,7 +19,7 @@ class CheckerConfigurationService {
   private implicit val jdbc: JdbcTemplate = null
 
   /**
-    * Get a list of all checkrunner configrations for a task of a course
+    * Get a list of all checkrunner configurations for a task of a course
     * @param cid Course id
     * @param tid Task id
     * @return List of configurations
