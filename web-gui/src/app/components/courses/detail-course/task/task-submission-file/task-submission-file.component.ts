@@ -25,6 +25,6 @@ export class TaskSubmissionFileComponent implements OnInit {
 
   updateSubmissionFile(event) {
     this.submissionFile = event.addedFiles
-    this.update.emit({taskid: this.task.task_id, content: this.submissionFile[0]})
+    this.update.emit({taskid: this.task.task_id, content: this.submissionFile})
   }
 }
