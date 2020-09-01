@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.conferences
 import java.security.MessageDigest
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services.UserService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -18,8 +18,11 @@ import scala.language.postfixOps
 @Service
 class BBBService(templateBuilder: RestTemplateBuilder) {
   private val restTemplate = templateBuilder.build()
-  private val secret = sys.env("BBB_SECRET")
-  private val apiUrl = sys.env("BBB_ENDPOINT")
+
+  @Value("${services.bbb.service-url}")
+  private val apiUrl: String = null
+  @Value("${services.bbb.shared-secret}")
+  private val secret: String = null
 
   @Autowired
   private implicit val userService: UserService = null
@@ -86,7 +89,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     */
   private def computeHexSha1Hash(input: String): String = {
     val digest = MessageDigest.getInstance("SHA-1")
-    digest.reset()
     digest.update(input.getBytes("utf8"))
     val hash = digest.digest()
     toHexString(hash)
@@ -98,6 +100,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return the encoded input
     */
   private def toHexString(input: Array[Byte]): String = input
-    .map(b => String.format("%02x", b)).
-    reduce((sb, s) => sb + s)
+    .map(b => String.format("%02x", b))
+    .reduce((sb, s) => sb + s)
 }
