@@ -20,12 +20,9 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
   private val restTemplate = templateBuilder.build()
 
   @Value("${services.bbb.service-url}")
-  private val apiUrl: String = null
+  private var apiUrl: String = null
   @Value("${services.bbb.shared-secret}")
   private val secret: String = null
-
-  @Autowired
-  private implicit val userService: UserService = null
 
   /**
     * Register a new conference.
@@ -51,6 +48,14 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
   def getBBBConferenceLink(user: User, id: String, password: String): String = {
     buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
+  }
+
+  /**
+    * Sets the apiURL
+    * @param apiUrl - the value the apiURL is set to
+    */
+  def setApiURL(apiUrl: String): Unit = {
+    this.apiUrl = apiUrl
   }
 
   /**
