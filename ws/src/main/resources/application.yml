@@ -62,3 +62,5 @@ spring:
 url:
   expiration:
     time: 300
+storage:
+  uploadDir: /upload-dir

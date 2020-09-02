@@ -1,8 +1,11 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.services.{CourseService, SettingService, UserService}
-import de.thm.ii.fbs.util.{BadRequestException, LDAPConnector, UnauthorizedException, Users}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, UnauthorizedException}
+import de.thm.ii.fbs.services.UserService
+import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.services.persistance.{CourseService, UserService}
+import de.thm.ii.fbs.util.LDAPConnector
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.ldaptive.LdapEntry
@@ -12,12 +15,10 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 
 /**
   * LoginController simply perform login request. In future it might send also a COOKIE
-  *
-  * @author Benjamin Manns
   */
 @RestController
 @EnableCasClient
-@RequestMapping(path = Array("/api/v1"))
+@RequestMapping(path = Array("/api/v1/login"))
 class LoginController extends CasClientConfigurerAdapter {
   private final val LABEL_STUDENT_ROLE = 16
   @Autowired
@@ -52,7 +53,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
-  @RequestMapping(value = Array("login"), method = Array(RequestMethod.GET))
+  @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def userLogin(@RequestParam(value = "route", required = false) route: String, request: HttpServletRequest, response: HttpServletResponse): Any = {
     try {
       val principal = request.getUserPrincipal
@@ -62,14 +63,14 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = principal.getName
       }
-      var existingUser = userService.loadUserFromDB(name, true)
+      var existingUser = userService.find(name)
       logger.info(LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN).toString)
       if (existingUser.isEmpty) {
         val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
         logger.info(entry.getAttribute("uid").getStringValue)
         userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
           entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
-        existingUser = userService.loadUserFromDB(name)
+        existingUser = userService.find(name)
       }
       val jwtToken = userService.generateTokenFromUser(existingUser.get)
       setBearer(response, jwtToken)
@@ -111,7 +112,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode Request Body of User login
     * @return Java Map
     */
-  @RequestMapping(value = Array("login/ldap"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/ldap"), method = Array(RequestMethod.POST))
   def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     var ldapUser: Option[LdapEntry] = None
     var username: String = null
@@ -142,7 +143,7 @@ class LoginController extends CasClientConfigurerAdapter {
       userService.insertUserIfNotExists(ldapUser.get.getAttribute("uid").getStringValue, ldapUser.get.getAttribute("mail").getStringValue,
         ldapUser.get.getAttribute("givenName").getStringValue, ldapUser.get.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
 
-      val user = userService.loadUserFromDB(username, false)
+      val user = userService.find(username)
       if (user.isEmpty) {
         throw new UnauthorizedException("Problem finding user, missmatch with LDAP result ")
       }
@@ -162,7 +163,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @return JSON if user is logged in
     */
-  @RequestMapping(value = Array("login/check"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/check"), method = Array(RequestMethod.POST))
   def checkIfUsersIsLogedIn(request: HttpServletRequest, response: HttpServletResponse): Map[String, Boolean] = {
     Users.claimAuthorization(request)
     Map(LABEL_SUCCESS -> true)
@@ -177,7 +178,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @return JSON if update worked out
     * @return
     */
-  @RequestMapping(value = Array("login/privacy/accept"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/privacy/accept"), method = Array(RequestMethod.POST))
   def privacyAcceptanceOfUser(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val username = jsonNode.get(LABEL_USERNAME).asText()
@@ -197,7 +198,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param jsonNode Request Body contains json
     * @return simple answer if user need to accept privacy policy
     */
-  @RequestMapping(value = Array("login/privacy/check"), method = Array(RequestMethod.POST))
+  @PostMapping(value = Array("/privacy/check"))
   def checkUsersPrivacyAcceptance(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Map[String, Boolean] = {
     try {
       val settingsPrivacyShow = settingService.loadSetting("privacy.show")
@@ -207,7 +208,7 @@ class LoginController extends CasClientConfigurerAdapter {
         Map(LABEL_SUCCESS -> true)
       } else {
         val username = jsonNode.get(LABEL_USERNAME).asText()
-        val user = userService.loadUserFromDB(username)
+        val user = userService.find(username)
         if(user.isEmpty) {
           Map(LABEL_SUCCESS -> false)
         } else {

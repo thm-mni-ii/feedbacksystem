@@ -2,8 +2,7 @@ package de.thm.ii.fbs.services.conferences
 
 import java.security.MessageDigest
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.UserService
-import org.springframework.beans.factory.annotation.{Autowired, Value}
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
