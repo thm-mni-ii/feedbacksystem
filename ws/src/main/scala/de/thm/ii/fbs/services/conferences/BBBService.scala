@@ -1,13 +1,13 @@
 package de.thm.ii.fbs.services.conferences
 
+import java.security.MessageDigest
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.persistance.UserService
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-
+import org.springframework.web.util.UriComponentsBuilder
 import scala.language.postfixOps
-import scala.sys.process._
 
 /**
   * Handles BBB requests.
@@ -16,8 +16,12 @@ import scala.sys.process._
   */
 @Service
 class BBBService(templateBuilder: RestTemplateBuilder) {
-  @Autowired
-  private implicit val userService: UserService = null
+  private val restTemplate = templateBuilder.build()
+
+  @Value("${services.bbb.service-url}")
+  private var apiUrl: String = null
+  @Value("${services.bbb.shared-secret}")
+  private val secret: String = null
 
   /**
     * Register a new conference.
@@ -27,9 +31,12 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @param moderatorPassword moderator password to register.
     * @return boolean showing if creation of room was successful
     */
-  def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Int = {
-    Process(s"create_room.py ${meetingName} ${id} ${password} ${moderatorPassword}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!
+  def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Boolean = {
+    val response = getBBBAPI("create", Map("name" -> meetingName, "meetingID" -> id,
+      "attendeePW" -> password, "moderatorPW" -> moderatorPassword))
+    response.getStatusCode.is2xxSuccessful()
   }
+
   /**
     * Get join Link for conference users conference.
     * @param id Conference id to register.
@@ -38,6 +45,65 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @return The uri of the registered conference
     */
   def getBBBConferenceLink(user: User, id: String, password: String): String = {
-    Process(s"join_room.py '${user.prename} ${user.surname}' ${id} ${password}", None, "BBB_SECRET" -> sys.env("BBB_SECRET"))!!
+    buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
+      "meetingID" -> id, "password" -> password))
   }
+
+  /**
+    * Sets the apiURL
+    * @param apiUrl - the value the apiURL is set to
+    */
+  def setApiURL(apiUrl: String): Unit = {
+    this.apiUrl = apiUrl
+  }
+
+  /**
+    * Sends a GET-Request to the BBB API
+    * @param method The BBB methode to invoked
+    * @param params The params to send
+    * @return The ResponseEntity
+    */
+  private def getBBBAPI(method: String, params: Map[String, String]): ResponseEntity[String] = {
+    val url = buildBBBRequestURL(method, params)
+    restTemplate.getForEntity(url, classOf[String])
+  }
+
+  /**
+    * Builds a BBB API URL with checksum
+    * @param method The method of the url
+    * @param params The params of the url
+    * @return The BBB API with checksum
+    */
+  private def buildBBBRequestURL(method: String, params: Map[String, String]): String = {
+    val queryBuilder = UriComponentsBuilder.newInstance()
+    for ((key, value) <- params) {
+      queryBuilder.queryParam(key, value);
+    }
+    var query = queryBuilder.toUriString.substring(1)
+    val checksum = computeHexSha1Hash(s"$method$query$secret")
+    queryBuilder.queryParam("checksum", checksum)
+    query = queryBuilder.toUriString.substring(1)
+    s"$apiUrl/api/$method?$query"
+  }
+
+  /**
+    * Hashes input
+    * @param input the input to hash
+    * @return the hex-encoeded hash
+    */
+  private def computeHexSha1Hash(input: String): String = {
+    val digest = MessageDigest.getInstance("SHA-1")
+    digest.update(input.getBytes("utf8"))
+    val hash = digest.digest()
+    toHexString(hash)
+  }
+
+  /**
+    * Hex encodes input
+    * @param input the input to encode
+    * @return the encoded input
+    */
+  private def toHexString(input: Array[Byte]): String = input
+    .map(b => String.format("%02x", b))
+    .reduce((sb, s) => sb + s)
 }

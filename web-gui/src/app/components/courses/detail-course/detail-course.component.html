@@ -22,9 +22,7 @@
   </mat-card>
 
   <mat-card class="details" id="{{courseTask.task_id}}">
-  <mat-card-subtitle>
-      <a *ngIf="isAuthorized()" [routerLink]="'/courses/'+courseID+'/task/'+courseTask.task_id+'/analyze'">Analyse</a>
-    </mat-card-subtitle>
+    <span *ngIf="courseTask.task_description != courseTask.task_name">{{courseTask.task_description}}</span>
     <mat-card-content>
       <div class="user-input">
         <mat-tab-group animationDuration="0ms">
@@ -54,7 +52,8 @@
         <button [disabled]="deadlineTask" mat-flat-button color="accent" (click)="submission(courseDetail.course_id, courseTask)">Abgeben</button>
         <button  *ngIf="isAuthorized()" mat-flat-button color="accent" (click)="displayTestsystemFeedback(courseTask)">Status</button>
 
-        <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers(courseTask.task_id)" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon></button>
+        <button *ngIf="isAuthorized()" mat-flat-button color="accent" [routerLink]="'/courses/'+courseID+'/task/'+courseTask.task_id+'/analyze'">Alle Abgaben</button>
+        <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers(courseTask.task_id)" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon>Alle ausführen</button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

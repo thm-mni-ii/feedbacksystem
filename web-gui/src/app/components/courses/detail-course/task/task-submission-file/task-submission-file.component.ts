@@ -13,7 +13,7 @@ export class TaskSubmissionFileComponent implements OnInit {
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
   @Output() trigger: EventEmitter<CourseTask> = new EventEmitter<CourseTask>();
 
-  submissionFile: File;
+  submissionFile: File[] = [];
   constructor() { }
 
   ngOnInit() {
@@ -23,10 +23,8 @@ export class TaskSubmissionFileComponent implements OnInit {
     this.trigger.emit(this.task)
   }
 
-  updateSubmissionFile(file: File){
-    this.submissionFile = file;
-    this.update.emit({taskid: this.task.task_id, content: this.submissionFile})
-
+  updateSubmissionFile(event) {
+    this.submissionFile = event.addedFiles
+    this.update.emit({taskid: this.task.task_id, content: this.submissionFile[0]})
   }
-
 }
