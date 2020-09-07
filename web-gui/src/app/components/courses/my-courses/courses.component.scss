@@ -1,8 +1,9 @@
 @import "src/colors";
 
 .container {
+  align-content: center;
   display: block;
-  padding: 16px;
+  padding: 16px 10%;
 
   .card {
     margin: 8px 0;

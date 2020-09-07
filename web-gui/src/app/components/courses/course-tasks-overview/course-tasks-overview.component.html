@@ -15,7 +15,7 @@
     <button mat-flat-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()">Go Online</button>
     <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
-
+  <div class="padding">
   <h2>{{courseDetail?.course_name}}</h2>
   <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>
 
@@ -40,4 +40,5 @@
       </button>
     </mat-card-actions>
   </mat-card>
+  </div>
 </div>
