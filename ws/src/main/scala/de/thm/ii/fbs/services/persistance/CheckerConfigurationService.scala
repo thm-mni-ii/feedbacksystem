@@ -39,12 +39,13 @@ class CheckerConfigurationService {
   def create(cid: Int, tid: Int, cc: CheckrunnerConfiguration): List[CheckrunnerConfiguration] =
     DB.query("SELECT DISTINCT task_id FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
       "WHERE course_id = ? AND task_id = ?", (res, _) => res.getInt("task_id"), cid, tid)
-      .flatMap(_ => DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord) VALUES (?,?,?,?,?);",
-          tid, cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord))
+      .flatMap(_ => DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file_uploaded, " +
+        "secondary_file_uploaded, ord) VALUES (?,?,?,?,?);",
+          tid, cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord).toList)
       .flatMap(_ => getAll(cid, tid))
     match {
       case Nil => throw new SQLException("Configuration could not be created")
-      case _ => _
+      case list: List[CheckrunnerConfiguration] => list
     }
 
   /**
