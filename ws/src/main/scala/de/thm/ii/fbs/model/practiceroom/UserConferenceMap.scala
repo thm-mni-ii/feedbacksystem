@@ -1,13 +1,17 @@
 package de.thm.ii.fbs.model.practiceroom
 
 import java.security.Principal
+
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.practiceroom.UserConferenceMap.Invitation
+import de.thm.ii.fbs.model.practiceroom.storage.BidirectionalStorage
+
 import scala.collection.mutable
 
 /**
-  * Maps session ids to principals.
+  * Maps invitations to principals.
   */
-object UserConferenceMap {
+object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
   private val conferenceToUser = mutable.Map[Invitation, Principal]()
   private val userToConference = mutable.Map[Principal, Invitation]()
 
@@ -18,11 +22,7 @@ object UserConferenceMap {
     * @param p          principal
     */
   def map(invitation: Invitation, p: Principal): Unit = {
-    if (userToConference.contains(p)) {
-      conferenceToUser.remove(userToConference(p))
-    }
-    conferenceToUser.put(invitation, p)
-    userToConference.put(p, invitation)
+    super.put(invitation, p)
     onMapListeners.foreach(_ (invitation, p))
   }
 
@@ -30,13 +30,13 @@ object UserConferenceMap {
     * @param invitation invitation details
     * @return The principal for the given session id
     */
-  def get(invitation: Invitation): Option[Principal] = conferenceToUser.get(invitation)
+  def get(invitation: Invitation): Option[Principal] = super.getB(invitation)
 
   /**
     * @param p The principal
     * @return The invitation for the given principal
     */
-  def get(p: Principal): Option[Invitation] = userToConference.get(p)
+  def get(p: Principal): Option[Invitation] = super.getA(p)
 
   /**
     * Removes both, the user and its invitation by using its invitation
@@ -44,8 +44,7 @@ object UserConferenceMap {
     * @param invitation Session id
     */
   def delete(invitation: Invitation): Unit = {
-    conferenceToUser.remove(invitation).foreach(p => {
-      userToConference.remove(p)
+    super.deleteByA(invitation).foreach(p => {
       onDeleteListeners.foreach(_ (invitation, p))
     })
   }
@@ -57,8 +56,8 @@ object UserConferenceMap {
     * @param principal  user that wants to attend
     */
   def attend(invitation: Invitation, principal: Principal): Unit = {
-    this.conferenceToUser.get(invitation) match {
-      case Some(p) => userToConference.get(p) match {
+    super.getB(invitation) match {
+      case Some(p) => super.getA(p) match {
         case Some(v) => v.attendees += principal.getName;
         case None =>
       }
@@ -75,11 +74,10 @@ object UserConferenceMap {
     * @param principal  user that wants to depart
     */
   def depart(invitation: Invitation, principal: Principal): Unit = {
-    userToConference.get(invitation.creator) match {
-      case Some(v) => {
+    super.getA(invitation.creator) match {
+      case Some(v) =>
         v.attendees -= principal.getName
         onDepartListeners.foreach(_ (invitation, principal))
-      }
       case None =>
     }
   }
@@ -90,7 +88,7 @@ object UserConferenceMap {
     * @param principal user that departs from conferences
     */
   def departAll(principal: Principal): Unit = {
-    conferenceToUser.keys.foreach((invitation) => {
+    super.getAllA.foreach((invitation) => {
       if (invitation.attendees.contains(principal.getName)) {
         this.depart(invitation, principal);
       }
@@ -103,8 +101,7 @@ object UserConferenceMap {
     * @param p The principal
     */
   def delete(p: Principal): Unit = {
-    userToConference.remove(p).foreach(invitation => {
-      conferenceToUser.remove(invitation)
+    this.deleteByB(p).foreach(invitation => {
       onDeleteListeners.foreach(_ (invitation, p))
     })
   }
