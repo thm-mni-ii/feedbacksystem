@@ -2,14 +2,14 @@ package de.thm.ii.fbs.model.practiceroom
 
 import java.security.Principal
 
-import de.thm.ii.fbs.model.practiceroom.storage.BidirectionalStorage
+import de.thm.ii.fbs.model.practiceroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
 
 import scala.collection.mutable
 
 /**
   * Maps session ids to principals.
   */
-object UserSessionMap extends BidirectionalStorage[String, Principal] {
+object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principal] {
   /**
     * Maps a user to its session
     *
@@ -25,13 +25,13 @@ object UserSessionMap extends BidirectionalStorage[String, Principal] {
     * @param id The session id
     * @return The principal for the given session id
     */
-  def get(id: String): Option[Principal] = super.getB(id)
+  def get(id: String): Option[Principal] = super.getSingleB(id)
 
   /**
     * @param p The principal
     * @return The session id for the given principal
     */
-  def get(p: Principal): Option[String] = super.getA(p)
+  def get(p: Principal): Option[String] = super.getSingleA(p)
 
   /**
     * Removes both, the user and its session by using its session id

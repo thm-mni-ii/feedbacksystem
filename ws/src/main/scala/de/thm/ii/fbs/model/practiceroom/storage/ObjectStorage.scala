@@ -33,14 +33,14 @@ class ObjectStorage[T] {
     * @param value the value the field should have
     * @return the found object
     */
-  def getWhere(fieldName: String, value: Any): Option[T] = {
+  def getWhere(fieldName: String, value: Any): Set[T] = {
     lock.readLock().lock()
-    var result: Option[T] = null
+    var result: Set[T] = null
     val index = this.indexes.get(fieldName)
     if (index.isDefined) {
       result = index.get.get(value)
     } else {
-      result = objects.find(obj => obj.getClass.getMethod(fieldName).invoke(obj).equals(value))
+      result = objects.filter(obj => obj.getClass.getMethod(fieldName).invoke(obj).equals(value)).toSet
     }
     lock.readLock().unlock()
     result
@@ -61,30 +61,6 @@ class ObjectStorage[T] {
     this.objects.remove(obj)
     this.indexes.values.foreach(index => index.remove(obj))
     lock.writeLock().unlock()
-  }
-
-  private class Index[K, V](private val fieldName: String,
-                            private val index: mutable.Map[K, V] = new mutable.HashMap[K, V]()) {
-    /**
-      * Add Obj to Index
-      * @param obj the obj
-      * @return
-      */
-    def add(obj: V): Unit = this.index(obj.getClass.getMethod(this.fieldName).invoke(obj).asInstanceOf[K]) = obj
-
-    /**
-      * Get Obj from Index
-      * @param key the key
-      * @return the obj
-      */
-    def get(key: K): Option[V] = this.index.get(key)
-
-    /**
-      * Removes the Obj from the Index
-      * @param obj the obj
-      * @return
-      */
-    def remove(obj: V): Unit = this.index.remove(obj.getClass.getMethod(this.fieldName).invoke(obj).asInstanceOf[K])
   }
 
   /**

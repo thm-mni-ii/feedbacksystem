@@ -4,17 +4,14 @@ import java.security.Principal
 
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.practiceroom.UserConferenceMap.Invitation
-import de.thm.ii.fbs.model.practiceroom.storage.BidirectionalStorage
+import de.thm.ii.fbs.model.practiceroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
 
 import scala.collection.mutable
 
 /**
   * Maps invitations to principals.
   */
-object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
-  private val conferenceToUser = mutable.Map[Invitation, Principal]()
-  private val userToConference = mutable.Map[Principal, Invitation]()
-
+object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Principal] {
   /**
     * Maps a user to its session
     *
@@ -30,13 +27,13 @@ object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
     * @param invitation invitation details
     * @return The principal for the given session id
     */
-  def get(invitation: Invitation): Option[Principal] = super.getB(invitation)
+  def get(invitation: Invitation): Option[Principal] = super.getSingleB(invitation)
 
   /**
     * @param p The principal
     * @return The invitation for the given principal
     */
-  def get(p: Principal): Option[Invitation] = super.getA(p)
+  def get(p: Principal): Option[Invitation] = super.getSingleA(p)
 
   /**
     * Removes both, the user and its invitation by using its invitation
@@ -56,8 +53,8 @@ object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
     * @param principal  user that wants to attend
     */
   def attend(invitation: Invitation, principal: Principal): Unit = {
-    super.getB(invitation) match {
-      case Some(p) => super.getA(p) match {
+    super.getSingleB(invitation) match {
+      case Some(p) => super.getSingleA(p) match {
         case Some(v) => v.attendees += principal.getName;
         case None =>
       }
@@ -74,7 +71,7 @@ object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
     * @param principal  user that wants to depart
     */
   def depart(invitation: Invitation, principal: Principal): Unit = {
-    super.getA(invitation.creator) match {
+    super.getSingleA(invitation.creator) match {
       case Some(v) =>
         v.attendees -= principal.getName
         onDepartListeners.foreach(_ (invitation, principal))
@@ -144,7 +141,7 @@ object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
     * @return boolean state of user existence in this map
     */
   def exists(user: User): Boolean = {
-    userToConference.exists((p) => p._1.getName == user.username)
+    this.getAllB.exists(p => p.getName == user.username)
   }
 
   /**
@@ -153,7 +150,7 @@ object UserConferenceMap extends BidirectionalStorage[Invitation, Principal] {
     * @param courseId The course id
     * @return The Invitations in the course
     */
-  def getInvitations(courseId: Int): List[Invitation] = this.conferenceToUser.filter(inv => courseId == courseId).keys.toList
+  def getInvitations(courseId: Int): List[Invitation] = this.getAllA.filter(inv => inv.courseId == courseId).toList
 
   /**
     * An Conference System Invitation
