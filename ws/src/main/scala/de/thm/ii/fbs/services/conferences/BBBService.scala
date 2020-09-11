@@ -1,12 +1,16 @@
 package de.thm.ii.fbs.services.conferences
 
+import java.net.URI
 import java.security.MessageDigest
+import java.util.UUID
+
 import de.thm.ii.fbs.model.User
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
+
 import scala.language.postfixOps
 
 /**
@@ -15,7 +19,39 @@ import scala.language.postfixOps
   * @author Simon Schniedenharn
   */
 @Service
-class BBBService(templateBuilder: RestTemplateBuilder) {
+class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
+  /**
+    * The name of the conference service
+    */
+  val name = "bbb"
+
+  /**
+    * Creates a new Conference using BBB
+    * @param id the id for the new conference
+    * @return the newly created conference
+    */
+  override def createConference(id: String): Conference = {
+    val participantPassword = UUID.randomUUID().toString
+    val modPassword = UUID.randomUUID().toString
+    this.registerBBBConference(id, id, participantPassword, modPassword)
+    new Conference {
+      override val id: String = id
+      override val serviceName: String = BBBService.this.name
+      private val meetingPassword = participantPassword
+      private val moderatorPassword = modPassword
+
+      override def getURL(user: User, moderator: Boolean): URI =
+        BBBService.this.getBBBConferenceLink(user, id, if (moderator) moderatorPassword else meetingPassword)
+
+      override def toMap: Map[String, String] = Map(
+        "meetingId" -> id,
+        "meetingPassword" -> meetingPassword,
+        "moderatorPassword" -> moderatorPassword,
+        "service" -> serviceName
+      )
+    }
+  }
+
   private val restTemplate = templateBuilder.build()
 
   @Value("${services.bbb.service-url}")
@@ -44,9 +80,10 @@ class BBBService(templateBuilder: RestTemplateBuilder) {
     * @param password password to register.
     * @return The uri of the registered conference
     */
-  def getBBBConferenceLink(user: User, id: String, password: String): String = {
-    buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
+  def getBBBConferenceLink(user: User, id: String, password: String): URI = {
+    val link = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
+    URI.create(link)
   }
 
   /**

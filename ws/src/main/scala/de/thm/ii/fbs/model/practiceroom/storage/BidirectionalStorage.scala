@@ -5,7 +5,7 @@ package de.thm.ii.fbs.model.practiceroom.storage
   * @tparam A The type of a
   * @tparam B The type of b
   */
-  class BidirectionalStorage[A, B] extends ObjectStorage[(A, B)] {
+class BidirectionalStorage[A, B] extends ObjectStorage[(A, B)] {
   super.addIndex("_1")
   super.addIndex("_2")
 
