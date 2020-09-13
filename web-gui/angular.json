@@ -98,5 +98,10 @@
       }
     }
   },
-  "defaultProject": "web-gui"
+  "defaultProject": "web-gui",
+  "schematics": {
+    "@schematics/angular:component": {
+      "styleext": "scss"
+    }
+  }
 }
