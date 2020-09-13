@@ -6,7 +6,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {DatabaseService} from '../../../service/database.service';
-import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
+import {GeneralCourseInformation} from '../../../model/HttpInterfaces';
 
 /**
  * Show all courses user can join

@@ -11,7 +11,7 @@ import {
   DetailedCourseInformation,
   TaskSubmission,
   User
-} from "../../../interfaces/HttpInterfaces";
+} from "../../../model/HttpInterfaces";
 import {FormControl} from "@angular/forms";
 import {Observable} from "rxjs";
 

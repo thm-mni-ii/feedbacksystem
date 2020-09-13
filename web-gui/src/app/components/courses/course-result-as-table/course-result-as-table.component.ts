@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {TaskSubmission} from "../../../interfaces/HttpInterfaces";
+import {TaskSubmission} from "../../../model/HttpInterfaces";
 import {MiscService} from "../../../service/misc.service";
 
 @Component({
