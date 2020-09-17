@@ -67,6 +67,23 @@ class ClassroomController {
   }
 
   /**
+    * Handle user enters classroom messages
+    * @param m Message
+    * @param headerAccessor Header information
+    * @return Invite URL to conference
+    */
+  @MessageMapping(value = Array("/classroom/leave"))
+  def userLeft(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val courseId = m.get(courseIdLiteral).asInt();
+    val user = headerAccessor.getUser
+    this.courseRegistrationService.getParticipants(courseId).find(p => p.user.equals(user)) match {
+      case Some(participant) => Classroom.leave(participant)
+        smt.convertAndSend("/topic/classroom/" + courseId + "/left")
+      case _ =>
+    }
+  }
+
+  /**
     * Retrives all users messages
     * @param m Message
     * @param headerAccessor Header information
@@ -92,60 +109,13 @@ class ClassroomController {
           smt.convertAndSendToUser(principal.getName(), "/classroom/users", response)
         }
       case (Some(globalUser), None) =>
-    }
-  }
-
-  /**
-    * Handles invite to conference messages.
-    * @param invite Composed invite message.
-    * @param headerAccessor Header information
-    */
-  @MessageMapping(value = Array("/classroom/invite"))
-  def handleInviteMsg(@Payload invite: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val principal = headerAccessor.getUser
-    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, invite.get("courseid").asInt());
-    val globalUserOpt = this.userService.find(principal.getName)
-
-    if (!userOpt.get.isAtLeastInRole(Role.TUTOR) && !globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)) {
-      logger.warn(s"User: ${userOpt.get.username} tried to access the stream at 'handleInviteMsg' without authorization")
-    } else {
-      val users = invite.get("users").asInstanceOf[ArrayNode]
-
-      val userAsJson = userToJson(userOpt.get)
-      userAsJson.remove("username")
-      userAsJson.remove("role")
-
-      val msg = new JSONObject(invite.toPrettyString)
-        .put("user", userAsJson)
-
-      users.elements().forEachRemaining(e => {
-        val username = e.get("username").asText()
-        if (sur.getUser(username) != null) {
-          smt.convertAndSendToUser(username, "/classroom/invite", msg.toString())
+        if (globalUser.globalRole <= GlobalRole.MODERATOR) {
+          val response = Classroom.getParticipants(cid)
+            .map(userToJson)
+            .foldLeft(new JSONArray())((a, u) => a.put(u))
+            .toString()
+          smt.convertAndSendToUser(principal.getName(), "/classroom/users", response)
         }
-      })
-    }
-  }
+   }
+}}
 
-  private def invitationToJson(invitation: Invitation): JSONObject = {
-    invitation match {
-      case BBBInvitation(creator, courseId, visibility, attendees, service, meetingId, meetingPasswort, moderatorPassword) =>
-        new JSONObject().put("creator", userToJson(creator))
-          .put("meetingId", meetingId)
-          .put(courseIdLiteral, courseId)
-          .put("service", service)
-          .put("meetingPassword", meetingPasswort)
-          .put("moderatorPassword", moderatorPassword)
-          .put("visibility", visibility)
-          .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
-      case JitsiInvitation(creator, courseId, visibility, attendees, service, href) => {
-        new JSONObject().put("creator", userToJson(creator))
-          .put(courseIdLiteral, courseId)
-          .put("service", service)
-          .put("href", href)
-          .put("visibility", visibility)
-          .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
-      }
-    }
-  }
-}

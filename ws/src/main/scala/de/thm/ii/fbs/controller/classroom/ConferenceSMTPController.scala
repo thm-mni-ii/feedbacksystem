@@ -25,7 +25,7 @@ import scala.collection.mutable
   * @author Andrej Sajenko
   */
 @Controller
-class ConferenceSMPTController {
+class ConferenceSMTPController {
     @Autowired
     private val sur: SimpUserRegistry = null
     @Autowired
@@ -36,7 +36,7 @@ class ConferenceSMPTController {
     private val jitsiService: JitsiService = null
     @Autowired
     implicit private val userService: UserService = null
-    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSMPTController])
+    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSMTPController])
     private val courseIdLiteral = "courseId";
     private def userToJson(user: User): JSONObject = new JSONObject()
       .put("username", user.username)
@@ -139,7 +139,6 @@ class ConferenceSMPTController {
           .foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
     }
-
 
     UserConferenceMap.onMap((invitation: Invitation, p: Principal) => {
     smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/opened", invitationToJson(invitation).toString)
