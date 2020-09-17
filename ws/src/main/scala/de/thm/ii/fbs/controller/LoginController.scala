@@ -2,9 +2,10 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, UnauthorizedException}
-import de.thm.ii.fbs.services.UserService
-import de.thm.ii.fbs.services.core.UserService
+import de.thm.ii.fbs.model.{User, GlobalRole}
+
 import de.thm.ii.fbs.services.persistance.{CourseService, UserService}
+import de.thm.ii.fbs.services.security.{AuthService}
 import de.thm.ii.fbs.util.LDAPConnector
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -24,7 +25,7 @@ class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private implicit val userService: UserService = null
   @Autowired
-  private val settingService: SettingService = null
+  private val authService: AuthService = null
   @Autowired
   private val courseService: CourseService = null
   @Value("${cas.client-host-url}")
@@ -56,43 +57,26 @@ class LoginController extends CasClientConfigurerAdapter {
   @RequestMapping(value = Array(""), method = Array(RequestMethod.GET))
   def userLogin(@RequestParam(value = "route", required = false) route: String, request: HttpServletRequest, response: HttpServletResponse): Any = {
     try {
-      val principal = request.getUserPrincipal
+      val casUser = request.getUserPrincipal
+
       var name: String = null
-      if (principal == null) {
+      if (casUser == null) {
         logger.warn("HELP WE GOT NO ANSWER FOM CAS")
       } else {
-        name = principal.getName
+        name = casUser.getName
       }
-      var existingUser = userService.find(name)
-      logger.info(LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN).toString)
-      if (existingUser.isEmpty) {
+      var user = userService.find(name)
+      if (user.isEmpty) {
         val entry = LDAPConnector.loadLDAPInfosByUID(name)(LDAP_URL, LDAP_BASE_DN)
-        logger.info(entry.getAttribute("uid").getStringValue)
-        userService.insertUserIfNotExists(entry.getAttribute("uid").getStringValue, entry.getAttribute("mail").getStringValue,
-          entry.getAttribute("givenName").getStringValue, entry.getAttribute("sn").getStringValue, LABEL_STUDENT_ROLE)
-        existingUser = userService.find(name)
+        userService.create(new User(
+          entry.getAttribute("uid").getStringValue,
+          entry.getAttribute("mail").getStringValue,
+          entry.getAttribute("givenName").getStringValue,
+          entry.getAttribute("sn").getStringValue,
+          GlobalRole.USER), "")
+          user = userService.find(name)
       }
-      val jwtToken = userService.generateTokenFromUser(existingUser.get)
-      setBearer(response, jwtToken)
-      val cookieMaxAge = 30
-      val co = new Cookie("jwt", jwtToken)
-      co.setPath("/")
-      co.setHttpOnly(false)
-      co.setMaxAge(cookieMaxAge)
-      logger.info("route = " + route)
-      response.addCookie(co)
-      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
-      if (request.getQueryString != null && request.getQueryString.indexOf("courses=") >= 0) {
-        val coursepath: String = request.getQueryString.replace('=', '/')
-        val numPattern = "/[0-9]+$".r
-        val courseId = numPattern.findFirstIn(coursepath).get.substring(1).toInt
-        if (this.courseService.isSubscriberForCourse(courseId, existingUser.get)) {
-          this.courseService.subscribeCourse(courseId, existingUser.get)
-        }
-        response.setHeader("Location", CLIENT_HOST_URL + "/" + coursepath)
-      } else {
-        response.setHeader("Location", CLIENT_HOST_URL + "/")
-      }
+     authService.renewAuthentication(user.get, response)
       "jwt"
     } catch {
       case e: Throwable => {

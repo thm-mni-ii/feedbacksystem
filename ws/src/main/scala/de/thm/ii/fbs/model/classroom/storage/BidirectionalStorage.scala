@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.practiceroom.storage
+package de.thm.ii.fbs.model.classroom.storage
 
 /**
   * Allows access to a by b and b by a

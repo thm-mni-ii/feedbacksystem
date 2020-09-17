@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.practiceroom.storage
+package de.thm.ii.fbs.model.classroom.storage
 
 /**
   * A Bidirectional Storage which does not allow duplicate a or bs

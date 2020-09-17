@@ -1,7 +1,7 @@
-package de.thm.ii.fbs.model.practiceroom
+package de.thm.ii.fbs.model.classroom
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.practiceroom.storage.BidirectionalStorage
+import de.thm.ii.fbs.model.classroom.storage.BidirectionalStorage
 
 import scala.collection.mutable
 

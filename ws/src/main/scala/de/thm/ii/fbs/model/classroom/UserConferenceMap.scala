@@ -1,10 +1,10 @@
-package de.thm.ii.fbs.model.practiceroom
+package de.thm.ii.fbs.model.classroom
 
 import java.security.Principal
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.practiceroom.UserConferenceMap.Invitation
-import de.thm.ii.fbs.model.practiceroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
+import de.thm.ii.fbs.model.classroom.UserConferenceMap.Invitation
+import de.thm.ii.fbs.model.classroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
 
 import scala.collection.mutable
 

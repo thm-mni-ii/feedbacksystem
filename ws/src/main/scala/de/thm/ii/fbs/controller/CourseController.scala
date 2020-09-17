@@ -3,8 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.CourseService
-import de.thm.ii.fbs.services.core.CourseService
+import de.thm.ii.fbs.services.persistance.CourseService
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._

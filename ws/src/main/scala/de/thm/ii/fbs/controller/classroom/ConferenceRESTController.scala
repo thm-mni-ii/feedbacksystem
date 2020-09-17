@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.controller.practiceroom
+package de.thm.ii.fbs.controller.classroom
 
 import java.net.URI
 import java.util.UUID
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1/courses/meeting"))
-class ConferenceController {
+@RequestMapping(path = Array("/classroom/conference"))
+class ConferenceRESTController {
   @Autowired
   private val authService: AuthService = null
   @Autowired
@@ -66,7 +66,7 @@ class ConferenceController {
     * @param body The body of the request.
     * @return The conference link
     */
-  @RequestMapping(value = Array("/bbb/invite"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/bigbluebutton/invite"), method = Array(RequestMethod.POST))
   @ResponseBody
   def getBBBConferenceLink(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = authService.authorize(req, res)

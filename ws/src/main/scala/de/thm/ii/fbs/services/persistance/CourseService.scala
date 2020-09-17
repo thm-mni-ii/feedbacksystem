@@ -37,7 +37,7 @@ class CourseService {
 
   /**
     * Lookup course by id
-    * @param id The users id
+    * @param id The Course id
     * @return The found course
     */
   def find(id: Int): Option[Course] = DB.query(

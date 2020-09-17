@@ -1,27 +1,23 @@
 package de.thm.ii.fbs.services.conferences
-import de.thm.ii.fbs.model.SimpleUser
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.test.context.junit4.SpringRunner
 import java.util.UUID
 
-import org.junit.AfterClass
-import org.junit.BeforeClass
+import de.thm.ii.fbs.model.{GlobalRole, User}
 import org.assertj.core.api.Assertions
+import org.junit.{AfterClass, BeforeClass, Test}
+import org.junit.runner.RunWith
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.mock.action.ExpectationCallback
-import org.mockserver.model.HttpClassCallback.callback
-import org.mockserver.model.{HttpRequest, HttpResponse, Parameter}
 import org.mockserver.model.HttpRequest.request
 import org.mockserver.model.HttpResponse.response
+import org.mockserver.model.{HttpRequest, HttpResponse}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringRunner
 
 import scala.collection.mutable
-import scala.util.control.Breaks.break
 
 /**
   * Tests BBBService
@@ -55,7 +51,7 @@ class BBBServiceTest {
   @Test
   def getBBBConferenceLinkTest: Unit = {
     bbbService.setApiURL(apiUrl)
-    val user = new SimpleUser(0, "test", "Test", "User", "test@example.org");
+    val user = new User( "test", "Test", "test@example.org", "User", GlobalRole.USER, Option.empty[String], 0) ;
     val id = UUID.randomUUID().toString
     val password = UUID.randomUUID().toString
     val conferenceLink = bbbService.getBBBConferenceLink(user, id, password)
@@ -63,6 +59,7 @@ class BBBServiceTest {
     Assertions.assertThat(conferenceLink).contains(s"${user.prename}%20${user.surname}")
     Assertions.assertThat(conferenceLink).contains(id)
     Assertions.assertThat(conferenceLink).contains(password)
+    Assertions.assertThat(conferenceLink).has
   }
 }
 

@@ -1,8 +1,8 @@
-package de.thm.ii.fbs.model.practiceroom
+package de.thm.ii.fbs.model.classroom
 
 import java.security.Principal
 
-import de.thm.ii.fbs.model.practiceroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
+import de.thm.ii.fbs.model.classroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
 
 import scala.collection.mutable
 
@@ -10,6 +10,9 @@ import scala.collection.mutable
   * Maps session ids to principals.
   */
 object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principal] {
+  private val onMapListeners = mutable.Set[(String, Principal) => Unit]()
+  private val onDeleteListeners = mutable.Set[(String, Principal) => Unit]()
+
   /**
     * Maps a user to its session
     *
@@ -55,9 +58,6 @@ object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principa
     })
   }
 
-  private val onMapListeners = mutable.Set[(String, Principal) => Unit]()
-  private val onDeleteListeners = mutable.Set[(String, Principal) => Unit]()
-
   /**
     * @param cb Callback that gets executed on every map event
     */
@@ -71,4 +71,5 @@ object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principa
   def onDelete(cb: (String, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
   }
+
 }

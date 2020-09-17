@@ -1,8 +1,8 @@
-package de.thm.ii.fbs.controller.practiceroom
+package de.thm.ii.fbs.controller.classroom
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User, practiceroom}
-import de.thm.ii.fbs.model.practiceroom.{Ticket, Tickets}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User, classroom}
+import de.thm.ii.fbs.model.classroom.{Ticket, Tickets}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}
@@ -130,7 +130,7 @@ class TicketController {
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
-    } yield (practiceroom.Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
+    } yield (classroom.Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
 
     ticketAndUser match {
       case Some(v) =>

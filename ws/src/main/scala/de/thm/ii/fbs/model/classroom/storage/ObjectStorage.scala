@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.practiceroom.storage
+package de.thm.ii.fbs.model.classroom.storage
 
 import java.util.concurrent.locks.{ReadWriteLock, ReentrantReadWriteLock}
 
