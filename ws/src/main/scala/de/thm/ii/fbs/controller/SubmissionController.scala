@@ -4,8 +4,6 @@ import java.nio.file.Files
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.Submission
-import de.thm.ii.fbs.services.TaskService
-import de.thm.ii.fbs.services.core.TaskService
 import de.thm.ii.fbs.services.persistance.{StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -118,6 +116,6 @@ class SubmissionController {
     */
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
   @ResponseBody
-  def getOne(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,  @PathVariable("sid") sid: Int,
+  def getOne(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
              req: HttpServletRequest, res: HttpServletResponse): Submission = ??? // TODO: Here
 }
