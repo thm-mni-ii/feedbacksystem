@@ -105,8 +105,8 @@ def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Un
           .filter(u => u.role < CourseRole.TUTOR)
       }
   }
-  val filteredParticipients = participants.map(userToJson)
+  val filteredParticipants = participants.map(userToJson)
     .foldLeft(new JSONArray())((a, u) => a.put(u))
     .toString()
-  smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipients)
+  smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipants)
 }}
