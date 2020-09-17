@@ -2,12 +2,11 @@ package de.thm.ii.fbs.controller.classroom
 
 import java.security.Principal
 
-import org.springframework.web.servlet.mvc.Controller
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.classroom.UserConferenceMap
 import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
-import de.thm.ii.fbs.model.{classroom, _}
-import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
@@ -17,6 +16,7 @@ import org.springframework.messaging.handler.annotation.{MessageMapping, Payload
 import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.stereotype.Controller
+
 import scala.collection.mutable
 
 /**

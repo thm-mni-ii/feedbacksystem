@@ -2,37 +2,33 @@ package de.thm.ii.fbs.controller.classroom
 
 import java.security.Principal
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
-import de.thm.ii.fbs.model.{classroom, _}
-import de.thm.ii.fbs.model.classroom.{Classroom, Ticket, Tickets, UserConferenceMap, UserSessionMap}
+import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.persistance.UserService
-import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.MessagingException
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
 import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.stereotype.Controller
-
-import scala.collection.mutable
 
 /**
   * WebSocket controller that allows users to appear as logged in user.
   * @author Andrej Sajenko
   */
 @Controller
-class classroomController {
+class ClassroomController {
   @Autowired
   private val sur: SimpUserRegistry = null
   @Autowired
   private val smt: SimpMessagingTemplate = null
   @Autowired
   implicit private val userService: UserService = null
-  private val logger: Logger = LoggerFactory.getLogger(classOf[classroomController])
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
   private val courseIdLiteral = "courseId";
 
   private def userToJson(user: User): JSONObject = new JSONObject()
@@ -133,8 +129,6 @@ class classroomController {
       })
     }
   }
-
-
 
   private def invitationToJson(invitation: Invitation): JSONObject = {
     invitation match {
