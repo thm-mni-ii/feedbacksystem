@@ -31,31 +31,27 @@ class ClassroomController {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
   @Autowired
   implicit private val courseRegistrationService: CourseRegistrationService = null
-  private val logger: Logger = LoggerFactory.getLogger(classOf[classroomController])
+  private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
   private val courseIdLiteral = "courseId";
 
-  private def userToJson(user: User): JSONObject = new JSONObject()
-    .put("username", user.username)
-    .put("prename", user.prename)
-    .put("surname", user.surname)
-    .put("role", user.globalRole.id)
+  private def userToJson(p: Participant): JSONObject = new JSONObject()
+    .put("username", p.user.username)
+    .put("prename", p.user.prename)
+    .put("surname", p.user.surname)
+    .put("role", p.role)
 
   /**
     * Removes users that loose connections
     */
-  UserSessionMap.onDelete((id: String, p: Principal) => {
-    val participants = Classroom.getAllB;
-    participants
-    val courseUser = for {
-      user <- this.userService.find(p.getName)
-      courseId <- Classroom.leave(user)
-    } yield (courseId, user)
-    courseUser.foreach {
-      case (course, user) => {
-        UserConferenceMap.delete(user)
-        smt.convertAndSend("/topic/classroom/" + course + "/left", userToJson(user).toString)
+  UserSessionMap.onDelete((id: String, principal: Principal) => {
+    val participant = Classroom.getAllB.find(p => p.user.equals(principal))
+    val courseId = Classroom.getAll.find(p => p._2.user.equals(principal))
+    UserConferenceMap.delete(principal)
+
+     (participant, courseId) match {
+       case (Some(value), id) =>
+        smt.convertAndSend("/topic/classroom/" + id + "/left", userToJson(value).toString)
       }
-    }
   })
 
   /**
