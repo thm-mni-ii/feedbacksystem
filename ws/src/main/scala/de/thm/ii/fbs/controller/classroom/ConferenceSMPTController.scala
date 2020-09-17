@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.UserConferenceMap
 import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
+import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
 import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.util.JsonWrapper._
 import org.json.{JSONArray, JSONObject}
@@ -20,7 +21,7 @@ import org.springframework.stereotype.Controller
 import scala.collection.mutable
 
 /**
-  * Handles conferece invitation massages
+  * Handles conference invitation massages
   * @author Andrej Sajenko
   */
 @Controller
@@ -30,8 +31,12 @@ class ConferenceSMPTController {
     @Autowired
     private val smt: SimpMessagingTemplate = null
     @Autowired
+    private val bbbService: BBBService = null
+    @Autowired
+    private val jitsiService: JitsiService = null
+    @Autowired
     implicit private val userService: UserService = null
-    private val logger: Logger = LoggerFactory.getLogger(classOf[classroomController])
+    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSMPTController])
     private val courseIdLiteral = "courseId";
     private def userToJson(user: User): JSONObject = new JSONObject()
       .put("username", user.username)
@@ -89,7 +94,7 @@ class ConferenceSMPTController {
       }
 
       val invitation = m.retrive("invitation").retrive("service").asText() match {
-        case Some(ConferenceSystemLabels.BIGBLUEBUTTON) => BBBInvitation(user.get,
+        case Some(bbbService.name) => BBBInvitation(user.get,
           courseId,
           m.retrive(invLit).retrive("visibility").asText().get,
           attendees,
@@ -97,7 +102,7 @@ class ConferenceSMPTController {
           m.retrive(invLit).retrive("meetingId").asText().get,
           m.retrive(invLit).retrive("meetingPassword").asText().get,
           m.retrive(invLit).retrive("moderatorPassword").asText().get)
-        case Some(ConferenceSystemLabels.JITSI) => JitsiInvitation(user.get,
+        case Some(jitsiService.name) => JitsiInvitation(user.get,
           courseId,
           m.retrive(invLit).retrive("visibility").asText().get,
           attendees,
@@ -159,14 +164,13 @@ class ConferenceSMPTController {
             .put("moderatorPassword", moderatorPassword)
             .put("visibility", visibility)
             .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
-        case JitsiInvitation(creator, courseId, visibility, attendees, service, href) => {
+        case JitsiInvitation(creator, courseId, visibility, attendees, service, href) =>
           new JSONObject().put("creator", userToJson(creator))
             .put(courseIdLiteral, courseId)
             .put("service", service)
             .put("href", href)
             .put("visibility", visibility)
             .put("attendees", attendees.foldLeft(new JSONArray())((a, u) => a.put(u)))
-        }
       }
     }
 
