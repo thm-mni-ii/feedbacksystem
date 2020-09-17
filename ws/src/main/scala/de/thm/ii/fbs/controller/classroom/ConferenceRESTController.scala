@@ -5,14 +5,13 @@ import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
-import de.thm.ii.fbs.services.labels.ConferenceSystemLabels
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 
 /**
-  * Handles conferece invitation massages
+  * Handles conference invitation massages
   * @author Andrej Sajenko
   */
 @RestController
@@ -39,22 +38,22 @@ class ConferenceRESTController {
     val user = authService.authorize(req, res)
 
     body.get("service").asText() match {
-      case ConferenceSystemLabels.JITSI =>
+      case jitsiService.name =>
         val id = UUID.randomUUID()
         val uri: URI = this.jitsiService.registerJitsiConference(id.toString)
-        Map("href" -> uri.toString, "service" -> ConferenceSystemLabels.JITSI)
-      case ConferenceSystemLabels.BIGBLUEBUTTON =>
+        Map("href" -> uri.toString, "service" -> jitsiService.name)
+      case bbbService.name =>
         val meetingId = UUID.randomUUID().toString
         val meetingPassword = UUID.randomUUID().toString
         val moderatorPassword = UUID.randomUUID().toString
         this.bbbService.registerBBBConference(meetingId, meetingId, meetingPassword, moderatorPassword)
-        val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, meetingId, moderatorPassword)
+        val inviteeUri: URI = this.bbbService.getBBBConferenceLink(user, meetingId, moderatorPassword)
         Map(
-          "href" -> inviteeUri,
+          "href" -> inviteeUri.toString,
           "meetingId" -> meetingId,
           "meetingPassword" -> meetingPassword,
           "moderatorPassword" -> moderatorPassword,
-          "service" -> ConferenceSystemLabels.BIGBLUEBUTTON
+          "service" -> bbbService.name
         )
     }
   }
@@ -70,7 +69,7 @@ class ConferenceRESTController {
   @ResponseBody
   def getBBBConferenceLink(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = authService.authorize(req, res)
-    val inviteeUri: String = this.bbbService.getBBBConferenceLink(user, body.get("meetingId").asText(), body.get("meetingPassword").asText())
-    Map("href" -> inviteeUri)
+    val inviteeUri: URI = this.bbbService.getBBBConferenceLink(user, body.get("meetingId").asText(), body.get("meetingPassword").asText())
+    Map("href" -> inviteeUri.toString)
   }
 }
