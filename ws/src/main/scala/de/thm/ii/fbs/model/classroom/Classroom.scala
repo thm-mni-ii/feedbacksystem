@@ -1,26 +1,21 @@
 package de.thm.ii.fbs.model.classroom
 
-import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.{Participant}
 import de.thm.ii.fbs.model.classroom.storage.BidirectionalStorage
-
-import scala.collection.mutable
 
 /**
   * Handles attendances in classes.
   *
   * @author Andrej Sajenko
   */
-object Classroom extends BidirectionalStorage[Int, User] {
-  private val roomsToUsers = mutable.Map[Int, mutable.Set[User]]()
-  private val userToRoom = mutable.Map[User, Int]()
-
+object Classroom extends BidirectionalStorage[Int, Participant] {
   /**
     * Adds a user to a classroom.
     *
     * @param courseId The courseId of a couse
     * @param user     The user to add
     */
-  def join(courseId: Int, user: User): Unit = super.put(courseId, user)
+  def join(courseId: Int, user: Participant): Unit = super.put(courseId, user)
 
   /**
     * Remove user fromm all courses
@@ -28,13 +23,14 @@ object Classroom extends BidirectionalStorage[Int, User] {
     * @param user The user to remove
     * @return Course id
     */
-  def leave(user: User): Option[Int] = super.deleteByB(user).headOption
+  def leave(user: Participant): Option[Int] = super.deleteByB(user).headOption
 
   /**
     * @param u A user
     * @return The course id of the user
     */
-  def get(u: User): Option[Int] = super.getA(u).headOption
+  def get(u: Participant): Option[Int] = super.getA(u).headOption
+
 
   /**
     * Get all user that currently in a course.
@@ -42,5 +38,5 @@ object Classroom extends BidirectionalStorage[Int, User] {
     * @param courseId The course id
     * @return The user in the course
     */
-  def getParticipants(courseId: Int): List[User] = super.getB(courseId).toList
+  def getParticipants(courseId: Int): List[Participant] = super.getB(courseId).toList
 }

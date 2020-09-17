@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +29,9 @@ class ClassroomController {
   @Autowired
   implicit private val userService: UserService = null
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
+  @Autowired
+  implicit private val courseRegistrationService: CourseRegistrationService = null
+  private val logger: Logger = LoggerFactory.getLogger(classOf[classroomController])
   private val courseIdLiteral = "courseId";
 
   private def userToJson(user: User): JSONObject = new JSONObject()
@@ -41,6 +44,8 @@ class ClassroomController {
     * Removes users that loose connections
     */
   UserSessionMap.onDelete((id: String, p: Principal) => {
+    val participants = Classroom.getAllB;
+    participants
     val courseUser = for {
       user <- this.userService.find(p.getName)
       courseId <- Classroom.leave(user)
@@ -63,11 +68,19 @@ class ClassroomController {
   def userJoined(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val courseId = m.get(courseIdLiteral).asInt();
     val principal = headerAccessor.getUser
-    val globalUserOpt = this.userService.find(principal.getName);
-    val userOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId)
-    val user = userToJson(userOpt.getOrElse(globalUserOpt.get))
-    Classroom.join(courseId, userOpt.getOrElse(globalUserOpt.get))
-    smt.convertAndSend("/topic/classroom/" + courseId + "/joined", user.toString)
+    val user = this.userService.find(principal.getName)
+    val participant = this.courseRegistrationService
+      .getParticipants(courseId)
+      .find(participant => participant.user.equals(user))
+
+    participant match {
+      case Some(participant) => Classroom.join(courseId, participant)
+        smt.convertAndSend("/topic/classroom/" + courseId + "/joined", user.toString)
+      case _ => logger.warn("User not registered in course")
+    }
+
+
+
   }
 
   /**
