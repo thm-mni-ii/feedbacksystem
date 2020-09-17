@@ -40,18 +40,14 @@ class ClassroomController {
     .put("surname", p.user.surname)
     .put("role", p.role)
 
-  /**
-    * Removes users that loose connections
-    */
+  // Removes users that loose connections
   UserSessionMap.onDelete((id: String, principal: Principal) => {
-    val participant = Classroom.getAllB.find(p => p.user.equals(principal))
-    val courseId = Classroom.getAll.find(p => p._2.user.equals(principal))
-    UserConferenceMap.delete(principal)
-
-     (participant, courseId) match {
-       case (Some(value), id) =>
-        smt.convertAndSend("/topic/classroom/" + id + "/left", userToJson(value).toString)
-      }
+    Classroom.getAll.find(p => p._2.user.equals(principal)) match {
+      case Some((cid, user)) =>
+        UserConferenceMap.delete(principal)
+        smt.convertAndSend("/topic/classroom/" + cid + "/left", userToJson(user).toString)
+      case None => // Nothing on purpose
+    }
   })
 
   /**
