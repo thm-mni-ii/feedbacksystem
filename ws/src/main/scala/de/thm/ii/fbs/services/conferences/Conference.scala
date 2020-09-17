@@ -11,12 +11,12 @@ abstract class Conference {
   /**
     * The id of the conference
     */
-  abstract val id: String
+  val id: String
 
   /**
     * The name of the ConferenceService used to create the Conference
     */
-  abstract val serviceName: String
+  val serviceName: String
 
   /**
     * Gets the http URL for the conference
@@ -24,11 +24,11 @@ abstract class Conference {
     * @param moderator the type of url to generate
     * @return the conference url
     */
-  abstract def getURL(user: User, moderator: Boolean = false): URI
+  def getURL(user: User, moderator: Boolean = false): URI
 
   /**
     * Creates a map containing information about the Conference
     * @return the map
     */
-  abstract def toMap: Map[String, String]
+  def toMap: Map[String, String]
 }
