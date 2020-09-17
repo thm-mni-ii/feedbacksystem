@@ -21,7 +21,7 @@ class UserController {
   @Autowired
   private val userService: UserService = null
   @Autowired
-  private val authService: UserService = null
+  private val authService: AuthService = null
 
   /**
     * Get all users of the system
