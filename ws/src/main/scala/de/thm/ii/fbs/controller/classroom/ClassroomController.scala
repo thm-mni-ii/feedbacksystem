@@ -31,7 +31,6 @@ class ClassroomController {
   private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
   @Autowired
   implicit private val courseRegistrationService: CourseRegistrationService = null
-  private val logger: Logger = LoggerFactory.getLogger(classOf[ClassroomController])
   private val courseIdLiteral = "courseId";
 
   private def userToJson(p: Participant): JSONObject = new JSONObject()
@@ -40,7 +39,7 @@ class ClassroomController {
     .put("surname", p.user.surname)
     .put("role", p.role)
 
-  // Removes users that loose connections
+  // Removes users that lose connections
   UserSessionMap.onDelete((id: String, principal: Principal) => {
     Classroom.getAll.find(p => p._2.user.equals(principal)) match {
       case Some((cid, user)) =>
@@ -59,15 +58,9 @@ class ClassroomController {
   @MessageMapping(value = Array("/classroom/join"))
   def userJoined(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val courseId = m.get(courseIdLiteral).asInt();
-    val principal = headerAccessor.getUser
-    val user = this.userService.find(principal.getName)
-    val participant = this.courseRegistrationService
-      .getParticipants(courseId)
-      .find(participant => participant.user.equals(user))
-
-    participant match {
+    this.courseRegistrationService.getParticipants(courseId).find(p => p.user.equals(user)) match {
       case Some(participant) => Classroom.join(courseId, participant)
-        smt.convertAndSend("/topic/classroom/" + courseId + "/joined", user.toString)
+        smt.convertAndSend("/topic/classroom/" + courseId + "/joined", participant.toString)
       case _ => logger.warn("User not registered in course")
     }
 
@@ -82,10 +75,27 @@ class ClassroomController {
     */
   @MessageMapping(value = Array("/classroom/users"))
   def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseId = m.get(courseIdLiteral).asInt()
+    val cid = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
-    val localUserOpt = this.userService.loadCourseUserFromDB(principal.getName, courseId);
-    val globalUserOpt = this.userService.find(principal.getName)
+    (this.userService.find(principal.getName), this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(principal))) match {
+      case (Some(globalUser), Some(localUser)) =>
+        if(globalUser.globalRole == GlobalRole.MODERATOR) {
+          val response = Classroom.getParticipants(cid)
+            .map(userToJson)
+            .foldLeft(new JSONArray())((a, u) => a.put(u))
+            .toString()
+          smt.convertAndSendToUser(principal.getName(), "/classroom/users", response)
+        } else {
+          val response = Classroom.getParticipants(cid)
+            .filter(u => u.isAtLeastInRole(Role.TUTOR) || UserConferenceMap.exists(u))
+            .map(userToJson)
+            .foldLeft(new JSONArray())((a, u) => a.put(u))
+            .toString()
+          smt.convertAndSendToUser(user.getName(), "/classroom/users", response)
+        }
+      case (Some(globalUser), None) =>
+    }
+
     val user = localUserOpt.getOrElse(globalUserOpt.get)
     if (user.isAtLeastInRole(Role.TUTOR) || globalUserOpt.get.isAtLeastInRole(Role.MODERATOR)){
       val response = Classroom.getParticipants(courseId)
