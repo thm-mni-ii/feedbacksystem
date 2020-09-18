@@ -55,7 +55,7 @@ class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService
   private val restTemplate = templateBuilder.build()
 
   @Value("${services.bbb.service-url}")
-  private var apiUrl: String = null
+  private val apiUrl: String = null
   @Value("${services.bbb.shared-secret}")
   private val secret: String = null
 
@@ -84,14 +84,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService
     val link = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
     URI.create(link)
-  }
-
-  /**
-    * Sets the apiURL
-    * @param apiUrl - the value the apiURL is set to
-    */
-  def setApiURL(apiUrl: String): Unit = {
-    this.apiUrl = apiUrl
   }
 
   /**

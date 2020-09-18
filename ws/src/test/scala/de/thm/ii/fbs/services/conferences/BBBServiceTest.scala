@@ -36,7 +36,6 @@ class BBBServiceTest {
     */
   @Test
   def registerBBBConferenceTest: Unit = {
-    bbbService.setApiURL("http://localhost:1080/bbb")
     val id = UUID.randomUUID().toString
     val password = UUID.randomUUID().toString
     val moderatorPassword = UUID.randomUUID().toString
@@ -50,7 +49,6 @@ class BBBServiceTest {
     */
   @Test
   def getBBBConferenceLinkTest: Unit = {
-    bbbService.setApiURL(apiUrl)
     val user = new User( "test", "Test", "test@example.org", "User", GlobalRole.USER, Option.empty[String], 0) ;
     val id = UUID.randomUUID().toString
     val password = UUID.randomUUID().toString
@@ -71,7 +69,7 @@ object BBBServiceTest {
     * Executed before the tests of this class are run
     */
   @BeforeClass def startServer(): Unit = {
-    mockServer = startClientAndServer(1080)
+    mockServer = startClientAndServer(5080)
     mockServer.when(request.withPath("/bbb/api/create")).callback(new ExpectationCallback() {
       override def handle(httpRequest: HttpRequest): HttpResponse = {
         val queryMap = new mutable.HashMap[String, String]()
