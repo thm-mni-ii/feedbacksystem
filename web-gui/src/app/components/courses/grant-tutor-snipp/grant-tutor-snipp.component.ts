@@ -5,7 +5,7 @@ import {UserService} from '../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSort} from '@angular/material/sort';
 import {flatMap, map, startWith} from 'rxjs/operators';
-import {User} from '../../../interfaces/HttpInterfaces';
+import {User} from '../../../model/HttpInterfaces';
 import {Observable} from 'rxjs';
 
 @Component({

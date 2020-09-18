@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
 import {DatabaseService} from '../../service/database.service';
-import {TextType} from '../../interfaces/HttpInterfaces';
+import {TextType} from '../../model/HttpInterfaces';
 import {UserService} from '../../service/user.service';
 
 /**

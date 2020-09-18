@@ -11,7 +11,7 @@ import {
   Testsystem,
   TextType,
   User
-} from '../interfaces/HttpInterfaces';
+} from '../model/HttpInterfaces';
 import {flatMap} from 'rxjs/operators';
 import {saveAs as importedSaveAs} from 'file-saver';
 

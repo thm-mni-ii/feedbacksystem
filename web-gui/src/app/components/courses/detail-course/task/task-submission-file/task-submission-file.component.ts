@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {CourseTask} from "../../../../../interfaces/HttpInterfaces";
+import {CourseTask} from "../../../../../model/HttpInterfaces";
 
 @Component({
   selector: 'app-task-submission-file',

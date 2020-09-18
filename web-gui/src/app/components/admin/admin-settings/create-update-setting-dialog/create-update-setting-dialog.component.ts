@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
-import {GlobalSetting} from "../../../../interfaces/HttpInterfaces";
+import {GlobalSetting} from "../../../../model/HttpInterfaces";
 
 @Component({
   selector: 'app-create-update-setting-dialog',
