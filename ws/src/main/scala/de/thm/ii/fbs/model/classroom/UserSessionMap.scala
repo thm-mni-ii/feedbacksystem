@@ -1,14 +1,17 @@
-package de.thm.ii.fbs.model.practiceroom
+package de.thm.ii.fbs.model.classroom
 
 import java.security.Principal
+
+import de.thm.ii.fbs.model.classroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
+
 import scala.collection.mutable
 
 /**
   * Maps session ids to principals.
   */
-object UserSessionMap {
-  private val sessionToUser = mutable.Map[String, Principal]()
-  private val userToSession = mutable.Map[Principal, String]()
+object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principal] {
+  private val onMapListeners = mutable.Set[(String, Principal) => Unit]()
+  private val onDeleteListeners = mutable.Set[(String, Principal) => Unit]()
 
   /**
     * Maps a user to its session
@@ -17,13 +20,7 @@ object UserSessionMap {
     * @param p  principal
     */
   def map(id: String, p: Principal): Unit = {
-    if (userToSession.contains(p)) {
-      sessionToUser.remove(userToSession(p))
-      userToSession.remove(p)
-    }
-
-    sessionToUser.put(id, p)
-    userToSession.put(p, id)
+    super.put(id, p)
     onMapListeners.foreach(_ (id, p))
   }
 
@@ -31,13 +28,13 @@ object UserSessionMap {
     * @param id The session id
     * @return The principal for the given session id
     */
-  def get(id: String): Option[Principal] = sessionToUser.get(id)
+  def get(id: String): Option[Principal] = super.getSingleB(id)
 
   /**
     * @param p The principal
     * @return The session id for the given principal
     */
-  def get(p: Principal): Option[String] = userToSession.get(p)
+  def get(p: Principal): Option[String] = super.getSingleA(p)
 
   /**
     * Removes both, the user and its session by using its session id
@@ -45,8 +42,7 @@ object UserSessionMap {
     * @param id Session id
     */
   def delete(id: String): Unit = {
-    sessionToUser.remove(id).foreach(p => {
-      userToSession.remove(p)
+    super.deleteByA(id).foreach(p => {
       onDeleteListeners.foreach(_ (id, p))
     })
   }
@@ -57,14 +53,10 @@ object UserSessionMap {
     * @param p The principal
     */
   def delete(p: Principal): Unit = {
-    userToSession.remove(p).foreach(id => {
-      sessionToUser.remove(id)
+    super.deleteByB(p).foreach(id => {
       onDeleteListeners.foreach(_ (id, p))
     })
   }
-
-  private val onMapListeners = mutable.Set[(String, Principal) => Unit]()
-  private val onDeleteListeners = mutable.Set[(String, Principal) => Unit]()
 
   /**
     * @param cb Callback that gets executed on every map event

@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.practiceroom
+package de.thm.ii.fbs.model.classroom
 
 import de.thm.ii.fbs.model.User
 import scala.collection.mutable
