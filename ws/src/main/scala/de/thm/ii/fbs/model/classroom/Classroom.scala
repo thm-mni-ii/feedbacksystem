@@ -31,7 +31,6 @@ object Classroom extends BidirectionalStorage[Int, Participant] {
     */
   def get(u: Participant): Option[Int] = super.getA(u).headOption
 
-
   /**
     * Get all user that currently in a course.
     *

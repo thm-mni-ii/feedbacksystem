@@ -71,5 +71,4 @@ object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principa
   def onDelete(cb: (String, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
   }
-
 }

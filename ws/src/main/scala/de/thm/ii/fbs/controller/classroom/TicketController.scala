@@ -187,7 +187,6 @@ class TicketController {
     .put("timestamp", ticket.timestamp)
     .put("queuePosition", ticket.queuePosition)
 
-
   private def getGlobalUser(headerAccessor: SimpMessageHeaderAccessor) =
     this.userService.find(headerAccessor.getUser.getName)
 

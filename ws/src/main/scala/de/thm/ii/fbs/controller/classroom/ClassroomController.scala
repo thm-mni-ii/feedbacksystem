@@ -81,30 +81,31 @@ class ClassroomController {
     }
   }
 
-/**
-  * Retrives all users messages
-  * @param m Message
-  * @param headerAccessor Header information
-  */
-@MessageMapping(value = Array("/classroom/users"))
-def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-  val cid = m.get(courseIdLiteral).asInt()
-  val principal = headerAccessor.getUser
-  var participants = Classroom.getParticipants(cid);
-  (this.userService.find(principal.getName), this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(principal))) match {
-    case (Some(globalUser), Some(localUser)) =>
-      if (globalUser.globalRole > GlobalRole.MODERATOR && localUser.role > CourseRole.TUTOR) {
-        participants = participants
-          .filter(u => u.role < CourseRole.TUTOR)
-      }
-    case (Some(globalUser), None) =>
-      if (globalUser.globalRole <= GlobalRole.MODERATOR) {
-        participants = participants
-          .filter(u => u.role < CourseRole.TUTOR)
-      }
+  /**
+    * Retrives all users messages
+    * @param m Message
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/users"))
+  def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val cid = m.get(courseIdLiteral).asInt()
+    val principal = headerAccessor.getUser
+    var participants = Classroom.getParticipants(cid);
+    (this.userService.find(principal.getName), this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(principal))) match {
+      case (Some(globalUser), Some(localUser)) =>
+        if (globalUser.globalRole > GlobalRole.MODERATOR && localUser.role > CourseRole.TUTOR) {
+          participants = participants
+            .filter(u => u.role < CourseRole.TUTOR)
+        }
+      case (Some(globalUser), None) =>
+        if (globalUser.globalRole <= GlobalRole.MODERATOR) {
+          participants = participants
+            .filter(u => u.role < CourseRole.TUTOR)
+        }
+    }
+    val filteredParticipants = participants.map(userToJson)
+      .foldLeft(new JSONArray())((a, u) => a.put(u))
+      .toString()
+    smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipants)
   }
-  val filteredParticipants = participants.map(userToJson)
-    .foldLeft(new JSONArray())((a, u) => a.put(u))
-    .toString()
-  smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipants)
-}}
+}
