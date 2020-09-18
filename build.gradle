@@ -12,7 +12,7 @@ subprojects { subproject ->
     version '1.0-SNAPSHOT'
 }
 
-task dist(dependsOn: ['ws:installDist', 'secrettoken-checker:installDist', 'sql-checker:installDist', "master-runner:installDist", "web-gui:installDist"]) {
+task dist(dependsOn: ['ws:installDist', 'secrettoken-checker:installDist', 'sql-checker:installDist', "web-gui:installDist"]) {
     doLast({
         installDist
     })

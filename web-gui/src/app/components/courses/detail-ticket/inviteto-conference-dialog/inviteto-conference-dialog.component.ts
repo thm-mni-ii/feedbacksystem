@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {ConferenceInvitation, User} from '../../../../model/HttpInterfaces';
+import {ConferenceInvitation, User} from '../../../../interfaces/HttpInterfaces';
 import {ConferenceService} from '../../../../service/conference.service';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {FormBuilder, FormGroup} from '@angular/forms';

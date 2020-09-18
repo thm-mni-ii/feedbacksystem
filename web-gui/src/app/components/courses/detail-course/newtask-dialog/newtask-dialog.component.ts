@@ -4,7 +4,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup} from '@angular/forms';
 import {DatabaseService} from '../../../../service/database.service';
 import {Subscription} from 'rxjs';
-import {DetailedCourseInformation, Testsystem, TestsystemTestfile} from '../../../../model/HttpInterfaces';
+import {DetailedCourseInformation, Testsystem, TestsystemTestfile} from '../../../../interfaces/HttpInterfaces';
 
 /**
  * Dialog to create a new task or update

@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {DatabaseService} from "../../../../service/database.service";
-import {Succeeded} from "../../../../model/HttpInterfaces";
+import {Succeeded} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-upload-plagiat-script',

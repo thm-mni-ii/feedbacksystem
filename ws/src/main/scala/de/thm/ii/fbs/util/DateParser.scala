@@ -20,8 +20,9 @@ object DateParser {
     for (pattern <- patterns) {
       try {
         date = LocalDate.parse(trimmedText, DateTimeFormatter.ofPattern(pattern))
-      } catch {
-        case _: DateTimeParseException => {} // TODO: Do not ignore errors until it is okay, here it is not the case
+      }
+      catch {
+        case _: DateTimeParseException => {}
       }
     }
     date

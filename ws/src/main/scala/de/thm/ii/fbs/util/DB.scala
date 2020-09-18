@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.util
 
-import java.sql.{Connection, ResultSet}
+import java.sql.Connection
+
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._
 import org.springframework.jdbc.support.{GeneratedKeyHolder, KeyHolder}
@@ -9,6 +10,8 @@ import scala.jdk.CollectionConverters._
 
 /**
   * Wraps the evil java spring jdbc template api into a scala conform api.
+  *
+  * @author Andrej Sajenko
   */
 object DB {
   // The timout to terminate a query after TIMEOUT_IN_SEC seconds.
@@ -29,36 +32,6 @@ object DB {
   def query[T](sql: String, rowMapper: RowMapper[T], args: Any*)(implicit jdbc: JdbcTemplate): List[T] = {
     jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     jdbc.query(sql, rowMapper, args.asJava.toArray: _*).asScala.toList
-  }
-
-  /**
-    * See @JdbcTemplate::update
-    * @param sql Prepared statement
-    * @param args Arguments to fill the prepared statement
-    * @param jdbc Spring JDBC Template.
-    * @throws DataAccessException If data could not be accessed by query.
-    * @return The generated keys
-    */
-  @throws[DataAccessException]
-  def insert(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Option[ResultSet] = {
-    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
-    jdbc.execute((conn: Connection) => {
-      val ps = conn.prepareStatement(sql)
-      val pss = new ArgumentPreparedStatementSetter(args.asJava.toArray)
-      pss.setValues(ps)
-      val num = ps.executeUpdate()
-
-      if (num == 0) {
-        None
-      } else {
-        val gk = ps.getGeneratedKeys
-        if (gk.next()) {
-          Some(gk)
-        } else {
-          None
-        }
-      }
-    })
   }
 
   /**

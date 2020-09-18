@@ -3,7 +3,7 @@ import {TitlebarService} from '../../../service/titlebar.service';
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {DatabaseService} from '../../../service/database.service';
-import {GeneralCourseInformation, Succeeded} from '../../../model/HttpInterfaces';
+import {GeneralCourseInformation, Succeeded} from '../../../interfaces/HttpInterfaces';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeleteCourseModalComponent} from '../modals/delete-course-modal/delete-course-modal.component';

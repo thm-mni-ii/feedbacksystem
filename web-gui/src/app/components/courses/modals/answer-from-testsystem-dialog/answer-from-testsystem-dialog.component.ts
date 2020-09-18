@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {NewTaskInformation} from "../../../../model/HttpInterfaces";
+import {NewTaskInformation} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-answer-from-testsystem-dialog',

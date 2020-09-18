@@ -3,7 +3,6 @@ package de.thm.ii.fbs.services.conferences
 import java.net.URI
 import java.util.Calendar
 
-import de.thm.ii.fbs.model.User
 import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
 import javax.xml.bind.DatatypeConverter
 import org.springframework.beans.factory.annotation.Value
@@ -17,29 +16,7 @@ import org.springframework.stereotype.Service
   * @author Andrej Sajenko
   */
 @Service
-class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
-  /**
-    * The name of the conference service
-    */
-  val name = "jitsi"
-
-  /**
-    * Creates a new Conference using Jitsi
-    * @param id the id for the new conference
-    * @return the newly created conference
-    */
-  override def createConference(id: String): Conference = {
-    val uri = this.registerJitsiConference(id)
-    new Conference {
-      override val id: String = id
-      override val serviceName: String = JitsiService.this.name
-      private val meetingURL = uri
-
-      override def getURL(user: User, moderator: Boolean): URI = meetingURL
-      override def toMap: Map[String, String] = Map("id" -> id, "service" -> serviceName)
-    }
-  }
-
+class JitsiService(templateBuilder: RestTemplateBuilder) {
   private val http = templateBuilder.build()
 
   @Value("${services.jitsi.shared-secret}")

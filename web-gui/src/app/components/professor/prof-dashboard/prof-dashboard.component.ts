@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
 import {Observable, of} from 'rxjs';
-import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../model/HttpInterfaces';
+import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {MatTabChangeEvent} from '@angular/material/tabs';
 import {FormControl} from '@angular/forms';

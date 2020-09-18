@@ -13,7 +13,7 @@ import {
   DetailedCourseInformation,
   NewTaskInformation,
   Succeeded, User
-} from '../../../model/HttpInterfaces';
+} from '../../../interfaces/HttpInterfaces';
 import {NewtaskDialogComponent} from '../detail-course/newtask-dialog/newtask-dialog.component';
 import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';

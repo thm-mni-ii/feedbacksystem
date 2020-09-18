@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {GlobalSetting} from "../../../../model/HttpInterfaces";
+import {GlobalSetting} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-delete-setting-dialog',

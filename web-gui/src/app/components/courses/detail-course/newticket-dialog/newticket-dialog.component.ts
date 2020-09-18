@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Ticket} from '../../../../model/HttpInterfaces';
+import {Ticket} from '../../../../interfaces/HttpInterfaces';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {UserService} from '../../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';

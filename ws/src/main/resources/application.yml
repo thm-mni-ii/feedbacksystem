@@ -36,9 +36,6 @@ services:
     service-url: ${JITSI_URI:https://fk-conf.mni.thm.de/newConf/rooms.php}
     shared-secret: ${JITSI_SECRET:8Dsupersecurekeydf0}
     user: ${JITSI_USER:fbs}
-  bbb:
-    service-url: ${BBB_URI:https://fk-vv.mni.thm.de/bigbluebutton/api}
-    shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -62,5 +59,3 @@ spring:
 url:
   expiration:
     time: 300
-storage:
-  uploadDir: /upload-dir

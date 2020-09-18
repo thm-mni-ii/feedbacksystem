@@ -113,9 +113,3 @@ services:
       MYSQL_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
       - ./data/upload-dir:/upload-dir
-
-  master-runner:
-    build: master-runner
-    ports:
-      - "8081:8081"
-

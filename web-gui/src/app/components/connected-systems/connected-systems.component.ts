@@ -5,7 +5,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {DatabaseService} from "../../service/database.service";
 import {TitlebarService} from "../../service/titlebar.service";
-import {Succeeded, Testsystem} from "../../model/HttpInterfaces";
+import {Succeeded, Testsystem} from "../../interfaces/HttpInterfaces";
 import {EditTestsystemsModalComponent} from "./modals/edit-testsystems-modal/edit-testsystems-modal.component";
 import {DeleteTestsystemAskModalComponent} from "./modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component";
 

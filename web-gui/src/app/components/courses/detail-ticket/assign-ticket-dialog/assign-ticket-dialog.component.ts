@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
-import {ConferenceInvitation, Ticket, User} from '../../../../model/HttpInterfaces';
+import {ConferenceInvitation, Ticket, User} from '../../../../interfaces/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {UpdateCourseDialogComponent} from '../../detail-course/update-course-dialog/update-course-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';

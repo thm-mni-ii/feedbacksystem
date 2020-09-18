@@ -3,7 +3,7 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import {JwtHelperService} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
 import {DOCUMENT} from '@angular/common';
-import {Succeeded} from '../model/HttpInterfaces';
+import {Succeeded} from '../interfaces/HttpInterfaces';
 import {CookieService} from 'ngx-cookie-service';
 
 const TOKEN_ID = 'token';

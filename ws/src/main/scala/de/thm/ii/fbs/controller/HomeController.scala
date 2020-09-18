@@ -1,11 +1,13 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
+import de.thm.ii.fbs.util.ResourceNotFoundException
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
 /**
-  * HomeController serve the Angular App and force every non registered "api" route to be an 404 error
+  * HomeController serve the Angular App and force every non registered "api" route to be a error 404
+  *
+  * @author Allan Karlson
   */
 @Controller
 class HomeController {

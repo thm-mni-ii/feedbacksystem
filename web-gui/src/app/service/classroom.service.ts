@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
-import {ConferenceInvitation, ConfInvite, Ticket, User} from '../model/HttpInterfaces';
+import {ConferenceInvitation, ConfInvite, Ticket, User} from '../interfaces/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
 import {UserService} from './user.service';
 import {Message} from 'stompjs';

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../../service/user.service";
 import {DatabaseService} from "../../../service/database.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {Succeeded} from "../../../model/HttpInterfaces";
+import {Succeeded} from "../../../interfaces/HttpInterfaces";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 
 @Component({

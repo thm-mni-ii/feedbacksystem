@@ -95,26 +95,6 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
 import {CloseTicketDialogComponent} from './components/courses/detail-ticket/close-ticket-dialog/close-ticket-dialog.component';
-import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
-import { CoursePreviewComponent } from './page-components/course-preview/course-preview.component';
-import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
-import { TaskDetailComponent } from './page-components/task-detail/task-detail.component';
-import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';
-import { UserOverviewComponent } from './page-components/user-overview/user-overview.component';
-import { ChangePasswordComponent } from './page-components/change-password/change-password.component';
-import { AllSubmissionsComponent } from './page-components/all-submissions/all-submissions.component';
-import { CourseResultsComponent } from './page-components/course-detail/course-results/course-results.component';
-import { TaskPreviewComponent } from './page-components/course-detail/task-preview/task-preview.component';
-import { NewTaskComponent } from './page-components/course-detail/new-task/new-task.component';
-import { SubmissionChoiceComponent } from './page-components/task-detail/submission-choice/submission-choice.component';
-import { SubmissionFileComponent } from './page-components/task-detail/submission-file/submission-file.component';
-import { SubmissionTextComponent } from './page-components/task-detail/submission-text/submission-text.component';
-import { SubmissionResultComponent } from './page-components/task-detail/submission-result/submission-result.component';
-import { DocentInCourseComponent } from './tool-components/docent-in-course/docent-in-course.component';
-import { TutorInCourseComponent } from './tool-components/tutor-in-course/tutor-in-course.component';
-import { SingleSubmissionComponent } from './page-components/single-submission/single-submission.component';
-import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
-import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -196,27 +176,7 @@ export const httpInterceptorProviders = [
     NewticketDialogComponent,
     IncomingCallDialogComponent,
     InvitetoConferenceDialogComponent,
-    CloseTicketDialogComponent,
-    SidebarComponent,
-    SearchCoursesComponent,
-    CoursePreviewComponent,
-    CourseDetailComponent,
-    TaskDetailComponent,
-    CourseAuthorizationComponent,
-    UserOverviewComponent,
-    ChangePasswordComponent,
-    AllSubmissionsComponent,
-    CourseResultsComponent,
-    TaskPreviewComponent,
-    NewTaskComponent,
-    SubmissionChoiceComponent,
-    SubmissionFileComponent,
-    SubmissionTextComponent,
-    SubmissionResultComponent,
-    DocentInCourseComponent,
-    TutorInCourseComponent,
-    SingleSubmissionComponent,
-    DropzoneComponent
+    CloseTicketDialogComponent
   ],
   imports: [
     BrowserModule,

@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
-import {CourseTaskEvaluation, TaskSubmission} from "../../../model/HttpInterfaces";
+import {CourseTaskEvaluation, TaskSubmission} from "../../../interfaces/HttpInterfaces";
 import {MiscService} from "../../../service/misc.service";
 
 @Component({

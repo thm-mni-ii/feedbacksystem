@@ -4,7 +4,7 @@ import {FormBuilder, FormControl, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {NewCourse, Testsystem, User} from '../../../model/HttpInterfaces';
+import {NewCourse, Testsystem, User} from '../../../interfaces/HttpInterfaces';
 import {Router} from '@angular/router';
 
 /**

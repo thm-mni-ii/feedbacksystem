@@ -8,7 +8,7 @@ import {
   NewTaskInformation,
   Succeeded,
   SucceededUpdateTask
-} from '../../../model/HttpInterfaces';
+} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';

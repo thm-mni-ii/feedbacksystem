@@ -6,7 +6,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
-import {User} from '../../../model/HttpInterfaces';
+import {User} from '../../../interfaces/HttpInterfaces';
 import {DeleteUserModalComponent} from "../../modals/delete-user-modal/delete-user-modal.component";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {throwError} from "rxjs";

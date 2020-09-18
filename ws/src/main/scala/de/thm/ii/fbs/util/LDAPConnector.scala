@@ -23,7 +23,7 @@ object LDAPConnector {
     * @param LDAP_BASE_DN ldap base distinguish name, has to be loaded from config file
     * @return Attribute Set
     */
-  def loadLDAPInfosByUID(uid: String)(implicit LDAP_URL: String, LDAP_BASE_DN: String): Option[LdapEntry] = {
+  def loadLDAPInfosByUID(uid: String)(implicit LDAP_URL: String, LDAP_BASE_DN: String): LdapEntry = {
     val cf = new DefaultConnectionFactory(LDAP_URL)
     val executor = new SearchExecutor()
     executor.setBaseDn(LDAP_BASE_DN)
@@ -31,7 +31,7 @@ object LDAPConnector {
     executor.setTimeLimit(Duration.ofSeconds(TIME_OUT))
     val entries = executor.search(cf, "(uid=" + uid + ")").getResult.getEntries
 
-    entries.asScala.find(e => e.getAttribute("cn") != null)
+    entries.asScala.find(e => e.getAttribute("cn") != null).get
   }
 
   /**
@@ -44,8 +44,11 @@ object LDAPConnector {
     * @return Ldap Entry if logged in
     */
   def loginLDAPUserByUIDAndPassword(uid: String, password: String)(implicit LDAP_URL: String, LDAP_BASE_DN: String): Option[LdapEntry] = {
-    loadLDAPInfosByUID(uid)(LDAP_URL, LDAP_BASE_DN).flatMap(entry => {
+    val entry = loadLDAPInfosByUID(uid)(LDAP_URL, LDAP_BASE_DN)
+    if (entry != null) {
       val user = entry.getDn
+
+      var loginSuccess = false
       try {
         val props = new Properties()
         props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory")
@@ -55,10 +58,19 @@ object LDAPConnector {
 
         // Performs binding and fails on wrong credentials
         new InitialDirContext(props)
-        Some(entry)
+        loginSuccess = true
       } catch {
-        case _: Exception => None
+        case _: Exception => {
+          loginSuccess = false
+        }
       }
-    })
+      if (!loginSuccess) {
+        None
+      } else {
+        Some(entry)
+      }
+    } else {
+      None
+    }
   }
 }

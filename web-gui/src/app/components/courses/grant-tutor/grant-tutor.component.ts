@@ -5,7 +5,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {UserService} from '../../../service/user.service';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {DatabaseService} from '../../../service/database.service';
-import {GeneralCourseInformation} from '../../../model/HttpInterfaces';
+import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 
 /**
  * Adding or removing tutor from course

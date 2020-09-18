@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 
 /**
   * Allow save retrivement of textrual attributes.
+  * @author Andrej Sajenko
   * @param jsonNode Wrapp json
   */
 class JsonWrapper(jsonNode: JsonNode) {

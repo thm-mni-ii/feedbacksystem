@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {DeleteCourseModalComponent} from "../delete-course-modal/delete-course-modal.component";
-import {User} from "../../../../model/HttpInterfaces";
+import {User} from "../../../../interfaces/HttpInterfaces";
 
 @Component({
   selector: 'app-delete-task-modal',

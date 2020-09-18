@@ -8,7 +8,7 @@ import {UserService} from '../../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
-import {GeneralCourseInformation, Ticket, User} from '../../../model/HttpInterfaces';
+import {GeneralCourseInformation, Ticket, User} from '../../../interfaces/HttpInterfaces';
 import { Pipe, PipeTransform } from '@angular/core';
 import {AssignTicketDialogComponent} from '../detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
 import {InvitetoConferenceDialogComponent} from '../detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';

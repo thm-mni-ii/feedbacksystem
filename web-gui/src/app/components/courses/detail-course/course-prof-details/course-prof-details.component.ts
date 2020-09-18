@@ -4,7 +4,7 @@ import {
   CourseTask,
   CourseTaskEvaluation,
   Succeeded, TaskExtension, TaskSubmission
-} from "../../../../model/HttpInterfaces";
+} from "../../../../interfaces/HttpInterfaces";
 import {DatabaseService} from "../../../../service/database.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {TitlebarService} from "../../../../service/titlebar.service";

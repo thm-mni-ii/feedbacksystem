@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../service/database.service';
-import {CourseTask, DashboardStudent} from '../../../model/HttpInterfaces';
+import {CourseTask, DashboardStudent} from '../../../interfaces/HttpInterfaces';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {Router} from '@angular/router';
 

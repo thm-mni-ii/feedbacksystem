@@ -5,7 +5,7 @@ import {TitlebarService} from "../../../service/titlebar.service";
 import {MatDialog} from "@angular/material/dialog";
 import {UserService} from "../../../service/user.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {ReSubmissionResult, TaskLastSubmission} from "../../../model/HttpInterfaces";
+import {ReSubmissionResult, TaskLastSubmission} from "../../../interfaces/HttpInterfaces";
 import {AnswerFromTestsystemDialogComponent} from "../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
 
 @Component({

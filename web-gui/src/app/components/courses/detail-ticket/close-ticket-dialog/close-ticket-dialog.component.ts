@@ -2,7 +2,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {ClassroomService} from '../../../../service/classroom.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Ticket} from '../../../../model/HttpInterfaces';
+import {Ticket} from '../../../../interfaces/HttpInterfaces';
 import {Observable} from 'rxjs';
 import {first} from 'rxjs/operators';
 import {UserService} from '../../../../service/user.service';

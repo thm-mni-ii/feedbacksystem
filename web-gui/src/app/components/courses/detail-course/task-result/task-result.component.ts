@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {MatTabChangeEvent} from "@angular/material/tabs";
-import {CourseTaskEvaluation} from "../../../../model/HttpInterfaces";
+import {CourseTaskEvaluation} from "../../../../interfaces/HttpInterfaces";
 import {DomSanitizer} from "@angular/platform-browser";
 import {MiscService} from "../../../../service/misc.service";
 

@@ -3,6 +3,7 @@ MAINTAINER Andrej Sajenko <Andrej.Sajenko@mni.thm.de>
 
 ADD build/install/ws /usr/local/ws
 ADD src/main/resources/init.sql /usr/local/ws
+COPY bbb_scripts/ /bin/
 VOLUME /usr/local/ws/markdown
 VOLUME /usr/local/ws/conf
 VOLUME /upload-dir

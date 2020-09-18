@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {GeneralCourseInformation} from '../../../model/HttpInterfaces';
+import {GeneralCourseInformation} from '../../../interfaces/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {Observable} from 'rxjs';
 import {Pipe, PipeTransform} from '@angular/core';

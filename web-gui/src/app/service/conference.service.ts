@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, BehaviorSubject,  timer, Subscription} from 'rxjs';
 import {flatMap, first} from 'rxjs/operators';
 import {ConferenceSystems} from '../util/ConferenceSystems';
-import {ConferenceInvitation} from '../model/HttpInterfaces';
+import {ConferenceInvitation} from '../interfaces/HttpInterfaces';
 
 /**
  * Handles the creation and retrivement of conference links.

@@ -3,7 +3,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {Testsystem, User} from "../model/HttpInterfaces";
+import {Testsystem, User} from "../interfaces/HttpInterfaces";
 import {DatabaseService} from "../service/database.service";
 import {TitlebarService} from "../service/titlebar.service";
 

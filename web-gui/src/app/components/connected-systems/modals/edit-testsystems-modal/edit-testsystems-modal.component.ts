@@ -2,8 +2,8 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {DatabaseService} from '../../../../service/database.service';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {GlobalSetting, Succeeded, TestsystemTestfile} from "../../../../model/HttpInterfaces";
-import {Testsystem} from "../../../../model/HttpInterfaces";
+import {GlobalSetting, Succeeded, TestsystemTestfile} from "../../../../interfaces/HttpInterfaces";
+import {Testsystem} from "../../../../interfaces/HttpInterfaces";
 import {FormControl} from "@angular/forms";
 
 @Component({

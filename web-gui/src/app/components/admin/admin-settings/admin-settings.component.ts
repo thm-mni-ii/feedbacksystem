@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {GlobalSetting, Succeeded} from "../../../model/HttpInterfaces";
+import {GlobalSetting, Succeeded} from "../../../interfaces/HttpInterfaces";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatSort} from "@angular/material/sort";
 import {DatabaseService} from "../../../service/database.service";
