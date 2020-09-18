@@ -2,8 +2,7 @@ package de.thm.ii.fbs.services.conferences
 import java.util.UUID
 
 import de.thm.ii.fbs.model.{GlobalRole, User}
-import org.assertj.core.api.Assertions
-import org.junit.{AfterClass, BeforeClass, Test}
+import org.junit.{AfterClass, BeforeClass, Test, Assert}
 import org.junit.runner.RunWith
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
@@ -42,7 +41,8 @@ class BBBServiceTest {
     val password = UUID.randomUUID().toString
     val moderatorPassword = UUID.randomUUID().toString
     val success = bbbService.registerBBBConference(id, "Test Meeting", password, moderatorPassword)
-    Assertions.assertThat(success).isEqualTo(true)
+
+    Assert.assertTrue(success)
   }
 
   /**
@@ -55,11 +55,12 @@ class BBBServiceTest {
     val id = UUID.randomUUID().toString
     val password = UUID.randomUUID().toString
     val conferenceLink = bbbService.getBBBConferenceLink(user, id, password)
-    Assertions.assertThat(conferenceLink).startsWith(apiUrl);
-    Assertions.assertThat(conferenceLink).contains(s"${user.prename}%20${user.surname}")
-    Assertions.assertThat(conferenceLink).contains(id)
-    Assertions.assertThat(conferenceLink).contains(password)
-    Assertions.assertThat(conferenceLink).has
+
+    val uri = conferenceLink.toString
+    Assert.assertTrue(uri.startsWith(apiUrl))
+    Assert.assertTrue(uri.contains(s"${user.prename}%20${user.surname}"))
+    Assert.assertTrue(uri.contains(id))
+    Assert.assertTrue(uri.contains(password))
   }
 }
 
