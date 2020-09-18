@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.UserConferenceMap
-import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
+import de.thm.ii.fbs.model.classroom.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
 import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.util.JsonWrapper._

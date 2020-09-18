@@ -3,8 +3,7 @@ package de.thm.ii.fbs.model.classroom
 import java.security.Principal
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.classroom.UserConferenceMap.Invitation
-import de.thm.ii.fbs.model.classroom.storage.{BidirectionalStorage, NonDuplicatesBidirectionalStorage}
+import de.thm.ii.fbs.model.classroom.storage.NonDuplicatesBidirectionalStorage
 
 import scala.collection.mutable
 
@@ -151,56 +150,4 @@ object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, P
     * @return The Invitations in the course
     */
   def getInvitations(courseId: Int): List[Invitation] = this.getAllA.filter(inv => inv.courseId == courseId).toList
-
-  /**
-    * An Conference System Invitation
-    *
-    * @param creator    creator of the invitation
-    * @param visibility set of users who attend the conference
-    * @param attendees  set of users who attend the conference
-    * @param service    set of users who attend the conference
-    * @param courseId   set of users who attend the conference
-    */
-  abstract class Invitation(val creator: User, val courseId: Int, val visibility: String,
-                            val attendees: scala.collection.mutable.Set[String], val service: String)
-
-  /**
-    * An Conference System Invitation
-    *
-    * @param meetingId         meetingId for users to generate their own invitation link
-    * @param meetingPassword   meetingPassword for users to generate their own invitation link
-    * @param moderatorPassword meetingPassword for users to generate their own invitation link with moderator rights
-    * @param creator           Issuer for the Invitation
-    * @param courseId          courseId for the Invitation
-    * @param service           courseId for the Invitation
-    * @param visibility        courseId for the Invitation
-    * @param attendees         courseId for the Invitation
-    */
-  case class BBBInvitation(override val creator: User, override val courseId: Int, override val visibility: String,
-                           override val attendees: scala.collection.mutable.Set[String], override val service: String,
-                           meetingId: String, meetingPassword: String, moderatorPassword: String) extends Invitation(creator: User,
-    courseId: Int,
-    visibility: String,
-    attendees: scala.collection.mutable.Set[String],
-    service: String
-  )
-
-  /**
-    * An Conference System Invitation
-    *
-    * @param href       JitsiConference Href for users to join the conference
-    * @param creator    Issuer for the Invitation
-    * @param courseId   courseId for the Invitation
-    * @param service    courseId for the Invitation
-    * @param visibility courseId for the Invitation
-    * @param attendees  courseId for the Invitation
-    **/
-  case class JitsiInvitation(override val creator: User, override val courseId: Int, override val visibility: String,
-                             override val attendees: scala.collection.mutable.Set[String], override val service: String,
-                             href: String) extends Invitation(creator: User,
-    courseId: Int,
-    visibility: String,
-    attendees: scala.collection.mutable.Set[String],
-    service: String)
-
 }

@@ -3,9 +3,7 @@ package de.thm.ii.fbs.controller.classroom
 import java.security.Principal
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import de.thm.ii.fbs.model._
-import de.thm.ii.fbs.model.classroom.UserConferenceMap.{BBBInvitation, Invitation, JitsiInvitation}
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import org.json.{JSONArray, JSONObject}
