@@ -8,7 +8,7 @@ import de.thm.ii.fbs.model.classroom.storage.BidirectionalStorage
   *
   * @author Andrej Sajenko
   */
-object Classroom extends BidirectionalStorage[Int, Participant] {
+class Classroom extends BidirectionalStorage[Int, Participant] {
   /**
     * Adds a user to a classroom.
     *
@@ -39,3 +39,8 @@ object Classroom extends BidirectionalStorage[Int, Participant] {
     */
   def getParticipants(courseId: Int): List[Participant] = super.getB(courseId).toList
 }
+
+/**
+  * The companion object of Classroom
+  */
+object Classroom extends Classroom

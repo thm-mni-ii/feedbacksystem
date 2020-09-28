@@ -1,6 +1,8 @@
 package de.thm.ii.fbs.model.classroom
 
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.classroom.storage.ObjectStorage
+
 import scala.collection.mutable
 
 /**
@@ -8,10 +10,9 @@ import scala.collection.mutable
   *
   * @author Andrej Sajenko
   */
-object Tickets {
-  private val courseToTickets = mutable.Map[Int, mutable.Set[Ticket]]()
-  private val ticketToCourse = mutable.Map[String, Int]()
-  private val idToTicket = mutable.Map[String, Ticket]()
+class Tickets extends ObjectStorage[Ticket] {
+  super.addIndex("id")
+  super.addIndex("courseId")
 
   /**
     * Creates and stores an issue ticket
@@ -27,11 +28,11 @@ object Tickets {
     */
   def create(courseId: Int, title: String, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
     val id = ((System.currentTimeMillis << 20) | (System.nanoTime & ~9223372036854251520L)).toString
-    if (ticketToCourse.contains(id)) {
+    if (super.getWhere("id", id).nonEmpty) {
       create(courseId, title, desc, status, creator, assignee, timestamp, priority)
     } else {
       val ticket = Ticket(courseId, title, desc, status, creator, assignee, timestamp, priority, id)
-      add(ticket)
+      addTicket(ticket)
       ticket
     }
   }
@@ -40,10 +41,10 @@ object Tickets {
     * Overwrites an existing ticket with the same id
     * @param ticket Ticket
     */
-  def update(ticket: Ticket): Unit = {
-    courseToTickets.get(ticket.courseId).foreach(_.remove(ticket))
-    courseToTickets.get(ticket.courseId).foreach(_.add(ticket))
-    idToTicket.put(ticket.id, ticket)
+  def update(ticket: Ticket): Unit = this.synchronized {
+    val currentTicket = super.getWhere("id", ticket.id).head
+    super.remove(currentTicket)
+    super.add(ticket)
 
     onUpdateCb.foreach(_(ticket))
   }
@@ -52,19 +53,11 @@ object Tickets {
     * Remove ticket by id
     * @param id The ticket id
     */
-  def remove(id: String): Unit = idToTicket.get(id).foreach(remove)
+  def remove(id: String): Unit = this.synchronized {
+    val currentTicket = super.getWhere("id", id).head
+    super.remove(currentTicket)
 
-  /**
-    * Remove ticket
-    * @param t The id
-    */
-  def remove(t: Ticket): Unit = {
-    ticketToCourse.remove(t.id)
-      .flatMap(courseToTickets.get)
-      .foreach(_.remove(t))
-    idToTicket.remove(t.id)
-
-    onRemoveCb.foreach(_(t))
+    onRemoveCb.foreach(_(currentTicket))
   }
 
   /**
@@ -72,14 +65,14 @@ object Tickets {
     * @param id The id
     * @return The ticket
     */
-  def getTicket(id: String): Option[Ticket] = idToTicket.get(id)
+  def getTicket(id: String): Option[Ticket] = super.getWhere("id", id).headOption
 
   /**
     * Get all tickets in course
     * @param courseId course id
     * @return The tickets in course
     */
-  def get(courseId: Int): List[Ticket] = courseToTickets.getOrElse(courseId, mutable.Set()).toList
+  def get(courseId: Int): List[Ticket] = List.from(super.getWhere("courseId", courseId))
 
   private val onCreateCb = mutable.Set[(Ticket) => Unit]()
   private val onUpdateCb = mutable.Set[(Ticket) => Unit]()
@@ -98,11 +91,14 @@ object Tickets {
     */
   def onRemove(cb: (Ticket) => Unit): Unit = onRemoveCb.add(cb)
 
-  private def add(t: Ticket): Unit = {
-    courseToTickets.getOrElseUpdate(t.courseId, mutable.Set.empty).add(t)
-    ticketToCourse.put(t.id, t.courseId)
-    idToTicket.put(t.id, t)
+  private def addTicket(t: Ticket): Unit = {
+    super.add(t)
 
     onCreateCb.foreach(_(t))
   }
 }
+
+/**
+  * The companion object of Tickets
+  */
+object Tickets extends Tickets
