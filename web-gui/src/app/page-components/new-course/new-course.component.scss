@@ -1,0 +1,14 @@
+.container {
+  padding: 16px;
+  display: block;
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-card-actions {
+  display: flex;
+  flex-direction: row-reverse;
+}

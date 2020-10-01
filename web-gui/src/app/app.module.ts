@@ -28,7 +28,7 @@ import {StudentDashboardComponent} from './components/student/student-dashboard/
 import {StartComponent} from './components/start/start.component';
 import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
 import {CoursesComponent} from './components/courses/my-courses/courses.component';
-import {FilterPipe, GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
+import { GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
 import {NewCourseComponent} from './components/courses/new-course/new-course.component';
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
@@ -61,7 +61,8 @@ import { EditTestsystemsModalComponent } from './components/connected-systems/mo
 import { DeleteTestsystemAskModalComponent } from './components/connected-systems/modals/delete-testsystem-ask-modal/delete-testsystem-ask-modal.component';
 import { TaskResultComponent } from './components/courses/detail-course/task-result/task-result.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
+//import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
+import { ImportCourseComponent } from "./page-components/import-course/import-course.component";
 import { ChangePasswdComponent } from './components/users/change-passwd/change-passwd.component';
 import { CourseResultDetailsComponent } from './components/courses/course-result-details/course-result-details.component';
 import { CourseResultDetailTableComponent } from './components/courses/course-result-detail-table/course-result-detail-table.component';
@@ -77,11 +78,7 @@ import { DeleteSettingDialogComponent } from './components/admin/admin-settings/
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { CourseTasksOverviewComponent } from './components/courses/course-tasks-overview/course-tasks-overview.component';
 import { NewconferenceDialogComponent } from './components/courses/detail-course/newconference-dialog/newconference-dialog.component';
-import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
-import {
-  CourseTicketsOverviewComponent, SafePipe,
-  TicketStatusFilter
-} from './components/courses/course-tickets-overview/course-tickets-overview.component';
+//import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {
   AssignTicketDialogComponent,
@@ -95,12 +92,13 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
 import {CloseTicketDialogComponent} from './components/courses/detail-ticket/close-ticket-dialog/close-ticket-dialog.component';
+
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
 import { CoursePreviewComponent } from './page-components/course-preview/course-preview.component';
 import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
 import { TaskDetailComponent } from './page-components/task-detail/task-detail.component';
 import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';
-import { UserOverviewComponent } from './page-components/user-overview/user-overview.component';
+import { UserManagementComponent } from './page-components/user-management/user-management.component';
 import { ChangePasswordComponent } from './page-components/change-password/change-password.component';
 import { AllSubmissionsComponent } from './page-components/all-submissions/all-submissions.component';
 import { CourseResultsComponent } from './page-components/course-detail/course-results/course-results.component';
@@ -115,13 +113,20 @@ import { TutorInCourseComponent } from './tool-components/tutor-in-course/tutor-
 import { SingleSubmissionComponent } from './page-components/single-submission/single-submission.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
+import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
+import {
+  ConferenceComponent, SafePipe,
+  TicketStatusFilter
+} from "./page-components/conference/conference.component";
+import { FilterPipe } from "./page-components/course-authorization/course-authorization.component";
+
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
       url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+       //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -188,7 +193,6 @@ export const httpInterceptorProviders = [
     CourseTasksOverviewComponent,
     NewconferenceDialogComponent,
     ConferenceComponent,
-    CourseTicketsOverviewComponent,
     TicketStatusFilter,
     SafePipe, FilterPipe,
     AssignTicketDialogComponent,
@@ -203,7 +207,7 @@ export const httpInterceptorProviders = [
     CourseDetailComponent,
     TaskDetailComponent,
     CourseAuthorizationComponent,
-    UserOverviewComponent,
+    UserManagementComponent,
     ChangePasswordComponent,
     AllSubmissionsComponent,
     CourseResultsComponent,
@@ -216,7 +220,9 @@ export const httpInterceptorProviders = [
     DocentInCourseComponent,
     TutorInCourseComponent,
     SingleSubmissionComponent,
-    DropzoneComponent
+    DropzoneComponent,
+    MyCoursesComponent,
+    ConferenceComponent
   ],
   imports: [
     BrowserModule,

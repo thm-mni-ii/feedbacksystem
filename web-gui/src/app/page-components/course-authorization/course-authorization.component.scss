@@ -1,0 +1,15 @@
+.container {
+  display: block;
+  padding: 16px;
+}
+.container > .filter {
+  width: 100%;
+}
+
+.container > * {
+  margin-bottom: 8px;
+}
+
+mat-chip-list {
+  margin: 12px;
+}
