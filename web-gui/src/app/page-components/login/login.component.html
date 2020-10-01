@@ -1,1 +1,33 @@
-<p>login works!</p>
+<div class="flex-container">
+  <header class="header">
+    <h1>Feedback System</h1>
+    <h2>Submit your work and get automated feedback</h2>
+  </header>
+  <div class="flex-card-container">
+    <mat-card class="card">
+      <mat-card-header class="login_title">
+        <mat-card-title>Login</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-actions class="login-buttons">
+        <button class="cas" (click)="loginCAS()" mat-flat-button color="accent">CAS Login</button>
+      </mat-card-actions>
+
+      <div class="divider-block">
+        <mat-divider class="divider"></mat-divider>
+        <div>or</div>
+      </div>
+      <mat-card-content (keyup.enter)="login()" class="login-inputs">
+        <mat-form-field>
+          <input [(ngModel)]="username" name="username" type="text" matInput placeholder="Benutzername">
+        </mat-form-field>
+        <mat-form-field>
+          <input [(ngModel)]="password" name="password" type="password" matInput placeholder="Passwort">
+        </mat-form-field>
+      </mat-card-content>
+      <mat-card-actions class="login-buttons">
+        <button (click)="login()" mat-flat-button color="accent">Lokaler Login</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

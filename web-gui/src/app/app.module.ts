@@ -6,7 +6,7 @@ import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {LayoutModule} from '@angular/cdk/layout';
 import {AppRoutingModule} from './app-routing.module';
-import {LoginComponent} from './components/login/login.component';
+import {LoginComponent} from './page-components/login/login.component';
 import {MaterialComponentsModule} from './modules/material-components/material-components.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
@@ -19,10 +19,7 @@ import {
 } from '@angular/common/http';
 import {JwtModule} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
-import {
-  AdminUserManagementComponent,
-  CreateGuestUserDialog
-} from './components/admin/admin-user-management/admin-user-management.component';
+import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
 import {AdminDashboardComponent} from './components/admin/admin-dashboard/admin-dashboard.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
 import {StartComponent} from './components/start/start.component';
@@ -120,13 +117,22 @@ import {
 } from "./page-components/conference/conference.component";
 import { FilterPipe } from "./page-components/course-authorization/course-authorization.component";
 
+import {ParameterCourseModalComponent} from "./dialogs/parameter-course-modal/parameter-course-modal.component";
+import {ParameterUserModalComponent} from "./dialogs/parameter-user-modal/parameter-user-modal.component";
+import {CourseDeleteModalComponent} from "./dialogs/course-delete-modal/course-delete-modal.component";
+import {TaskDeleteModalComponent} from "./dialogs/task-delete-modal/task-delete-modal.component";
+import {UserDeleteModalComponent} from "./dialogs/user-delete-modal/user-delete-modal.component";
+import {TaskNewDialogComponent} from "./dialogs/task-new-dialog/task-new-dialog.component";
+import {CourseUpdateDialogComponent} from "./dialogs/course-update-dialog/course-update-dialog.component";
+import {PlagiatScriptUploadComponent} from "./dialogs/plagiat-script-upload/plagiat-script-upload.component";
+import {CreateGuestUserDialog} from "./dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
       url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-       //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -147,7 +153,6 @@ export const httpInterceptorProviders = [
     CreateGuestUserDialog,
     AdminDashboardComponent,
     AdminCheckerComponent,
-    LoginComponent,
     StudentDashboardComponent,
     StartComponent,
     CoursesComponent,
@@ -222,7 +227,17 @@ export const httpInterceptorProviders = [
     SingleSubmissionComponent,
     DropzoneComponent,
     MyCoursesComponent,
-    ConferenceComponent
+    ConferenceComponent,
+
+    LoginComponent,
+    ParameterCourseModalComponent,
+    ParameterUserModalComponent,
+    CourseDeleteModalComponent,
+    TaskDeleteModalComponent,
+    UserDeleteModalComponent,
+    TaskNewDialogComponent,
+    CourseUpdateDialogComponent,
+    PlagiatScriptUploadComponent,
   ],
   imports: [
     BrowserModule,

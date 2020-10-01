@@ -1,4 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
+
+import {UserService} from "../../service/user.service";
+import {DatabaseService} from "../../service/database.service";
+import {Succeeded} from "../../model/HttpInterfaces";
 
 @Component({
   selector: 'app-change-password',
@@ -6,10 +12,47 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./change-password.component.scss']
 })
 export class ChangePasswordComponent implements OnInit {
+  passwd_repeat: string;
+  passwd: string;
 
-  constructor() { }
 
-  ngOnInit(): void {
+  passwordMatcher = new FormControl('', [Validators.required]);
+
+  constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
+
+  showOK(){
+    this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
+      .afterDismissed()
+      .toPromise()
+      .then()
   }
 
+  showError(msg: string){
+    this.snackbar.open(msg, 'OK', {duration: 3000});
+  }
+  save(){
+    if(this.passwd.length == 0){
+      this.showError("Bitte ein Passwort eingeben")
+    }
+    else if(this.passwd != this.passwd_repeat) {
+      this.showError("Passwörter stimmen nicht überein")
+    } else {
+      this.db.setNewPWOfGuestAccount(this.userService.getUserId(), this.passwd, this.passwd_repeat).toPromise()
+        .then((data:Succeeded) => {
+          if(data.success){
+            this.showOK()
+            setTimeout(() => {
+              location.reload()
+            }, 2000)
+          } else {
+            this.showError("Leider gab es einen Fehler mit dem Update")
+          }
+        }).catch((e) => {
+        this.showError("Leider gab es einen Fehler mit dem Update")
+      })
+    }
+  }
+
+  ngOnInit() {
+  }
 }
