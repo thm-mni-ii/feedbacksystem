@@ -138,7 +138,6 @@ export const httpInterceptorProviders = [
     DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
-    NotFoundComponent,
     LoginComponent,
     ParameterCourseModalComponent,
     ParameterUserModalComponent,
@@ -148,7 +147,10 @@ export const httpInterceptorProviders = [
     TaskNewDialogComponent,
     CourseUpdateDialogComponent,
     AssignTicketDialogComponent,
-    InvitetoConferenceDialogComponent
+    InvitetoConferenceDialogComponent,
+    DropzoneComponent,
+    MyCoursesComponent,
+    ConferenceComponent
   ],
   imports: [
     BrowserModule,

@@ -1,9 +1,8 @@
 import {Component, OnInit} from '@angular/core';
+import {GeneralCourseInformation} from '../../model/HttpInterfaces';
+import {DatabaseService} from '../../service/database.service';
 import {Observable} from 'rxjs';
 import {Pipe, PipeTransform} from '@angular/core';
-import {GeneralCourseInformation} from '../../model/HttpInterfaces';
-import {DatabaseService} from "../../service/database.service";
-
 
 /**
  * Adding and removing docents from courses
@@ -50,4 +49,3 @@ export class FilterPipe implements PipeTransform {
     });
   }
 }
-

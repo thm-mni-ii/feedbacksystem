@@ -32,7 +32,7 @@ const routes: Routes = [
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: CourseDetailComponent},
       {path: 'courses/:id/tickets', component: ConferenceComponent},
-      {path: 'courses/:id/task/:taskid', component: TaskDetailComponent},
+      {path: 'courses/:id/task/:taskid', component: CourseDetailComponent},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},

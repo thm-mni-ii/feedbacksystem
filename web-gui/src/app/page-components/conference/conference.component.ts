@@ -213,8 +213,6 @@ export class ConferenceComponent implements OnInit {
     });
   }
 
-
-
   public openUrlInNewWindow(url: string): Window {
     return window.open(url, '_blank');
   }
