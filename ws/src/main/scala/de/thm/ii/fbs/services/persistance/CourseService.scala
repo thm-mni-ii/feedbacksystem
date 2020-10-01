@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.persistance
 
+import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 
 import de.thm.ii.fbs.model.Course
@@ -51,7 +52,7 @@ class CourseService {
     */
   def create(course: Course): Course = {
     DB.insert("INSERT INTO course (name, description, visible) VALUES (?,?,?);", course.name, course.description, course.visible)
-      .map(gk => gk.getInt(1))
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
       case None => throw new SQLException("Course could not be created")

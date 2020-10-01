@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.util
 
-import java.sql.{Connection, ResultSet}
+import java.sql.{Connection, ResultSet, Statement}
+
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._
 import org.springframework.jdbc.support.{GeneratedKeyHolder, KeyHolder}
@@ -40,10 +41,10 @@ object DB {
     * @return The generated keys
     */
   @throws[DataAccessException]
-  def insert(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Option[ResultSet] = {
+  def insert(sql: String, args: Any*)(implicit jdbc: JdbcTemplate): Option[IndexedSeq[AnyRef]] = {
     jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
     jdbc.execute((conn: Connection) => {
-      val ps = conn.prepareStatement(sql)
+      val ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
       val pss = new ArgumentPreparedStatementSetter(args.asJava.toArray)
       pss.setValues(ps)
       val num = ps.executeUpdate()
@@ -53,7 +54,9 @@ object DB {
       } else {
         val gk = ps.getGeneratedKeys
         if (gk.next()) {
-          Some(gk)
+          val columnCount = gk.getMetaData.getColumnCount
+          val gka = (1 to columnCount).map(cid => gk.getObject(cid))
+          Some(gka)
         } else {
           None
         }

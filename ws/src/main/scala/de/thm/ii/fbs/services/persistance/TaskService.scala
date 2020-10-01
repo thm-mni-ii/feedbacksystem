@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.persistance
 
+import java.math.BigInteger
 import java.sql
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
@@ -45,7 +46,7 @@ class TaskService {
     DB.insert("INSERT INTO task (name, media_type, description, deadline, course_id) VALUES (?, ?, ?, ?, ?);",
       task.name, task.mediaType, task.description,
       new sql.Date(task.deadline.getTime), cid)
-      .map(gk => gk.getInt(1))
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
       case None => throw new SQLException("Task could not be created")
