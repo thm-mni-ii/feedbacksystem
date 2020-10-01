@@ -25,13 +25,13 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
 
   /**
     * Creates a new Conference using Jitsi
-    * @param id the id for the new conference
+    * @param cid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(id: String): Conference = {
-    val uri = this.registerJitsiConference(id)
+  override def createConference(cid: String): Conference = {
+    val uri = this.registerJitsiConference(cid)
     new Conference {
-      override val id: String = id
+      override val id: String = cid
       override val serviceName: String = JitsiService.this.name
       private val meetingURL = uri
 

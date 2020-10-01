@@ -9,7 +9,7 @@ import scala.collection.mutable
 /**
   * Maps session ids to principals.
   */
-object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principal] {
+class UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principal] {
   private val onMapListeners = mutable.Set[(String, Principal) => Unit]()
   private val onDeleteListeners = mutable.Set[(String, Principal) => Unit]()
 
@@ -72,3 +72,8 @@ object UserSessionMap extends NonDuplicatesBidirectionalStorage[String, Principa
     onDeleteListeners.add(cb)
   }
 }
+
+/**
+  * The companion object of UserConferenceMap
+  */
+object UserSessionMap extends UserSessionMap

@@ -2,6 +2,7 @@ package de.thm.ii.fbs.model.classroom.storage
 
 /**
   * A Bidirectional Storage which does not allow duplicate a or bs
+  *
   * @tparam A The type of a
   * @tparam B The type of b
   */
@@ -11,7 +12,7 @@ class NonDuplicatesBidirectionalStorage[A, B] extends BidirectionalStorage[A, B]
     * @param a the first component
     * @param b the second component
     */
-  override def put(a: A, b: B): Unit = {
+  override def put(a: A, b: B): Unit = this.synchronized {
     super.deleteByA(a)
     super.deleteByB(b)
 

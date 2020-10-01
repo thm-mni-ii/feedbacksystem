@@ -10,7 +10,7 @@ import scala.collection.mutable
 /**
   * Maps invitations to principals.
   */
-object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Principal] {
+class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Principal] {
   /**
     * Maps a user to its session
     *
@@ -46,52 +46,6 @@ object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, P
   }
 
   /**
-    * Lets a user attend a conference of another user
-    *
-    * @param invitation invitation of the conference the user want to attend
-    * @param principal  user that wants to attend
-    */
-  def attend(invitation: Invitation, principal: Principal): Unit = {
-    super.getSingleB(invitation) match {
-      case Some(p) => super.getSingleA(p) match {
-        case Some(v) => v.attendees += principal.getName;
-        case None =>
-      }
-      case None =>
-    }
-    onAttendListeners.foreach(_ (invitation, principal))
-  }
-
-  /**
-    * Lets a user depart from a conference of another user
-    * Removes both, the user and its invitation by using its invitation
-    *
-    * @param invitation invitation of the conference the user want to depart from
-    * @param principal  user that wants to depart
-    */
-  def depart(invitation: Invitation, principal: Principal): Unit = {
-    super.getSingleA(invitation.creator) match {
-      case Some(v) =>
-        v.attendees -= principal.getName
-        onDepartListeners.foreach(_ (invitation, principal))
-      case None =>
-    }
-  }
-
-  /**
-    * Lets a user depart from a conference if he attends any
-    *
-    * @param principal user that departs from conferences
-    */
-  def departAll(principal: Principal): Unit = {
-    super.getAllA.foreach((invitation) => {
-      if (invitation.attendees.contains(principal.getName)) {
-        this.depart(invitation, principal);
-      }
-    })
-  }
-
-  /**
     * Removes both, the user and its session by using its principal
     *
     * @param p The principal
@@ -104,28 +58,12 @@ object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, P
 
   private val onMapListeners = mutable.Set[(Invitation, Principal) => Unit]()
   private val onDeleteListeners = mutable.Set[(Invitation, Principal) => Unit]()
-  private val onAttendListeners = mutable.Set[(Invitation, Principal) => Unit]()
-  private val onDepartListeners = mutable.Set[(Invitation, Principal) => Unit]()
 
   /**
     * @param cb Callback that gets executed on every map event
     */
   def onMap(cb: (Invitation, Principal) => Unit): Unit = {
     onMapListeners.add(cb)
-  }
-
-  /**
-    * @param cb Callback that gets executed on every attend event
-    */
-  def onAttend(cb: (Invitation, Principal) => Unit): Unit = {
-    onAttendListeners.add(cb)
-  }
-
-  /**
-    * @param cb Callback that gets executed on every depart event
-    */
-  def onDepart(cb: (Invitation, Principal) => Unit): Unit = {
-    onDepartListeners.add(cb)
   }
 
   /**
@@ -151,3 +89,8 @@ object UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, P
     */
   def getInvitations(courseId: Int): List[Invitation] = this.getAllA.filter(inv => inv.courseId == courseId).toList
 }
+
+/**
+  * The companion object of UserConferenceMap
+  */
+object UserConferenceMap extends UserConferenceMap

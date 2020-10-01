@@ -27,15 +27,15 @@ class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService
 
   /**
     * Creates a new Conference using BBB
-    * @param id the id for the new conference
+    * @param cid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(id: String): Conference = {
+  override def createConference(cid: String): Conference = {
     val participantPassword = UUID.randomUUID().toString
     val modPassword = UUID.randomUUID().toString
-    this.registerBBBConference(id, id, participantPassword, modPassword)
+    this.registerBBBConference(cid, cid, participantPassword, modPassword)
     new Conference {
-      override val id: String = id
+      override val id: String = cid
       override val serviceName: String = BBBService.this.name
       private val meetingPassword = participantPassword
       private val moderatorPassword = modPassword
