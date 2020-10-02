@@ -87,6 +87,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
 import {CloseTicketDialogComponent} from './components/courses/detail-ticket/close-ticket-dialog/close-ticket-dialog.component';
+import {CourseTicketsOverviewComponent} from "./components/courses/course-tickets-overview/course-tickets-overview.component";
 
 import {NewCourseComponent} from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
@@ -200,6 +201,7 @@ export const httpInterceptorProviders = [
     NewconferenceDialogComponent,
     ConferenceComponent,
     TicketStatusFilter,
+    CourseTicketsOverviewComponent,
     SafePipe, FilterPipe,
     AssignTicketDialogComponent,
     UserTeacherFilter,
