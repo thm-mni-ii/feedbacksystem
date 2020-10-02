@@ -1,13 +1,14 @@
 import {Component, OnInit} from '@angular/core';
-import {DatabaseService} from '../../../service/database.service';
-import {Observable, of} from 'rxjs';
-import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../model/HttpInterfaces';
-import {TitlebarService} from '../../../service/titlebar.service';
-import {MatTabChangeEvent} from '@angular/material/tabs';
 import {FormControl} from '@angular/forms';
-import {UserService} from '../../../service/user.service';
+import {MatTabChangeEvent} from '@angular/material/tabs';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {Observable, of} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
+import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../model/HttpInterfaces';
+import {DatabaseService} from '../../../service/database.service';
+import {TitlebarService} from '../../../service/titlebar.service';
+import {UserService} from '../../../service/user.service';
+
 
 /**
  * Matrix for every course docent a has

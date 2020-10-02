@@ -1,13 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {TitlebarService} from '../../service/titlebar.service';
-import {Observable} from 'rxjs';
-import {Router} from '@angular/router';
-import {DatabaseService} from '../../service/database.service';
-import {GeneralCourseInformation, Succeeded} from '../../model/HttpInterfaces';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DeleteCourseModalComponent} from '../../components/courses/modals/delete-course-modal/delete-course-modal.component';
+import {Router} from '@angular/router';
+import {Observable} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
+import {TitlebarService} from '../../service/titlebar.service';
+import {DatabaseService} from '../../service/database.service';
+import {GeneralCourseInformation, Succeeded} from '../../model/HttpInterfaces';
+import {DeleteCourseModalComponent} from '../../components/courses/modals/delete-course-modal/delete-course-modal.component';
 
 /**
  * Show all courses user subscribed

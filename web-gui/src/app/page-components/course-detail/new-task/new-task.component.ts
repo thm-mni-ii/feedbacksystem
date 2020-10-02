@@ -2,8 +2,8 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup} from '@angular/forms';
-import {DatabaseService} from '../../../service/database.service';
 import {Subscription} from 'rxjs';
+import {DatabaseService} from '../../../service/database.service';
 import {DetailedCourseInformation, Testsystem, TestsystemTestfile} from '../../../model/HttpInterfaces';
 
 /**

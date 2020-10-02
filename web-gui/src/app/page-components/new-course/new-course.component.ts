@@ -1,11 +1,11 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {DatabaseService} from '../../service/database.service';
+import {Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormBuilder, FormControl, Validators} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {TitlebarService} from '../../service/titlebar.service';
 import {NewCourse, Testsystem, User} from '../../model/HttpInterfaces';
-import {Router} from '@angular/router';
+import {DatabaseService} from '../../service/database.service';
+import {TitlebarService} from '../../service/titlebar.service';
 
 /**
  * Create a new course
