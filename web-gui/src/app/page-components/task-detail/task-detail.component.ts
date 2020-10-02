@@ -1,44 +1,24 @@
-import {AfterViewChecked, Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {of, throwError} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DOCUMENT} from '@angular/common';
-import {MatTabChangeEvent} from '@angular/material/tabs';
 import {DomSanitizer} from '@angular/platform-browser';
-
-import { Task } from '../../model/Task';
-import { Course} from "../../model/Course";
 import {
   CourseTask, CourseTaskEvaluation,
   DetailedCourseInformation, DetailedCourseInformationSingleTask,
-  NewTaskInformation,
   Succeeded,
   SucceededUpdateTask
 } from '../../model/HttpInterfaces';
 import {DatabaseService} from '../../service/database.service';
 import {TitlebarService} from '../../service/titlebar.service';
 import {UserService} from '../../service/user.service';
-
 import {TaskNewDialogComponent} from "../../dialogs/task-new-dialog/task-new-dialog.component";
-import {ExitCourseDialogComponent} from "../../dialogs/exit-course-dialog/exit-course-dialog.component";
 import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
-import {DeleteCourseModalComponent} from "../../components/courses/modals/delete-course-modal/delete-course-modal.component";
+import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/course-delete-modal.component";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
-// import {TestsystemAnswerDialogComponent} from "../../dialogs/testsystem-answer-dialog/testsystem-answer-dialog.component";
-import {ParameterCourseModalComponent} from "../../dialogs/parameter-course-modal/parameter-course-modal.component";
-import {ParameterUserModalComponent} from "../../dialogs/parameter-user-modal/parameter-user-modal.component";
-import {PlagiatScriptUploadComponent} from "../../dialogs/plagiat-script-upload/plagiat-script-upload.component";
-import {TaskService} from "../../service/task.service";
-import {CourseParameterModalComponent} from "../../components/courses/detail-course/course-parameter-modal/course-parameter-modal.component";
-import {CourseParameterUserModalComponent} from "../../components/courses/detail-course/course-parameter-user-modal/course-parameter-user-modal.component";
-import {UploadPlagiatScriptComponent} from "../../components/courses/modals/upload-plagiat-script/upload-plagiat-script.component";
-import {NewtaskDialogComponent} from "../../components/courses/detail-course/newtask-dialog/newtask-dialog.component";
-import {AnswerFromTestsystemDialogComponent} from "../../components/courses/modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component";
-import {DeleteTaskModalComponent} from "../../components/courses/modals/delete-task-modal/delete-task-modal.component";
-import {UpdateCourseDialogComponent} from "../../components/courses/detail-course/update-course-dialog/update-course-dialog.component";
-
 
 /**
  * Shows a course in detail
@@ -49,8 +29,6 @@ import {UpdateCourseDialogComponent} from "../../components/courses/detail-cours
   styleUrls: ['./task-detail.component.scss']
 })
 export class TaskDetailComponent implements OnInit {
-//
-
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
@@ -65,9 +43,7 @@ export class TaskDetailComponent implements OnInit {
   deadlineTask: boolean;
   courseID: number;
   breakpoint: number;
-  // multipleChoices: { [task: number]: boolean };
   taskID: number;
-
 
   private reachedDeadline(now: Date, deadline: Date): boolean {
     return now > deadline;
@@ -168,9 +144,7 @@ export class TaskDetailComponent implements OnInit {
       } catch (e) {
         return false;
       }
-
     }
-
   }
 
   public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean) {
@@ -184,7 +158,6 @@ export class TaskDetailComponent implements OnInit {
         this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
       });
     }
-
   }
 
   onResize(event) {
@@ -205,26 +178,8 @@ export class TaskDetailComponent implements OnInit {
       });
   }
 
-  public openSettings() {
-    if (this.isAuthorized()) {
-      this.dialog.open(CourseParameterModalComponent, {data: {courseid: this.courseID}});
-    } else {
-      this.dialog.open(CourseParameterUserModalComponent, {data: {courseid: this.courseID}});
-    }
-  }
-
-  public plagiatModule(courseDetail: DetailedCourseInformation) {
-    this.dialog.open(UploadPlagiatScriptComponent, { data: {courseid: this.courseID}}).afterClosed()
-      .toPromise()
-      .then((close) => {
-        if (close) {
-          this.loadCourseDetails();
-        }
-      });
-  }
-
   public deleteCourse(courseDetail: DetailedCourseInformation) {
-    this.dialog.open(DeleteCourseModalComponent, {
+    this.dialog.open(CourseDeleteModalComponent, {
       data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
     }).afterClosed().pipe(
       flatMap(value => {
@@ -287,9 +242,7 @@ export class TaskDetailComponent implements OnInit {
       if (res.success) {
         this.db.getTaskResult(currentTask.task_id).pipe(
           flatMap(taskResult => {
-
             this.courseTask = taskResult;
-
             if (this.isInFetchingResultOfTasks(taskResult)) {
               return throwError('No result yet');
             }
@@ -312,7 +265,7 @@ export class TaskDetailComponent implements OnInit {
    * @param course The course data for dialog
    */
   createTask(course: DetailedCourseInformation) {
-    this.dialog.open(NewtaskDialogComponent, {
+    this.dialog.open(TaskNewDialogComponent, {
       height: 'auto',
       width: 'auto',
       data: {courseID: course.course_id}
@@ -320,7 +273,6 @@ export class TaskDetailComponent implements OnInit {
       flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid);
         }
         return this.db.getCourseDetailOfTask(course.course_id, this.taskID);
       })
@@ -334,47 +286,6 @@ export class TaskDetailComponent implements OnInit {
           this.submissionAsFile = 'text';
         }
       }
-
-
-    });
-  }
-
-
-
-  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
-    setTimeout(() => {
-      this.db.getTaskResult(taskid).pipe(
-        flatMap((taskResult: NewTaskInformation) => {
-          const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
-
-          if (acceptance_flaggs.indexOf(null) < 0) {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
-            return of({success: true});
-          } else {
-            return throwError('Not all results yet');
-          }
-        }),
-        retryWhen(errors => errors.pipe(
-          delay(5000),
-          take(50)))
-      ).toPromise()
-        .then(d => {
-          if (typeof d == 'undefined') {
-            this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
-          }
-        })
-        .catch((e) => {
-
-        });
-    }, 2000);
-  }
-
-  displayTestsystemFeedback(task) {
-    this.db.getTaskResult(task.task_id).toPromise()
-      .then((data: NewTaskInformation) => {
-        this.dialog.open(AnswerFromTestsystemDialogComponent, {data: data});
-      }).catch(() => {
-
     });
   }
 
@@ -383,7 +294,7 @@ export class TaskDetailComponent implements OnInit {
    * @param task The task to update
    */
   updateTask(task: CourseTask) {
-    this.dialog.open(NewtaskDialogComponent, {
+    this.dialog.open(TaskNewDialogComponent, {
       height: 'auto',
       width: 'auto',
       data: {
@@ -393,8 +304,6 @@ export class TaskDetailComponent implements OnInit {
       flatMap((value: SucceededUpdateTask) => {
         if (value.success) {
           this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(task.task_id);
-
         }
         return this.db.getCourseDetailOfTask(this.courseDetail.course_id, this.taskID);
       })
@@ -410,7 +319,7 @@ export class TaskDetailComponent implements OnInit {
    * @param task The task that will be deleted
    */
   deleteTask(task: CourseTask) {
-    this.dialog.open(DeleteTaskModalComponent, {
+    this.dialog.open(TaskDeleteModalComponent, {
       data: {taskname: task.task_name}
     }).afterClosed().pipe(
       flatMap(value => {
@@ -469,13 +378,11 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
-
-
   /**
    * Opens dialog to update course information
    */
   updateCourse() {
-    this.dialog.open(UpdateCourseDialogComponent, {
+    this.dialog.open(CourseUpdateDialogComponent, {
       height: '600px',
       width: '800px',
       data: {data: this.courseDetail}
@@ -507,15 +414,7 @@ export class TaskDetailComponent implements OnInit {
     });
   }
 
-  tabChanged(event: MatTabChangeEvent) {
-
-  }
-
   isInRole(roles: string[]): Boolean {
     return roles.indexOf(this.userRole) >= 0;
-  }
-
-  get plagiarism_script_status() {
-    return (this.courseDetail.plagiarism_script) ? 'primary' : 'warn';
   }
 }

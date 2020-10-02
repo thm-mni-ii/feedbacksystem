@@ -10,15 +10,16 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
 import {GeneralCourseInformation, Ticket, User} from '../../model/HttpInterfaces';
 import { Pipe, PipeTransform } from '@angular/core';
-import {AssignTicketDialogComponent} from "../../components/courses/detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component";
-import {InvitetoConferenceDialogComponent} from "../../components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component";
 import {Observable, Subscription, timer, interval, BehaviorSubject} from 'rxjs';
 import {ClassroomService} from '../../service/classroom.service';
-import {UserRoles} from '../../util/UserRoles';
 import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
 import {NewconferenceDialogComponent} from "../../dialogs/newconference-dialog/newconference-dialog.component";
 import {first, share} from 'rxjs/operators';
 import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
+import {AuthService} from "../../service/auth.service";
+import {Roles} from "../../model/Roles";
+import {InvitetoConferenceDialogComponent} from "../../dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component";
+import {AssignTicketDialogComponent} from "../../dialogs/assign-ticket-dialog/assign-ticket-dialog.component";
 
 
 @Component({
@@ -29,7 +30,7 @@ import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/in
 export class ConferenceComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
-              private dialog: MatDialog, public user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
+              private dialog: MatDialog, public auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
   }
 
@@ -57,7 +58,7 @@ export class ConferenceComponent implements OnInit {
       });
     this.onlineUsers.subscribe(n => {
       this.self = n.find(u => {
-        return u.username == this.user.getUsername();
+        return u.username == this.auth.getToken().username
       });
     });
     if (!this.classroomService.isJoined()) {
@@ -66,7 +67,8 @@ export class ConferenceComponent implements OnInit {
   }
 
   public isAuthorized() {
-    return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
+    const courseRole = this.auth.getToken().courseRoles[this.courseID]
+    return courseRole == Roles.CourseRole.DOCENT || courseRole == Roles.CourseRole.TUTOR
   }
 
   public inviteToConference(user) {
@@ -95,7 +97,7 @@ export class ConferenceComponent implements OnInit {
 
   public sortTickets(tickets) {
     return tickets.sort( (a, b) => {
-      const username: String = this.user.getUsername();
+      const username: String = this.auth.getToken().username
       if (a.assignee.username === username && b.assignee.username === username) {
         return a.timestamp > b.timestamp ? 1 : -1;
       } else if (a.assignee.username === username) {
@@ -143,15 +145,11 @@ export class ConferenceComponent implements OnInit {
 
   public getRoleName(roleid) {
     switch (roleid) {
-      case UserRoles.Admin:
-        return 'Admin';
-      case UserRoles.Moderator:
-        return 'Moderator';
-      case UserRoles.Dozent:
+      case Roles.CourseRole.DOCENT:
         return 'Dozent';
-      case UserRoles.Tutor:
+      case Roles.CourseRole.TUTOR:
         return 'Tutor';
-      case UserRoles.Student:
+      default:
         return 'Student';
     }
   }

@@ -28,17 +28,17 @@
       </mat-nav-list>
       <mat-divider></mat-divider>
 
-      <mat-nav-list *ngIf="isAdmin || isModerator || isDocent">
+      <mat-nav-list *ngIf="isDocent || isAdmin || isModerator">
         <p>Administration</p>
         <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/new" routerLinkActive="selected">
           <mat-icon>playlist_add</mat-icon>
           <p>Kurs erstellen</p>
         </a>
 
-        <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/authorization" routerLinkActive="selected">
+        <!--<a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/authorization" routerLinkActive="selected">
           <mat-icon>person</mat-icon>
           <p>Kursberechtigungen</p>
-        </a>
+        </a>-->
 
         <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
           <mat-icon>supervised_user_circle</mat-icon>
@@ -63,7 +63,7 @@
       </mat-nav-list>
       <mat-divider></mat-divider>
 
-      <mat-nav-list *ngIf="user.isGuest()">
+      <mat-nav-list>
         <p>Einstellungen</p>
         <a mat-list-item routerLink="/users/password" routerLinkActive="selected">
           <mat-icon>settings</mat-icon>
@@ -74,7 +74,7 @@
       <span class="filler"></span>
       <mat-divider></mat-divider>
       <mat-nav-list>
-        <a mat-list-item href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung  ">
+        <a mat-list-item href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung">
           <mat-icon class="">help</mat-icon>
           <p>Wiki</p>
         </a>

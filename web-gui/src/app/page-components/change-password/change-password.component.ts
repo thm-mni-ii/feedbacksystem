@@ -1,30 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component} from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
-
-import {UserService} from "../../service/user.service";
+import {FormControl, Validators} from "@angular/forms";
 import {DatabaseService} from "../../service/database.service";
 import {Succeeded} from "../../model/HttpInterfaces";
+import {AuthService} from "../../service/auth.service";
 
 @Component({
   selector: 'app-change-password',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
-export class ChangePasswordComponent implements OnInit {
+export class ChangePasswordComponent {
   passwd_repeat: string;
   passwd: string;
 
-
   passwordMatcher = new FormControl('', [Validators.required]);
 
-  constructor(private userService: UserService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
+  constructor(private auth: AuthService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
 
   showOK(){
     this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
       .afterDismissed()
-      .toPromise()
-      .then()
+      .subscribe()
   }
 
   showError(msg: string){
@@ -37,8 +34,8 @@ export class ChangePasswordComponent implements OnInit {
     else if(this.passwd != this.passwd_repeat) {
       this.showError("Passwörter stimmen nicht überein")
     } else {
-      this.db.setNewPWOfGuestAccount(this.userService.getUserId(), this.passwd, this.passwd_repeat).toPromise()
-        .then((data:Succeeded) => {
+      this.db.setNewPWOfGuestAccount(this.auth.getToken().id, this.passwd, this.passwd_repeat)
+        .subscribe((data:Succeeded) => {
           if(data.success){
             this.showOK()
             setTimeout(() => {
@@ -47,12 +44,9 @@ export class ChangePasswordComponent implements OnInit {
           } else {
             this.showError("Leider gab es einen Fehler mit dem Update")
           }
-        }).catch((e) => {
-        this.showError("Leider gab es einen Fehler mit dem Update")
-      })
+        }, error => {
+          this.showError("Leider gab es einen Fehler mit dem Update")
+        })
     }
-  }
-
-  ngOnInit() {
   }
 }

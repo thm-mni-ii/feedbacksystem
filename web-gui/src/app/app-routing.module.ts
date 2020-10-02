@@ -2,8 +2,6 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
 import {AuthGuard} from './guards/auth.guard';
-import {IsDocentGuard} from './guards/is-docent.guard';
-import {GuestGuard} from './guards/guest.guard';
 import {IsGeqDocentGuard} from './guards/is-geq-docent';
 import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
@@ -43,7 +41,7 @@ const routes: Routes = [
       // {path: 'admin/settings', component: AdminSettingsComponent, canActivate: [AdminGuard]},
 
       // Users self settings
-      {path: 'users/password', component: ChangePasswordComponent, canActivate: [GuestGuard]},
+      {path: 'users/password', component: ChangePasswordComponent, canActivate: [AuthGuard]},
 
       // Student
       //{path: 'student/dashboard', component: StudentDashboardComponent},

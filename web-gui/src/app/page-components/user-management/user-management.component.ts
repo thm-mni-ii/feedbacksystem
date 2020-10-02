@@ -7,12 +7,11 @@ import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from "../../service/titlebar.service";
 // import {User} from "../../model/HttpInterfaces";
-import {DeleteUserModalComponent} from "../../components/modals/delete-user-modal/delete-user-modal.component";
+import {UserDeleteModalComponent} from "../../dialogs/user-delete-modal/user-delete-modal.component";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {throwError} from "rxjs";
 import {MatPaginator} from "@angular/material/paginator";
-
-import {NewUserService} from "../../service/new-user.service";
+import {UserService} from "../../service/user.service";
 import {User} from "../../model/User";
 
 export interface GuestUserAccount {
@@ -26,8 +25,7 @@ export interface GuestUserAccount {
 }
 
 /**
- * This component is for admin managing
- * users
+ * This component is for admin managing users
  */
 @Component({
   selector: 'app-user-management',
@@ -39,7 +37,7 @@ export class UserManagementComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
-              private dialog: MatDialog, private userService: NewUserService) {
+              private dialog: MatDialog, private userService: UserService) {
   }
 
   columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];

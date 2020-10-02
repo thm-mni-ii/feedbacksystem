@@ -1,6 +1,5 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {DeleteCourseModalComponent} from "../../components/courses/modals/delete-course-modal/delete-course-modal.component";
 import {User} from "../../model/HttpInterfaces";
 
 @Component({
@@ -10,7 +9,7 @@ import {User} from "../../model/HttpInterfaces";
 })
 export class TaskDeleteModalComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: User, public dialogRef: MatDialogRef<DeleteCourseModalComponent>) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: User, public dialogRef: MatDialogRef<TaskDeleteModalComponent>) { }
 
   ngOnInit() {
   }

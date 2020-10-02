@@ -3,11 +3,9 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {Observable} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from '../../service/titlebar.service';
 import {DatabaseService} from '../../service/database.service';
-import {GeneralCourseInformation, Succeeded} from '../../model/HttpInterfaces';
-import {DeleteCourseModalComponent} from '../../components/courses/modals/delete-course-modal/delete-course-modal.component';
+import {GeneralCourseInformation} from '../../model/HttpInterfaces';
 
 /**
  * Show all courses user subscribed

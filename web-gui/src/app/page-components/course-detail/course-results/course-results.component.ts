@@ -2,13 +2,11 @@ import {Component, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatTabChangeEvent} from '@angular/material/tabs';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable, of} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
 import {CourseTask, DashboardProf, GeneralCourseInformation} from '../../../model/HttpInterfaces';
 import {DatabaseService} from '../../../service/database.service';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {UserService} from '../../../service/user.service';
-
 
 /**
  * Matrix for every course docent a has
@@ -46,11 +44,11 @@ export class CourseResultsComponent implements OnInit {
 
     this.tb.emitTitle('Dashboard');
     this.db.getSubscribedCourses().subscribe(courses => {
-      if (this.userService.getUserRole() === 4) {
-        this.courses = courses.filter(course => course.role_id === 4);
-      } else { // implicit does it means it is an admin, maybe also explizit allow moderators
-        this.courses = courses;
-      }
+      // if (this.userService.getUserRole() === 4) {
+      //   this.courses = courses.filter(course => course.role_id === 4);
+      // } else { // implicit does it means it is an admin, maybe also explizit allow moderators
+      //   this.courses = courses;
+      // }
     });
   }
 

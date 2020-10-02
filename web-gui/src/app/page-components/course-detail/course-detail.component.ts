@@ -26,6 +26,8 @@ import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket
 import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
 import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/course-delete-modal.component";
 import {ExitCourseDialogComponent} from "../../dialogs/exit-course-dialog/exit-course-dialog.component";
+import {AuthService} from "../../service/auth.service";
+import {Roles} from "../../model/Roles";
 
 @Component({
   selector: 'app-course-detail',
@@ -36,7 +38,7 @@ export class CourseDetailComponent implements OnInit {
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
-              private dialog: MatDialog, private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
+              private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }
 
@@ -66,7 +68,8 @@ export class CourseDetailComponent implements OnInit {
   }
 
   public isAuthorized() {
-    return this.user.isTutorInCourse(this.courseID) || this.user.isDocentInCourse(this.courseID);
+    const courseRole = this.auth.getToken().courseRoles[this.courseID]
+    return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
   /**

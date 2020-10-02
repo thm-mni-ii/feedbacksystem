@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {UserService} from '../../service/user.service';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {TitlebarService} from '../../service/titlebar.service';
 import {Subscription} from 'rxjs';
 import {CookieService} from 'ngx-cookie-service';
+import {Roles} from "../../model/Roles";
 
 /**
  * Root component shows sidenav and titlebar
@@ -15,58 +15,29 @@ import {CookieService} from 'ngx-cookie-service';
   styleUrls: ['./sidebar.component.scss']
 })
 export class SidebarComponent implements OnInit, OnDestroy {
-  constructor(private user: UserService, private router: Router, private auth: AuthService,
+  constructor(private router: Router, private auth: AuthService,
               private titlebar: TitlebarService, private cookie: CookieService) {
   }
 
   private sub: Subscription;
 
   title: string;
-  userRole: number;
-  userRoleString: string;
-  isAdmin: boolean;
-  isDocent: boolean;
-  isModerator: boolean;
-  isTutor: boolean;
-  isStudent: boolean;
-
   opened: boolean;
-  username: string;
-  prename: string;
-  surname: string;
-  email: string;
   innerWidth:number;
 
-  ngOnInit() {
+  username: string;
+  isAdmin: boolean;
+  isModerator: boolean;
+  isDocent: boolean;
 
-    this.username = this.user.getUsername();
-    this.userRole = this.user.getUserRole();
-    this.prename = this.user.getPrename();
-    this.surname = this.user.getSurname();
-    this.email = this.user.getEmail();
+  ngOnInit() {
+    this.username = this.auth.getToken().username
+    const globalRole = this.auth.getToken().globalRole
     this.opened = true;
 
-    switch (this.userRole) {
-      case 1:
-        this.isAdmin = true;
-        this.userRoleString = 'admin';
-        break;
-      case 2:
-        this.isModerator = true;
-        break;
-      case 4:
-        this.isDocent = true;
-        this.userRoleString = 'docent';
-        break;
-      case 8:
-        this.isTutor = true;
-        this.userRoleString = 'student';
-        break;
-      case 16:
-        this.isStudent = true;
-        this.userRoleString = 'student';
-        break;
-    }
+    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole)
+    this.isModerator = Roles.GlobalRole.isModerator(globalRole);
+    this.isDocent = this.auth.getToken().courseRoles.find(o => o == Roles.CourseRole.DOCENT)
 
     this.sub = this.titlebar.getTitle().subscribe(title => this.title = title);
     this.innerWidth = window.innerWidth;
@@ -77,8 +48,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
    */
   logout() {
     this.auth.logout();
-    this.cookie.delete('jwt');
-    localStorage.removeItem('token');
     this.router.navigate(['login']);
   }
 
@@ -97,5 +66,4 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub.unsubscribe();
   }
-
 }
