@@ -6,14 +6,14 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
  * exit course
  */
 @Component({
-  selector: 'app-exit-course',
-  templateUrl: './exit-course.component.html',
-  styleUrls: ['./exit-course.component.scss']
+  selector: 'app-exit-course-dialog',
+  templateUrl: './exit-course-dialog.component.html',
+  styleUrls: ['./exit-course-dialog.component.scss']
 })
-export class ExitCourseComponent {
+export class ExitCourseDialogComponent {
 
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<ExitCourseComponent>) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<ExitCourseDialogComponent>) {
   }
 
   /**

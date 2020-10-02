@@ -1,10 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DatabaseService} from '../../../../service/database.service';
+import {DatabaseService} from '../../service/database.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {ConferenceInvitation, User} from '../../../../model/HttpInterfaces';
-import {ConferenceSystems} from '../../../../util/ConferenceSystems';
-import {ConferenceService} from '../../../../service/conference.service';
+import {ConferenceInvitation, User} from '../../model/HttpInterfaces';
+import {ConferenceSystems} from '../../util/ConferenceSystems';
+import {ConferenceService} from '../../service/conference.service';
 import {first} from 'rxjs/operators';
 
 @Component({

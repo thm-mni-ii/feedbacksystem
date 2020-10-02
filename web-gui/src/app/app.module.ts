@@ -27,13 +27,11 @@ import {AdminCheckerComponent} from './components/admin/admin-checker/admin-chec
 import {CoursesComponent} from './components/courses/my-courses/courses.component';
 import { GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
 import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
-import {NewCourseComponent} from './components/courses/new-course/new-course.component';
 import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
 import {DetailCourseComponent} from './components/courses/detail-course/detail-course.component';
 import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof-dashboard.component';
 import {ReadMoreComponent} from './components/courses/search-course/read-more/read-more.component';
 import {NewtaskDialogComponent} from './components/courses/detail-course/newtask-dialog/newtask-dialog.component';
-import {ExitCourseComponent} from './components/courses/detail-course/exit-course/exit-course.component';
 import {UpdateCourseDialogComponent} from './components/courses/detail-course/update-course-dialog/update-course-dialog.component';
 import {DataprivacyDialogComponent} from './components/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './components/impressum-dialog/impressum-dialog.component';
@@ -74,15 +72,15 @@ import { CreateUpdateSettingDialogComponent } from './components/admin/admin-set
 import { DeleteSettingDialogComponent } from './components/admin/admin-settings/delete-setting-dialog/delete-setting-dialog.component';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { CourseTasksOverviewComponent } from './components/courses/course-tasks-overview/course-tasks-overview.component';
-import { NewconferenceDialogComponent } from './components/courses/detail-course/newconference-dialog/newconference-dialog.component';
+import { NewconferenceDialogComponent } from './dialogs/newconference-dialog/newconference-dialog.component';
 //import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {
   AssignTicketDialogComponent,
   UserTeacherFilter
 } from './components/courses/detail-ticket/assign-ticket-dialog/assign-ticket-dialog.component';
-import { NewticketDialogComponent } from './components/courses/detail-course/newticket-dialog/newticket-dialog.component';
-import { IncomingCallDialogComponent } from './components/courses/detail-course/incoming-call-dialog/incoming-call-dialog.component';
+import { NewticketDialogComponent } from './dialogs/newticket-dialog/newticket-dialog.component';
+import { IncomingCallDialogComponent } from './dialogs/incoming-call-dialog/incoming-call-dialog.component';
 // tslint:disable-next-line:max-line-length
 import { InvitetoConferenceDialogComponent} from './components/courses/detail-ticket/inviteto-conference-dialog/inviteto-conference-dialog.component';
 import {MatSelectModule} from '@angular/material/select';
@@ -90,6 +88,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
 import {CloseTicketDialogComponent} from './components/courses/detail-ticket/close-ticket-dialog/close-ticket-dialog.component';
 
+import {NewCourseComponent} from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
 import { CoursePreviewComponent } from './page-components/course-preview/course-preview.component';
 import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
@@ -126,6 +125,7 @@ import {TaskNewDialogComponent} from "./dialogs/task-new-dialog/task-new-dialog.
 import {CourseUpdateDialogComponent} from "./dialogs/course-update-dialog/course-update-dialog.component";
 import {PlagiatScriptUploadComponent} from "./dialogs/plagiat-script-upload/plagiat-script-upload.component";
 import {CreateGuestUserDialog} from "./dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
+import {ExitCourseDialogComponent} from "./dialogs/exit-course-dialog/exit-course-dialog.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -164,7 +164,7 @@ export const httpInterceptorProviders = [
     ProfDashboardComponent,
     ReadMoreComponent,
     NewtaskDialogComponent,
-    ExitCourseComponent,
+    ExitCourseDialogComponent,
     UpdateCourseDialogComponent,
     DataprivacyDialogComponent,
     ImpressumDialogComponent,
@@ -267,7 +267,7 @@ export const httpInterceptorProviders = [
     MatFormFieldModule,
     MatSliderModule
   ],
-  entryComponents: [NewtaskDialogComponent, ExitCourseComponent, UpdateCourseDialogComponent,
+  entryComponents: [NewtaskDialogComponent, ExitCourseDialogComponent, UpdateCourseDialogComponent,
     DataprivacyDialogComponent, CreateGuestUserDialog, CreateUpdateSettingDialogComponent,
     ImpressumDialogComponent, DeleteCourseModalComponent, DeleteUserModalComponent,
     DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,

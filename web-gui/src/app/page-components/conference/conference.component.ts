@@ -15,10 +15,10 @@ import {InvitetoConferenceDialogComponent} from "../../components/courses/detail
 import {Observable, Subscription, timer, interval, BehaviorSubject} from 'rxjs';
 import {ClassroomService} from '../../service/classroom.service';
 import {UserRoles} from '../../util/UserRoles';
-import {NewticketDialogComponent} from "../../components/courses/detail-course/newticket-dialog/newticket-dialog.component";
-import {NewconferenceDialogComponent} from "../../components/courses/detail-course/newconference-dialog/newconference-dialog.component";
+import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
+import {NewconferenceDialogComponent} from "../../dialogs/newconference-dialog/newconference-dialog.component";
 import {first, share} from 'rxjs/operators';
-import {IncomingCallDialogComponent} from "../../components/courses/detail-course/incoming-call-dialog/incoming-call-dialog.component";
+import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
 
 
 @Component({

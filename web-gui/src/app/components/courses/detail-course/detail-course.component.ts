@@ -14,7 +14,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {NewtaskDialogComponent} from './newtask-dialog/newtask-dialog.component';
 import {UserService} from '../../../service/user.service';
-import {ExitCourseComponent} from './exit-course/exit-course.component';
+import {ExitCourseDialogComponent} from "../../../dialogs/exit-course-dialog/exit-course-dialog.component";
 import {of, throwError} from 'rxjs';
 
 import {UpdateCourseDialogComponent} from './update-course-dialog/update-course-dialog.component';

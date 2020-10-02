@@ -6,11 +6,14 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {flatMap} from 'rxjs/operators';
 import {TitlebarService} from "../../service/titlebar.service";
-import {User} from "../../model/HttpInterfaces";
+// import {User} from "../../model/HttpInterfaces";
 import {DeleteUserModalComponent} from "../../components/modals/delete-user-modal/delete-user-modal.component";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {throwError} from "rxjs";
 import {MatPaginator} from "@angular/material/paginator";
+
+import {NewUserService} from "../../service/new-user.service";
+import {User} from "../../model/User";
 
 export interface GuestUserAccount {
   gPrename: string;
@@ -36,7 +39,7 @@ export class UserManagementComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
-              private dialog: MatDialog) {
+              private dialog: MatDialog, private userService: NewUserService) {
   }
 
   columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];
@@ -60,7 +63,8 @@ export class UserManagementComponent implements OnInit {
   }
 
   private loadAllUsers() {
-    this.db.getAllUsers().subscribe(users => {
+    // this.db.getAllUsers().subscribe(users => {
+    this.userService.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
       this.dataSource.paginator = this.paginator;
@@ -93,23 +97,24 @@ export class UserManagementComponent implements OnInit {
    * @param user The user to delete
    */
   deleteUser(user: User) {
-    this.dialog.open(DeleteUserModalComponent, {
-      data: user
-    }).afterClosed().pipe(
-      flatMap(value => {
-        if (value.exit) {
-          return this.db.adminDeleteUser(user.user_id)
-        } else {
-          return null
-        }
-      })
-    ).toPromise().then((result) => {
-      if (result.success) {
-        this.snackBar.open(user.username + ' wurde gelöscht');
-        this.loadAllUsers();
-      }
-    }).catch(e => {
-    })
+    // TODOD: neuer User Service hat noch kein Observable return
+    // this.dialog.open(DeleteUserModalComponent, {
+    //   data: user
+    // }).afterClosed().pipe(
+    //   flatMap(value => {
+    //     if (value.exit) {
+    //       return this.db.adminDeleteUser(user.id)
+    //     } else {
+    //       return null
+    //     }
+    //   })
+    // ).toPromise().then((result) => {
+    //   if (result.success) {
+    //     this.snackBar.open(user.username + ' wurde gelöscht');
+    //     this.loadAllUsers();
+    //   }
+    // }).catch(e => {
+    // })
 
   }
 
@@ -152,42 +157,3 @@ export class UserManagementComponent implements OnInit {
     this.userData.gUsername = '';
   }
 }
-
-/*@Component({
-  selector: 'create-guest-user-dialog',
-  templateUrl: 'create-guest-user-dialog.html',
-  styleUrls: ['./create-guest-user-dialog.scss']
-})
-export class CreateGuestUserDialog {
-
-  private passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-    return control.value == this.data.gPassword ? null : {'notMatch': true};
-  };
-
-  passwordMatcher = new FormControl('', [Validators.required, this.passwordsMatchValidator]);
-
-  constructor(public dialog: MatDialog,
-              public dialogRef: MatDialogRef<CreateGuestUserDialog>,
-              @Inject(MAT_DIALOG_DATA) public data: GuestUserAccount,
-              private snackBar: MatSnackBar) {
-  }
-
-  onCancel(): void {
-    this.data.gPrename = '';
-    this.data.gSurname = '';
-    this.data.gEmail = '';
-    this.data.gPassword = '';
-    this.data.gPasswordRepeat = '';
-    this.data.gUsername = '';
-    this.data.gRole = 16;
-    this.dialogRef.close(null);
-  }
-
-  onSubmit(): void {
-    if (this.data.gPassword === this.data.gPasswordRepeat)
-      this.dialogRef.close(this.data);
-    else
-      this.snackBar.open('Error: ' + "Die Passwörter müssen übereinstimmen", null, {duration: 5000});
-  }
-}
-*/

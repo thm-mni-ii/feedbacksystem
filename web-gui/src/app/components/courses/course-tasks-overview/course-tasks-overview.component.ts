@@ -15,18 +15,18 @@ import {
   Succeeded, User
 } from '../../../model/HttpInterfaces';
 import {NewtaskDialogComponent} from '../detail-course/newtask-dialog/newtask-dialog.component';
-import {NewconferenceDialogComponent} from '../detail-course/newconference-dialog/newconference-dialog.component';
+import {NewconferenceDialogComponent} from '../../../dialogs/newconference-dialog/newconference-dialog.component';
 import {delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {AnswerFromTestsystemDialogComponent} from '../modals/answer-from-testsystem-dialog/answer-from-testsystem-dialog.component';
 import {of, throwError} from 'rxjs';
 import {UpdateCourseDialogComponent} from '../detail-course/update-course-dialog/update-course-dialog.component';
 import {ConferenceService} from '../../../service/conference.service';
 import {Observable, Subscription} from 'rxjs';
-import {NewticketDialogComponent} from '../detail-course/newticket-dialog/newticket-dialog.component';
-import {IncomingCallDialogComponent} from '../detail-course/incoming-call-dialog/incoming-call-dialog.component';
+import {NewticketDialogComponent} from '../../../dialogs/newticket-dialog/newticket-dialog.component';
+import {IncomingCallDialogComponent} from '../../../dialogs/incoming-call-dialog/incoming-call-dialog.component';
 import {ClassroomService} from '../../../service/classroom.service';
 import {DeleteCourseModalComponent} from '../modals/delete-course-modal/delete-course-modal.component';
-import {ExitCourseComponent} from "../detail-course/exit-course/exit-course.component";
+import {ExitCourseDialogComponent} from "../../../dialogs/exit-course-dialog/exit-course-dialog.component";
 
 @Component({
   selector: 'app-course-tasks-overview',
@@ -213,7 +213,7 @@ export class CourseTasksOverviewComponent implements OnInit {
    * @param courseID The id of current course
    */
   exitCourse(courseName: string, courseID: number) {
-    this.dialog.open(ExitCourseComponent, {
+    this.dialog.open(ExitCourseDialogComponent, {
       data: {coursename: courseName}
     }).afterClosed().pipe(
       flatMap(value => {
