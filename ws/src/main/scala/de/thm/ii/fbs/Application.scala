@@ -31,14 +31,14 @@ class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  private val initSQLPath = Paths.get("/usr/local/ws/init.sql")
+  private val initSQLPath = Paths.get("/usr/local/ws/fbs.sql")
 
   private var initSQLFile: File = null
   try {
     initSQLFile = if (Files.isRegularFile(initSQLPath)) {
       new File(initSQLPath.toString)
     } else {
-      ResourceUtils.getFile("classpath:init.sql")
+      ResourceUtils.getFile("classpath:fbs.sql")
     }
   } catch {
     case _: java.io.FileNotFoundException => {
