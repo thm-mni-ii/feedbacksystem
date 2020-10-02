@@ -74,7 +74,7 @@ class UserController {
     val password = body.retrive("passwd").asText()
     val passwordRepeat = body.retrive("passwdRepeat").asText()
 
-    if (password.isEmpty || !password.eq(passwordRepeat) || password.get.isBlank) {
+    if (password.isEmpty || password.get.isBlank || password != passwordRepeat) {
       throw new BadRequestException("Malformed Request Body")
     }
 

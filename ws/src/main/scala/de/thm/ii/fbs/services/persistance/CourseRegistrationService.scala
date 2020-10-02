@@ -51,7 +51,8 @@ class CourseRegistrationService {
     * @return List of courses
     */
   def getParticipants(cid: Int): List[Participant] = DB.query(
-    "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) where deleted = 0",
+    "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) where deleted = 0" +
+      "and course_id = ?",
     (res, _) => Participant(parseUserResult(res), CourseRole.parse(res.getInt("course_role"))), cid)
 
   private def parseCourseResult(res: ResultSet): Course = Course(

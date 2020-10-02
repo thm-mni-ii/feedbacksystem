@@ -38,7 +38,7 @@ class CourseController {
   def getAll(@RequestParam(value = "visible", required = false) visible: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     authService.authorize(req, res)
-    courseService.getAll()
+    courseService.getAll(visible)
   }
 
   /**
