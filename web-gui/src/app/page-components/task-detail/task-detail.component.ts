@@ -26,7 +26,7 @@ import {TaskNewDialogComponent} from "../../dialogs/task-new-dialog/task-new-dia
 import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
 import {DeleteCourseModalComponent} from "../../components/courses/modals/delete-course-modal/delete-course-modal.component";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
-import {TestsystemAnswerDialogComponent} from "../../dialogs/testsystem-answer-dialog/testsystem-answer-dialog.component";
+// import {TestsystemAnswerDialogComponent} from "../../dialogs/testsystem-answer-dialog/testsystem-answer-dialog.component";
 import {ParameterCourseModalComponent} from "../../dialogs/parameter-course-modal/parameter-course-modal.component";
 import {ParameterUserModalComponent} from "../../dialogs/parameter-user-modal/parameter-user-modal.component";
 import {PlagiatScriptUploadComponent} from "../../dialogs/plagiat-script-upload/plagiat-script-upload.component";

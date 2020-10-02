@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {LoginComponent} from './components/login/login.component';
+//import {LoginComponent} from './components/login/login.component';
 import {AuthGuard} from './guards/auth.guard';
 import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
 import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
@@ -42,6 +42,7 @@ import {UserManagementComponent} from "./page-components/user-management/user-ma
 import {CoursePreviewComponent} from "./page-components/course-preview/course-preview.component";
 import {CourseResultsComponent} from "./page-components/course-detail/course-results/course-results.component";
 import {NotFoundComponent} from "./page-components/not-found/not-found.component";
+import {LoginComponent} from "./page-components/login/login.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},

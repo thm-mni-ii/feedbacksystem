@@ -2,7 +2,7 @@ import {Component, Inject} from "@angular/core";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {GuestUserAccount} from "../../page-components/user-overview/user-overview.component";
+import {GuestUserAccount} from "../../page-components/user-management/user-management.component";
 
 @Component({
   selector: 'app-create-guest-user-dialog',
