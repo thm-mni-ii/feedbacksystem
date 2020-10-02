@@ -1,12 +1,9 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-
 import {AuthGuard} from './guards/auth.guard';
-import {IsGeqDocentGuard} from './guards/is-geq-docent';
 import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
-
 import {ChangePasswordComponent} from "./page-components/change-password/change-password.component";
 import {MyCoursesComponent} from "./page-components/my-courses/my-courses.component";
 import {CourseAuthorizationComponent} from "./page-components/course-authorization/course-authorization.component";
