@@ -1,16 +1,41 @@
-@import "../../../colors";
+@import "src/colors";
+
+.task-container {
+  cursor: pointer;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  .meta {
+    > * {
+      margin-left: 8px;
+    }
+    > .tiny {
+      font-size: small;
+    }
+    .state {
+      text-align: center;
+      line-height: 30px;
+    }
+  }
+  span {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.task-container:hover {
+  background: #819ca9;
+}
 
 .container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: block;
+  padding: 16px;
 }
 
 .actions {
+  margin: -15px;
   display: flex;
   height: 40px;
-  border-bottom: solid 1px darkgray;
   width: 100%;
   padding-left: 10px;
   margin-bottom: 10px;
@@ -34,106 +59,6 @@
   }
 }
 
-#description {
-  width: 80%;
-  min-width: 180px;
-  background: $cPrimary-light;
-  color: white;
-}
-
-.title {
-  display: flex;
-  align-items: center;
-}
-
-.details {
-  width: 80%;
-  margin-top: 12px;
-}
-
-.filler {
-  flex-grow: 1;
-}
-
-#result {
-  margin-left: 12px;
-}
-
-.user-input {
-  display: flex;
-  flex-direction: column;
-  margin-top: 24px;
-}
-
-
-.user-input-text {
-  width: 100%;
-}
-
-.result {
-  display: flex;
-  width: 100%;
-}
-
-#task-result-text.true {
-  color: green;
-}
-
-#task-result-text.false {
-  color: red;
-}
-
-mat-card-actions {
-  display: flex;
-  justify-content: space-around;
-}
-
-.desc-button {
-  margin-right: 12px;
-}
-
-mat-radio-button {
-  margin: 12px;
-}
-
-
-.resetExternalInfo{
-  display: block;
-  color: gray;
-  font-style: italic;
-  cursor: pointer;
-}
-
-#choice_form {
-  padding: 0 .75em 0 0.9em;
-  margin-top: 1.25em;
-  position: relative;
-  margin-bottom: 1em;
-}
-
-.task-container {
-  width: 80%;
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  .meta {
-    > * {
-      margin-left: 8px;
-    }
-    > .tiny {
-      font-size: small;
-    }
-    .state {
-      text-align: center;
-      line-height: 30px;
-    }
-  }
-  span {
-    display: flex;
-    align-items: center;
-  }
-}
-
 .passed {
   color: green;
 }
@@ -145,4 +70,18 @@ mat-radio-button {
 
 .not-done {
   color: darkorange;
+}
+
+.green {
+  background-color: green;
+}
+.red {
+  background-color: red;
+}
+
+.danger-zone {
+  margin-top: 16px;
+  h3 {
+    color: $red;
+  }
 }
