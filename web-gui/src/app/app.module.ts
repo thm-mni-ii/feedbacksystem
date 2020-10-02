@@ -116,6 +116,7 @@ import {
   TicketStatusFilter
 } from "./page-components/conference/conference.component";
 import { FilterPipe } from "./page-components/course-authorization/course-authorization.component";
+import { NotFoundComponent } from "./page-components/not-found/not-found.component";
 
 import {ParameterCourseModalComponent} from "./dialogs/parameter-course-modal/parameter-course-modal.component";
 import {ParameterUserModalComponent} from "./dialogs/parameter-user-modal/parameter-user-modal.component";
@@ -131,8 +132,8 @@ import {CreateGuestUserDialog} from "./dialogs/create-guest-user-dialog/create-g
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
+      //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
@@ -228,6 +229,7 @@ export const httpInterceptorProviders = [
     DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
+    NotFoundComponent,
 
     LoginComponent,
     ParameterCourseModalComponent,
@@ -273,7 +275,7 @@ export const httpInterceptorProviders = [
     DeleteTaskModalComponent, AnswerFromTestsystemDialogComponent, DeleteSettingDialogComponent,
     CourseParameterModalComponent, CourseParameterUserModalComponent, UploadPlagiatScriptComponent,
     EditTestsystemsModalComponent, DeleteTestsystemAskModalComponent],
-  providers: [CookieService, httpInterceptorProviders],
+  providers: [CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

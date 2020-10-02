@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
-import {DatabaseService} from "../../service/database.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Router} from "@angular/router";
+import {DatabaseService} from "../../service/database.service";
 
 @Component({
   selector: 'app-import-course',
