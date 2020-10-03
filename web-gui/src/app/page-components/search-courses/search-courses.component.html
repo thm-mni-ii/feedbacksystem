@@ -1,26 +1,13 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
     <mat-label>Kurs suchen</mat-label>
-    <input type="text" aria-label="Kurs suchen" matInput [formControl]="myControl"
-           [matAutocomplete]="auto">
-    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-      <mat-option *ngFor="let option of filteredOptions | async" [value]="option">
-        {{option.course_name}} ({{option.course_modul_id}})
-      </mat-option>
-    </mat-autocomplete>
-    <mat-icon matSuffix>filter_list</mat-icon>
+    <input type="text" aria-label="Kurs suchen" matInput [formControl]="control">
+    <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
-  <mat-card class="card" *ngFor="let course of cardCourses" (click)="goToCourse(course.course_id)">
-    <span>{{course.course_name}}</span>
-    <span>
-          <button mat-icon-button color="accent" matTooltip="Kurs beitreten"
-                  *ngIf="!hasSubbed(course.course_id)"
-                  (click)="joinCourse(course.course_name,course.course_id)">
-            <mat-icon color="accent">input</mat-icon>
-          </button>
-    </span>
+  <mat-card class="card" *ngFor="let course of filteredCourses | async" (click)="goToCourse(course.id)">
+    <span>{{course.name}}</span>
   </mat-card>
 
-  <span class="noElements" *ngIf="cardCourses?.length == 0">Es gibt noch keiner Kurse denen Sie beitreten können.</span>
+  <span class="noElements" *ngIf="(courses | async).length == 0">Es gibt noch keiner Kurse denen Sie beitreten können.</span>
 </div>
