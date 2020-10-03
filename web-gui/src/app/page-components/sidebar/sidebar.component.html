@@ -45,10 +45,10 @@
           <p>Benutzer</p>
         </a>
 
-        <a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
+        <!--<a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
           <mat-icon>import_export</mat-icon>
           <p>Kurs Importieren</p>
-        </a>
+        </a>-->
 
         <!--<a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
           <mat-icon>widgets</mat-icon>
@@ -95,7 +95,7 @@
         <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
       </button>
       <div class="flex-toolbar-container">
-        <span class="mat-h1">{{title}}</span>
+        <span class="mat-h1">{{title | async}}</span>
       </div>
     </mat-toolbar>
     <router-outlet></router-outlet>

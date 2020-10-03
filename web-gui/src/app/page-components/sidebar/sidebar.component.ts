@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {TitlebarService} from '../../service/titlebar.service';
-import {Subscription} from 'rxjs';
+import {Subscription, Observable, of} from 'rxjs';
 import {CookieService} from 'ngx-cookie-service';
 import {Roles} from "../../model/Roles";
 
@@ -14,14 +14,13 @@ import {Roles} from "../../model/Roles";
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
-export class SidebarComponent implements OnInit, OnDestroy {
-  constructor(private router: Router, private auth: AuthService,
-              private titlebar: TitlebarService, private cookie: CookieService) {
+export class SidebarComponent implements OnInit {
+  constructor(private router: Router,
+              private auth: AuthService,
+              private titlebar: TitlebarService) {
   }
 
-  private sub: Subscription;
-
-  title: string;
+  title: Observable<string> = of('');
   opened: boolean;
   innerWidth:number;
 
@@ -39,7 +38,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.isModerator = Roles.GlobalRole.isModerator(globalRole);
     this.isDocent = this.auth.getToken().courseRoles.find(o => o == Roles.CourseRole.DOCENT)
 
-    this.sub = this.titlebar.getTitle().subscribe(title => this.title = title);
+    this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;
   }
 
@@ -61,9 +60,5 @@ export class SidebarComponent implements OnInit, OnDestroy {
    */
   onResize(event){
     this.innerWidth = event.target.innerWidth
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
   }
 }
