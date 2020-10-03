@@ -8,21 +8,21 @@ import {Observable, Subject} from 'rxjs';
   providedIn: 'root'
 })
 export class TitlebarService {
-
   private subject = new Subject<string>();
 
-  constructor() {
-  }
+  constructor() {}
 
-
+  /**
+   * Get the last emitted title
+   */
   getTitle(): Observable<string> {
     return this.subject.asObservable();
   }
 
-
+  /**
+   * @param title The new title value of the title bar
+   */
   emitTitle(title: string) {
-    this.subject.next(title);
+    setTimeout(() => { this.subject.next(title); }, 0);
   }
-
-
 }
