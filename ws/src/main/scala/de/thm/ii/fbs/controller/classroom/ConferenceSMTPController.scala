@@ -106,7 +106,6 @@ class ConferenceSMTPController {
     def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
       val creator = userService.find(headerAccessor.getUser.getName)
       val invitationJsonWrapper = m.retrive("invitation")
-      val courseId = m.retrive(courseIdLiteral).asInt().get
       val invitation = invitationJsonWrapper.retrive("service").asText() match {
         case Some(bbbService.name) => BBBInvitation(creator.get,
           invitationJsonWrapper.retrive("courseId").asInt().get,
@@ -156,9 +155,5 @@ class ConferenceSMTPController {
 
   UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
     smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/left", invitationToJson(invitation).toString)
-  })
-
-  UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
-      smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/left", invitationToJson(invitation).toString)
   })
 }
