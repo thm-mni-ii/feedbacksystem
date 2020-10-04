@@ -55,7 +55,7 @@
 }
 
 .user-input {
-  min-height: 300px; // fixes Bug (jumps to top of page when tab is changed)
+ // min-height: 350px; // fix Bug? (jumps to top of page when tab is changed)
   display: flex;
   flex-direction: column;
   margin-top: 24px;

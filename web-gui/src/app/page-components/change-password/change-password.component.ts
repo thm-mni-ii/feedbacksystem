@@ -1,5 +1,6 @@
-import { Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {TitlebarService} from "../../service/titlebar.service";
 import {FormControl, Validators} from "@angular/forms";
 import {DatabaseService} from "../../service/database.service";
 import {Succeeded} from "../../model/HttpInterfaces";
@@ -10,13 +11,15 @@ import {AuthService} from "../../service/auth.service";
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
-export class ChangePasswordComponent {
+export class ChangePasswordComponent implements OnInit {
   passwd_repeat: string;
   passwd: string;
 
   passwordMatcher = new FormControl('', [Validators.required]);
 
-  constructor(private auth: AuthService, private db: DatabaseService,  private snackbar: MatSnackBar,) { }
+  constructor(private auth: AuthService, private db: DatabaseService,
+              private snackbar: MatSnackBar,
+              private titlebar: TitlebarService) { }
 
   showOK(){
     this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
@@ -48,5 +51,9 @@ export class ChangePasswordComponent {
           this.showError("Leider gab es einen Fehler mit dem Update")
         })
     }
+  }
+
+  ngOnInit() {
+    this.titlebar.emitTitle('Passwort ändern');
   }
 }
