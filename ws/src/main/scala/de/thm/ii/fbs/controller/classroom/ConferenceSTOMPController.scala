@@ -23,9 +23,7 @@ import scala.collection.mutable
   * @author Andrej Sajenko
   */
 @Controller
-class ConferenceSMTPController {
-    @Autowired
-    private val sur: SimpUserRegistry = null
+class ConferenceSTOMPController {
     @Autowired
     private val smt: SimpMessagingTemplate = null
     @Autowired
@@ -33,9 +31,11 @@ class ConferenceSMTPController {
     @Autowired
     private val jitsiService: JitsiService = null
     @Autowired
-    implicit private val userService: UserService = null
-    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSMTPController])
-    private val courseIdLiteral = "courseId";
+    implicit private val authService: AuthService = null
+    @Autowired
+    implicit private val courseRegistrationService: CourseRegistrationService = null
+
+    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSTOMPController])
     private def userToJson(user: User): JSONObject = new JSONObject()
       .put("username", user.username)
       .put("prename", user.prename)
@@ -47,14 +47,14 @@ class ConferenceSMTPController {
         case BBBInvitation(creator, courseId, visibility, service, meetingId, meetingPassword, moderatorPassword) =>
           new JSONObject().put("creator", userToJson(creator))
             .put("meetingId", meetingId)
-            .put(courseIdLiteral, courseId)
+            .put("courseId", courseId)
             .put("service", service)
             .put("meetingPassword", meetingPassword)
             .put("moderatorPassword", moderatorPassword)
             .put("visibility", visibility)
         case JitsiInvitation(creator, courseId, visibility, service, href) =>
           new JSONObject().put("creator", userToJson(creator))
-            .put(courseIdLiteral, courseId)
+            .put("courseId", courseId)
             .put("service", service)
             .put("href", href)
             .put("visibility", visibility)
@@ -68,6 +68,9 @@ class ConferenceSMTPController {
     */
   @MessageMapping(value = Array("/classroom/conference/invite"))
   def handleInviteMsg(@Payload p: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    logger.info("/classroom/conference/invite")
+    logger.info("Accessor: " + headerAccessor.getUser)
+    logger.info("Payload: " + p.asText())
     val inviter = headerAccessor.getUser
     val invitation = p.get("invitation").asInstanceOf[Invitation]
     val invitees = p.get("users").asInstanceOf[Array[User]]
@@ -104,19 +107,22 @@ class ConferenceSMTPController {
       */
     @MessageMapping(value = Array("/classroom/conference/open"))
     def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+      logger.info("/classroom/conference/open")
+      logger.info("Accessor: " + headerAccessor.getUser)
+      logger.info("Payload: " + m.asText())
       val creator = userService.find(headerAccessor.getUser.getName)
       val invitationJsonWrapper = m.retrive("invitation")
       val invitation = invitationJsonWrapper.retrive("service").asText() match {
         case Some(bbbService.name) => BBBInvitation(creator.get,
           invitationJsonWrapper.retrive("courseId").asInt().get,
-          invitationJsonWrapper.retrive("visibility").asText().get,
+          invitationJsonWrapper.retrive("visible").asBool().get,
           invitationJsonWrapper.retrive("service").asText().get,
           invitationJsonWrapper.retrive("meetingId").asText().get,
           invitationJsonWrapper.retrive("meetingPassword").asText().get,
           invitationJsonWrapper.retrive("moderatorPassword").asText().get)
         case Some(jitsiService.name) => JitsiInvitation(creator.get,
           invitationJsonWrapper.retrive("courseId").asInt().get,
-          invitationJsonWrapper.retrive("visibility").asText().get,
+          invitationJsonWrapper.retrive("visible").asBool().get,
           invitationJsonWrapper.retrive("service").asText().get,
           invitationJsonWrapper.retrive("href").asText().get)
       }
@@ -124,12 +130,15 @@ class ConferenceSMTPController {
    }
 
     /**
-      * Handles the removal of tickets
+      * Removes user and related invitation from map
       * @param m Composed ticket message.
       * @param headerAccessor Header information
       */
     @MessageMapping(value = Array("/classroom/conference/leave"))
     def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+      logger.info("/classroom/conference/leave")
+      logger.info("Accessor: " + headerAccessor.getUser)
+      logger.info("Payload: " + m.asText())
       UserConferenceMap.delete(headerAccessor.getUser)
     }
 
@@ -140,11 +149,10 @@ class ConferenceSMTPController {
       */
     @MessageMapping(value = Array("/classroom/conferences"))
     def getConferences(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-      val courseId = m.get(courseIdLiteral).asInt()
-      val principal = headerAccessor.getUser
-      val user = this.userService.find(principal.getName)
+      val courseId = m.get("courseId").asInt()
+      val user = this.userService.find(headerAccessor.getUser.getName)
       smt.convertAndSendToUser(user.get.username, "/classroom/conferences",
-        UserConferenceMap.getInvitations(courseId).map(invitationToJson)
+        UserConferenceMap.getInvitations(courseId).filter(i => i.visible).map(invitationToJson)
           .foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
     }
