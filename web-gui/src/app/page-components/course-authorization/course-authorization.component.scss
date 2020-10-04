@@ -14,8 +14,25 @@ mat-chip-list {
   margin: 12px;
 }
 
-.mat-grid-tile .mat-grid-list figure.mat-figure .mat-card-content {
-  display: flow-root;
-  align-items: flex-start;
-  justify-content: left;
+.mat-grid-tile .mat-grid-list figure.mat-figure .mat-card-content .my-grid-tile {
+  display: flow-root !important;
+  align-items: baseline !important;
+  justify-content: left !important;
+  margin-right: auto;
 }
+
+th {
+  width: 550px;
+  float: left;
+  margin: 6px 0px 6px 0px;
+}
+
+td {
+  width: 550px;
+  float: right;
+  margin: 6px 6px 6px 6px;
+  font-style: normal;
+}
+ h4 {
+   margin: 10px 0px 15px 0px;
+ }

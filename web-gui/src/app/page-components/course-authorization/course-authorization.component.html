@@ -7,34 +7,21 @@
 
   <mat-card *ngFor="let course of courses | async | filter : filterValue :'course_name'">
     <h4>{{course.course_name}}</h4>
-    <mat-grid-list cols="2" rowHeight="4:1">
-      <mat-grid-list cols="2" rowHeight="16:1">
-        <mat-grid-tile><h5>Dozenten</h5></mat-grid-tile>
-        <mat-grid-tile><h5>Tutoren</h5></mat-grid-tile>
-      </mat-grid-list>
-      <mat-grid-tile>
-        <app-docent-in-course [liveUpdate]="true" [course]="course"></app-docent-in-course>
-      </mat-grid-tile>
-      <mat-grid-tile>
-        <app-tutor-in-course [liveUpdate]="true" [course]="course"></app-tutor-in-course>
-      </mat-grid-tile>
-    </mat-grid-list>
+    <mat-divider></mat-divider>
+    <table class="mat-table">
+      <tr>
+        <td>Tutoren</td>
+        <td>Dozenten</td>
+      </tr>
+      <tr>
+        <td>
+          <app-tutor-in-course [liveUpdate]="true" [course]="course"></app-tutor-in-course>
+        </td>
+        <td>
+          <app-docent-in-course [liveUpdate]="true" [course]="course"></app-docent-in-course>
+        </td>
+      </tr>
+    </table>
   </mat-card>
 </div>
 
-<!--
-<h4>{{course.course_name}}</h4>
-<mat-grid-list cols="2" rowHeight="4:1">
-  <h5>Dozenten</h5>
-  <mat-grid-tile>
-    <mat-card-content>
-      <app-docent-in-course [liveUpdate]="true" [course]="course"></app-docent-in-course>
-    </mat-card-content>
-  </mat-grid-tile>
-  <h5>Tutoren</h5>
-  <mat-grid-tile>
-    <mat-card-content>
-      <app-tutor-in-course [liveUpdate]="true" [course]="course"></app-tutor-in-course>
-    </mat-card-content>
-  </mat-grid-tile>
-</mat-grid-list>-->
