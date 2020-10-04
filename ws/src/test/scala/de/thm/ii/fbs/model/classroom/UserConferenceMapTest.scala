@@ -123,7 +123,7 @@ class UserConferenceMapTest {
 
   private val testUser = new User("Test", "User",
     "test.user@example.org", "test", GlobalRole.USER, None, 0)
-  private val testInvitation = BBBInvitation(testUser, 2, "public", mutable.Set.empty[String], "bbb", "1234", "12345678", "87654321")
+  private val testInvitation = BBBInvitation(testUser, 2, true, "bbb", "1234", "12345678", "87654321")
   private val exampleUser = new User("Example", "User",
     "example.user@example.org", "example", GlobalRole.USER, None, 0)
 }
