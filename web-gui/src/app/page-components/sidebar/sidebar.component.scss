@@ -5,6 +5,10 @@
   height: 100%;
 }
 
+mat-sidenav {
+  width: 18%;
+}
+
 mat-toolbar {
   background-color: $cPrimary;
   color: #fff;
@@ -59,10 +63,6 @@ mat-toolbar {
   .logout-icon {
     color:darkred;
   }
-}
-
-.selected {
-  background: lightgray;
 }
 
 .sidenav-group {

@@ -1,4 +1,4 @@
-<mat-sidenav-container class="container" autosize>
+<mat-sidenav-container class="container">
   <mat-sidenav #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
     <div class="sidenav-group">
       <div class="logo">
@@ -10,7 +10,6 @@
       </div>
 
       <mat-nav-list>
-        <p>Main</p>
 <!--        <a mat-list-item *ngIf="isAdmin || isModerator || isDocent" routerLink="/{{userRoleString}}/dashboard" routerLinkActive="selected">-->
 <!--          <mat-icon>dashboard</mat-icon>-->
 <!--          <p>Dashboard</p>-->
