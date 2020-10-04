@@ -78,10 +78,8 @@ class ConferenceSTOMPController {
       case Some(localUser) =>
         if (localUser.role > CourseRole.TUTOR) {
           invitees.foreach(invitee => {
-            Classroom.getParticipants(invitation.courseId).find(p => p.user.equals(invitee)) match {
-              case Some(invitee) =>
-                smt.convertAndSendToUser(invitee.user.username, "/classroom/invite", invitationToJson(invitation))
-              case _ =>
+            if (Classroom.getParticipants(invitation.courseId).exists(p => p.user.username == invitee.username)){
+              smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitationToJson(invitation))
             }
           })
         }
@@ -90,10 +88,8 @@ class ConferenceSTOMPController {
           case Some(globalUser) =>
             if (globalUser.globalRole <= GlobalRole.MODERATOR) {
               invitees.foreach(invitee => {
-                Classroom.getParticipants(invitation.courseId).find(p => p.user.equals(invitee)) match {
-                  case Some(invitee) =>
-                    smt.convertAndSendToUser(invitee.user.username, "/classroom/invite", invitationToJson(invitation))
-                  case _ =>
+                if (Classroom.getParticipants(invitation.courseId).exists(p => p.user.username == invitee.username)){
+                  smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitationToJson(invitation))
                 }
               })
             }
@@ -152,7 +148,9 @@ class ConferenceSTOMPController {
       val courseId = m.get("courseId").asInt()
       val user = this.userService.find(headerAccessor.getUser.getName)
       smt.convertAndSendToUser(user.get.username, "/classroom/conferences",
-        UserConferenceMap.getInvitations(courseId).filter(i => i.visible).map(invitationToJson)
+        UserConferenceMap.getInvitations(courseId)
+          .filter(i => i.visible)
+          .map(invitationToJson)
           .foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
     }
