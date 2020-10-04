@@ -1,24 +1,13 @@
 <div class="container">
+
   <mat-toolbar>
     <span style="flex: 1 1 auto">Kurs/e</span>
     <span style="flex: 1 1 auto"></span>
     <span>Rolle</span>
   </mat-toolbar>
-  <mat-card class="card" *ngFor="let course of userCourses$ | async" (click)="goToCourse(course.course_id)">
-    <span>{{course.course_name}}<br>
-     <span class="docent" *ngIf="course.course_docent.length>1">Dozenten: </span> <span class="docent" *ngIf="course.course_docent.length==1">Dozent/in: </span><i><span class="docent" *ngFor="let docent of course.course_docent; let isLast=last">{{docent.prename}} {{docent.surname}}{{isLast ? '' : ', '}}</span></i>
-    </span>
 
-    <span>
-        <mat-icon role="img">admin_panel_settings</mat-icon>
-        <span *ngIf="course.role_name == 'admin'">Admin</span>
-        <span *ngIf="course.role_name == 'moderator'">Moderator</span>
-        <span *ngIf="course.role_name == 'docent'">Dozent</span>
-        <span *ngIf="course.role_name == 'tutor'">Tutor</span>
-        <span *ngIf="course.role_name == 'student'">Student</span>
-    </span>
-  </mat-card>
+  <app-course-preview *ngFor="let course of registeredCourses$ | async" [data]="course"></app-course-preview>
 
-  <span class="noElements" *ngIf="(userCourses$ | async)?.length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
+  <span class="noElements" *ngIf="(registeredCourses$ | async)?.length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
 </div>
 
