@@ -11,6 +11,10 @@ import {Course} from "../model/Course";
 export class CourseService {
   constructor() { }
 
+  getCourseList(): Observable<Course[]> {
+    return of(COURSE)
+  }
+
   // GET /users/{uid}/courses
   getRegisteredCourses(uid: number): Observable<Course[]>{
     return of(COURSE);
