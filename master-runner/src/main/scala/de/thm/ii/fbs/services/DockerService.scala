@@ -32,7 +32,6 @@ object DockerService {
     Seq("-v", s"${mount._1}:${mount._2}")
   }
 
-
   /**
     * Function to run a Docker Container
     *

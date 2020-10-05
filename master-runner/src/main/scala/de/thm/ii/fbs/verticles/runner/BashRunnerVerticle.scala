@@ -13,15 +13,15 @@ import io.vertx.scala.core.eventbus.Message
 import scala.concurrent.Future
 
 /**
-  * TODO
+  * Object that stores all static vars for the BashRunnerVerticle
   */
 object BashRunnerVerticle {
-  /*Event Bus Address to start an runner*/
+  /** Event Bus Address to start an runner */
   val RUN_ADDRESS = "de.thm.ii.fbs"
 }
 
 /**
-  * TODO
+  * Verticle that starts the BashRunner
   *
   * @author Max Stephan
   */
@@ -73,7 +73,7 @@ class BashRunnerVerticle extends ScalaVerticle {
   }
 
   private def handleError(e: Throwable, submissionId: Int, bashRunner: BashRunnerService): Unit = {
-    logger.error(s"Error on Submission-${submissionId}: ", e)
+    logger.error(s"Error on Submission-$submissionId: ", e)
 
     val result = JsonObject.mapFrom(Map("sid" -> submissionId, "exitCode" -> -1, "stderr" -> s"Runner: ${e.getMessage}"))
     vertx.eventBus().sendFuture(HttpVerticle.SEND_COMPLETION, Option(result))
