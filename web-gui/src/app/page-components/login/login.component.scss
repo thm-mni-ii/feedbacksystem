@@ -1,0 +1,103 @@
+@import '../../../colors';
+
+mat-toolbar {
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.flex-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flex-card-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url("../../../assets/login-back.jpg");
+  background-size: cover;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-button {
+  margin: 5px;
+}
+
+button {
+  width: 100%;
+}
+
+.divider-block {
+  display: flex;
+  justify-content: center;
+  .divider {
+    margin-top: 15px;
+  }
+  div {
+    width: 30px;
+    height: 30px;
+    background-color: $cPrimary;
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    z-index: 1;
+  }
+}
+
+.login-inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-buttons {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  .cas {
+    background-color: green;
+  }
+}
+.login_title {
+  justify-content: center;
+}
+.header {
+  background-color: $cPrimary;
+  width: 100%;
+  display: block;
+  text-align: center;
+  h1, h2 {
+    font-weight: 300;
+    color: #fff;
+    font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+  }
+  h1 {
+    padding-top: 10px;
+    font-size: 56px;
+    line-height: 56px;
+    margin: 15px 5px;
+  }
+  h2 {
+    font-size: 18px;
+    line-height: 28px;
+    margin: 15px 0 25px;
+  }
+}
+
+#cas-login {
+  align-self: center;
+  color: blue;
+  text-decoration: underline;
+}
+
+#cas-login:hover {
+  cursor: pointer;
+}

@@ -1,69 +1,57 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {LoginComponent} from './components/login/login.component';
+
 import {AuthGuard} from './guards/auth.guard';
-import {AdminUserManagementComponent} from './components/admin/admin-user-management/admin-user-management.component';
-import {StudentDashboardComponent} from './components/student/student-dashboard/student-dashboard.component';
-import {StartComponent} from './components/start/start.component';
-import {AdminCheckerComponent} from './components/admin/admin-checker/admin-checker.component';
-import {CoursesComponent} from './components/courses/my-courses/courses.component';
-import {GrantDocentComponent} from './components/courses/grant-docent/grant-docent.component';
-import {GrantTutorComponent} from './components/courses/grant-tutor/grant-tutor.component';
-import {NewCourseComponent} from './components/courses/new-course/new-course.component';
-import {SearchCourseComponent} from './components/courses/search-course/search-course.component';
-import {DetailCourseComponent} from './components/courses/detail-course/detail-course.component';
-import {ProfDashboardComponent} from './components/professor/prof-dashboard/prof-dashboard.component';
+import {IsGeqDocentGuard} from './guards/is-geq-docent';
 import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
-import {IsDocentGuard} from './guards/is-docent.guard';
-import {NotFound404Component} from './components/not-found404/not-found404.component';
-import {ImportCourseComponent} from './components/courses/import-course/import-course.component';
-import {ChangePasswdComponent} from './components/users/change-passwd/change-passwd.component';
-import {GuestGuard} from './guards/guest.guard';
-import {CourseResultDetailsComponent} from './components/courses/course-result-details/course-result-details.component';
-import {TaskAnalyzeSubmissionsComponent} from './components/courses/task-analyze-submissions/task-analyze-submissions.component';
-import {CourseProfDetailsComponent} from './components/courses/detail-course/course-prof-details/course-prof-details.component';
-import {IsGeqDocentGuard} from './guards/is-geq-docent';
-import {CourseTasksOverviewComponent} from './components/courses/course-tasks-overview/course-tasks-overview.component';
-import {CourseTicketsOverviewComponent} from './components/courses/course-tickets-overview/course-tickets-overview.component';
 
+import {ChangePasswordComponent} from "./page-components/change-password/change-password.component";
+import {MyCoursesComponent} from "./page-components/my-courses/my-courses.component";
+import {CourseAuthorizationComponent} from "./page-components/course-authorization/course-authorization.component";
+import {NewCourseComponent} from "./page-components/new-course/new-course.component";
+import {SearchCoursesComponent} from "./page-components/search-courses/search-courses.component";
+import {ImportCourseComponent} from "./page-components/import-course/import-course.component";
+import {CourseDetailComponent} from "./page-components/course-detail/course-detail.component";
+import {ConferenceComponent} from "./page-components/conference/conference.component";
+import {UserManagementComponent} from "./page-components/user-management/user-management.component";
+import {NotFoundComponent} from "./page-components/not-found/not-found.component";
+import {LoginComponent} from "./page-components/login/login.component";
+import {SidebarComponent} from "./page-components/sidebar/sidebar.component";
+import {TaskDetailComponent} from "./page-components/task-detail/task-detail.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {
-    path: '', component: StartComponent, canActivate: [AuthGuard], children: [
-      {path: 'courses/user', component: CoursesComponent},
-      {path: 'courses/docent', component: GrantDocentComponent, canActivate: [ModeratorGuard]},
-      {path: 'courses/tutor', component: GrantTutorComponent, canActivate: [DocentGuard]},
+    path: '', component: SidebarComponent, canActivate: [AuthGuard], children: [
+      {path: 'courses', component: MyCoursesComponent},
+      {path: 'courses/authorization', component: CourseAuthorizationComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
-      {path: 'courses/search', component: SearchCourseComponent},
+      {path: 'courses/search', component: SearchCoursesComponent},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
-      {path: 'courses/:id', component: CourseTasksOverviewComponent},
-      {path: 'courses/:id/tickets', component: CourseTicketsOverviewComponent},
-      {path: 'courses/:id/task/:taskid', component: DetailCourseComponent},
-      {path: 'courses/:id/result', component: CourseResultDetailsComponent},
-      {path: 'courses/:id/task/:taskid/analyze', component: TaskAnalyzeSubmissionsComponent},
+      {path: 'courses/:id', component: CourseDetailComponent},
+      {path: 'courses/:id/tickets', component: ConferenceComponent},
+      {path: 'courses/:id/task/:taskid', component: TaskDetailComponent},
 
       // Admin
-      {path: 'admin/dashboard', component: ProfDashboardComponent, canActivate: [AdminGuard]},
-      {path: 'admin/user-management', component: AdminUserManagementComponent, canActivate: [AdminGuard]},
-      {path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
+      {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},
+      //{path: 'admin/checker', component: AdminCheckerComponent, canActivate: [AdminGuard]},
       // {path: 'admin/testsystems', component: ConnectedSystemsComponent, canActivate: [AdminGuard]},
       // {path: 'admin/settings', component: AdminSettingsComponent, canActivate: [AdminGuard]},
 
       // Users self settings
-      {path: 'users/passwd', component: ChangePasswdComponent, canActivate: [GuestGuard]},
+      {path: 'users/password', component: ChangePasswordComponent, canActivate: [AuthGuard]},
 
       // Student
-      {path: 'student/dashboard', component: StudentDashboardComponent},
+      //{path: 'student/dashboard', component: StudentDashboardComponent},
 
       // Prof
-      {path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]},
-      {path: 'docent/dashboard/task/:taskid/user/:userid', component: CourseProfDetailsComponent, canActivate: [IsGeqDocentGuard]},
+      //{path: 'docent/dashboard', component: ProfDashboardComponent, canActivate: [IsDocentGuard]},
+      //{path: 'docent/dashboard/task/:taskid/user/:userid', component: CourseProfDetailsComponent, canActivate: [IsGeqDocentGuard]},
 
       // General Sites
-      {path: '404', component: NotFound404Component},
+      {path: '404', component: NotFoundComponent},
     ]
   },
   { path: '**', redirectTo: '404' }

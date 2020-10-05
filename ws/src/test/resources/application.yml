@@ -1,0 +1,4 @@
+services:
+  bbb:
+    service-url: http://localhost:5080/bbb
+    shared-secret: 8Dsupersecurekeydf0

@@ -1,1 +1,13 @@
-<p>search-courses works!</p>
+<div class="container">
+  <mat-form-field class="search" appearance="outline">
+    <mat-label>Kurs suchen</mat-label>
+    <input type="text" aria-label="Kurs suchen" matInput [formControl]="control">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-card class="card" *ngFor="let course of filteredCourses | async" (click)="goToCourse(course.id)">
+    <span>{{course.name}}</span>
+  </mat-card>
+
+  <span class="noElements" *ngIf="(courses | async).length == 0">Es gibt noch keiner Kurse denen Sie beitreten können.</span>
+</div>

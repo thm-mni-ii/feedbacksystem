@@ -27,6 +27,8 @@ class User(val prename: String, val surname: String, val email: String,
     */
   override def equals(other: Any): Boolean = other match {
     case that: User => username.equals(that.username)
+    case that: Principal => username.equals(that.getName)
+    case that: Participant => username.equals(that.user.username)
     case _ => false
   }
 
