@@ -33,7 +33,7 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT name, media_type, description, deadline, course_id FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, media_type, description, deadline, course_id FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
