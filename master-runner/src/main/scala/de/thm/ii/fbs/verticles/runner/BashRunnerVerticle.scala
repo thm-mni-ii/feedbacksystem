@@ -50,7 +50,7 @@ class BashRunnerVerticle extends ScalaVerticle {
       FileService.addUploadDir(runArgs)
       bashRunner.checkFiles()
       bashRunner.prepareRunnerStart()
-      logger.info(s"${runArgs.runner.mainFile}, ${runArgs.runner.secondaryFile}")
+
       val dockerCmd = bashRunner.getDockerCmd
 
       logger.info(s"Submission-${runArgs.submission.id}: start Docker-Container")
@@ -68,14 +68,14 @@ class BashRunnerVerticle extends ScalaVerticle {
       bashRunner.cleanUp()
     } catch {
       case e: Exception =>
-        handleError(e, runArgs.submission.id, bashRunner)
+        handleError(e, bashRunner)
     }
   }
 
-  private def handleError(e: Throwable, submissionId: Int, bashRunner: BashRunnerService): Unit = {
-    logger.error(s"Error on Submission-$submissionId: ", e)
+  private def handleError(e: Throwable, bashRunner: BashRunnerService): Unit = {
+    logger.error(s"Error on Submission-${bashRunner.submission.id}: ", e)
 
-    val result = JsonObject.mapFrom(Map("sid" -> submissionId, "exitCode" -> -1, "stderr" -> s"Runner: ${e.getMessage}"))
+    val result = JsonObject.mapFrom(bashRunner.transformResult(-1, "", s"Runner: ${e.getMessage}"))
     vertx.eventBus().sendFuture(HttpVerticle.SEND_COMPLETION, Option(result))
     bashRunner.cleanUp()
   }

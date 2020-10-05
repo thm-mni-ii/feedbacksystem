@@ -42,7 +42,7 @@ paths:
 
         "400":
           description: Bad Request
-  /results/{sid}:
+  /results/{sid}/{ccid}:
     post:
       tags:
         - Runner Extern
@@ -51,6 +51,12 @@ paths:
         - name: sid
           in: path
           description: ID of submission
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: Checker (runner) configuration id
           required: true
           schema:
             type: integer
@@ -72,8 +78,12 @@ components:
       type: object
       required:
         - type
+        - id
         - mainFileLocation
       properties:
+        id:
+          type: integer
+          description: The runner Configuration id (Currently checker configuration id)
         type:
           $ref: "#/components/schemas/runnerType"
         mainFileLocation:
@@ -106,9 +116,6 @@ components:
         solutionFileLocation:
           type: string
           description: The relativ path (form the upload-dir) to the solution File
-        isInfo:
-          type: boolean
-          description: Define if the submission is an information
     user:
       type: object
       required:
