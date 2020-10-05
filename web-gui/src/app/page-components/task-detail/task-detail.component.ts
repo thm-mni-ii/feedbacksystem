@@ -48,6 +48,9 @@ export class TaskDetailComponent implements OnInit {
   submissions: Submission[];
   token: JWTToken;
   deadlineTask: boolean;
+  submissionStatus: boolean;
+
+
 
   // alt
   courseDetail: DetailedCourseInformationSingleTask = <DetailedCourseInformationSingleTask>{};
@@ -58,14 +61,15 @@ export class TaskDetailComponent implements OnInit {
   submissionAsFile: string;
 
   courseID: number;
-  breakpoint: number;
   taskID: number;
 
   ngOnInit() {
     this.submissionAsFile = '';
     this.processing = false;
-    this.submissionData = '';
+    this.submissionData = null;
     this.deadlineTask = false;
+    this.submissionStatus = false;
+
 
     // Get course id from url and receive data
     this.route.params.subscribe(
@@ -76,6 +80,7 @@ export class TaskDetailComponent implements OnInit {
       }, error => this.router.navigate(['404'])
     );
 
+      this.submissionStatus = this.getStatus();
       this.submissionAsFile = 'task';
       this.processing = false;
       // this.triggerExternalDescriptionIfNeeded(this.courseTask, false);
@@ -91,7 +96,6 @@ export class TaskDetailComponent implements OnInit {
       }
     }, 1000);
 
-    this.breakpoint = (window.innerWidth <= 400) ? 1 : 3; // TODO: whats this for?
   }
 
   /**
@@ -127,6 +131,11 @@ export class TaskDetailComponent implements OnInit {
     this.token = this.authService.getToken()
   }
 
+  // TODO: This is to display if the task has been done or not
+  private getStatus(): boolean {
+    return false;
+  }
+
   private reachedDeadline(now: number, deadline: number): boolean {
     return now > deadline;
   }
@@ -137,93 +146,79 @@ export class TaskDetailComponent implements OnInit {
     else return "file"
   }
 
-  // TODO: can this be deleted?
-  // private externalInfoPoller(task: CourseTask, step: number) {
-  //   if (step > 10) {
-  //     this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
-  //     return;
-  //   }
-  //   this.db.getTaskResult(task.task_id).toPromise()
-  //     .then((loadedTask: CourseTask) => {
-  //       if (loadedTask.external_description != null) {
-  //         this.courseTask = loadedTask;
-  //         if (this.externalInfoIsForm(loadedTask)) { this.submissionAsFile = 'choice'; }
-  //       } else {
-  //         setTimeout(() => {
-  //           this.externalInfoPoller(task, step + 1);
-  //         }, 5000);
-  //       }
-  //     });
-  // }
-  //
-  // externalInfoIsForm(task: CourseTask) {
-  //   if (!task.load_external_description || !task.external_description) {
-  //     return false;
-  //   } else {
-  //     try {
-  //       return JSON.parse(task.external_description);
-  //     } catch (e) {
-  //       return false;
-  //     }
-  //   }
-  // }
-  //
-  // public triggerExternalDescriptionIfNeeded(task: CourseTask, force: Boolean) {
-  //   if (force) {
-  //     task.external_description = '';
-  //   }
-  //   if (task.load_external_description && task.external_description == null || force) {
-  //     this.db.triggerExternalInfo(task.task_id, task.testsystems[0].testsystem_id).toPromise().then(() => {
-  //       this.externalInfoPoller(task, 0);
-  //     }).catch(() => {
-  //       this.snackbar.open('Leider konnte keine externe Aufgabenstellung geladen werden.', 'OK', {duration: 5000});
-  //     });
-  //   }
-  // }
-  //
-  onResize(event) {
-    this.breakpoint = (event.target.innerWidth <= 400) ? 1 : 3;
+  /**
+   * Submission of user solution
+   */
+  submission() {
+    console.log(this.submissionData)
+    if (this.submissionData == null) {
+      console.log("HI");
+      this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + this.task.name + ' abgegeben', 'Ups!');
+      return;
+    } else {
+      // TODO: implement submission, especially the result!
+        this.submit();
+      this.snackbar.open("You submitted something!", "Yay.");
+    }
+
+    // TODO: is this important?
+    // if user submits but there is a pending submission
+    // if (currentTask.submit_date && this.isInFetchingResultOfTasks(currentTask)) {
+    //   this.snackbar.open('Für Aufgabe "' + currentTask.task_name +
+    //     '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
+    //     .onAction()
+    //     .subscribe(() => {
+    //       this.submitTask(currentTask);
+    //     });
+    // } else {
+    //   this.submitTask(currentTask);
+    // }
   }
 
-  // TODO: can this be deleted? Should be in course-detail
-  // public deleteCourse(courseDetail: DetailedCourseInformation) {
-  //   this.dialog.open(CourseDeleteModalComponent, {
-  //     data: {coursename: courseDetail.course_name, courseID: courseDetail.course_id}
-  //   }).afterClosed().pipe(
-  //     flatMap(value => {
-  //       if (value.exit) {
-  //         return this.db.deleteCourse(courseDetail.course_id);
-  //       }
-  //     })
-  //   )
-  //     .toPromise()
-  //     .then( (value: Succeeded) => {
-  //       if (typeof value == 'undefined') {
-  //         return ;
-  //       }
-  //       if (value.success) {
-  //         this.snackbar.open('Kurs mit der ID ' + courseDetail.course_id + ' wurde gelöscht', 'OK', {duration: 5000});
-  //       } else {
-  //         this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.', 'OK', {duration: 5000});
-  //       }
-  //     })
-  //     .catch(() => {
-  //       this.snackbar.open('Leider konnte der Kurs ' + courseDetail.course_id + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung', 'OK', {duration: 5000});
-  //     })
-  //     .then(() => {
-  //       this.router.navigate(['courses']);
-  //     });
-  // }
-  //
+  private submit() {
+    this.processing = true;
+
+    this.taskService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
+      res => {
+        // TODO: handle result here
+        this.submissionStatus = true;
+      }, error => {
+        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.");
+      }
+    );
+    // if (res.success) {
+    //     this.db.getTaskResult(currentTask.task_id).pipe(
+    //       flatMap(taskResult => {
+    //         this.courseTask = taskResult;
+    //         if (this.isInFetchingResultOfTasks(taskResult)) {
+    //           return throwError('No result yet');
+    //         }
+    //         return of(taskResult);
+    //       }),
+    //       retryWhen(errors => errors.pipe(
+    //         delay(5000),
+    //         take(120)))
+    //     ).subscribe(taskResult => {
+    //       this.processing = false;
+    //       this.courseTask = taskResult;
+    //     });
+
+  }
+
+
   public isAuthorized() {
     return true // TODO
     // return this.userRole === 'docent' || this.userRole === 'admin' || this.userRole === 'moderator' || this.userRole === 'tutor';
   }
 
+  private updateSubmissionContent(data: any) {
+    this.submissionData = data['content'];
+  }
+
   public runAllTaskAllUsers() {
     this.taskService.restartAllSubmissions(1,1,1,1)
   }
-  //
+
   // reRunTask(task: CourseTask) {
   //   this.submissionData = task.submission_data;
   //   this.submitTask(task);
@@ -242,188 +237,47 @@ export class TaskDetailComponent implements OnInit {
   //   }
   // }
   //
-  // private submitTask(currentTask: CourseTask) {
-  //   this.processing = true;
-  //   this.courseTask.submission_data = '';
-  //   this.db.submitTask(currentTask.task_id, this.submissionData).subscribe(res => {
-  //     this.submissionData = '';
-  //
-  //     if (res.success) {
-  //       this.db.getTaskResult(currentTask.task_id).pipe(
-  //         flatMap(taskResult => {
-  //           this.courseTask = taskResult;
-  //           if (this.isInFetchingResultOfTasks(taskResult)) {
-  //             return throwError('No result yet');
-  //           }
-  //           return of(taskResult);
-  //         }),
-  //         retryWhen(errors => errors.pipe(
-  //           delay(5000),
-  //           take(120)))
-  //       ).subscribe(taskResult => {
-  //         this.processing = false;
-  //         this.courseTask = taskResult;
-  //       });
-  //
-  //     }
-  //   });
-  // }
 
-  /**
-   * Opens dialog for creation of new task
-   * @param course The course data for dialog
-   */
-  // createTask(course: DetailedCourseInformation) {
-  //   this.dialog.open(TaskNewDialogComponent, {
-  //     height: 'auto',
-  //     width: 'auto',
-  //     data: {courseID: course.course_id}
-  //   }).afterClosed().pipe(
-  //     flatMap((value) => {
-  //       if (value.success) {
-  //         this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-  //       }
-  //       return this.db.getCourseDetailOfTask(course.course_id, this.taskID);
-  //     })
-  //   ).subscribe(course_detail => {
-  //     this.courseTask = course_detail.task;
-  //
-  //     if (typeof this.submissionAsFile == 'undefined') {
-  //       if (this.externalInfoIsForm(this.courseTask)) {
-  //         this.submissionAsFile = 'choice';
-  //       } else {
-  //         this.submissionAsFile = 'text';
-  //       }
-  //     }
-  //   });
-  // }
 
   /**
    * Opens dialog to update task
    * @param task The task to update
    */
-  // updateTask(task: CourseTask) {
-  //   this.dialog.open(TaskNewDialogComponent, {
-  //     height: 'auto',
-  //     width: 'auto',
-  //     data: {
-  //       task: task
-  //     }
-  //   }).afterClosed().pipe(
-  //     flatMap((value: SucceededUpdateTask) => {
-  //       if (value.success) {
-  //         this.snackbar.open('Update der Aufgabe ' + task.task_name + ' erfolgreich', 'OK', {duration: 3000});
-  //       }
-  //       return this.db.getCourseDetailOfTask(this.courseDetail.course_id, this.taskID);
-  //     })
-  //   ).subscribe(course_detail => {
-  //     this.courseTask = course_detail.task;
-  //   });
-  // }
-  //
-  // /**
-  //  * Opens snackbar and asks
-  //  * if docent/tutor really wants to delete
-  //  * this task
-  //  * @param task The task that will be deleted
-  //  */
-  // deleteTask(task: CourseTask) {
-  //   this.dialog.open(TaskDeleteModalComponent, {
-  //     data: {taskname: task.task_name}
-  //   }).afterClosed().pipe(
-  //     flatMap(value => {
-  //       if (value.exit) {
-  //         return this.db.deleteTask(task.task_id);
-  //       }
-  //     })
-  //   ).toPromise()
-  //     .then( (value: Succeeded) => {
-  //       if (value.success) {
-  //         this.snackbar.open('Aufgabe ' + task.task_name + ' wurde gelöscht', 'OK', {duration: 3000});
-  //         this.loadCourseDetailsTasks();
-  //       } else {
-  //         this.snackbar.open('Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       this.snackbar.open('Es gab ein Datenbankfehler, Aufgabe ' + task.task_name + ' konnte nicht gelöscht werden', 'OK', {duration: 3000});
-  //     });
-  // }
-  //
-  // /**
-  //  * Get file user wants to submit
-  //  * @param file The file user submits
-  //  * @param currentTask The current task to get file from
-  //  */
-  // getSubmissionFile(file: File, currentTask: CourseTask) {
-  //   this.submissionData = file;
-  // }
-  //
-  // updateSubmissionContent(payload: any) {
-  //   this.submissionData = payload['content'];
-  // }
-  //
-  // /**
-  //  * Submission of user solution
-  //  * @param courseID Current course
-  //  * @param currentTask The current task for submission
-  //  */
-  // submission(courseID: number, currentTask: CourseTask) {
-  //   if (this.submissionData == null) {
-  //     this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + currentTask.task_name + ' abgegeben', 'Ups!');
-  //     return;
-  //   }
-  //
-  //   // if user submits but there is a pending submission
-  //   if (currentTask.submit_date && this.isInFetchingResultOfTasks(currentTask)) {
-  //     this.snackbar.open('Für Aufgabe "' + currentTask.task_name +
-  //       '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
-  //       .onAction()
-  //       .subscribe(() => {
-  //         this.submitTask(currentTask);
-  //       });
-  //   } else {
-  //     this.submitTask(currentTask);
-  //   }
-  // }
-  //
-  // /**
-  //  * Opens dialog to update course information
-  //  */
-  // updateCourse() {
-  //   this.dialog.open(CourseUpdateDialogComponent, {
-  //     height: '600px',
-  //     width: '800px',
-  //     data: {data: this.courseDetail}
-  //   }).afterClosed().subscribe((value: Succeeded) => {
-  //     location.hash = '';
-  //     if (value.success) {
-  //       this.db.getCourseDetailOfTask(this.courseID, this.taskID).subscribe(courses => {
-  //         this.courseDetail = courses;
-  //         this.titlebar.emitTitle(this.courseDetail.course_name);
-  //       });
-  //     }
-  //   });
-  // }
+  updateTask() {
+    this.dialog.open(TaskNewDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {
+        task: this.task
+      }
+    }).afterClosed().subscribe(
+      res => {
+        if (res.success){
+          this.snackbar.open('Update der Aufgabe ' + this.task.name + ' erfolgreich', 'OK', {duration: 3000});
+          this.getInformation(this.course.id, this.task.id);
+        }
+      });
+  }
 
-  // /**
-  //  * If user gets course directly from link
-  //  */
-  // subscribeCourse() {
-  //   this.db.subscribeCourse(this.courseID).pipe(
-  //     flatMap(success => {
-  //       if (success.success) {
-  //         this.snackbar.open('Kurs ' + this.courseDetail.course_name + ' beigetreten', 'OK', {duration: 3000});
-  //         return this.db.getCourseDetailOfTask(this.courseID, this.taskID);
-  //       }
-  //     })
-  //   ).subscribe(courseDetail => {
-  //     this.courseDetail = courseDetail;
-  //     this.courseTask = courseDetail.task;
-  //   });
-  // }
+  /**
+   * Opens snackbar and asks
+   * if docent/tutor really wants to delete
+   * this task
+   * @param task The task that will be deleted
+   */
+  deleteTask() {
+    this.dialog.open(TaskDeleteModalComponent, {
+      data: {taskname: this.task.name}
+    }).afterClosed().subscribe( value => {
+      if (value.exit){
+        this.taskService.deleteTask(this.course.id, this.task.id); // TODO: Should send back status (Fehlerbehandlung)
+        this.router.navigate(['courses',this.course.id]);
+      }
+    });
+  }
 
   isInRole(roles: string[]): Boolean {
     return roles.indexOf(this.userRole) >= 0;
   }
+
 }
