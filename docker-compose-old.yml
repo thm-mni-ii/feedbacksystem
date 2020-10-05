@@ -18,11 +18,22 @@ services:
   nodeenv:
     build: node-container
 
+  mysql2:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    volumes:
+      - ./data/mysql2:/var/lib/mysql
+
   ws:
     build: ws
     restart: always
     depends_on:
       - mysql1
+      - kafka1
+      - zoo1
     ports:
       - "443:443"
     volumes:
@@ -42,6 +53,21 @@ services:
       - JITSI_USER=fbs
       - JWT_SECRET=8Dsupersecurekeydf0
       - BBB_SECRET
+
+  sqlchecker:
+    build: sql-checker
+    depends_on:
+      - mysql2
+      - kafka1
+      - zoo1
+      - ws
+    environment:
+      KAFKA_ADDRESS: kafka1:9092
+      MYSQL_URI: jdbc:mysql://mysql2:3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    volumes:
+      - ./data/upload-dir:/upload-dir
 
   master-runner:
     build: master-runner
