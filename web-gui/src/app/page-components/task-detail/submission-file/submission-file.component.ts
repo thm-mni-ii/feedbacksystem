@@ -20,7 +20,7 @@ export class SubmissionFileComponent implements OnInit {
   }
 
   updateSubmissionFile(event) {
-    this.submissionFile = event.addedFiles
-    this.update.emit({taskid: this.task.id, content: this.submissionFile[0]})
+    this.submissionFile = event['content'];
+    this.update.emit({content: this.submissionFile})
   }
 }

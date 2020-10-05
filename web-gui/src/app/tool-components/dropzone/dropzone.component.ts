@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Task} from "../../model/Task";
 
 @Component({
   selector: 'app-dropzone',
@@ -6,9 +7,10 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./dropzone.component.scss']
 })
 export class DropzoneComponent implements OnInit {
+  @Input() usage: String;
+  @Output() update: EventEmitter<any> = new EventEmitter<any>();
+
   private submissionFile: any;
-  private update: any;
-  private task: any;
 
   constructor() { }
 
@@ -17,7 +19,7 @@ export class DropzoneComponent implements OnInit {
 
   updateSubmissionFile(event) {
     this.submissionFile = event.addedFiles
-    this.update.emit({taskid: this.task.task_id, content: this.submissionFile[0]})
+    this.update.emit({content: this.submissionFile[0]})
     // TODO: muss noch generisch gemacht werden
   }
 }
