@@ -1,0 +1,12 @@
+{
+  "HttpVerticle": {
+    "port": 8081,
+    "result.server": {
+      "port": 8081,
+      "host": "localhost"
+    }
+  },
+  "BashRunnerVerticle": {
+    "instances": 10
+  }
+}

@@ -1,15 +1,17 @@
-package de.thm.ii.fbs.security
+package de.thm.ii.fbs.util
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+
 import javax.xml.bind.DatatypeConverter
 
 /**
   * Secrets holds static data used for Security operations
+  *
   * @author Benjamin Manns
   */
 object Secrets {
-  /** currently constant but later dynamicall content used for SUPER_SECRET_KEY*/
+  /** currently constant but later dynamicall content used for SUPER_SECRET_KEY */
   private val SUPER_SECRET_KEY_PLAIN: String = "uigbduhegafudegufqu8o3q4tgru4ieubfiel"
 
   /** Base64 Binary Key */
@@ -28,6 +30,7 @@ object Secrets {
 
   /**
     * creates a random String based contain current time and random String
+    *
     * @author Benjamin Manns
     * @return a random String
     */
@@ -43,6 +46,7 @@ object Secrets {
 
   /**
     * creates a random sha1 string based contain current time and random String
+    *
     * @author Benjamin Manns
     * @return a random SHA
     */

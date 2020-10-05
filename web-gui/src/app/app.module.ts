@@ -24,7 +24,6 @@ import {CookieService} from 'ngx-cookie-service';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {MarkdownModule} from 'ngx-markdown';
-import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 //import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
@@ -161,8 +160,6 @@ export const httpInterceptorProviders = [
     MarkdownModule.forRoot(),
     MatDatepickerModule,
     MatNativeDateModule,
-    OwlDateTimeModule,
-    OwlNativeDateTimeModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
