@@ -11,6 +11,10 @@ import {Course} from "../model/Course";
 export class CourseService {
   constructor() { }
 
+  getCourse(cid: number): Observable<Course> {
+    return of(COURSE.pop())
+  }
+
   getCourseList(): Observable<Course[]> {
     return of(COURSE)
   }
