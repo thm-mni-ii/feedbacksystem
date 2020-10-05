@@ -4,7 +4,7 @@
     <button mat-flat-button color="primary" [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><mat-icon >dashboard</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
-    <button mat-flat-button color="primary" color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>
+<!--    <button mat-flat-button color="primary" color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>-->
     <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
@@ -17,8 +17,7 @@
     <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
 
-  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>
-
+<!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
   <mat-card [routerLink]="'/courses/'+courseID+'/task/'+task.task_id" *ngFor="let task of tasks" class="task-container" id="{{task.task_id}}">
     <span>{{task.task_name}}</span>
     <span class="meta">
