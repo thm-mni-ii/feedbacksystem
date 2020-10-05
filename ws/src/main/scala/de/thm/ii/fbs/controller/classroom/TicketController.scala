@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User, classroom}
 import de.thm.ii.fbs.model.classroom.{Ticket, Tickets}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.security.CourseAuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +24,8 @@ class TicketController {
   implicit private val userService: UserService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val courseAuthService: CourseAuthService = null
 
   private val courseIdLiteral = "courseId"
 
@@ -45,7 +48,7 @@ class TicketController {
   @MessageMapping(value = Array("/classroom/tickets"))
   def listAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val courseIdOption = m.retrive(courseIdLiteral).asInt()
-    val userOption = this.getGlobalUser(headerAccessor)
+    val userOption = courseAuthService.getGlobalUser(headerAccessor)
 
     if (courseIdOption.isEmpty) {
       throw new MessagingException("Invalid msg: " + m)
@@ -54,7 +57,7 @@ class TicketController {
     val courseId = courseIdOption.get
     val user = userOption.get
 
-    val response = if (this.isPrivilegedInCourse(courseId, user)) {
+    val response = if (courseAuthService.isPrivilegedInCourse(courseId, user)) {
       this.getTicketsForCourse(courseId)
     } else {
       this.getTicketsByUser(courseId, user)
@@ -94,7 +97,7 @@ class TicketController {
       throw  new Exception("Priority must be between 0 and 11")
     }
     val ticketOpt = for {
-      user <- this.getCourseUser(headerAccessor, m)
+      user <- courseAuthService.getCourseUser(headerAccessor, m)
       courseId <- m.retrive(courseIdLiteral).asInt()
       title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
@@ -116,7 +119,7 @@ class TicketController {
   @MessageMapping(value = Array("/classroom/ticket/update"))
   def updateTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
-      user <- this.getCourseUser(headerAccessor, m)
+      user <- courseAuthService.getCourseUser(headerAccessor, m)
       id <- m.retrive("id").asText()
       courseId <- m.retrive(courseIdLiteral).asInt()
       title <- m.retrive("title").asText()
@@ -135,7 +138,7 @@ class TicketController {
     ticketAndUser match {
       case Some(v) =>
         val (ticket, user) = v
-        if (ticket.creator.username == user.username || this.isPrivilegedInCourse(ticket.courseId, user)) {
+        if (ticket.creator.username == user.username || courseAuthService.isPrivilegedInCourse(ticket.courseId, user)) {
           Tickets.update(ticket)
         } else {
           throw new MessagingException("User is not allowed to edit this ticket")
@@ -152,7 +155,7 @@ class TicketController {
   @MessageMapping(value = Array("/classroom/ticket/remove"))
   def removeTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val ticketAndUser = for {
-      user <- this.getCourseUser(headerAccessor, m)
+      user <- courseAuthService.getCourseUser(headerAccessor, m)
       id <- m.retrive("id").asText()
       ticket <- Tickets.getTicket(id)
     } yield (ticket, user)
@@ -160,7 +163,7 @@ class TicketController {
     ticketAndUser match {
       case Some(v) =>
         val (ticket, user) = v
-        if (ticket.creator.username == user.username || this.isPrivilegedInCourse(ticket.courseId, user)) {
+        if (ticket.creator.username == user.username || courseAuthService.isPrivilegedInCourse(ticket.courseId, user)) {
           Tickets.remove(ticket)
         } else {
           throw new MessagingException("User is not allowed to remove this ticket")
@@ -186,19 +189,4 @@ class TicketController {
     .put(courseIdLiteral, ticket.courseId)
     .put("timestamp", ticket.timestamp)
     .put("queuePosition", ticket.queuePosition)
-
-  private def getGlobalUser(headerAccessor: SimpMessageHeaderAccessor) =
-    this.userService.find(headerAccessor.getUser.getName)
-
-  private def getCourseUser(headerAccessor: SimpMessageHeaderAccessor, payload: JsonNode) =
-    this.courseRegistrationService.getParticipants(payload.retrive(courseIdLiteral).asInt().get)
-      .find(_.user.username == headerAccessor.getUser.getName).map(_.user)
-
-  private def isPrivilegedInCourse(courseID: Int, user: User) =
-    if (user.globalRole >= GlobalRole.MODERATOR) {
-      true
-    } else {
-      val courseUser = this.courseRegistrationService.getParticipants(courseID).find(_.user.id == user.id).get
-      courseUser.role >= CourseRole.TUTOR
-    }
 }
