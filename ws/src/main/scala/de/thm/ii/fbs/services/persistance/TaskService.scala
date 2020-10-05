@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.persistance
 
+import java.math.BigInteger
 import java.sql
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
@@ -24,7 +25,7 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT name, media_type, description, deadline, course_id FROM task WHERE course_id = ?", (res, _) => parseResult(res), cid)
+    DB.query("SELECT task_id, name, media_type, description, deadline, course_id FROM task WHERE course_id = ?", (res, _) => parseResult(res), cid)
 
   /**
     * Lookup task by id
@@ -32,7 +33,7 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT name, media_type, description, deadline, course_id FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, media_type, description, deadline, course_id FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
@@ -45,7 +46,7 @@ class TaskService {
     DB.insert("INSERT INTO task (name, media_type, description, deadline, course_id) VALUES (?, ?, ?, ?, ?);",
       task.name, task.mediaType, task.description,
       new sql.Date(task.deadline.getTime), cid)
-      .map(gk => gk.getInt(1))
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
       case None => throw new SQLException("Task could not be created")

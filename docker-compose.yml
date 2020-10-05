@@ -32,7 +32,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
-      MYSQL_DATABASE: submissionchecker
+      MYSQL_DATABASE: fbs
     volumes:
       - ./data/mysql1:/var/lib/mysql
     ports:

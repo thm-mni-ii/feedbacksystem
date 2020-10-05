@@ -12,10 +12,11 @@ import org.springframework.stereotype.Component
 @Component
 class StorageService {
   @Value("${storage.uploadDir}")
-  private def uploadDir(): String = null
+  private val uploadDir: String = null
+  private def uploadDirPath: Path = Path.of(uploadDir)
 
-  private def tasksDir(tid: Int) = Path.of(uploadDir()).resolve("tasks").resolve(String.valueOf(tid))
-  private def submissionDir(sid: Int) = Path.of(uploadDir()).resolve("submissions").resolve(String.valueOf(sid))
+  private def tasksDir(tid: Int) = uploadDirPath.resolve("tasks").resolve(String.valueOf(tid))
+  private def submissionDir(sid: Int) = uploadDirPath.resolve("submissions").resolve(String.valueOf(sid))
 
   /**
     * Store (replace if exists) the main file of a task

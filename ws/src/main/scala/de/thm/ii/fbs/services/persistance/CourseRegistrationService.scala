@@ -42,7 +42,8 @@ class CourseRegistrationService {
     * @return List of courses
     */
   def getRegisteredCourses(uid: Int, ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, name, description, visible FROM course WHERE user_id = ?" + (if (ignoreHidden) " AND visible = 1" else ""),
+    "SELECT course_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = ?"
+      + (if (ignoreHidden) " AND visible = 1" else ""),
     (res, _) => parseCourseResult(res), uid)
 
   /**
@@ -51,7 +52,8 @@ class CourseRegistrationService {
     * @return List of courses
     */
   def getParticipants(cid: Int): List[Participant] = DB.query(
-    "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) where deleted = 0",
+    "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) where deleted = 0" +
+      " and course_id = ?",
     (res, _) => Participant(parseUserResult(res), CourseRole.parse(res.getInt("course_role"))), cid)
 
   private def parseCourseResult(res: ResultSet): Course = Course(

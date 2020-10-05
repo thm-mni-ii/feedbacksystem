@@ -49,7 +49,7 @@ spring:
       max-active: 50
       max-wait: 10000
       test-on-borrow: true
-    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/submissionchecker?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false
     username: ${MYSQL_USER:root}
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect

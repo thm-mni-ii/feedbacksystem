@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.persistance
 
+import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 
 import de.thm.ii.fbs.model.{GlobalRole, User}
@@ -60,10 +61,10 @@ class UserService {
     * @return The created user object
     */
   def create(user: User, password: String): User = {
-    DB.insert("INSERT INTO user (prename, surname, email, username, alias, global_role, password) VALUES (?,?,?,?,?,?);",
+    DB.insert("INSERT INTO user (prename, surname, email, username, alias, global_role, password) VALUES (?,?,?,?,?,?,?);",
       user.prename, user.surname, user.email, user.username, user.alias.orNull, user.globalRole.id,
       if (password == null) null else Hash.hash(password))
-      .map(gk => gk.getInt(1))
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(user) => user
       case None => throw new SQLException("User could not be created")
