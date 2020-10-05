@@ -54,7 +54,6 @@ export class CourseDetailComponent implements OnInit {
       param => {
         this.courseID = param.id;
         this.loadTasksFromCourse(param.id);
-
       }
     );
   }
@@ -64,6 +63,7 @@ export class CourseDetailComponent implements OnInit {
       this.courseDetail = value;
       this.tasks = value.tasks;
       this.userRole = value.role_name;
+      this.titlebar.emitTitle(this.courseDetail.course_name);
     });
   }
 

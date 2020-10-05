@@ -1,6 +1,7 @@
 <div class="container">
   <div class="actions">
-    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', 'user']" matTooltip="Zurück zur Kursübersicht"><mat-icon >arrow_back</mat-icon></button>
+    <button mat-flat-button color="primary" [routerLink]="['/', 'courses']" matTooltip="Zurück zur Kursübersicht"><mat-icon >arrow_back</mat-icon></button>
+    <button mat-flat-button color="primary" [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><mat-icon >dashboard</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
     <button mat-flat-button color="primary" color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>
@@ -16,7 +17,6 @@
     <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
 
-  <h2>{{courseDetail?.course_name}}</h2>
   <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>
 
   <mat-card [routerLink]="'/courses/'+courseID+'/task/'+task.task_id" *ngFor="let task of tasks" class="task-container" id="{{task.task_id}}">

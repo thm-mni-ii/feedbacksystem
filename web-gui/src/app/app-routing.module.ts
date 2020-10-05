@@ -1,12 +1,9 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-
 import {AuthGuard} from './guards/auth.guard';
-import {IsGeqDocentGuard} from './guards/is-geq-docent';
 import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
-
 import {ChangePasswordComponent} from "./page-components/change-password/change-password.component";
 import {MyCoursesComponent} from "./page-components/my-courses/my-courses.component";
 import {CourseAuthorizationComponent} from "./page-components/course-authorization/course-authorization.component";
@@ -20,6 +17,7 @@ import {NotFoundComponent} from "./page-components/not-found/not-found.component
 import {LoginComponent} from "./page-components/login/login.component";
 import {SidebarComponent} from "./page-components/sidebar/sidebar.component";
 import {TaskDetailComponent} from "./page-components/task-detail/task-detail.component";
+import {CourseResultsComponent} from "./page-components/course-detail/course-results/course-results.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -33,6 +31,7 @@ const routes: Routes = [
       {path: 'courses/:id', component: CourseDetailComponent},
       {path: 'courses/:id/tickets', component: ConferenceComponent},
       {path: 'courses/:id/task/:taskid', component: TaskDetailComponent},
+      {path: 'courses/:id/results', component: CourseResultsComponent},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},

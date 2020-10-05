@@ -1,6 +1,4 @@
 .new-task-form {
-  display: flex;
-  flex-direction: column;
 }
 
 mat-dialog-content {
@@ -41,3 +39,6 @@ mat-select {
   }
 }
 
+.upload {
+  margin: 4px;
+}

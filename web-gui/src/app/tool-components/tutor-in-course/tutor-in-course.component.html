@@ -1,7 +1,6 @@
 <mat-chip-list>
   <mat-chip
     *ngFor="let tutor of correctCourseTutor"
-    color="accent"
     selected="true"
     removable="true"
     (removed)="removeTutor(course.course_id, tutor.user_id)">

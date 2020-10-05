@@ -10,10 +10,9 @@
 .actions {
   display: flex;
   height: 40px;
-  border-bottom: solid 1px darkgray;
-  width: 100%;
   padding-left: 10px;
   margin-bottom: 10px;
+  margin-right: auto;
   .mat-flat-button {
     line-height: 30px;
     margin: 0 2.5px;
@@ -46,10 +45,6 @@
   align-items: center;
 }
 
-.details {
-  width: 80%;
-  margin-top: 12px;
-}
 
 .filler {
   flex-grow: 1;
@@ -60,6 +55,7 @@
 }
 
 .user-input {
+ // min-height: 350px; // fix Bug? (jumps to top of page when tab is changed)
   display: flex;
   flex-direction: column;
   margin-top: 24px;
@@ -111,9 +107,14 @@ mat-radio-button {
   margin-bottom: 1em;
 }
 
-.task-container {
+.details {
   width: 80%;
   margin-top: 12px;
+}
+
+.task-container {
+  //width: 80%;
+  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   .meta {

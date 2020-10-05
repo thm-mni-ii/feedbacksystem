@@ -21,5 +21,4 @@ export class TaskDeleteModalComponent implements OnInit {
   deleteTask(exit: boolean) {
     this.dialogRef.close({exit: exit});
   }
-
 }

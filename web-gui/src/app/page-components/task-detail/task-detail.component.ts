@@ -20,6 +20,7 @@ import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/co
 import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/course-delete-modal.component";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
 
+
 /**
  * Shows a course in detail
  */

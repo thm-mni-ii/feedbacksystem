@@ -56,7 +56,7 @@ export class UserManagementComponent implements OnInit {
   };
 
   ngOnInit() {
-    this.titlebar.emitTitle('Benutzer Verwaltung');
+    this.titlebar.emitTitle('Benutzerverwaltung');
     this.loadAllUsers();
   }
 

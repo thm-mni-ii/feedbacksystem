@@ -1,27 +1,25 @@
 <div class="container">
   <div class="actions">
     <button mat-flat-button color="primary" [routerLink]="['/', 'courses', courseID]" matTooltip="Zurück zur Aufgabenübersicht"><mat-icon >arrow_back</mat-icon></button>
-
-    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask(courseDetail)" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
+    <!--<button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask(courseDetail)" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>-->
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="plagiatModule(courseDetail)" matTooltip="Plagiarismchecker Skript"><mat-icon>backup</mat-icon></button>
     <button mat-flat-button [color]="plagiarism_script_status"  *ngIf="isAuthorized()" matTooltip="Plagiarismchecker Skript Status"><mat-icon>report</mat-icon></button>
     <!--<button mat-flat-button color="primary" (click)="openSettings()" matTooltip="Kurs Parameter"><mat-icon>settings</mat-icon></button>-->
-    <button mat-flat-button color="primary"  *ngIf="isAuthorized()" [routerLink]="['/', 'courses', courseID, 'result']"  matTooltip="Open Course Results View"><mat-icon>insert_chart_outlined</mat-icon></button>
+    <!--<button mat-flat-button color="primary"  *ngIf="isAuthorized()" [routerLink]="['/', 'courses', courseID, 'result']"  matTooltip="Open Course Results View"><mat-icon>insert_chart_outlined</mat-icon></button>-->
   </div>
 
-  <mat-card class="task-container">
-    <span>{{courseTask.task_name}}</span>
-    <span class="meta">
-      <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
-      <span class="tiny">{{courseTask.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-      <span class="state passed" *ngIf="['true',true].indexOf(courseTask.combined_passed) >= 0"><mat-icon>check_circle</mat-icon></span>
-      <span class="state failed" *ngIf="['false',false].indexOf(courseTask.combined_passed) >= 0"><mat-icon>add_circle</mat-icon></span>
-      <span class="state not-done" *ngIf="courseTask.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
-      <span><mat-spinner *ngIf="processing && isInFetchingResultOfTasks(courseTask);" diameter="20"></mat-spinner></span>
-    </span>
-  </mat-card>
-
   <mat-card class="details" id="{{courseTask.task_id}}">
+    <div class="task-container">
+      <span>{{courseTask.task_name}}</span>
+      <span class="meta">
+        <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
+        <span class="tiny">{{courseTask.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
+        <span class="state passed" *ngIf="['true',true].indexOf(courseTask.combined_passed) >= 0"><mat-icon>check_circle</mat-icon></span>
+        <span class="state failed" *ngIf="['false',false].indexOf(courseTask.combined_passed) >= 0"><mat-icon>add_circle</mat-icon></span>
+        <span class="state not-done" *ngIf="courseTask.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
+        <span><mat-spinner *ngIf="processing && isInFetchingResultOfTasks(courseTask);" diameter="20"></mat-spinner></span>
+      </span>
+    </div>
     <span *ngIf="courseTask.task_description != courseTask.task_name">{{courseTask.task_description}}</span>
     <mat-card-content>
       <div class="user-input">

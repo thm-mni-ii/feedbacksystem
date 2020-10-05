@@ -1,16 +1,26 @@
 <div class="container">
   <mat-form-field class="filter" appearance="outline">
-    <mat-label>Kurse filtern</mat-label>
+    <mat-label>Kurse suchen</mat-label>
     <input matInput (keyup)="setFilterValue($event.target.value)">
-    <mat-icon matSuffix>filter_list</mat-icon>
+    <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
   <mat-card *ngFor="let course of courses | async | filter : filterValue :'course_name'">
     <h4>{{course.course_name}}</h4>
-    <h5>Dozenten</h5>
-    <app-grant-docent-snipp [liveUpdate]="true" [course]="course"></app-grant-docent-snipp>
-    <h5>Tutoren</h5>
-    <app-grant-tutor-snipp [liveUpdate]="true" [course]="course"></app-grant-tutor-snipp>
+    <mat-divider></mat-divider>
+    <table class="mat-table">
+      <tr>
+        <td>Tutoren</td>
+        <td>Dozenten</td>
+      </tr>
+      <tr>
+        <td>
+          <app-tutor-in-course [liveUpdate]="true" [course]="course"></app-tutor-in-course>
+        </td>
+        <td>
+          <app-docent-in-course [liveUpdate]="true" [course]="course"></app-docent-in-course>
+        </td>
+      </tr>
+    </table>
   </mat-card>
 </div>
-

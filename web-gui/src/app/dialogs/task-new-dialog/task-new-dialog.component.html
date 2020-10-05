@@ -10,13 +10,6 @@
       <input type="text" matInput formControlName="taskName" required>
     </mat-form-field>
 
-    <!-- Task Description -->
-    <mat-form-field>
-      <mat-label>Beschreibung</mat-label>
-      <textarea matInput type="text" matTextareaAutosize matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                formControlName="taskDescription" required></textarea>
-    </mat-form-field>
-
     <!--<i>Vorschau:</i>
       <markdown ngPreserveWhitespaces [data]="newTaskDescription"></markdown>
       <mat-divider style="margin: 14px 0;"></mat-divider>-->
@@ -26,6 +19,14 @@
       <input matInput [matDatepicker]="picker" [formControl]="deadline" (click)="picker.open()">
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <br>
+    <!-- Task Description -->
+    <mat-form-field>
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
+                formControlName="taskDescription" required></textarea>
     </mat-form-field>
 
     <div class="checker">
@@ -39,12 +40,12 @@
           <mat-option *ngFor="let type of testTypes" value="{{type.testsystem_id}}">{{type.name}}</mat-option>
         </mat-select>
 
-        <h3 *ngIf="isUpdate">{{testsystemList[j]}}</h3>
+        <h4 *ngIf="isUpdate">{{testsystemList[j]}}</h4>
         <mat-icon *ngIf="!isUpdate" style="cursor: pointer;" (click)="deleteTestsystem(j)" color="warn">delete</mat-icon>
         <div *ngFor="let testfile of testSystemFiles[j]">
           {{testfile.filename}} <span *ngIf="testfile.required" class="isRequiredInfo">*</span>
 
-          <input id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename, j)" type="file" placeholder="Lösung" [required]="testfile.required">
+          <input class="upload" id="{{testfile.filename}}" (change)="addFilesToList($event.target.files, testfile.filename, j)" type="file" placeholder="Lösung" [required]="testfile.required">
 
         </div>
         <mat-divider></mat-divider>
@@ -57,6 +58,7 @@
 
   </form>
 
+  <br>
   <mat-slide-toggle [(ngModel)]="load_external_description" aria-label="Info vom Testsystem">
     Lade Aufgabenstellung vom Testsystem:
   </mat-slide-toggle>

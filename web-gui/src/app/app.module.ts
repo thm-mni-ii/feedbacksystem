@@ -62,7 +62,7 @@ import { SingleSubmissionComponent } from './page-components/single-submission/s
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
 import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
-import {ConferenceComponent, SafePipe, TicketStatusFilter} from "./page-components/conference/conference.component";
+import {ConferenceComponent} from "./page-components/conference/conference.component";
 import { FilterPipe } from "./page-components/course-authorization/course-authorization.component";
 import { NotFoundComponent } from "./page-components/not-found/not-found.component";
 import {ParameterCourseModalComponent} from "./dialogs/parameter-course-modal/parameter-course-modal.component";
@@ -111,19 +111,16 @@ export const httpInterceptorProviders = [
     ChangePasswordComponent,
     NewconferenceDialogComponent,
     ConferenceComponent,
-    TicketStatusFilter,
-    SafePipe, FilterPipe,
+    FilterPipe,
     UserTeacherFilter,
     NewticketDialogComponent,
     IncomingCallDialogComponent,
-    SidebarComponent,
     SearchCoursesComponent,
     CoursePreviewComponent,
     CourseDetailComponent,
     TaskDetailComponent,
     CourseAuthorizationComponent,
     UserManagementComponent,
-    ChangePasswordComponent,
     AllSubmissionsComponent,
     CourseResultsComponent,
     TaskPreviewComponent,
@@ -138,7 +135,6 @@ export const httpInterceptorProviders = [
     DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
-    NotFoundComponent,
     LoginComponent,
     ParameterCourseModalComponent,
     ParameterUserModalComponent,
@@ -148,7 +144,10 @@ export const httpInterceptorProviders = [
     TaskNewDialogComponent,
     CourseUpdateDialogComponent,
     AssignTicketDialogComponent,
-    InvitetoConferenceDialogComponent
+    InvitetoConferenceDialogComponent,
+    DropzoneComponent,
+    MyCoursesComponent,
+    ConferenceComponent
   ],
   imports: [
     BrowserModule,

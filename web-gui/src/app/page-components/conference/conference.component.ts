@@ -213,32 +213,30 @@ export class ConferenceComponent implements OnInit {
     });
   }
 
-
-
   public openUrlInNewWindow(url: string): Window {
     return window.open(url, '_blank');
   }
 }
 
-@Pipe({
-  name: 'ticketstatus',
-  pure: false
-})
-export class TicketStatusFilter implements PipeTransform {
-  transform(items: any[], filter: string): any {
-    if (!items || !filter) {
-      return items;
-    }
-    // filter items array, items which match and return true will be
-    // kept, false will be filtered out
-    return items.filter(item => item.creator.username !== item.assignee.username);
-  }
-}
-
-@Pipe({ name: 'safe' })
-export class SafePipe implements PipeTransform {
-  constructor(private sanitizer: DomSanitizer) { }
-  transform(url) {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
-  }
-}
+// @Pipe({
+//   name: 'ticketstatus',
+//   pure: false
+// })
+// export class TicketStatusFilter implements PipeTransform {
+//   transform(items: any[], filter: string): any {
+//     if (!items || !filter) {
+//       return items;
+//     }
+//     // filter items array, items which match and return true will be
+//     // kept, false will be filtered out
+//     return items.filter(item => item.creator.username !== item.assignee.username);
+//   }
+// }
+//
+// @Pipe({ name: 'safe' })
+// export class SafePipe implements PipeTransform {
+//   constructor(private sanitizer: DomSanitizer) { }
+//   transform(url) {
+//     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+//   }
+// }
