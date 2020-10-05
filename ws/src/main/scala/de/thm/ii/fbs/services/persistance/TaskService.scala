@@ -25,7 +25,7 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT name, media_type, description, deadline, course_id FROM task WHERE course_id = ?", (res, _) => parseResult(res), cid)
+    DB.query("SELECT task_id, name, media_type, description, deadline, course_id FROM task WHERE course_id = ?", (res, _) => parseResult(res), cid)
 
   /**
     * Lookup task by id

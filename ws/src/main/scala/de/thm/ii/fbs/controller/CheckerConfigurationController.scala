@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller
 
-import java.nio.file.Files
+import java.io.{FileInputStream, FileOutputStream, InputStream}
+import java.nio.file.{Files, Path, Paths}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
@@ -139,41 +140,53 @@ class CheckerConfigurationController {
     * @param ccid Checker configuration id
     * @param req Http request
     * @param res Http response
-    * @param file File content
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
-  def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse,
-                    @RequestBody file: MultipartFile): Unit = {
-    val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-        this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
-          case Some(checkerConfiguration) =>
-            val tempDesc = Files.createTempFile("fbs", ".tmp")
-            file.transferTo(tempDesc)
-            storageService.storeMainFile(tid, tempDesc)
-            this.ccs.update(cid, tid, ccid, checkerConfiguration.copy(mainFileUploaded = true))
-          case _ => throw new ResourceNotFoundException()
-        }
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                     req: HttpServletRequest, res: HttpServletResponse): Unit =
+    uploadFile(storageService.storeMainFile, (cc) => this.ccs.update(cid, tid, ccid, cc.copy(mainFileUploaded = true)))(cid, tid, ccid, req, res)
 
   /**
+    * Downloads the main file for a task configuration
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Checker configuration id
+    * @param req Http request
+    * @param res Http response
+    */
+  @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
+  def getMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                     req: HttpServletRequest, res: HttpServletResponse): Unit =
+    getFile(storageService.pathToMainFile)(cid, tid, ccid, req, res)
+
+    /**
     * Upload a the secondary file for a task configuration
     * @param cid Course id
     * @param tid Task id
     * @param ccid Checker configuration id
     * @param req Http request
     * @param res Http response
-    * @param file File content
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
-  def updateSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse,
-                     @RequestBody file: MultipartFile): Unit = {
+  def uploadSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                          req: HttpServletRequest, res: HttpServletResponse): Unit =
+    uploadFile(storageService.storeSecondaryFile, (cc) => this.ccs.update(cid, tid, ccid, cc.copy(secondaryFileUploaded = true)))(cid, tid, ccid, req, res)
+
+  /**
+    * Downloads the secondary file for a task configuration
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Checker configuration id
+    * @param req Http request
+    * @param res Http response
+    */
+  @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
+  def getSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                  req: HttpServletRequest, res: HttpServletResponse): Unit = getFile(storageService.pathToSecondaryFile)(cid, tid, ccid, req, res)
+
+  private def uploadFile(storageFn: (Int, Path) => Unit, postHook: (CheckrunnerConfiguration) => Unit)
+                        (cid: Int, tid: Int, ccid: Int,
+                     req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
@@ -182,9 +195,31 @@ class CheckerConfigurationController {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkerConfiguration) =>
           val tempDesc = Files.createTempFile("fbs", ".tmp")
-          file.transferTo(tempDesc)
-          storageService.storeSecondaryFile(tid, tempDesc)
-          this.ccs.update(cid, tid, ccid, checkerConfiguration.copy(mainFileUploaded = true))
+          req.getInputStream.transferTo(new FileOutputStream(tempDesc.toFile))
+          storageFn(ccid, tempDesc)
+          postHook(checkerConfiguration)
+        case _ => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  private def getFile(pathFn: (Int) => Option[Path])(cid: Int, tid: Int, ccid: Int,
+                                                     req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+      this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
+        case Some(_) =>
+          pathFn(ccid) match {
+            case Some(mainFilePath) =>
+              val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
+              mainFileInputStream.transferTo(res.getOutputStream)
+            case _ => throw new ResourceNotFoundException()
+          }
         case _ => throw new ResourceNotFoundException()
       }
     } else {
