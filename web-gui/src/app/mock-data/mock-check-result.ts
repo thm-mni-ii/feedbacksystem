@@ -7,12 +7,12 @@ export const CHECKRESULT: CheckResult[] = [{
   "checkerType": "eget vulputate",
   "configurationId": 10
 }, {
-  "exitCode": 2,
+  "exitCode": 0,
   "resultText": "metus sapien ut nunc vestibulum ante ipsum primis in faucibus orci luctus et ultrices",
   "checkerType": "est",
   "configurationId": 4
 }, {
-  "exitCode": 4,
+  "exitCode": 0,
   "resultText": "sed vestibulum sit amet cursus id turpis integer aliquet massa id lobortis convallis tortor",
   "checkerType": "nisl",
   "configurationId": 8

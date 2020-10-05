@@ -41,7 +41,7 @@ export const TASKS: Task[] =
     "id": 7,
     "name": "Mirounga leonina",
     "description": "Integer pede justo, lacinia eget, tincidunt eget, tempus vel, pede.",
-    "deadline": 1578686945,
+    "deadline": 1633452775,
     "mediaType": "Daltfresh"
   } //, {
   //   "id": 8,
