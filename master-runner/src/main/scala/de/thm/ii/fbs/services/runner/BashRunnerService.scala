@@ -30,7 +30,6 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
     val scriptContent = FileService.fileToString(submission.solutionFileLocation.toFile)
     val interpreter = if (scriptContent.split("\n").head.matches("#!.*php.*")) "php" else "bash"
 
-    val infoArgument = if (submission.isInfo) "info" else ""
     val submissionMount = s"$SOURCE_FOLDER/${submission.solutionFileLocation.getFileName}"
 
     /* Build Docker Command */
@@ -38,20 +37,15 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
       (runner.mainFile.toString, MAIN_FILE_MOUNT),
       (submission.solutionFileLocation.toString, submissionMount))
 
+    var runOptions = Seq(interpreter, MAIN_FILE_MOUNT, submission.user.username, submissionMount)
+
+    // If runner has secondary file add it to Docker configuration
     if (runner.hasSecondaryFile) {
       mountFiles = mountFiles :+ (runner.secondaryFile.toString, SECONDARY_FILE_MOUNT)
+      runOptions = runOptions :+ SECONDARY_FILE_MOUNT
     }
 
-    // If secondary file is present add its path to an environment Variable
-    val dockerOptions = if (runner.hasSecondaryFile) {
-      Seq("--env", s"TESTFILE_PATH=$SECONDARY_FILE_MOUNT")
-    } else {
-      Seq.empty
-    }
-
-    val runOptions = Seq(interpreter, MAIN_FILE_MOUNT, submission.user.username, submissionMount, infoArgument)
-
-    new DockerCmdConfig(DockerService.getBashImage, DockerService.convertMountLocation(mountFiles), dockerOptions, runOptions)
+    new DockerCmdConfig(DockerService.getBashImage, DockerService.convertMountLocation(mountFiles), runOptions = runOptions)
   }
 
   /**
@@ -102,7 +96,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
     var checkedExitCode = exitCode
     if (stderr.length > 0 && checkedExitCode == 0) checkedExitCode = 42
 
-    Map("sid" -> submission.id, "exitCode" -> checkedExitCode, "stdout" -> stdout, "stderr" -> stderr)
+    Map("ccid" -> runner.id, "sid" -> submission.id, "exitCode" -> checkedExitCode, "stdout" -> stdout, "stderr" -> stderr)
   }
 
   /**

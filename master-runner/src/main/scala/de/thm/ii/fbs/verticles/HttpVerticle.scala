@@ -71,14 +71,16 @@ class HttpVerticle extends ScalaVerticle {
 
   private def sendResult(msg: Message[JsonObject]): Unit = {
     try {
+      val resultJson = msg.body()
+
       // Configure Client
       val clientConfig = config.getJsonObject("result.server")
       val request = client.get.post(clientConfig.getInteger("port", 80),
         clientConfig.getString("host", "localhost"),
-        s"/results/${msg.body().getInteger("sid")}")
+        s"/results/${resultJson.getInteger("sid")}/${resultJson.getInteger("ccid")}")
 
       // Send Request
-      request.handler(resultResponse).end(msg.body().encode())
+      request.handler(resultResponse).end(resultJson.encode())
     } catch {
       case e: Exception => logger.error("Count not send result", e) // TODO handle
     }
