@@ -69,7 +69,7 @@ export class CourseDetailComponent implements OnInit {
 
   public isAuthorized() {
     const courseRole = this.auth.getToken().courseRoles[this.courseID]
-    return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
+    return true //Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
   /**

@@ -1,14 +1,3 @@
-<mat-card class="card"  (click)="goToCourse(course.id)">
-    <span>{{course.name}}<br>
-     <span class="docent" *ngIf="docents$.length>1">Dozenten: </span> <span class="docent" *ngIf="docents$.length==1">Dozent/in: </span><i><span class="docent" *ngFor="let docent of docents$|async; let isLast=last">{{docent.prename}} {{docent.surname}}{{isLast ? '' : ', '}}</span></i>
-    </span>
-
-    <span>
-        <mat-icon role="img">admin_panel_settings</mat-icon>
-        <span *ngIf="role == 'admin'">Admin</span>
-        <span *ngIf="role == 'moderator'">Moderator</span>
-        <span *ngIf="role == 'docent'">Dozent</span>
-        <span *ngIf="role == 'tutor'">Tutor</span>
-        <span *ngIf="role == 'student'">Student</span>
-    </span>
+<mat-card class="card"  (click)="goToCourse(data.id)">
+  <span>{{data.name}}</span>
 </mat-card>
