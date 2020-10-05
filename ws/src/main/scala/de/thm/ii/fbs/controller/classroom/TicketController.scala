@@ -23,8 +23,6 @@ class TicketController {
   @Autowired
   implicit private val userService: UserService = null
   @Autowired
-  private val courseRegistrationService: CourseRegistrationService = null
-  @Autowired
   private val courseAuthService: CourseAuthService = null
 
   private val courseIdLiteral = "courseId"
