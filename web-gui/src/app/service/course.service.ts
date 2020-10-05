@@ -19,6 +19,11 @@ export class CourseService {
     return of(COURSE)
   }
 
+  // GET /courses/{cid}
+  getCourse(cid: number): Observable<Course>{
+    return of(COURSE.pop())
+  }
+
   // GET /users/{uid}/courses
   getRegisteredCourses(uid: number): Observable<Course[]>{
     return of(COURSE);

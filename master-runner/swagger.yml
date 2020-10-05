@@ -1,0 +1,142 @@
+openapi: 3.0.0
+info:
+  title: Feedbacksystem - Master-runner
+  description: Feedbacksystem Master-runner API
+  version: 1.0.0
+  contact:
+    email: Andrej.Sajenko@mni.thm.de
+  license:
+    name: CC BY-NC-SA 4.0
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+tags:
+  - name: Runner
+    description: Runner api
+  - name: Runner Extern
+    description: Api that the runner will Call on Complition
+paths:
+  /runner/start:
+    post:
+      tags:
+        - Runner
+      summary: Start a runner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskId
+                - runner
+                - submittion
+              properties:
+                taskId:
+                  type: integer
+                runner:
+                  $ref: "#/components/schemas/runner"
+                submittion:
+                  $ref: "#/components/schemas/submission"
+      responses:
+        "202":
+          description: Accepted
+
+        "400":
+          description: Bad Request
+  /results/{sid}/{ccid}:
+    post:
+      tags:
+        - Runner Extern
+      summary: Requst that will the Runner call to notify about an Submission result
+      parameters:
+        - name: sid
+          in: path
+          description: ID of submission
+          required: true
+          schema:
+            type: integer
+        - name: ccid
+          in: path
+          description: Checker (runner) configuration id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/result'
+
+      responses:
+        "204":
+          description: ok
+
+
+components:
+  schemas:
+    runner:
+      type: object
+      required:
+        - type
+        - id
+        - mainFileLocation
+      properties:
+        id:
+          type: integer
+          description: The runner Configuration id (Currently checker configuration id)
+        type:
+          $ref: "#/components/schemas/runnerType"
+        mainFileLocation:
+          type: string
+          description: The relativ path (form the upload-dir) to the main File
+        hasSecondaryFile:
+          type: boolean
+          description: If true secondaryFileLocation musst be provided
+        secondaryFileLocation:
+          type: string
+          description: The relativ path (form the upload-dir) to the Secondary File
+    runnerType:
+      type: string
+      enum:
+        - bash
+        - sql
+      description: the type of the Runner
+    submission:
+      type: object
+      required:
+        - id
+        - user
+        - solutionFileLocation
+      properties:
+        id:
+          type: integer
+          description: The submission id
+        user:
+          $ref: "#/components/schemas/user"
+        solutionFileLocation:
+          type: string
+          description: The relativ path (form the upload-dir) to the solution File
+    user:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+    result:
+      type: object
+      required:
+        - exitCode
+      properties:
+        exitCode:
+          type: integer
+          description: The exit Code from the Runner (-1 if an error raised while creation)
+        stdout:
+          type: string
+          description: The standart Output of the Runner
+        stderr:
+          type: string
+          description: The standart Error Output of the Runner

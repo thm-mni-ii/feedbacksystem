@@ -4,14 +4,14 @@ import { CHECKRESULT } from './mock-check-result';
 export const SUBMISSION: Submission[] =
   [{
     "submissionTime": 1568199972,
-    "done": false,
+    "done": true,
     "id": 1,
-    "results": null
+    "results": CHECKRESULT.slice(0,2)
   }, {
     "submissionTime": 1568200054,
     "done": true,
     "id": 2,
-    "results": null
+    "results": CHECKRESULT.slice(3,3)
   }, {
     "submissionTime": 1568199952,
     "done": false,
@@ -94,13 +94,13 @@ export const SUBMISSION: Submission[] =
     "results": null
   }, {
     "submissionTime": 1568199957,
-    "done": false,
+    "done": true,
     "id": 19,
     "results": null
   }, {
     "submissionTime": 1568200120,
     "done": true,
     "id": 20,
-    "results": null
+    "results": CHECKRESULT.slice(1,2)
   }
 ]
