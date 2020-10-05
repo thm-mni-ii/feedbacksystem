@@ -35,7 +35,7 @@ class ConferenceSTOMPController {
     @Autowired
     implicit private val courseRegistrationService: CourseRegistrationService = null
 
-    private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSTOMPController])
+    // private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSTOMPController])
     private def userToJson(user: User): JSONObject = new JSONObject()
       .put("username", user.username)
       .put("prename", user.prename)
@@ -68,9 +68,6 @@ class ConferenceSTOMPController {
     */
   @MessageMapping(value = Array("/classroom/conference/invite"))
   def handleInviteMsg(@Payload p: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    logger.info("/classroom/conference/invite")
-    logger.info("Accessor: " + headerAccessor.getUser)
-    logger.info("Payload: " + p.asText())
     val inviter = headerAccessor.getUser
     val invitation = p.get("invitation").asInstanceOf[Invitation]
     val invitees = p.get("users").asInstanceOf[Array[User]]
@@ -103,9 +100,6 @@ class ConferenceSTOMPController {
       */
     @MessageMapping(value = Array("/classroom/conference/open"))
     def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-      logger.info("/classroom/conference/open")
-      logger.info("Accessor: " + headerAccessor.getUser)
-      logger.info("Payload: " + m.asText())
       val creator = userService.find(headerAccessor.getUser.getName)
       val invitationJsonWrapper = m.retrive("invitation")
       val invitation = invitationJsonWrapper.retrive("service").asText() match {
@@ -132,9 +126,6 @@ class ConferenceSTOMPController {
       */
     @MessageMapping(value = Array("/classroom/conference/leave"))
     def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-      logger.info("/classroom/conference/leave")
-      logger.info("Accessor: " + headerAccessor.getUser)
-      logger.info("Payload: " + m.asText())
       UserConferenceMap.delete(headerAccessor.getUser)
     }
 
