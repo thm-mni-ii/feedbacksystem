@@ -43,7 +43,35 @@ paths:
                 type: string
         "401":
           description: Unauthorized
-  /login/password:
+  /login/ldap:
+    post:
+      tags:
+        - Login
+      summary: Login into system via username and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+  /login/local:
     post:
       tags:
         - Login
@@ -1713,7 +1741,7 @@ components:
           description: The users global role id
         courseRoles:
           type: object
-          description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 0:
+          description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 2:
             User)"
           properties:
             key:

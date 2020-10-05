@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 
+// TODO: do we need this class?
 @Injectable({
   providedIn: 'root'
 })

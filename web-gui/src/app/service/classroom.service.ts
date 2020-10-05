@@ -2,9 +2,9 @@ import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
 import {ConferenceInvitation, ConfInvite, Ticket, User} from '../model/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
-import {UserService} from './user.service';
 import {Message} from 'stompjs';
 import {ConferenceService} from './conference.service';
+import {AuthService} from "./auth.service";
 
 /**
  * Service that provides observables that asynchronacally updates tickets, users and privide invitations to take
@@ -26,7 +26,7 @@ export class ClassroomService {
 
   private stompRx: RxStompClient = null;
 
-  public constructor(private user: UserService, private conferenceService: ConferenceService) {
+  public constructor(private authService: AuthService, private conferenceService: ConferenceService) {
     this.users = new BehaviorSubject<User[]>([]);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.invitations = new Subject<ConferenceInvitation>();
@@ -90,12 +90,12 @@ export class ClassroomService {
     this.stompRx = new RxStompClient('wss://feedback.mni.thm.de/websocket', this.constructHeaders());
     this.stompRx.onConnect(_ => {
       // Handles invitation from tutors / docents to take part in a webconference
-      this.listen('/user/' + this.user.getUsername() + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
-      this.listen('/user/' + this.user.getUsername() + '/classroom/users').subscribe(m => this.handleUsersMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/users').subscribe(m => this.handleUsersMsg(m));
       this.listen('/topic/classroom/' + this.courseId + '/left').subscribe(m => this.requestUsersUpdate());
       this.listen('/topic/classroom/' + this.courseId + '/joined').subscribe(m => this.requestUsersUpdate());
       this.requestUsersUpdate();
-      this.listen('/user/' + this.user.getUsername() + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
       this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
       this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
       this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
@@ -104,7 +104,7 @@ export class ClassroomService {
       this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
       this.listen('/topic/classroom/' + this.courseId + '/conference/attend').subscribe(m => this.requestConferenceUpdate());
       this.listen('/topic/classroom/' + this.courseId + '/conference/depart').subscribe(m => this.requestConferenceUpdate());
-      this.listen('/user/' + this.user.getUsername() + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
       this.requestTicketsUpdate();
       this.joinCourse();
     });
@@ -179,7 +179,7 @@ export class ClassroomService {
   }
 
   private constructHeaders() {
-    return {'Auth-Token': this.user.getPlainToken()};
+    return {'Auth-Token': this.authService.loadToken()};
   }
 
   private send(topic: string, body: {}): void {
