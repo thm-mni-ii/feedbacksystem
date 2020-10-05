@@ -2,7 +2,6 @@ FROM openjdk:14.0.1-slim
 MAINTAINER Andrej Sajenko <Andrej.Sajenko@mni.thm.de>
 
 ADD build/install/ws /usr/local/ws
-ADD src/main/resources/fbs.sql /usr/local/ws
 VOLUME /usr/local/ws/markdown
 VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
