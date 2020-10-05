@@ -85,7 +85,7 @@ class HttpVerticle extends ScalaVerticle {
   }
 
   private def resultResponse(res: HttpClientResponse): Unit = {
-    logger.info(s"${res.statusCode()}")
+    logger.info(s"result response Status: ${res.statusCode()}")
     // TODO what do here
   }
 }

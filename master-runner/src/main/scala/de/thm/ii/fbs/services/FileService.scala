@@ -15,7 +15,7 @@ import scala.util.Properties
   */
 object FileService {
   private val INSIDE_DOCKER: Boolean = Properties.envOrElse("INSIDE_DOCKER", "false").toBoolean
-  private val ULDIR: Path = Path.of(if (INSIDE_DOCKER) "/upload-dir" else "uploadDir")
+  private val ULDIR: Path = Path.of(if (INSIDE_DOCKER) "/upload-dir" else "upload-dir")
   private val CONTAINER_TEMP = Path.of("/dockertemp")
 
   /**
