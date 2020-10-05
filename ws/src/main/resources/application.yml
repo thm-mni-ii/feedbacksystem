@@ -54,11 +54,6 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
     open-in-view: false
-  kafka:
-    auto-offset-reset: earliest
-    bootstrap-servers: ${KAFKA_ADDRESS:localhost:29092}
-    consumer:
-      group-id: jcg-group
 url:
   expiration:
     time: 300
