@@ -1,16 +1,16 @@
 package de.thm.ii.fbs.controller
 
+import java.io.FileOutputStream
 import java.nio.file.Files
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.Submission
-import de.thm.ii.fbs.services.persistance.{StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.checker.RemoteCheckerService
+import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
-import org.springframework.web.multipart.MultipartFile
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -27,6 +27,10 @@ class SubmissionController {
   private val submissionService: SubmissionService = null
   @Autowired
   private val taskService: TaskService = null
+  @Autowired
+  private val checkerConfigurationService: CheckerConfigurationService = null
+  @Autowired
+  private val remoteCheckerService: RemoteCheckerService = null
 
   /**
     * Get a list of all submissions for a task
@@ -40,7 +44,15 @@ class SubmissionController {
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def getAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             req: HttpServletRequest, res: HttpServletResponse): List[Submission] = ??? // TODO: Here
+             req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
+    val user = authService.authorize(req, res)
+
+    if (user.id == uid) {
+      submissionService.getAll(uid, cid, tid)
+    } else {
+      throw new ForbiddenException()
+    }
+  }
 
   /**
     * Submit a file for a task
@@ -49,28 +61,26 @@ class SubmissionController {
     * @param tid Task id
     * @param req Http request
     * @param res Http response
-    * @param file Content: file to submit
     * @return Submission information
     */
-  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"),
-  consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             req: HttpServletRequest, res: HttpServletResponse, @RequestBody file: MultipartFile): Submission = {
+             req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
-    val allowed = user.id == uid
 
-    if (allowed) {
+    if (user.id == uid) {
       this.taskService.getOne(tid) match {
         case Some(task) =>
           val expectedMediaType = task.mediaType
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
           if (true) { // TODO: Check media type compatibility
             val tempDesc = Files.createTempFile("fbs", ".tmp")
-            file.transferTo(tempDesc)
-            val submission = submissionService.register(uid, tid)
+            req.getInputStream.transferTo(new FileOutputStream(tempDesc.toFile))
+            val submission = submissionService.create(uid, tid)
             storageService.storeSolutionFile(submission.id, tempDesc)
-            // TODO: Notify checker handler about new submission
+            checkerConfigurationService.getAll(cid, tid).foreach(cc =>
+              remoteCheckerService.notify(tid, submission.id, cc, user))
             submission
           } else {
             throw new BadRequestException("Unsupported Media Type")
@@ -105,7 +115,7 @@ class SubmissionController {
   }
 
   /**
-    * Get a list of all submissions for a task
+    * Get the status of submission
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
@@ -117,5 +127,16 @@ class SubmissionController {
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
   @ResponseBody
   def getOne(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
-             req: HttpServletRequest, res: HttpServletResponse): Submission = ??? // TODO: Here
+             req: HttpServletRequest, res: HttpServletResponse): Submission = {
+    val user = authService.authorize(req, res)
+
+    if (user.id == uid) {
+      submissionService.getOne(sid) match {
+        case Some(submission) => submission
+        case None => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
 }
