@@ -24,8 +24,6 @@
     <mat-error *ngIf="!courseDescription.valid && courseDescription.errors.maxlength">Die Beschreibung darf
       maximal {{courseDescription.errors.maxlength.requiredLength}} Zeichen lang sein!
     </mat-error>
-    <i *ngIf="description !== '' ">Vorschau:</i>
-    <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
     <!--<mat-form-field>
       <mat-label>Standart Aufgabentyp:</mat-label>

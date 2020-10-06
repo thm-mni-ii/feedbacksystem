@@ -90,8 +90,7 @@ export class CourseDetailComponent implements OnInit {
    */
   updateCourse() {
     this.dialog.open(CourseUpdateDialogComponent, {
-      height: '600px',
-      width: '800px',
+      width: '50%',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
       location.hash = '';
