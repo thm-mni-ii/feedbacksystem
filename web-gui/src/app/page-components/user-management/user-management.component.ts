@@ -14,16 +14,6 @@ import {MatPaginator} from "@angular/material/paginator";
 import {UserService} from "../../service/user.service";
 import {User} from "../../model/User";
 
-export interface GuestUserAccount {
-  gPrename: string;
-  gSurname: string;
-  gPassword: string;
-  gPasswordRepeat: string;
-  gUsername: string;
-  gEmail: string;
-  gRole: number;
-}
-
 /**
  * This component is for admin managing users
  */
@@ -42,18 +32,6 @@ export class UserManagementComponent implements OnInit {
 
   columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];
   dataSource = new MatTableDataSource<User>();
-
-  // Guest Account
-
-  userData: GuestUserAccount = {
-    gPrename: '',
-    gSurname: '',
-    gPassword: '',
-    gPasswordRepeat: '',
-    gUsername: '',
-    gEmail: '',
-    gRole: 16
-  };
 
   ngOnInit() {
     this.titlebar.emitTitle('Benutzerverwaltung');
@@ -80,14 +58,8 @@ export class UserManagementComponent implements OnInit {
       this.snackBar.open('Bitte über "Dozent/Tutor bestimmen" auswählen', 'OK', {duration: 5000});
       return;
     }
-
-    this.db.changeUserRole(userID, role).subscribe(res => {
-      if (res.success) {
-        this.snackBar.open(username + ' ist jetzt ' + res.grant, 'OK', {duration: 3000});
-      } else {
-        this.snackBar.open('Fehler', 'OK', {duration: 3000});
-      }
-    });
+    this.userService.changeRole(userID, role); // TODO: error handling
+    this.snackBar.open("Hat geklappt.","cool");
   }
 
   /**
@@ -95,24 +67,18 @@ export class UserManagementComponent implements OnInit {
    * @param user The user to delete
    */
   deleteUser(user: User) {
-    // TODOD: neuer User Service hat noch kein Observable return
-    // this.dialog.open(DeleteUserModalComponent, {
-    //   data: user
-    // }).afterClosed().pipe(
-    //   flatMap(value => {
-    //     if (value.exit) {
-    //       return this.db.adminDeleteUser(user.id)
-    //     } else {
-    //       return null
-    //     }
-    //   })
-    // ).toPromise().then((result) => {
-    //   if (result.success) {
-    //     this.snackBar.open(user.username + ' wurde gelöscht');
-    //     this.loadAllUsers();
-    //   }
-    // }).catch(e => {
-    // })
+    // TODO: neuer User Service hat noch kein Observable return
+    this.dialog.open(UserDeleteModalComponent, {
+      data: user
+    }).afterClosed().subscribe(
+      exit => {
+        if (exit){
+          this.userService.deleteUser(user.id) //TODO: Error handling
+          if(true){
+          }
+        }
+      }
+    )
 
   }
 
@@ -146,12 +112,12 @@ export class UserManagementComponent implements OnInit {
       });*/
   }
 
-  private resetUserData(): void {
-    this.userData.gPrename = '';
-    this.userData.gSurname = '';
-    this.userData.gEmail = '';
-    this.userData.gPassword = '';
-    this.userData.gRole = 16;
-    this.userData.gUsername = '';
-  }
+  // private resetUserData(): void {
+  //   this.userData.gPrename = '';
+  //   this.userData.gSurname = '';
+  //   this.userData.gEmail = '';
+  //   this.userData.gPassword = '';
+  //   this.userData.gRole = 16;
+  //   this.userData.gUsername = '';
+  // }
 }

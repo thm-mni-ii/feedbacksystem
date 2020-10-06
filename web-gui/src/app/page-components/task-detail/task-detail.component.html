@@ -9,11 +9,12 @@
       <span class="meta">
         <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
         <span class="tiny">{{task.deadline*1000 | date:'dd.MM.yyyy HH:mm'}}</span>
-        <span class="state passed" *ngIf="submissionStatus"><mat-icon>check_circle</mat-icon></span>
-        <span class="state failed" *ngIf="!submissionStatus && submissionStatus != null"><mat-icon>add_circle</mat-icon></span>
-        <span class="state not-done" *ngIf="submissionStatus == null"><mat-icon>new_releases</mat-icon></span>
+        <span class="state passed tiny" *ngIf="submissionStatus"><mat-icon>check_circle</mat-icon>&nbsp;bestanden</span>
+        <span class="state failed tiny" *ngIf="!submissionStatus && submissionStatus != null"><mat-icon>not_interested</mat-icon>&nbsp;nicht bestanden</span>
+        <span class="state tiny not-done" *ngIf="submissionStatus == null"><mat-icon>error_outline</mat-icon></span>
       </span>
     </div>
+    <div *ngIf="task.name != task.description" class="description"> {{task.description}}</div>
     <mat-card-content>
       <div class="user-input">
         <app-submission-file *ngIf="submissionTypeOfTask() == 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>

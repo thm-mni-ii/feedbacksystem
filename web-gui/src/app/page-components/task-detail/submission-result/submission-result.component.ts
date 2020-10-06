@@ -18,6 +18,10 @@ export class SubmissionResultComponent implements OnInit {
   ngOnInit() {
   }
 
+  public convertExitCode(exitCode: number): String{
+    if(exitCode == 0) return "pass"
+    else return "fail"
+  }
   tabChanged(event: MatTabChangeEvent) {
 
   }
