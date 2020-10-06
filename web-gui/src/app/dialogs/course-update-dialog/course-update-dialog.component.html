@@ -27,28 +27,23 @@
     <i *ngIf="description !== '' ">Vorschau:</i>
     <markdown ngPreserveWhitespaces data="{{description}}"></markdown>
 
-    <mat-form-field>
+    <!--<mat-form-field>
       <mat-label>Standart Aufgabentyp:</mat-label>
-      <mat-select [(value)]="standardTaskType" required>
+      <mat-select required>
         <mat-option *ngFor="let testsystem of testsystems$ | async"
                     [value]="testsystem.testsystem_id">{{testsystem.name}}</mat-option>
       </mat-select>
       <mat-error *ngIf="courseDefaultTaskTyp.errors.required">Der Aufgabentyp, ist erforderlich!</mat-error>
-    </mat-form-field>
-
-    <mat-form-field>
-      <mat-label>Modul-ID:</mat-label>
-      <input matInput placeholder="CSxxxx (Optional)" [(ngModel)]="course_module_id">
-    </mat-form-field>
+    </mat-form-field>-->
 
     <div class="choose_docent_tutor_area">
       <mat-label>Dozenten/in auswählen:</mat-label>
-      <app-grant-docent-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
-                              (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-docent-snipp>
+      <app-docent-in-course class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
+                              (loadAllCourses)="loadDocentTutorForCourse()"></app-docent-in-course>
 
       <mat-label>Tutor/in auswählen:</mat-label>
-      <app-grant-tutor-snipp class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
-                             (loadAllCourses)="loadDocentTutorForCourse()"></app-grant-tutor-snipp>
+      <app-tutor-in-course class="tag_selection" [course]="courseDetails" [liveUpdate]="true"
+                             (loadAllCourses)="loadDocentTutorForCourse()"></app-tutor-in-course>
     </div>
 
   </mat-dialog-content>

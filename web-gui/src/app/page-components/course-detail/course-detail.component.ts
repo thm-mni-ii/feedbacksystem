@@ -30,6 +30,7 @@ import {TaskService} from "../../service/task.service";
 import {Course} from "../../model/Course";
 import {Task} from "../../model/Task";
 import {CourseService} from "../../service/course.service";
+import {Submission} from "../../model/Submission";
 
 @Component({
   selector: 'app-course-detail',
@@ -50,12 +51,15 @@ export class CourseDetailComponent implements OnInit {
   courseDetail: Course;
   openConferences: Observable<string[]>;
   subscriptions: Subscription[] = [];
+  submissionStatus: boolean;
+  submissions: Submission[];
 
   ngOnInit() {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.loadAllInitalInformation(param.id)
+        this.loadAllInitalInformation(param.id);
+        this.submissionStatus = this.getStatus();
       }
     );
   }
@@ -63,13 +67,16 @@ export class CourseDetailComponent implements OnInit {
   loadAllInitalInformation(courseid: number) {
     this.taskService.getAllTasks(this.courseID).subscribe(
       tasks => {
-        this.tasks = tasks
+        this.tasks = tasks;
+        this.submissionStatus = this.getStatus();
       }
     );
     this.courseService.getCourse(this.courseID).subscribe(
       course => {
-      this.titlebar.emitTitle(course.name);
+        this.courseDetail = course;
+        this.titlebar.emitTitle(course.name);
     })
+
   }
 
 
@@ -114,8 +121,8 @@ export class CourseDetailComponent implements OnInit {
         //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
         return this.taskService.getTask(this.courseID, value.taskid)
       })
-    ).subscribe(course_detail => {
-      this.router.navigate(['courses', this.courseID, 'task', course_detail.id]);
+    ).subscribe(courseDetail => {
+      this.router.navigate(['courses', this.courseID, 'task', this.courseDetail.id]);
     });
   }
 
@@ -191,7 +198,7 @@ export class CourseDetailComponent implements OnInit {
   /**
    * Delete a course by its ID, if the user not permitted to do that, nothing happens
    */
-  deleteCourse(cid: number) {
+  deleteCourse() {
         this.dialog.open(CourseDeleteModalComponent, {
           data: {coursename: this.courseDetail.name, courseID: this.courseID}
         }).afterClosed().pipe(
@@ -205,7 +212,7 @@ export class CourseDetailComponent implements OnInit {
           .then( (value: Succeeded) => {
             if (value.success) {
               this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
-              this.router.navigate(['courses']);
+              this.router.navigate(['courses', 'user']);
             } else {
               this.snackbar.open('Leider konnte der Kurs ' + this.courseID
                 + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
@@ -242,7 +249,16 @@ export class CourseDetailComponent implements OnInit {
       });
     }
 
-    /*public exportSubmissions() {
+    public exportSubmissions() {
       this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
-    }*/
+    }
+
+  // true if the user has passed the task successfully
+  private getStatus(): boolean {
+    if (this.submissions.length==0) return null
+    for (let sub of this.submissions){
+      if (!sub.done || sub.results.find(element => element.exitCode != 0)) return false
+    }
+    return true
+  }
 }
