@@ -176,7 +176,7 @@ export const httpInterceptorProviders = [
   ],
   entryComponents: [ExitCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, ImpressumDialogComponent,
     InvitetoConferenceDialogComponent, AssignTicketDialogComponent],
-  providers: [CookieService],
+  providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule {
