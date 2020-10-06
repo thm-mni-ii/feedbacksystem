@@ -1,15 +1,3 @@
-<!--<p style="word-wrap: break-word;" *ngIf="task.load_external_description"><b>Externe Aufgabenstellung</b> {{task.external_description}} <span class="resetExternalInfo" (click)="triggerInfo()">Reset</span></p>-->
-<!--<div class="result">-->
-<!--  <p *ngIf="!!task.submission_data">-->
-<!--    Abgabe: {{task.submission_data}}-->
-<!--    <br>-->
-<!--    <br>-->
-<!--    <button mat-flat-button  color="primary"  (click)="reRunTask()" *ngIf="!deadlineTask" matTooltip="Abgabe erneut senden"><mat-icon >replay</mat-icon>Abgabe erneut senden</button>-->
-<!--  </p>-->
-<!--  <span class="filler"></span>-->
-<!--  <p>{{task.submit_date| date:'medium'}}</p>-->
-<!--</div>-->
-
 <mat-form-field style="width: 100%;" class="user-input-text" appearance="outline">
   <mat-label>Abgabe Text:</mat-label>
   <textarea style="height: 60px;" matInput type="text" (ngModelChange)="updateSubmission($event)" [(ngModel)]="toSubmit"></textarea>

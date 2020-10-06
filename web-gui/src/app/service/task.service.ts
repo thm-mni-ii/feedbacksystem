@@ -49,7 +49,7 @@ export class TaskService {
   // SUBMISSIONS
   // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions
   getAllSubmissions(uid: number, cid: number, tid: number): Observable<Submission[]>{
-    return of(SUBMISSION.slice(1,2))
+    return of(SUBMISSION.slice(0,1))
   }
 
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
