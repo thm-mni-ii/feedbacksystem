@@ -28,7 +28,7 @@ export class CourseService {
   }
 
   // DELETE /courses/{cid}
-  deleteCourse(cid: number): Observable<Succeeded> { // returns an Observable<Succeeded>
+  deleteCourse(cid: number): Observable<any> { // returns an Observable<Succeeded>
     return of();
   }
 

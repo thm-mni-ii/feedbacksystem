@@ -1,6 +1,7 @@
-.guest-account {
+mat-dialog-content {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .actions {

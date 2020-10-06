@@ -13,6 +13,7 @@ import {throwError} from "rxjs";
 import {MatPaginator} from "@angular/material/paginator";
 import {UserService} from "../../service/user.service";
 import {User} from "../../model/User";
+import {CreateGuestUserDialog} from "../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
 
 /**
  * This component is for admin managing users
@@ -91,6 +92,21 @@ export class UserManagementComponent implements OnInit {
   }
 
   showGuestUserDialog() {
+    this.dialog.open(CreateGuestUserDialog, {
+      width: '500px',
+    }).afterClosed().subscribe(
+      user => {
+        if(user) {
+          this.userService.createUser(user).subscribe(
+            res => {
+              this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
+              console.log(user);
+              this.dataSource.data.push(user)
+            }, error => {
+              this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
+            });
+        }
+      });
     /*const dialogRef = this.dialog.open(CreateGuestUserDialog, {
       width: '500px',
       data: this.userData
@@ -111,13 +127,4 @@ export class UserManagementComponent implements OnInit {
         }
       });*/
   }
-
-  // private resetUserData(): void {
-  //   this.userData.gPrename = '';
-  //   this.userData.gSurname = '';
-  //   this.userData.gEmail = '';
-  //   this.userData.gPassword = '';
-  //   this.userData.gRole = 16;
-  //   this.userData.gUsername = '';
-  // }
 }
