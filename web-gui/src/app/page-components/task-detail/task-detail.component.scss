@@ -121,9 +121,6 @@ mat-radio-button {
     > * {
       margin-left: 8px;
     }
-    > .tiny {
-      font-size: small;
-    }
     .state {
       text-align: center;
       line-height: 30px;
@@ -141,9 +138,19 @@ mat-radio-button {
 
 .failed {
   color: red;
-  transform: rotate(45deg);
 }
 
 .not-done {
-  color: darkorange;
+  color: #9d9ea4;
 }
+
+.tiny {
+  font-size: small;
+}
+
+.description {
+  font-size: small;
+  padding-bottom: 20px;
+}
+
+

@@ -1,12 +1,10 @@
 <mat-tab-group (selectedTabChange)="tabChanged($event)">
-  <mat-tab *ngFor="let taskResult of taskResults" label="{{taskResult.checkerType}}" class="tab">
-
-    <h4>Ergebnis:</h4>
-    <div *ngIf="taskResult.exitCode==0">Checker erfolgreich</div>
-    <div *ngIf="taskResult.exitCode!=0">Checker nicht erfolgreich. Exitcode: {{taskResult.exitCode}}</div>
+  <mat-tab *ngFor="let taskResult of taskResults" label="{{taskResult.checkerType}}">
+    <span *ngIf="taskResult.exitCode==0">Checker erfolgreich</span>
+    <span *ngIf="taskResult.exitCode!=0">Checker nicht erfolgreich. Exitcode: {{taskResult.exitCode}}</span>
     <br>
-    <h5>Ergebnistext:</h5>
-    {{taskResult.resultText}}
+    <span class="{{convertExitCode(taskResult.exitCode)}}" >{{taskResult.resultText}}</span>
   </mat-tab>
 </mat-tab-group>
+
 

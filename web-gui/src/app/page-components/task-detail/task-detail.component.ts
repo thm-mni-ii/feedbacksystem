@@ -39,7 +39,6 @@ export class TaskDetailComponent implements OnInit {
   token: JWTToken;
   deadlineTask: boolean;
   submissionStatus: boolean;
-  currentResults: CheckResult[];
   lastSubmission: Submission;
   submissionData: string | File;
 
@@ -65,7 +64,6 @@ export class TaskDetailComponent implements OnInit {
         // find the latest submission to display the result
         let max = Math.max.apply(Math, this.submissions.map(sub => { return sub.submissionTime}));
         this.lastSubmission = this.submissions.find(sub => sub.submissionTime ==max);
-        console.log(this.submissions.length)
       }
 
       this.titlebar.emitTitle(this.course.name);
@@ -168,7 +166,7 @@ export class TaskDetailComponent implements OnInit {
           this.submissions.push(res);
           this.result(res);
         } else {
-          this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.");
+          this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
           this.taskService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
             delay(2000)
           ).subscribe(res2 =>{
@@ -176,12 +174,12 @@ export class TaskDetailComponent implements OnInit {
             if(res2.done){
               this.result(res2)// TODO result??
             } else {
-              this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.");
+              this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
             }
           });
         }
       }, error => {
-        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.");
+        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
       }
     );
   }
@@ -189,9 +187,9 @@ export class TaskDetailComponent implements OnInit {
   private result(submission: Submission){
     this.lastSubmission = submission;
     if(this.getStatus()) {
-      this.snackbar.open("Du hast erfolgreich bestanden.");
+      this.snackbar.open("Du hast erfolgreich bestanden.",'OK', {duration: 3000});
     } else {
-      this.snackbar.open("Das musst du wohl nochmal probieren.");
+      this.snackbar.open("Das musst du wohl nochmal probieren.", 'OK', {duration: 3000});
     }
   }
 
