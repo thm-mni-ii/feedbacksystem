@@ -23,6 +23,7 @@ services:
     restart: always
     depends_on:
       - mysql1
+      - master-runner
     ports:
       - "443:443"
     volumes:
@@ -42,6 +43,7 @@ services:
       - JITSI_USER=fbs
       - JWT_SECRET=8Dsupersecurekeydf0
       - BBB_SECRET
+      - MASTER_RUNNER_URL=http://master-runner:8081
 
   master-runner:
     build: master-runner
@@ -55,5 +57,3 @@ services:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/upload-dir:/upload-dir
-
-
