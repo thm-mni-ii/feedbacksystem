@@ -9,7 +9,7 @@ VOLUME /usr/local/ws/markdown
 VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
 VOLUME /shared-messages
-EXPOSE 8080
+EXPOSE 433
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
 ENTRYPOINT ["./wsd"]
