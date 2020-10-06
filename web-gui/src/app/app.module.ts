@@ -41,7 +41,7 @@ import {MatSliderModule} from '@angular/material/slider';
 
 import {NewCourseComponent} from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
-import { CoursePreviewComponent } from './page-components/course-preview/course-preview.component';
+import { CoursePreviewComponent} from "./page-components/course-preview/course-preview.component";
 import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
 import { TaskDetailComponent } from './page-components/task-detail/task-detail.component';
 import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';
@@ -81,8 +81,8 @@ import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
+      url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest);
