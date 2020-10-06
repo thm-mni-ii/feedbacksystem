@@ -17,6 +17,7 @@ import {AuthService} from "../../service/auth.service";
 import {JWTToken} from "../../model/JWTToken";
 import {Submission} from "../../model/Submission";
 import {CheckResult} from "../../model/CheckResult";
+import {error} from "@angular/compiler/src/util";
 
 /**
  * Shows a task in detail
@@ -59,7 +60,7 @@ export class TaskDetailComponent implements OnInit {
         this.getInformation(courseID, taskID);
       }, error => this.router.navigate(['404'])
     );
-      if(this.submissions != null) {
+      if(this.submissions.length != 0) {
         this.submissionStatus = this.getStatus();
         // find the latest submission to display the result
         let max = Math.max.apply(Math, this.submissions.map(sub => { return sub.submissionTime}));
@@ -70,9 +71,8 @@ export class TaskDetailComponent implements OnInit {
 
     // Check if task reached deadline TODO: this needs work
     setInterval(() => {
-      if (!this.submissionStatus || this.submissions==null) {
+      if (!this.submissionStatus) {
         let now: number = Date.now();
-        // console.log(now);
         this.deadlineTask = false // this.reachedDeadline(now, this.task.deadline);
       }
     }, 1000);
@@ -91,7 +91,8 @@ export class TaskDetailComponent implements OnInit {
         }
         this.task = task;
       }
-    );
+    ), error => {this.router.navigate(['404'])}
+
     this.courseService.getCourse(cid).subscribe(
       course => {
         if (Object.keys(course).length == 0) {
@@ -99,20 +100,25 @@ export class TaskDetailComponent implements OnInit {
         }
         this.course = course;
       }
-    );
+    ), error => {this.router.navigate(['404'])};
     this.getSubmissions(cid, tid);
     this.token = this.authService.getToken()
   }
 
   getSubmissions(cid: number, tid: number){
-    this.taskService.getAllSubmissions(1, cid, tid).subscribe(
-      submissions => {
-        // TODO: error handling
-        if (submissions != null) {
-          this.submissions = submissions;
-        } else this.submissions = null
-      }
-    );
+    try {
+      this.taskService.getAllSubmissions(1, cid, tid).subscribe(
+        submissions => {
+          // TODO: error handling
+          if (submissions != null) {
+            this.submissions = submissions;
+          }
+        }
+      );
+    } catch (e) {
+      this.submissions = []
+      this.lastSubmission
+    }
   }
 
   // true if the user has passed the task successfully
@@ -143,23 +149,24 @@ export class TaskDetailComponent implements OnInit {
       return;
     } else {
       // if user submits but there is a pending submission
-      if (this.submissions.find(submission => !submission.done)) {
-        this.snackbar.open('Für Aufgabe "' + this.task.name +
-          '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
-          .onAction()
-          .subscribe(() => {
-            this.submit();
-          });
-        // TODO: reload submissioins, to see if its done?
-        this.getSubmissions(this.course.id, this.task.id);
-      } else {
-        this.submit();
+      if (this.submissions.length != 0) {
+        if (this.submissions.find(submission => !submission.done)) {
+          this.snackbar.open('Für Aufgabe "' + this.task.name +
+            '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
+            .onAction()
+            .subscribe(() => {
+              this.submit();
+            });
+          // TODO: reload submissioins, to see if its done?
+          this.getSubmissions(this.course.id, this.task.id);
+          return;
+        }
       }
+      this.submit()
     }
   }
 
   private submit() {
-
     this.taskService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
       res => {
         if(res.done) {
@@ -186,7 +193,8 @@ export class TaskDetailComponent implements OnInit {
 
   private result(submission: Submission){
     this.lastSubmission = submission;
-    if(this.getStatus()) {
+    this.submissionStatus = this.getStatus();
+    if(this.submissionStatus) {
       this.snackbar.open("Du hast erfolgreich bestanden.",'OK', {duration: 3000});
     } else {
       this.snackbar.open("Das musst du wohl nochmal probieren.", 'OK', {duration: 3000});
@@ -204,13 +212,14 @@ export class TaskDetailComponent implements OnInit {
     this.submissionData = data['content'];
   }
 
-  public runAllTaskAllUsers() {
-    this.taskService.restartAllSubmissions(1,1,1,1)
-  }
+  // TODO: there is no route for this
+  // public runAllTaskAllUsers() {
+  //   this.taskService.restartAllSubmissions(1,1,1,1)
+  // }
 
   reRun() {
     if(this.lastSubmission != null) {
-      this.taskService.restartSubmission(this.token.id, this.course.id, this.task.id, this.lastSubmission.id)
+      this.taskService.restartSubmission(this.token.id, this.course.id, this.task.id, this.lastSubmission.id);
       this.getSubmissions(this.course.id, this.task.id);
     }
   }
@@ -244,9 +253,16 @@ export class TaskDetailComponent implements OnInit {
       data: {taskname: this.task.name}
     }).afterClosed().subscribe( value => {
       if (value.exit){
-        this.taskService.deleteTask(this.course.id, this.task.id); // TODO: Should send back status (Fehlerbehandlung)
-        this.router.navigate(['courses',this.course.id]);
-      }
+        this.taskService.deleteTask(this.course.id, this.task.id).subscribe(
+          res => {
+            this.snackbar.open('Dieser Task wurde gelöscht.', 'Ok', {duration: 10000})
+              .onAction()
+              .subscribe(() => {
+                this.router.navigate(['courses',this.course.id]);
+              });
+          }
+        );
+      } else this.snackbar.open('Hi','ok')
     });
   }
 

@@ -17,8 +17,8 @@ export class UserService {
   }
 
   // POST /users
-  createUser(){
-
+  createUser(user: User): Observable<any>{
+    return of(true)
   }
 
   // GET /users/{uid}
