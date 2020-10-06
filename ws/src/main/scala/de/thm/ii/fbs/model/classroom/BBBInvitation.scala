@@ -11,7 +11,7 @@ import de.thm.ii.fbs.model.User
   * @param creator           Issuer for the Invitation
   * @param courseId          courseId for the Invitation
   * @param service           conference system used
-  * @param visible          defines if conference is publicly visible in the classroom
+  * @param visible           defines if conference is publicly visible in the classroom
   */
 case class BBBInvitation(override val creator: User, override val courseId: Int, override val visible: Boolean,
                          override val service: String, meetingId: String, meetingPassword: String,

@@ -12,7 +12,6 @@ import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
-import org.springframework.messaging.simp.user.SimpUserRegistry
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
 import org.springframework.stereotype.Controller
 
@@ -76,7 +75,7 @@ class ConferenceSTOMPController {
         if (localUser.role > CourseRole.TUTOR) {
           invitees.foreach(invitee => {
             if (Classroom.getParticipants(invitation.courseId).exists(p => p.user.username == invitee.username)){
-              smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitationToJson(invitation))
+              smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitation)
             }
           })
         }
@@ -100,21 +99,10 @@ class ConferenceSTOMPController {
       */
     @MessageMapping(value = Array("/classroom/conference/open"))
     def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-      val creator = userService.find(headerAccessor.getUser.getName)
-      val invitationJsonWrapper = m.retrive("invitation")
-      val invitation = invitationJsonWrapper.retrive("service").asText() match {
-        case Some(bbbService.name) => BBBInvitation(creator.get,
-          invitationJsonWrapper.retrive("courseId").asInt().get,
-          invitationJsonWrapper.retrive("visible").asBool().get,
-          invitationJsonWrapper.retrive("service").asText().get,
-          invitationJsonWrapper.retrive("meetingId").asText().get,
-          invitationJsonWrapper.retrive("meetingPassword").asText().get,
-          invitationJsonWrapper.retrive("moderatorPassword").asText().get)
-        case Some(jitsiService.name) => JitsiInvitation(creator.get,
-          invitationJsonWrapper.retrive("courseId").asInt().get,
-          invitationJsonWrapper.retrive("visible").asBool().get,
-          invitationJsonWrapper.retrive("service").asText().get,
-          invitationJsonWrapper.retrive("href").asText().get)
+      val objectMapper = new ObjectMapper();
+      val invitation = m.retrive("invitation").retrive("service").asText() match {
+        case Some(bbbService.name) => objectMapper.treeToValue(m, classOf[BBBInvitation])
+        case Some(jitsiService.name) => objectMapper.treeToValue(m, classOf[JitsiInvitation])
       }
       UserConferenceMap.map(invitation, headerAccessor.getUser)
    }
