@@ -3,7 +3,6 @@ import {DatabaseService} from '../../service/database.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
-import {UserService} from '../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
@@ -58,17 +57,15 @@ export class CourseDetailComponent implements OnInit {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.loadAllInitalInformation(param.id);
-        this.submissionStatus = this.getStatus();
+        this.loadAllInitalInformation();
       }
     );
   }
 
-  loadAllInitalInformation(courseid: number) {
+  loadAllInitalInformation() {
     this.taskService.getAllTasks(this.courseID).subscribe(
       tasks => {
         this.tasks = tasks;
-        this.submissionStatus = this.getStatus();
       }
     );
     this.courseService.getCourse(this.courseID).subscribe(
@@ -137,7 +134,7 @@ export class CourseDetailComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+  /*private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
@@ -160,7 +157,8 @@ export class CourseDetailComponent implements OnInit {
         })
         .catch(console.error);
     }, 2000);
-  }
+  }*/
+
   goOnline() {
     this.db.subscribeCourse(this.courseID).subscribe();
     Notification.requestPermission();
@@ -251,13 +249,4 @@ export class CourseDetailComponent implements OnInit {
     public exportSubmissions() {
       this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
     }
-
-  // true if the user has passed the task successfully
-  private getStatus(): boolean {
-    if (this.submissions.length==0) return null
-    for (let sub of this.submissions){
-      if (!sub.done || sub.results.find(element => element.exitCode != 0)) return false
-    }
-    return true
-  }
 }
