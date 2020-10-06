@@ -1,50 +1,34 @@
 <div class="container">
   <div class="actions">
-    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', courseID]" matTooltip="Zurück zur Aufgabenübersicht"><mat-icon >arrow_back</mat-icon></button>
+    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', course.id]" matTooltip="Zurück zur Aufgabenübersicht"><mat-icon >arrow_back</mat-icon></button>
   </div>
-
-  <div *ngIf="!submissionStatus">FALSE</div>
 
   <mat-card class="details" id="{{task.id}}">
     <div class="task-container">
       <span>{{task.name}}</span>
       <span class="meta">
         <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
-        <span class="tiny">{{task.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-        <span class="state passed" *ngIf="['true',true].indexOf(courseTask.combined_passed) >= 0"><mat-icon>check_circle</mat-icon></span>
-        <span class="state failed" *ngIf="['false',false].indexOf(courseTask.combined_passed) >= 0"><mat-icon>add_circle</mat-icon></span>
-        <span class="state not-done" *ngIf="courseTask.combined_passed == null"><mat-icon>new_releases</mat-icon></span>
-<!--        <span><mat-spinner *ngIf="processing && isInFetchingResultOfTasks(courseTask);" diameter="20"></mat-spinner></span>-->
+        <span class="tiny">{{task.deadline*1000 | date:'dd.MM.yyyy HH:mm'}}</span>
+        <span class="state passed" *ngIf="submissionStatus"><mat-icon>check_circle</mat-icon></span>
+        <span class="state failed" *ngIf="!submissionStatus && submissionStatus != null"><mat-icon>add_circle</mat-icon></span>
+        <span class="state not-done" *ngIf="submissionStatus == null"><mat-icon>new_releases</mat-icon></span>
       </span>
     </div>
-    <span *ngIf="courseTask.task_description != courseTask.task_name">{{courseTask.task_description}}</span>
     <mat-card-content>
       <div class="user-input">
         <app-submission-file *ngIf="submissionTypeOfTask() == 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>
         <app-submission-text *ngIf="submissionTypeOfTask() == 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
-
-            <!--<app-task-submission-file *ngIf="submissionTypeOfTask() == 'file'" [task]="courseTask" [deadlineTask]="deadlineTask"-->
-<!--                                      (update)="updateSubmissionContent($event)" ></app-task-submission-file>-->
-<!--            <app-task-submission-text *ngIf="submissionTypeOfTask() == 'text'" [task]="courseTask" [deadlineTask]="deadlineTask"-->
-<!--                                      (rerun)="reRunTask($event)" (update)="updateSubmissionContent($event)"-->
-<!--                                      (trigger)="triggerExternalDescriptionIfNeeded($event, true)"></app-task-submission-text>-->
-<!--            <app-task-submission-choice *ngIf="subTypes == 'choice'" [task]="courseTask" [deadlineTask]="deadlineTask"-->
-<!--                                        (update)="updateSubmissionContent($event)"-->
-<!--                                        (trigger)="triggerExternalDescriptionIfNeeded($event, true)"></app-task-submission-choice>-->
-
-
-        <app-submission-result style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="courseTask.evaluation" [taskPassed]="courseTask.passed"></app-submission-result>
-
-        <p style="font-style: italic;" *ngIf="courseTask.result">Exitcode: {{courseTask.exitcode}}</p>
-
       </div>
+
+      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="isAuthorized()" mat-flat-button color="warn" (click)="deleteTask()">Löschen</button>
-        <button *ngIf="isAuthorized()" mat-flat-button color="accent" (click)="updateTask()">Bearbeiten</button>
+        <button *ngIf="isAuthorized('docent, admin')" mat-flat-button color="warn" (click)="deleteTask()">Löschen</button>
+        <button *ngIf="isAuthorized('')" mat-flat-button color="accent" (click)="updateTask()">Bearbeiten</button>
+        <button *ngIf="isAuthorized('')" mat-flat-button color="primary" (click)="reRun()">Erneut senden</button>
         <button [disabled]="deadlineTask" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
-        <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="runAllTaskAllUsers()" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon>Alle ausführen</button>
+        <button mat-flat-button color="primary" *ngIf="isAuthorized('')" (click)="runAllTaskAllUsers()" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon>Alle ausführen</button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>

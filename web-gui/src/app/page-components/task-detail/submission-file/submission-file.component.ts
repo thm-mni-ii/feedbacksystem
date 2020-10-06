@@ -7,8 +7,6 @@ import {Task} from "../../../model/Task";
   styleUrls: ['./submission-file.component.scss']
 })
 export class SubmissionFileComponent implements OnInit {
-  @Input() task: Task;
-  @Input() deadlineTask:any;
 
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
