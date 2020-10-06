@@ -4,7 +4,8 @@ import java.util.Date
 
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.util.ScalaObjectMapper
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.xml.bind.DatatypeConverter
@@ -16,13 +17,13 @@ import scala.util.Try
 
 /**
   * Authentication service
-  *
-  * @author Andrej Sajenko
   */
 @Component
 class AuthService {
   @Autowired
   private val userService: UserService = null
+  @Autowired
+  private val crs: CourseRegistrationService = null
 
   @Value("${jwt.secret}")
   private val jwtSecret: String = null
@@ -89,13 +90,23 @@ class AuthService {
     * @param user User
     * @return new token
     */
-  private def createToken(user: User): String =
+  private def createToken(user: User): String = {
+    val privileges = crs.getCoursePriviledges(user.id)
+    val mapper = new ScalaObjectMapper
+
+    val courseRoles = privileges match {
+      case m: Map[Int, Int] if m.isEmpty => "{}"
+      case _ => mapper.writeValueAsString(privileges)
+    }
+
     Jwts.builder.setSubject("client_authentication")
       .claim("id", user.id)
       .claim("username", user.username)
       .claim("globalRole", user.globalRole.id)
+      .claim("courseRoles", courseRoles)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))
       .signWith(SignatureAlgorithm.HS256, jwtSecretEncoding())
       .compact
+  }
 }
