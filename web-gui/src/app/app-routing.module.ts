@@ -23,15 +23,15 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {
     path: '', component: SidebarComponent, canActivate: [AuthGuard], children: [
-      {path: 'courses', component: MyCoursesComponent},
+      {path: 'courses', component: MyCoursesComponent, canActivate: [AuthGuard]},
       {path: 'courses/authorization', component: CourseAuthorizationComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
-      {path: 'courses/search', component: SearchCoursesComponent},
+      {path: 'courses/search', component: SearchCoursesComponent, canActivate: [AuthGuard]},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
-      {path: 'courses/:id', component: CourseDetailComponent},
-      {path: 'courses/:id/tickets', component: ConferenceComponent},
-      {path: 'courses/:id/task/:taskid', component: TaskDetailComponent},
-      {path: 'courses/:id/results', component: CourseResultsComponent},
+      {path: 'courses/:id', component: CourseDetailComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/tickets', component: ConferenceComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/task/:taskid', component: TaskDetailComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},
