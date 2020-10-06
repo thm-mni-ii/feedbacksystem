@@ -5,6 +5,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {Observable} from 'rxjs';
 import {DatabaseService} from '../../service/database.service';
 import {DetailedCourseInformation, Testsystem} from '../../model/HttpInterfaces';
+import {Course} from "../../model/Course";
 
 
 /**
@@ -18,11 +19,10 @@ import {DetailedCourseInformation, Testsystem} from '../../model/HttpInterfaces'
 export class CourseUpdateDialogComponent implements OnInit {
   name: string;
   description: string;
-  standardTaskType: string;
-  semester: string;
-  course_module_id: string;
+  id: number;
+  visible: boolean;
   userDataAllowed: boolean;
-  courseDetails: DetailedCourseInformation;
+  courseDetails: Course;
   coursenameMinLength: number = 5;
   courseNameMaxLength: number = 100;
   courseDescriptionMaxLength: number = 8000;
@@ -35,9 +35,8 @@ export class CourseUpdateDialogComponent implements OnInit {
               public dialogRef: MatDialogRef<CourseUpdateDialogComponent>, private snackbar: MatSnackBar) {
     this.name = '';
     this.description = '';
-    this.standardTaskType = '';
-    this.semester = '';
-    this.course_module_id = '';
+    this.id;
+    this.visible;
   }
 
   testsystems$: Observable<Testsystem[]>;
@@ -45,15 +44,11 @@ export class CourseUpdateDialogComponent implements OnInit {
   ngOnInit() {
     this.courseDetails = this.data.data;
     this.userDataAllowed = false;
-    this.testsystems$ = this.db.getTestsystemTypes();
     console.log(this.courseDetails);
 
-    this.name = this.courseDetails.course_name;
-    this.description = this.courseDetails.course_description;
-    this.standardTaskType = this.courseDetails.standard_task_typ;
-    this.semester = this.courseDetails.course_semester;
-    this.course_module_id = this.courseDetails.course_module_id;
-    this.userDataAllowed = this.courseDetails.personalised_submission;
+    this.name = this.courseDetails.name;
+    this.description = this.courseDetails.description;
+    this.visible = this.courseDetails.visible;
   }
 
   /**
@@ -67,21 +62,21 @@ export class CourseUpdateDialogComponent implements OnInit {
    * Update course information and close dialog
    */
   updateCourse() {
-    this.db.updateCourse(this.courseDetails.course_id, this.name, this.description, this.standardTaskType, this.semester,
+    /*this.db.updateCourse(this.courseDetails.id, this.name, this.description, this.standardTaskType, this.semester,
       this.course_module_id, this.userDataAllowed).subscribe(success => {
       this.dialogRef.close(success);
       this.snackbar.open('Kurseigenschaften erfolgreich geändert!', 'OK', {duration: 3000});
     }, error => {
       this.snackbar.open(error.error.message, 'OK', {duration: 3000});
-    });
+    });*/
 
   }
 
   loadDocentTutorForCourse() {
-    this.db.getCourseDetail(this.courseDetails.course_id).subscribe((value: DetailedCourseInformation) => {
+    /*this.db.getCourseDetail(this.courseDetails.id).subscribe((value: DetailedCourseInformation) => {
       this.courseDetails.course_docent = value.course_docent;
       this.courseDetails.course_tutor = value.course_tutor;
-    });
+    });*/
   }
 
   isInputValid(): boolean {
