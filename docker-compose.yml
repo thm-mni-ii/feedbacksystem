@@ -25,7 +25,8 @@ services:
       - mysql1
       - master-runner
     ports:
-      - "443:443"
+      - 443:443
+      - 80:80
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./data/zip-dir:/zip-dir
