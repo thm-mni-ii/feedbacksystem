@@ -4,6 +4,7 @@ import {User} from '../model/User';
 import { Observable, of } from 'rxjs';
 import {COURSE} from "../mock-data/mock-courses";
 import {Course} from "../model/Course";
+import {Succeeded} from "../model/HttpInterfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +12,7 @@ import {Course} from "../model/Course";
 export class CourseService {
   constructor() { }
 
-  getCourse(cid: number): Observable<Course> {
-    return of(COURSE.pop())
-  }
-
+  // GET /courses/
   getCourseList(): Observable<Course[]> {
     return of(COURSE)
   }
@@ -27,5 +25,15 @@ export class CourseService {
   // GET /users/{uid}/courses
   getRegisteredCourses(uid: number): Observable<Course[]>{
     return of(COURSE);
+  }
+
+  // DELETE /courses/{cid}
+  deleteCourse(cid: number): Observable<Succeeded> { // returns an Observable<Succeeded>
+    return of();
+  }
+
+  //DELETE /users/{uid}/courses/{cid}
+  unsubscribeCourse(cid: number, uid: number) {
+
   }
 }

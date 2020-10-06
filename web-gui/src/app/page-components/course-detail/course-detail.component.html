@@ -4,17 +4,17 @@
     <button mat-flat-button color="primary" [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><mat-icon >dashboard</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
-<!--&lt;!&ndash;    <button mat-flat-button color="primary" color="warn" *ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id" (click)="exitCourse(courseDetail.course_name, courseDetail.course_id)">Austragen</button>&ndash;&gt;-->
+    <button mat-flat-button color="primary" color="warn" (click)="exitCourse(courseDetail.name, courseDetail.id)">Austragen</button><!--*ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id"-->
 <!--    <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>-->
-<!--    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>-->
-<!--    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>-->
-<!--    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" [routerLink]="['/','courses',courseID,'tickets']" matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>-->
-<!--    <mat-menu #confMenu>-->
-<!--      <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item-->
-<!--              (click)="openUrlInNewWindow(url)">Room {{i}}</button>-->
-<!--    </mat-menu>-->
-<!--    <button mat-flat-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()">Go Online</button>-->
-<!--    <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>-->
+    <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
+    <button mat-flat-button color="primary" *ngIf="classroomService.isJoined()" [routerLink]="['/','courses',courseID,'tickets']" matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>
+    <mat-menu #confMenu>
+      <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
+              (click)="openUrlInNewWindow(url)">Room {{i}}</button>
+    </mat-menu>
+    <button mat-flat-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()">Go Online</button>
+    <button mat-flat-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
   </div>
 
 <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
@@ -29,10 +29,10 @@
     </span>
   </mat-card>
 
-  <mat-card *ngIf="userRole === 'admin' || userRole === 'moderator'" class="danger-zone">
+  <mat-card class="danger-zone"><!--*ngIf="userRole === 'admin' || userRole === 'moderator'"-->
     <h3>Danger Zone</h3>
     <mat-card-actions>
-      <button mat-raised-button (click)="deleteCourse()"
+      <button mat-raised-button (click)="deleteCourse(this.courseID)"
               color="warn"
               matTooltip="Delete module">
         Kurs löschen
