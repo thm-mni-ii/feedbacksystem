@@ -9,13 +9,6 @@ import {JWTToken} from "../model/JWTToken";
 
 const TOKEN_ID = 'token';
 
-const TOKEN_DUMMY: JWTToken = {
-  id: 0,
-  globalRole: 0,
-  username: 'lemi',
-  courseRoles: [],
-}
-
 /**
  * Manages login and logout of the user of the page.
  */
@@ -37,24 +30,22 @@ export class AuthService {
    * Returns true only if a valid token exists.
    */
   public isAuthenticated(): boolean {
-    return true
-    // const token = this.loadToken()
-    // return token && !this.jwtHelper.isTokenExpired(token);
+    const token = this.loadToken()
+    return token && !this.jwtHelper.isTokenExpired(token);
   }
 
   /**
    * @return The lastly received token.
    */
   getToken(): JWTToken {
-    // const token = this.loadToken();
-    // const decodedToken = this.decodeToken(token)
-    // if (!decodedToken) {
-    //   return throwError('Decoding the token failed')
-    // } else if (this.jwtHelper.isTokenExpired(token)) {
-    //   return throwError("Token expired")
-    // }
-    // return decodedToken;
-    return TOKEN_DUMMY
+    const token = this.loadToken();
+    const decodedToken = this.decodeToken(token)
+    if (!decodedToken) {
+      throw 'Decoding the token failed'
+    } else if (this.jwtHelper.isTokenExpired(token)) {
+      throw "Token expired"
+    }
+    return decodedToken;
   }
 
   /**
@@ -94,23 +85,22 @@ export class AuthService {
   }
 
   private login(username: string, password: string, uri: string): Observable<JWTToken> {
-    return of(TOKEN_DUMMY)
-    // return this.http.post<Succeeded>(uri,
-    //   {username: username, password: password},
-    //   {observe: 'response'})
-    //   .pipe(map(res => {
-    //     const token = this.extractTokenFromHeader(res)
-    //     this.storeToken(token)
-    //     return token
-    //   }), flatMap(token => {
-    //     const decodedToken = this.decodeToken(token)
-    //     if (!decodedToken) {
-    //       return throwError('Decoding the token failed')
-    //     } else if (this.jwtHelper.isTokenExpired(token)) {
-    //       return throwError("Token expired")
-    //     }
-    //     return of(decodedToken);
-    //   }))
+    return this.http.post<Succeeded>(uri,
+      {username: username, password: password},
+      {observe: 'response'})
+      .pipe(map(res => {
+        const token = this.extractTokenFromHeader(res)
+        this.storeToken(token)
+        return token
+      }), flatMap(token => {
+        const decodedToken = this.decodeToken(token)
+        if (!decodedToken) {
+          return throwError('Decoding the token failed')
+        } else if (this.jwtHelper.isTokenExpired(token)) {
+          return throwError("Token expired")
+        }
+        return of(decodedToken);
+      }))
   }
 
   private decodeToken(token: string): JWTToken | null {
