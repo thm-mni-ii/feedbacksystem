@@ -101,103 +101,103 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
-    createTask() {
-      this.dialog.open(TaskNewDialogComponent, {
+  createTask() {
+    this.dialog.open(TaskNewDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    }).afterClosed().pipe(
+      flatMap((value) => {
+        if (value.success) {
+          this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
+        }
+        //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
+        return this.taskService.getTask(this.courseID, value.taskid)
+      })
+    ).subscribe(course_detail => {
+      this.router.navigate(['courses', this.courseID, 'task', course_detail.id]);
+    });
+  }
+
+  createConference() {
+    this.dialog.open(NewconferenceDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    });
+  }
+
+  openUrlInNewWindow(url: string) {
+    window.open(url, '_blank');
+  }
+
+  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+    setTimeout(() => {
+      this.db.getTaskResult(taskid).pipe(
+        flatMap((taskResult: NewTaskInformation) => {
+          const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
+          if (acceptance_flaggs.indexOf(null) < 0) {
+            // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
+            return of({success: true});
+          } else {
+            return throwError('Not all results yet');
+          }
+        }),
+        retryWhen(errors => errors.pipe(
+          delay(5000),
+          take(50)))
+      ).toPromise()
+        .then(d => {
+          if (typeof d == 'undefined') {
+            // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
+          }
+        })
+        .catch(console.error);
+    }, 2000);
+  }
+  goOnline() {
+    this.db.subscribeCourse(this.courseID).subscribe();
+    Notification.requestPermission();
+    this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
+      this.dialog.open(IncomingCallDialogComponent, {
         height: 'auto',
         width: 'auto',
-        data: {courseID: this.courseID}
-      }).afterClosed().pipe(
-        flatMap((value) => {
-          if (value.success) {
-            this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          }
-          //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
-          return this.taskService.getTask(this.courseID, value.taskid)
-        })
-      ).subscribe(course_detail => {
-        this.router.navigate(['courses', this.courseID, 'task', course_detail.id]);
+        data: {courseID: this.courseID, invitation: n},
+        disableClose: true
+      }).afterClosed().subscribe(hasAccepted => {
+
       });
-    }
+    }));
+    this.classroomService.join(this.courseID);
+    this.router.navigate(['courses', this.courseID, 'tickets']);
+  }
 
-      createConference() {
-        this.dialog.open(NewconferenceDialogComponent, {
-          height: 'auto',
-          width: 'auto',
-          data: {courseID: this.courseID}
-        });
-      }
+  goOffline() {
+    this.classroomService.leave();
+  }
 
-      openUrlInNewWindow(url: string) {
-        window.open(url, '_blank');
+  createTicket() {
+    this.dialog.open(NewticketDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    }).afterClosed().subscribe(ticket => {
+      if (ticket) {
+        this.classroomService.createTicket(ticket);
       }
+    });
+  }
 
-      private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
-        setTimeout(() => {
-          this.db.getTaskResult(taskid).pipe(
-            flatMap((taskResult: NewTaskInformation) => {
-              const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
-              if (acceptance_flaggs.indexOf(null) < 0) {
-                // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
-                return of({success: true});
-              } else {
-                return throwError('Not all results yet');
-              }
-            }),
-            retryWhen(errors => errors.pipe(
-              delay(5000),
-              take(50)))
-          ).toPromise()
-            .then(d => {
-              if (typeof d == 'undefined') {
-                // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
-              }
-            })
-            .catch(console.error);
-        }, 2000);
-      }
-      goOnline() {
-        this.db.subscribeCourse(this.courseID).subscribe();
-        Notification.requestPermission();
-        this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
-          this.dialog.open(IncomingCallDialogComponent, {
-            height: 'auto',
-            width: 'auto',
-            data: {courseID: this.courseID, invitation: n},
-            disableClose: true
-          }).afterClosed().subscribe(hasAccepted => {
-
-          });
-        }));
-        this.classroomService.join(this.courseID);
-        this.router.navigate(['courses', this.courseID, 'tickets']);
-      }
-
-      goOffline() {
-        this.classroomService.leave();
-      }
-
-      createTicket() {
-        this.dialog.open(NewticketDialogComponent, {
-          height: 'auto',
-          width: 'auto',
-          data: {courseID: this.courseID}
-        }).afterClosed().subscribe(ticket => {
-          if (ticket) {
-            this.classroomService.createTicket(ticket);
-          }
-        });
-      }
-  /*
-      /!**
-       * Delete a course by its ID, if the user not permitted to do that, nothing happens
-       *!/
-      deleteCourse() {
+  /**
+   * Delete a course by its ID, if the user not permitted to do that, nothing happens
+   */
+  deleteCourse(cid: number) {
         this.dialog.open(CourseDeleteModalComponent, {
-          data: {coursename: this.courseDetail.course_name, courseID: this.courseID}
+          data: {coursename: this.courseDetail.name, courseID: this.courseID}
         }).afterClosed().pipe(
           flatMap(value => {
             if (value.exit) {
-              return this.db.deleteCourse(this.courseID);
+              return this.courseService.deleteCourse(this.courseID);
             }
           })
         )
@@ -205,7 +205,7 @@ export class CourseDetailComponent implements OnInit {
           .then( (value: Succeeded) => {
             if (value.success) {
               this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
-              this.router.navigate(['courses', 'user']);
+              this.router.navigate(['courses']);
             } else {
               this.snackbar.open('Leider konnte der Kurs ' + this.courseID
                 + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
@@ -219,30 +219,30 @@ export class CourseDetailComponent implements OnInit {
           });
       }
 
-      /!**
-       * Unsubscribe course
-       * @param courseName The name to show user
-       * @param courseID The id of current course
-       *!/
-      exitCourse(courseName: string, courseID: number) {
-        this.dialog.open(ExitCourseDialogComponent, {
-          data: {coursename: courseName}
-        }).afterClosed().pipe(
-          flatMap(value => {
-            if (value.exit) {
-              return this.db.unsubscribeCourse(courseID);
-            }
-          })
-        ).subscribe(res => {
-          if (res.success) {
-            this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
-            this.router.navigate(['courses', 'user']);
-
+    /**
+      * Unsubscribe course
+    * @param courseName The name to show user
+    * @param courseID The id of current course
+    */
+    exitCourse(courseName: string, courseID: number) {
+      this.dialog.open(ExitCourseDialogComponent, {
+        data: {coursename: courseName}
+      }).afterClosed().pipe(
+        flatMap(value => {
+          if (value.exit) {
+            return this.db.unsubscribeCourse(courseID);
           }
-        });
-      }
+        })
+      ).subscribe(res => {
+        if (res.success) {
+          this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
+          this.router.navigate(['courses', 'user']);
 
-      public exportSubmissions() {
-        this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name);
-      }*/
+        }
+      });
+    }
+
+    /*public exportSubmissions() {
+      this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
+    }*/
 }
