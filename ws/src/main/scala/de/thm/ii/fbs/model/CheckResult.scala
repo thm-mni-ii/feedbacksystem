@@ -7,4 +7,4 @@ package de.thm.ii.fbs.model
   * @param checkerType The cheker type that checked the submission
   * @param configurationId Checker configuration id
   */
-case class CheckResult(exitCode: Int = 1, resultText: String, checkerType: Int, configurationId: Int)
+case class CheckResult(exitCode: Int = 1, resultText: String, checkerType: String, configurationId: Int)
