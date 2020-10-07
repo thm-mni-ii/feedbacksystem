@@ -5,7 +5,6 @@ import de.thm.ii.fbs.services.{DockerService, FileService}
 import de.thm.ii.fbs.types.RunArgs
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.BashRunnerVerticle.RUN_ADDRESS
-import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -59,7 +58,7 @@ class BashRunnerVerticle extends ScalaVerticle {
       // TODO may run unblocking?
       val (exitCode, stdout, stderr) = DockerService.runContainer(dockerCmd)
 
-      val result = JsonObject.mapFrom(bashRunner.transformResult(exitCode, stdout, stderr))
+      val result = bashRunner.transformResult(exitCode, stdout, stderr)
 
       logger.info(s"Submission-${runArgs.submission.id} Finished\nExitCode: $exitCode \nstdout: $stdout \nstderr: $stderr")
       logger.info(s"Submission-${runArgs.submission.id}: Send result")
@@ -75,7 +74,7 @@ class BashRunnerVerticle extends ScalaVerticle {
   private def handleError(e: Throwable, bashRunner: BashRunnerService): Unit = {
     logger.error(s"Error on Submission-${bashRunner.submission.id}: ", e)
 
-    val result = JsonObject.mapFrom(bashRunner.transformResult(-1, "", s"Runner: ${e.getMessage}"))
+    val result = bashRunner.transformResult(-1, "", s"Runner: ${e.getMessage}")
     vertx.eventBus().sendFuture(HttpVerticle.SEND_COMPLETION, Option(result))
     bashRunner.cleanUp()
   }

@@ -5,6 +5,7 @@ import java.nio.file.Path
 import de.thm.ii.fbs.services.{DockerService, FileService}
 import de.thm.ii.fbs.types.{DockerCmdConfig, Runner, Submission}
 import de.thm.ii.fbs.util.RunnerException
+import io.vertx.core.json.JsonObject
 
 /**
   * BashRunnerService provides all functions to start a Bash Runner
@@ -91,12 +92,17 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
     * @param stderr   Runner standard error Output
     * @return The Runner Results in a Map
     */
-  def transformResult(exitCode: Int, stdout: String, stderr: String): Map[String, Any] = {
+  def transformResult(exitCode: Int, stdout: String, stderr: String): JsonObject = {
     /*If stdout Contains Something change exit code to 42*/
     var checkedExitCode = exitCode
     if (stderr.length > 0 && checkedExitCode == 0) checkedExitCode = 42
 
-    Map("ccid" -> runner.id, "sid" -> submission.id, "exitCode" -> checkedExitCode, "stdout" -> stdout, "stderr" -> stderr)
+    val res = new JsonObject()
+    res.put("ccid", runner.id)
+      .put("sid", submission.id)
+      .put("exitCode", checkedExitCode)
+      .put("stdout", stdout)
+      .put("stderr", stderr)
   }
 
   /**
