@@ -1,44 +1,38 @@
 <div matDialogTitle *ngIf="!isUpdate">Neue Aufgabe erstellen</div>
 <div matDialogTitle *ngIf="isUpdate">Aufgabe bearbeiten</div>
+<div class="newTask">
+    <form [formGroup]="taskForm">
+      <!-- Task name -->
+      <mat-form-field>
+        <input type="text" placeholder="Taskname" matInput formControlName="taskName" required>
+      </mat-form-field>
 
-<mat-dialog-content>
-  <form [formGroup]="taskForm">
-    <!-- Task name -->
-    <mat-form-field>
-      <input type="text" placeholder="Taskname" matInput formControlName="taskName" required>
-    </mat-form-field>
+      <!-- Task Description -->
+      <mat-form-field>
+        <mat-label>Beschreibung</mat-label>
+        <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
+                  formControlName="taskDescription"></textarea>
+      </mat-form-field>
 
-    <!-- Task Description -->
-    <mat-form-field>
-      <mat-label>Beschreibung</mat-label>
-      <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                formControlName="taskDescription"></textarea>
-    </mat-form-field>
+      <!-- Task Deadline -->
+      <mat-form-field>
+        <mat-label>Deadline</mat-label>
+        <input matInput [matDatepicker]="picker" [formControl]="deadline" (dateChange)="addDate($event)">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
-    <!-- Task Deadline -->
-    <mat-form-field>
-      <mat-label>Deadline</mat-label>
-      <input matInput [matDatepicker]="picker" [formControl]="deadline" (dateChange)="addDate($event)">
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
+      <!-- Task Mediatype -->
+      <mat-form-field>
+        <mat-label>Medientyp</mat-label>
+        <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
+                  formControlName="mediaType"></textarea>
+      </mat-form-field>
+      <br>
+      <mat-divider></mat-divider>
 
-    <!-- Task Mediatype -->
-    <mat-form-field>
-      <mat-label>Medientyp</mat-label>
-      <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                formControlName="mediaType"></textarea>
-    </mat-form-field>
-    <br>
-    <mat-divider></mat-divider>
-
-    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>
-    <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!taskForm.valid" (click)="updateTask(taskForm.value)">Update</button>
-  </form>
-
-<!--  <mat-dialog-actions class="dialog-action-buttons">-->
-<!--    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>-->
-
-<!--  </mat-dialog-actions>-->
-</mat-dialog-content>
+      <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+      <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>
+      <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!taskForm.valid" (click)="updateTask(taskForm.value)">Update</button>
+    </form>
+</div>
