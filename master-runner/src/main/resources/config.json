@@ -1,9 +1,14 @@
 {
   "HttpVerticle": {
     "port": 8081,
-    "result.server": {
-      "port": 8081,
-      "host": "localhost"
+    "pfxPassword": "passwd",
+    "pfxPath": "keystore.p12",
+    "result-server": {
+      "port": 443,
+      "host": "ws",
+      "ssl": true,
+      "trustAll": true,
+      "verifyHost": false
     }
   },
   "BashRunnerVerticle": {

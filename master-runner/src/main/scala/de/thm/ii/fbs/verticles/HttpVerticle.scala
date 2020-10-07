@@ -5,7 +5,8 @@ import de.thm.ii.fbs.verticles.runner.BashRunnerVerticle
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
-import io.vertx.scala.core.http.{HttpClient, HttpClientResponse, HttpServer}
+import io.vertx.scala.core.http._
+import io.vertx.scala.core.net.PfxOptions
 import io.vertx.scala.ext.web.handler.BodyHandler
 import io.vertx.scala.ext.web.{Router, RoutingContext}
 
@@ -46,14 +47,33 @@ class HttpVerticle extends ScalaVerticle {
       .handler(run)
     // TODO validate request params
 
+    // Activate ssl
+    val options = HttpServerOptions()
+      .setSsl(true)
+      .setPfxKeyCertOptions(
+        PfxOptions()
+          .setPassword(config.getString("pfxPassword"))
+          .setPath(config.getString("pfxPath"))
+      )
+
+    // Create Server
     vertx
-      .createHttpServer()
+      .createHttpServer(options)
       .requestHandler(router.accept _)
       .listenFuture(config.getInteger("port", 8081), config.getString("host", "0.0.0.0"))
   }
 
   private def registerClient(): Future[Unit] = {
-    client = Option(vertx.createHttpClient())
+    // Configure Client
+    val resultConfig = config.getJsonObject("result-server")
+    val options = HttpClientOptions()
+      .setSsl(resultConfig.getBoolean("ssl", true))
+      .setVerifyHost(resultConfig.getBoolean("verifyHost", true))
+      .setTrustAll(resultConfig.getBoolean("trustAll", false))
+      .setDefaultHost(resultConfig.getString("host", "localhost"))
+      .setDefaultPort(resultConfig.getInteger("port", 80))
+
+    client = Option(vertx.createHttpClient(options))
     vertx.eventBus().consumer(SEND_COMPLETION, sendResult).completionFuture()
   }
 
@@ -70,20 +90,21 @@ class HttpVerticle extends ScalaVerticle {
   }
 
   private def sendResult(msg: Message[JsonObject]): Unit = {
-    try {
-      val resultJson = msg.body()
+    val resultJson = msg.body()
 
-      // Configure Client
-      val clientConfig = config.getJsonObject("result.server")
-      val request = client.get.post(clientConfig.getInteger("port", 80),
-        clientConfig.getString("host", "localhost"),
-        s"/results/${resultJson.getInteger("sid")}/${resultJson.getInteger("ccid")}")
+    // Configure Client
+    val request = client.get
+      .post(s"/results/${resultJson.getInteger("sid")}/${resultJson.getInteger("ccid")}")
 
-      // Send Request
-      request.handler(resultResponse).end(resultJson.encode())
-    } catch {
-      case e: Exception => logger.error("Count not send result", e) // TODO handle
-    }
+    // Add handler
+    request.exceptionHandler({ e =>
+      logger.warn("Count not send result", e) // TODO handle
+    })
+    request.handler(resultResponse)
+
+    // Send Request
+    request.putHeader("content-type", "application/json")
+    request.end(resultJson.encode())
   }
 
   private def resultResponse(res: HttpClientResponse): Unit = {
