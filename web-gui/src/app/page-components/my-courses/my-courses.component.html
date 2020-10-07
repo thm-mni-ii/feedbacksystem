@@ -3,7 +3,6 @@
   <mat-toolbar>
     <span style="flex: 1 1 auto">Kurs/e</span>
     <span style="flex: 1 1 auto"></span>
-    <span>Rolle</span>
   </mat-toolbar>
 
   <app-course-preview *ngFor="let course of registeredCourses$ | async" [data]="course"></app-course-preview>
