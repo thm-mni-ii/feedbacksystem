@@ -27,5 +27,6 @@ export class MyCoursesComponent implements OnInit {
   ngOnInit() {
     this.titlebar.emitTitle('Meine Kurse');
     this.registeredCourses$ = this.courseService.getRegisteredCourses(5); // TODO: ID from cookie
+    console.log()
   }
 }

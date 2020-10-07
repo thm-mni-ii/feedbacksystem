@@ -30,6 +30,7 @@ import {Course} from "../../model/Course";
 import {Task} from "../../model/Task";
 import {CourseService} from "../../service/course.service";
 import {Submission} from "../../model/Submission";
+import {UserService} from "../../service/user.service";
 
 @Component({
   selector: 'app-course-detail',
@@ -41,13 +42,15 @@ export class CourseDetailComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
-              private router: Router, private taskService: TaskService, private courseService: CourseService, @Inject(DOCUMENT) document) {
+              private router: Router, private taskService: TaskService, private authService: AuthService,
+              private courseService: CourseService, @Inject(DOCUMENT) document) {
   }
 
   tasks: Task[];
   courseID: number;
-  userRole: string;
+  user: string;
   courseDetail: Course;
+  role: [];
   openConferences: Observable<string[]>;
   subscriptions: Subscription[] = [];
   submissionStatus: boolean;
@@ -73,7 +76,9 @@ export class CourseDetailComponent implements OnInit {
         this.courseDetail = course;
         this.titlebar.emitTitle(course.name);
     })
-
+    this.role = this.authService.getToken().courseRoles;
+    //TODO: only show role, if user has multiple courseRoles
+    //0: docent, 1: tutor, 2: user
   }
 
 
