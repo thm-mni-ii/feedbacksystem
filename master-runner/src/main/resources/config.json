@@ -1,17 +1,12 @@
 {
-  "HttpVerticle": {
-    "port": 8081,
-    "pfxPassword": "passwd",
-    "pfxPath": "keystore.p12",
-    "result-server": {
-      "port": 443,
-      "host": "ws",
-      "ssl": true,
-      "trustAll": true,
-      "verifyHost": false
-    }
-  },
-  "BashRunnerVerticle": {
-    "instances": 10
-  }
+  "SERVER_PORT": 8081,
+  "SERVER_SSL": true,
+  "PFX_PASSWORD": "passwd",
+  "PFX_PATH": "keystore.p12",
+  "RESULT_SERVER_PORT": 443,
+  "RESULT_SERVER_HOST": "localhost",
+  "RESULT_SERVER_SSL": true,
+  "RESULT_SERVER_TRUST_ALL": true,
+  "RESULT_SERVER_VERIFY_HOST": false,
+  "BASH_RUNNER_INSTANCES": 10
 }

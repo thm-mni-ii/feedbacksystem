@@ -49,29 +49,28 @@ class HttpVerticle extends ScalaVerticle {
 
     // Activate ssl
     val options = HttpServerOptions()
-      .setSsl(true)
+      .setSsl(config.getBoolean("SERVER_SSL", false))
       .setPfxKeyCertOptions(
         PfxOptions()
-          .setPassword(config.getString("pfxPassword"))
-          .setPath(config.getString("pfxPath"))
+          .setPassword(config.getString("PFX_PASSWORD"))
+          .setPath(config.getString("PFX_PATH"))
       )
 
     // Create Server
     vertx
       .createHttpServer(options)
       .requestHandler(router.accept _)
-      .listenFuture(config.getInteger("port", 8081), config.getString("host", "0.0.0.0"))
+      .listenFuture(config.getInteger("SERVER_PORT", 8081), config.getString("SERVER_HOST", "0.0.0.0"))
   }
 
   private def registerClient(): Future[Unit] = {
     // Configure Client
-    val resultConfig = config.getJsonObject("result-server")
     val options = HttpClientOptions()
-      .setSsl(resultConfig.getBoolean("ssl", true))
-      .setVerifyHost(resultConfig.getBoolean("verifyHost", true))
-      .setTrustAll(resultConfig.getBoolean("trustAll", false))
-      .setDefaultHost(resultConfig.getString("host", "localhost"))
-      .setDefaultPort(resultConfig.getInteger("port", 80))
+      .setSsl(config.getBoolean("RESULT_SERVER_SSL", true))
+      .setVerifyHost(config.getBoolean("RESULT_SERVER_VERIFY_HOST", true))
+      .setTrustAll(config.getBoolean("RESULT_SERVER_TRUST_ALL", false))
+      .setDefaultHost(config.getString("RESULT_SERVER_HOST", "localhost"))
+      .setDefaultPort(config.getInteger("RESULT_SERVER_PORT", 80))
 
     client = Option(vertx.createHttpClient(options))
     vertx.eventBus().consumer(SEND_COMPLETION, sendResult).completionFuture()
