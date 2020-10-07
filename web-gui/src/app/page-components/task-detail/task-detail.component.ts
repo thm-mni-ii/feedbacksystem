@@ -262,7 +262,7 @@ export class TaskDetailComponent implements OnInit {
               });
           }
         );
-      } else this.snackbar.open('Hi','ok')
+      }
     });
   }
 

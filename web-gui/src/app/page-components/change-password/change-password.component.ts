@@ -2,9 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {TitlebarService} from "../../service/titlebar.service";
 import {FormControl, Validators} from "@angular/forms";
-import {DatabaseService} from "../../service/database.service";
-import {Succeeded} from "../../model/HttpInterfaces";
 import {AuthService} from "../../service/auth.service";
+import {UserService} from "../../service/user.service";
 
 @Component({
   selector: 'app-change-password',
@@ -17,9 +16,13 @@ export class ChangePasswordComponent implements OnInit {
 
   passwordMatcher = new FormControl('', [Validators.required]);
 
-  constructor(private auth: AuthService, private db: DatabaseService,
+  constructor(private auth: AuthService, private userService: UserService,
               private snackbar: MatSnackBar,
-              private titlebar: TitlebarService) { }
+              private titlebar: TitlebarService) {}
+
+  ngOnInit() {
+    this.titlebar.emitTitle('Passwort ändern');
+  }
 
   showOK(){
     this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
@@ -30,6 +33,7 @@ export class ChangePasswordComponent implements OnInit {
   showError(msg: string){
     this.snackbar.open(msg, 'OK', {duration: 3000});
   }
+
   save(){
     if(this.passwd.length == 0){
       this.showError("Bitte ein Passwort eingeben")
@@ -37,9 +41,9 @@ export class ChangePasswordComponent implements OnInit {
     else if(this.passwd != this.passwd_repeat) {
       this.showError("Passwörter stimmen nicht überein")
     } else {
-      this.db.setNewPWOfGuestAccount(this.auth.getToken().id, this.passwd, this.passwd_repeat)
-        .subscribe((data:Succeeded) => {
-          if(data.success){
+      this.userService.changePassword(this.auth.getToken().id, this.passwd, this.passwd_repeat).subscribe(
+        res => {
+          if (res){
             this.showOK()
             setTimeout(() => {
               location.reload()
@@ -49,11 +53,7 @@ export class ChangePasswordComponent implements OnInit {
           }
         }, error => {
           this.showError("Leider gab es einen Fehler mit dem Update")
-        })
+        });
+      }
     }
-  }
-
-  ngOnInit() {
-    this.titlebar.emitTitle('Passwort ändern');
-  }
 }

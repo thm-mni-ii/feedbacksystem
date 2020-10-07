@@ -27,17 +27,17 @@ export class UserService {
   }
 
   // DELETE /users/{uid}
-  deleteUser(uid: number){ // TODO: bei response code: Observable<number> ??
-
+  deleteUser(uid: number): Observable<any>{
+    return of(true)
   }
 
   // PUT /users/{uid}/passwd
-  changePassword(uid: number, passwd: String, passwdRepeat: String){
-
+  changePassword(uid: number, passwd: String, passwdRepeat: String): Observable<any>{
+    return of(true)
   }
 
   //PUT /users/{uid}/global-role
-  changeRole(uid: number, roleId: number){
-
+  changeRole(uid: number, roleId: number): Observable<any>{
+    return of(true)
   }
 }
