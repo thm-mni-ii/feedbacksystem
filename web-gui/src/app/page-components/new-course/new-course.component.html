@@ -46,9 +46,9 @@
       <!--      <br>-->
       <form>
         <h4>Dozenten</h4>
-        <app-grant-docent-snipp style="margin-bottom: 15px;" [docent_list]="docent_list" [liveUpdate]="false" (loadAllCourses)="null" [course]="{}" ></app-grant-docent-snipp>
+        <app-docent-in-course style="margin-bottom: 15px;" [docent_list]="docent_list" [liveUpdate]="false" (loadAllCourses)="null" [course]="{}" ></app-docent-in-course>
         <h4>Tutoren</h4>
-        <app-grant-tutor-snipp [tutor_list]="tutor_list" (loadAllCourses)="null" [course]="{}" [liveUpdate]="false"></app-grant-tutor-snipp>
+        <app-tutor-in-course [tutor_list]="tutor_list" (loadAllCourses)="null" [course]="{}" [liveUpdate]="false"></app-tutor-in-course>
       </form>
     </mat-card-content>
 

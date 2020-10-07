@@ -29,11 +29,11 @@ export class CourseService {
 
   // DELETE /courses/{cid}
   deleteCourse(cid: number): Observable<any> { // returns an Observable<Succeeded>
-    return of();
+    return of(true);
   }
 
   //DELETE /users/{uid}/courses/{cid}
-  unsubscribeCourse(cid: number, uid: number) {
-
+  unsubscribeCourse(cid: number, uid: number): Observable<any>{
+    return of(true)
   }
 }
