@@ -1,6 +1,6 @@
 @import "src/colors";
 
-.task-container {
+/*.task-container {
   cursor: pointer;
   margin-top: 12px;
   display: flex;
@@ -25,7 +25,7 @@
 
 .task-container:hover {
   background: #d4dadd;
-}
+}*/
 
 .container {
   display: block;
@@ -44,58 +44,66 @@
     margin: 0 2.5px;
     height: 30px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     .mat-icon {
       height: 25px;
     }
   }
   span {
-    height: 24px;
-    margin-top: 2px;
+    height: 30px;
+    margin-top: 2.5px;
   }
   .mat-icon {
     cursor: pointer;
   }
 }
 
-.passed {
-  color: green;
-}
-
-.failed {
-  color: red;
-  transform: rotate(45deg);
-}
-
-.not-done {
-  color: darkorange;
-}
-
 .green {
-  background-color: green;
+  background-color: #74838d;
   color: white;
 }
 .red {
-  background-color: red;
+  background-color: #3fa73f;
   color: white;
 }
-
-.danger-zone {
-  margin-top: 16px;
-  h3 {
-    color: $red;
-  }
+.unsubscribe-btn {
+  justify-content: right;
+  alignment: inherit;
 }
 
-.role {
+.icon-btn {
   position: relative;
-  margin-left: 50%;
+  alignment: inherit;
+  display: flow;
+  //margin-left: 55%;
+  justify-content: right;
 }
 
 .create-task {
-  display: flex;
   justify-content: center;
-  margin-bottom: 30px;
   color: #fff;
+  margin-top: 2%;
+}
+
+.mat-form-field {
+  justify-content: left;
+}
+
+#settings {
+  height: 24px;
+}
+
+.conference {
+  alignment: right;
+  display: flow;
+  margin-left: 55%;
+}
+
+.icon-btn {
+  position: relative;
+  alignment: inherit;
+  display: flow;
+  justify-content: right;
+  font-size: 30px;
 }
