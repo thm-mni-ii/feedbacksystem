@@ -10,7 +10,6 @@ import {SUBMISSION} from "../mock-data/mock-submissions";
   providedIn: 'root'
 })
 export class SubmissionService {
-
   constructor() { }
 
   // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions
@@ -31,5 +30,15 @@ export class SubmissionService {
   // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}
   getSubmission(uid: number, cid: number, tid: number, sid: number): Observable<Submission>{
     return of(SUBMISSION.pop())
+  }
+
+  // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
+  submitSolution(uid: number, cid: number, tid: number, solution: any): Observable<Submission>{
+    return of(SUBMISSION.pop())
+  }
+
+  // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
+  restartAllSubmissions(uid: number, cid: number, tid: number, sid: number){
+    //TODO: this Route doesn't exist yet
   }
 }
