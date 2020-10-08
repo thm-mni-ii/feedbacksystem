@@ -86,7 +86,8 @@ dependencies {
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     compile 'org.scala-lang:scala-library:2.13.1'
     compile 'mysql:mysql-connector-java:8.0.19'
-    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.10.1'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
+    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: springVersion

@@ -2,6 +2,10 @@ package de.thm.ii.fbs.model
 
 import java.security.Principal
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
+import de.thm.ii.fbs.util.ScalaObjectMapper
+
 /**
   * User object
   * @param id local DB's userid
@@ -13,7 +17,8 @@ import java.security.Principal
   * @param alias the DB password hash
   */
 class User(val prename: String, val surname: String, val email: String,
-          val username: String, val globalRole: GlobalRole.Value,
+           val username: String,
+           @JsonScalaEnumeration(value = classOf[GlobalRoleType]) val globalRole: GlobalRole.Value,
            val alias: Option[String] = None, val id: Int = 0) extends Principal {
   /**
     * @return unique username

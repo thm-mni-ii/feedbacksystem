@@ -269,5 +269,4 @@ export class TaskDetailComponent implements OnInit {
   isInRole(roles: string[]): Boolean {
     return roles.indexOf(this.userRole) >= 0;
   }
-
 }

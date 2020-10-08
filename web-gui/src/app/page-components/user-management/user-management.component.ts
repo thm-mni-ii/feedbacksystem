@@ -11,7 +11,7 @@ import {CreateGuestUserDialog} from "../../dialogs/create-guest-user-dialog/crea
 import {UserDeleteModalComponent} from "../../dialogs/user-delete-modal/user-delete-modal.component";
 
 /**
- * This component is for admin managing users
+ * This component is for admins managing users
  */
 @Component({
   selector: 'app-user-management',
@@ -19,22 +19,22 @@ import {UserDeleteModalComponent} from "../../dialogs/user-delete-modal/user-del
   styleUrls: ['./user-management.component.scss']
 })
 export class UserManagementComponent implements OnInit {
-
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
+
+  columns = ['surname', 'prename', 'email', 'username', 'globalRole', 'action'];
+  dataSource = new MatTableDataSource<User>();
+
   constructor(private snackBar: MatSnackBar, private titlebar: TitlebarService,
               private dialog: MatDialog, private userService: UserService) {
   }
 
-  columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];
-  dataSource = new MatTableDataSource<User>();
-
   ngOnInit() {
     this.titlebar.emitTitle('Benutzerverwaltung');
-    this.loadAllUsers();
+    this.refreshUserList();
   }
 
-  private loadAllUsers() {
+  private refreshUserList() {
     // this.db.getAllUsers().subscribe(users => {
     this.userService.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
@@ -49,21 +49,10 @@ export class UserManagementComponent implements OnInit {
    * @param userID The id of user
    * @param role Selected role from admin
    */
-  roleChange(username: string, userID: number, role: number) {
-    if (Number(role) === 4 || Number(role) === 8) {
-      this.snackBar.open('Bitte über "Dozent/Tutor bestimmen" auswählen', 'OK', {duration: 5000});
-      return;
-    }
-    this.userService.changeRole(userID, role).subscribe(
-      res => {
-        if (res){
-          this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
-          // setTimeout(() => {
-          //   location.reload()
-          // }, 2000)
-        } else {
-          this.snackBar.open("Leider gab es einen Fehler mit dem Update","OK", {duration: 5000})
-        }
+  roleChange(username: string, userID: number, role: string) {
+    this.userService.changeRole(userID, role).subscribe(res => {
+        this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
+        this.refreshUserList()
       }, error => {
         this.snackBar.open("Leider gab es einen Fehler mit dem Update","OK", {duration: 5000})
       });
@@ -78,11 +67,7 @@ export class UserManagementComponent implements OnInit {
       data: user
     }).afterClosed().subscribe(
       res => {
-        if (res){
           this.snackBar.open("Benutzer wurde gelöscht.","OK",{duration: 5000});
-        } else {
-          this.snackBar.open("Leider gab es einen Fehler.","OK", {duration: 5000})
-        }
       }, error => {
         this.snackBar.open("Leider gab es einen Fehler.","OK", {duration: 5000})
       });
@@ -102,14 +87,12 @@ export class UserManagementComponent implements OnInit {
   showGuestUserDialog() {
     this.dialog.open(CreateGuestUserDialog, {
       width: '500px',
-    }).afterClosed().subscribe(
-      user => {
-        if(user) {
+    }).afterClosed().subscribe(user => {
+        if (user) {
           this.userService.createUser(user).subscribe(
             res => {
               this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
-              console.log(user);
-              this.dataSource.data.push(user)
+              this.refreshUserList()
             }, error => {
               this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
             });

@@ -27,7 +27,6 @@ export class SidebarComponent implements OnInit {
   username: string;
   isAdmin: boolean;
   isModerator: boolean;
-  isDocent: boolean;
 
   ngOnInit() {
     this.username = this.auth.getToken().username
@@ -36,7 +35,6 @@ export class SidebarComponent implements OnInit {
 
     this.isAdmin = Roles.GlobalRole.isAdmin(globalRole)
     this.isModerator = Roles.GlobalRole.isModerator(globalRole);
-    this.isDocent = this.auth.getToken().courseRoles.find(o => o == Roles.CourseRole.DOCENT)
 
     this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;

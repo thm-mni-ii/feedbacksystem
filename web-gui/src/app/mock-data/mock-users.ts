@@ -8,7 +8,7 @@ export const USERS: User[] = [
     "email": "ctampin0@ifeng.com",
     "username": "ctampin0",
     "alias": null,
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 2,
     "prename": "Burnaby",
@@ -16,7 +16,7 @@ export const USERS: User[] = [
     "email": "bmortel1@about.com",
     "username": "bmortel1",
     "alias": "bmortel1",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 3,
     "prename": "Yurik",
@@ -24,7 +24,7 @@ export const USERS: User[] = [
     "email": "ybrockest2@omniture.com",
     "username": "ybrockest2",
     "alias": null,
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 4,
     "prename": "Katrinka",
@@ -32,7 +32,7 @@ export const USERS: User[] = [
     "email": "kcanton3@barnesandnoble.com",
     "username": "kcanton3",
     "alias": "kcanton3",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 5,
     "prename": "Bianka",
@@ -40,7 +40,7 @@ export const USERS: User[] = [
     "email": "bklyner4@tumblr.com",
     "username": "bklyner4",
     "alias": "bklyner4",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 6,
     "prename": "Modesta",
@@ -48,7 +48,7 @@ export const USERS: User[] = [
     "email": "mbrettell5@yahoo.co.jp",
     "username": "mbrettell5",
     "alias": null,
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 7,
     "prename": "Merwyn",
@@ -56,7 +56,7 @@ export const USERS: User[] = [
     "email": "mgiffon6@ocn.ne.jp",
     "username": "mgiffon6",
     "alias": "mgiffon6",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 8,
     "prename": "Dominick",
@@ -64,7 +64,7 @@ export const USERS: User[] = [
     "email": "dclemon7@cisco.com",
     "username": "dclemon7",
     "alias": null,
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 9,
     "prename": "Krystyna",
@@ -72,7 +72,7 @@ export const USERS: User[] = [
     "email": "kleathard8@huffingtonpost.com",
     "username": "kleathard8",
     "alias": "kleathard8",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 10,
     "prename": "Tyson",
@@ -80,7 +80,7 @@ export const USERS: User[] = [
     "email": "tfrances9@desdev.cn",
     "username": "tfrances9",
     "alias": "tfrances9",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 11,
     "prename": "Lydie",
@@ -88,7 +88,7 @@ export const USERS: User[] = [
     "email": "ldegana@businesswire.com",
     "username": "ldegana",
     "alias": "ldegana",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 12,
     "prename": "Tiffani",
@@ -96,7 +96,7 @@ export const USERS: User[] = [
     "email": "tdelmonteb@tumblr.com",
     "username": "tdelmonteb",
     "alias": "tdelmonteb",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 13,
     "prename": "Thibaud",
@@ -104,7 +104,7 @@ export const USERS: User[] = [
     "email": "tipwellc@ebay.co.uk",
     "username": "tipwellc",
     "alias": "tipwellc",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 14,
     "prename": "Amara",
@@ -112,7 +112,7 @@ export const USERS: User[] = [
     "email": "adakind@bizjournals.com",
     "username": "adakind",
     "alias": null,
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 15,
     "prename": "Garner",
@@ -120,7 +120,7 @@ export const USERS: User[] = [
     "email": "gparkese@unc.edu",
     "username": "gparkese",
     "alias": "gparkese",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 16,
     "prename": "Tessy",
@@ -128,7 +128,7 @@ export const USERS: User[] = [
     "email": "taujeanf@jimdo.com",
     "username": "taujeanf",
     "alias": "taujeanf",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 17,
     "prename": "Shaw",
@@ -136,7 +136,7 @@ export const USERS: User[] = [
     "email": "socarrollg@nbcnews.com",
     "username": "socarrollg",
     "alias": "socarrollg",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 18,
     "prename": "Esther",
@@ -144,7 +144,7 @@ export const USERS: User[] = [
     "email": "estilliardh@gravatar.com",
     "username": "estilliardh",
     "alias": "estilliardh",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 19,
     "prename": "Bourke",
@@ -152,7 +152,7 @@ export const USERS: User[] = [
     "email": "bgabbatissi@zimbio.com",
     "username": "bgabbatissi",
     "alias": null,
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 20,
     "prename": "Berny",
@@ -160,7 +160,7 @@ export const USERS: User[] = [
     "email": "bwestgatej@themeforest.net",
     "username": "bwestgatej",
     "alias": "bwestgatej",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 21,
     "prename": "Maddy",
@@ -168,7 +168,7 @@ export const USERS: User[] = [
     "email": "mbeushawk@msu.edu",
     "username": "mbeushawk",
     "alias": "mbeushawk",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 22,
     "prename": "Carissa",
@@ -176,7 +176,7 @@ export const USERS: User[] = [
     "email": "cjennaroyl@tuttocitta.it",
     "username": "cjennaroyl",
     "alias": null,
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 23,
     "prename": "Morganne",
@@ -184,7 +184,7 @@ export const USERS: User[] = [
     "email": "mcollingworthm@biblegateway.com",
     "username": "mcollingworthm",
     "alias": null,
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 24,
     "prename": "Diane",
@@ -192,7 +192,7 @@ export const USERS: User[] = [
     "email": "dcorintonn@soundcloud.com",
     "username": "dcorintonn",
     "alias": "dcorintonn",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 25,
     "prename": "Jane",
@@ -200,7 +200,7 @@ export const USERS: User[] = [
     "email": "jboecko@cafepress.com",
     "username": "jboecko",
     "alias": "jboecko",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 26,
     "prename": "Enrique",
@@ -208,7 +208,7 @@ export const USERS: User[] = [
     "email": "ekaaskooperp@java.com",
     "username": "ekaaskooperp",
     "alias": null,
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 27,
     "prename": "Worthy",
@@ -216,7 +216,7 @@ export const USERS: User[] = [
     "email": "wbartellq@blogger.com",
     "username": "wbartellq",
     "alias": "wbartellq",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 28,
     "prename": "Tann",
@@ -224,7 +224,7 @@ export const USERS: User[] = [
     "email": "tgateleyr@apache.org",
     "username": "tgateleyr",
     "alias": "tgateleyr",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 29,
     "prename": "Thatcher",
@@ -232,7 +232,7 @@ export const USERS: User[] = [
     "email": "treckes@omniture.com",
     "username": "treckes",
     "alias": null,
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 30,
     "prename": "Sauncho",
@@ -240,7 +240,7 @@ export const USERS: User[] = [
     "email": "scorsellest@weebly.com",
     "username": "scorsellest",
     "alias": null,
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 31,
     "prename": "Elga",
@@ -248,7 +248,7 @@ export const USERS: User[] = [
     "email": "ecostellou@wordpress.com",
     "username": "ecostellou",
     "alias": "ecostellou",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 32,
     "prename": "Leanna",
@@ -256,7 +256,7 @@ export const USERS: User[] = [
     "email": "lzarfatv@ucsd.edu",
     "username": "lzarfatv",
     "alias": "lzarfatv",
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 33,
     "prename": "Abby",
@@ -264,7 +264,7 @@ export const USERS: User[] = [
     "email": "araistrickw@imgur.com",
     "username": "araistrickw",
     "alias": null,
-    "globalRole": 0
+    "globalRole": "ADMIN"
   }, {
     "id": 34,
     "prename": "Abbot",
@@ -272,7 +272,7 @@ export const USERS: User[] = [
     "email": "amaccurtainx@ucsd.edu",
     "username": "amaccurtainx",
     "alias": "amaccurtainx",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 35,
     "prename": "Latrena",
@@ -280,7 +280,7 @@ export const USERS: User[] = [
     "email": "lmccutcheony@ed.gov",
     "username": "lmccutcheony",
     "alias": "lmccutcheony",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 36,
     "prename": "Carline",
@@ -288,7 +288,7 @@ export const USERS: User[] = [
     "email": "cnichez@paginegialle.it",
     "username": "cnichez",
     "alias": "cnichez",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 37,
     "prename": "Eleonora",
@@ -296,7 +296,7 @@ export const USERS: User[] = [
     "email": "esimakov10@wired.com",
     "username": "esimakov10",
     "alias": "esimakov10",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 38,
     "prename": "Mable",
@@ -304,7 +304,7 @@ export const USERS: User[] = [
     "email": "mmcnickle11@fda.gov",
     "username": "mmcnickle11",
     "alias": "mmcnickle11",
-    "globalRole": 1
+    "globalRole": "MODERATOR"
   }, {
     "id": 39,
     "prename": "Friedrick",
@@ -312,7 +312,7 @@ export const USERS: User[] = [
     "email": "fsollom12@reverbnation.com",
     "username": "fsollom12",
     "alias": "fsollom12",
-    "globalRole": 2
+    "globalRole": "USER"
   }, {
     "id": 40,
     "prename": "Merrill",
@@ -320,7 +320,7 @@ export const USERS: User[] = [
     "email": "mreary13@storify.com",
     "username": "mreary13",
     "alias": "mreary13",
-    "globalRole": 2
+    "globalRole": "USER"
   }
 ];
 
@@ -332,7 +332,7 @@ export const USERS: User[] = [
 //   "password": "ngKfHEXQWJjF",
 //   "username": "nivashechkin0",
 //   "alias": "nivashechkin0",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 2,
 //   "prename": "Kevyn",
@@ -341,7 +341,7 @@ export const USERS: User[] = [
 //   "password": "JIDmx4xJn9so",
 //   "username": "kgrimoldby1",
 //   "alias": "kgrimoldby1",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 3,
 //   "prename": "Delcine",
@@ -350,7 +350,7 @@ export const USERS: User[] = [
 //   "password": "67VPdsPeasM",
 //   "username": "dmccrackem2",
 //   "alias": "dmccrackem2",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 4,
 //   "prename": "Perry",
@@ -359,7 +359,7 @@ export const USERS: User[] = [
 //   "password": "wQyusZNBV8t",
 //   "username": "pwrought3",
 //   "alias": "pwrought3",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 5,
 //   "prename": "Worth",
@@ -368,7 +368,7 @@ export const USERS: User[] = [
 //   "password": "v8RKbDvr",
 //   "username": "wwoolvett4",
 //   "alias": "wwoolvett4",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 6,
 //   "prename": "Vaughn",
@@ -377,7 +377,7 @@ export const USERS: User[] = [
 //   "password": "j8abT2YS",
 //   "username": "vberget5",
 //   "alias": "vberget5",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 7,
 //   "prename": "Iggy",
@@ -386,7 +386,7 @@ export const USERS: User[] = [
 //   "password": "B1TdCWjJ2bh",
 //   "username": "ijeffreys6",
 //   "alias": null,
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 8,
 //   "prename": "Mychal",
@@ -395,7 +395,7 @@ export const USERS: User[] = [
 //   "password": "4F1gxBn9SzXG",
 //   "username": "mmark7",
 //   "alias": "mmark7",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 9,
 //   "prename": "Abner",
@@ -404,7 +404,7 @@ export const USERS: User[] = [
 //   "password": "U1LEAlJwvA7",
 //   "username": "aduffer8",
 //   "alias": null,
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 10,
 //   "prename": "Arvy",
@@ -413,7 +413,7 @@ export const USERS: User[] = [
 //   "password": "nNP8dnUy",
 //   "username": "agreguoli9",
 //   "alias": null,
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 11,
 //   "prename": "Samuele",
@@ -422,7 +422,7 @@ export const USERS: User[] = [
 //   "password": "Osq1kHy",
 //   "username": "swhitmorea",
 //   "alias": "swhitmorea",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 12,
 //   "prename": "Jonis",
@@ -431,7 +431,7 @@ export const USERS: User[] = [
 //   "password": "gskdIjAkqHmG",
 //   "username": "jmausb",
 //   "alias": "jmausb",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 13,
 //   "prename": "Daisey",
@@ -440,7 +440,7 @@ export const USERS: User[] = [
 //   "password": "LI0uNUhZ",
 //   "username": "ddollimorec",
 //   "alias": "ddollimorec",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 14,
 //   "prename": "Carly",
@@ -449,7 +449,7 @@ export const USERS: User[] = [
 //   "password": "d7ab9X7qXJvP",
 //   "username": "chaddlestond",
 //   "alias": null,
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 15,
 //   "prename": "Bobbette",
@@ -458,7 +458,7 @@ export const USERS: User[] = [
 //   "password": "KLRhv7",
 //   "username": "bkeelye",
 //   "alias": "bkeelye",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 16,
 //   "prename": "Dame",
@@ -467,7 +467,7 @@ export const USERS: User[] = [
 //   "password": "hAIEed2",
 //   "username": "dboustredf",
 //   "alias": "dboustredf",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 17,
 //   "prename": "Lonny",
@@ -476,7 +476,7 @@ export const USERS: User[] = [
 //   "password": "2Jwezj9",
 //   "username": "lyushmanovg",
 //   "alias": "lyushmanovg",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 18,
 //   "prename": "Horatius",
@@ -485,7 +485,7 @@ export const USERS: User[] = [
 //   "password": "E4BfFZiNd",
 //   "username": "hwedgeh",
 //   "alias": null,
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 19,
 //   "prename": "Tabitha",
@@ -494,7 +494,7 @@ export const USERS: User[] = [
 //   "password": "QdnzGvoITox",
 //   "username": "thendersoni",
 //   "alias": "thendersoni",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 20,
 //   "prename": "Dory",
@@ -503,7 +503,7 @@ export const USERS: User[] = [
 //   "password": "BEWaT1",
 //   "username": "dmcpeakej",
 //   "alias": "dmcpeakej",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 21,
 //   "prename": "Frazier",
@@ -512,7 +512,7 @@ export const USERS: User[] = [
 //   "password": "TzOpKPx",
 //   "username": "froomek",
 //   "alias": "froomek",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 22,
 //   "prename": "Ruggiero",
@@ -521,7 +521,7 @@ export const USERS: User[] = [
 //   "password": "kCJQoEC",
 //   "username": "rnorthalll",
 //   "alias": "rnorthalll",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 23,
 //   "prename": "Natty",
@@ -530,7 +530,7 @@ export const USERS: User[] = [
 //   "password": "Pmq9Kazw",
 //   "username": "nnormandm",
 //   "alias": "nnormandm",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 24,
 //   "prename": "Walker",
@@ -539,7 +539,7 @@ export const USERS: User[] = [
 //   "password": "ANI89Wt",
 //   "username": "wbettlesonn",
 //   "alias": "wbettlesonn",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 25,
 //   "prename": "Walliw",
@@ -548,7 +548,7 @@ export const USERS: User[] = [
 //   "password": "CWjVcO6",
 //   "username": "wdoolando",
 //   "alias": null,
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 26,
 //   "prename": "Kai",
@@ -557,7 +557,7 @@ export const USERS: User[] = [
 //   "password": "3bAn10lwj",
 //   "username": "knobrigap",
 //   "alias": "knobrigap",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 27,
 //   "prename": "Kristel",
@@ -566,7 +566,7 @@ export const USERS: User[] = [
 //   "password": "6cJaDt6k",
 //   "username": "kcaesmansq",
 //   "alias": "kcaesmansq",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 28,
 //   "prename": "Concettina",
@@ -575,7 +575,7 @@ export const USERS: User[] = [
 //   "password": "iVnHcqf034Xj",
 //   "username": "cbeedr",
 //   "alias": "cbeedr",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 29,
 //   "prename": "Fernande",
@@ -584,7 +584,7 @@ export const USERS: User[] = [
 //   "password": "szcGOD7acK0x",
 //   "username": "fschoenleiters",
 //   "alias": "fschoenleiters",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 30,
 //   "prename": "Sylvia",
@@ -593,7 +593,7 @@ export const USERS: User[] = [
 //   "password": "yNIiQqXON1Sg",
 //   "username": "srobust",
 //   "alias": null,
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 31,
 //   "prename": "Kai",
@@ -602,7 +602,7 @@ export const USERS: User[] = [
 //   "password": "y7Y2Mer",
 //   "username": "kcavanu",
 //   "alias": "kcavanu",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 32,
 //   "prename": "Dorothea",
@@ -611,7 +611,7 @@ export const USERS: User[] = [
 //   "password": "UUMvmddcOH",
 //   "username": "dleachv",
 //   "alias": "dleachv",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 33,
 //   "prename": "Karil",
@@ -620,7 +620,7 @@ export const USERS: User[] = [
 //   "password": "ha4nZIY",
 //   "username": "kconstanzaw",
 //   "alias": "kconstanzaw",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 34,
 //   "prename": "Laughton",
@@ -629,7 +629,7 @@ export const USERS: User[] = [
 //   "password": "GDwwaJ5x",
 //   "username": "lpyburnx",
 //   "alias": "lpyburnx",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 35,
 //   "prename": "Aldis",
@@ -638,7 +638,7 @@ export const USERS: User[] = [
 //   "password": "le1Tdw4G",
 //   "username": "afuchery",
 //   "alias": "afuchery",
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }, {
 //   "id": 36,
 //   "prename": "Aurie",
@@ -647,7 +647,7 @@ export const USERS: User[] = [
 //   "password": "L0NHJ2X66C",
 //   "username": "alempennyz",
 //   "alias": "alempennyz",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 37,
 //   "prename": "Ruthy",
@@ -656,7 +656,7 @@ export const USERS: User[] = [
 //   "password": "wSRCjzqtiGh",
 //   "username": "rjanse10",
 //   "alias": "rjanse10",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 38,
 //   "prename": "Brendan",
@@ -665,7 +665,7 @@ export const USERS: User[] = [
 //   "password": "QjXgFh",
 //   "username": "bginni11",
 //   "alias": "bginni11",
-//   "globalRole": 0
+//   "globalRole": "ADMIN"
 // }, {
 //   "id": 39,
 //   "prename": "Thacher",
@@ -674,7 +674,7 @@ export const USERS: User[] = [
 //   "password": "6eQvTA0B",
 //   "username": "tmckall12",
 //   "alias": "tmckall12",
-//   "globalRole": 2
+//   "globalRole": "USER"
 // }, {
 //   "id": 40,
 //   "prename": "Orran",
@@ -683,5 +683,5 @@ export const USERS: User[] = [
 //   "password": "FnFkSXgQpf",
 //   "username": "obrogiotti13",
 //   "alias": null,
-//   "globalRole": 1
+//   "globalRole": "MODERATOR"
 // }]

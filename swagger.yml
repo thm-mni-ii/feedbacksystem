@@ -281,10 +281,10 @@ paths:
             schema:
               type: object
               required:
-                - roleId
+                - roleName
               properties:
-                roleId:
-                  type: integer
+                roleName:
+                  type: string
         description: The global role id
         required: true
       responses:
@@ -399,11 +399,11 @@ paths:
             schema:
               type: object
               required:
-                - roleId
+                - roleName
               properties:
-                roleId:
-                  type: integer
-        description: "Course role id 0: Docent, 1: Tutor, 2: Student, default is 2"
+                roleName:
+                  type: string
+        description: "Course role: either DOCENT, TUTOR, or STUDENT. Default is STUDENT"
       responses:
         "200":
           description: OK
@@ -1625,8 +1625,8 @@ components:
         alias:
           type: string
         globalRole:
-          type: integer
-          description: "0: Admin, 1: Moderator, 2: User, Default is 2"
+          type: string
+          description: "Either, ADMIN, MODERATOR, or USER. Default is USER"
     Course:
       type: object
       required:
@@ -1737,12 +1737,11 @@ components:
           type: string
           description: The users username
         globalRole:
-          type: integer
+          type: string
           description: The users global role id
         courseRoles:
           type: object
-          description: "Associative array: course id -> role id (0: Docent, 1: Tutor, 2:
-            User)"
+          description: "Associative array: course id -> role id (Either, DOCENT, TUTOR, or STUDENT)"
           properties:
             key:
               type: integer
