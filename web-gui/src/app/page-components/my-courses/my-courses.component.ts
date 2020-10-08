@@ -1,15 +1,11 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {Observable, of} from 'rxjs';
 import {TitlebarService} from '../../service/titlebar.service';
-import {DatabaseService} from '../../service/database.service';
-import {UserService} from "../../service/user.service";
-import {CourseService} from "../../service/course.service";
 import {Course} from "../../model/Course";
 import {AuthService} from "../../service/auth.service";
 import {flatMap, startWith} from "rxjs/operators";
 import {FormControl} from "@angular/forms";
+import {CourseRegistrationService} from "../../service/course-registration.service";
 
 /**
  * Show all registered courses
@@ -22,7 +18,7 @@ import {FormControl} from "@angular/forms";
 export class MyCoursesComponent implements OnInit {
 
   constructor(private titlebar: TitlebarService,
-              private courseService: CourseService,
+              private courseRegistrationService: CourseRegistrationService,
               private authService: AuthService) {
   }
 
@@ -33,7 +29,7 @@ export class MyCoursesComponent implements OnInit {
   ngOnInit() {
     this.titlebar.emitTitle('Meine Kurse');
     let userID = this.authService.getToken().id;
-    this.courses = this.courseService.getRegisteredCourses(userID);
+    this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(''),
