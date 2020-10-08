@@ -24,7 +24,6 @@
         <span *ngIf="role == 'tutor'">Tutor</span>
         <span *ngIf="role == 'student'">Student</span>
     </span>
-
   </div>
 
   <div class="create-task">
@@ -32,8 +31,9 @@
   </div>
 
 <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
-  <app-task-preview></app-task-preview>
-
+  <div class="container">
+    <app-task-preview *ngFor="let task of tasks" [courseId]="courseID" [task]="task"></app-task-preview>
+  </div>
 
   <button mat-flat-button color="primary" [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><mat-icon >dashboard</mat-icon></button>
 
