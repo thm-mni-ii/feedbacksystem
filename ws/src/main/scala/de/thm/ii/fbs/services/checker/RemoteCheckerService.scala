@@ -6,18 +6,23 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.persistance.StorageService
 import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import de.thm.ii.fbs.model.{User => FBSUser}
+import org.apache.http.conn.ssl.{NoopHostnameVerifier, SSLConnectionSocketFactory, TrustSelfSignedStrategy}
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.ssl.SSLContextBuilder
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.web.client.RestTemplate
 
 /**
   * Communicate with an remote checker to notify him about new submissions
-  * @param templateBuilder RestTemplateBuilder injected by Spring
+  * @param insecure if true the tls certificate of the remote checker will not be validated
   */
 @Service
-class RemoteCheckerService(templateBuilder: RestTemplateBuilder) {
-  private val restTemplate = templateBuilder.build()
+class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) {
+  private val restTemplate = makeRestTemplate(insecure)
+
   @Autowired
   private val storageService: StorageService = null
 
@@ -117,5 +122,17 @@ class RemoteCheckerService(templateBuilder: RestTemplateBuilder) {
       json.set("submission", this.submission.toJson)
       json
     }
+  }
+
+  private def makeRestTemplate(insecure: Boolean = false): RestTemplate = {
+    val requestFactory = new HttpComponentsClientHttpRequestFactory()
+    if (insecure) {
+      val sslContextBuilder = new SSLContextBuilder()
+      sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy)
+      val socketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build, NoopHostnameVerifier.INSTANCE)
+      val httpClient = HttpClients.custom.setSSLSocketFactory(socketFactory).build()
+      requestFactory.setHttpClient(httpClient)
+    }
+    new RestTemplate(requestFactory)
   }
 }
