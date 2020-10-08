@@ -41,6 +41,7 @@ import {CourseRegistrationService} from "../../service/course-registration.servi
   styleUrls: ['./course-detail.component.scss']
 })
 export class CourseDetailComponent implements OnInit {
+  courseID: number;
 
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
@@ -51,7 +52,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   tasks: Task[];
-  courseID: number;
   user: string;
   courseDetail: Course;
   token: JWTToken;
@@ -88,8 +88,11 @@ export class CourseDetailComponent implements OnInit {
   }
 
   public isAuthorized() {
-    // const courseRole = this.auth.getToken().courseRoles[this.courseID] // TODO: identify through Token
-    return true //Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
+    const token = this.auth.getToken()
+    const courseRole = token.courseRoles[this.courseID]
+    const globalRole = token.globalRole
+    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
+      || Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
   /**

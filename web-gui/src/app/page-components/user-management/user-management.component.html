@@ -5,7 +5,9 @@
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
+  <div class="create-guest-user">
     <button mat-raised-button color="accent" (click)="showGuestUserDialog()" class="create-guest-user"><mat-icon>person_add</mat-icon>Neuen Benutzer erstellen</button>
+  </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
 

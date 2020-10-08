@@ -1725,8 +1725,8 @@ components:
         user:
           $ref: "#/components/schemas/User"
         role:
-          type: integer
-          description: Users course role id
+          type: string
+          description: Users course role name. Either DOCENT, TUTOR, or STUDENT.
     JWTToken:
       type: object
       properties:
