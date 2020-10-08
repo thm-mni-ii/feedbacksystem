@@ -96,7 +96,6 @@ class UserServiceTest {
   def updatePasswordForTest(): Unit = {
     us.updatePasswordFor(202020, "dummyUS_2021")
     Assertions.assertThat(us.find("dum20", "dummyUS_2021")).isEqualTo(dummyUS)
-
   }
 
   /**
@@ -149,6 +148,5 @@ class UserServiceTest {
     Assertions.assertThat(us.delete(20201)).isEqualTo(true)
     Assertions.assertThat(us.find(20201)).isNull()
   }
-
 }
 
