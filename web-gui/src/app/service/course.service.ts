@@ -32,6 +32,11 @@ export class CourseService {
     return of(true);
   }
 
+  // PUT /users/{uid}/courses/{cid}
+  subscribeCourse(cid: number, uid: number): Observable<any>{
+    return of(true)
+  }
+
   //DELETE /users/{uid}/courses/{cid}
   unsubscribeCourse(cid: number, uid: number): Observable<any>{
     return of(true)

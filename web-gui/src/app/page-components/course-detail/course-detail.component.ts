@@ -31,6 +31,8 @@ import {Task} from "../../model/Task";
 import {CourseService} from "../../service/course.service";
 import {Submission} from "../../model/Submission";
 import {UserService} from "../../service/user.service";
+import {JWTToken} from "../../model/JWTToken";
+import {error} from "@angular/compiler/src/util";
 
 @Component({
   selector: 'app-course-detail',
@@ -50,6 +52,7 @@ export class CourseDetailComponent implements OnInit {
   courseID: number;
   user: string;
   courseDetail: Course;
+  token: JWTToken;
   role: [];
   openConferences: Observable<string[]>;
   subscriptions: Subscription[] = [];
@@ -76,13 +79,14 @@ export class CourseDetailComponent implements OnInit {
         this.courseDetail = course;
         this.titlebar.emitTitle(course.name);
     })
-    this.role = this.authService.getToken().courseRoles;
+    this.token = this.authService.getToken()
+    // this.role = this.authService.getToken().courseRoles;
     //TODO: only show role, if user has multiple courseRoles
     //0: docent, 1: tutor, 2: user
   }
 
   public isAuthorized() {
-    const courseRole = this.auth.getToken().courseRoles[this.courseID]
+    // const courseRole = this.auth.getToken().courseRoles[this.courseID] // TODO: identify through Token
     return true //Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
@@ -164,7 +168,7 @@ export class CourseDetailComponent implements OnInit {
   }*/
 
   goOnline() {
-    this.db.subscribeCourse(this.courseID).subscribe();
+    this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     Notification.requestPermission();
     this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
@@ -227,27 +231,38 @@ export class CourseDetailComponent implements OnInit {
           });
       }
 
+    subscribeCourse(){
+    this.courseService.subscribeCourse(this.courseDetail.id, this.token.id).subscribe(
+      res => {
+        if (res){
+          // TODO: reload token?
+          // this.role = "USER"
+          this.snackbar.open("Du bist dich für " + this.courseDetail.name + " eingetragen.", "ok", {duration: 3000})
+        } else {
+          this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+        }
+      }
+    )
+    }
+
     /**
       * Unsubscribe course
-    * @param courseName The name to show user
-    * @param courseID The id of current course
     */
-    exitCourse(courseName: string, courseID: number) {
+    unsubscribeCourse() {
       this.dialog.open(ExitCourseDialogComponent, {
-        data: {coursename: courseName}
+        data: {coursename: this.courseDetail.name}
       }).afterClosed().pipe(
         flatMap(value => {
           if (value.exit) {
-            return this.db.unsubscribeCourse(courseID);
+            return this.courseService.unsubscribeCourse(this.courseDetail.id, this.token.id);
           }
         })
       ).subscribe(res => {
-        if (res.success) {
-          this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
+        if (res) {
+          this.snackbar.open('Du hast den Kurs ' + this.courseDetail.name + ' verlassen', 'OK', {duration: 3000});
           this.router.navigate(['courses', 'user']);
-
-        }
-      });
+        } else this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+      }), error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
     }
 
     public exportSubmissions() {

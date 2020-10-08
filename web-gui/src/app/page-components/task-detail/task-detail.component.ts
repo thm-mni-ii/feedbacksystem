@@ -260,8 +260,7 @@ export class TaskDetailComponent implements OnInit {
               .subscribe(() => {
                 this.router.navigate(['courses',this.course.id]);
               });
-          }
-        );
+          });
       }
     });
   }

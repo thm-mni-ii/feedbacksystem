@@ -6,7 +6,7 @@
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon >add</mat-icon></button>
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="updateCourse()" matTooltip="Kurs bearbeiten"><mat-icon >edit</mat-icon></button>
 
-    <button mat-flat-button color="primary" color="warn" (click)="exitCourse(courseDetail.name, courseDetail.id)">Austragen</button><!--*ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id"-->
+    <button mat-flat-button color="primary" color="warn" (click)="exitCourse()">Austragen</button><!--*ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id"-->
 <!--    <button mat-flat-button color="accent"  *ngIf="isAuthorized()" (click)="exportSubmissions()" matTooltip="Export Course"><mat-icon>move_to_inbox</mat-icon></button>-->
 
     <button mat-flat-button color="primary" *ngIf="isAuthorized()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >voice_chat</mat-icon></button>
