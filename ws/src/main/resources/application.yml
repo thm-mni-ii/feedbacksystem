@@ -41,6 +41,7 @@ services:
     shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
+    insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
 spring:
   main:
     allow-bean-definition-overriding: true
