@@ -40,7 +40,7 @@ services:
     service-url: ${BBB_URI:https://fk-vv.mni.thm.de/bigbluebutton/api}
     shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}
   masterRunner:
-    url: ${MASTER_RUNNER_URL:http://localhost:8081}
+    url: ${MASTER_RUNNER_URL:https://localhost:8081}
 spring:
   main:
     allow-bean-definition-overriding: true

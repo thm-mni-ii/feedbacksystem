@@ -6,7 +6,6 @@ import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.config.{ConfigRetriever, ConfigRetrieverOptions, ConfigStoreOptions}
 import io.vertx.scala.core.DeploymentOptions
 
-import scala.collection.mutable
 import scala.util.{Failure, Success}
 
 /**
@@ -24,29 +23,29 @@ class MainVerticle extends ScalaVerticle {
     */
   override def start(): Unit = {
     /* Get Configuration */
-    val fileStore = ConfigStoreOptions()
-      .setType("file")
-      .setConfig(new io.vertx.core.json.JsonObject().put("path", "config.json"))
-
-    val sysPropsStore = ConfigStoreOptions()
-      .setType("sys")
 
     val options = ConfigRetrieverOptions()
-      .setStores(mutable.Buffer(fileStore, sysPropsStore))
+      .addStore(
+        ConfigStoreOptions()
+          .setType("file")
+          .setConfig(new io.vertx.core.json.JsonObject().put("path", "config.json"))
+      ).addStore(
+      ConfigStoreOptions()
+        .setType("env")
+    )
 
     val retriever = ConfigRetriever.create(vertx, options)
 
     /* Start all Other Vertices */
     retriever.getConfigFuture().onComplete({
       case Success(config) =>
-        val HttpVerticleOptions = DeploymentOptions().setConfig(config.getJsonObject("HttpVerticle"))
+        val HttpVerticleOptions = DeploymentOptions().setConfig(config)
         vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[HttpVerticle], HttpVerticleOptions)
 
-        val bashRunnerJson = config.getJsonObject("BashRunnerVerticle")
         val bashRunnerVerticleOptions = DeploymentOptions()
-          .setConfig(bashRunnerJson)
+          .setConfig(config)
           .setWorker(true)
-          .setInstances(bashRunnerJson.getInteger("instances", 1))
+          .setInstances(config.getInteger("BASH_RUNNER_INSTANCES", 1))
 
         vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[BashRunnerVerticle], bashRunnerVerticleOptions)
       case Failure(exception) =>
