@@ -44,7 +44,7 @@ services:
       - JITSI_USER=fbs
       - JWT_SECRET=8Dsupersecurekeydf0
       - BBB_SECRET
-      - MASTER_RUNNER_URL=http://master-runner:8081
+      - MASTER_RUNNER_URL=https://master-runner:8081
 
   master-runner:
     build: master-runner
@@ -54,6 +54,7 @@ services:
       BASH_DOCKER: "thmmniii/bashenv:dev-latest"
       HOST_TMP_DIR: "/tmp/feebi" # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
+      RESULT_SERVER_HOST: "ws"
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
