@@ -1,5 +1,4 @@
 <div class="container">
-<!--  <div class="actions">-->
 <ng-container>
   <mat-form-field appearance="outline" id="settings">
     <mat-label><mat-icon>settings</mat-icon>&nbsp;Einstellungen</mat-label>
@@ -10,9 +9,9 @@
       <mat-option *ngIf="isAuthorized()" (click)="createConference()">
         <mat-icon >video_settings</mat-icon><span>Konferenz-Einstellungen</span>
       </mat-option>
-      <mat-option *ngIf="isAuthorized()" (click)="deleteCourse()">
-        <mat-icon >delete</mat-icon><span>Kurs löschen</span>
-      </mat-option>
+<!--      <mat-option *ngIf="isAuthorized()" (click)="deleteCourse()">-->
+<!--        <mat-icon >delete</mat-icon><span>Kurs löschen</span>-->
+<!--      </mat-option>-->
     </mat-select>
   </mat-form-field>
 
@@ -40,7 +39,7 @@
 </ng-container>
 
   <br><br>
-  <markdown ngPreserveWhitespaces [data]="courseDetail.description"></markdown>
+<!--  <markdown ngPreserveWhitespaces [data]="courseDetail.description"></markdown>-->
 
   <div class="create-task">
     <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon>add</mat-icon>&nbsp;Aufgabe erstellen</button>
@@ -63,7 +62,7 @@
   </mat-accordion>
 
   <br>
-  <mat-expansion-panel hideToggle>
+  <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
         Ergebnisse
@@ -72,6 +71,8 @@
         Übersicht aller Abgaben
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <p [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><app-course-results></app-course-results></p>
+  <!--<p [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse">
+      <app-course-results></app-course-results>
+      </p>-->
   </mat-expansion-panel>
 </div>
