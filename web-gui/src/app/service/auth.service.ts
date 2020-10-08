@@ -45,6 +45,7 @@ export class AuthService {
     } else if (this.jwtHelper.isTokenExpired(token)) {
       throw "Token expired"
     }
+    decodedToken.courseRoles = JSON.parse(<any>decodedToken.courseRoles)
     return decodedToken;
   }
 

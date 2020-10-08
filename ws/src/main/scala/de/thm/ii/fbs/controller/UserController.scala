@@ -95,11 +95,11 @@ class UserController {
   @PutMapping(value = Array("users/{uid}/global-role"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def updateGlobalRole(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
-    val someRoleId = body.retrive("roleId").asInt()
+    val someRoleName = body.retrive("roleName").asText()
 
-    (user.globalRole, someRoleId) match {
-      case (GlobalRole.ADMIN, Some(roleId)) =>
-        userService.updateGlobalRoleFor(uid, GlobalRole.parse(roleId))
+    (user.globalRole, someRoleName) match {
+      case (GlobalRole.ADMIN, Some(roleName)) =>
+        userService.updateGlobalRoleFor(uid, GlobalRole.parse(roleName))
       case (GlobalRole.ADMIN, None) => throw new BadRequestException("Malformed Request Body")
       case _ => throw new ForbiddenException()
     }
@@ -126,10 +126,10 @@ class UserController {
       body.retrive("password").asText(),
       body.retrive("username").asText(),
       body.retrive("alias").asText(),
-      body.retrive("globalRole").asInt()
+      body.retrive("globalRole").asText()
     ) match {
-      case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleId) =>
-        userService.create(new User(prename, surname, email, username, globalRoleId.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+      case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
+        userService.create(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }

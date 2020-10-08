@@ -1,23 +1,23 @@
 export const Roles = {
   GlobalRole: {
-    ADMIN: 0,
-    MODERATOR: 1,
-    USER: 2,
-    isAdmin: (globalRole: number): boolean => {
+    ADMIN: 'ADMIN',
+    MODERATOR: 'MODERATOR',
+    USER: 'USER',
+    isAdmin: (globalRole: string): boolean => {
       return globalRole == Roles.GlobalRole.ADMIN
     },
-    isModerator: (globalRole: number): boolean => {
+    isModerator: (globalRole: string): boolean => {
       return globalRole == Roles.GlobalRole.MODERATOR
     }
   },
   CourseRole: {
-    DOCENT: 0,
-    TUTOR: 1,
-    STUDENT: 2,
-    isDocent: (courseRole: number): boolean => {
+    DOCENT: 'DOCENT',
+    TUTOR: 'TUTOR',
+    STUDENT: 'STUDENT',
+    isDocent: (courseRole: string): boolean => {
       return courseRole == Roles.CourseRole.DOCENT
     },
-    isTutor: (courseRole: number): boolean => {
+    isTutor: (courseRole: string): boolean => {
       return courseRole == Roles.CourseRole.TUTOR
     }
   }

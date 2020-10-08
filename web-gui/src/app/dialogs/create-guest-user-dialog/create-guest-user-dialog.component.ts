@@ -15,7 +15,7 @@ export class CreateGuestUserDialog{
   data: User = new class implements User {
     alias: string;
     email: string;
-    globalRole: number;
+    globalRole: string;
     id: number;
     password: string ='';
     prename: string;
