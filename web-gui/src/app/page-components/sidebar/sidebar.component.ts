@@ -5,6 +5,9 @@ import {TitlebarService} from '../../service/titlebar.service';
 import {Subscription, Observable, of} from 'rxjs';
 import {CookieService} from 'ngx-cookie-service';
 import {Roles} from "../../model/Roles";
+import {MatDialog} from "@angular/material/dialog";
+import {DataprivacyDialogComponent} from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
+import {ImpressumDialogComponent} from "../../dialogs/impressum-dialog/impressum-dialog.component";
 
 /**
  * Root component shows sidenav and titlebar
@@ -17,7 +20,8 @@ import {Roles} from "../../model/Roles";
 export class SidebarComponent implements OnInit {
   constructor(private router: Router,
               private auth: AuthService,
-              private titlebar: TitlebarService) {
+              private titlebar: TitlebarService,
+              private dialog: MatDialog) {
   }
 
   title: Observable<string> = of('');
@@ -58,5 +62,18 @@ export class SidebarComponent implements OnInit {
    */
   onResize(event){
     this.innerWidth = event.target.innerWidth
+  }
+
+  /**
+   * Show data privay dialog
+   */
+  showDataprivacy() {
+    this.dialog.open(DataprivacyDialogComponent, {data: {onlyForShow: true}});
+  }
+  /**
+   * Show impressum dialog
+   */
+  showImpressum() {
+    this.dialog.open(ImpressumDialogComponent);
   }
 }
