@@ -33,6 +33,7 @@ import {Submission} from "../../model/Submission";
 import {UserService} from "../../service/user.service";
 import {JWTToken} from "../../model/JWTToken";
 import {error} from "@angular/compiler/src/util";
+import {CourseRegistrationService} from "../../service/course-registration.service";
 
 @Component({
   selector: 'app-course-detail',
@@ -45,7 +46,8 @@ export class CourseDetailComponent implements OnInit {
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, private taskService: TaskService, private authService: AuthService,
-              private courseService: CourseService, @Inject(DOCUMENT) document) {
+              private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
+              @Inject(DOCUMENT) document) {
   }
 
   tasks: Task[];
@@ -232,7 +234,7 @@ export class CourseDetailComponent implements OnInit {
       }
 
     subscribeCourse(){
-    this.courseService.subscribeCourse(this.courseDetail.id, this.token.id).subscribe(
+    this.courseRegistrationService.registerCourse(this.courseDetail.id, this.token.id).subscribe(
       res => {
         if (res){
           // TODO: reload token?
@@ -254,7 +256,7 @@ export class CourseDetailComponent implements OnInit {
       }).afterClosed().pipe(
         flatMap(value => {
           if (value.exit) {
-            return this.courseService.unsubscribeCourse(this.courseDetail.id, this.token.id);
+            return this.courseRegistrationService.deregisterCourse(this.courseDetail.id, this.token.id);
           }
         })
       ).subscribe(res => {
@@ -262,7 +264,7 @@ export class CourseDetailComponent implements OnInit {
           this.snackbar.open('Du hast den Kurs ' + this.courseDetail.name + ' verlassen', 'OK', {duration: 3000});
           this.router.navigate(['courses', 'user']);
         } else this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
-      }), error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+      }, error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000}))
     }
 
     public exportSubmissions() {
