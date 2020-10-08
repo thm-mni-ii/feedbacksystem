@@ -35,6 +35,18 @@
     <app-task-preview *ngFor="let task of tasks" [courseId]="courseID" [task]="task"></app-task-preview>
   </div>
 
+  <mat-accordion class="participants">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Kursteilnehmer
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <app-participants [courseID]="courseID"></app-participants>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+
   <button mat-flat-button color="primary" [routerLink]="['/', 'courses',courseID,'results']" matTooltip="Kursergebnisse"><mat-icon >dashboard</mat-icon></button>
 
 </div>
