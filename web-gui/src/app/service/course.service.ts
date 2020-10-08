@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {Course} from "../model/Course";
-import {Succeeded} from "../model/HttpInterfaces";
 import {HttpClient} from "@angular/common/http";
 
 @Injectable({
@@ -38,8 +37,8 @@ export class CourseService {
    * @param cid Course id to update
    * @param course The new course state
    */
-  updateCourse(cid: number, course: Course): Observable<Succeeded> {
-    return this.http.put<Succeeded>(`/api/v1/courses/${cid}`, course)
+  updateCourse(cid: number, course: Course): Observable<void> {
+    return this.http.put<void>(`/api/v1/courses/${cid}`, course)
   }
 
   /**
@@ -47,8 +46,8 @@ export class CourseService {
    * @param cid The course id
    * @return Observable that succeeds if the course does not exists after the operation
    */
-  deleteCourse(cid: number): Observable<Succeeded> { // returns an Observable<Succeeded>
-    return this.http.delete<Succeeded>(`/api/v1/courses/${cid}`)
+  deleteCourse(cid: number): Observable<void> { // returns an Observable<Succeeded>
+    return this.http.delete<void>(`/api/v1/courses/${cid}`)
   }
 
   // TODO: export a course as zip format

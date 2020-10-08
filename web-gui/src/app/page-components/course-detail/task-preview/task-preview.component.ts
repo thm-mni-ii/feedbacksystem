@@ -1,11 +1,9 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {MatDialog} from "@angular/material/dialog";
 import {AuthService} from "../../../service/auth.service";
-import {CourseService} from "../../../service/course.service";
 import {Task} from "../../../model/Task";
-import {Submission} from "../../../model/Submission";
 import {SubmissionService} from "../../../service/submission.service";
+import {Observable, of} from "rxjs"
+import {map} from "rxjs/operators"
 
 @Component({
   selector: 'app-task-preview',
@@ -15,41 +13,23 @@ import {SubmissionService} from "../../../service/submission.service";
 export class TaskPreviewComponent implements OnInit {
   @Input() courseId: number
   @Input() task: Task
+  status: Observable<boolean | null> = of(null)
 
-  constructor(private route: ActivatedRoute, private dialog: MatDialog, private router: Router,
-              private submissionService: SubmissionService, private courseService: CourseService,
-              private authService: AuthService) {
-  }
+  constructor(private authService: AuthService, private submissionService: SubmissionService) {}
 
-  submissions: Submission[];
-  submissionStatus: boolean;
-
-  ngOnInit() {
-    this.submissionStatus = null;
-    this.getSubmissions(this.courseId, this.task.id)
-    if (this.submissions != null) {
-      this.submissionStatus = this.getStatus();
-    }
-  }
-
-  getSubmissions(cid: number, tid: number) {
-    this.submissionService.getAllSubmissions(this.authService.getToken().id, cid, tid).subscribe(
-      submissions => {
-        // TODO: error handling
-        if (submissions != null) {
-          this.submissions = submissions;
-        } else this.submissions = null
-      }
-    );
-  }
-
-  // true if the user has passed the task successfully
-  private getStatus(): boolean {
-    if (this.submissions.length == 0) return null
-    for (let sub of this.submissions) {
-      if (!sub.done || sub.results.find(element => element.exitCode != 0)) return false
-    }
-    return true
+  ngOnInit(): void {
+    const uid = this.authService.getToken().id
+    this.status = this.submissionService.getAllSubmissions(uid, this.courseId, this.task.id)
+      .pipe(map(submissions => {
+        if (submissions.length == 0) {
+          return <boolean>null
+        } else {
+          return submissions.reduce((acc, submission) => {
+            const done = submission.done
+            const finalExitCode = submission.results.reduce((acc, value) => acc + value.exitCode, 0)
+            return acc || done && finalExitCode == 0
+          }, false)
+        }
+      }))
   }
 }
-

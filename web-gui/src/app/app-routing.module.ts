@@ -24,8 +24,6 @@ const routes: Routes = [
   {
     path: '', component: SidebarComponent, canActivate: [AuthGuard], children: [
       {path: 'courses', component: MyCoursesComponent, canActivate: [AuthGuard]},
-      {path: 'courses/authorization', component: CourseAuthorizationComponent, canActivate: [ModeratorGuard]},
-      {path: 'courses/new', component: NewCourseComponent, canActivate: [ModeratorGuard]},
       {path: 'courses/search', component: SearchCoursesComponent, canActivate: [AuthGuard]},
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: CourseDetailComponent, canActivate: [AuthGuard]},

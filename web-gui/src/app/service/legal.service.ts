@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {Observable} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
-import {Succeeded} from "../model/HttpInterfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -36,8 +35,7 @@ export class LegalService {
    * @param uid the user id
    * wouldn't work without argument in the body
    */
-  acceptTermsOfUse(uid: number): Observable<Succeeded>{
-    return this.http.put<Succeeded>(`/api/v1/legal/termsofuse/${uid}`,uid)
+  acceptTermsOfUse(uid: number): Observable<void>{
+    return this.http.put<void>(`/api/v1/legal/termsofuse/${uid}`,uid)
   }
-
 }

@@ -169,28 +169,28 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private submit() {
-    this.submissionService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
-      res => {
-        if(res.done) {
-          this.submissions.push(res);
-          this.result(res);
-        } else {
-          this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
-          this.submissionService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
-            delay(2000)
-          ).subscribe(res2 =>{
-            this.submissions.push(res2);
-            if(res2.done){
-              this.result(res2)// TODO result??
-            } else {
-              this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
-            }
-          });
-        }
-      }, error => {
-        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
-      }
-    );
+    // this.submissionService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
+    //   res => {
+    //     if(res.done) {
+    //       this.submissions.push(res);
+    //       this.result(res);
+    //     } else {
+    //       this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
+    //       this.submissionService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
+    //         delay(2000)
+    //       ).subscribe(res2 =>{
+    //         this.submissions.push(res2);
+    //         if(res2.done){
+    //           this.result(res2)// TODO result??
+    //         } else {
+    //           this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
+    //         }
+    //       });
+    //     }
+    //   }, error => {
+    //     this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
+    //   }
+    // );
   }
 
   private result(submission: Submission){

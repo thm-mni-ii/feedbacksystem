@@ -58,16 +58,11 @@ export class ParticipantsComponent implements OnInit {
   roleChange(userID: number, role: string) {
     this.registrationService.registerCourse(userID, this.courseID, role)
       .subscribe(res => {
-        // TODO
-        if(res){
-          this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
-          this.refreshUserList()
-        } else {
-          this.snackBar.open("Leider gab es einen Fehler.","OK", {duration: 5000})
-        }
-    }, () => {
-      this.snackBar.open("Leider gab es einen Fehler mit dem Update","OK", {duration: 5000})
-    });
+        this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
+        this.refreshUserList()
+      }, () => {
+        this.snackBar.open("Leider gab es einen Fehler mit dem Update","OK", {duration: 5000})
+      })
   }
 
   /**

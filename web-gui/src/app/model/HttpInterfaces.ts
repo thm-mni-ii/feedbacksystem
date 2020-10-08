@@ -154,13 +154,8 @@ export interface AfterLogin {
   };
 }
 
-/**
- * Gives back if something succeeded
- */
-export interface Succeeded {
-  success: boolean;
-  fileupload?: boolean;
-}
+
+export interface Succeeded {}
 
 
 /**

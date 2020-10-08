@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {Observable, of} from "rxjs";
 import {Task} from "../model/Task";
 import {HttpClient} from "@angular/common/http";
-import {Succeeded} from "../model/HttpInterfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -46,8 +45,8 @@ export class TaskService {
    * @param task The new task state
    * @return Observable that succeeds if updated successfully
    */
-  updateTask(cid: number, tid: number, task: Task): Observable<Succeeded>{
-    return this.http.put<Succeeded>(`/api/v1/courses/${cid}/tasks/${tid}`, task)
+  updateTask(cid: number, tid: number, task: Task): Observable<void>{
+    return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}`, task)
   }
 
   /**
@@ -56,8 +55,8 @@ export class TaskService {
    * @param tid Task id
    * @return Observable that succeeds if the task does not exists after this operation.
    */
-  deleteTask(cid: number, tid: number): Observable<Succeeded>{
-    return this.http.delete<Succeeded>(`/api/v1/courses/${cid}/tasks/${tid}`)
+  deleteTask(cid: number, tid: number): Observable<void>{
+    return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}`)
   }
 
   // PUT /courses/{cid}/tasks/{tid}/main-file
