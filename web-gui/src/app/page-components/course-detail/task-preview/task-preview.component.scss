@@ -1,15 +1,88 @@
-#resultCard.true{
-  background-color: green;
+@import "src/colors";
+
+.task-container {
+  cursor: pointer;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  .meta {
+    > * {
+      margin-left: 8px;
+    }
+    > .tiny {
+      font-size: small;
+    }
+    .state {
+      text-align: center;
+      line-height: 30px;
+    }
+  }
+  span {
+    display: flex;
+    align-items: center;
+  }
 }
 
-#task-result-text.true {
+.task-container:hover {
+  background: #d4dadd;
+}
+
+.container {
+  display: block;
+  padding: 16px;
+}
+
+.actions {
+  margin: -15px;
+  display: flex;
+  height: 40px;
+  width: 100%;
+  padding-left: 10px;
+  margin-bottom: 10px;
+  .mat-flat-button {
+    line-height: 30px;
+    margin: 0 2.5px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .mat-icon {
+      height: 25px;
+    }
+  }
+  span {
+    height: 24px;
+    margin-top: 2px;
+  }
+  .mat-icon {
+    cursor: pointer;
+  }
+}
+
+.passed {
   color: green;
 }
 
-#task-result-text{
-  word-break: break-word;
+.failed {
+  color: red;
 }
 
-#resultCard.false, #task-result-text.false {
-  color: red;
+.not-done {
+  color: #9d9ea4;
+}
+
+.green {
+  background-color: green;
+  color: white;
+}
+.red {
+  background-color: red;
+  color: white;
+}
+
+.danger-zone {
+  margin-top: 16px;
+  h3 {
+    color: $red;
+  }
 }

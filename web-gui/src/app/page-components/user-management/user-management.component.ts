@@ -1,31 +1,17 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
-import {DatabaseService} from "../../service/database.service";
 import {MatTableDataSource} from '@angular/material/table';
+import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {flatMap} from 'rxjs/operators';
+import {MatDialog} from '@angular/material/dialog';
 import {TitlebarService} from "../../service/titlebar.service";
-// import {User} from "../../model/HttpInterfaces";
-import {UserDeleteModalComponent} from "../../dialogs/user-delete-modal/user-delete-modal.component";
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
-import {throwError} from "rxjs";
-import {MatPaginator} from "@angular/material/paginator";
 import {UserService} from "../../service/user.service";
 import {User} from "../../model/User";
-
-export interface GuestUserAccount {
-  gPrename: string;
-  gSurname: string;
-  gPassword: string;
-  gPasswordRepeat: string;
-  gUsername: string;
-  gEmail: string;
-  gRole: number;
-}
+import {CreateGuestUserDialog} from "../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
+import {UserDeleteModalComponent} from "../../dialogs/user-delete-modal/user-delete-modal.component";
 
 /**
- * This component is for admin managing users
+ * This component is for admins managing users
  */
 @Component({
   selector: 'app-user-management',
@@ -33,34 +19,22 @@ export interface GuestUserAccount {
   styleUrls: ['./user-management.component.scss']
 })
 export class UserManagementComponent implements OnInit {
-
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  constructor(private db: DatabaseService, private snackBar: MatSnackBar, private titlebar: TitlebarService,
+
+  columns = ['surname', 'prename', 'email', 'username', 'globalRole', 'action'];
+  dataSource = new MatTableDataSource<User>();
+
+  constructor(private snackBar: MatSnackBar, private titlebar: TitlebarService,
               private dialog: MatDialog, private userService: UserService) {
   }
 
-  columns = ['surname', 'prename', 'email', 'username', 'role_id', 'action'];
-  dataSource = new MatTableDataSource<User>();
-
-  // Guest Account
-
-  userData: GuestUserAccount = {
-    gPrename: '',
-    gSurname: '',
-    gPassword: '',
-    gPasswordRepeat: '',
-    gUsername: '',
-    gEmail: '',
-    gRole: 16
-  };
-
   ngOnInit() {
     this.titlebar.emitTitle('Benutzerverwaltung');
-    this.loadAllUsers();
+    this.refreshUserList();
   }
 
-  private loadAllUsers() {
+  private refreshUserList() {
     // this.db.getAllUsers().subscribe(users => {
     this.userService.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
@@ -75,19 +49,13 @@ export class UserManagementComponent implements OnInit {
    * @param userID The id of user
    * @param role Selected role from admin
    */
-  roleChange(username: string, userID: number, role: number) {
-    if (Number(role) === 4 || Number(role) === 8) {
-      this.snackBar.open('Bitte über "Dozent/Tutor bestimmen" auswählen', 'OK', {duration: 5000});
-      return;
-    }
-
-    this.db.changeUserRole(userID, role).subscribe(res => {
-      if (res.success) {
-        this.snackBar.open(username + ' ist jetzt ' + res.grant, 'OK', {duration: 3000});
-      } else {
-        this.snackBar.open('Fehler', 'OK', {duration: 3000});
-      }
-    });
+  roleChange(username: string, userID: number, role: string) {
+    this.userService.changeRole(userID, role).subscribe(res => {
+        this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
+        this.refreshUserList()
+      }, error => {
+        this.snackBar.open("Leider gab es einen Fehler mit dem Update","OK", {duration: 5000})
+      });
   }
 
   /**
@@ -95,25 +63,14 @@ export class UserManagementComponent implements OnInit {
    * @param user The user to delete
    */
   deleteUser(user: User) {
-    // TODOD: neuer User Service hat noch kein Observable return
-    // this.dialog.open(DeleteUserModalComponent, {
-    //   data: user
-    // }).afterClosed().pipe(
-    //   flatMap(value => {
-    //     if (value.exit) {
-    //       return this.db.adminDeleteUser(user.id)
-    //     } else {
-    //       return null
-    //     }
-    //   })
-    // ).toPromise().then((result) => {
-    //   if (result.success) {
-    //     this.snackBar.open(user.username + ' wurde gelöscht');
-    //     this.loadAllUsers();
-    //   }
-    // }).catch(e => {
-    // })
-
+    this.dialog.open(UserDeleteModalComponent, {
+      data: user
+    }).afterClosed().subscribe(
+      res => {
+          this.snackBar.open("Benutzer wurde gelöscht.","OK",{duration: 5000});
+      }, error => {
+        this.snackBar.open("Leider gab es einen Fehler.","OK", {duration: 5000})
+      });
   }
 
   /**
@@ -124,34 +81,22 @@ export class UserManagementComponent implements OnInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  /**
+   * Opens dialog to create a new local user
+   */
   showGuestUserDialog() {
-    /*const dialogRef = this.dialog.open(CreateGuestUserDialog, {
+    this.dialog.open(CreateGuestUserDialog, {
       width: '500px',
-      data: this.userData
-    });
-
-    dialogRef.afterClosed()
-      .subscribe(user => {
+    }).afterClosed().subscribe(user => {
         if (user) {
-          this.db.createGuestUser(user.gUsername, user.gPassword, user.gRole, user.gPrename, user.gSurname, user.gEmail).pipe(
-            flatMap(result => (result.success) ? this.db.getAllUsers() : throwError(result))
-          ).subscribe(users => {
-            this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
-            this.dataSource.data = users;
-            this.resetUserData();
-          }, error => {
-            this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
-          });
+          this.userService.createUser(user).subscribe(
+            res => {
+              this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
+              this.refreshUserList()
+            }, error => {
+              this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
+            });
         }
-      });*/
-  }
-
-  private resetUserData(): void {
-    this.userData.gPrename = '';
-    this.userData.gSurname = '';
-    this.userData.gEmail = '';
-    this.userData.gPassword = '';
-    this.userData.gRole = 16;
-    this.userData.gUsername = '';
+      });
   }
 }

@@ -102,7 +102,7 @@ class AuthService {
     Jwts.builder.setSubject("client_authentication")
       .claim("id", user.id)
       .claim("username", user.username)
-      .claim("globalRole", user.globalRole.id)
+      .claim("globalRole", user.globalRole.toString)
       .claim("courseRoles", courseRoles)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))

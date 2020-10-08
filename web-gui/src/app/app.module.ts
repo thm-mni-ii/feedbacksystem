@@ -41,7 +41,7 @@ import {MatSliderModule} from '@angular/material/slider';
 
 import {NewCourseComponent} from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
-import { CoursePreviewComponent } from './page-components/course-preview/course-preview.component';
+import { CoursePreviewComponent} from "./page-components/course-preview/course-preview.component";
 import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
 import { TaskDetailComponent } from './page-components/task-detail/task-detail.component';
 import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';

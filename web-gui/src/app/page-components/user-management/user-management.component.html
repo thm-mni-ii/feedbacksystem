@@ -6,7 +6,7 @@
   </mat-form-field>
 
   <div class="create-guest-user">
-    <button mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person_add</mat-icon>Neuen Benutzer erstellen</button>
+    <button mat-raised-button color="accent" (click)="showGuestUserDialog()"><mat-icon>person_add</mat-icon><span></span> Neuen Benutzer erstellen</button>
   </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
@@ -36,13 +36,13 @@
     </ng-container>
 
     <!-- Role id Column-->
-    <ng-container matColumnDef="role_id">
+    <ng-container matColumnDef="globalRole">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Rolle</th>
       <td mat-cell *matCellDef="let user">
-        <mat-select value="{{user.role_id}}" (selectionChange)="roleChange(user.username, user.user_id, $event.value)">
-          <mat-option value="1">Admin</mat-option>
-          <mat-option value="2">Moderator</mat-option>
-          <mat-option value="16">User</mat-option>
+        <mat-select value="{{user.globalRole}}" (selectionChange)="roleChange(user.username, user.id, $event.value)">
+          <mat-option value="ADMIN">Admin</mat-option>
+          <mat-option value="MODERATOR">Moderator</mat-option>
+          <mat-option value="USER">User</mat-option>
         </mat-select>
       </td>
     </ng-container>

@@ -6,12 +6,12 @@ export const SUBMISSION: Submission[] =
     "submissionTime": 1568199972,
     "done": false,
     "id": 1,
-    "results": null
+    "results": CHECKRESULT.slice(0,2)
   }, {
     "submissionTime": 1568200054,
-    "done": true,
+    "done": false,
     "id": 2,
-    "results": null
+    "results": CHECKRESULT.slice(2,3)
   }, {
     "submissionTime": 1568199952,
     "done": false,
@@ -19,7 +19,7 @@ export const SUBMISSION: Submission[] =
     "results": null
   }, {
     "submissionTime": 1568200043,
-    "done": false,
+    "done": true,
     "id": 4,
     "results": null
   }, {
@@ -94,13 +94,13 @@ export const SUBMISSION: Submission[] =
     "results": null
   }, {
     "submissionTime": 1568199957,
-    "done": false,
+    "done": true,
     "id": 19,
     "results": null
   }, {
     "submissionTime": 1568200120,
     "done": true,
     "id": 20,
-    "results": null
+    "results": CHECKRESULT.slice(0,1)
   }
 ]

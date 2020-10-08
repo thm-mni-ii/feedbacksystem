@@ -3,7 +3,6 @@ import {DatabaseService} from '../../service/database.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
-import {UserService} from '../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
@@ -11,10 +10,8 @@ import {first, share, delay, flatMap, retryWhen, take} from 'rxjs/operators';
 import {of, throwError, Observable, Subscription} from 'rxjs';
 
 import {
-  CourseTask,
-  DetailedCourseInformation,
   NewTaskInformation,
-  Succeeded, User
+  Succeeded
 } from '../../model/HttpInterfaces';
 import {ConferenceService} from '../../service/conference.service';
 import {ClassroomService} from '../../service/classroom.service';
@@ -28,6 +25,15 @@ import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/cour
 import {ExitCourseDialogComponent} from "../../dialogs/exit-course-dialog/exit-course-dialog.component";
 import {AuthService} from "../../service/auth.service";
 import {Roles} from "../../model/Roles";
+import {TaskService} from "../../service/task.service";
+import {Course} from "../../model/Course";
+import {Task} from "../../model/Task";
+import {CourseService} from "../../service/course.service";
+import {Submission} from "../../model/Submission";
+import {UserService} from "../../service/user.service";
+import {JWTToken} from "../../model/JWTToken";
+import {error} from "@angular/compiler/src/util";
+import {CourseRegistrationService} from "../../service/course-registration.service";
 
 @Component({
   selector: 'app-course-detail',
@@ -39,37 +45,51 @@ export class CourseDetailComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
-              private router: Router, @Inject(DOCUMENT) document) {
+              private router: Router, private taskService: TaskService, private authService: AuthService,
+              private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
+              @Inject(DOCUMENT) document) {
   }
 
-  tasks: CourseTask[] = [];
+  tasks: Task[];
   courseID: number;
-  userRole: string;
-  courseDetail: DetailedCourseInformation;
+  user: string;
+  courseDetail: Course;
+  token: JWTToken;
+  role: [];
   openConferences: Observable<string[]>;
   subscriptions: Subscription[] = [];
+  submissionStatus: boolean;
+  submissions: Submission[];
 
   ngOnInit() {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.loadTasksFromCourse(param.id);
+        this.loadAllInitalInformation();
       }
     );
   }
 
-  loadTasksFromCourse(courseid: number) {
-    this.db.getCourseDetail(courseid).subscribe((value: DetailedCourseInformation) => {
-      this.courseDetail = value;
-      this.tasks = value.tasks;
-      this.userRole = value.role_name;
-      this.titlebar.emitTitle(this.courseDetail.course_name);
-    });
+  loadAllInitalInformation() {
+    this.taskService.getAllTasks(this.courseID).subscribe(
+      tasks => {
+        this.tasks = tasks;
+      }
+    );
+    this.courseService.getCourse(this.courseID).subscribe(
+      course => {
+        this.courseDetail = course;
+        this.titlebar.emitTitle(course.name);
+    })
+    this.token = this.authService.getToken()
+    // this.role = this.authService.getToken().courseRoles;
+    //TODO: only show role, if user has multiple courseRoles
+    //0: docent, 1: tutor, 2: user
   }
 
   public isAuthorized() {
-    const courseRole = this.auth.getToken().courseRoles[this.courseID]
-    return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
+    // const courseRole = this.auth.getToken().courseRoles[this.courseID] // TODO: identify through Token
+    return true //Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
   /**
@@ -77,16 +97,19 @@ export class CourseDetailComponent implements OnInit {
    */
   updateCourse() {
     this.dialog.open(CourseUpdateDialogComponent, {
-      height: '600px',
-      width: '800px',
+      width: '50%',
       data: {data: this.courseDetail}
     }).afterClosed().subscribe((value: Succeeded) => {
       location.hash = '';
       if (value.success) {
-        this.db.getCourseDetail(this.courseID).subscribe(courses => {
+        /*this.db.getCourseDetail(this.courseID).subscribe(courses => {
           this.courseDetail = courses;
           this.titlebar.emitTitle(this.courseDetail.course_name);
-        });
+        });*/
+        this.courseService.getCourse(this.courseID).subscribe((courses => {
+          this.courseDetail = courses;
+          this.titlebar.emitTitle(this.courseDetail.name);
+        }))
       }
     });
   }
@@ -100,12 +123,12 @@ export class CourseDetailComponent implements OnInit {
       flatMap((value) => {
         if (value.success) {
           this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-          this.waitAndDisplayTestsystemAcceptanceMessage(value.taskid);
         }
-        return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
+        //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
+        return this.taskService.getTask(this.courseID, value.taskid)
       })
-    ).subscribe(course_detail => {
-      this.router.navigate(['courses', this.courseID, 'task', course_detail.task.task_id]);
+    ).subscribe(courseDetail => {
+      this.router.navigate(['courses', this.courseID, 'task', this.courseDetail.id]);
     });
   }
 
@@ -121,7 +144,7 @@ export class CourseDetailComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+  /*private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
     setTimeout(() => {
       this.db.getTaskResult(taskid).pipe(
         flatMap((taskResult: NewTaskInformation) => {
@@ -144,9 +167,10 @@ export class CourseDetailComponent implements OnInit {
         })
         .catch(console.error);
     }, 2000);
-  }
+  }*/
+
   goOnline() {
-    this.db.subscribeCourse(this.courseID).subscribe();
+    this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     Notification.requestPermission();
     this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
@@ -182,57 +206,68 @@ export class CourseDetailComponent implements OnInit {
    * Delete a course by its ID, if the user not permitted to do that, nothing happens
    */
   deleteCourse() {
-    this.dialog.open(CourseDeleteModalComponent, {
-      data: {coursename: this.courseDetail.course_name, courseID: this.courseID}
-    }).afterClosed().pipe(
-      flatMap(value => {
-        if (value.exit) {
-          return this.db.deleteCourse(this.courseID);
-        }
-      })
-    )
-      .toPromise()
-      .then( (value: Succeeded) => {
-        if (value.success) {
-          this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
-          this.router.navigate(['courses', 'user']);
-        } else {
-          this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-            + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
-            'OK', {duration: 5000});
-        }
-      })
-      .catch(() => {
-        this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-          + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
-          'OK', {duration: 5000});
-      });
-  }
-
-  /**
-   * Unsubscribe course
-   * @param courseName The name to show user
-   * @param courseID The id of current course
-   */
-  exitCourse(courseName: string, courseID: number) {
-    this.dialog.open(ExitCourseDialogComponent, {
-      data: {coursename: courseName}
-    }).afterClosed().pipe(
-      flatMap(value => {
-        if (value.exit) {
-          return this.db.unsubscribeCourse(courseID);
-        }
-      })
-    ).subscribe(res => {
-      if (res.success) {
-        this.snackbar.open('Du hast den Kurs ' + courseName + ' verlassen', 'OK', {duration: 3000});
-        this.router.navigate(['courses', 'user']);
-
+        this.dialog.open(CourseDeleteModalComponent, {
+          data: {coursename: this.courseDetail.name, courseID: this.courseID}
+        }).afterClosed().pipe(
+          flatMap(value => {
+            if (value.exit) {
+              return this.courseService.deleteCourse(this.courseID);
+            }
+          })
+        )
+          .toPromise()
+          .then( (value: Succeeded) => {
+            if (value.success) {
+              this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
+              this.router.navigate(['courses', 'user']);
+            } else {
+              this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+                + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
+                'OK', {duration: 5000});
+            }
+          })
+          .catch(() => {
+            this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+              + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
+              'OK', {duration: 5000});
+          });
       }
-    });
-  }
 
-  public exportSubmissions() {
-    this.db.exportCourseSubmissions(this.courseID, this.courseDetail.course_name);
-  }
+    subscribeCourse(){
+    this.courseRegistrationService.registerCourse(this.courseDetail.id, this.token.id).subscribe(
+      res => {
+        if (res){
+          // TODO: reload token?
+          // this.role = "USER"
+          this.snackbar.open("Du bist dich für " + this.courseDetail.name + " eingetragen.", "ok", {duration: 3000})
+        } else {
+          this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+        }
+      }
+    )
+    }
+
+    /**
+      * Unsubscribe course
+    */
+    unsubscribeCourse() {
+      this.dialog.open(ExitCourseDialogComponent, {
+        data: {coursename: this.courseDetail.name}
+      }).afterClosed().pipe(
+        flatMap(value => {
+          if (value.exit) {
+            return this.courseRegistrationService.deregisterCourse(this.courseDetail.id, this.token.id);
+          }
+        })
+      ).subscribe(res => {
+        if (res) {
+          this.snackbar.open('Du hast den Kurs ' + this.courseDetail.name + ' verlassen', 'OK', {duration: 3000});
+          this.router.navigate(['courses', 'user']);
+        } else this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+      }, error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000}))
+    }
+
+    public exportSubmissions() {
+      this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
+    }
 }

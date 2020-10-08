@@ -1,13 +1,17 @@
 <div class="container">
+  <mat-form-field class="search" appearance="outline">
+    <mat-label>Kurs suchen</mat-label>
+    <input type="text" aria-label="Kurs suchen" matInput [formControl]="control">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
 
-  <mat-toolbar>
-    <span style="flex: 1 1 auto">Kurs/e</span>
-    <span style="flex: 1 1 auto"></span>
-    <span>Rolle</span>
-  </mat-toolbar>
+<!--  <mat-toolbar>-->
+<!--    <span style="flex: 1 1 auto">Kurs/e</span>-->
+<!--    <span style="flex: 1 1 auto"></span>-->
+<!--  </mat-toolbar>-->
 
-  <app-course-preview *ngFor="let course of registeredCourses$ | async" [data]="course"></app-course-preview>
+  <app-course-preview *ngFor="let course of filteredCourses | async" [data]="course"></app-course-preview>
 
-  <span class="noElements" *ngIf="(registeredCourses$ | async)?.length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
+  <span class="noElements" *ngIf="(courses | async).length == 0">Tragen Sie sich in Kurse ein um diese hier zu sehen.</span>
 </div>
 

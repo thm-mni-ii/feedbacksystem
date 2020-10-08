@@ -1,32 +1,55 @@
 import { Injectable } from '@angular/core';
-import {USERS} from '../mock-data/mock-users';
-import {User} from '../model/User';
-import { Observable, of } from 'rxjs';
-import {COURSE} from "../mock-data/mock-courses";
+import { Observable } from 'rxjs';
 import {Course} from "../model/Course";
+import {Succeeded} from "../model/HttpInterfaces";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CourseService {
-  constructor() { }
-
+  constructor(private http: HttpClient) { }
+  /**
+   * @return Observable with all courses
+   */
   getCourseList(): Observable<Course[]> {
-    return of(COURSE)
+    return this.http.get<Course[]>('/api/v1/courses')
   }
 
-  // GET /users/{uid}/courses
-  getRegisteredCourses(uid: number): Observable<Course[]>{
-    return of(COURSE);
+  /**
+   * Get a single course by its id, if it exits
+   * @param cid The course id
+   */
+  getCourse(cid: number): Observable<Course>{
+    return this.http.get<Course>(`/api/v1/courses/${cid}`)
   }
 
-  // GET /courses/{cid}/participants --> filter for Role 0
-  getDocents(cid: number): Observable<User[]> { // String Array?
-    return of(USERS.slice(3,6));
+  /**
+   * Create a new course
+   * @param course The course state
+   * @return The created course, adjusted by the system
+   */
+  createCourse(course: Course): Observable<Course> {
+    return this.http.post<Course>('/api/v1/courses', course);
   }
 
-  // GET /courses/{cid}/participants --> filter for User
-  getRoleOfUser(uid: number, cid: number): Observable<String>{ // number or String?
-    return of("tutor");
+  /**
+   * Update an existing course
+   * @param cid Course id to update
+   * @param course The new course state
+   */
+  updateCourse(cid: number, course: Course): Observable<Succeeded> {
+    return this.http.put<Succeeded>(`/api/v1/courses/${cid}`, course)
   }
+
+  /**
+   * Delete a course by its id
+   * @param cid The course id
+   * @return Observable that succeeds if the course does not exists after the operation
+   */
+  deleteCourse(cid: number): Observable<Succeeded> { // returns an Observable<Succeeded>
+    return this.http.delete<Succeeded>(`/api/v1/courses/${cid}`)
+  }
+
+  // TODO: export a course as zip format
 }

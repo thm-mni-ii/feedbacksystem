@@ -2,32 +2,32 @@ import { CheckResult} from "../model/CheckResult";
 import { USERS } from './mock-users';
 
 export const CHECKRESULT: CheckResult[] = [{
-  "exitCode": 1,
+  "exitCode": 0,
   "resultText": "volutpat eleifend donec ut dolor morbi vel lectus in quam fringilla rhoncus mauris enim leo rhoncus sed vestibulum sit amet",
   "checkerType": "eget vulputate",
   "configurationId": 10
 }, {
-  "exitCode": 2,
+  "exitCode": 0,
   "resultText": "metus sapien ut nunc vestibulum ante ipsum primis in faucibus orci luctus et ultrices",
   "checkerType": "est",
   "configurationId": 4
 }, {
-  "exitCode": 4,
+  "exitCode": 1,
   "resultText": "sed vestibulum sit amet cursus id turpis integer aliquet massa id lobortis convallis tortor",
   "checkerType": "nisl",
   "configurationId": 8
 }, {
-  "exitCode": 3,
+  "exitCode": 0,
   "resultText": "interdum mauris ullamcorper purus sit amet nulla quisque arcu libero rutrum ac lobortis",
   "checkerType": "sapien iaculis congue",
   "configurationId": 4
 }, {
-  "exitCode": 3,
+  "exitCode": 0,
   "resultText": "rutrum neque aenean auctor gravida sem praesent id massa id nisl venenatis lacinia aenean",
   "checkerType": "congue risus semper",
   "configurationId": 2
 }, {
-  "exitCode": 1,
+  "exitCode": 0,
   "resultText": "varius ut blandit non interdum in ante vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere",
   "checkerType": "orci luctus et",
   "configurationId": 10

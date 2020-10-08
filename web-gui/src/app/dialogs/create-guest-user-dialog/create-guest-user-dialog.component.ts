@@ -1,41 +1,45 @@
-import {Component, Inject} from "@angular/core";
+import {Component} from "@angular/core";
 import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
+import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {GuestUserAccount} from "../../page-components/user-management/user-management.component";
+import {User} from "../../model/User";
 
 @Component({
   selector: 'app-create-guest-user-dialog',
   templateUrl: 'create-guest-user-dialog.component.html',
   styleUrls: ['./create-guest-user-dialog.component.scss']
 })
-export class CreateGuestUserDialog {
+export class CreateGuestUserDialog{
+
+  pwRepeat: String = '';
+  data: User = new class implements User {
+    alias: string;
+    email: string;
+    globalRole: string;
+    id: number;
+    password: string ='';
+    prename: string;
+    surname: string;
+    username: string;
+  };
 
   private passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-    return control.value == this.data.gPassword ? null : {'notMatch': true};
+    return control.value == this.data.password ? null : {'notMatch': true};
   };
 
   passwordMatcher = new FormControl('', [Validators.required, this.passwordsMatchValidator]);
 
   constructor(public dialog: MatDialog,
               public dialogRef: MatDialogRef<CreateGuestUserDialog>,
-              @Inject(MAT_DIALOG_DATA) public data: GuestUserAccount,
               private snackBar: MatSnackBar) {
   }
 
   onCancel(): void {
-    this.data.gPrename = '';
-    this.data.gSurname = '';
-    this.data.gEmail = '';
-    this.data.gPassword = '';
-    this.data.gPasswordRepeat = '';
-    this.data.gUsername = '';
-    this.data.gRole = 16;
     this.dialogRef.close(null);
   }
 
   onSubmit(): void {
-    if (this.data.gPassword === this.data.gPasswordRepeat)
+    if (this.data.password === this.pwRepeat)
       this.dialogRef.close(this.data);
     else
       this.snackBar.open('Error: ' + "Die Passwörter müssen übereinstimmen", null, {duration: 5000});
