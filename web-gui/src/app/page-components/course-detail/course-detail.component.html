@@ -34,7 +34,7 @@
         <span *ngIf="role == 'student'">Student</span>
   </span>
   <span class="icon-btn">
-      <button mat-flat-button (click)="unsubscribeCourse()" matTooltip="Kurs verlassen"><mat-icon>exit_to_app</mat-icon></button><!--*ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id"-->
+      <button mat-flat-button (click)="exitCourse()" matTooltip="Kurs verlassen"><mat-icon>exit_to_app</mat-icon></button><!--*ngIf="(userRole != 'admin' && userRole != 'moderator') && userRole != 'docent' && courseDetail.role_id"-->
   </span>
 
 </ng-container>
@@ -46,7 +46,21 @@
     <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon>add</mat-icon>&nbsp;Aufgabe erstellen</button>
   </div>
 
-  <app-task-preview></app-task-preview>
+<!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
+  <div class="container">
+    <app-task-preview *ngFor="let task of tasks" [courseId]="courseID" [task]="task"></app-task-preview>
+  </div>
+
+  <mat-accordion class="participants">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Kursteilnehmer
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <app-participants [courseID]="courseID"></app-participants>
+    </mat-expansion-panel>
+  </mat-accordion>
 
   <br>
   <mat-expansion-panel hideToggle>

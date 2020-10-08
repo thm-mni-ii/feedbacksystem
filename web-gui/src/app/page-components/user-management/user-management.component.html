@@ -39,7 +39,7 @@
     <ng-container matColumnDef="globalRole">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Rolle</th>
       <td mat-cell *matCellDef="let user">
-        <mat-select value="{{user.globalRole}}" (selectionChange)="roleChange(user.username, user.id, $event.value)">
+        <mat-select value="{{user.globalRole}}" (selectionChange)="roleChange(user.id, $event.value)">
           <mat-option value="ADMIN">Admin</mat-option>
           <mat-option value="MODERATOR">Moderator</mat-option>
           <mat-option value="USER">User</mat-option>

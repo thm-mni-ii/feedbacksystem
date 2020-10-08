@@ -1,12 +1,10 @@
-<div class="container">
-  <mat-card [routerLink]="'/courses/'+course.id+'/task/'+task.id" *ngFor="let task of tasks" class="task-container" id="{{task.id}}">
-    <span>{{task.name}}</span>
-    <span class="meta">
-      <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
-      <span class="tiny">{{task.deadline*1000 | date:'dd.MM.yyyy HH:mm'}}</span>
-      <span class="state passed" *ngIf="submissionStatus"><mat-icon>check_circle</mat-icon></span>
-      <span class="state failed" *ngIf="!submissionStatus && submissionStatus != null"><mat-icon>not_interested</mat-icon></span>
-      <span class="state not-done" *ngIf="submissionStatus == null"><mat-icon>error_outline</mat-icon></span>
-    </span>
-  </mat-card>
-</div>
+<mat-card [routerLink]="['/courses', courseId, 'task', task.id]" class="task-container" id="{{task.id}}">
+  <span>{{task.name}}</span>
+  <span class="meta">
+    <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
+    <span class="tiny">{{task.deadline*1000 | date:'dd.MM.yyyy HH:mm'}}</span>
+    <span class="state passed" *ngIf="submissionStatus"><mat-icon>check_circle</mat-icon></span>
+    <span class="state failed" *ngIf="!submissionStatus && submissionStatus != null"><mat-icon>not_interested</mat-icon></span>
+    <span class="state not-done" *ngIf="submissionStatus == null"><mat-icon>error_outline</mat-icon></span>
+  </span>
+</mat-card>

@@ -25,13 +25,14 @@ export class TaskNewDialogComponent implements OnInit, OnDestroy {
     deadline: new FormControl(new Date()),
     mediaType: new FormControl(''),
   });
+
   isUpdate: boolean;
   courseID: number;
-  task: Task = new class implements Task {
-    deadline: number = Date.now();
-    description: string;
-    mediaType: string;
-    name: string;
+  task: Task = {
+    deadline: Date.now(),
+    description: '',
+    mediaType: '',
+    name: ''
   }
 
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
@@ -40,18 +41,14 @@ export class TaskNewDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     if (this.data.task) {
       this.isUpdate = true;
       this.task = this.data.task
       this.taskForm.controls['taskName'].setValue(this.data.task.name);
       this.taskForm.controls['taskDescription'].setValue(this.data.task.description);
       this.taskForm.controls['mediaType'].setValue(this.data.task.mediaType);
-    } else if (this.data.courseDetail) {
-        this.courseID = this.data.courseDetail.id
-    } else {
-      // ERROR
     }
+    this.courseID = this.data.courseID
   }
 
   ngOnDestroy(): void {
@@ -67,8 +64,11 @@ export class TaskNewDialogComponent implements OnInit, OnDestroy {
   }
 
   checkDate():boolean{
-    if(this.task.deadline<=Date.now()) return false
-    else return true
+    if (this.task.deadline<=Date.now()) {
+      return false
+    } else {
+      return true
+    }
   }
 
   getValues(){
@@ -83,14 +83,11 @@ export class TaskNewDialogComponent implements OnInit, OnDestroy {
   createTask(value: any) {
     this.getValues()
     if(this.checkDate() && this.task.name) {
-      this.snackBar.open("Neuer Task erstellt.", "ok");
-      this.taskService.createTask(this.courseID, this.task).subscribe(
-        res => {
-          this.dialogRef.close({success: res});
-        });
-    }
-    else{
-      this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
+      this.taskService.createTask(this.courseID, this.task).subscribe(task => {
+          this.dialogRef.close({success: true, task: task});
+      });
+    } else {
+      this.snackBar.open("Das Datum muss in der Zukunft liegen.", "ok");
     }
   }
 
@@ -102,12 +99,10 @@ export class TaskNewDialogComponent implements OnInit, OnDestroy {
     this.getValues()
     if(this.checkDate() && this.task.name) {
       this.snackBar.open("Task bearbeitet.", "ok");
-      this.taskService.updateTask(this.courseID, this.task.id, this.task).subscribe(
-        res => {
-          this.dialogRef.close({success: res});
+      this.taskService.updateTask(this.courseID, this.task.id, this.task).subscribe(task => {
+          this.dialogRef.close({success: true, task: task});
         });
-    }
-    else{
+    } else {
       this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
     }
   }

@@ -42,49 +42,77 @@ import {CourseRegistrationService} from "../../service/course-registration.servi
 })
 export class CourseDetailComponent implements OnInit {
   courseID: number;
+  tasks: Task[]
+  role: string = null
 
-  constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
+  constructor(private taskService: TaskService,
+              private authService: AuthService,
+              private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
-              private router: Router, private taskService: TaskService, private authService: AuthService,
+              private router: Router,
               private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
               @Inject(DOCUMENT) document) {
   }
-
-  tasks: Task[];
-  user: string;
-  courseDetail: Course;
-  token: JWTToken;
-  role: [];
-  openConferences: Observable<string[]>;
-  subscriptions: Subscription[] = [];
-  submissionStatus: boolean;
-  submissions: Submission[];
 
   ngOnInit() {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.loadAllInitalInformation();
+        this.reloadTasks()
       }
     );
+    this.role = this.auth.getToken().courseRoles[this.courseID]
   }
 
-  loadAllInitalInformation() {
-    this.taskService.getAllTasks(this.courseID).subscribe(
-      tasks => {
-        this.tasks = tasks;
-      }
-    );
-    this.courseService.getCourse(this.courseID).subscribe(
-      course => {
-        this.courseDetail = course;
-        this.titlebar.emitTitle(course.name);
-    })
-    this.role = this.authService.getToken().courseRoles;
+  reloadTasks() {
+    this.taskService.getAllTasks(this.courseID).subscribe(tasks => this.tasks = tasks)
+  }
 
-    //TODO: only show role, if user has multiple courseRoles
-    //0: docent, 1: tutor, 2: user
+  updateCourse() {
+    // this.dialog.open(CourseUpdateDialogComponent, {
+    //   width: '50%',
+    //   data: {data: this.courseDetail}
+    // }).afterClosed().subscribe((value: Succeeded) => {
+    //   location.hash = '';
+    //   if (value.success) {
+    //     /*this.db.getCourseDetail(this.courseID).subscribe(courses => {
+    //       this.courseDetail = courses;
+    //       this.titlebar.emitTitle(this.courseDetail.course_name);
+    //     });*/
+    //     this.courseService.getCourse(this.courseID).subscribe((courses => {
+    //       this.courseDetail = courses;
+    //       this.titlebar.emitTitle(this.courseDetail.name);
+    //     }))
+    //   }
+    // });
+  }
+
+  createTask() {
+    this.dialog.open(TaskNewDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    }).afterClosed()
+      .subscribe(result => {
+        if (result.success) {
+          this.router.navigate(['courses', this.courseID, 'task', result.task.id]);
+        }
+      }, error => console.error(error))
+  }
+
+  /**
+   * Join a course by registering into it.
+   */
+  joinCourse() {
+
+  }
+
+  /**
+   * Leave the course by de-registering from it.
+   */
+  exitCourse() {
+
   }
 
   public isAuthorized() {
@@ -95,45 +123,9 @@ export class CourseDetailComponent implements OnInit {
       || Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
-  /**
-   * Opens dialog to update course information
-   */
-  updateCourse() {
-    this.dialog.open(CourseUpdateDialogComponent, {
-      width: '50%',
-      data: {data: this.courseDetail}
-    }).afterClosed().subscribe((value: Succeeded) => {
-      location.hash = '';
-      if (value.success) {
-        /*this.db.getCourseDetail(this.courseID).subscribe(courses => {
-          this.courseDetail = courses;
-          this.titlebar.emitTitle(this.courseDetail.course_name);
-        });*/
-        this.courseService.getCourse(this.courseID).subscribe((courses => {
-          this.courseDetail = courses;
-          this.titlebar.emitTitle(this.courseDetail.name);
-        }))
-      }
-    });
-  }
+  // Conferences
 
-  createTask() {
-    this.dialog.open(TaskNewDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
-    }).afterClosed().pipe(
-      flatMap((value) => {
-        if (value.success) {
-          this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
-        }
-        //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
-        return this.taskService.getTask(this.courseID, value.taskid)
-      })
-    ).subscribe(courseDetail => {
-      this.router.navigate(['courses', this.courseID, 'task', this.courseDetail.id]);
-    });
-  }
+  openConferences: Observable<string[]>;
 
   createConference() {
     this.dialog.open(NewconferenceDialogComponent, {
@@ -147,33 +139,8 @@ export class CourseDetailComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  /*private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
-    setTimeout(() => {
-      this.db.getTaskResult(taskid).pipe(
-        flatMap((taskResult: NewTaskInformation) => {
-          const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
-          if (acceptance_flaggs.indexOf(null) < 0) {
-            // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
-            return of({success: true});
-          } else {
-            return throwError('Not all results yet');
-          }
-        }),
-        retryWhen(errors => errors.pipe(
-          delay(5000),
-          take(50)))
-      ).toPromise()
-        .then(d => {
-          if (typeof d == 'undefined') {
-            // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
-          }
-        })
-        .catch(console.error);
-    }, 2000);
-  }*/
-
   goOnline() {
-    this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
+    // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     Notification.requestPermission();
     this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
       this.dialog.open(IncomingCallDialogComponent, {
@@ -205,72 +172,219 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
-  /**
-   * Delete a course by its ID, if the user not permitted to do that, nothing happens
-   */
-  deleteCourse() {
-        this.dialog.open(CourseDeleteModalComponent, {
-          data: {coursename: this.courseDetail.name, courseID: this.courseID}
-        }).afterClosed().pipe(
-          flatMap(value => {
-            if (value.exit) {
-              return this.courseService.deleteCourse(this.courseID);
-            }
-          })
-        )
-          .toPromise()
-          .then( (value: Succeeded) => {
-            if (value.success) {
-              this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
-              this.router.navigate(['courses', 'user']);
-            } else {
-              this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-                + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
-                'OK', {duration: 5000});
-            }
-          })
-          .catch(() => {
-            this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-              + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
-              'OK', {duration: 5000});
-          });
-      }
-
-    subscribeCourse(){
-    this.courseRegistrationService.registerCourse(this.courseDetail.id, this.token.id).subscribe(
-      res => {
-        if (res){
-          // TODO: reload token?
-          // this.role = "USER"
-          this.snackbar.open("Du bist dich für " + this.courseDetail.name + " eingetragen.", "ok", {duration: 3000})
-        } else {
-          this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
-        }
-      }
-    )
-    }
-
-    /**
-      * Unsubscribe course
-    */
-    unsubscribeCourse() {
-      this.dialog.open(ExitCourseDialogComponent, {
-        data: {coursename: this.courseDetail.name}
-      }).afterClosed().pipe(
-        flatMap(value => {
-          if (value.exit) {
-            return this.courseRegistrationService.deregisterCourse(this.courseDetail.id, this.token.id);
-          }
-        })
-      ).subscribe(res => {
-        if (res) {
-          this.snackbar.open('Du hast den Kurs ' + this.courseDetail.name + ' verlassen', 'OK', {duration: 3000});
-          this.router.navigate(['courses', 'user']);
-        } else this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
-      }, error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000}))
-    }
-
-    public exportSubmissions() {
-      this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
-    }
+  //
+  // user: string;
+  // courseDetail: Course;
+  // token: JWTToken;
+  // role: [];
+  // openConferences: Observable<string[]>;
+  // subscriptions: Subscription[] = [];
+  // submissionStatus: boolean;
+  // submissions: Submission[];
+  //
+  //
+  //
+  // loadAllInitalInformation() {
+  //   this.taskService.getAllTasks(this.courseID).subscribe(
+  //     tasks => {
+  //       this.tasks = tasks;
+  //     }
+  //   );
+  //   this.courseService.getCourse(this.courseID).subscribe(
+  //     course => {
+  //       this.courseDetail = course;
+  //       this.titlebar.emitTitle(course.name);
+  //   })
+  //   this.role = this.authService.getToken().courseRoles;
+  //
+  //   //TODO: only show role, if user has multiple courseRoles
+  //   //0: docent, 1: tutor, 2: user
+  // }
+  //
+  // public isAuthorized() {
+  //   const token = this.auth.getToken()
+  //   const courseRole = token.courseRoles[this.courseID]
+  //   const globalRole = token.globalRole
+  //   return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
+  //     || Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
+  // }
+  //
+  // /**
+  //  * Opens dialog to update course information
+  //  */
+  // updateCourse() {
+  //   this.dialog.open(CourseUpdateDialogComponent, {
+  //     width: '50%',
+  //     data: {data: this.courseDetail}
+  //   }).afterClosed().subscribe((value: Succeeded) => {
+  //     location.hash = '';
+  //     if (value.success) {
+  //       /*this.db.getCourseDetail(this.courseID).subscribe(courses => {
+  //         this.courseDetail = courses;
+  //         this.titlebar.emitTitle(this.courseDetail.course_name);
+  //       });*/
+  //       this.courseService.getCourse(this.courseID).subscribe((courses => {
+  //         this.courseDetail = courses;
+  //         this.titlebar.emitTitle(this.courseDetail.name);
+  //       }))
+  //     }
+  //   });
+  // }
+  //
+  // createTask() {
+  //   this.dialog.open(TaskNewDialogComponent, {
+  //     height: 'auto',
+  //     width: 'auto',
+  //     data: {courseID: this.courseID}
+  //   }).afterClosed().pipe(
+  //     flatMap((value) => {
+  //       if (value.success) {
+  //         this.snackbar.open('Erstellung der Aufgabe erfolgreich', 'OK', {duration: 3000});
+  //       }
+  //       //return this.db.getCourseDetailOfTask(this.courseID, value.taskid);
+  //       return this.taskService.getTask(this.courseID, value.taskid)
+  //     })
+  //   ).subscribe(courseDetail => {
+  //     this.router.navigate(['courses', this.courseID, 'task', this.courseDetail.id]);
+  //   });
+  // }
+  //
+  // createConference() {
+  //   this.dialog.open(NewconferenceDialogComponent, {
+  //     height: 'auto',
+  //     width: 'auto',
+  //     data: {courseID: this.courseID}
+  //   });
+  // }
+  //
+  // openUrlInNewWindow(url: string) {
+  //   window.open(url, '_blank');
+  // }
+  //
+  // /*private waitAndDisplayTestsystemAcceptanceMessage(taskid: number) {
+  //   setTimeout(() => {
+  //     this.db.getTaskResult(taskid).pipe(
+  //       flatMap((taskResult: NewTaskInformation) => {
+  //         const acceptance_flaggs = (taskResult.testsystems.map(t => t.test_file_accept));
+  //         if (acceptance_flaggs.indexOf(null) < 0) {
+  //           // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: taskResult});
+  //           return of({success: true});
+  //         } else {
+  //           return throwError('Not all results yet');
+  //         }
+  //       }),
+  //       retryWhen(errors => errors.pipe(
+  //         delay(5000),
+  //         take(50)))
+  //     ).toPromise()
+  //       .then(d => {
+  //         if (typeof d == 'undefined') {
+  //           // this.dialog.open(AnswerFromTestsystemDialogComponent, {data: {no_reaction: true}});
+  //         }
+  //       })
+  //       .catch(console.error);
+  //   }, 2000);
+  // }*/
+  //
+  // goOnline() {
+  //   this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
+  //   Notification.requestPermission();
+  //   this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
+  //     this.dialog.open(IncomingCallDialogComponent, {
+  //       height: 'auto',
+  //       width: 'auto',
+  //       data: {courseID: this.courseID, invitation: n},
+  //       disableClose: true
+  //     }).afterClosed().subscribe(hasAccepted => {
+  //
+  //     });
+  //   }));
+  //   this.classroomService.join(this.courseID);
+  //   this.router.navigate(['courses', this.courseID, 'tickets']);
+  // }
+  //
+  // goOffline() {
+  //   this.classroomService.leave();
+  // }
+  //
+  // createTicket() {
+  //   this.dialog.open(NewticketDialogComponent, {
+  //     height: 'auto',
+  //     width: 'auto',
+  //     data: {courseID: this.courseID}
+  //   }).afterClosed().subscribe(ticket => {
+  //     if (ticket) {
+  //       this.classroomService.createTicket(ticket);
+  //     }
+  //   });
+  // }
+  //
+  // /**
+  //  * Delete a course by its ID, if the user not permitted to do that, nothing happens
+  //  */
+  // deleteCourse() {
+  //       this.dialog.open(CourseDeleteModalComponent, {
+  //         data: {coursename: this.courseDetail.name, courseID: this.courseID}
+  //       }).afterClosed().pipe(
+  //         flatMap(value => {
+  //           if (value.exit) {
+  //             return this.courseService.deleteCourse(this.courseID);
+  //           }
+  //         })
+  //       )
+  //         .toPromise()
+  //         .then( (value: Succeeded) => {
+  //           if (value.success) {
+  //             this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
+  //             this.router.navigate(['courses', 'user']);
+  //           } else {
+  //             this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+  //               + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
+  //               'OK', {duration: 5000});
+  //           }
+  //         })
+  //         .catch(() => {
+  //           this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+  //             + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
+  //             'OK', {duration: 5000});
+  //         });
+  //     }
+  //
+  //   subscribeCourse(){
+  //   this.courseRegistrationService.registerCourse(this.courseDetail.id, this.token.id).subscribe(
+  //     res => {
+  //       if (res){
+  //         // TODO: reload token?
+  //         // this.role = "USER"
+  //         this.snackbar.open("Du bist dich für " + this.courseDetail.name + " eingetragen.", "ok", {duration: 3000})
+  //       } else {
+  //         this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+  //       }
+  //     }
+  //   )
+  //   }
+  //
+  //   /**
+  //     * Unsubscribe course
+  //   */
+  //   unsubscribeCourse() {
+  //     this.dialog.open(ExitCourseDialogComponent, {
+  //       data: {coursename: this.courseDetail.name}
+  //     }).afterClosed().pipe(
+  //       flatMap(value => {
+  //         if (value.exit) {
+  //           return this.courseRegistrationService.deregisterCourse(this.courseDetail.id, this.token.id);
+  //         }
+  //       })
+  //     ).subscribe(res => {
+  //       if (res) {
+  //         this.snackbar.open('Du hast den Kurs ' + this.courseDetail.name + ' verlassen', 'OK', {duration: 3000});
+  //         this.router.navigate(['courses', 'user']);
+  //       } else this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000})
+  //     }, error => this.snackbar.open("Es ist ein Fehler aufgetreten.", "ok", {duration: 3000}))
+  //   }
+  //
+  //   public exportSubmissions() {
+  //     this.db.exportCourseSubmissions(this.courseID, this.courseDetail.name);
+  //   }
 }

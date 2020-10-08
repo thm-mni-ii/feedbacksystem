@@ -18,6 +18,7 @@ import {JWTToken} from "../../model/JWTToken";
 import {Submission} from "../../model/Submission";
 import {CheckResult} from "../../model/CheckResult";
 import {error} from "@angular/compiler/src/util";
+import {SubmissionService} from "../../service/submission.service";
 
 /**
  * Shows a task in detail
@@ -31,6 +32,7 @@ export class TaskDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private titlebar: TitlebarService, private dialog: MatDialog,
               private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, private taskService: TaskService, private courseService: CourseService,
+              private submissionService: SubmissionService,
               private authService: AuthService, @Inject(DOCUMENT) document) {
   }
 
@@ -107,7 +109,7 @@ export class TaskDetailComponent implements OnInit {
 
   getSubmissions(cid: number, tid: number){
     try {
-      this.taskService.getAllSubmissions(1, cid, tid).subscribe(
+      this.submissionService.getAllSubmissions(1, cid, tid).subscribe(
         submissions => {
           // TODO: error handling
           if (submissions != null) {
@@ -167,14 +169,14 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private submit() {
-    this.taskService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
+    this.submissionService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
       res => {
         if(res.done) {
           this.submissions.push(res);
           this.result(res);
         } else {
           this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
-          this.taskService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
+          this.submissionService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
             delay(2000)
           ).subscribe(res2 =>{
             this.submissions.push(res2);
@@ -219,7 +221,7 @@ export class TaskDetailComponent implements OnInit {
 
   reRun() {
     if(this.lastSubmission != null) {
-      this.taskService.restartSubmission(this.token.id, this.course.id, this.task.id, this.lastSubmission.id);
+      this.submissionService.restartSubmission(this.token.id, this.course.id, this.task.id, this.lastSubmission.id);
       this.getSubmissions(this.course.id, this.task.id);
     }
   }
