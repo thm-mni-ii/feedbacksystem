@@ -12,15 +12,15 @@ export class LegalService {
   /**
    * Returns the impressum
    */
-  getImpressum(): Observable<String>{
-    return this.http.get<String>(`/api/v1/legal/impressum`);
+  getImpressum(): Observable<{ markdown: String }>{
+    return this.http.get<{ markdown: String }>(`/api/v1/legal/impressum`);
   }
 
   /**
    * Returns the information of how user data is treated in the system
    */
-  getPrivacyText(): Observable<String>{
-    return this.http.get<String>(`/api/v1/legal/privacy-text`);
+  getPrivacyText(): Observable<{ markdown: String }>{
+    return this.http.get<{ markdown: String }>(`/api/v1/legal/privacy-text`);
   }
 
   /**
@@ -34,9 +34,10 @@ export class LegalService {
   /**
    * Accept the terms of usage
    * @param uid the user id
+   * wouldn't work without argument in the body
    */
   acceptTermsOfUse(uid: number): Observable<Succeeded>{
-    return this.http.put<Succeeded>('/api/v1/legal/termsofuse', uid)
+    return this.http.put<Succeeded>(`/api/v1/legal/termsofuse/${uid}`,uid)
   }
 
 }
