@@ -81,8 +81,8 @@ export class CourseDetailComponent implements OnInit {
         this.courseDetail = course;
         this.titlebar.emitTitle(course.name);
     })
-    this.token = this.authService.getToken()
-    // this.role = this.authService.getToken().courseRoles;
+    this.role = this.authService.getToken().courseRoles;
+
     //TODO: only show role, if user has multiple courseRoles
     //0: docent, 1: tutor, 2: user
   }

@@ -59,6 +59,7 @@
           <p>Einstellungen</p>
         </a>-->
 
+
       </mat-nav-list>
       <mat-divider></mat-divider>
 
@@ -71,6 +72,11 @@
       </mat-nav-list>
 
       <span class="filler"></span>
+
+      <a mat-list-item class="general" (click)="showImpressum()">Impressum</a>
+      <br>
+      <a mat-list-item class="general" (click)="showDataprivacy()">Datenschutzerklärung</a>
+
       <mat-divider></mat-divider>
       <mat-nav-list>
         <a mat-list-item href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung">
@@ -85,6 +91,7 @@
           <p>Logout</p>
         </a>
       </mat-nav-list>
+
     </div>
   </mat-sidenav>
 
@@ -100,3 +107,7 @@
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+
+
+
