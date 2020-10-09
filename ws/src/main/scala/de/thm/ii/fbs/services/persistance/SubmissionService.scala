@@ -35,14 +35,15 @@ class SubmissionService {
 
   /**
     * Lookup a submission by id
-    * @param id The users id
+    * @param id The sumissions id
+    * @param uid The users id
     * @return The found task
     */
-  def getOne(id: Int): Option[Submission] =
+  def getOne(id: Int, uid: Int): Option[Submission] =
     reduceSubmissions(DB.query("SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
-      "WHERE submission_id = ?",
-      (res, _) => parseResult(res), id)).headOption
+      "WHERE submission_id = ? AND user_id = ?",
+      (res, _) => parseResult(res), id, uid)).headOption
 
   /**
     * Create a new submission
@@ -53,7 +54,7 @@ class SubmissionService {
   def create(uid: Int, tid: Int): Submission =
     DB.insert("INSERT INTO user_task_submission (user_id, task_id) VALUES (?, ?)", uid, tid)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-      .flatMap(id => getOne(id)) match {
+      .flatMap(id => getOne(id, uid)) match {
       case Some(submission) => submission
       case None => throw new SQLException("Submission could not be created")
     }
@@ -68,6 +69,16 @@ class SubmissionService {
   def storeResult(sid: Int, ccid: Int, exitCode: Int, resultText: String): Unit =
     DB.insert("INSERT INTO checker_result (submission_id, configuration_id, exit_code, result_text) " +
       "VALUES (?, ?, ?, ?)", sid, ccid, exitCode, resultText)
+
+  /**
+    * Removes all results stored for this submission
+    * @param sid The submission id
+    * @param uid The user id
+    * @return True if results where deleted
+    */
+  def clearResults(sid: Int, uid: Int): Boolean =
+    0 < DB.update("DELETE checker_result FROM checker_result JOIN user_task_submission USING (submission_id) " +
+      "WHERE submission_id = ? AND user_id = ?", sid, uid)
 
   /**
     * Delete a submission by id
