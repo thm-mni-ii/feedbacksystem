@@ -39,11 +39,9 @@ distributions {
 // After build the ng app, we copy the dist content to or spring boot webservice static resoorce path
 // It will work on evry system, because of relative paths (at leat I hope so)
 
-task copyWebToWS(type:Copy, dependsOn: [build]) {
-  copy {
+task copyWebToWS(type: Copy, dependsOn: [build]) {
     from "${projectDir}/dist/${project.name}" // path from distributed web-gui
     into "${projectDir}/../ws/src/main/resources/static"
-  }
 }
 
 copyWebToWS
