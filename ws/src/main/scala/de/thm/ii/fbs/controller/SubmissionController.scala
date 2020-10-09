@@ -134,7 +134,7 @@ class SubmissionController {
     val user = authService.authorize(req, res)
 
     if (user.id == uid) {
-      submissionService.getOne(sid) match {
+      submissionService.getOne(sid, uid) match {
         case Some(submission) => submission
         case None => throw new ResourceNotFoundException()
       }
