@@ -1,7 +1,20 @@
 <div class="container">
-  <div class="actions">
-    <button mat-flat-button color="primary" [routerLink]="['/', 'courses', course.id]" matTooltip="Zurück zur Aufgabenübersicht"><mat-icon >arrow_back</mat-icon></button>
-  </div>
+  <ng-container class="header">
+    <div class="actions">
+      <button mat-flat-button style="background: #fafafa; margin-top: 15px" [routerLink]="['/', 'courses', course.id]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+      <mat-form-field appearance="outline" id="settings">
+        <mat-label><mat-icon>settings</mat-icon>&nbsp;Einstellungen</mat-label>
+        <mat-select>
+          <mat-option *ngIf="isAuthorized('')" mat-flat-button color="accent" (click)="updateTask()">
+            <mat-icon >edit</mat-icon><span>Task bearbeiten</span>
+          </mat-option>
+          <mat-option *ngIf="isAuthorized('docent, admin')" mat-flat-button color="warn" (click)="deleteTask()">
+            <mat-icon >delete</mat-icon><span>Task löschen</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </ng-container>
 
   <mat-card class="details" id="{{task.id}}">
     <div class="task-container">
@@ -14,8 +27,13 @@
         <span class="state tiny not-done" *ngIf="submissionStatus == null"><mat-icon>error_outline</mat-icon></span>
       </span>
     </div>
-    <div *ngIf="task.name != task.description" class="description"> {{task.description}}</div>
-    <mat-card-content>
+    <div *ngIf="task.name != task.description" class="description" style="width: 90%">
+      {{task.description}}
+    </div>
+    <div>
+      <button *ngIf="isAuthorized('')" mat-flat-button style="float: right" (click)="reRun()"><mat-icon>cached</mat-icon></button>
+    </div>
+      <mat-card-content>
       <div class="user-input">
         <app-submission-file *ngIf="submissionTypeOfTask() == 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>
         <app-submission-text *ngIf="submissionTypeOfTask() == 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
@@ -25,11 +43,8 @@
 
       <!-- Action buttons -->
       <mat-card-actions>
-        <button *ngIf="isAuthorized('docent, admin')" mat-flat-button color="warn" (click)="deleteTask()">Löschen</button>
-        <button *ngIf="isAuthorized('')" mat-flat-button color="accent" (click)="updateTask()">Bearbeiten</button>
-        <button *ngIf="isAuthorized('')" mat-flat-button color="primary" (click)="reRun()">Erneut senden</button>
         <button [disabled]="deadlineTask" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
-        <button mat-flat-button color="primary" *ngIf="isAuthorized('')" (click)="runAllTaskAllUsers()" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon>Alle ausführen</button>
+<!--        <button mat-flat-button color="primary" *ngIf="isAuthorized('')" (click)="runAllTaskAllUsers()" matTooltip="Aufgabe ausführen"><mat-icon>playlist_play</mat-icon>Alle ausführen</button>-->
       </mat-card-actions>
     </mat-card-content>
   </mat-card>
