@@ -108,9 +108,12 @@ class SubmissionController {
     val user = authService.authorize(req, res)
     val allowed = user.id == uid
     if (allowed) {
-      if (submissionService.clearResults(sid, uid)) {
-        checkerConfigurationService.getAll(cid, tid).foreach(cc =>
-          remoteCheckerService.notify(tid, sid, cc, user))
+      submissionService.getOne(sid, uid) match {
+        case Some(_) =>
+          submissionService.clearResults(sid, uid)
+          checkerConfigurationService.getAll(cid, tid).foreach(cc =>
+            remoteCheckerService.notify(tid, sid, cc, user))
+        case None => throw new ResourceNotFoundException()
       }
     } else {
       throw new ForbiddenException()
