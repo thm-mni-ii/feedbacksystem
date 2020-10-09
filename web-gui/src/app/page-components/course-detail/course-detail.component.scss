@@ -29,7 +29,8 @@
 
 .container {
   display: block;
-  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 30px;
 }
 
 .actions {
@@ -60,12 +61,10 @@
 }
 
 .green {
-  background-color: #74838d;
-  color: white;
+  color: #3fa73f;
 }
 .red {
-  background-color: #3fa73f;
-  color: white;
+  color: #FF3300;
 }
 .unsubscribe-btn {
   justify-content: right;
@@ -113,5 +112,30 @@
 }
 
 .create-task {
-  margin-left: 38%;
+  display: flex;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+.menu-bar {
+  margin-top: 30px;
+  background-color: transparent;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+  padding-left: 8px;
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.description {
+  margin-top: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
 }

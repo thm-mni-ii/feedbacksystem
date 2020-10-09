@@ -18,6 +18,8 @@ import {LoginComponent} from "./page-components/login/login.component";
 import {SidebarComponent} from "./page-components/sidebar/sidebar.component";
 import {TaskDetailComponent} from "./page-components/task-detail/task-detail.component";
 import {CourseResultsComponent} from "./page-components/course-detail/course-results/course-results.component";
+import {ConfigurationListComponent} from "./page-components/configuration-list/configuration-list.component";
+import {ConfigurationDetailsComponent} from "./page-components/configuration-details/configuration-details.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -30,6 +32,8 @@ const routes: Routes = [
       {path: 'courses/:id/tickets', component: ConferenceComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/task/:taskid', component: TaskDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:cid/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:cid/tasks/:tid/configurations/:ccid', component: ConfigurationDetailsComponent, canActivate: [AuthGuard]},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},

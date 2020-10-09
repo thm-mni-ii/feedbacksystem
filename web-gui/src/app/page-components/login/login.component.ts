@@ -30,7 +30,7 @@ export class LoginComponent {
       localStorage.removeItem('route');
       this.router.navigateByUrl('' + extraRoute);
     } else {
-      this.router.navigate(['/courses/search']);
+      this.router.navigate(['/courses']);
     }
   }
 
@@ -58,14 +58,14 @@ export class LoginComponent {
   private checktermsOfUse(uid: number){
     this.legalService.getTermsOfUse(uid).subscribe(res => {
         if(res.accepted){
-          this.router.navigateByUrl('/courses/search')
+          this.router.navigateByUrl('/courses')
         } else {
           this.dialog.open(DataprivacyDialogComponent,{data: {onlyForShow: false}}).afterClosed()
             .subscribe( data => {
               if(data.success) {
                 this.legalService.acceptTermsOfUse(uid).subscribe(res =>{
                   console.log(res);
-                  this.router.navigateByUrl('/courses/search');
+                  this.router.navigateByUrl('/courses');
                 });
               } else {
                 this.auth.logout()

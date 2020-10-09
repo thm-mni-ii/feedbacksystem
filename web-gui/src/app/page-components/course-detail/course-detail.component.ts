@@ -44,6 +44,7 @@ export class CourseDetailComponent implements OnInit {
   courseID: number;
   tasks: Task[]
   role: string = null
+  course: Observable<Course> = of()
 
   constructor(private taskService: TaskService,
               private authService: AuthService,
@@ -59,6 +60,10 @@ export class CourseDetailComponent implements OnInit {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
+        this.course = this.courseService.getCourse(this.courseID)
+        this.course.subscribe(course => {
+          this.titlebar.emitTitle(course.name)
+        })
         this.reloadTasks()
       }
     );
@@ -171,6 +176,34 @@ export class CourseDetailComponent implements OnInit {
       }
     });
   }
+
+  deleteCourse() {
+        // this.dialog.open(CourseDeleteModalComponent, {
+        //   data: {coursename: this.courseDetail.name, courseID: this.courseID}
+        // }).afterClosed().pipe(
+        //   flatMap(value => {
+        //     if (value.exit) {
+        //       return this.courseService.deleteCourse(this.courseID);
+        //     }
+        //   })
+        // )
+        //   .toPromise()
+        //   .then( (value: Succeeded) => {
+        //     if (value.success) {
+        //       this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
+        //       this.router.navigate(['courses', 'user']);
+        //     } else {
+        //       this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+        //         + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
+        //         'OK', {duration: 5000});
+        //     }
+        //   })
+        //   .catch(() => {
+        //     this.snackbar.open('Leider konnte der Kurs ' + this.courseID
+        //       + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
+        //       'OK', {duration: 5000});
+        //   });
+      }
 
   //
   // user: string;

@@ -75,6 +75,8 @@ import {InvitetoConferenceDialogComponent} from "./dialogs/inviteto-conference-d
 import {UserTeacherFilter} from "./pipes/user-teacher-filter";
 import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign-ticket-dialog.component";
 import { ParticipantsComponent } from './tool-components/participants/participants.component';
+import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
+import { ConfigurationDetailsComponent } from './page-components/configuration-details/configuration-details.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -144,7 +146,9 @@ export const httpInterceptorProviders = [
     DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
-    ParticipantsComponent
+    ParticipantsComponent,
+    ConfigurationListComponent,
+    ConfigurationDetailsComponent,
   ],
   imports: [
     BrowserModule,
