@@ -108,7 +108,10 @@ class SubmissionController {
     val user = authService.authorize(req, res)
     val allowed = user.id == uid
     if (allowed) {
-      // TODO: Notify checker handler about new submission
+      if (submissionService.clearResults(sid, uid)) {
+        checkerConfigurationService.getAll(cid, tid).foreach(cc =>
+          remoteCheckerService.notify(tid, sid, cc, user))
+      }
     } else {
       throw new ForbiddenException()
     }

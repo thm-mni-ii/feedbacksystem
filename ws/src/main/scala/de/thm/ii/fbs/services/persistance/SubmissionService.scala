@@ -70,6 +70,16 @@ class SubmissionService {
       "VALUES (?, ?, ?, ?)", sid, ccid, exitCode, resultText)
 
   /**
+    * Removes all results stored for this submission
+    * @param sid The submission id
+    * @param uid The user id
+    * @return True if results where deleted
+    */
+  def clearResults(sid: Int, uid: Int): Boolean =
+    0 < DB.update("DELETE checker_result FROM checker_result JOIN user_task_submission USING (submission_id) " +
+      "WHERE submission_id = ? AND user_id = ?", sid, uid)
+
+  /**
     * Delete a submission by id
     * @param sid The submission id
     * @return True if successful
