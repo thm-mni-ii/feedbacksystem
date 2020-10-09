@@ -1,12 +1,16 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Teilnehmer suchen</mat-label>
-    <input matInput (keyup)="applyFilter($event.target.value)">
+    <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
+    <input matInput (keyup)="applyFilter($event.target.value)" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)='addParticipant($event.option.value)' [displayWith]="displayFn">
+      <mat-option *ngFor="let user of allUser" [value]="user">
+        {{user.surname}}
+      </mat-option>
+    </mat-autocomplete>
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
-
     <!-- Name Column -->
     <ng-container matColumnDef="prename">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Vorname</th>
