@@ -102,12 +102,16 @@ export class ParticipantsComponent implements OnInit {
   addParticipant(user: User){
     this.snackBar.open("Soll " + user.prename + " " + user.surname +" dem Kurs hinzugefügt werden?", "Ja", {duration: 5000})
       .onAction().subscribe( () =>{
-        this.registrationService.registerCourse(user.id, this.courseID)
-          .subscribe(res => {
-            this.snackBar.open("Teilnehmer hinzugefügt.", "ok",{duration: 3000});
-            this.refreshUserList();
-        })
-    })
+        if(this.user.find(participant => participant.id == user.id)) {
+          this.snackBar.open(user.prename + " " + user.surname + " nimmt bereits an dem Kurs teil.", "ok",{duration: 3000});
+        } else {
+          this.registrationService.registerCourse(user.id, this.courseID)
+            .subscribe(() => {
+              this.snackBar.open("Teilnehmer hinzugefügt.", "ok", {duration: 3000});
+              this.refreshUserList();
+            });
+        }
+    });
   }
 
   displayFn(user?: User): string | undefined {
