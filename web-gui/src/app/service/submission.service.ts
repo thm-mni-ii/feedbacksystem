@@ -43,13 +43,14 @@ export class SubmissionService {
    * @param sid submission id
    * @return Observable that succeeds with the submission
    */
-  getSubmission(uid: number, cid: number, tid: number, sid: number): Observable<void> {
-    return this.http.get<void>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`)
+  getSubmission(uid: number, cid: number, tid: number, sid: number): Observable<Submission> {
+    return this.http.get<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`)
   }
 
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
-  submitSolution(uid: number, cid: number, tid: number, solution: any): Observable<Submission>{
-    return of(SUBMISSION.pop()) // TODO: the solution must be a file that we uplaod in body
+  submitSolution(uid: number, cid: number, tid: number, solution: File | String): Observable<Submission>{
+    return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, solution)
+    // return of(SUBMISSION.pop()) // TODO: the solution must be a file that we uplaod in body
   }
 
   // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/

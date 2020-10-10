@@ -16,8 +16,6 @@ import {CourseService} from "../../service/course.service";
 import {AuthService} from "../../service/auth.service";
 import {JWTToken} from "../../model/JWTToken";
 import {Submission} from "../../model/Submission";
-import {CheckResult} from "../../model/CheckResult";
-import {error} from "@angular/compiler/src/util";
 import {SubmissionService} from "../../service/submission.service";
 
 /**
@@ -43,7 +41,7 @@ export class TaskDetailComponent implements OnInit {
   deadlineTask: boolean;
   submissionStatus: boolean;
   lastSubmission: Submission;
-  submissionData: string | File;
+  submissionData: String | File;
 
   // alt
   userRole: string;
@@ -60,7 +58,7 @@ export class TaskDetailComponent implements OnInit {
         let courseID = +params['id'];
         let taskID = params.taskid;
         this.getInformation(courseID, taskID);
-      }, error => this.router.navigate(['404'])
+      }, () => this.router.navigate(['404'])
     );
       if(this.submissions.length != 0) {
         this.submissionStatus = this.getStatus();
@@ -75,7 +73,7 @@ export class TaskDetailComponent implements OnInit {
     setInterval(() => {
       if (!this.submissionStatus) {
         let now: number = Date.now();
-        this.deadlineTask = false // this.reachedDeadline(now, this.task.deadline);
+        this.deadlineTask = this.reachedDeadline(now, this.task.deadline);
       }
     }, 1000);
   }
@@ -93,7 +91,7 @@ export class TaskDetailComponent implements OnInit {
         }
         this.task = task;
       }
-    ), error => {this.router.navigate(['404'])}
+    ), () => {this.router.navigate(['404'])}
 
     this.courseService.getCourse(cid).subscribe(
       course => {
@@ -169,28 +167,30 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private submit() {
-    // this.submissionService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
-    //   res => {
-    //     if(res.done) {
-    //       this.submissions.push(res);
-    //       this.result(res);
-    //     } else {
-    //       this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
-    //       this.submissionService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
-    //         delay(2000)
-    //       ).subscribe(res2 =>{
-    //         this.submissions.push(res2);
-    //         if(res2.done){
-    //           this.result(res2)// TODO result??
-    //         } else {
-    //           this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
-    //         }
-    //       });
-    //     }
-    //   }, error => {
-    //     this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
-    //   }
-    // );
+    console.log(this.submissionData)
+    this.submissionService.submitSolution(this.token.id, this.course.id, this.task.id, this.submissionData).subscribe(
+      res => {
+        console.log(res)
+        if(res.done) {
+          this.submissions.push(res);
+          this.result(res);
+        } else {
+          this.snackbar.open("Deine Aufgabe wird überprüft, bitte warte kurz.",'OK', {duration: 3000});
+          this.submissionService.getSubmission(this.token.id, this.course.id, this.task.id, res.id).pipe(
+            delay(2000)
+          ).subscribe(res2 =>{
+            this.submissions.push(res2);
+            if(res2.done){
+              this.result(res2)// TODO result??
+            } else {
+              this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
+            }
+          });
+        }
+      }, error => {
+        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
+      }
+    );
   }
 
   private result(submission: Submission){
@@ -203,7 +203,6 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
-  //
   public isAuthorized(roles: String[]) {
     // if (roles.find(role => role == 'dozent')) return true TODO: do the roles match??
     return true // TODO
