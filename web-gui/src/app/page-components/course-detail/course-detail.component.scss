@@ -31,6 +31,7 @@
   display: block;
   margin-top: 16px;
   margin-bottom: 30px;
+  padding: 16px;
 }
 
 .actions {
@@ -138,4 +139,10 @@
 
 .spacer {
   flex: 1 1 auto;
+}
+
+.task-list {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 30px;
 }
