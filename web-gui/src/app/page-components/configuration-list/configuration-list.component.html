@@ -1,1 +1,18 @@
-<p>configuration-list works!</p>
+<div class="container">
+
+  <div class="create-button">
+    <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="addConfig()" matTooltip="Überprüfung hinzufügen"><mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen</button>
+  </div>
+
+  <mat-card class="card" *ngFor="let configuration of configurations | async">
+    <span>{{configuration.checkerType}}</span>
+
+    <span class="spacer"></span>
+
+    <button mat-icon-button color="primary" (click)="downloadMainFile()" matTooltip="Hauptdatei herunterladen"><mat-icon>save_alt</mat-icon></button>
+    <button mat-icon-button color="primary" (click)="downloadSecondaryFile()" matTooltip="Nebendatei herunterladen"><mat-icon>save_alt</mat-icon></button>
+
+    <button mat-icon-button color="primary" (click)="editConfig()" matTooltip="Überprüfung bearbeiten"><mat-icon>edit</mat-icon></button>
+    <button mat-icon-button color="primary" (click)="deleteConfig()" matTooltip="Überprüfung entfernen"><mat-icon>delete</mat-icon></button>
+  </mat-card>
+</div>

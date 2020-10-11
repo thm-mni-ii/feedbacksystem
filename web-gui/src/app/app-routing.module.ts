@@ -1,13 +1,10 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {AuthGuard} from './guards/auth.guard';
-import {ModeratorGuard} from './guards/moderator.guard';
 import {DocentGuard} from './guards/docent.guard';
 import {AdminGuard} from './guards/admin.guard';
 import {ChangePasswordComponent} from "./page-components/change-password/change-password.component";
 import {MyCoursesComponent} from "./page-components/my-courses/my-courses.component";
-import {CourseAuthorizationComponent} from "./page-components/course-authorization/course-authorization.component";
-import {NewCourseComponent} from "./page-components/new-course/new-course.component";
 import {SearchCoursesComponent} from "./page-components/search-courses/search-courses.component";
 import {ImportCourseComponent} from "./page-components/import-course/import-course.component";
 import {CourseDetailComponent} from "./page-components/course-detail/course-detail.component";
@@ -19,7 +16,6 @@ import {SidebarComponent} from "./page-components/sidebar/sidebar.component";
 import {TaskDetailComponent} from "./page-components/task-detail/task-detail.component";
 import {CourseResultsComponent} from "./page-components/course-detail/course-results/course-results.component";
 import {ConfigurationListComponent} from "./page-components/configuration-list/configuration-list.component";
-import {ConfigurationDetailsComponent} from "./page-components/configuration-details/configuration-details.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -33,7 +29,6 @@ const routes: Routes = [
       {path: 'courses/:id/task/:tid', component: TaskDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
       {path: 'courses/:cid/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},
-      {path: 'courses/:cid/tasks/:tid/configurations/:ccid', component: ConfigurationDetailsComponent, canActivate: [AuthGuard]},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},

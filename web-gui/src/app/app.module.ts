@@ -76,7 +76,6 @@ import {UserTeacherFilter} from "./pipes/user-teacher-filter";
 import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign-ticket-dialog.component";
 import { ParticipantsComponent } from './tool-components/participants/participants.component';
 import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
-import { ConfigurationDetailsComponent } from './page-components/configuration-details/configuration-details.component';
 import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
 
 @Injectable()
@@ -149,7 +148,6 @@ export const httpInterceptorProviders = [
     ConferenceComponent,
     ParticipantsComponent,
     ConfigurationListComponent,
-    ConfigurationDetailsComponent,
     MenuBarComponent,
   ],
   imports: [
