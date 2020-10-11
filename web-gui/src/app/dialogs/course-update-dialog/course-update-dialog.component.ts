@@ -34,6 +34,12 @@ export class CourseUpdateDialogComponent implements OnInit {
 
   ngOnInit() {
     this.isUpdateDialog = this.data.isUpdateDialog
+    if (this.isUpdateDialog) {
+      const course: Course = this.data.course
+      this.name.setValue(course.name)
+      this.description.setValue(course.description)
+      this.isVisible = course.visible
+    }
   }
 
   /**
@@ -51,7 +57,9 @@ export class CourseUpdateDialogComponent implements OnInit {
     }
 
     if (this.isUpdateDialog) {
-      // TODO: Make update
+      this.courseService
+        .updateCourse(this.data.course.id, course)
+        .subscribe(ok => this.dialogRef.close({success: true}), error => console.error(error))
     } else {
       this.courseService
         .createCourse(course)

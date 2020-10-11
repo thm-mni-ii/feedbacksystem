@@ -60,14 +60,18 @@ export class CourseDetailComponent implements OnInit {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
-        this.course = this.courseService.getCourse(this.courseID)
-        this.course.subscribe(course => {
-          this.titlebar.emitTitle(course.name)
-        })
+        this.reloadCourse()
         this.reloadTasks()
       }
     );
     this.role = this.auth.getToken().courseRoles[this.courseID]
+  }
+
+  private reloadCourse() {
+    this.course = this.courseService.getCourse(this.courseID)
+    this.course.subscribe(course => {
+      this.titlebar.emitTitle(course.name)
+    })
   }
 
   reloadTasks() {
@@ -75,22 +79,16 @@ export class CourseDetailComponent implements OnInit {
   }
 
   updateCourse() {
-    // this.dialog.open(CourseUpdateDialogComponent, {
-    //   width: '50%',
-    //   data: {data: this.courseDetail}
-    // }).afterClosed().subscribe((value: Succeeded) => {
-    //   location.hash = '';
-    //   if (value.success) {
-    //     /*this.db.getCourseDetail(this.courseID).subscribe(courses => {
-    //       this.courseDetail = courses;
-    //       this.titlebar.emitTitle(this.courseDetail.course_name);
-    //     });*/
-    //     this.courseService.getCourse(this.courseID).subscribe((courses => {
-    //       this.courseDetail = courses;
-    //       this.titlebar.emitTitle(this.courseDetail.name);
-    //     }))
-    //   }
-    // });
+    this.courseService.getCourse(this.courseID).pipe(flatMap(course =>
+      this.dialog.open(CourseUpdateDialogComponent, {
+        width: '50%',
+        data: {course: course, isUpdateDialog: true}
+      }).afterClosed()
+    )).subscribe((res) => {
+      if (res.success) {
+        this.reloadCourse()
+      }
+    });
   }
 
   createTask() {
