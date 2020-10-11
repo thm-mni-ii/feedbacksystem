@@ -30,7 +30,7 @@ const routes: Routes = [
       {path: 'courses/import', component: ImportCourseComponent, canActivate: [DocentGuard]},
       {path: 'courses/:id', component: CourseDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/tickets', component: ConferenceComponent, canActivate: [AuthGuard]},
-      {path: 'courses/:id/task/:taskid', component: TaskDetailComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/task/:tid', component: TaskDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
       {path: 'courses/:cid/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},
       {path: 'courses/:cid/tasks/:tid/configurations/:ccid', component: ConfigurationDetailsComponent, canActivate: [AuthGuard]},

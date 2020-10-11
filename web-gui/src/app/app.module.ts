@@ -77,6 +77,7 @@ import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign
 import { ParticipantsComponent } from './tool-components/participants/participants.component';
 import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
 import { ConfigurationDetailsComponent } from './page-components/configuration-details/configuration-details.component';
+import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -149,6 +150,7 @@ export const httpInterceptorProviders = [
     ParticipantsComponent,
     ConfigurationListComponent,
     ConfigurationDetailsComponent,
+    MenuBarComponent,
   ],
   imports: [
     BrowserModule,

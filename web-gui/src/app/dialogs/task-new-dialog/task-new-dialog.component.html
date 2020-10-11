@@ -4,20 +4,20 @@
     <form [formGroup]="taskForm">
       <!-- Task name -->
       <mat-form-field>
-        <input type="text" placeholder="Taskname" matInput formControlName="taskName" required>
+        <input type="text" placeholder="Name" matInput formControlName="name" required>
       </mat-form-field>
 
       <!-- Task Description -->
       <mat-form-field>
         <mat-label>Beschreibung</mat-label>
         <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                  formControlName="taskDescription"></textarea>
+                  formControlName="description"></textarea>
       </mat-form-field>
 
       <!-- Task Deadline -->
       <mat-form-field>
         <mat-label>Deadline</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="deadline" (dateChange)="addDate($event)">
+        <input matInput [matDatepicker]="picker" formControlName="deadline" (dateChange)="addDate($event)">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
