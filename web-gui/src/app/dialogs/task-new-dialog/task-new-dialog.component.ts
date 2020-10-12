@@ -24,7 +24,7 @@ export class TaskNewDialogComponent implements OnInit {
   });
 
   isUpdate: boolean;
-  coursenumber: number;
+  courseId: number;
   task: Task = {
     deadline: Date.now(),
     description: '',
@@ -45,7 +45,7 @@ export class TaskNewDialogComponent implements OnInit {
       this.taskForm.controls['description'].setValue(this.task.description);
       this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
     }
-    this.coursenumber = this.data.courseId
+    this.courseId = this.data.courseID
   }
 
   /**
@@ -68,8 +68,8 @@ export class TaskNewDialogComponent implements OnInit {
   createTask(value: any) {
     this.getValues()
     if (this.task.name) {
-      this.taskService.createTask(this.coursenumber, this.task).subscribe(task => {
-        this.dialogRef.close({success: true, task: task});
+      this.taskService.createTask(this.courseId, this.task).subscribe(task => {
+          this.dialogRef.close({success: true, task: task});
       });
     } else {
       this.snackBar.open("Bitte ein valides Datum wählen.", "ok");
@@ -84,7 +84,7 @@ export class TaskNewDialogComponent implements OnInit {
     this.getValues()
     if (this.task.name) {
       this.snackBar.open("Task bearbeitet.", "ok");
-      this.taskService.updateTask(this.coursenumber, this.task.id, this.task).subscribe(task => {
+      this.taskService.updateTask(this.courseId, this.task.id, this.task).subscribe(task => {
           this.dialogRef.close({success: true, task: task});
         });
     } else {
