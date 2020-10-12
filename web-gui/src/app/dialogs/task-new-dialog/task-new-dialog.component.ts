@@ -45,7 +45,7 @@ export class TaskNewDialogComponent implements OnInit {
       this.taskForm.controls['description'].setValue(this.task.description);
       this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
     }
-    this.courseId = this.data.courseID
+    this.courseId = this.data.courseId
   }
 
   /**

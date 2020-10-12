@@ -92,7 +92,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   createTask() {
-    console.log(this.courseID)
     this.dialog.open(TaskNewDialogComponent, {
       height: 'auto',
       width: '50%',
