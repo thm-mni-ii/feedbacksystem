@@ -19,7 +19,7 @@ export class ParticipantsComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  courseID: number;
+  courseID: number = 0;
   columns = ['surname', 'prename', 'email', 'globalRole', 'action'];
   dataSource = new MatTableDataSource<User>();
   user: User[];
@@ -28,13 +28,13 @@ export class ParticipantsComponent implements OnInit {
 
   constructor(private snackBar: MatSnackBar, private userService: UserService,
               private registrationService: CourseRegistrationService,
-              private route: ActivatedRoute,) { }
+              private route: ActivatedRoute) { }
 
 
   ngOnInit(): void {
     this.route.params.subscribe(
       param => {
-        this.courseID = param.id;
+        this.courseID = param.id
         this.userService.getAllUsers().subscribe(
           user => {
             this.allUser = user;
@@ -108,7 +108,7 @@ export class ParticipantsComponent implements OnInit {
 
   addParticipant(user: User){
     this.snackBar.open("Soll " + user.prename + " " + user.surname +" dem Kurs hinzugefügt werden?", "Ja", {duration: 5000})
-      .onAction().subscribe( () =>{
+      .onAction().subscribe( () => {
         if(this.user.find(participant => participant.id == user.id)) {
           this.snackBar.open(user.prename + " " + user.surname + " nimmt bereits an dem Kurs teil.", "ok",{duration: 3000});
         } else {
@@ -124,5 +124,4 @@ export class ParticipantsComponent implements OnInit {
   displayFn(user?: User): string | undefined {
     return user ? user.surname : undefined;
   }
-
 }

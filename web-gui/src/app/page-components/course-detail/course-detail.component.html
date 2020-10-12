@@ -16,8 +16,8 @@
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>
     </mat-menu>
 
-    <button mat-icon-button *ngIf="role" [routerLink]="['/','courses', courseID,'participants']" matTooltip="Teilnehmer"><mat-icon>groups</mat-icon></button>
-    <button mat-icon-button *ngIf="role" [routerLink]="['/','courses', courseID,'results']" matTooltip="Ergebnisse"><mat-icon>insights</mat-icon></button>
+    <button mat-icon-button *ngIf="isAuthorized()" [routerLink]="['/','courses', courseID,'results']" matTooltip="Ergebnisse"><mat-icon>insights</mat-icon></button>
+    <button mat-icon-button *ngIf="isAuthorized()" [routerLink]="['/','courses', courseID,'participants']" matTooltip="Teilnehmer"><mat-icon>groups</mat-icon></button>
 
     <button mat-icon-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()" matTooltip="Sitzung beitreten"><mat-icon>voice_chat</mat-icon></button>
     <button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>
