@@ -18,7 +18,7 @@
       <span>{{task?.name}}</span>
       <span class="meta">
         <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
-        <span class="tiny">{{task?.deadline*1000 | date:'dd.MM.yyyy HH:mm'}}</span>
+        <span class="tiny">{{task?.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
         <span class="state passed tiny" *ngIf="status"><mat-icon>check_circle</mat-icon>&nbsp;bestanden</span>
         <span class="state failed tiny" *ngIf="!status && status != null"><mat-icon>not_interested</mat-icon>&nbsp;nicht bestanden</span>
         <span class="state tiny not-done" *ngIf="status == null"><mat-icon>error_outline</mat-icon></span>

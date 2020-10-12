@@ -161,7 +161,7 @@ export class TaskDetailComponent implements OnInit {
   updateTask() {
     this.dialog.open(TaskNewDialogComponent, {
       height: 'auto',
-      width: 'auto',
+      width: '50%',
       data: {
         courseId: this.courseId,
         task: this.task

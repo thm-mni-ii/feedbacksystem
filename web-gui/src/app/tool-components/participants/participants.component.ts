@@ -8,6 +8,7 @@ import {MatTableDataSource} from "@angular/material/table";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Observable} from "rxjs";
 import {UserService} from "../../service/user.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-participants',
@@ -15,10 +16,10 @@ import {UserService} from "../../service/user.service";
   styleUrls: ['./participants.component.scss']
 })
 export class ParticipantsComponent implements OnInit {
-  @Input() courseID: number;
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
+  courseID: number;
   columns = ['surname', 'prename', 'email', 'globalRole', 'action'];
   dataSource = new MatTableDataSource<User>();
   user: User[];
@@ -26,16 +27,22 @@ export class ParticipantsComponent implements OnInit {
   allUser: User[]
 
   constructor(private snackBar: MatSnackBar, private userService: UserService,
-              private registrationService: CourseRegistrationService,) { }
+              private registrationService: CourseRegistrationService,
+              private route: ActivatedRoute,) { }
 
 
   ngOnInit(): void {
-    this.userService.getAllUsers().subscribe(
-      user => {
-        this.allUser = user;
+    this.route.params.subscribe(
+      param => {
+        this.courseID = param.id;
+        this.userService.getAllUsers().subscribe(
+          user => {
+            this.allUser = user;
+            this.refreshUserList();
+          }
+        );
       }
     );
-    this.refreshUserList();
   }
 
   private refreshUserList() {

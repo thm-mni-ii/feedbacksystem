@@ -1,6 +1,8 @@
 <div class="container">
+  <button mat-icon-button [routerLink]="['/', 'courses', courseID]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
+   <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)='addParticipant($event.option.value)' [displayWith]="displayFn">
       <mat-option *ngFor="let user of allUser" [value]="user">

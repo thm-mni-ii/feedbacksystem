@@ -16,6 +16,7 @@ import {SidebarComponent} from "./page-components/sidebar/sidebar.component";
 import {TaskDetailComponent} from "./page-components/task-detail/task-detail.component";
 import {CourseResultsComponent} from "./page-components/course-detail/course-results/course-results.component";
 import {ConfigurationListComponent} from "./page-components/configuration-list/configuration-list.component";
+import {ParticipantsComponent} from "./tool-components/participants/participants.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -29,6 +30,8 @@ const routes: Routes = [
       {path: 'courses/:id/task/:tid', component: TaskDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
       {path: 'courses/:cid/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
+      {path: 'courses/:id/participants', component: ParticipantsComponent, canActivate: [AuthGuard]},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},

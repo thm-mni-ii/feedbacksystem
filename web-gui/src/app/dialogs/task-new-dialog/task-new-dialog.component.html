@@ -25,11 +25,12 @@
       <!-- Task Mediatype -->
       <mat-form-field>
         <mat-label>Medientyp</mat-label>
-        <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                  formControlName="mediaType"></textarea>
+        <mat-select formControlName="mediaType">
+          <mat-option value="text/plain">Text</mat-option>
+          <mat-option value="application/zip">Zip-Datei</mat-option>
+        </mat-select>
       </mat-form-field>
       <br>
-      <mat-divider></mat-divider>
 
       <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
       <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>

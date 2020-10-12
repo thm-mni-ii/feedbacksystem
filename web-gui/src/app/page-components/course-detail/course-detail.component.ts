@@ -92,10 +92,11 @@ export class CourseDetailComponent implements OnInit {
   }
 
   createTask() {
+    console.log(this.courseID)
     this.dialog.open(TaskNewDialogComponent, {
       height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
+      width: '50%',
+      data: {courseId: this.courseID}
     }).afterClosed()
       .subscribe(result => {
         if (result.success) {
