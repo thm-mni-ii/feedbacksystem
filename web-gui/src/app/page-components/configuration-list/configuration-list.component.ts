@@ -12,17 +12,16 @@ import {ActivatedRoute} from "@angular/router";
   styleUrls: ['./configuration-list.component.scss']
 })
 export class ConfigurationListComponent implements OnInit {
-  configurations: Observable<CheckerConfig[]> = of(CHECKERCONFIG)
+  configurations: Observable<CheckerConfig[]> = of()
   courseId: number
   taskId: number
 
-  constructor(private checkerService: CheckerService, private route: ActivatedRoute,
-              ) { }
+  constructor(private checkerService: CheckerService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(
       params => {
-        this.courseId = params.cid
+        this.courseId = params.id
         this.taskId = params.tid
         this.configurations = this.checkerService.getChecker(this.courseId, this.taskId)
       });

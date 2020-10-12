@@ -7,7 +7,6 @@ import {CheckerConfig} from "../model/CheckerConfig";
   providedIn: 'root'
 })
 export class CheckerService {
-
   constructor(private http: HttpClient) { }
 
   /**
@@ -16,7 +15,7 @@ export class CheckerService {
    * @param tid Task id
    * @return Observable that succeeds with the configured Checker
    */
-  getChecker(cid: number, tid: number): Observable<CheckerConfig[]> {
+  public getChecker(cid: number, tid: number): Observable<CheckerConfig[]> {
     return this.http.get<CheckerConfig[]>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`)
   }
 
@@ -27,7 +26,7 @@ export class CheckerService {
    * @param file the file to upload
    * @return the created Checker Configuration
    */
-  createChecker(cid: number, tid: number, file: String): Observable<CheckerConfig> {
+  public createChecker(cid: number, tid: number, file: String): Observable<CheckerConfig> {
     return this.http.post<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`,file)
   }
 
@@ -39,7 +38,7 @@ export class CheckerService {
    * @param file the file to upload
    * @return Observable that succeeds with the configured Checker
    */
-  updateChecker(cid: number, tid: number, ccid: number, file: File): Observable<CheckerConfig> {
+  public updateChecker(cid: number, tid: number, ccid: number, file: File): Observable<CheckerConfig> {
     return this.http.put<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`, file)
   }
 
@@ -50,7 +49,7 @@ export class CheckerService {
    * @param ccid Checker Configuration id
    * @return Observable that succeeds if the Checker does not exists after this operation.
    */
-  deleteChecker(cid: number, tid: number, ccid: number): Observable<CheckerConfig> {
+  public deleteChecker(cid: number, tid: number, ccid: number): Observable<CheckerConfig> {
     return this.http.delete<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`)
   }
 
@@ -61,7 +60,7 @@ export class CheckerService {
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the Main File of configured Checker
    */
-  getMainFile(cid: number, tid: number, ccid: number): Observable<String | File> {
+  public getMainFile(cid: number, tid: number, ccid: number): Observable<String | File> {
     return this.http.get<String | File>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`)
   }
 
@@ -73,7 +72,7 @@ export class CheckerService {
    * @param file the file to upload
    * @return Observable that succeeds with the upload of the main file
    */
-  updateMainFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
+  public updateMainFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
     return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`, file)
   }
 
@@ -84,7 +83,7 @@ export class CheckerService {
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the secondary File of configured Checker
    */
-  getSecondaryFile(cid: number, tid: number, ccid: number): Observable<String | File> {
+  public getSecondaryFile(cid: number, tid: number, ccid: number): Observable<String | File> {
     return this.http.get<String | File>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`)
   }
 
@@ -96,7 +95,7 @@ export class CheckerService {
    * @param file the file to upload
    * @return Observable that succeeds with the upload of the file
    */
-  updateSecondaryFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
+  public updateSecondaryFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
     return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`, file)
   }
 }
