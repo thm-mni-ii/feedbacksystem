@@ -33,7 +33,7 @@
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     .task-result {
       width: 30px;
       min-height: 30px;
@@ -55,7 +55,8 @@
     white-space: nowrap
   }
   .header {
-    height: 130px;
+    min-height: 130px;
+    max-height: 200px;
     font-size: small;
     .task-result {
     }
@@ -65,6 +66,7 @@
 .content-container {
   display: flex;
   flex-direction: column;
+  margin-top: 50px;
 }
 
 .state {
@@ -109,13 +111,10 @@
 }
 
 .task-result .failed-task {
-  background-color: $orange;
+  background-color: $red;
 }
 .task-result .not-tried {
   background-color: $grey;
-}
-.task-result-backpane.plagiat {
-  border-color: $red;
 }
 
 .card-options {
@@ -128,4 +127,8 @@
   color: rgba(0, 0, 0, 0.54);
   font-family: Roboto, "Helvetica Neue", sans-serif;
   font-size: 12px;
+}
+
+.spacer {
+  flex: 1 1 auto;
 }
