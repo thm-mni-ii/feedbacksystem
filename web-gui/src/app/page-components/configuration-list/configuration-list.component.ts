@@ -3,6 +3,8 @@ import {CheckerConfig} from "../../model/CheckerConfig";
 import {Observable, of} from "rxjs"
 import {flatMap} from "rxjs/operators"
 import {CHECKERCONFIG} from "../../mock-data/mock-checker-config";
+import {CheckerService} from "../../service/checker.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'app-configuration-list',
@@ -11,10 +13,19 @@ import {CHECKERCONFIG} from "../../mock-data/mock-checker-config";
 })
 export class ConfigurationListComponent implements OnInit {
   configurations: Observable<CheckerConfig[]> = of(CHECKERCONFIG)
+  courseId: number
+  taskId: number
 
-  constructor() { }
+  constructor(private checkerService: CheckerService, private route: ActivatedRoute,
+              ) { }
 
   ngOnInit(): void {
+    this.route.params.subscribe(
+      params => {
+        this.courseId = params.cid
+        this.taskId = params.tid
+        this.configurations = this.checkerService.getChecker(this.courseId, this.taskId)
+      });
   }
 
   isAuthorized(): boolean {
@@ -22,7 +33,10 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   addConfig() {
-
+    // this.checkerService.createChecker(this.courseId, this.taskId, )
+    //   .subscribe(res => {
+    //   console.log(res)
+    // })
   }
 
   editConfig() {
