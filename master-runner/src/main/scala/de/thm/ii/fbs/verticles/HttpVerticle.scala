@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.verticles
 
 import de.thm.ii.fbs.verticles.HttpVerticle.SEND_COMPLETION
-import de.thm.ii.fbs.verticles.runner.BashRunnerVerticle
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlRunnerVerticle}
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -80,9 +80,13 @@ class HttpVerticle extends ScalaVerticle {
     val body = ctx.getBodyAsJson()
     val rType = body.getOrElse(new JsonObject()).getJsonObject("runner").getString("type")
 
+
     rType match {
       case "bash" =>
         vertx.eventBus().send(BashRunnerVerticle.RUN_ADDRESS, body)
+        ctx.response().setStatusCode(202).end()
+      case "sql" =>
+        vertx.eventBus().send(SqlRunnerVerticle.RUN_ADDRESS, body)
         ctx.response().setStatusCode(202).end()
       case _ => ctx.response().setStatusCode(404).end("Invalid Runner Type")
     }
