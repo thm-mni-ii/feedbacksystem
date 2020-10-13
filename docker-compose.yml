@@ -65,7 +65,7 @@ services:
       BASH_DOCKER: thmmniii/bashenv:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: ws
+      RESULT_SERVER_HOST: http
       SQL_SERVER_URL: jdbc:mysql://mysql2:3306
       SQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
