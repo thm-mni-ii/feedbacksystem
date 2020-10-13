@@ -161,7 +161,6 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     }))
   }
 
-
   /**
     * Compare the Runner and Submission results
     *

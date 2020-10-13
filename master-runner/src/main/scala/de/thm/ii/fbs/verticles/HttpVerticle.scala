@@ -80,7 +80,6 @@ class HttpVerticle extends ScalaVerticle {
     val body = ctx.getBodyAsJson()
     val rType = body.getOrElse(new JsonObject()).getJsonObject("runner").getString("type")
 
-
     rType match {
       case "bash" =>
         vertx.eventBus().send(BashRunnerVerticle.RUN_ADDRESS, body)

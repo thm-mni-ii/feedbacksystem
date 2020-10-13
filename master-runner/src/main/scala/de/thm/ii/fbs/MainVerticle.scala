@@ -57,7 +57,6 @@ class MainVerticle extends ScalaVerticle {
           .setWorker(true)
           .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
 
-
         vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlRunnerVerticle], sqlRunnerVerticleOptions)
       case Failure(exception) =>
         logger.warn("Could not load Config", exception) //TODO
