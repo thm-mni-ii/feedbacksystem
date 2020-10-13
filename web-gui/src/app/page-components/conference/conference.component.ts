@@ -40,7 +40,10 @@ export class ConferenceComponent implements OnInit {
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
+  username: string;
+
   ngOnInit(): void {
+    this.username = this.auth.getToken().username
     this.db.subscribeCourse(this.courseID);
     this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
@@ -68,7 +71,7 @@ export class ConferenceComponent implements OnInit {
 
   public isAuthorized() {
     const courseRole = this.auth.getToken().courseRoles[this.courseID]
-    return courseRole == Roles.CourseRole.DOCENT || courseRole == Roles.CourseRole.TUTOR
+    return courseRole == 0 || courseRole == 1
   }
 
   public inviteToConference(user) {

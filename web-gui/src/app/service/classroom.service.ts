@@ -87,7 +87,7 @@ export class ClassroomService {
    */
   public join(courseId: number) {
     this.courseId = courseId;
-    this.stompRx = new RxStompClient('wss://feedback.mni.thm.de/websocket', this.constructHeaders());
+    this.stompRx = new RxStompClient(window.origin.replace(/^http(s)?/, 'ws$1') + '/websocket', this.constructHeaders());
     this.stompRx.onConnect(_ => {
       // Handles invitation from tutors / docents to take part in a webconference
       this.listen('/user/' + this.authService.getToken().username + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
@@ -125,7 +125,7 @@ export class ClassroomService {
    * @param users The users to invite
    */
   public inviteToConference(invitation: ConferenceInvitation, users: { username: string; prename: string; surname: string }[]) {
-    this.send('/websocket/classroom/invite', {invitation: invitation, users, 'courseid': this.courseId});
+    this.send('/websocket/classroom/conference/invite', {invitation: invitation, users, 'courseid': this.courseId});
   }
 
   /**

@@ -16,14 +16,19 @@ import scala.language.postfixOps
 /**
   * Handles BBB requests.
   * @param templateBuilder Request template builder.
+  * @param apiUrl the bbb api url
+  * @param secret the bbb secret
   * @author Simon Schniedenharn
   */
 @Service
-class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
+class BBBService(templateBuilder: RestTemplateBuilder,
+                 @Value("${services.bbb.service-url}") private val apiUrl: String,
+                 @Value("${services.bbb.shared-secret}") private val secret: String)
+  extends ConferenceService {
   /**
     * The name of the conference service
     */
-  val name = "bbb"
+  val name = "bigbluebutton"
 
   /**
     * Creates a new Conference using BBB
@@ -53,11 +58,6 @@ class BBBService(templateBuilder: RestTemplateBuilder) extends ConferenceService
   }
 
   private val restTemplate = templateBuilder.build()
-
-  @Value("${services.bbb.service-url}")
-  private val apiUrl: String = null
-  @Value("${services.bbb.shared-secret}")
-  private val secret: String = null
 
   /**
     * Register a new conference.

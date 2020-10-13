@@ -62,7 +62,7 @@ class CourseRegistrationService {
     * @return Map of course id to its course role. Note that courses where the user is a student are not listed here.
     */
   def getCoursePriviledges(uid: Int): Map[Int, Int] = {
-    DB.query("SELECT course_id, course_role FROM user_course WHERE user_id = ? AND course_role <> ?", (res, _) => {
+    DB.query("SELECT course_id, course_role FROM user_course WHERE user_id = ? AND course_role >= ?", (res, _) => {
       (res.getInt("course_id"), res.getInt("course_role"))
     }, uid, CourseRole.TUTOR.id)
       .foldLeft(Map[Int, Int]())((akku, value) => akku + value)

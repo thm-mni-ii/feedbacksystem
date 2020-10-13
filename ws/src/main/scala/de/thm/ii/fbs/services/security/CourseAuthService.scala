@@ -47,7 +47,11 @@ class CourseAuthService {
     if (user.globalRole >= GlobalRole.MODERATOR) {
       true
     } else {
-      val courseUser = this.courseRegistrationService.getParticipants(courseID).find(_.user.id == user.id).get
-      courseUser.role >= CourseRole.TUTOR
+      val courseUser = this.courseRegistrationService.getParticipants(courseID).find(_.user.id == user.id)
+      if (courseUser.isEmpty) {
+        false
+      } else {
+        courseUser.get.role >= CourseRole.TUTOR
+      }
     }
 }

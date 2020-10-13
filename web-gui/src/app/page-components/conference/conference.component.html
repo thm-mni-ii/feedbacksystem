@@ -29,8 +29,8 @@
     <h3>Offene Tickets</h3>
     <mat-list>
       <mat-card class="ticket-mat-card" mat-list-item (click)="assignTeacher(ticket)" *ngFor="let ticket of sortTickets(tickets | async)"
-                [ngClass]="{'selfassigned': ticket.assignee.username == user.getUsername(),
-                'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != user.getUsername(),
+                [ngClass]="{'selfassigned': ticket.assignee.username == username,
+                'otherassigned': ticket.assignee.username != ticket.creator.username && ticket.assignee.username != username,
                 'unassigned': ticket.assignee.username == ticket.creator.username}">
         <mat-card-content>
           <div class="grid-container">

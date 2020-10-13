@@ -59,7 +59,7 @@ class ClassroomController {
     val user = headerAccessor.getUser
     this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(user)) match {
       case Some(participant) => Classroom.join(cid, participant)
-        smt.convertAndSend("/topic/classroom/" + cid + "/joined", participant.toString)
+        smt.convertAndSend("/topic/classroom/" + cid + "/joined", participant)
       case _ => logger.warn("User not registered in course")
     }
   }
@@ -76,7 +76,7 @@ class ClassroomController {
     val user = headerAccessor.getUser
     this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(user)) match {
       case Some(participant) => Classroom.leave(participant)
-        smt.convertAndSend("/topic/classroom/" + cid + "/left")
+        smt.convertAndSend("/topic/classroom/" + cid + "/left", participant)
       case _ =>
     }
   }

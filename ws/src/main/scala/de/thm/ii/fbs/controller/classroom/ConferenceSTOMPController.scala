@@ -6,7 +6,7 @@ import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom._
 import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, CourseAuthService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}
 import org.slf4j.{Logger, LoggerFactory}
@@ -31,6 +31,8 @@ class ConferenceSTOMPController {
     private val jitsiService: JitsiService = null
     @Autowired
     private val userService: UserService = null
+    @Autowired
+    private val courseAuthService: CourseAuthService = null
     @Autowired
     implicit private val authService: AuthService = null
     @Autowired
@@ -69,28 +71,15 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/invite"))
   def handleInviteMsg(@Payload p: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val inviter = headerAccessor.getUser
-    val invitation = p.get("invitation").asInstanceOf[Invitation]
-    val invitees = p.get("users").asInstanceOf[Array[User]]
-    Classroom.getParticipants(invitation.courseId).find(p => p.user.equals(inviter)) match {
-      case Some(localUser) =>
-        if (localUser.role > CourseRole.TUTOR) {
-          invitees.foreach(invitee => {
-            if (Classroom.getParticipants(invitation.courseId).exists(p => p.user.username == invitee.username)){
-              smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitation)
-            }
-          })
+    val invitation = p.get("invitation")
+    val courseID = p.get("courseid").asInt()
+    val invitees = p.get("users")
+    if (courseAuthService.isPrivilegedInCourse(courseID, userService.find(inviter.getName).get)) {
+      invitees.forEach(invitee => {
+        if (Classroom.getParticipants(courseID).exists(p => p.user.username == invitee.get("username").asText())){
+          smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite", invitation)
         }
-      case _ =>
-        userService.find(inviter.getName) match {
-          case Some(globalUser) =>
-            if (globalUser.globalRole <= GlobalRole.MODERATOR) {
-              invitees.foreach(invitee => {
-                if (Classroom.getParticipants(invitation.courseId).exists(p => p.user.username == invitee.username)){
-                  smt.convertAndSendToUser(invitee.username, "/classroom/invite", invitationToJson(invitation))
-                }
-              })
-            }
-        }
+      })
     }
   }
     /**
@@ -98,14 +87,19 @@ class ConferenceSTOMPController {
       * @param m Composed ticket message.
       * @param headerAccessor Header information
       */
-    @MessageMapping(value = Array("/classroom/conference/open"))
+    @MessageMapping(value = Array("/classroom/conference/opened"))
     def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-      val objectMapper = new ObjectMapper();
-      val invitation = m.retrive("invitation").retrive("service").asText() match {
-        case Some(bbbService.name) => objectMapper.treeToValue(m, classOf[BBBInvitation])
-        case Some(jitsiService.name) => objectMapper.treeToValue(m, classOf[JitsiInvitation])
+      userService.find(headerAccessor.getUser.getName) match {
+        case Some(user) =>
+          val invitation = m.retrive("invitation").retrive("service").asText() match {
+            case Some(bbbService.name) => bbbInvitationFromJSON(m, user)
+            case Some(jitsiService.name) => jitsiInvitationFromJSON(m, user)
+            case Some(name) => throw new IllegalArgumentException(s"Unknown service: ${name}")
+            case None => throw new IllegalArgumentException("Service name not provided")
+          }
+          UserConferenceMap.map(invitation, headerAccessor.getUser)
+        case None => throw new Exception("User not found")
       }
-      UserConferenceMap.map(invitation, headerAccessor.getUser)
    }
 
     /**
@@ -113,7 +107,7 @@ class ConferenceSTOMPController {
       * @param m Composed ticket message.
       * @param headerAccessor Header information
       */
-    @MessageMapping(value = Array("/classroom/conference/leave"))
+    @MessageMapping(value = Array("/classroom/conference/closed"))
     def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
       UserConferenceMap.delete(headerAccessor.getUser)
     }
@@ -140,6 +134,19 @@ class ConferenceSTOMPController {
   })
 
   UserConferenceMap.onDelete((invitation: Invitation, p: Principal) => {
-    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/left", invitationToJson(invitation).toString)
+    smt.convertAndSend("/topic/classroom/" + invitation.courseId + "/conference/closed", invitationToJson(invitation).toString)
   })
+
+  private def bbbInvitationFromJSON(m: JsonNode, user: User): BBBInvitation = {
+    val invitation = m.get("invitation")
+    BBBInvitation(user, m.get("courseId").asInt(), invitation.get("visibility").textValue() == "public",
+      invitation.get("service").asText(), invitation.get("meetingId").asText(),
+      invitation.get("meetingPassword").asText(), invitation.get("moderatorPassword").asText())
+  }
+
+  private def jitsiInvitationFromJSON(m: JsonNode, user: User): JitsiInvitation = {
+    val invitation = m.get("invitation")
+    JitsiInvitation(null, m.get("courseId").asInt(), invitation.get("visibility").textValue() == "public",
+      invitation.get("service").asText(), invitation.get("href").asText())
+  }
 }

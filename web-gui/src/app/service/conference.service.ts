@@ -58,7 +58,7 @@ export class ConferenceService {
     if (this.personalLinksRecieved) {
       return this.personalConferenceLink.asObservable();
     } else {
-      return this.http.post<any>('/api/v1/courses/meeting', {service: service})
+      return this.http.post<any>('/api/v1/classroom/conference', {service: service})
         .pipe(flatMap(res => {
           this.personalLinksRecieved = true;
           this.personalConferenceLink.next(res.href);
@@ -79,7 +79,7 @@ export class ConferenceService {
    * @return Returns a personal conference link to a BBB conference.
    */
   public getBBBConferenceInvitationLink(meetingId: String, meetingPassword: String): Observable<object> {
-    return this.http.post<object>('/api/v1/courses/meeting/bbb/invite',
+    return this.http.post<object>('/api/v1/classroom/conference/bigbluebutton/invite',
       {meetingId: meetingId, meetingPassword: meetingPassword})
       .pipe(flatMap(res => {
         this.bbbInvitationLink.next(res);
