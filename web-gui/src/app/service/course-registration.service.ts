@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import {User} from '../model/User';
 import { Observable, of } from 'rxjs';
-import {COURSE} from "../mock-data/mock-courses";
 import {Course} from "../model/Course";
-import {Succeeded} from "../model/HttpInterfaces";
 import {HttpClient} from "@angular/common/http";
 import {Participant} from "../model/Participant";
 
@@ -36,8 +33,8 @@ export class CourseRegistrationService {
    * @param roleName Either, DOCENT, TUTOR, or STUDENT
    * @return Observable that succeeds on successful registration
    */
-  registerCourse(uid: number, cid: number, roleName: string = 'STUDENT'): Observable<Succeeded> {
-    return this.http.put<Succeeded>(`/api/v1/users/${uid}/courses/${cid}`, {roleName: roleName})
+  registerCourse(uid: number, cid: number, roleName: string = 'STUDENT'): Observable<void> {
+    return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}`, {roleName: roleName})
   }
 
   /**
@@ -45,7 +42,7 @@ export class CourseRegistrationService {
    * @param cid Course id
    * @param uid User id
    */
-  deregisterCourse(cid: number, uid: number): Observable<Succeeded>{
-    return this.http.delete<Succeeded>(`/api/v1/users/${uid}/courses/${cid}`)
+  deregisterCourse(cid: number, uid: number): Observable<void>{
+    return this.http.delete<void>(`/api/v1/users/${uid}/courses/${cid}`)
   }
 }

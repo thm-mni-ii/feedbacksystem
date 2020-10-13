@@ -1,10 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DatabaseService} from '../../service/database.service';
-import {TextType} from '../../model/HttpInterfaces';
 import {AuthService} from '../../service/auth.service';
 import {Roles} from "../../model/Roles";
+import {LegalService} from "../../service/legal.service";
 
 /**
  * The impressum dialog
@@ -16,11 +15,11 @@ import {Roles} from "../../model/Roles";
 })
 export class ImpressumDialogComponent implements OnInit {
 
-  constructor(private dialogRef: MatDialogRef<ImpressumDialogComponent>, private db: DatabaseService,
+  constructor(private dialogRef: MatDialogRef<ImpressumDialogComponent>, private legalService: LegalService,
               private snackBar: MatSnackBar, private auth: AuthService) {
   }
 
-  markdown: string;
+  markdown: String;
   isAdmin: boolean;
 
   ngOnInit() {
@@ -29,11 +28,10 @@ export class ImpressumDialogComponent implements OnInit {
       this.isAdmin = Roles.GlobalRole.isAdmin(this.auth.getToken().globalRole)
     }
 
-    this.db.getPrivacyOrImpressumText(TextType.Impressum).subscribe(data => {
+    this.legalService.getImpressum().subscribe(data => {
       this.markdown = data.markdown;
     });
   }
-
 
   /**
    * Close dialog window
@@ -41,7 +39,6 @@ export class ImpressumDialogComponent implements OnInit {
   close() {
     this.dialogRef.close();
   }
-
 
   /**
    * Admin saves new impressum text
@@ -55,5 +52,4 @@ export class ImpressumDialogComponent implements OnInit {
       }
     });
   }*/
-
 }

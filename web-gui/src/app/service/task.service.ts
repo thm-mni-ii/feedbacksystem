@@ -1,75 +1,71 @@
 import { Injectable } from '@angular/core';
 import {Observable, of} from "rxjs";
 import {Task} from "../model/Task";
-import {Submission} from "../model/Submission";
-import {TASKS} from "../mock-data/mock-tasks";
-import {SUBMISSION} from "../mock-data/mock-submissions";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
+  constructor(private http: HttpClient) { }
 
-  constructor() { }
-
-  // GET /courses/{cid}/tasks
+  /**
+   * Get all tasks of a course
+   * @param cid Course id
+   * @return Observable that succeeds with all tasks of the course
+   */
   getAllTasks(cid: number): Observable<Task[]>{
-    return of(TASKS)
+    return this.http.get<Task[]>(`/api/v1/courses/${cid}/tasks`)
   }
 
-  // POST /courses/{cid}/tasks
-  createTask(cid: number, task: Task): Observable<any>{
-    return of(true)
+  /**
+   * Create a new task
+   * @param cid Course id
+   * @param task Task state
+   * @return The task state adjusted by the server
+   */
+  createTask(cid: number, task: Task): Observable<Task>{
+    return this.http.post<Task>(`/api/v1/courses/${cid}/tasks`, task)
   }
 
-  // GET /courses/{cid}/tasks/{tid}
+  /**
+   * Get a task by id
+   * @param cid Course id
+   * @param tid Task id
+   * @return Observable that succeeds with the task state
+   */
   getTask(cid: number, tid: number): Observable<Task>{
-    return of(TASKS.pop())
+    return this.http.get<Task>(`/api/v1/courses/${cid}/tasks/${tid}`)
   }
 
-  // PUT /courses/{cid}/tasks/{tid}
-  updateTask(cid: number, tid: number, task: Task): Observable<any>{
-    return of(true)
+  /**
+   * Update an existing task
+   * @param cid Course id
+   * @param tid Task id
+   * @param task The new task state
+   * @return Observable that succeeds if updated successfully
+   */
+  updateTask(cid: number, tid: number, task: Task): Observable<void>{
+    return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}`, task)
   }
 
-  // DELETE /courses/{cid}/tasks/{tid}
-  deleteTask(cid: number, tid: number): Observable<any>{
-    return of(true)
+  /**
+   * Delete a task
+   * @param cid Course id
+   * @param tid Task id
+   * @return Observable that succeeds if the task does not exists after this operation.
+   */
+  deleteTask(cid: number, tid: number): Observable<void>{
+    return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}`)
   }
 
   // PUT /courses/{cid}/tasks/{tid}/main-file
   updateMainFile(cid: number, tid: number, file: String): Observable<any>{
-    return of(true)
+    return of(true) // TODO upload file
   }
 
   // PUT /courses/{cid}/tasks/{tid}/secondary-file
   updateSecondaryFile(cid: number, tid: number, file: String): Observable<any>{
-    return of(true)
-  }
-
-  // SUBMISSIONS
-  // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions
-  getAllSubmissions(uid: number, cid: number, tid: number): Observable<Submission[]>{
-    return null //of(SUBMISSION.slice(0,1))
-  }
-
-  // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
-  submitSolution(uid: number, cid: number, tid: number, solution: any): Observable<Submission>{
-    return of(SUBMISSION.pop())
-  }
-
-  // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}
-  restartSubmission(uid: number, cid: number, tid: number, sid: number): Observable<any>{
-    return of()
-  }
-
-  // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}
-  getSubmission(uid: number, cid: number, tid: number, sid: number): Observable<Submission>{
-    return of(SUBMISSION.pop())
-  }
-
-  // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
-  restartAllSubmissions(uid: number, cid: number, tid: number, sid: number){
-    //TODO: this Route doesn't exist yet
+    return of(true) // TODO upload file
   }
 }

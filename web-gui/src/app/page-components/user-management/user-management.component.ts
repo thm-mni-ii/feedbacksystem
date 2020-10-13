@@ -35,7 +35,6 @@ export class UserManagementComponent implements OnInit {
   }
 
   private refreshUserList() {
-    // this.db.getAllUsers().subscribe(users => {
     this.userService.getAllUsers().subscribe(users => {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
@@ -45,11 +44,10 @@ export class UserManagementComponent implements OnInit {
 
   /**
    * Admin selects new role for user
-   * @param username The username of current user
    * @param userID The id of user
    * @param role Selected role from admin
    */
-  roleChange(username: string, userID: number, role: string) {
+  roleChange(userID: number, role: string) {
     this.userService.changeRole(userID, role).subscribe(res => {
         this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
         this.refreshUserList()

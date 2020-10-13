@@ -6,6 +6,9 @@ import {Observable} from 'rxjs';
 import {DatabaseService} from '../../service/database.service';
 import {DetailedCourseInformation, Testsystem} from '../../model/HttpInterfaces';
 import {Course} from "../../model/Course";
+import {CourseService} from "../../service/course.service";
+import {TitlebarService} from "../../service/titlebar.service";
+import {Router} from "@angular/router";
 
 
 /**
@@ -17,38 +20,60 @@ import {Course} from "../../model/Course";
   styleUrls: ['./course-update-dialog.component.scss']
 })
 export class CourseUpdateDialogComponent implements OnInit {
-  name: string;
-  description: string;
-  id: number;
-  visible: boolean;
-  userDataAllowed: boolean;
-  courseDetails: Course;
-  coursenameMinLength: number = 5;
-  courseNameMaxLength: number = 100;
-  courseDescriptionMaxLength: number = 8000;
-  coursename = new FormControl('', [Validators.required, Validators.minLength(this.coursenameMinLength),
-    Validators.maxLength(this.courseNameMaxLength)]);
-  courseDefaultTaskTyp = new FormControl('', [Validators.required]);
-  courseDescription = new FormControl('', Validators.maxLength(this.courseDescriptionMaxLength));
+  name = new FormControl('', [Validators.required]);
+  description = new FormControl('');
+  isVisible = true
 
-  constructor(private db: DatabaseService, @Inject(MAT_DIALOG_DATA) public data: any,
-              public dialogRef: MatDialogRef<CourseUpdateDialogComponent>, private snackbar: MatSnackBar) {
-    this.name = '';
-    this.description = '';
-    this.id;
-    this.visible;
+  isUpdateDialog: boolean = false;
+
+  constructor(private courseService: CourseService,
+              private snackBar: MatSnackBar,
+              @Inject(MAT_DIALOG_DATA) public data: any,
+              public dialogRef: MatDialogRef<CourseUpdateDialogComponent>) {
   }
 
-  testsystems$: Observable<Testsystem[]>;
-
   ngOnInit() {
-    this.courseDetails = this.data.data;
-    this.userDataAllowed = false;
-    console.log(this.courseDetails);
+    this.isUpdateDialog = this.data.isUpdateDialog
+    if (this.isUpdateDialog) {
+      const course: Course = this.data.course
+      this.name.setValue(course.name)
+      this.description.setValue(course.description)
+      this.isVisible = course.visible
+    }
+  }
 
-    this.name = this.courseDetails.name;
-    this.description = this.courseDetails.description;
-    this.visible = this.courseDetails.visible;
+  /**
+   * Get data from form groups and create new course
+   */
+  saveCourse() {
+    if (!this.isInputValid) {
+      return;
+    }
+
+    const course: Course = {
+      name: this.name.value,
+      description: this.description.value,
+      visible: this.isVisible
+    }
+
+    if (this.isUpdateDialog) {
+      this.courseService
+        .updateCourse(this.data.course.id, course)
+        .subscribe(ok => this.dialogRef.close({success: true}), error => console.error(error))
+    } else {
+      this.courseService
+        .createCourse(course)
+        .subscribe(course => {
+          this.dialogRef.close({success: true, course: course})
+        }, error => {
+          console.error(error)
+          this.snackBar.open("Es ist ein fehler beim erstellen des Kurses aufgetreten", null, {duration: 3000});
+        })
+    }
+  }
+
+  isInputValid(): boolean {
+    return this.name.valid && this.description.valid;
   }
 
   /**
@@ -56,31 +81,5 @@ export class CourseUpdateDialogComponent implements OnInit {
    */
   closeDialog() {
     this.dialogRef.close({success: false});
-  }
-
-  /**
-   * Update course information and close dialog
-   */
-  updateCourse() {
-    /*this.db.updateCourse(this.courseDetails.id, this.name, this.description, this.standardTaskType, this.semester,
-      this.course_module_id, this.userDataAllowed).subscribe(success => {
-      this.dialogRef.close(success);
-      this.snackbar.open('Kurseigenschaften erfolgreich geändert!', 'OK', {duration: 3000});
-    }, error => {
-      this.snackbar.open(error.error.message, 'OK', {duration: 3000});
-    });*/
-
-  }
-
-  loadDocentTutorForCourse() {
-    /*this.db.getCourseDetail(this.courseDetails.id).subscribe((value: DetailedCourseInformation) => {
-      this.courseDetails.course_docent = value.course_docent;
-      this.courseDetails.course_tutor = value.course_tutor;
-    });*/
-  }
-
-  isInputValid(): boolean {
-    return this.coursename.valid && this.courseDescription.valid;
-
   }
 }

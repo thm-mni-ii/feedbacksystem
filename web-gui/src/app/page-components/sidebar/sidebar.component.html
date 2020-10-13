@@ -1,5 +1,5 @@
 <mat-sidenav-container class="container">
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
+  <mat-sidenav class="sidenav" #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
     <div class="sidenav-group">
       <div class="logo">
         <h1>Feedbacksystem <i class="material-icons">feedback</i>
@@ -10,11 +10,6 @@
       </div>
 
       <mat-nav-list>
-<!--        <a mat-list-item *ngIf="isAdmin || isModerator || isDocent" routerLink="/{{userRoleString}}/dashboard" routerLinkActive="selected">-->
-<!--          <mat-icon>dashboard</mat-icon>-->
-<!--          <p>Dashboard</p>-->
-<!--        </a>-->
-
         <a mat-list-item routerLink="/courses" routerLinkActive="selected">
           <mat-icon>list</mat-icon>
           <p>Meine Kurse</p>
@@ -22,76 +17,26 @@
 
         <a mat-list-item routerLink="/courses/search" routerLinkActive="selected">
           <mat-icon>search</mat-icon>
-          <p>Kurs Suchen</p>
+          <p>Alle Kurse</p>
         </a>
-      </mat-nav-list>
-      <mat-divider></mat-divider>
-
-      <mat-nav-list *ngIf="isAdmin || isModerator">
-        <p>Administration</p>
-        <a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/new" routerLinkActive="selected">
-          <mat-icon>playlist_add</mat-icon>
-          <p>Kurs erstellen</p>
-        </a>
-
-        <!--<a mat-list-item *ngIf="isAdmin || isModerator" routerLink="/courses/authorization" routerLinkActive="selected">
-          <mat-icon>person</mat-icon>
-          <p>Kursberechtigungen</p>
-        </a>-->
 
         <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
           <mat-icon>supervised_user_circle</mat-icon>
           <p>Benutzer</p>
         </a>
 
-        <!--<a mat-list-item *ngIf="isDocent || isAdmin || isModerator" routerLink="/courses/import" routerLinkActive="selected">
-          <mat-icon>import_export</mat-icon>
-          <p>Kurs Importieren</p>
-        </a>-->
-
-        <!--<a mat-list-item routerLink="/admin/testsystems" routerLinkActive="selected">
-          <mat-icon>widgets</mat-icon>
-          <p>Verbundene Systeme</p>
-        </a>
-
-        <a mat-list-item routerLink="/admin/settings" routerLinkActive="selected">
-          <mat-icon>settings</mat-icon>
-          <p>Einstellungen</p>
-        </a>-->
-
-
-      </mat-nav-list>
-      <mat-divider></mat-divider>
-
-      <mat-nav-list>
-        <p>Einstellungen</p>
-        <a mat-list-item routerLink="/users/password" routerLinkActive="selected">
-          <mat-icon>settings</mat-icon>
-          <p>Passwort ändern</p>
-        </a>
-      </mat-nav-list>
-
-      <span class="filler"></span>
-
-      <a mat-list-item class="general" (click)="showImpressum()">Impressum</a>
-      <br>
-      <a mat-list-item class="general" (click)="showDataprivacy()">Datenschutzerklärung</a>
-
-      <mat-divider></mat-divider>
-      <mat-nav-list>
         <a mat-list-item href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung">
           <mat-icon class="">help</mat-icon>
           <p>Wiki</p>
         </a>
       </mat-nav-list>
-      <mat-divider></mat-divider>
-      <mat-nav-list>
-        <a mat-list-item (click)="logout()">
-          <mat-icon class="logout-icon">power_settings_new</mat-icon>
-          <p>Logout</p>
-        </a>
-      </mat-nav-list>
 
+      <span class="filler"></span>
+
+      <span class="legal">
+        <a mat-list-item class="general" (click)="showImpressum()">Impressum</a>
+        <a mat-list-item class="general" (click)="showDataprivacy()">Datenschutzerklärung</a>
+      </span>
     </div>
   </mat-sidenav>
 
@@ -100,11 +45,19 @@
       <button mat-icon-button>
         <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
       </button>
-      <div class="flex-toolbar-container">
-        <span class="mat-h1">{{title | async}}</span>
-      </div>
+      <span class="mat-h1">{{title | async}}</span>
+      <span class="toolbar-spacer"></span>
+      <button mat-icon-button [matMenuTriggerFor]="menu" class="toolbar-icon favorite-icon" aria-label="User Menu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="logout()"><mat-icon class="logout-icon">power_settings_new</mat-icon> Logout</button>
+        <!--<button mat-menu-item routerLink="/users/password"><mat-icon>settings</mat-icon>Passwort ändern</button>-->
+      </mat-menu>
     </mat-toolbar>
-    <router-outlet></router-outlet>
+    <div class="content-container">
+      <router-outlet></router-outlet>
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
 
