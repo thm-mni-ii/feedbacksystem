@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import {CheckerConfig} from "../../model/CheckerConfig";
 import {Observable, of} from "rxjs"
-import {flatMap} from "rxjs/operators"
-import {CHECKERCONFIG} from "../../mock-data/mock-checker-config";
+
 import {CheckerService} from "../../service/checker.service";
 import {ActivatedRoute} from "@angular/router";
+import {NewCheckerDialogComponent} from "../../dialogs/new-checker-dialog/new-checker-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
   selector: 'app-configuration-list',
@@ -16,7 +18,8 @@ export class ConfigurationListComponent implements OnInit {
   courseId: number
   taskId: number
 
-  constructor(private checkerService: CheckerService, private route: ActivatedRoute) { }
+  constructor(private checkerService: CheckerService, private route: ActivatedRoute,
+              private dialog: MatDialog, private snackbar: MatSnackBar,) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(
@@ -24,7 +27,7 @@ export class ConfigurationListComponent implements OnInit {
         this.courseId = params.id
         this.taskId = params.tid
         this.configurations = this.checkerService.getChecker(this.courseId, this.taskId)
-      });
+    });
   }
 
   isAuthorized(): boolean {
@@ -32,25 +35,67 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   addConfig() {
-    // this.checkerService.createChecker(this.courseId, this.taskId, )
-    //   .subscribe(res => {
-    //   console.log(res)
-    // })
+    this.dialog.open(NewCheckerDialogComponent, {
+      height: 'auto',
+      width: '50%',
+      data: {
+        courseId: this.courseId,
+        taskId: this.taskId
+      }
+    }).afterClosed().subscribe(
+      res => {
+        if (res.success){
+          this.snackbar.open('Überprüfung erfolgreich erstellt.', 'OK', {duration: 3000});
+          this.configurations = this.checkerService.getChecker(this.courseId, this.taskId)
+        }
+      }, error => {
+        console.error(error)
+        this.snackbar.open('Überprüfung ändern hat nicht funktioniert.', 'OK', {duration: 3000});
+      });
   }
 
-  editConfig() {
-
+  editConfig(checker: CheckerConfig) {
+    console.log(checker);
+    // this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, "test").subscribe(
+    // )
+    this.dialog.open(NewCheckerDialogComponent, {
+      height: 'auto',
+      width: '50%',
+      data: {
+        checker: checker,
+        courseId: this.courseId,
+        taskId: this.taskId
+      }
+    }).afterClosed().subscribe(
+      res => {
+        if (res.success){
+          this.snackbar.open('Überprüfung erfolgreich geändert.', 'OK', {duration: 3000});
+          this.configurations = this.checkerService.getChecker(this.courseId, this.taskId)
+        }
+      }, error => {
+        console.error(error)
+        this.snackbar.open('Überprüfung ändern hat nicht funktioniert.', 'OK', {duration: 3000});
+      });
   }
 
-  deleteConfig() {
-
+  deleteConfig(checker: CheckerConfig) {
+    this.snackbar.open("Soll die Überprüfung gelöscht werden?" , "Ja", {duration: 3000}).onAction()
+      .subscribe( () => {
+          this.checkerService.deleteChecker(this.courseId, this.taskId, checker.id)
+            .subscribe( () => this.configurations = this.checkerService.getChecker(this.courseId, this.taskId))
+        });
   }
 
-  downloadMainFile() {
-
+  downloadMainFile(checker: CheckerConfig) {
+    console.log(checker)
+    if (checker.mainFileUploaded){
+      this.checkerService.getMainFile(this.courseId, this.taskId, checker.id)
+    } else {
+      this.snackbar.open("Es gibt keine Hauptdatei.", "OK", {duration: 3000})
+    }
   }
 
-  downloadSecondaryFile() {
+  downloadSecondaryFile(checker: CheckerConfig) {
 
   }
 }

@@ -3,5 +3,5 @@ export interface CheckerConfig {
   checkerType: string;
   mainFileUploaded?: boolean;
   secondaryFileUploaded?: boolean;
-  ord: string;
+  ord: number;
 }
