@@ -54,6 +54,8 @@ dependencies {
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-config-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-web-scala_2.12:${vertxVersion}"
+    implementation "io.vertx:vertx-jdbc-client-scala_2.12:${vertxVersion}"
+    implementation 'mysql:mysql-connector-java:8.0.21'
     testCompile 'junit:junit:4.12'
 }
 
