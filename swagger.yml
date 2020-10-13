@@ -1074,7 +1074,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CheckerConfig'
+              type: array
+              items:
+                $ref: "#/components/schemas/CheckerConfig"
 
       responses:
         "201":
@@ -1630,7 +1632,7 @@ components:
           type: boolean
           description: True if secondary file was provided
         ord:
-          type: string
+          type: integer
           description: Defines in which order the checker are executed
     Participant:
       type: object
