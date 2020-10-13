@@ -1,7 +1,7 @@
 #!/bin/bash
 
-tag=$1
-branch=$2
+branch=$1
+tag=$2
 
 function dockerPush(){
     tag=$1
