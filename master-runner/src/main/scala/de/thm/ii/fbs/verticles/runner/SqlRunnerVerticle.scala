@@ -31,6 +31,7 @@ object SqlRunnerVerticle {
   */
 class SqlRunnerVerticle extends ScalaVerticle {
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
+  private var client: Option[JDBCClient] = None
 
   /**
     * start SqlRunnerVerticle
@@ -38,6 +39,15 @@ class SqlRunnerVerticle extends ScalaVerticle {
     * @return vertx Future
     */
   override def startFuture(): Future[_] = {
+    val sqlConfig = new JsonObject()
+      .put("user", config.getString("SQL_SERVER_USERNAME", "root"))
+      .put("password", config.getString("SQL_SERVER_PASSWORD", ""))
+      .put("url", config.getString("SQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
+      .put("max_pool_size", config.getInteger("SQL_MAX_POOL_SIZE", 15))
+      .put("driver_class", "com.mysql.cj.jdbc.Driver")
+
+    client = Option(JDBCClient.createShared(vertx, sqlConfig))
+
     vertx.eventBus().consumer(RUN_ADDRESS, startSqlRunner).completionFuture()
   }
 
@@ -50,15 +60,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       // change file paths
       FileService.addUploadDir(runArgs)
 
-      val sqlConfig = new JsonObject()
-        .put("user", config.getString("SQL_SERVER_USERNAME", "root"))
-        .put("password", config.getString("SQL_SERVER_PASSWORD", ""))
-        .put("url", config.getString("SQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
-        .put("driver_class", "com.mysql.cj.jdbc.Driver")
-
-      val client = JDBCClient.createShared(vertx, sqlConfig)
-
-      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client)
+      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get)
 
       val results = for {
         f1Result <- sqlRunner.executeRunnerQueries()
