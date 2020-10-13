@@ -64,11 +64,12 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.ord = value.ord
     if (this.checker.checkerType && this.checker.ord && this.mainFile && this.secondaryFile) {
       this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
-        .subscribe(res => {
-            const temp = res.pop()
-          this.checkerService.updateMainFile(this.courseId, this.taskId, temp.id, this.mainFile) //TODO:
-          this.checkerService.updateSecondaryFile(this.courseId, this.taskId, temp.id, this.secondaryFile)
-          });
+        .subscribe(checker => {
+          this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)
+            .subscribe(ok => {}, error => console.error(error))
+          this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
+            .subscribe(ok => {}, error => console.error(error))
+        });
       this.dialogRef.close({success: true});
     } else {
       this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");

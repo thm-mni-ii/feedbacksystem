@@ -9,8 +9,8 @@
 
     <span class="spacer"></span>
 
-    <button mat-icon-button color="primary" (click)="downloadMainFile(configuration)" matTooltip="Hauptdatei herunterladen"><mat-icon>save_alt</mat-icon></button>
-    <button mat-icon-button color="primary" (click)="downloadSecondaryFile(configuration)" matTooltip="Nebendatei herunterladen"><mat-icon>save_alt</mat-icon></button>
+    <button mat-icon-button color="primary" [disabled]="!configuration.mainFileUploaded" (click)="downloadMainFile(configuration)" matTooltip="Hauptdatei herunterladen"><mat-icon>save_alt</mat-icon></button>
+    <button mat-icon-button color="primary" [disabled]="!configuration.secondaryFileUploaded" (click)="downloadSecondaryFile(configuration)" matTooltip="Nebendatei herunterladen"><mat-icon>save_alt</mat-icon></button>
 
     <button mat-icon-button color="primary" (click)="editConfig(configuration)" matTooltip="Überprüfung bearbeiten"><mat-icon>edit</mat-icon></button>
     <button mat-icon-button color="primary" (click)="deleteConfig(configuration)" matTooltip="Überprüfung entfernen"><mat-icon>delete</mat-icon></button>

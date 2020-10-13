@@ -66,7 +66,7 @@ class CheckerConfigurationController {
     consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def create(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest,
-             res: HttpServletResponse, @RequestBody body: JsonNode): List[CheckrunnerConfiguration] = {
+             res: HttpServletResponse, @RequestBody body: JsonNode): CheckrunnerConfiguration = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
@@ -138,13 +138,16 @@ class CheckerConfigurationController {
     * @param cid Course id
     * @param tid Task id
     * @param ccid Checker configuration id
+    * @param file Multipart file
     * @param req Http request
     * @param res Http response
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                     @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile(storageService.storeMainFile, (cc) => this.ccs.update(cid, tid, ccid, cc.copy(mainFileUploaded = true)))(cid, tid, ccid, req, res)
+    uploadFile(storageService.storeMainFile,
+      (cc) => this.ccs.update(cid, tid, ccid, cc.copy(mainFileUploaded = true)))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the main file for a task configuration
@@ -164,13 +167,16 @@ class CheckerConfigurationController {
     * @param cid Course id
     * @param tid Task id
     * @param ccid Checker configuration id
+    * @param file Multipart file
     * @param req Http request
     * @param res Http response
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def uploadSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
+                         @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile(storageService.storeSecondaryFile, (cc) => this.ccs.update(cid, tid, ccid, cc.copy(secondaryFileUploaded = true)))(cid, tid, ccid, req, res)
+    uploadFile(storageService.storeSecondaryFile,
+      (cc) => this.ccs.update(cid, tid, ccid, cc.copy(secondaryFileUploaded = true)))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the secondary file for a task configuration
@@ -185,17 +191,16 @@ class CheckerConfigurationController {
                   req: HttpServletRequest, res: HttpServletResponse): Unit = getFile(storageService.pathToSecondaryFile)(cid, tid, ccid, req, res)
 
   private def uploadFile(storageFn: (Int, Path) => Unit, postHook: (CheckrunnerConfiguration) => Unit)
-                        (cid: Int, tid: Int, ccid: Int,
-                     req: HttpServletRequest, res: HttpServletResponse): Unit = {
+                        (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
+      this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
           val tempDesc = Files.createTempFile("fbs", ".tmp")
-          req.getInputStream.transferTo(new FileOutputStream(tempDesc.toFile))
+          file.transferTo(tempDesc)
           storageFn(ccid, tempDesc)
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()

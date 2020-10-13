@@ -49,7 +49,7 @@ export class TaskDetailComponent implements OnInit {
     // }, 1000);
   }
 
-  submissionData: String | File;
+  submissionData: string | File;
 
   ngOnInit() {
     this.route.params.pipe(

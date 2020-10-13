@@ -1074,9 +1074,7 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/CheckerConfig"
+              $ref: "#/components/schemas/CheckerConfig"
 
       responses:
         "201":

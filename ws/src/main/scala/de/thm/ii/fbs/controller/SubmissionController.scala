@@ -11,6 +11,7 @@ import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
+import org.springframework.web.multipart.MultipartFile
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -59,6 +60,7 @@ class SubmissionController {
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
+    * @param file Mutipart file
     * @param req Http request
     * @param res Http response
     * @return Submission information
@@ -66,6 +68,7 @@ class SubmissionController {
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+             @RequestParam file: MultipartFile,
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
 
@@ -76,7 +79,7 @@ class SubmissionController {
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
           if (true) { // TODO: Check media type compatibility
             val tempDesc = Files.createTempFile("fbs", ".tmp")
-            req.getInputStream.transferTo(new FileOutputStream(tempDesc.toFile))
+            file.transferTo(tempDesc)
             val submission = submissionService.create(uid, tid)
             storageService.storeSolutionFile(submission.id, tempDesc)
             checkerConfigurationService.getAll(cid, tid).foreach(cc =>

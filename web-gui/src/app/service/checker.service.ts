@@ -27,8 +27,8 @@ export class CheckerService {
    * @param checker the to be created checker
    * @return all Checker Configurations
    */
-  public createChecker(cid: number, tid: number, checker: CheckerConfig): Observable<CheckerConfig[]> {
-    return this.http.post<CheckerConfig[]>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`,checker)
+  public createChecker(cid: number, tid: number, checker: CheckerConfig): Observable<CheckerConfig> {
+    return this.http.post<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`, checker)
   }
 
   /**
@@ -62,11 +62,11 @@ export class CheckerService {
    * @return Observable that succeeds with the Main File of configured Checker
    */
   public getMainFile(cid: number, tid: number, ccid: number) {
-    this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`,{responseType: 'arraybuffer'}).
-    subscribe(response => {
-      const blob = new Blob([response], {type: 'text/plain'});
-      importedSaveAs(blob);
-    });
+    this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`,{responseType: 'arraybuffer'})
+      .subscribe(response => {
+        const blob = new Blob([response], {type: 'text/plain'});
+        importedSaveAs(blob);
+      });
   }
 
   /**
@@ -88,8 +88,12 @@ export class CheckerService {
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the secondary File of configured Checker
    */
-  public getSecondaryFile(cid: number, tid: number, ccid: number): Observable<String | File> {
-    return this.http.get<String | File>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`)
+  public getSecondaryFile(cid: number, tid: number, ccid: number){
+    return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`, {responseType: 'arraybuffer'})
+      .subscribe(response => {
+        const blob = new Blob([response], {type: 'text/plain'});
+        importedSaveAs(blob);
+      });
   }
 
   /**
@@ -106,7 +110,7 @@ export class CheckerService {
 
   private uploadFile(file: File, url: string): Observable<void>{
     let formData:FormData = new FormData();
-    formData.append('uploadFile', file, file.name);
+    formData.append('file', file);
     // let headers = new HttpHeaders({
     //   'Content-Type': ''
     // });

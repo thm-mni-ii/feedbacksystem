@@ -7,6 +7,8 @@ import {ActivatedRoute} from "@angular/router";
 import {NewCheckerDialogComponent} from "../../dialogs/new-checker-dialog/new-checker-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {AuthService} from "../../service/auth.service";
+import {Roles} from "../../model/Roles";
 
 @Component({
   selector: 'app-configuration-list',
@@ -19,6 +21,7 @@ export class ConfigurationListComponent implements OnInit {
   taskId: number
 
   constructor(private checkerService: CheckerService, private route: ActivatedRoute,
+              private authService: AuthService,
               private dialog: MatDialog, private snackbar: MatSnackBar,) { }
 
   ngOnInit(): void {
@@ -31,7 +34,13 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   isAuthorized(): boolean {
-    return true // TODO:
+    const token = this.authService.getToken()
+    const globalRole = token.globalRole
+    const courseRole = token.courseRoles[this.courseId]
+    return Roles.GlobalRole.isAdmin(globalRole)
+      || Roles.GlobalRole.isModerator(globalRole)
+      || Roles.CourseRole.isDocent(courseRole)
+      || Roles.CourseRole.isTutor(courseRole)
   }
 
   addConfig() {
@@ -87,7 +96,6 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   downloadMainFile(checker: CheckerConfig) {
-    console.log(checker)
     if (checker.mainFileUploaded){
       this.checkerService.getMainFile(this.courseId, this.taskId, checker.id)
     } else {
@@ -96,6 +104,10 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   downloadSecondaryFile(checker: CheckerConfig) {
-
+    if (checker.secondaryFileUploaded){
+      this.checkerService.getSecondaryFile(this.courseId, this.taskId, checker.id)
+    } else {
+      this.snackbar.open("Es gibt keine Hauptdatei.", "OK", {duration: 3000})
+    }
   }
 }

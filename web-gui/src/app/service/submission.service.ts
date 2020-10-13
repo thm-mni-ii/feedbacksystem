@@ -48,9 +48,10 @@ export class SubmissionService {
   }
 
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
-  submitSolution(uid: number, cid: number, tid: number, solution: File | String): Observable<Submission>{
-    return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, solution)
-    // return of(SUBMISSION.pop()) // TODO: the solution must be a file that we uplaod in body
+  submitSolution(uid: number, cid: number, tid: number, solution: File | string): Observable<Submission> {
+    let formData:FormData = new FormData();
+    formData.append('file', solution);
+    return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, formData)
   }
 
   // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
