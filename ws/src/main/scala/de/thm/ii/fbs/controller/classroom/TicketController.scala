@@ -163,7 +163,6 @@ class TicketController {
         val (ticket, user) = v
         if (ticket.creator.username == user.username || courseAuthService.isPrivilegedInCourse(ticket.courseId, user)) {
           Tickets.remove(ticket.id)
-          println(Tickets.getAll)
         } else {
           throw new MessagingException("User is not allowed to remove this ticket")
         }

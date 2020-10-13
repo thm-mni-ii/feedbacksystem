@@ -9,7 +9,6 @@ import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserServic
 import de.thm.ii.fbs.services.security.{AuthService, CourseAuthService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}
-import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
