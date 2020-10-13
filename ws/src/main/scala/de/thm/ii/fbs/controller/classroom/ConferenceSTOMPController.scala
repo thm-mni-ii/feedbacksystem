@@ -30,11 +30,12 @@ class ConferenceSTOMPController {
     @Autowired
     private val jitsiService: JitsiService = null
     @Autowired
+    private val userService: UserService = null
+    @Autowired
     implicit private val authService: AuthService = null
     @Autowired
     implicit private val courseRegistrationService: CourseRegistrationService = null
 
-    // private val logger: Logger = LoggerFactory.getLogger(classOf[ConferenceSTOMPController])
     private def userToJson(user: User): JSONObject = new JSONObject()
       .put("username", user.username)
       .put("prename", user.prename)

@@ -102,6 +102,7 @@ class ClassroomController {
           participants = participants
             .filter(u => u.role < CourseRole.TUTOR)
         }
+      case _ => throw new IllegalArgumentException()
     }
     val filteredParticipants = participants.map(userToJson)
       .foldLeft(new JSONArray())((a, u) => a.put(u))
