@@ -16,7 +16,7 @@ import scala.concurrent.Future
   */
 object BashRunnerVerticle {
   /** Event Bus Address to start an runner */
-  val RUN_ADDRESS = "de.thm.ii.fbs"
+  val RUN_ADDRESS = "de.thm.ii.fbs.runner.bash"
 }
 
 /**

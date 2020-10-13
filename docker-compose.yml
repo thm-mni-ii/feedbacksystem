@@ -48,15 +48,28 @@ services:
       - MASTER_RUNNER_TLS_INSECURE=true
 
   master-runner:
+    depends_on:
+      - mysql2
     build: master-runner
     ports:
       - "8081:8081"
     environment:
-      BASH_DOCKER: "thmmniii/bashenv:dev-latest"
-      HOST_TMP_DIR: "/tmp/feebi" # Need to be the same folder as mounted to /dockertemp
+      BASH_DOCKER: thmmniii/bashenv:dev-latest
+      HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: "ws"
+      RESULT_SERVER_HOST: ws
+      SQL_SERVER_URL: jdbc:mysql://mysql2:3306
+      SQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/upload-dir:/upload-dir
+
+  mysql2:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    volumes:
+      - ./data/mysql2:/var/lib/mysql
