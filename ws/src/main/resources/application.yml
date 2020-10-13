@@ -25,7 +25,7 @@ security:
     enabled: false
 server:
   host: ${SERVER_HOST:https://localhost}
-  port: 8080
+  port: 443
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
