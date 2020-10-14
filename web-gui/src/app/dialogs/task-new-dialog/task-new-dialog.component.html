@@ -15,7 +15,7 @@
       </mat-form-field>
 
       <!-- Task Deadline -->
-      <mat-form-field>
+      <mat-form-field class="col">
         <mat-label>Deadline</mat-label>
         <input matInput [matDatepicker]="picker" formControlName="deadline" (dateChange)="addDate($event)">
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -23,7 +23,7 @@
       </mat-form-field>
 
       <!-- Task Mediatype -->
-      <mat-form-field>
+      <mat-form-field class="col pad">
         <mat-label>Medientyp</mat-label>
         <mat-select formControlName="mediaType">
           <mat-option value="text/plain">Text</mat-option>

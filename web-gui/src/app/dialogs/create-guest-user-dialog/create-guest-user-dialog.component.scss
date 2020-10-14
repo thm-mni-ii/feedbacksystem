@@ -1,12 +1,5 @@
-mat-dialog-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+mat-form-field {
+  width: 45%;
+  padding-right: 20px;
 }
 
-.actions {
-  float: right;
-  button {
-    margin-left: 10px;
-  }
-}

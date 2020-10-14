@@ -1,6 +1,11 @@
-.mat-form-field {
-  display: flex;
-  flex-direction: column;
+.mat-form-field{
+  width: 47%;
+  //display: flex;
+  //flex-direction: column;
+}
+
+mat-select {
+  width: 47%;
 }
 
 button {
@@ -8,8 +13,12 @@ button {
 }
 app-dropzone{
   display: inline-block;
-  width: 50%;
+  width: 47%;
   padding-bottom: 10px;
+}
+
+.pad {
+  padding-right: 6%;
 }
 
 

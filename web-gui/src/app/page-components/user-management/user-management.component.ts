@@ -84,7 +84,7 @@ export class UserManagementComponent implements OnInit {
    */
   showGuestUserDialog() {
     this.dialog.open(CreateGuestUserDialog, {
-      width: '500px',
+      width: '700px',
     }).afterClosed().subscribe(user => {
         if (user) {
           this.userService.createUser(user).subscribe(
