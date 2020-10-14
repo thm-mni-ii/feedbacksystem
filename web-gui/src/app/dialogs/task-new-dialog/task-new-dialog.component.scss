@@ -1,11 +1,24 @@
 .mat-form-field {
-  display: flex;
-  flex-direction: column;
+  //display: flex;
+  //flex-direction: column;
+  width: 100%;
+}
+
+.col {
+
+  width: 47%;
+}
+.pad {
+  padding-left: 6%;
 }
 
 .new-task {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+button {
+  margin-right: 10px;
 }
 

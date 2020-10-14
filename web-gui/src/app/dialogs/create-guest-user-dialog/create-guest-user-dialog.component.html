@@ -1,10 +1,10 @@
-<h1 mat-dialog-title>Neuen Gast-Benutzer erstellen</h1>
-<div class="guest-account" mat-dialog-content>
-  <p>
-    Note: All users of the Central Authentication Service (CAS) can log in into the system.
-    A guest user is an ordinary user, but is restricted to use the local login.
-    This type of user account is meant to be used by external persons only.
-  </p>
+<h1 mat-dialog-title>Neuen Benutzer erstellen</h1>
+<!--<div class="guest-account" mat-dialog-content>-->
+<!--  <p>-->
+<!--    Note: All users of the Central Authentication Service (CAS) can log in into the system.-->
+<!--    A guest user is an ordinary user, but is restricted to use the local login.-->
+<!--    This type of user account is meant to be used by external persons only.-->
+<!--  </p>-->
   <form class="guest-account" #guestUserForm="ngForm">
   <mat-form-field>
     <mat-label>Vorname</mat-label>
@@ -55,5 +55,5 @@
       <button mat-raised-button color="accent" [disabled]="guestUserForm.form.invalid" (click)="onSubmit()">Hinzufügen</button>
     </div>
   </form>
-</div>
+<!--</div>-->
 
