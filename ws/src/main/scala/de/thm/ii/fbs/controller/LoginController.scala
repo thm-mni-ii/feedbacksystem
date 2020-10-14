@@ -45,7 +45,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @return Java Map
     */
-  @RequestMapping(value = Array("cas"), method = Array(RequestMethod.GET))
+  @RequestMapping(value = Array("/cas"), method = Array(RequestMethod.GET))
   def userLogin(@RequestParam(value = "route", required = false) route: String, request: HttpServletRequest,
                 response: HttpServletResponse): Unit = {
     try {
