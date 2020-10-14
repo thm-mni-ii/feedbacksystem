@@ -52,7 +52,7 @@ export class LoginComponent {
   casLogin() {
     const getUrl = window.location;
     const baseUrl = getUrl.protocol + '//' + getUrl.host;
-    this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login';
+    this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login/cas';
   }
 
   private checktermsOfUse(uid: number){
