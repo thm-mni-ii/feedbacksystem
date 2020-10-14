@@ -78,6 +78,7 @@ import { ParticipantsComponent } from './tool-components/participants/participan
 import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
 import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
 import { NewCheckerDialogComponent } from './dialogs/new-checker-dialog/new-checker-dialog.component';
+import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -151,6 +152,7 @@ export const httpInterceptorProviders = [
     ConfigurationListComponent,
     MenuBarComponent,
     NewCheckerDialogComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,

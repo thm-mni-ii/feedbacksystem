@@ -80,7 +80,7 @@ class CourseRegistrationController {
   def register(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse,
                @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
-    val role = Option(body).flatMap(_.retrive("roleId").asInt()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
+    val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
 
     (user.globalRole, user.id) match {
       case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) => courseRegistrationService.register(cid, uid, role)

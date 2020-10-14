@@ -28,4 +28,16 @@ object CourseRole extends Enumeration {
     case 1 => CourseRole.TUTOR
     case _ => CourseRole.STUDENT
   }
+
+  /**
+    * Parse a string to a course role.
+    * @param roleName The role name
+    * @return Course role, where the name is mapped to its assigned enum type, if no enum type
+    *         is assigned to the name provided, then the STUDENT type is returned.
+    */
+  def parse(roleName: String): CourseRole.Value = roleName match {
+    case "DOCENT" => CourseRole.DOCENT
+    case "TUTOR" => CourseRole.TUTOR
+    case _ => CourseRole.STUDENT
+  }
 }

@@ -1,18 +1,13 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {DatabaseService} from '../../service/database.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
-import {first, share, delay, flatMap, retryWhen, take} from 'rxjs/operators';
-import {of, throwError, Observable, Subscription} from 'rxjs';
+import {flatMap} from 'rxjs/operators';
+import {of, Observable} from 'rxjs';
 
-import {
-  NewTaskInformation,
-  Succeeded
-} from '../../model/HttpInterfaces';
 import {ConferenceService} from '../../service/conference.service';
 import {ClassroomService} from '../../service/classroom.service';
 
@@ -21,19 +16,14 @@ import {NewconferenceDialogComponent} from "../../dialogs/newconference-dialog/n
 import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
 import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
 import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
-import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/course-delete-modal.component";
-import {ExitCourseDialogComponent} from "../../dialogs/exit-course-dialog/exit-course-dialog.component";
 import {AuthService} from "../../service/auth.service";
 import {Roles} from "../../model/Roles";
 import {TaskService} from "../../service/task.service";
 import {Course} from "../../model/Course";
 import {Task} from "../../model/Task";
 import {CourseService} from "../../service/course.service";
-import {Submission} from "../../model/Submission";
-import {UserService} from "../../service/user.service";
-import {JWTToken} from "../../model/JWTToken";
-import {error} from "@angular/compiler/src/util";
 import {CourseRegistrationService} from "../../service/course-registration.service";
+import {ConfirmDialogComponent} from "../../dialogs/confirm-dialog/confirm-dialog.component";
 
 @Component({
   selector: 'app-course-detail',
@@ -72,6 +62,13 @@ export class CourseDetailComponent implements OnInit {
     this.course.subscribe(course => {
       this.titlebar.emitTitle(course.name)
     })
+    this.courseRegistrationService.getRegisteredCourses(this.authService.getToken().id)
+      .subscribe(course => {
+        let c = course.find(c => c.id == this.courseID)
+        if (c && !this.role) {
+          this.role = 'STUDENT'
+        }
+      })
   }
 
   reloadTasks() {
@@ -108,22 +105,36 @@ export class CourseDetailComponent implements OnInit {
    * Join a course by registering into it.
    */
   joinCourse() {
-
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {title: "Kurs beitreten?", message: 'Wollen Sie diesem Kurs beitreten?'}
+    }).afterClosed()
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
+            .subscribe(ok => this.ngOnInit(), error => console.error(error))
+        }
+      })
   }
 
   /**
    * Leave the course by de-registering from it.
    */
   exitCourse() {
-
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {title: "Kurs verlassen?", message: 'Wollen Sie diesen Kurs verlassen? Alle ihre Abgaben könnten verloren gehen!'}
+    }).afterClosed()
+      .subscribe(confirmed => {
+        this.courseRegistrationService.deregisterCourse(this.authService.getToken().id, this.courseID)
+          .subscribe(ok => {this.router.navigate(['/courses'])}, error => console.error(error))
+      })
   }
 
-  public isAuthorized() {
+  public isAuthorized(ignoreTutor: boolean = false) {
     const token = this.auth.getToken()
     const courseRole = token.courseRoles[this.courseID]
     const globalRole = token.globalRole
     return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
-      || Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
+      || Roles.CourseRole.isDocent(courseRole) || (Roles.CourseRole.isTutor(courseRole) && !ignoreTutor)
   }
 
   // Conferences

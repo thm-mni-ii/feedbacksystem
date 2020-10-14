@@ -39,10 +39,10 @@ export class CourseRegistrationService {
 
   /**
    * De-register a user from a course
-   * @param cid Course id
    * @param uid User id
+   * @param cid Course id
    */
-  deregisterCourse(cid: number, uid: number): Observable<void>{
+  deregisterCourse(uid: number, cid: number): Observable<void>{
     return this.http.delete<void>(`/api/v1/users/${uid}/courses/${cid}`)
   }
 }

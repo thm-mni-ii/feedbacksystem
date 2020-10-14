@@ -1,0 +1,6 @@
+<h2 matDialogTitle>{{data.title}}</h2>
+<mat-dialog-content>{{data.message}}</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-flat-button color="accent" (click)="confirm(false)">Abbrechen</button> &nbsp; &nbsp;
+  <button mat-flat-button color="warn" (click)="confirm(true)">Ja</button>
+</mat-dialog-actions>

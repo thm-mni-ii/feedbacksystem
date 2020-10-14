@@ -74,6 +74,32 @@ class CheckerConfigurationService {
   }
 
   /**
+    * Set main file uploaded state
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Chekcrunner configuration id
+    * @param state The state of the uploaded status.
+    * @return True if successful
+    */
+  def setMainFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET main_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
+  }
+
+  /**
+    * Set secondary file uploaded state
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Chekcrunner configuration id
+    * @param state The state of the uploaded status.
+    * @return True if successful
+    */
+  def setSecondaryFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET secondary_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
+  }
+
+  /**
     * Delete a checker configuration
     * @param cid course  id
     * @param tid task id

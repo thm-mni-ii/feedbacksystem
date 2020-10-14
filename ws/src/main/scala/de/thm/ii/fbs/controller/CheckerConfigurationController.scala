@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
-import java.io.{FileInputStream, FileOutputStream, InputStream}
-import java.nio.file.{Files, Path, Paths}
+import java.io.FileInputStream
+import java.nio.file.{Files, Path}
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
@@ -147,7 +147,7 @@ class CheckerConfigurationController {
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageService.storeMainFile,
-      (cc) => this.ccs.update(cid, tid, ccid, cc.copy(mainFileUploaded = true)))(cid, tid, ccid, file, req, res)
+      (cc) => this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the main file for a task configuration
@@ -176,7 +176,7 @@ class CheckerConfigurationController {
                          @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageService.storeSecondaryFile,
-      (cc) => this.ccs.update(cid, tid, ccid, cc.copy(secondaryFileUploaded = true)))(cid, tid, ccid, file, req, res)
+      (cc) => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the secondary file for a task configuration

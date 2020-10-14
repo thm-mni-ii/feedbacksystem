@@ -63,7 +63,7 @@ export class TaskDetailComponent implements OnInit {
         const uid = this.authService.getToken().id
         this.titlebar.emitTitle(this.task.name);
 
-        return this.submissionService.getAllSubmissions(uid, this.courseId, this.task.id)
+        return this.submissionService.getAllSubmissions(uid, this.courseId, task.id)
       }),
       tap(submissions => {
         this.submissions = submissions
