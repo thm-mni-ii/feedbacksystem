@@ -50,7 +50,7 @@ export class SubmissionService {
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
   submitSolution(uid: number, cid: number, tid: number, solution: File | string): Observable<Submission> {
     let formData:FormData = new FormData();
-    formData.append('file', solution);
+    formData.append('file', (<any>solution).name ? solution : new Blob([solution]))
     return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, formData)
   }
 
