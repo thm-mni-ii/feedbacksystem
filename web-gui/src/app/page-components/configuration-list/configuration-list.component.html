@@ -1,5 +1,11 @@
 <div class="container">
 
+  <app-menu-bar>
+    <button mat-icon-button [routerLink]="['/courses', courseId, 'task', taskId]" matTooltip="Zurück zum Aufgabe"><mat-icon >arrow_back</mat-icon></button>
+    <span class="spacer"></span>
+
+  </app-menu-bar>
+
   <div class="create-button">
     <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="addConfig()" matTooltip="Überprüfung hinzufügen"><mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen</button>
   </div>
