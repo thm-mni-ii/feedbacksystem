@@ -95,29 +95,41 @@ export class TaskDetailComponent implements OnInit {
     else return "file"
   }
 
+  isSubmissionEmpty(): boolean {
+    let input = this.submissionData
+    if (!input) {
+      return true;
+    }
+    if ((<any>input).name) {
+      return (<File>input).size == 0
+    } else {
+      return (<string>input).trim().length == 0
+    }
+  }
+
   /**
    * Submission of user solution
    */
   submission() {
-    if (this.submissionData == null) {
+    if (this.isSubmissionEmpty()) {
       this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + this.task.name + ' abgegeben', 'Ups!');
-    } else {
-      // if user submits but there is a pending submission
-      if (this.submissions.length != 0) {
-        if (this.submissions.find(submission => !submission.done)) {
-          this.snackbar.open('Für Aufgabe "' + this.task.name +
-            '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
-            .onAction()
-            .subscribe(() => {
-              this.submit();
-            });
-          // TODO: reload submissions, to see if its done?
-          this.ngOnInit()
-          return;
-        }
-      }
-      this.submit()
+      return;
     }
+    // if user submits but there is a pending submission
+    if (this.submissions.length != 0) {
+      if (this.submissions.find(submission => !submission.done)) {
+        this.snackbar.open('Für Aufgabe "' + this.task.name +
+          '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
+          .onAction()
+          .subscribe(() => {
+            this.submit();
+          });
+        // TODO: reload submissions, to see if its done?
+        this.ngOnInit()
+        return;
+      }
+    }
+    this.submit()
   }
 
   private submit() {

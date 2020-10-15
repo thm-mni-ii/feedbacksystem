@@ -36,7 +36,7 @@
       <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>
 
       <mat-card-actions>
-        <button [disabled]="deadlinePassed" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
+        <button [disabled]="deadlinePassed || isSubmissionEmpty()" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
       </mat-card-actions>
     </mat-card-content>
   </mat-card>
