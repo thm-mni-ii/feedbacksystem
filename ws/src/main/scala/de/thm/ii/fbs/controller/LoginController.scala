@@ -7,7 +7,7 @@ import de.thm.ii.fbs.services.persistance.UserService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import de.thm.ii.fbs.util.LDAPConnector
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -60,7 +60,15 @@ class LoginController extends CasClientConfigurerAdapter {
       userService.find(name)
         .orElse(loadUserFromLdap(name))
         .map(u => userService.create(u, ""))
-        .foreach(u => authService.renewAuthentication(u, response))
+        .foreach(u => {
+          val token = authService.createToken(u)
+          val co = new Cookie("jwt", token)
+          co.setPath("/")
+          co.setHttpOnly(false)
+          co.setMaxAge(30)
+          response.addCookie(co)
+        })
+
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       response.setHeader("Location", CLIENT_HOST_URL + "/courses")
     } catch {

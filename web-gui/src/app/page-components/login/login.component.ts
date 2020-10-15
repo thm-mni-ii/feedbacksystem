@@ -6,6 +6,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
 import {LegalService} from "../../service/legal.service";
 import {DataprivacyDialogComponent} from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
+import {CookieService} from "ngx-cookie-service";
 
 /**
  * Manages the login page for Submissionchecker
@@ -21,10 +22,15 @@ export class LoginComponent {
 
   constructor(private router: Router, private auth: AuthService, private dialog: MatDialog,
               @Inject(DOCUMENT) private document: Document, private snackbar: MatSnackBar,
-              private legalService: LegalService) {
+              private legalService: LegalService, private cookieService: CookieService) {
   }
 
   ngOnInit() {
+    const token = this.cookieService.get('jwt');
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+
     const extraRoute = localStorage.getItem('route');
     if (extraRoute) {
       localStorage.removeItem('route');
