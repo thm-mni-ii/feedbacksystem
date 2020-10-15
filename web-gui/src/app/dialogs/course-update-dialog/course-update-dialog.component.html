@@ -15,8 +15,8 @@
       <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="isVisible">Kurs anzeigen</p><p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle>
     </mat-card-content>
   </mat-dialog-content>
-  <mat-action-list class="action-buttons">
+  <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
     <button mat-flat-button color="accent" (click)="saveCourse()" [disabled]="!isInputValid()">Speichern</button>
-  </mat-action-list>
+  </mat-dialog-actions>
 </div>

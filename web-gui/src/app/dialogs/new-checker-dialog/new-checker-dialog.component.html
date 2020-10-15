@@ -13,9 +13,10 @@
 
     <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
     <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>
-
+  </form>
+  <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
     <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!checkerForm.valid" (click)="createChecker(checkerForm.value)">Erstellen</button>
     <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!checkerForm.valid" (click)="updateTask(checkerForm.value)">Update</button>
-  </form>
+  </mat-dialog-actions>
 </div>

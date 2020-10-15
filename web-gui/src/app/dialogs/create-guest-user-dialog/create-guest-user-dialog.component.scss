@@ -3,3 +3,14 @@ mat-form-field {
   padding-right: 20px;
 }
 
+.mat-dialog-content {
+  overflow: unset;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    margin-left: 16px;
+  }
+}

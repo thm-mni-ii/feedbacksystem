@@ -31,9 +31,10 @@
         </mat-select>
       </mat-form-field>
       <br>
-
-      <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-      <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>
-      <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!taskForm.valid" (click)="updateTask(taskForm.value)">Update</button>
     </form>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>
+    <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!taskForm.valid" (click)="updateTask(taskForm.value)">Update</button>
+  </mat-dialog-actions>
 </div>
