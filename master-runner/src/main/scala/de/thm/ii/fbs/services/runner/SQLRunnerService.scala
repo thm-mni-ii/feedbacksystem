@@ -44,6 +44,10 @@ object SQLRunnerService {
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
+      if (submissionQuarry.isBlank) {
+        throw new RunnerException("Die Abgabe darf nicht leer sein!")
+      }
+
       new SqlRunArgs(section, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
     } catch {
       // TODO enhance messages
