@@ -61,6 +61,7 @@ class LoginController extends CasClientConfigurerAdapter {
         .orElse(loadUserFromLdap(name))
         .map(u => userService.create(u, ""))
         .foreach(u => authService.renewAuthentication(u, response))
+      response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       response.setHeader("Location", CLIENT_HOST_URL + "/courses")
     } catch {
       case e: Throwable => {
