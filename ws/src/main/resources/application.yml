@@ -4,7 +4,7 @@ cas:
   server-login-url: https://cas.thm.de/cas/login
   server-url-prefix: https://cas.thm.de/cas/
   validation-type: CAS3
-  validation-url-patterns: /api/v1/login
+  validation-url-patterns: /api/v1/login/cas
 compile:
   production: true
 jwt:
