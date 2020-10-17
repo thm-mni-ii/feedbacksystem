@@ -34,6 +34,13 @@ class HomeController {
     * Forward every access that is not defined to the index page.
     * @return Forward undefined access to index.
     */
+  @RequestMapping(value = Array("/courses")) // TODO: Remove as soon as possible
+  def redirectRoot: String = "forward:/"
+
+  /**
+    * Forward every access that is not defined to the index page.
+    * @return Forward undefined access to index.
+    */
   @RequestMapping(value = Array("/{head:[^w][^e][^b].*}/**/{tail:[^\\.]*}"))
   def redirect: String = "forward:/"
 }

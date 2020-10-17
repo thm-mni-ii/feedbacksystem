@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.security
 import java.util.Date
 
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
-import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
@@ -90,13 +90,13 @@ class AuthService {
     * @param user User
     * @return new token
     */
-  private def createToken(user: User): String = {
+    def createToken(user: User): String = {
     val privileges = crs.getCoursePriviledges(user.id)
     val mapper = new ScalaObjectMapper
 
     val courseRoles = privileges match {
-      case m: Map[Int, Int] if m.isEmpty => "{}"
-      case _ => mapper.writeValueAsString(privileges)
+      case m: Map[Int, CourseRole.Value] if m.isEmpty => "{}"
+      case _ => mapper.writeValueAsString(privileges.map((f: (Int, CourseRole.Value)) => (f._1, f._2.toString)))
     }
 
     Jwts.builder.setSubject("client_authentication")

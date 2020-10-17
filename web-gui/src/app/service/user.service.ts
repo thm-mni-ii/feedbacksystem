@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {User} from '../model/User';
 import {Observable} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
-import {Succeeded} from "../model/HttpInterfaces";
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +22,8 @@ export class UserService {
    * @param user The user
    * @return Observable that succeeds if the user is created
    */
-  createUser(user: User): Observable<Succeeded>{
-    return this.http.post<Succeeded>('/api/v1/users', user);
+  createUser(user: User): Observable<void>{
+    return this.http.post<void>('/api/v1/users', user);
   }
 
   /**
@@ -39,8 +38,8 @@ export class UserService {
    * Delete a user
    * @param uid The user id
    */
-  deleteUser(uid: number): Observable<Succeeded>{
-    return this.http.delete<Succeeded>(`/api/v1/users/${uid}`)
+  deleteUser(uid: number): Observable<void>{
+    return this.http.delete<void>(`/api/v1/users/${uid}`)
   }
 
   /**
@@ -50,7 +49,7 @@ export class UserService {
    * @param passwdRepeat Same password
    */
   changePassword(uid: number, passwd: String, passwdRepeat: String): Observable<any>{
-    return this.http.put<Succeeded>(`/api/v1/users/${uid}/passwd`, {
+    return this.http.put<void>(`/api/v1/users/${uid}/passwd`, {
       passwd: passwd,
       passwdRepeat: passwdRepeat
     })
@@ -62,7 +61,7 @@ export class UserService {
    * @param roleName Either ADMIN, MODERATOR, or USER
    */
   changeRole(uid: number, roleName: string): Observable<any>{
-    return this.http.put<Succeeded>(`/api/v1/users/${uid}/global-role`, {
+    return this.http.put<void>(`/api/v1/users/${uid}/global-role`, {
       roleName: roleName
     })
   }

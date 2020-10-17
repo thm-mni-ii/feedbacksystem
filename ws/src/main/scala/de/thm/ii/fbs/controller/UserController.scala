@@ -2,8 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{GlobalRole, User}
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -22,6 +22,8 @@ class UserController {
   private val userService: UserService = null
   @Autowired
   private val authService: AuthService = null
+  @Autowired
+  private val courseRegistrationService: CourseRegistrationService = null
 
   /**
     * Get all users of the system
@@ -33,10 +35,11 @@ class UserController {
   @ResponseBody
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] = {
     val user = authService.authorize(req, res)
-    user.globalRole match {
-      case GlobalRole.ADMIN =>
-        userService.getAll()
-      case _ => throw new ForbiddenException()
+    val isDozent = courseRegistrationService.getCoursePriviledges(user.id).exists(e => e._2 == CourseRole.DOCENT)
+    if (user.globalRole == GlobalRole.ADMIN || isDozent) {
+      userService.getAll()
+    } else {
+      throw new ForbiddenException()
     }
   }
 
@@ -51,13 +54,14 @@ class UserController {
   @ResponseBody
   def getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User = {
     val user = authService.authorize(req, res)
-    ((user.globalRole, user.id) match {
-      case (GlobalRole.ADMIN, _) | (_, `uid`) =>
-        userService.find(uid)
-      case _ => throw new ForbiddenException()
-    }) match {
-      case Some(u) => u
-      case _ => throw new ResourceNotFoundException()
+    val isDozent = courseRegistrationService.getCoursePriviledges(user.id).exists(e => e._2 == CourseRole.DOCENT)
+    if (user.globalRole == GlobalRole.ADMIN || isDozent) {
+      userService.find(uid) match {
+        case Some(u) => u
+        case _ => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ForbiddenException()
     }
   }
 

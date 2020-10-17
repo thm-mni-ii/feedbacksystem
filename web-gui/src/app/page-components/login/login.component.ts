@@ -4,6 +4,9 @@ import {DOCUMENT} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
+import {LegalService} from "../../service/legal.service";
+import {DataprivacyDialogComponent} from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
+import {CookieService} from "ngx-cookie-service";
 
 /**
  * Manages the login page for Submissionchecker
@@ -18,16 +21,22 @@ export class LoginComponent {
   password: string;
 
   constructor(private router: Router, private auth: AuthService, private dialog: MatDialog,
-              @Inject(DOCUMENT) private document: Document, private snackbar: MatSnackBar) {
+              @Inject(DOCUMENT) private document: Document, private snackbar: MatSnackBar,
+              private legalService: LegalService, private cookieService: CookieService) {
   }
 
   ngOnInit() {
+    const token = this.cookieService.get('jwt');
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+
     const extraRoute = localStorage.getItem('route');
     if (extraRoute) {
       localStorage.removeItem('route');
       this.router.navigateByUrl('' + extraRoute);
     } else {
-      this.router.navigate(['']);
+      this.router.navigate(['/courses']);
     }
   }
 
@@ -36,10 +45,9 @@ export class LoginComponent {
    */
   localLogin() {
     this.auth.localLogin(this.username, this.password)
-      .subscribe(() => {
-        this.router.navigateByUrl('/')
-        // TODO: check if it is the first login, and if so, display the privacy dialog
-      }, error => {
+      .subscribe(token => {
+        this.checktermsOfUse(token.id)
+      }, () => {
         this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK', {duration: 3000});
       })
   }
@@ -50,6 +58,28 @@ export class LoginComponent {
   casLogin() {
     const getUrl = window.location;
     const baseUrl = getUrl.protocol + '//' + getUrl.host;
-    this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login';
+    this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login/cas';
+  }
+
+  private checktermsOfUse(uid: number){
+    this.legalService.getTermsOfUse(uid).subscribe(res => {
+        if(res.accepted){
+          this.router.navigateByUrl('/courses')
+        } else {
+          this.dialog.open(DataprivacyDialogComponent,{data: {onlyForShow: false}}).afterClosed()
+            .subscribe( data => {
+              if(data.success) {
+                this.legalService.acceptTermsOfUse(uid).subscribe(res =>{
+                  console.log(res);
+                  this.router.navigateByUrl('/courses');
+                });
+              } else {
+                this.auth.logout()
+              }
+            }, error => {
+              this.auth.logout()
+            });
+        }
+      })
   }
 }

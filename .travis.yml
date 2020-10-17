@@ -35,7 +35,8 @@ cache:
 
 deploy:
   provider: script
-  script: bash ci/docker-deploy.sh $TRAVIS_TAG
+  script: bash ci/docker-deploy.sh $TRAVIS_BRANCH $TRAVIS_TAG
   skip_cleanup: true
   on:
-    branch: master
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(master|dev)$

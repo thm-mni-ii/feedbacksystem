@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.persistance
 
+import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 
 import de.thm.ii.fbs.model.CheckrunnerConfiguration
@@ -30,20 +31,31 @@ class CheckerConfigurationService {
       (res, _) => parseResult(res), cid, tid)
 
   /**
+    * Get one checker configuration
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Checker configuration id
+    * @return Optional checker configuration
+    */
+  def find(cid: Int, tid: Int, ccid: Int): Option[CheckrunnerConfiguration] =
+    DB.query("SELECT configuration_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord FROM checkrunner_configuration " +
+      "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
+      (res, _) => parseResult(res), cid, tid, ccid).headOption
+
+  /**
     * Create a new checker configuration
     * @param cid Course id
     * @param tid Task id
     * @param cc Checker configuration
     * @return The current list of configurations
     */
-  def create(cid: Int, tid: Int, cc: CheckrunnerConfiguration): List[CheckrunnerConfiguration] =
+  def create(cid: Int, tid: Int, cc: CheckrunnerConfiguration): CheckrunnerConfiguration =
     DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file_uploaded, " +
-        "secondary_file_uploaded, ord) VALUES (?,?,?,?,?);",
-          tid, cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord).toList
-      .flatMap(_ => getAll(cid, tid))
-    match {
-      case Nil => throw new SQLException("Configuration could not be created")
-      case list: List[CheckrunnerConfiguration] => list
+        "secondary_file_uploaded, ord) VALUES (?,?,?,?,?);", tid, cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord)
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+      .flatMap(ccid => find(cid, tid, ccid)) match {
+      case Some(configuration) => configuration
+      case None => throw new SQLException("Configuration could not be created")
     }
 
   /**
@@ -59,6 +71,32 @@ class CheckerConfigurationService {
       "SET checker_type = ?, main_file_uploaded = ?, secondary_file_uploaded = ?, ord = ? WHERE course_id = ? " +
       "AND task_id = ? AND configuration_id = ?",
     cc.checkerType, cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord, cid, tid, ccid)
+  }
+
+  /**
+    * Set main file uploaded state
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Chekcrunner configuration id
+    * @param state The state of the uploaded status.
+    * @return True if successful
+    */
+  def setMainFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET main_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
+  }
+
+  /**
+    * Set secondary file uploaded state
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Chekcrunner configuration id
+    * @param state The state of the uploaded status.
+    * @return True if successful
+    */
+  def setSecondaryFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET secondary_file_uploaded = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?", state, cid, tid, ccid)
   }
 
   /**

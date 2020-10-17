@@ -84,7 +84,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   }
 
   /**
-    * Transforms the Result into an Map.
+    * Transforms the Result into an JsonObject.
     * It also Checks if the stderr is empty if not it willl change the exit code to 42
     *
     * @param exitCode Runner exit Code

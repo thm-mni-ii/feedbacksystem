@@ -4,20 +4,14 @@
     <mat-card-content>
       <mat-form-field>
         <mat-label>Kursname</mat-label>
-        <input [formControl]="name" name="newCourseName" type="text" matInput required minlength="5" maxlength="100">
-        <mat-error *ngIf="name.errors">Der Kursname ist erforderlich! Und muss mindestens 5 Zeichen besitzen</mat-error>
+        <input [formControl]="name" name="newCourseName" type="text" matInput required minlength="3" maxlength="100">
+        <mat-error *ngIf="name.errors">Der Kursname ist erforderlich! Und muss mindestens 3 Zeichen besitzen</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Kursbeschreibung</mat-label>
         <input [formControl]="description" name="newCourseDescription" type="text" matInput>
       </mat-form-field>
-      <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="isVisible">Anzeigen</p><p *ngIf="!isVisible">Verbergen</p></mat-slide-toggle>
-      <form>
-        <h4>Dozenten</h4>
-        <app-docent-in-course style="margin-bottom: 15px;" [docent_list]="docent_list" [liveUpdate]="false" (loadAllCourses)="null" [course]="{}" ></app-docent-in-course>
-        <h4>Tutoren</h4>
-        <app-tutor-in-course [tutor_list]="tutor_list" (loadAllCourses)="null" [course]="{}" [liveUpdate]="false"></app-tutor-in-course>
-      </form>
+      <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="isVisible">Kurs anzeigen</p><p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle>
     </mat-card-content>
 
     <mat-card-actions>

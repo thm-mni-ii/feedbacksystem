@@ -1,56 +1,51 @@
 <div class="container">
-  <mat-tab-group (selectedTabChange)="tabChanged($event)">
-    <mat-tab *ngFor="let course of courses" label="{{course.course_name}}" class="tab">
+  <app-menu-bar>
+    <button mat-icon-button [routerLink]="['/', 'courses', courseId]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+    <span class="spacer"></span>
+<!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
+  </app-menu-bar>
 
-      <mat-form-field appearance="outline" class="filter">
-        <mat-label>Filter</mat-label>
-        <input matInput [formControl]="filter">
-        <mat-icon matSuffix>filter_list</mat-icon>
-      </mat-form-field>
+  <mat-card class="content-container">
+    <div class="card-options">
+<!--      <div class="actions">-->
+<!--        <span class="lb">Download: </span>-->
+<!--
+<!--      </div>-->
 
-      <mat-card class="content-container">
-        <div class="card-options">
-          <div class="actions">
-            <span class="lb">Download: </span>
-            <button (click)="exportCourse(course.course_id)" mat-icon-button color="primary" [disabled]="csvLoading" matTooltip="Feedback exportieren"><mat-icon>get_app</mat-icon></button>
-          </div>
-
-          <mat-paginator [length]="userlength"
-                         [pageSize]="limit"
-                         [pageSizeOptions]="[5, 10, 20, 50, 100]"
-                         (page)="pageEvent($event)">
-          </mat-paginator>
+<!--      <mat-paginator [length]="userlength"-->
+<!--                     [pageSize]="limit"-->
+<!--                     [pageSizeOptions]="[5, 10, 20, 50, 100]"-->
+<!--                     (page)="pageEvent($event)">-->
+<!--      </mat-paginator>-->
+    </div>
+    <div class="card">
+      <div class="name-column">
+        <div class="name-container header">
+          <span class="title"><h2>Names</h2></span>
         </div>
-        <div class="card">
-          <div class="name-column">
-            <div class="name-container header">
-              <span class="title"><h2>Names</h2></span>
-            </div>
-            <div class="name-container" *ngFor="let student of matrix">
-              <span class="state passed" *ngIf="student.passed === 1"><mat-icon>check_circle</mat-icon></span>
-              <span class="state failed" *ngIf="student.passed === 0"><mat-icon>add_circle</mat-icon></span>
-              <span class="username">{{student.surname}}, {{student.prename}}</span>
-            </div>
-          </div>
-
-          <div class="task-column">
-            <div class="task-container header">
-              <span class="task-result" *ngFor="let task of tasks">
-                <span class="title">{{task.task_name}}</span>
-              </span>
-            </div>
-            <div class="task-container" *ngFor="let student of matrix">
-              <span class="task-result" *ngFor="let task of student.tasks">
-                <span class="task-result-backpane {{(task[key].passed == null) ? 'not-tried' : (task[key].passed) ? '' : 'failed-task'}} {{(task[key].plagiat_passed == null) ? '' : 'plagiat'}}" *ngFor="let key of keys(task)"
-                      [routerLink]="'/docent/dashboard/task/' + task[key].task_id + '/user/' + student.user_id"
-                      matTooltipPosition="above" matTooltip="{{student.surname}}, {{student.prename}} {{task[key].task_name}}">
-                  <span>{{task[key].trials}}</span>
-                </span>
-              </span>
-            </div>
-          </div>
+        <div class="name-container" *ngFor="let result of courseResults | async">
+          <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
+          <span class="state failed" *ngIf="result.passed"><mat-icon>add_circle</mat-icon></span>
+          <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
         </div>
-      </mat-card>
-    </mat-tab>
-  </mat-tab-group>
+      </div>
+
+      <div class="task-column">
+        <div class="task-container header">
+          <span class="task-result" *ngFor="let task of tasks | async">
+            <span class="title">{{task.name}}</span>
+          </span>
+        </div>
+        <div class="task-container" *ngFor="let result of courseResults | async">
+          <span class="task-result" *ngFor="let taskResult of result.results">
+            <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
+                  (click)="showResult(result.user.id, this.courseId, taskResult.task.id)"
+                  matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
+              <span>{{taskResult.attempts}}</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </mat-card>
 </div>

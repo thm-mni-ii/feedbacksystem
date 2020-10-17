@@ -1,0 +1,25 @@
+.container {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 30px;
+  padding: 16px;
+}
+
+.create-button {
+  display: flex;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+.card {
+  margin: 8px 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}

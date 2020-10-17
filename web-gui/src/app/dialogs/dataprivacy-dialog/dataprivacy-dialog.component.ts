@@ -2,12 +2,11 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
-import {DatabaseService} from '../../service/database.service';
-import {TextType} from '../../model/HttpInterfaces';
 import {Roles} from "../../model/Roles";
+import {LegalService} from "../../service/legal.service";
 
 /**
- * Data privacy dialog of submissionchecker
+ * Data privacy dialog
  */
 @Component({
   selector: 'app-dataprivacy-dialog',
@@ -17,12 +16,12 @@ import {Roles} from "../../model/Roles";
 export class DataprivacyDialogComponent implements OnInit {
 
   constructor(public dialogRef: MatDialogRef<DataprivacyDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: any,
-              private snackBar: MatSnackBar, private auth: AuthService, private db: DatabaseService) {
+              private snackBar: MatSnackBar, private auth: AuthService, private legalService: LegalService) {
   }
 
   privacyChecked: boolean;
   onlyForShow: boolean;
-  markdown: string;
+  markdown: String;
   isAdmin: boolean;
 
   ngOnInit() {
@@ -31,7 +30,7 @@ export class DataprivacyDialogComponent implements OnInit {
     if (this.auth.isAuthenticated()) {
       this.isAdmin = Roles.GlobalRole.isAdmin(this.auth.getToken().globalRole)
     }
-    this.db.getPrivacyOrImpressumText(TextType.Dataprivacy).subscribe(data => {
+    this.legalService.getPrivacyText().subscribe(data => {
       this.markdown = data.markdown;
     });
   }

@@ -6,6 +6,11 @@ import {Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {CourseService} from "../../service/course.service";
 import {Course} from "../../model/Course";
+import {Roles} from "../../model/Roles";
+import {AuthService} from "../../service/auth.service";
+import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
+import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 /**
  * Show all courses
@@ -18,6 +23,8 @@ import {Course} from "../../model/Course";
 export class SearchCoursesComponent implements OnInit {
   constructor(private courseService: CourseService,
               private router: Router,
+              private auth: AuthService,
+              private dialog: MatDialog,
               private titlebar: TitlebarService) {
   }
 
@@ -33,6 +40,23 @@ export class SearchCoursesComponent implements OnInit {
       startWith(''),
       flatMap(value => this._filter(value))
     );
+  }
+
+  createCourse() {
+    this.dialog.open(CourseUpdateDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {isUpdateDialog: false}
+    }).afterClosed().subscribe(result => {
+      if (result.success) {
+        setTimeout( () => {this.router.navigate(['/courses', result.course.id]); }, 100);
+      }
+    }, error => console.error(error));
+  }
+
+  public isAuthorized() {
+    const globalRole = this.auth.getToken().globalRole
+    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
   }
 
   /**

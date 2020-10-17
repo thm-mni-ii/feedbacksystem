@@ -28,17 +28,23 @@ class CourseController {
 
   /**
     * Get a course list
-    * @param visible optional filter to filter only for visible courses
+    * @param ignoreHidden optional filter to filter only for visible courses
     * @param req http request
     * @param res http response
     * @return course list
     */
   @GetMapping(value = Array(""))
   @ResponseBody
-  def getAll(@RequestParam(value = "visible", required = false) visible: Boolean,
+  def getAll(@RequestParam(value = "visible", required = false) ignoreHidden: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
-    authService.authorize(req, res)
-    courseService.getAll(visible)
+    val user = authService.authorize(req, res)
+    val courses = courseService.getAll(false)
+    val courseRights = courseRegistrationService.getCoursePriviledges(user.id)
+    user.globalRole match {
+      case GlobalRole.ADMIN | GlobalRole.MODERATOR => courses
+      case _ => courses
+        .filter(c => c.visible || courseRights.getOrElse(c.id, CourseRole.STUDENT) != CourseRole.STUDENT)
+    }
   }
 
   /**
@@ -76,11 +82,14 @@ class CourseController {
   def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course = {
     val user = authService.authorize(req, res)
     val isSubscribed = courseRegistrationService.getParticipants(cid).exists(_.user.id == user.id)
-    if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isSubscribed))  {
-      throw new ForbiddenException()
-    }
+
     courseService.find(cid) match {
-      case Some(course) => course
+      case Some(course) =>
+        if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isSubscribed || course.visible))  {
+          throw new ForbiddenException()
+        } else {
+          course
+        }
       case _ => throw new ResourceNotFoundException()
     }
   }

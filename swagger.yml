@@ -814,94 +814,6 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
-  "/courses/{cid}/tasks/{tid}/main-file":
-    put:
-      security:
-        - JWT: []
-      tags:
-        - Task
-      summary: Upload the main file for the task
-      parameters:
-        - name: cid
-          in: path
-          description: course id
-          required: true
-          schema:
-            type: integer
-        - name: tid
-          in: path
-          description: task id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          "*/*":
-            schema:
-              type: string
-              format: binary
-        description: A file
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "404":
-          description: Not found
-  "/courses/{cid}/tasks/{tid}/secondary-file":
-    put:
-      security:
-        - JWT: []
-      tags:
-        - Task
-      summary: Upload the secondary file for the task
-      parameters:
-        - name: cid
-          in: path
-          description: course id
-          required: true
-          schema:
-            type: integer
-        - name: tid
-          in: path
-          description: task id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          "*/*":
-            schema:
-              type: string
-              format: binary
-        description: A file
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "404":
-          description: Not found
 
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
@@ -1130,7 +1042,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CheckerConfig"
+                type: array
+                items:
+                  $ref: "#/components/schemas/CheckerConfig"
         "401":
           description: Unauthorized
         "403":
@@ -1157,7 +1071,11 @@ paths:
           schema:
             type: integer
       requestBody:
-        $ref: "#/components/requestBodies/postCourses_cid_tasks_tid_checkerConfigurations"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckerConfig"
+
       responses:
         "201":
           description: Created
@@ -1205,7 +1123,10 @@ paths:
           schema:
             type: integer
       requestBody:
-        $ref: "#/components/requestBodies/postCourses_cid_tasks_tid_checkerConfigurations"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckerConfig'
       responses:
         "200":
           description: OK
@@ -1214,10 +1135,6 @@ paths:
               description: Bearer
               schema:
                 type: string
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CheckerConfig"
         "400":
           description: Bad Request
         "401":
@@ -1259,10 +1176,6 @@ paths:
               description: Bearer
               schema:
                 type: string
-          content:
-            "*/*":
-              schema:
-                $ref: "#/components/schemas/CheckerConfig"
         "400":
           description: Bad Request
         "401":
@@ -1717,7 +1630,7 @@ components:
           type: boolean
           description: True if secondary file was provided
         ord:
-          type: string
+          type: integer
           description: Defines in which order the checker are executed
     Participant:
       type: object
@@ -1725,8 +1638,8 @@ components:
         user:
           $ref: "#/components/schemas/User"
         role:
-          type: integer
-          description: Users course role id
+          type: string
+          description: Users course role name. Either DOCENT, TUTOR, or STUDENT.
     JWTToken:
       type: object
       properties:

@@ -55,8 +55,6 @@ import { SubmissionChoiceComponent } from './page-components/task-detail/submiss
 import { SubmissionFileComponent } from './page-components/task-detail/submission-file/submission-file.component';
 import { SubmissionTextComponent } from './page-components/task-detail/submission-text/submission-text.component';
 import { SubmissionResultComponent } from './page-components/task-detail/submission-result/submission-result.component';
-import { DocentInCourseComponent } from './tool-components/docent-in-course/docent-in-course.component';
-import { TutorInCourseComponent } from './tool-components/tutor-in-course/tutor-in-course.component';
 import { SingleSubmissionComponent } from './page-components/single-submission/single-submission.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -76,12 +74,17 @@ import {ExitCourseDialogComponent} from "./dialogs/exit-course-dialog/exit-cours
 import {InvitetoConferenceDialogComponent} from "./dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component";
 import {UserTeacherFilter} from "./pipes/user-teacher-filter";
 import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign-ticket-dialog.component";
+import { ParticipantsComponent } from './tool-components/participants/participants.component';
+import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
+import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
+import { NewCheckerDialogComponent } from './dialogs/new-checker-dialog/new-checker-dialog.component';
+import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
+      //url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
       //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
@@ -128,8 +131,6 @@ export const httpInterceptorProviders = [
     SubmissionFileComponent,
     SubmissionTextComponent,
     SubmissionResultComponent,
-    DocentInCourseComponent,
-    TutorInCourseComponent,
     SingleSubmissionComponent,
     DropzoneComponent,
     MyCoursesComponent,
@@ -146,7 +147,12 @@ export const httpInterceptorProviders = [
     InvitetoConferenceDialogComponent,
     DropzoneComponent,
     MyCoursesComponent,
-    ConferenceComponent
+    ConferenceComponent,
+    ParticipantsComponent,
+    ConfigurationListComponent,
+    MenuBarComponent,
+    NewCheckerDialogComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
