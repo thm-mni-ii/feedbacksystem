@@ -43,7 +43,7 @@ export class AssignTicketDialogComponent implements OnInit {
 
   public startCall = (function(invitee) {
     this.users.pipe(first()).subscribe(n => {
-      const self = n.find(u => u.username == this.user.getUsername());
+      const self = n.find(u => u.username == this.auth.getToken()).username;
       if (self) {
         this.assignTicket(self);
       }
@@ -72,7 +72,7 @@ export class AssignTicketDialogComponent implements OnInit {
         // @ts-ignore
         if (ticket.assignee && ticket.assignee.username) {
           // @ts-ignore
-          return ticket.assignee.username == this.user.getUsername() && ticket.id != this.ticket.id;
+          return ticket.assignee.username == this.auth.getToken().username && ticket.id != this.ticket.id;
         }
       });
       if (hasAssignedTicket) {

@@ -25,16 +25,14 @@ export class NewticketDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this._formBuilder.group({
-      title: '',
       desc: '',
-      priority: 0,
+      priority: 1,
     });
   }
 
   createTicket() {
      const ticket: Ticket = {
        id: null,
-       title: this.form.get('title').value.trim(),
        desc: this.form.get('desc').value.trim(),
        priority: this.form.get('priority').value,
        courseId: null,
@@ -43,7 +41,7 @@ export class NewticketDialogComponent implements OnInit {
        creator: null,
        assignee: null,
      };
-     if (ticket.title !== "" && ticket.desc !== "" && ticket.priority > 0 && ticket.priority <= 10){
+     if (ticket.desc !== "" && ticket.priority > 0 && ticket.priority <= 10){
        this.classroomService.createTicket(ticket);
        this.snackBar.open(`Das Ticket wurde erfolgreich erstellt.`, 'OK', {duration: 3000});
        this.dialogRef.close();
