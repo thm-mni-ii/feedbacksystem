@@ -82,12 +82,8 @@ class TicketController {
     */
   @MessageMapping(value = Array("/classroom/ticket/create"))
   def createTicket(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val title = m.retrive("title").toString.trim
     val desc = m.retrive("desc").toString.trim
     val priority = m.retrive("priority").asInt().getOrElse(0)
-    if (title.isBlank) {
-      throw new Exception("Title can not be empty")
-    }
     if (desc.isBlank) {
       throw new Exception("Description can not be empty")
     }
@@ -97,12 +93,11 @@ class TicketController {
     val ticketOpt = for {
       user <- courseAuthService.getCourseUser(headerAccessor, m)
       courseId <- m.retrive(courseIdLiteral).asInt()
-      title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
-    } yield Tickets.create(courseId, title, desc, status, user, user, timestamp, priority)
+    } yield Tickets.create(courseId, desc, status, user, user, timestamp, priority)
 
     if (ticketOpt.isEmpty) {
       throw new MessagingException("Invalid msg: " + m)
@@ -120,7 +115,6 @@ class TicketController {
       user <- courseAuthService.getCourseUser(headerAccessor, m)
       id <- m.retrive("id").asText()
       courseId <- m.retrive(courseIdLiteral).asInt()
-      title <- m.retrive("title").asText()
       desc <- m.retrive("desc").asText()
       creator <- m.retrive("creator").asObject()
       assignee <- m.retrive("assignee").asObject()
@@ -131,7 +125,7 @@ class TicketController {
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
       priority <- m.retrive("priority").asInt()
-    } yield (classroom.Ticket(courseId, title, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
+    } yield (classroom.Ticket(courseId, desc, status, creatorAsUser, assigneeAsUser, timestamp, priority, id), user)
 
     ticketAndUser match {
       case Some(v) =>
@@ -178,7 +172,6 @@ class TicketController {
 
   private def ticketToJson(ticket: Ticket): JSONObject = new JSONObject()
     .put("id", ticket.id)
-    .put("title", ticket.title)
     .put("desc", ticket.desc)
     .put("creator", userToJson(ticket.creator))
     .put("assignee", userToJson(ticket.assignee))

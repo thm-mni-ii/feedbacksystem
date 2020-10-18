@@ -8,7 +8,6 @@ import de.thm.ii.fbs.model.User
   * An issue ticket
   *
   * @param courseId The course id
-  * @param title Title of a ticket
   * @param desc The message
   * @param status The ticket status
   * @param creator The user who created the ticket
@@ -18,7 +17,7 @@ import de.thm.ii.fbs.model.User
   * @param id the unique ticket id
   * @param queuePosition the unique ticket id
   */
-case class Ticket(courseId: Int, title: String, desc: String, status: String, creator: User,
+case class Ticket(courseId: Int, desc: String, status: String, creator: User,
                   assignee: User, timestamp: Long, priority: Int, id: String = "0", var queuePosition: Int = 0) {
   /**
     * @return The hash code -- using id
