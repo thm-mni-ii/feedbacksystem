@@ -20,7 +20,7 @@
         <span class="meta">
           <mat-icon *ngIf="isAuthorized() && this.auth.getToken().username != user.username" class="material-icons call" color="accent" (click)="inviteToConference(user)">call</mat-icon>
           <mat-icon *ngIf="classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(user)">phone_callback</mat-icon>
-          <mat-icon *ngIf="classroomService.isInConference(user) && !classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(classroomService.isInConference(user).creator)">meeting_room</mat-icon>
+          <!-- <mat-icon *ngIf="classroomService.isInConference(user) && !classroomService.hasOpenConference(user)" class="material-icons call" color="accent" (click)="joinConference(classroomService.isInConference(user).creator)">meeting_room</mat-icon> -->
         </span>
       </mat-card>
     </mat-list>

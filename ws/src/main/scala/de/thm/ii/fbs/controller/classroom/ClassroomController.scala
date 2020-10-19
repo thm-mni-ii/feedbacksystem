@@ -41,6 +41,7 @@ class ClassroomController {
   UserSessionMap.onDelete((id: String, principal: Principal) => {
     Classroom.getAll.find(p => p._2.user.equals(principal)) match {
       case Some((cid, user)) =>
+        Classroom.deleteByB(user)
         UserConferenceMap.delete(principal)
         smt.convertAndSend("/topic/classroom/" + cid + "/left", userToJson(user).toString)
       case None => // Nothing on purpose
@@ -95,7 +96,7 @@ class ClassroomController {
       case (Some(globalUser), Some(localUser)) =>
         if (globalUser.globalRole > GlobalRole.MODERATOR && localUser.role > CourseRole.TUTOR) {
           participants = participants
-            .filter(u => u.role < CourseRole.TUTOR)
+            .filter(u => u.role < CourseRole.TUTOR || UserConferenceMap.getA(u.user).nonEmpty)
         }
       case (Some(globalUser), None) =>
         if (globalUser.globalRole <= GlobalRole.MODERATOR) {

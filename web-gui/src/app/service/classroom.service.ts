@@ -116,6 +116,7 @@ export class ClassroomService {
    * @return Observable that completes when disconnected.
    */
   public leave() {
+    this.send('/websocket/classroom/leave', {courseId: this.courseId});
     return this.stompRx.disconnect();
   }
 
