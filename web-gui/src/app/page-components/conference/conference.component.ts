@@ -4,12 +4,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {ConferenceService} from '../../service/conference.service';
 import {MatDialog} from '@angular/material/dialog';
-import {UserService} from '../../service/user.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
 import {GeneralCourseInformation, Ticket, User} from '../../model/HttpInterfaces';
-import { Pipe, PipeTransform } from '@angular/core';
 import {Observable, Subscription, timer, interval, BehaviorSubject} from 'rxjs';
 import {ClassroomService} from '../../service/classroom.service';
 import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
@@ -40,7 +38,10 @@ export class ConferenceComponent implements OnInit {
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
+  username: string;
+
   ngOnInit(): void {
+    this.username = this.auth.getToken().username
     this.db.subscribeCourse(this.courseID);
     this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
@@ -68,7 +69,7 @@ export class ConferenceComponent implements OnInit {
 
   public isAuthorized() {
     const courseRole = this.auth.getToken().courseRoles[this.courseID]
-    return courseRole == Roles.CourseRole.DOCENT || courseRole == Roles.CourseRole.TUTOR
+    return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
   public inviteToConference(user) {

@@ -17,7 +17,6 @@ class Tickets extends ObjectStorage[Ticket] {
   /**
     * Creates and stores an issue ticket
     * @param courseId The course id
-    * @param title Title of a ticket
     * @param desc The message
     * @param status The status of the ticket
     * @param creator The user who created the ticket
@@ -26,12 +25,12 @@ class Tickets extends ObjectStorage[Ticket] {
     * @param priority The priority of the ticket
     * @return A ticket with a unique id
     */
-  def create(courseId: Int, title: String, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
+  def create(courseId: Int, desc: String, status: String, creator: User, assignee: User, timestamp: Long, priority: Int): Ticket = {
     val id = ((System.currentTimeMillis << 20) | (System.nanoTime & ~9223372036854251520L)).toString
     if (super.getWhere("id", id).nonEmpty) {
-      create(courseId, title, desc, status, creator, assignee, timestamp, priority)
+      create(courseId, desc, status, creator, assignee, timestamp, priority)
     } else {
-      val ticket = Ticket(courseId, title, desc, status, creator, assignee, timestamp, priority, id)
+      val ticket = Ticket(courseId, desc, status, creator, assignee, timestamp, priority, id)
       addTicket(ticket)
       ticket
     }

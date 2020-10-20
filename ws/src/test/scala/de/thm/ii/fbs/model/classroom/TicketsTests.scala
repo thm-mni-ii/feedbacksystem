@@ -81,7 +81,7 @@ class TicketsTests {
     tickets.onUpdate(updatedTicket => {
       Assert.assertEquals(ticket.id, updatedTicket.id)
       Assert.assertEquals(10, updatedTicket.queuePosition)
-      Assert.assertEquals("An Issue", ticket.title)
+      Assert.assertEquals("I have an issue", ticket.desc)
       called = true
     })
     ticket.queuePosition = 10
@@ -96,7 +96,7 @@ class TicketsTests {
     val tickets = new Tickets()
     var called = false
     tickets.onCreate(ticket => {
-      Assert.assertEquals("An Issue", ticket.title)
+      Assert.assertEquals("I have an issue", ticket.desc)
       called = true
     })
     this.createIssue(tickets)
@@ -112,7 +112,7 @@ class TicketsTests {
     var called = false
     tickets.onRemove(removedTicket => {
       Assert.assertEquals(ticket.id, removedTicket.id)
-      Assert.assertEquals("An Issue", ticket.title)
+      Assert.assertEquals("I have an issue", ticket.desc)
       called = true
     })
     tickets.remove(ticket.id)
@@ -124,8 +124,8 @@ class TicketsTests {
   private val exampleUser = new User("Example", "User",
     "example.user@example.org", "example", GlobalRole.USER, None, 0)
 
-  private def createIssue(tickets: Tickets) = tickets.create(2, "An Issue",
+  private def createIssue(tickets: Tickets) = tickets.create(2,
     "I have an issue", "open", testUser, exampleUser, Instant.now().getEpochSecond, 1)
-  private def createAnotherIssue(tickets: Tickets) = tickets.create(2, "Another Issue",
-    "I  also have an issue", "open", exampleUser, exampleUser, Instant.now().getEpochSecond, 1)
+  private def createAnotherIssue(tickets: Tickets) = tickets.create(2,
+    "I also have an issue", "open", exampleUser, exampleUser, Instant.now().getEpochSecond, 1)
 }

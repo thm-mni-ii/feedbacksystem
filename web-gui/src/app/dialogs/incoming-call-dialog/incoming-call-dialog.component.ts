@@ -20,7 +20,7 @@ export class IncomingCallDialogComponent implements OnInit {
               @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   ngOnInit(): void {
-    this.invitation = this.data.invitation.invitation;
+    this.invitation = this.data.invitation;
     const notification = new Notification('Konferenzeinladung Feedbacksystem',
       {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
     notification.onclick = () => window.focus();

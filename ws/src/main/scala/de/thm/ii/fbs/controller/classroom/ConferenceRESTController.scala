@@ -4,11 +4,12 @@ import java.net.URI
 import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.services.conferences.{BBBService, JitsiService}
+import de.thm.ii.fbs.services.conferences.{BBBService, ConferenceServiceFactoryService, JitsiService}
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
+import scala.collection.mutable
 
 /**
   * Handles conference invitation massages
@@ -16,14 +17,14 @@ import org.springframework.web.bind.annotation._
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/classroom/conference"))
+@RequestMapping()
 class ConferenceRESTController {
   @Autowired
   private val authService: AuthService = null
   @Autowired
-  private val bbbService: BBBService = null
+  private val conferenceServiceFactoryService: ConferenceServiceFactoryService = null
   @Autowired
-  private val jitsiService: JitsiService = null
+  private val bbbService: BBBService = null
 
   /**
     * Creates a single unique conference link.
@@ -32,30 +33,21 @@ class ConferenceRESTController {
     * @param body The body of the request.
     * @return The conference link
     */
-  @RequestMapping(value = Array("/"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/api/v1/classroom/conference"), method = Array(RequestMethod.POST))
   @ResponseBody
   def createConference(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = authService.authorize(req, res)
 
-    body.get("service").asText() match {
-      case jitsiService.name =>
-        val id = UUID.randomUUID()
-        val uri: URI = this.jitsiService.registerJitsiConference(id.toString)
-        Map("href" -> uri.toString, "service" -> jitsiService.name)
-      case bbbService.name =>
-        val meetingId = UUID.randomUUID().toString
-        val meetingPassword = UUID.randomUUID().toString
-        val moderatorPassword = UUID.randomUUID().toString
-        this.bbbService.registerBBBConference(meetingId, meetingId, meetingPassword, moderatorPassword)
-        val inviteeUri: URI = this.bbbService.getBBBConferenceLink(user, meetingId, moderatorPassword)
-        Map(
-          "href" -> inviteeUri.toString,
-          "meetingId" -> meetingId,
-          "meetingPassword" -> meetingPassword,
-          "moderatorPassword" -> moderatorPassword,
-          "service" -> bbbService.name
-        )
-    }
+    val serviceName = body.get("service").asText()
+
+    val conferenceService = conferenceServiceFactoryService(serviceName)
+    val conference = conferenceService.createConference(UUID.randomUUID().toString)
+
+    val conferenceMap = mutable.Map(conference.toMap.toSeq: _*)
+
+    conferenceMap("href") = conference.getURL(user).toString
+
+    conferenceMap.toMap
   }
 
   /**
@@ -65,7 +57,7 @@ class ConferenceRESTController {
     * @param body The body of the request.
     * @return The conference link
     */
-  @RequestMapping(value = Array("/bigbluebutton/invite"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/api/v1/classroom/conference/bigbluebutton/invite"), method = Array(RequestMethod.POST))
   @ResponseBody
   def getBBBConferenceLink(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Map[String, String] = {
     val user = authService.authorize(req, res)

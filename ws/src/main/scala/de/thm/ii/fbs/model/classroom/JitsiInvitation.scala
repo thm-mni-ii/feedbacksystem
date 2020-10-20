@@ -8,14 +8,11 @@ import de.thm.ii.fbs.model.User
   * @param href       JitsiConference Href for users to join the conference
   * @param creator    Issuer for the Invitation
   * @param courseId   courseId for the Invitation
-  * @param service    courseId for the Invitation
-  * @param visibility courseId for the Invitation
-  * @param attendees  courseId for the Invitation
+  * @param service    service for the Invitation
+  * @param visible visibility for the Invitation
   **/
-case class JitsiInvitation(override val creator: User, override val courseId: Int, override val visibility: String,
-                           override val attendees: scala.collection.mutable.Set[String], override val service: String,
+case class JitsiInvitation(override val creator: User, override val courseId: Int, override val visible: Boolean, override val service: String,
                            href: String) extends Invitation(creator: User,
   courseId: Int,
-  visibility: String,
-  attendees: scala.collection.mutable.Set[String],
+  visible: Boolean,
   service: String)

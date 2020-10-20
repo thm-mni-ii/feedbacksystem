@@ -23,7 +23,7 @@ class ConferenceServiceFactoryServiceTests {
     */
   @Test
   def createBBBServiceTest(): Unit = {
-    val bbbService = ConferenceServiceFactoryService("bbb")
+    val bbbService = ConferenceServiceFactoryService("bigbluebutton")
     Assert.assertTrue(bbbService.isInstanceOf[BBBService])
   }
 
