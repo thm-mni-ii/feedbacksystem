@@ -58,7 +58,7 @@ class LoginController extends CasClientConfigurerAdapter {
         name = casUser.getName
       }
       userService.find(name)
-        .orElse(loadUserFromLdap(name).map(u => userService.create(u, "")))
+        .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
         .foreach(u => {
           val token = authService.createToken(u)
           val co = new Cookie("jwt", token)
