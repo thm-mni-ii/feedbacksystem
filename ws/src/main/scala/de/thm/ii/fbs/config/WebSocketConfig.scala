@@ -126,10 +126,15 @@ class JWTAuthenticationChannelInterceptor(registry: DefaultSimpUserRegistry, aut
 /**
   * Subscription Authentication
   */
-
 class SubscriptionAuthenticationInterceptor() extends ChannelInterceptor {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
+  /**
+    * Executed before sending a message
+    * @param message the message
+    * @param channel the channel the message is send to
+    * @return the handled message
+    */
   override def preSend(message: Message[_], channel: MessageChannel): Message[_] = {
     val accessor = StompHeaderAccessor.wrap(message)
     if (accessor.getMessageType == SimpMessageType.SUBSCRIBE) {
@@ -142,10 +147,15 @@ class SubscriptionAuthenticationInterceptor() extends ChannelInterceptor {
             logMsg += s" for user ${user.username}"
           }
           logger.info(logMsg)
-          return null
+          null
+        } else {
+          message
         }
+      } else {
+        message
       }
+    } else {
+      message
     }
-    message
   }
 }
