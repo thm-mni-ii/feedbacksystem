@@ -4,7 +4,7 @@
 
     <span class="spacer"></span>
 
-    <button mat-icon-button (click)="reRun()" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>
+    <button mat-icon-button (click)="reRun()" [disabled]="this.lastSubmission == null" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>
     <button mat-icon-button *ngIf="canEdit()" [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']" matTooltip="Überprüfung konfigurieren"><mat-icon class="logout-icon">engineering</mat-icon></button>
     <button mat-icon-button *ngIf="canEdit()" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
