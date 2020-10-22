@@ -42,15 +42,11 @@ export class ChangePasswordComponent implements OnInit {
       this.showError("Passwörter stimmen nicht überein")
     } else {
       this.userService.changePassword(this.auth.getToken().id, this.passwd, this.passwd_repeat).subscribe(
-        res => {
-          if (res){
-            this.showOK()
-            setTimeout(() => {
-              location.reload()
-            }, 2000)
-          } else {
-            this.showError("Leider gab es einen Fehler mit dem Update")
-          }
+      res => {
+          this.showOK()
+          setTimeout(() => {
+            location.reload()
+          }, 2000)
         }, error => {
           this.showError("Leider gab es einen Fehler mit dem Update")
         });
