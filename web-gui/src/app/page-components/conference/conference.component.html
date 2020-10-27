@@ -4,11 +4,11 @@
 
     <span class="spacer"></span>
 
-    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined() " (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
+    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined() " (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon>live_help</mat-icon></button>
     <button mat-icon-button color="primary" *ngIf="isAuthorized() && classroomService.isJoined()" (click)="createConference()" matTooltip="Konferenzeinstellungen"><mat-icon >duo</mat-icon></button>
-    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="openConference()" matTooltip="Konferenz öffnen"><mat-icon >lock_open</mat-icon></button>
-    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="closeConference()" matTooltip="Konferenz schliessen"><mat-icon >lock</mat-icon></button>
-    <button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
+    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="openConference()" matTooltip="Konferenz öffnen"><mat-icon>lock_open</mat-icon></button>
+    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="closeConference()" matTooltip="Konferenz schliessen"><mat-icon>lock</mat-icon></button>
+    <button mat-icon-button color="warn" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>cancel</mat-icon></button>
   </app-menu-bar>
 
 </div>
