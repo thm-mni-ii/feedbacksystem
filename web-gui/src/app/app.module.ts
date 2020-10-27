@@ -84,6 +84,7 @@ import {
   NgxMatNativeDateModule,
   NgxMatTimepickerModule
 } from '@angular-material-components/datetime-picker';
+import { InfoComponent } from './tool-components/info/info.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -158,6 +159,7 @@ export const httpInterceptorProviders = [
     MenuBarComponent,
     NewCheckerDialogComponent,
     ConfirmDialogComponent,
+    InfoComponent,
   ],
   imports: [
     BrowserModule,
