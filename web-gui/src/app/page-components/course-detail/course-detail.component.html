@@ -1,5 +1,5 @@
 <div class="container">
-  <app-menu-bar>
+  <app-menu-bar *ngIf="role">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
         <span *ngIf="role == 'DOCENT'">Dozent/in</span>
@@ -9,18 +9,18 @@
 
     <span class="spacer"></span>
 
-    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>
-    <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" [routerLink]="['/','courses',courseID,'tickets']" matTooltip="Ticket Übersicht"><mat-icon >contact_support</mat-icon></button>
-    <mat-menu #confMenu>
+    <!--<mat-menu #confMenu>
       <button *ngFor="let url of openConferences | async; let i = index" mat-menu-item
               (click)="openUrlInNewWindow(url)">Room {{i}}</button>
-    </mat-menu>
+    </mat-menu>-->
 
-    <button mat-icon-button *ngIf="isAuthorized()" [routerLink]="['/','courses', courseID,'results']" matTooltip="Ergebnisse"><mat-icon>insights</mat-icon></button>
+    <button mat-icon-button *ngIf="isAuthorized()" [routerLink]="['/','courses', courseID,'results']" matTooltip="Bewertungsübersicht"><mat-icon>insights</mat-icon></button>
     <button mat-icon-button *ngIf="isAuthorized(true)" [routerLink]="['/','courses', courseID,'participants']" matTooltip="Teilnehmer"><mat-icon>groups</mat-icon></button>
 
-    <button mat-icon-button class="green" *ngIf="!classroomService.isJoined()" (click)="goOnline()" matTooltip="Sitzung beitreten"><mat-icon>voice_chat</mat-icon></button>
-    <button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>
+    <!--<button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>-->
+    <button mat-icon-button class="green" *ngIf="classroomService.isJoined()" [routerLink]="['/','courses',courseID,'tickets']" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
+    <button mat-icon-button *ngIf="!classroomService.isJoined()" (click)="goOnline()" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
+    <!--<button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>-->
 
     <button mat-icon-button *ngIf="isAuthorized() || role" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
