@@ -20,7 +20,9 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Pr
     */
   def map(conference: Conference, p: Principal): Unit = {
     super.put(conference, p)
-    onMapListeners.foreach(_ (conference, p))
+    if(conference.isVisible) {
+      onMapListeners.foreach(_ (conference, p))
+    }
   }
 
   /**
@@ -42,7 +44,9 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Pr
     */
   def delete(conference: Conference): Unit = {
     super.deleteByA(conference).foreach(p => {
-      onDeleteListeners.foreach(_ (conference, p))
+      if (conference.isVisible) {
+        onDeleteListeners.foreach(_ (conference, p))
+      }
     })
   }
 
@@ -53,7 +57,9 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Pr
     */
   def delete(p: Principal): Unit = {
     this.deleteByB(p).foreach(conference => {
-      onDeleteListeners.foreach(_ (conference, p))
+        if (conference.isVisible) {
+          onDeleteListeners.foreach(_ (conference, p))
+        }
     })
   }
 

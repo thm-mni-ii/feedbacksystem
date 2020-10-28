@@ -68,6 +68,8 @@ class ConferenceSTOMPController {
     }
     val conference: Conference = conferenceService.createConference(UUID.randomUUID().toString)
     UserConferenceMap.map(conference, headerAccessor.getUser)
+    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/open",
+      new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
   }
 
   /**
@@ -82,6 +84,8 @@ class ConferenceSTOMPController {
       case None => throw new IllegalArgumentException("Unknown Conference Host")
     }
     UserConferenceMap.map(conference, headerAccessor.getUser)
+    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/join",
+      new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
   }
 
     /**
@@ -93,6 +97,32 @@ class ConferenceSTOMPController {
     def closeConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
       UserConferenceMap.delete(headerAccessor.getUser)
     }
+
+  /**
+    * Removes user and related conference from map
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/show"))
+  def showConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
+    UserConferenceMap.delete(conference)
+    conference.visibility = "true"
+    UserConferenceMap.add(conference, headerAccessor.getUser)
+  }
+
+  /**
+    * Removes user and related conference from map
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/conference/hide"))
+  def hideConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
+    UserConferenceMap.delete(conference)
+    conference.visibility = "false"
+    UserConferenceMap.add(conference, headerAccessor.getUser)
+  }
 
     /**
       * Get Users that are sharing their conference
@@ -113,10 +143,11 @@ class ConferenceSTOMPController {
     }
 
   UserConferenceMap.onMap((conference: Conference, p: Principal) => {
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", conference.toJson.toString)
+    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", {})
   })
 
+
   UserConferenceMap.onDelete((conference: Conference, p: Principal) => {
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", conference.toJson.toString)
+    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", {})
   })
 }

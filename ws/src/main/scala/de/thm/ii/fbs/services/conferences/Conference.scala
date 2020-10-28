@@ -27,7 +27,7 @@ abstract class Conference {
   /**
     * The visibility of the Conference
     */
-  val visibility: String
+  var visibility: String
 
   /**
     * Gets the http URL for the conference
