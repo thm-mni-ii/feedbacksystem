@@ -1,11 +1,12 @@
 package de.thm.ii.fbs.services.conferences
 
 import java.net.URI
-import java.util.Calendar
+import java.util.{Calendar, UUID}
 
 import de.thm.ii.fbs.model.User
 import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
 import javax.xml.bind.DatatypeConverter
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.{HttpEntity, HttpHeaders}
@@ -19,25 +20,37 @@ import org.springframework.stereotype.Service
 @Service
 class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
   /**
-    * The name of the conference service
-    */
-  val name = "jitsi"
-
-  /**
     * Creates a new Conference using Jitsi
-    * @param cid the id for the new conference
+    * @param courseId the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(cid: String): Conference = {
+  override def createConference(courseId: String): Conference = {
+    val cid = UUID.randomUUID().toString
     val uri = this.registerJitsiConference(cid)
     new Conference {
       override val id: String = cid
-      override val serviceName: String = JitsiService.this.name
-      private val meetingURL = uri
+      override val serviceName: String = JitsiService.name
+      override val courseId: String = courseId
+      private val meetingURL: URI = uri
 
       override def getURL(user: User, moderator: Boolean): URI = meetingURL
       override def toMap: Map[String, String] = Map("id" -> id, "service" -> serviceName)
-    }
+
+      /**
+        * The visibility of the Conference
+        */
+      override val visibility: String = "false"
+
+      /**
+        * Creates a JSONObject containing information about the Conference
+        *
+        * @return the JSONObject
+        */
+      override def toJson(): JSONObject = new JSONObject().put("meetingId", id)
+        .put("courseId", courseId)
+        .put("service", serviceName)
+        .put("visibility", visibility)
+}
   }
 
   private val http = templateBuilder.build()
@@ -73,4 +86,11 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
 
     http.postForLocation(JITSI_URL, request)
   }
+}
+
+object JitsiService {
+  /**
+    * The name of the conference service
+    */
+  val name = "jitsi"
 }

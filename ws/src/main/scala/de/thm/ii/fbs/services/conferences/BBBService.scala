@@ -5,7 +5,9 @@ import java.security.MessageDigest
 import java.util.UUID
 
 import de.thm.ii.fbs.model.User
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.jackson.JsonObjectDeserializer
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -26,24 +28,24 @@ class BBBService(templateBuilder: RestTemplateBuilder,
                  @Value("${services.bbb.shared-secret}") private val secret: String)
   extends ConferenceService {
   /**
-    * The name of the conference service
-    */
-  val name = "bigbluebutton"
-
-  /**
     * Creates a new Conference using BBB
-    * @param cid the id for the new conference
+    * @param courseId the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(cid: String): Conference = {
+  override def createConference(courseId: String): Conference = {
+    val cid = UUID.randomUUID().toString
     val participantPassword = UUID.randomUUID().toString
     val modPassword = UUID.randomUUID().toString
+
+    // actual registering of conference against BBB api
     this.registerBBBConference(cid, cid, participantPassword, modPassword)
     new Conference {
       override val id: String = cid
-      override val serviceName: String = BBBService.this.name
-      private val meetingPassword = participantPassword
-      private val moderatorPassword = modPassword
+      override val serviceName: String = BBBService.name
+      override val visibility: String = "false"
+      override val courseId: String = courseId
+      private val meetingPassword: String = participantPassword
+      private val moderatorPassword: String = modPassword
 
       override def getURL(user: User, moderator: Boolean): URI =
         BBBService.this.getBBBConferenceLink(user, id, if (moderator) moderatorPassword else meetingPassword)
@@ -54,6 +56,13 @@ class BBBService(templateBuilder: RestTemplateBuilder,
         "moderatorPassword" -> moderatorPassword,
         "service" -> serviceName
       )
+
+      override def toJson(): JSONObject = new JSONObject().put("meetingId", id)
+        .put("courseId", courseId)
+        .put("service", serviceName)
+        .put("meetingPassword", meetingPassword)
+        .put("moderatorPassword", moderatorPassword)
+        .put("visibility", visibility)
     }
   }
 
@@ -135,4 +144,14 @@ class BBBService(templateBuilder: RestTemplateBuilder,
   private def toHexString(input: Array[Byte]): String = input
     .map(b => String.format("%02x", b))
     .reduce((sb, s) => sb + s)
+}
+
+/**
+ Companion object carrying name attribute
+ */
+object BBBService {
+  /*
+   name attribute
+   */
+  val name = "bigbluebutton"
 }
