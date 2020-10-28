@@ -2,13 +2,14 @@ package de.thm.ii.fbs.controller.classroom
 
 import java.security.Principal
 import java.util.UUID
+
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap}
 import de.thm.ii.fbs.services.conferences.{BBBService, Conference, ConferenceServiceFactoryService, JitsiService}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.{AuthService, CourseAuthService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import org.json.JSONArray
+import org.json.{JSONArray, JSONObject}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
 import org.springframework.messaging.simp.{SimpMessageHeaderAccessor, SimpMessagingTemplate}
@@ -41,13 +42,13 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/invite"))
   def handleInviteMsg(@Payload p: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val inviter = headerAccessor.getUser
-    val conference = UserConferenceMap.get(inviter)
-    val courseID = p.get("courseid").asInt()
+    val conference = UserConferenceMap.get(inviter).getOrElse(throw new Exception("Unkonwn Conference"))
     val invitees = p.get("users")
-    if (courseAuthService.isPrivilegedInCourse(courseID, userService.find(inviter.getName).get)) {
+    if (courseAuthService.isPrivilegedInCourse(conference.courseId.toInt, userService.find(inviter.getName).get)) {
       invitees.forEach(invitee => {
-        if (Classroom.getParticipants(courseID).exists(p => p.user.username == invitee.get("username").asText())){
-          smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite", conference)
+        if (Classroom.getParticipants(conference.courseId.toInt).exists(p => p.user.username == invitee.get("username").asText())){
+          val href = conference.getURL(userService.find(invitee.get("username").asText()).get)
+          smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite", new JSONObject().put("href", href.toString).toString)
         }
       })
     }
