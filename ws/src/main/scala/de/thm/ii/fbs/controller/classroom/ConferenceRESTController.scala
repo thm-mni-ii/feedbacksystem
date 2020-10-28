@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation._
 import scala.collection.mutable
 
 /**
-  * Handles conference invitation massages
+  * Handles conference conference massages
   * @author Andrej Sajenko
   */
 @RestController

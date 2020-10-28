@@ -4,44 +4,45 @@ import java.security.Principal
 
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.classroom.storage.NonDuplicatesBidirectionalStorage
+import de.thm.ii.fbs.services.conferences.Conference
 
 import scala.collection.mutable
 
 /**
-  * Maps invitations to principals.
+  * Maps Conferences to principals.
   */
-class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Principal] {
+class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Principal] {
   /**
     * Maps a user to its session
     *
-    * @param invitation invitation
+    * @param conference Conference
     * @param p          principal
     */
-  def map(invitation: Invitation, p: Principal): Unit = {
-    super.put(invitation, p)
-    onMapListeners.foreach(_ (invitation, p))
+  def map(conference: Conference, p: Principal): Unit = {
+    super.put(conference, p)
+    onMapListeners.foreach(_ (conference, p))
   }
 
   /**
-    * @param invitation invitation details
+    * @param conference Conference details
     * @return The principal for the given session id
     */
-  def get(invitation: Invitation): Option[Principal] = super.getSingleB(invitation)
+  def get(conference: Conference): Option[Principal] = super.getSingleB(conference)
 
   /**
     * @param p The principal
-    * @return The invitation for the given principal
+    * @return The Conference for the given principal
     */
-  def get(p: Principal): Option[Invitation] = super.getSingleA(p)
+  def get(p: Principal): Option[Conference] = super.getSingleA(p)
 
   /**
-    * Removes both, the user and its invitation by using its invitation
+    * Removes both, the user and its Conference by using its Conference
     *
-    * @param invitation Session id
+    * @param conference Session id
     */
-  def delete(invitation: Invitation): Unit = {
-    super.deleteByA(invitation).foreach(p => {
-      onDeleteListeners.foreach(_ (invitation, p))
+  def delete(conference: Conference): Unit = {
+    super.deleteByA(conference).foreach(p => {
+      onDeleteListeners.foreach(_ (conference, p))
     })
   }
 
@@ -51,25 +52,25 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Pr
     * @param p The principal
     */
   def delete(p: Principal): Unit = {
-    this.deleteByB(p).foreach(invitation => {
-      onDeleteListeners.foreach(_ (invitation, p))
+    this.deleteByB(p).foreach(conference => {
+      onDeleteListeners.foreach(_ (conference, p))
     })
   }
 
-  private val onMapListeners = mutable.Set[(Invitation, Principal) => Unit]()
-  private val onDeleteListeners = mutable.Set[(Invitation, Principal) => Unit]()
+  private val onMapListeners = mutable.Set[(Conference, Principal) => Unit]()
+  private val onDeleteListeners = mutable.Set[(Conference, Principal) => Unit]()
 
   /**
     * @param cb Callback that gets executed on every map event
     */
-  def onMap(cb: (Invitation, Principal) => Unit): Unit = {
+  def onMap(cb: (Conference, Principal) => Unit): Unit = {
     onMapListeners.add(cb)
   }
 
   /**
     * @param cb Callback that gets executed on every map event
     */
-  def onDelete(cb: (Invitation, Principal) => Unit): Unit = {
+  def onDelete(cb: (Conference, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
   }
 
@@ -85,9 +86,9 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Invitation, Pr
     * Get all user that currently in a course.
     *
     * @param courseId The course id
-    * @return The Invitations in the course
+    * @return The Conferences in the course
     */
-  def getInvitations(courseId: Int): List[Invitation] = this.getAllA.filter(inv => inv.courseId == courseId).toList
+  def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId).toList
 }
 
 /**
