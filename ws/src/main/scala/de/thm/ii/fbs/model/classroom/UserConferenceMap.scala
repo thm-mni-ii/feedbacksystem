@@ -3,15 +3,15 @@ package de.thm.ii.fbs.model.classroom
 import java.security.Principal
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.classroom.storage.NonDuplicatesBidirectionalStorage
 import de.thm.ii.fbs.services.conferences.Conference
+import de.thm.ii.fbs.model.classroom.storage.OneToManyBidirectionalStorage
 
 import scala.collection.mutable
 
 /**
   * Maps Conferences to principals.
   */
-class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Principal] {
+class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Principal] {
   /**
     * Maps a user to its session
     *
@@ -29,13 +29,13 @@ class UserConferenceMap extends NonDuplicatesBidirectionalStorage[Conference, Pr
     * @param conference Conference details
     * @return The principal for the given session id
     */
-  def get(conference: Conference): Option[Principal] = super.getSingleB(conference)
+  def get(conference: Conference): Set[Principal] = super.getMany(conference)
 
   /**
     * @param p The principal
     * @return The Conference for the given principal
     */
-  def get(p: Principal): Option[Conference] = super.getSingleA(p)
+  def get(p: Principal): Option[Conference] = super.getOne(p)
 
   /**
     * Removes both, the user and its Conference by using its Conference

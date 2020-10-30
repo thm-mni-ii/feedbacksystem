@@ -27,7 +27,7 @@ class UserConferenceMapTest {
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testInvitation, testUser)
     val testUserOption = userConferenceMap.get(testInvitation)
-    Assert.assertTrue(testUserOption.isDefined)
+    Assert.assertFalse(testUserOption.isEmpty)
   }
 
   /**
