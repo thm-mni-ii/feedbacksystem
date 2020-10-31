@@ -46,10 +46,8 @@ class User(val prename: String, val surname: String, val email: String,
   /**
     * @return JSON representation of a user object
     */
-  def toJson(): JSONObject = new JSONObject().put("surname", surname)
-    .put("email", email)
+  def toJson(): JSONObject = new JSONObject().put("prename", prename)
     .put("username", username)
-    .put("globalRole", globalRole)
-    .put("alias", alias)
+    .put("surname", surname)
     .put("id", id)
 }

@@ -22,7 +22,7 @@ export class NewconferenceDialogComponent implements OnInit {
               private _formBuilder: FormBuilder, public conferenceService: ConferenceService, public classroomService: ClassroomService) {
   }
   ngOnInit(): void {
-    this.conferenceService.getConference().subscribe(n => this.conferenceURL = n.meetingId);
+
   }
 
   cancelBtn() {

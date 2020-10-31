@@ -21,16 +21,16 @@ import org.springframework.stereotype.Service
 class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
   /**
     * Creates a new Conference using Jitsi
-    * @param courseId the id for the new conference
+    * @param courseid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(courseId: String): Conference = {
+  override def createConference(courseid: String): Conference = {
     val cid = UUID.randomUUID().toString
     val uri = this.registerJitsiConference(cid)
     new Conference {
       override val id: String = cid
       override val serviceName: String = JitsiService.name
-      override val courseId: String = courseId
+      override val courseId: String = courseid
       private val meetingURL: URI = uri
 
       override def getURL(user: User, moderator: Boolean): URI = meetingURL
@@ -39,14 +39,14 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
       /**
         * The visibility of the Conference
         */
-      override val visibility: String = "false"
+      override var visibility: String = "false"
 
       /**
         * Creates a JSONObject containing information about the Conference
         *
         * @return the JSONObject
         */
-      override def toJson(): JSONObject = new JSONObject().put("meetingId", id)
+      override def toJson: JSONObject = new JSONObject().put("meetingId", id)
         .put("courseId", courseId)
         .put("service", serviceName)
         .put("visibility", visibility)

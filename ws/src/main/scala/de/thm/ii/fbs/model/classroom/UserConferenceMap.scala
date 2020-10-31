@@ -20,9 +20,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     */
   def map(conference: Conference, p: Principal): Unit = {
     super.put(conference, p)
-    if(conference.isVisible) {
       onMapListeners.foreach(_ (conference, p))
-    }
   }
 
   /**
@@ -44,9 +42,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     */
   def delete(conference: Conference): Unit = {
     super.deleteByA(conference).foreach(p => {
-      if (conference.isVisible) {
         onDeleteListeners.foreach(_ (conference, p))
-      }
     })
   }
 
@@ -57,9 +53,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     */
   def delete(p: Principal): Unit = {
     this.deleteByB(p).foreach(conference => {
-        if (conference.isVisible) {
-          onDeleteListeners.foreach(_ (conference, p))
-        }
+      onDeleteListeners.foreach(_ (conference, p))
     })
   }
 
@@ -94,7 +88,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     * @param courseId The course id
     * @return The Conferences in the course
     */
-  def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId).toList
+  def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId.toString).toList
 }
 
 /**

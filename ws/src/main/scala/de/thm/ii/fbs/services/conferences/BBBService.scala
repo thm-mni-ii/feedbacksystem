@@ -29,10 +29,10 @@ class BBBService(templateBuilder: RestTemplateBuilder,
   extends ConferenceService {
   /**
     * Creates a new Conference using BBB
-    * @param courseId the id for the new conference
+    * @param courseid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(courseId: String): Conference = {
+  override def createConference(courseid: String): Conference = {
     val cid = UUID.randomUUID().toString
     val participantPassword = UUID.randomUUID().toString
     val modPassword = UUID.randomUUID().toString
@@ -42,8 +42,8 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     new Conference {
       override val id: String = cid
       override val serviceName: String = BBBService.name
-      override val visibility: String = "false"
-      override val courseId: String = courseId
+      override var visibility: String = "false"
+      override val courseId: String = courseid
       private val meetingPassword: String = participantPassword
       private val moderatorPassword: String = modPassword
 
@@ -57,7 +57,7 @@ class BBBService(templateBuilder: RestTemplateBuilder,
         "service" -> serviceName
       )
 
-      override def toJson(): JSONObject = new JSONObject().put("meetingId", id)
+      override def toJson: JSONObject = new JSONObject().put("meetingId", id)
         .put("courseId", courseId)
         .put("service", serviceName)
         .put("meetingPassword", meetingPassword)
@@ -150,8 +150,8 @@ class BBBService(templateBuilder: RestTemplateBuilder,
  Companion object carrying name attribute
  */
 object BBBService {
-  /*
-   name attribute
+  /**
+   * name attribute
    */
   val name = "bigbluebutton"
 }
