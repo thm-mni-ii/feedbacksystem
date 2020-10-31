@@ -335,7 +335,7 @@ export interface GlobalSetting {
   setting_typ: string;
 }
 
-export interface ConferenceInvitation {
+export interface Conference {
   service: string;
   visibility: string;
   attendees: string[];

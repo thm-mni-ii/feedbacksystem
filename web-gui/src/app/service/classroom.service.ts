@@ -1,37 +1,41 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
-import {ConferenceInvitation, ConfInvite, Ticket, User} from '../model/HttpInterfaces';
+import {Ticket, User} from '../model/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
 import {Message} from 'stompjs';
 import {ConferenceService} from './conference.service';
 import {AuthService} from "./auth.service";
+import {MatDialog} from "@angular/material/dialog";
+import {IncomingCallDialogComponent} from "../dialogs/incoming-call-dialog/incoming-call-dialog.component";
 
 /**
- * Service that provides observables that asynchronacally updates tickets, users and privide invitations to take
+ * Service that provides observables that asynchronacally updates tickets, users and privide Conferences to take
  * part in a conference.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class ClassroomService {
+  private dialog: MatDialog;
   private users: Subject<User[]>;
   private tickets: Subject<Ticket[]>;
-  private invitations: Subject<ConferenceInvitation>;
-  private openConferences: BehaviorSubject<ConferenceInvitation[]>;
-
+  private usersInConference: Subject<User[]>;
+  private inviteUsers: Subject<boolean>;
   private courseId = 0;
-  private myInvitation: ConferenceInvitation;
-  private otherInvitation: ConferenceInvitation;
+  private service = "bigbluebutton"
   incomingCallSubscriptions: Subscription[] = [];
 
   private stompRx: RxStompClient = null;
 
-  public constructor(private authService: AuthService, private conferenceService: ConferenceService) {
+  public constructor(private authService: AuthService, private conferenceService: ConferenceService, private mDialog: MatDialog) {
     this.users = new BehaviorSubject<User[]>([]);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
-    this.invitations = new Subject<ConferenceInvitation>();
-    this.openConferences = new BehaviorSubject<ConferenceInvitation[]>([]);
-    this.conferenceService.getConferenceInvitation().subscribe(n => this.myInvitation = n);
+    this.usersInConference = new BehaviorSubject<User[]>([]);
+    this.inviteUsers = new Subject<boolean>();
+    this.conferenceService.getSelectedConferenceSystem().subscribe((service :string) => {
+      this.service = service
+    })
+    this.dialog = mDialog;
   }
 
   /**
@@ -41,36 +45,27 @@ export class ClassroomService {
     return this.users.asObservable();
   }
 
+  /**
+   * @return Users in public conferences.
+   */
+  public getUsersInConference(): Observable<User[]> {
+    return this.usersInConference.asObservable();
+  }
+
+  public userInviter(): Observable<boolean> {
+    return this.inviteUsers.asObservable();
+  }
   public subscribeIncomingCalls(subscription) {
     this.incomingCallSubscriptions.forEach(s => s.unsubscribe());
     this.incomingCallSubscriptions = [];
     this.incomingCallSubscriptions.push(subscription);
   }
-  public getInvitationFromUser(user: User): ConferenceInvitation {
-    return this.openConferences.value.find((invitation) => invitation.creator.username == user.username);
-  }
-  public hasOpenConference(user: User) {
-   return this.openConferences.value.findIndex((invitation) => invitation.creator.username == user.username) != -1;
-  }
 
-  public isInConference(user: User): ConferenceInvitation {
-    return this.openConferences.value
-      .find((invitation) => {
-        return invitation.attendees.find((username) => username == user.username);
-      });
-  }
   /**
    * @return Tickets of the connected course.
    */
   public getTickets(): Observable<Ticket[]> {
     return this.tickets.asObservable();
-  }
-
-  /**
-   * @return Get invitations to take part in a conference
-   */
-  public getInvitations(): Observable<ConferenceInvitation> {
-    return this.invitations.asObservable();
   }
 
   /**
@@ -89,24 +84,26 @@ export class ClassroomService {
     this.courseId = courseId;
     this.stompRx = new RxStompClient(window.origin.replace(/^http(s)?/, 'ws$1') + '/websocket', this.constructHeaders());
     this.stompRx.onConnect(_ => {
-      // Handles invitation from tutors / docents to take part in a webconference
+      // Handles Conference from tutors / docents to take part in a webconference
       this.listen('/user/' + this.authService.getToken().username + '/classroom/invite').subscribe(m => this.handleInviteMsg(m));
       this.listen('/user/' + this.authService.getToken().username + '/classroom/users').subscribe(m => this.handleUsersMsg(m));
-      this.listen('/topic/classroom/' + this.courseId + '/left').subscribe(m => this.requestUsersUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/joined').subscribe(m => this.requestUsersUpdate());
-      this.requestUsersUpdate();
-      this.listen('/user/' + this.authService.getToken().username + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
-      this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(m => this.requestTicketsUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(m => this.requestTicketsUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(m => this.requestTicketsUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/left').subscribe(_m => this.requestUsersUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/joined').subscribe(_m => this.requestUsersUpdate());
 
-      this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(m => this.requestConferenceUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(m => this.requestConferenceUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/conference/attend').subscribe(m => this.requestConferenceUpdate());
-      this.listen('/topic/classroom/' + this.courseId + '/conference/depart').subscribe(m => this.requestConferenceUpdate());
-      this.listen('/user/' + this.authService.getToken().username + '/classroom/conferences').subscribe(m => this.handleConferenceMsg(m));
-      this.requestTicketsUpdate();
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/tickets').subscribe(m => this.handleTicketsMsg(m));
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/create').subscribe(_m => this.requestTicketsUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/update').subscribe(_m => this.requestTicketsUpdate());
+      this.listen('/topic/classroom/' + this.courseId + '/ticket/remove').subscribe(_m => this.requestTicketsUpdate());
+
+      this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(_m => this.requestConferenceUsersUpdate());
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/opened').subscribe(m => this.handleConferenceOpenedMsg(m));
+      this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(_m => this.requestConferenceUsersUpdate());
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/users').subscribe(m => this.handleConferenceUsersMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/joined').subscribe(m => this.handleConferenceJoinedMsg(m));
       this.joinCourse();
+      this.requestUsersUpdate();
+      this.requestConferenceUsersUpdate();
+      this.requestTicketsUpdate();
     });
     this.stompRx.connect();
   }
@@ -122,11 +119,10 @@ export class ClassroomService {
 
   /**
    * Invites user to a conference by following the link provided as href.
-   * @param href The link of the conference server
    * @param users The users to invite
    */
-  public inviteToConference(invitation: ConferenceInvitation, users: { username: string; prename: string; surname: string }[]) {
-    this.send('/websocket/classroom/conference/invite', {invitation: invitation, users, 'courseid': this.courseId});
+  public inviteToConference(users: User[]) {
+    this.send('/websocket/classroom/conference/invite', {users:users, 'courseid': this.courseId});
   }
 
   /**
@@ -156,7 +152,13 @@ export class ClassroomService {
   }
 
   private handleInviteMsg(msg: Message) {
-    this.invitations.next(JSON.parse(msg.body));
+    let body = JSON.parse(msg.body)
+    this.dialog.open(IncomingCallDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {inviter: body.user, cid: body.cid}
+    });
+
   }
 
   private handleUsersMsg(msg: Message) {
@@ -191,37 +193,41 @@ export class ClassroomService {
     return this.stompRx.subscribeToTopic(topic, this.constructHeaders());
   }
 
-  public openConference(courseId, visibility) {
-    const inv = this.myInvitation;
-    inv.visibility = visibility;
-    this.send('/websocket/classroom/conference/opened', {invitation: inv, courseId: courseId});
+  public openConference() {
+    this.send('/websocket/classroom/conference/open', {service: this.service, courseId: this.courseId});
   }
 
-  public shareConference(inv, courseId, visibility) {
-    inv.visibility = visibility;
-    this.send('/websocket/classroom/conference/opened', {invitation: inv, courseId: courseId});
+  public closeConference() {
+    this.send('/websocket/classroom/conference/close', {});
   }
 
-  public closeConference(courseId) {
-    this.send('/websocket/classroom/conference/closed', {invitation: this.myInvitation, courseId: courseId});
-  }
-
-  private requestConferenceUpdate() {
+  private requestConferenceUsersUpdate() {
     this.requestUsersUpdate();
-    this.send('/websocket/classroom/conferences', {courseId: this.courseId});
+    this.send('/websocket/classroom/conference/users', {courseId: this.courseId});
   }
 
-  private handleConferenceMsg(msg: Message) {
-    this.openConferences.next(JSON.parse(msg.body));
+  private handleConferenceUsersMsg(msg: Message) {
+    this.usersInConference.next(JSON.parse(msg.body))
   }
 
-  public attendConference(invitation) {
-    this.otherInvitation = invitation;
-    this.send('/websocket/classroom/conference/attend', {invitation: invitation});
+  private handleConferenceOpenedMsg(msg: Message) {
+    this.inviteUsers.next(true)
+    window.open(JSON.parse(msg.body).href)
   }
 
-  public departConference(invitation) {
-    this.otherInvitation = undefined;
-    this.send('/websocket/classroom/conference/depart', {invitation: invitation});
+  private handleConferenceJoinedMsg(msg: Message) {
+    window.open(JSON.parse(msg.body).href)
+  }
+
+  public joinConference(user: User, mid:number = 0) {
+    this.send('/websocket/classroom/conference/join', {user: user, mid: mid});
+  }
+
+  public showConference() {
+    this.send('/websocket/classroom/conference/show', {});
+  }
+
+  public hideConference() {
+    this.send('/websocket/classroom/conference/hide', {});
   }
 }

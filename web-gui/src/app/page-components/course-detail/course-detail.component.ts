@@ -15,7 +15,6 @@ import {TaskNewDialogComponent} from "../../dialogs/task-new-dialog/task-new-dia
 import {NewconferenceDialogComponent} from "../../dialogs/newconference-dialog/newconference-dialog.component";
 import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
 import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
-import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
 import {AuthService} from "../../service/auth.service";
 import {Roles} from "../../model/Roles";
 import {TaskService} from "../../service/task.service";
@@ -155,17 +154,6 @@ export class CourseDetailComponent implements OnInit {
 
   goOnline() {
     // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
-    Notification.requestPermission();
-    this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
-      this.dialog.open(IncomingCallDialogComponent, {
-        height: 'auto',
-        width: 'auto',
-        data: {courseID: this.courseID, invitation: n},
-        disableClose: true
-      }).afterClosed().subscribe(hasAccepted => {
-
-      });
-    }));
     this.classroomService.join(this.courseID);
     this.router.navigate(['courses', this.courseID, 'tickets']);
   }
@@ -331,11 +319,11 @@ export class CourseDetailComponent implements OnInit {
   // goOnline() {
   //   this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
   //   Notification.requestPermission();
-  //   this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
+  //   this.classroomService.subscribeIncomingCalls(this.classroomService.getConferences().subscribe(n => {
   //     this.dialog.open(IncomingCallDialogComponent, {
   //       height: 'auto',
   //       width: 'auto',
-  //       data: {courseID: this.courseID, invitation: n},
+  //       data: {courseID: this.courseID, Conference: n},
   //       disableClose: true
   //     }).afterClosed().subscribe(hasAccepted => {
   //

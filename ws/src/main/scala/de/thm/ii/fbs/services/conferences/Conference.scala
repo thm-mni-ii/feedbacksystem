@@ -41,15 +41,7 @@ abstract class Conference {
     * Creates a map containing information about the Conference
     * @return the map
     */
-  def isVisible: Boolean = visibility == "true"
-
-  /**
-    * Creates a map containing information about the Conference
-    * @return the map
-    */
   def toMap: Map[String, String]
-
-
 
   /**
     * Creates a JSONObject containing information about the Conference

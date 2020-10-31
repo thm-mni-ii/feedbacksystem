@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.controller.classroom
 
 import java.security.Principal
-import java.util.UUID
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap}
@@ -43,12 +42,16 @@ class ConferenceSTOMPController {
   def handleInviteMsg(@Payload p: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val inviter = headerAccessor.getUser
     val conference = UserConferenceMap.get(inviter).getOrElse(throw new Exception("Unkonwn Conference"))
-    val invitees = p.get("users")
+    val invitees = p.get("users").elements()
     if (courseAuthService.isPrivilegedInCourse(conference.courseId.toInt, userService.find(inviter.getName).get)) {
-      invitees.forEach(invitee => {
+      invitees.forEachRemaining(invitee => {
         if (Classroom.getParticipants(conference.courseId.toInt).exists(p => p.user.username == invitee.get("username").asText())){
-          val href = conference.getURL(userService.find(invitee.get("username").asText()).get)
-          smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite", new JSONObject().put("href", href.toString).toString)
+          conference.getURL(userService.find(invitee.get("username").asText()).get)
+          smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite",
+            new JSONObject()
+              .put("user", userService.find(inviter.getName).get.toJson)
+              .put("cid", conference.id)
+              .toString)
         }
       })
     }
@@ -66,9 +69,10 @@ class ConferenceSTOMPController {
       case Some(name) => throw new IllegalArgumentException(s"Unknown service: ${name}")
       case None => throw new IllegalArgumentException("Service name not provided")
     }
-    val conference: Conference = conferenceService.createConference(UUID.randomUUID().toString)
+    val courseId: String = m.retrive("courseId").asText().getOrElse(throw new IllegalArgumentException("Missing courseId"))
+    val conference: Conference = conferenceService.createConference(courseId)
     UserConferenceMap.map(conference, headerAccessor.getUser)
-    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/open",
+    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/opened",
       new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
   }
 
@@ -78,14 +82,15 @@ class ConferenceSTOMPController {
     * @param headerAccessor Header information
     */
   @MessageMapping(value = Array("/classroom/conference/join"))
-  def joinConference(@Payload m: Principal, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val conference: Conference = UserConferenceMap.get(m).filter(c => c.isVisible) match {
+  def joinConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val conference: Conference = UserConferenceMap.get(userService.find(m.get("user").get("username").asText).get)
+      .filter(c => c.visibility == "true" || m.get("mid").asText == c.id) match {
       case Some(conference) => conference
       case None => throw new IllegalArgumentException("Unknown Conference Host")
     }
     UserConferenceMap.map(conference, headerAccessor.getUser)
-    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/join",
-      new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
+    smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/conference/joined",
+     new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
   }
 
     /**
@@ -106,9 +111,8 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/show"))
   def showConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
-    UserConferenceMap.delete(conference)
     conference.visibility = "true"
-    UserConferenceMap.add(conference, headerAccessor.getUser)
+    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", {})
   }
 
   /**
@@ -119,9 +123,8 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/hide"))
   def hideConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
-    UserConferenceMap.delete(conference)
     conference.visibility = "false"
-    UserConferenceMap.add(conference, headerAccessor.getUser)
+    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", {})
   }
 
     /**
@@ -133,19 +136,22 @@ class ConferenceSTOMPController {
     def getUsers(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
       val courseId = m.get("courseId").asInt()
       val user = this.userService.find(headerAccessor.getUser.getName)
-      smt.convertAndSendToUser(user.get.username, "/classroom/conferences",
-        UserConferenceMap.getConferences(courseId)
-          .filter(conference => conference.isVisible)
-          .map(conference => UserConferenceMap.get(conference).get)
-          .map(principal => userService.find(principal.getName))
-          .foldLeft(new JSONArray())((a, u) => a.put(u))
+      smt.convertAndSendToUser(user.get.username, "/classroom/conference/users",
+        UserConferenceMap.getAll
+          .filter(c => (c._1.visibility == "true" || c._2 == headerAccessor.getUser) && c._1.courseId == courseId.toString)
+          .map(c => userService.find(c._2.getName).get.toJson).foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
+       /* UserConferenceMap.getConferences(courseId)
+          .filter(conference => conference.isVisible)
+          .map(conference => UserConferenceMap.get(conference))
+          .map(principals => Classroom.getParticipants(courseId).find(p => p.user.username == principal.).get.toJson)
+           */
+
     }
 
   UserConferenceMap.onMap((conference: Conference, p: Principal) => {
     smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", {})
   })
-
 
   UserConferenceMap.onDelete((conference: Conference, p: Principal) => {
     smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", {})

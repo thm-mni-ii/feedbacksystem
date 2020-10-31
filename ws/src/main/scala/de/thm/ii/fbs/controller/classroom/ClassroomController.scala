@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
-import org.json.{JSONArray, JSONObject}
+import org.json.JSONArray
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
@@ -31,19 +31,13 @@ class ClassroomController {
   implicit private val courseRegistrationService: CourseRegistrationService = null
   private val courseIdLiteral = "courseId";
 
-  private def userToJson(p: Participant): JSONObject = new JSONObject()
-    .put("username", p.user.username)
-    .put("prename", p.user.prename)
-    .put("surname", p.user.surname)
-    .put("role", p.role)
-
   // Removes users that lose connections
   UserSessionMap.onDelete((id: String, principal: Principal) => {
     Classroom.getAll.find(p => p._2.user.equals(principal)) match {
       case Some((cid, user)) =>
         Classroom.deleteByB(user)
         UserConferenceMap.delete(principal)
-        smt.convertAndSend("/topic/classroom/" + cid + "/left", userToJson(user).toString)
+        smt.convertAndSend("/topic/classroom/" + cid + "/left", user.toJson.toString)
       case None => // Nothing on purpose
     }
   })
@@ -96,16 +90,19 @@ class ClassroomController {
       case (Some(globalUser), Some(localUser)) =>
         if (globalUser.globalRole > GlobalRole.MODERATOR && localUser.role > CourseRole.TUTOR) {
           participants = participants
-            .filter(u => u.role < CourseRole.TUTOR || UserConferenceMap.getA(u.user).nonEmpty)
+            .filter(u => u.role <= CourseRole.TUTOR
+              || UserConferenceMap.getA(u.user).exists(c => c.visibility == "true")
+              || u.user == principal)
         }
       case (Some(globalUser), None) =>
         if (globalUser.globalRole <= GlobalRole.MODERATOR) {
           participants = participants
-            .filter(u => u.role < CourseRole.TUTOR)
+            .filter(u => u.role <= CourseRole.TUTOR
+              || u.user == principal)
         }
       case _ => throw new IllegalArgumentException()
     }
-    val filteredParticipants = participants.map(userToJson)
+    val filteredParticipants = participants.map(p => p.toJson)
       .foldLeft(new JSONArray())((a, u) => a.put(u))
       .toString()
     smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipants)

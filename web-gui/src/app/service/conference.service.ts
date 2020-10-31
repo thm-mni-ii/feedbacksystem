@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, BehaviorSubject,  timer, Subscription} from 'rxjs';
 import {flatMap, first} from 'rxjs/operators';
 import {ConferenceSystems} from '../util/ConferenceSystems';
-import {ConferenceInvitation} from '../model/HttpInterfaces';
+import {Conference} from "../model/HttpInterfaces";
 
 /**
  * Handles the creation and retrivement of conference links.
@@ -15,17 +15,17 @@ import {ConferenceInvitation} from '../model/HttpInterfaces';
 export class ConferenceService {
   private timoutTime = 600000; // 10 minutes
   private personalConferenceLink: BehaviorSubject<string>;
-  private bbbInvitationLink: BehaviorSubject<object>;
-  private conferenceInvitation: BehaviorSubject<ConferenceInvitation>;
+  private bbbConferenceLink: BehaviorSubject<object>;
+  private conference: BehaviorSubject<Conference>;
   public selectedConferenceSystem: BehaviorSubject<string>;
   private personalLinksRecieved = false;
   private conferenceWindowHandle: Window;
   public conferenceTimeoutTimer: Subscription;
   public constructor(private http: HttpClient) {
      this.personalConferenceLink = new BehaviorSubject<string>(null);
-     this.bbbInvitationLink = new  BehaviorSubject<object>(null);
+     this.bbbConferenceLink = new  BehaviorSubject<object>(null);
      this.selectedConferenceSystem = new BehaviorSubject<string>(ConferenceSystems.BigBlueButton);
-     this.conferenceInvitation = new BehaviorSubject<ConferenceInvitation>(null);
+     this.conference = new BehaviorSubject<Conference>(null);
   }
 
   public openWindowIfClosed(href: string): Window | undefined {
@@ -44,13 +44,13 @@ export class ConferenceService {
     return this.selectedConferenceSystem.next(service);
   }
 
-  public getConferenceInvitation(): Observable<ConferenceInvitation> {
-    return this.conferenceInvitation.asObservable();
+  public getConferenceConference(): Observable<Conference> {
+    return this.conference.asObservable();
   }
 
   /**
    * This function recieves a conference link to the choosen Conference system.
-   * It also sets the invitation to send to other users.
+   * It also sets the Conference to send to other users.
    * @param service Conference system to use
    * @return Returns a personal conference link.
    */
@@ -62,28 +62,28 @@ export class ConferenceService {
         .pipe(flatMap(res => {
           this.personalLinksRecieved = true;
           this.personalConferenceLink.next(res.href);
-          // remove mod href and mod password from invitation
+          // remove mod href and mod password from Conference
           if (res.service == ConferenceSystems.BigBlueButton) {
             res.href = undefined;
           }
-          this.conferenceInvitation.next(res);
+          this.conference.next(res);
           return this.personalConferenceLink.asObservable();
         }));
     }
   }
 
   /**
-   * This Route lets a user generate its own personal Big Blue Button invitation link personalised by FullName
+   * This Route lets a user generate its own personal Big Blue Button Conference link personalised by FullName
    * @param meetingId id that the user receives either bei direct call or by open conferences list
    * @param meetingPassword password that the user receives either bei direct call or by open conferences list
    * @return Returns a personal conference link to a BBB conference.
    */
-  public getBBBConferenceInvitationLink(meetingId: String, meetingPassword: String): Observable<object> {
+  public getBBBConferenceConferenceLink(meetingId: String, meetingPassword: String): Observable<object> {
     return this.http.post<object>('/api/v1/classroom/conference/bigbluebutton/invite',
       {meetingId: meetingId, meetingPassword: meetingPassword})
       .pipe(flatMap(res => {
-        this.bbbInvitationLink.next(res);
-        return this.bbbInvitationLink.asObservable();
+        this.bbbConferenceLink.next(res);
+        return this.bbbConferenceLink.asObservable();
       }));
   }
 

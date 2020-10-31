@@ -7,7 +7,6 @@ import java.util.UUID
 import de.thm.ii.fbs.model.User
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.jackson.JsonObjectDeserializer
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service

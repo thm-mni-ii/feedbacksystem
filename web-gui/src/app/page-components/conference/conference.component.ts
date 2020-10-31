@@ -32,51 +32,40 @@ export class ConferenceComponent implements OnInit {
               private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
   }
 
-  courseID: number;
+  courseId: number;
   onlineUsers: Observable<User[]>;
   tickets: Observable<Ticket[]>;
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
   username: string;
+  usersInConference: User[] = [];
 
   ngOnInit(): void {
     this.username = this.auth.getToken().username
-    this.db.subscribeCourse(this.courseID);
     this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
-    this.route.params.subscribe(
-      param => {
-        this.courseID = param.id;
-        this.db.getSubscribedCourses().subscribe(n => {
-          const thisCourse: GeneralCourseInformation | undefined = n.find((course) => {
-            course.course_id = this.courseID;
-          });
-          if (thisCourse) {
-            this.isCourseSubscriber.next(true);
-          }
-        });
+    this.route.params.subscribe(param => {
+        this.courseId = param.id;
       });
-    this.onlineUsers.subscribe(n => {
-      this.self = n.find(u => {
-        return u.username == this.auth.getToken().username
-      });
-    });
+    this.classroomService.getUsersInConference().subscribe((users) => {
+      this.usersInConference = users;
+    })
     if (!this.classroomService.isJoined()) {
       this.goOnline();
     }
   }
 
   public isAuthorized() {
-    const courseRole = this.auth.getToken().courseRoles[this.courseID]
+    const courseRole = this.auth.getToken().courseRoles[this.courseId]
     return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
-  public inviteToConference(user) {
+  public inviteToConference(users) {
     this.dialog.open(InvitetoConferenceDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {user: user}
+      data: {users: users}
     });
   }
 
@@ -84,7 +73,7 @@ export class ConferenceComponent implements OnInit {
     this.dialog.open(NewconferenceDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseID}
+      data: {courseID: this.courseId}
     });
   }
 
@@ -92,7 +81,7 @@ export class ConferenceComponent implements OnInit {
     this.dialog.open(AssignTicketDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseID, users: this.onlineUsers, ticket: ticket}
+      data: {courseID: this.courseId, users: this.onlineUsers, ticket: ticket}
     });
   }
 
@@ -127,92 +116,38 @@ export class ConferenceComponent implements OnInit {
   }
   goOnline() {
     Notification.requestPermission();
-    this.classroomService.subscribeIncomingCalls(this.classroomService.getInvitations().subscribe(n => {
-      this.dialog.open(IncomingCallDialogComponent, {
-        height: 'auto',
-        width: 'auto',
-        data: {courseID: this.courseID, invitation: n},
-        disableClose: true
-      });
-    }));
-    console.log(this.subscriptions);
-    this.classroomService.join(this.courseID);
+    this.classroomService.join(this.courseId);
   }
 
   goOffline() {
     this.classroomService.leave();
-    this.router.navigate(['courses', this.courseID]);
+    this.router.navigate(['courses', this.courseId]);
   }
 
-  public getRoleName(roleid) {
-    switch (roleid) {
-      case Roles.CourseRole.DOCENT:
-        return 'Dozent';
-      case Roles.CourseRole.TUTOR:
-        return 'Tutor';
-      default:
-        return 'Student';
+  public parseCourseRole(role: String): String{
+    switch(role) {
+      case "DOCENT": return "Dozent"
+      case "TUTOR": return "Tutor"
+      case "STUDENT": return "Student"
     }
   }
+
   public createTicket() {
     this.dialog.open(NewticketDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseID}
+      data: {courseID: this.courseId}
     }).afterClosed().subscribe(ticket => {
       if (ticket) {
         this.classroomService.createTicket(ticket);
       }
     });
   }
-  openConference() {
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
-      const conferenceWindowHandle: Window = this.conferenceService.openWindowIfClosed(m);
-      if (conferenceWindowHandle) {
-        this.conferenceService.stopTimeout();
-        const sub: Subscription = interval(5000).subscribe(_ => {
-          if (!conferenceWindowHandle || conferenceWindowHandle.closed) {
-            this.conferenceService.startTimeout();
-            this.closeConference();
-            sub.unsubscribe();
-          }
-        });
-        this.classroomService.openConference(this.courseID, 'public');
-      }
-    });
+
+  public isInConference(user: User) {
+    return this.usersInConference.filter(u => u.username == user.username).length != 0;
   }
 
-  shareConference() {
-    this.classroomService.isInConference(this.self);
-  }
-
-  closeConference() {
-    this.classroomService.closeConference(this.courseID);
-  }
-
-  joinConference(user: User) {
-    const invitation = this.classroomService.getInvitationFromUser(user);
-    let windowHandle: Window;
-    if (invitation.service == 'bigbluebutton') {
-      // tslint:disable-next-line:max-line-length
-      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.moderatorPassword)
-        .pipe(first())
-        .subscribe(n => {
-          // @ts-ignore
-          windowHandle = this.openUrlInNewWindow(n.href);
-          this.classroomService.attendConference(invitation);
-        });
-    } else if (invitation.service == 'jitsi') {
-      windowHandle = this.openUrlInNewWindow(invitation.href);
-      this.classroomService.attendConference(invitation);
-    }
-    const sub = interval(5000).subscribe(_ => {
-      if (!windowHandle || windowHandle.closed) {
-        this.classroomService.departConference(invitation);
-        sub.unsubscribe();
-      }
-    });
-  }
 
   public openUrlInNewWindow(url: string): Window {
     return window.open(url, '_blank');
