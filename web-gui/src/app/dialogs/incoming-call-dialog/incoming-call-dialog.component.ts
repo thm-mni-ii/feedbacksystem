@@ -1,11 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DatabaseService} from '../../service/database.service';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {ConferenceInvitation, User} from '../../model/HttpInterfaces';
-import {ConferenceSystems} from '../../util/ConferenceSystems';
+import {ConferenceConference, User} from '../../model/HttpInterfaces';
 import {ConferenceService} from '../../service/conference.service';
-import {first} from 'rxjs/operators';
+import {ClassroomService} from "../../service/classroom.service";
 
 @Component({
   selector: 'app-incoming-call-dialog',
@@ -13,14 +10,16 @@ import {first} from 'rxjs/operators';
   styleUrls: ['./incoming-call-dialog.component.scss']
 })
 export class IncomingCallDialogComponent implements OnInit {
-  invitation: ConferenceInvitation;
+  inviter: User;
+  cid: number;
   audio: HTMLAudioElement;
   conferenceURL: string;
-  constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, public conferenceService: ConferenceService,
+  constructor(public dialogRef: MatDialogRef<IncomingCallDialogComponent>, public classroomService: ClassroomService,
               @Inject(MAT_DIALOG_DATA) public data: any) { }
 
   ngOnInit(): void {
-    this.invitation = this.data.invitation;
+    this.inviter = this.data.inviter;
+    this.cid = this.data.cid
     const notification = new Notification('Konferenzeinladung Feedbacksystem',
       {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
     notification.onclick = () => window.focus();
@@ -44,22 +43,11 @@ export class IncomingCallDialogComponent implements OnInit {
   }
   // todo: fix string constants ( enum didnt work)
   public acceptCall() {
-    if (this.invitation.service == 'bigbluebutton') {
-      this.conferenceService.getBBBConferenceInvitationLink(this.invitation.meetingId,
-        // @ts-ignore
-        this.invitation.moderatorPassword).pipe(first()).subscribe(n => this.openUrlInNewWindow(n.href));
-    } else if (this.invitation.service == 'jitsi') {
-      this.conferenceURL = this.invitation.href;
-    }
-
+    this.classroomService.joinConference(this.inviter, this.cid)
     this.dialogRef.close();
   }
 
   public declineCall() {
     this.dialogRef.close();
-  }
-
-  public openUrlInNewWindow(url: string) {
-    window.open(url, '_blank');
   }
 }

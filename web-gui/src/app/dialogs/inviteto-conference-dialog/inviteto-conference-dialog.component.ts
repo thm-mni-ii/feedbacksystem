@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {ConferenceInvitation, User} from '../../model/HttpInterfaces';
+import {ConferenceConference, User} from '../../model/HttpInterfaces';
 import {ConferenceService} from '../../service/conference.service';
 import {ClassroomService} from '../../service/classroom.service';
 import {FormBuilder, FormGroup} from '@angular/forms';
@@ -14,11 +14,11 @@ import {UpdateCourseDialogComponent} from "../update-course-dialog/update-course
   styleUrls: ['./inviteto-conference-dialog.component.scss']
 })
 export class InvitetoConferenceDialogComponent implements OnInit {
-  invitee: User;
+  invitees: User[];
   form: FormGroup;
 
   conferenceSystem: string;
-  conferenceInvitation: ConferenceInvitation;
+  conferenceConference: ConferenceConference;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private conferenceService: ConferenceService,
@@ -26,22 +26,16 @@ export class InvitetoConferenceDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.invitee = this.data.user;
-    this.conferenceService.getSelectedConferenceSystem().subscribe(n => {
-      this.conferenceSystem = n;
-    });
-    this.conferenceService.getConferenceInvitation().subscribe(n => {
-      this.conferenceInvitation = n;
-    });
+    this.invitees = this.data.users;
   }
 
   public startCall(invitee) {
-    this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
-      this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
-      this.conferenceService.openWindowIfClosed(m);
+      this.classroomService.userInviter().pipe(first()).subscribe(() => {
+        this.classroomService.inviteToConference(invitee);
+      })
+      this.classroomService.openConference()
       this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
       this.dialogRef.close();
-    });
   }
 
   public cancelCall() {
