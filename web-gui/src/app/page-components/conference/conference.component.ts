@@ -29,7 +29,7 @@ export class ConferenceComponent implements OnInit {
   constructor(private db: DatabaseService, private route: ActivatedRoute, private titlebar: TitlebarService,
               private conferenceService: ConferenceService, private classroomService: ClassroomService,
               private dialog: MatDialog, public auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
-              private router: Router, @Inject(DOCUMENT) document, private databaseService: DatabaseService) {
+              private router: Router, @Inject(DOCUMENT) document) {
   }
 
   courseId: number;

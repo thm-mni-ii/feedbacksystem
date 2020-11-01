@@ -1,7 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ConferenceConference, User} from '../../model/HttpInterfaces';
-import {ConferenceService} from '../../service/conference.service';
+import {User} from '../../model/HttpInterfaces';
 import {ClassroomService} from "../../service/classroom.service";
 
 @Component({

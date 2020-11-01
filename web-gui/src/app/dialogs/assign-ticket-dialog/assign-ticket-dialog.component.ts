@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
-import {ConferenceInvitation, Ticket, User} from '../../model/HttpInterfaces';
+import {Ticket, User} from '../../model/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {interval, Observable} from 'rxjs';
@@ -29,62 +29,19 @@ export class AssignTicketDialogComponent implements OnInit {
   users: Observable<User[]>;
   ticket: Ticket;
   courseID: number;
-  conferenceSystem: String;
-  conferenceInvitation: ConferenceInvitation;
+  usersInConference: User[] = [];
 
-  public assignTicket = (function(assignee) {
-    this.classroomService.getTickets().pipe(first()).subscribe(t => {
+  public assignTicket(assignee, ticket) {
       this.ticket.assignee = assignee;
-      this.classroomService.updateTicket(this.ticket);
+      this.classroomService.updateTicket(ticket);
       this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
       this.dialogRef.close();
-    });
-  }).bind(this);
-
-  public startCall = (function(invitee) {
-    this.users.pipe(first()).subscribe(n => {
-      const self = n.find(u => u.username == this.auth.getToken()).username;
-      if (self) {
-        this.assignTicket(self);
-      }
-    });
-    this.classroomService.getTickets().pipe(first()).subscribe(t => {
-      this.conferenceService.getSingleConferenceLink(this.conferenceService.selectedConferenceSystem.value).pipe(first()).subscribe(m => {
-        this.classroomService.inviteToConference(this.conferenceInvitation, [invitee]);
-        this.conferenceService.openWindowIfClosed(m);
-        this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
-        this.dialogRef.close();
-      });
-    });
-  }).bind(this);
+    }
 
   ngOnInit(): void {
-    this.conferenceService.getSelectedConferenceSystem().subscribe(n => {
-      this.conferenceSystem = n;
-    });
-    this.conferenceService.getConferenceInvitation().subscribe(n => {
-      this.conferenceInvitation = n;
-    });
-  }
-  public deleteAssignedDialog(user, cb) {
-    this.classroomService.getTickets().pipe(first()).subscribe(t => {
-      const hasAssignedTicket = t.find(ticket => {
-        // @ts-ignore
-        if (ticket.assignee && ticket.assignee.username) {
-          // @ts-ignore
-          return ticket.assignee.username == this.auth.getToken().username && ticket.id != this.ticket.id;
-        }
-      });
-      if (hasAssignedTicket) {
-        this.dialog.open(CloseTicketDialogComponent, {
-          height: 'auto',
-          width: 'auto',
-          data: {user: user},
-        }).afterClosed().pipe(first()).subscribe( _ => cb(user));
-      } else {
-        cb(user);
-      }
-    });
+    this.classroomService.getUsersInConference().subscribe((users) => {
+      this.usersInConference = users;
+    })
   }
   public closeTicket(ticket) {
     this.classroomService.removeTicket(ticket);
@@ -97,28 +54,19 @@ export class AssignTicketDialogComponent implements OnInit {
     return Roles.CourseRole.isDocent(courseRole) || Roles.CourseRole.isTutor(courseRole)
   }
 
+  public startCall(invitee) {
+    this.classroomService.userInviter().pipe(first()).subscribe(() => {
+      this.classroomService.inviteToConference(invitee);
+    })
+    this.classroomService.openConference()
+    this.snackBar.open(`${invitee.prename} ${invitee.surname} wurde eingeladen der Konferenz beizutreten.`, 'OK', {duration: 3000});
+    this.dialogRef.close();
+  }
+  public isInConference(user: User) {
+    return this.usersInConference.filter(u => u.username == user.username).length != 0;
+  }
   joinConference(user: User) {
-    const invitation = this.classroomService.getInvitationFromUser(user);
-    let windowHandle: Window;
-    if (invitation.service == 'bigbluebutton') {
-      // tslint:disable-next-line:max-line-length
-      this.conferenceService.getBBBConferenceInvitationLink(invitation.meetingId, invitation.moderatorPassword)
-        .pipe(first())
-        .subscribe(n => {
-          // @ts-ignore
-          windowHandle = this.openUrlInNewWindow(n.href);
-          this.classroomService.attendConference(invitation);
-        });
-    } else if (invitation.service == 'jitsi') {
-      windowHandle = this.openUrlInNewWindow(invitation.href);
-      this.classroomService.attendConference(invitation);
-    }
-    const sub = interval(5000).subscribe(_ => {
-      if (!windowHandle || windowHandle.closed) {
-        this.classroomService.departConference(invitation);
-        sub.unsubscribe();
-      }
-    });
+    this.classroomService.joinConference(user)
   }
   public openUrlInNewWindow(url: string): Window {
     return window.open(url, '_blank');

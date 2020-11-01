@@ -10,7 +10,7 @@
     <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="this.classroomService.closeConference()" matTooltip="Konferenz schliessen"><mat-icon >lock</mat-icon></button>
     <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="this.classroomService.showConference()" matTooltip="Konferenz sichtbar machen"><mat-icon >visibility</mat-icon></button>
     <button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="this.classroomService.hideConference()" matTooltip="Konferenz unsichtbar machen"><mat-icon >visibility_off</mat-icon></button>
-    <button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()">Go Offline</button>
+    <button mat-icon-button class="warn" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Online Übungsraum verlassen"><mat-icon >cancel</mat-icon></button>
   </app-menu-bar>
 </div>
 <div class="ticketOverview">
