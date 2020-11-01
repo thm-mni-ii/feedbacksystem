@@ -15,18 +15,18 @@ class UserConferenceMapTest {
   @Test
   def mapTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
+    userConferenceMap.map(testConference, testUser)
     Assert.assertEquals(1, userConferenceMap.getAll.size)
   }
 
   /**
-    * Tests the get method by Invitation
+    * Tests the get method by Conference
     */
   @Test
-  def getByInvitationTest(): Unit = {
+  def getByConferenceTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
-    val testUserOption = userConferenceMap.get(testInvitation)
+    userConferenceMap.map(testConference, testUser)
+    val testUserOption = userConferenceMap.get(testConference)
     Assert.assertFalse(testUserOption.isEmpty)
   }
 
@@ -36,23 +36,23 @@ class UserConferenceMapTest {
   @Test
   def getByPrincipalTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
-    val testInvitationOption = userConferenceMap.get(testUser)
-    Assert.assertTrue(testInvitationOption.isDefined)
-    val testInvitationOptionEmpty = userConferenceMap.get(exampleUser)
-    Assert.assertTrue(testInvitationOptionEmpty.isEmpty)
+    userConferenceMap.map(testConference, testUser)
+    val testConferenceOption = userConferenceMap.get(testUser)
+    Assert.assertTrue(testConferenceOption.isDefined)
+    val testConferenceOptionEmpty = userConferenceMap.get(exampleUser)
+    Assert.assertTrue(testConferenceOptionEmpty.isEmpty)
   }
 
   /**
     * Tests the delete method
     */
   @Test
-  def deleteInvitationTest(): Unit = {
+  def deleteConferenceTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
-    userConferenceMap.delete(testInvitation)
-    val testInvitationOption = userConferenceMap.get(testUser)
-    Assert.assertTrue(testInvitationOption.isEmpty)
+    userConferenceMap.map(testConference, testUser)
+    userConferenceMap.delete(testConference)
+    val testConferenceOption = userConferenceMap.get(testUser)
+    Assert.assertTrue(testConferenceOption.isEmpty)
   }
 
   /**
@@ -61,10 +61,10 @@ class UserConferenceMapTest {
   @Test
   def deletePrincipalTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
+    userConferenceMap.map(testConference, testUser)
     userConferenceMap.delete(testUser)
-    val testInvitationOption = userConferenceMap.get(testInvitation)
-    Assert.assertTrue(testInvitationOption.isEmpty)
+    val testConferenceOption = userConferenceMap.get(testConference)
+    Assert.assertTrue(testConferenceOption.isEmpty)
   }
 
   /**
@@ -74,12 +74,12 @@ class UserConferenceMapTest {
   def onMapTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
     var run = false
-    userConferenceMap.onMap((invitation, principal) => {
-      Assert.assertEquals(testInvitation, invitation)
+    userConferenceMap.onMap((Conference, principal) => {
+      Assert.assertEquals(testConference, Conference)
       Assert.assertEquals(testUser, principal)
       run = true
     })
-    userConferenceMap.map(testInvitation, testUser)
+    userConferenceMap.map(testConference, testUser)
     Assert.assertTrue(run)
   }
 
@@ -89,13 +89,13 @@ class UserConferenceMapTest {
   def onDeleteTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
     var run = false
-    userConferenceMap.onDelete((invitation, principal) => {
-      Assert.assertEquals(testInvitation, invitation)
+    userConferenceMap.onDelete((Conference, principal) => {
+      Assert.assertEquals(testConference, Conference)
       Assert.assertEquals(testUser, principal)
       run = true
     })
-    userConferenceMap.map(testInvitation, testUser)
-    userConferenceMap.delete(testInvitation)
+    userConferenceMap.map(testConference, testUser)
+    userConferenceMap.delete(testConference)
     Assert.assertTrue(run)
   }
 
@@ -104,7 +104,7 @@ class UserConferenceMapTest {
     */
   def existsTest(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
+    userConferenceMap.map(testConference, testUser)
     val existingUser = userConferenceMap.exists(testUser)
     Assert.assertTrue(existingUser)
     val nonExistingUser = userConferenceMap.exists(exampleUser)
@@ -112,18 +112,18 @@ class UserConferenceMapTest {
   }
 
   /**
-    * Tests the getInvitation method
+    * Tests the getConference method
     */
-  def getInvitationsTests(): Unit = {
+  def getConferencesTests(): Unit = {
     val userConferenceMap = new UserConferenceMap
-    userConferenceMap.map(testInvitation, testUser)
-    val invitations = userConferenceMap.getInvitations(2)
-    Assert.assertEquals(1, invitations.size)
+    userConferenceMap.map(testConference, testUser)
+    val Conferences = userConferenceMap.getConferences(2)
+    Assert.assertEquals(1, Conferences.size)
   }
 
   private val testUser = new User("Test", "User",
     "test.user@example.org", "test", GlobalRole.USER, None, 0)
-  private val testInvitation = BBBInvitation(testUser, 2, true, "bbb", "1234", "12345678", "87654321")
+  private val testConference = BBBConference(testUser, 2, true, "bbb", "1234", "12345678", "87654321")
   private val exampleUser = new User("Example", "User",
     "example.user@example.org", "example", GlobalRole.USER, None, 0)
 }
