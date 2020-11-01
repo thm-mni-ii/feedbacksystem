@@ -79,6 +79,12 @@ import { ConfigurationListComponent } from './page-components/configuration-list
 import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
 import { NewCheckerDialogComponent } from './dialogs/new-checker-dialog/new-checker-dialog.component';
 import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
+import {
+  NgxMatDatetimePickerModule,
+  NgxMatNativeDateModule,
+  NgxMatTimepickerModule
+} from '@angular-material-components/datetime-picker';
+import { InfoComponent } from './tool-components/info/info.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -153,6 +159,7 @@ export const httpInterceptorProviders = [
     MenuBarComponent,
     NewCheckerDialogComponent,
     ConfirmDialogComponent,
+    InfoComponent,
   ],
   imports: [
     BrowserModule,
@@ -178,7 +185,10 @@ export const httpInterceptorProviders = [
     MatGridListModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatSliderModule
+    MatSliderModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
   ],
   entryComponents: [ExitCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, ImpressumDialogComponent,
     InvitetoConferenceDialogComponent, AssignTicketDialogComponent],

@@ -118,3 +118,12 @@
   margin-top: 16px;
   margin-bottom: 30px;
 }
+
+.info {
+  display: block;
+  margin-top: 32px;
+  div {
+    display: flex;
+    justify-content: center;
+  }
+}

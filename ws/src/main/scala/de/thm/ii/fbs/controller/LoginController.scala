@@ -58,7 +58,7 @@ class LoginController extends CasClientConfigurerAdapter {
         name = casUser.getName
       }
       userService.find(name)
-        .orElse(loadUserFromLdap(name).map(u => userService.create(u, "")))
+        .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
         .foreach(u => {
           val token = authService.createToken(u)
           val co = new Cookie("jwt", token)
@@ -66,6 +66,12 @@ class LoginController extends CasClientConfigurerAdapter {
           co.setHttpOnly(false)
           co.setMaxAge(30)
           response.addCookie(co)
+          val cr = new Cookie("JSESSIONID", "")
+          cr.setPath("/")
+          cr.setHttpOnly(true)
+          cr.setSecure(true)
+          cr.setMaxAge(0)
+          response.addCookie(cr)
         })
 
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)

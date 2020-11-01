@@ -27,7 +27,7 @@ class CheckerConfigurationService {
     */
   def getAll(cid: Int, tid: Int): List[CheckrunnerConfiguration] =
     DB.query("SELECT configuration_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord FROM checkrunner_configuration " +
-      "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ?",
+      "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ? ORDER BY ord",
       (res, _) => parseResult(res), cid, tid)
 
   /**

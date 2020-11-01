@@ -62,7 +62,7 @@ export class NewCheckerDialogComponent implements OnInit {
   createChecker(value: any) {
     this.checker.checkerType = value.checkerType
     this.checker.ord = value.ord
-    if (this.checker.checkerType && this.checker.ord && this.mainFile && this.secondaryFile) {
+    if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType == 'bash')) {
       this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
         .subscribe(checker => {
           this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)

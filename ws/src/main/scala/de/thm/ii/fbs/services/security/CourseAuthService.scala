@@ -44,14 +44,13 @@ class CourseAuthService {
     * @return Boolean indicating if the user is priviledged
     */
    def isPrivilegedInCourse(courseID: Int, user: User): Boolean =
-    if (user.globalRole >= GlobalRole.MODERATOR) {
+    if (user.globalRole == GlobalRole.MODERATOR || user.globalRole == GlobalRole.ADMIN) {
       true
     } else {
       val courseUser = this.courseRegistrationService.getParticipants(courseID).find(_.user.id == user.id)
-      if (courseUser.isEmpty) {
-        false
-      } else {
-        courseUser.get.role >= CourseRole.TUTOR
+      courseUser match {
+        case None => false
+        case Some(cUser) => cUser.role == CourseRole.TUTOR || cUser.role == CourseRole.DOCENT
       }
     }
 }

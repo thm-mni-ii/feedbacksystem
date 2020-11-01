@@ -16,7 +16,7 @@
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!checkerForm.valid" (click)="createChecker(checkerForm.value)">Erstellen</button>
+    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!checkerForm.valid || this.mainFile?.size <= 0 || !(this.secondaryFile?.size > 0 || checkerForm.value.checkerType == 'bash')" (click)="createChecker(checkerForm.value)">Erstellen</button>
     <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!checkerForm.valid" (click)="updateTask(checkerForm.value)">Update</button>
   </mat-dialog-actions>
 </div>

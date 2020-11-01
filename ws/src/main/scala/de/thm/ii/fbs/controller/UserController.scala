@@ -36,7 +36,7 @@ class UserController {
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] = {
     val user = authService.authorize(req, res)
     val isDozent = courseRegistrationService.getCoursePriviledges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || isDozent) {
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDozent) {
       userService.getAll()
     } else {
       throw new ForbiddenException()
@@ -54,8 +54,9 @@ class UserController {
   @ResponseBody
   def getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User = {
     val user = authService.authorize(req, res)
+    val selfRequest = user.id == uid
     val isDozent = courseRegistrationService.getCoursePriviledges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || isDozent) {
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDozent || selfRequest) {
       userService.find(uid) match {
         case Some(u) => u
         case _ => throw new ResourceNotFoundException()
