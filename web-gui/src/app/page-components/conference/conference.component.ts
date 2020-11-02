@@ -31,19 +31,18 @@ export class ConferenceComponent implements OnInit {
               private dialog: MatDialog, public auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }
-
   courseId: number;
-  onlineUsers: Observable<User[]>;
+  users: User[] = [];
   tickets: Observable<Ticket[]>;
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
   username: string;
   usersInConference: User[] = [];
+  conferenceWindowOpen: Boolean = false;
 
   ngOnInit(): void {
     this.username = this.auth.getToken().username
-    this.onlineUsers = this.classroomService.getUsers();
     this.tickets = this.classroomService.getTickets();
     this.route.params.subscribe(param => {
         this.courseId = param.id;
@@ -51,9 +50,15 @@ export class ConferenceComponent implements OnInit {
     this.classroomService.getUsersInConference().subscribe((users) => {
       this.usersInConference = users;
     })
+    this.classroomService.getUsers().subscribe((users) => {
+      this.users = users;
+    })
     if (!this.classroomService.isJoined()) {
-      this.goOnline();
+      this.joinClassroom();
     }
+    this.classroomService.getConferenceWindowHandle().subscribe(isOpen => {
+      this.conferenceWindowOpen = isOpen
+    })
   }
 
   public isAuthorized() {
@@ -81,7 +86,7 @@ export class ConferenceComponent implements OnInit {
     this.dialog.open(AssignTicketDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseId, users: this.onlineUsers, ticket: ticket}
+      data: {courseID: this.courseId, users: this.users, ticket: ticket}
     });
   }
 
@@ -114,12 +119,13 @@ export class ConferenceComponent implements OnInit {
       }
     });
   }
-  goOnline() {
+
+  joinClassroom() {
     Notification.requestPermission();
     this.classroomService.join(this.courseId);
   }
 
-  goOffline() {
+  leaveClassroom() {
     this.classroomService.leave();
     this.router.navigate(['courses', this.courseId]);
   }
@@ -147,10 +153,11 @@ export class ConferenceComponent implements OnInit {
   public isInConference(user: User) {
     return this.usersInConference.filter(u => u.username == user.username).length != 0;
   }
-
-
-  public openUrlInNewWindow(url: string): Window {
-    return window.open(url, '_blank');
+  public isInConferenceName(username: string) {
+    return this.usersInConference.filter(u => u.username == username).length != 0;
+  }
+  public isInClassroom(username: string) {
+    return this.users.filter(u => u.username == username).length != 0;
   }
 }
 
