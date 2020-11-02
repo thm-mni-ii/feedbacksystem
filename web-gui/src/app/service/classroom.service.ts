@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
 import {Ticket, User} from '../model/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
+import {distinctUntilChanged} from 'rxjs/operators'
 import {Message} from 'stompjs';
 import {ConferenceService} from './conference.service';
 import {AuthService} from "./auth.service";
@@ -21,6 +22,8 @@ export class ClassroomService {
   private tickets: Subject<Ticket[]>;
   private usersInConference: Subject<User[]>;
   private inviteUsers: Subject<boolean>;
+  private conferenceWindowHandle: Window;
+  private isWindowhandleOpen: Subject<Boolean>;
   private courseId = 0;
   private service = "bigbluebutton"
   incomingCallSubscriptions: Subscription[] = [];
@@ -29,6 +32,14 @@ export class ClassroomService {
 
   public constructor(private authService: AuthService, private conferenceService: ConferenceService, private mDialog: MatDialog) {
     this.users = new BehaviorSubject<User[]>([]);
+    this.isWindowhandleOpen = new Subject<Boolean>();
+    this.isWindowhandleOpen.asObservable().subscribe((isOpen) => {
+      console.log(isOpen)
+        if(!isOpen){
+          this.closeConference();
+        }
+    })
+    this.isWindowhandleOpen.next(true)
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.usersInConference = new BehaviorSubject<User[]>([]);
     this.inviteUsers = new Subject<boolean>();
@@ -36,6 +47,18 @@ export class ClassroomService {
       this.service = service
     })
     this.dialog = mDialog;
+    //this.conferenceWindowHandle = new Window();
+    setInterval(()=>{
+      if(this.conferenceWindowHandle) {
+        if (this.conferenceWindowHandle.closed) {
+          this.isWindowhandleOpen.next(false)
+        } else {
+          this.isWindowhandleOpen.next(true)
+        }
+      }
+    },1000)
+
+
   }
 
   /**
@@ -45,6 +68,9 @@ export class ClassroomService {
     return this.users.asObservable();
   }
 
+  public getConferenceWindowHandle() {
+    return this.isWindowhandleOpen.asObservable();
+  }
   /**
    * @return Users in public conferences.
    */
@@ -54,11 +80,6 @@ export class ClassroomService {
 
   public userInviter(): Observable<boolean> {
     return this.inviteUsers.asObservable();
-  }
-  public subscribeIncomingCalls(subscription) {
-    this.incomingCallSubscriptions.forEach(s => s.unsubscribe());
-    this.incomingCallSubscriptions = [];
-    this.incomingCallSubscriptions.push(subscription);
   }
 
   /**
@@ -198,6 +219,9 @@ export class ClassroomService {
   }
 
   public closeConference() {
+    if(this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
+      this.conferenceWindowHandle.close();
+    }
     this.send('/websocket/classroom/conference/close', {});
   }
 
@@ -212,15 +236,15 @@ export class ClassroomService {
 
   private handleConferenceOpenedMsg(msg: Message) {
     this.inviteUsers.next(true)
-    window.open(JSON.parse(msg.body).href)
+    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href)
   }
 
   private handleConferenceJoinedMsg(msg: Message) {
-    window.open(JSON.parse(msg.body).href)
+    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href)
   }
 
   public joinConference(user: User, mid:number = 0) {
-    this.send('/websocket/classroom/conference/join', {user: user, mid: mid});
+    this.send('/websocket/classroom/conference/join', {user: user, mid: mid, courseId: this.courseId});
   }
 
   public showConference() {
@@ -229,5 +253,13 @@ export class ClassroomService {
 
   public hideConference() {
     this.send('/websocket/classroom/conference/hide', {});
+  }
+
+  public showUser() {
+    this.send('/websocket/classroom/user/show', {courseId: this.courseId});
+  }
+
+  public hideUser() {
+    this.send('/websocket/classroom/user/hide', {courseId: this.courseId});
   }
 }
