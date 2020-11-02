@@ -26,6 +26,14 @@ class User(val prename: String, val surname: String, val email: String,
   override def getName: String = username
 
   /**
+    * @param role A global role
+    * @param roles Optional set of roles
+    * @return Returns true exactly if the users global role is any of the given role.
+    */
+  def hasRole(role: GlobalRole.Value, roles: GlobalRole.Value*): Boolean =
+    globalRole == role || roles.contains(globalRole)
+
+  /**
     * Compares objects instances: two users are equal if they have the same username
     * @param other Other user
     * @return true, if they have the same username.
