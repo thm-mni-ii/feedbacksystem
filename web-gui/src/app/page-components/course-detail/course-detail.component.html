@@ -19,7 +19,7 @@
 
     <!--<button mat-icon-button color="primary" *ngIf="classroomService.isJoined()" (click)="createTicket()" matTooltip="Ticket erstellen"><mat-icon >live_help</mat-icon></button>-->
     <button mat-icon-button class="green" *ngIf="classroomService.isJoined()" [routerLink]="['/','courses',courseID,'tickets']" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
-    <button mat-icon-button *ngIf="!classroomService.isJoined()" (click)="goOnline()" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
+    <button mat-icon-button *ngIf="!classroomService.isJoined()" (click)="joinClassroom()" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
     <!--<button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>-->
 
     <button mat-icon-button *ngIf="isAuthorized() || role" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>

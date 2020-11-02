@@ -148,18 +148,10 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
-  openUrlInNewWindow(url: string) {
-    window.open(url, '_blank');
-  }
-
-  goOnline() {
+  joinClassroom() {
     // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     this.classroomService.join(this.courseID);
     this.router.navigate(['courses', this.courseID, 'tickets']);
-  }
-
-  goOffline() {
-    this.classroomService.leave();
   }
 
   createTicket() {
