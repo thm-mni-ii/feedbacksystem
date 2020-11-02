@@ -3,6 +3,7 @@ package de.thm.ii.fbs.model.classroom
 import java.util.Objects
 
 import de.thm.ii.fbs.model.User
+import org.json.JSONObject
 
 /**
   * An issue ticket
@@ -32,4 +33,18 @@ case class Ticket(courseId: Int, desc: String, status: String, creator: User,
     case that: Ticket => that.canEqual(this) && this.id == that.id
     case _ => false
   }
+
+  /**
+    * @return ticket as JSONObject
+    */
+  def toJson: JSONObject = new JSONObject()
+    .put("id", this.id)
+    .put("desc", this.desc)
+    .put("creator", this.creator.toJson)
+    .put("assignee", this.assignee.toJson)
+    .put("priority", this.priority)
+    .put("status", this.status)
+    .put("courseId", this.courseId)
+    .put("timestamp", this.timestamp)
+    .put("queuePosition", this.queuePosition)
 }

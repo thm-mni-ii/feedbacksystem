@@ -18,7 +18,7 @@ class UserSessionMapTests {
   }
 
   /**
-    * Tests the get method by Invitation
+    * Tests the get method by Conference
     */
   @Test
   def getBySessionTest(): Unit = {
@@ -35,10 +35,10 @@ class UserSessionMapTests {
   def getByPrincipalTest(): Unit = {
     val userSessionMap = new UserSessionMap
     userSessionMap.map(sessionID, testUser)
-    val testInvitationOption = userSessionMap.get(testUser)
-    Assert.assertTrue(testInvitationOption.isDefined)
-    val testInvitationOptionEmpty = userSessionMap.get(exampleUser)
-    Assert.assertTrue(testInvitationOptionEmpty.isEmpty)
+    val testConferenceOption = userSessionMap.get(testUser)
+    Assert.assertTrue(testConferenceOption.isDefined)
+    val testConferenceOptionEmpty = userSessionMap.get(exampleUser)
+    Assert.assertTrue(testConferenceOptionEmpty.isEmpty)
   }
 
   /**
@@ -49,8 +49,8 @@ class UserSessionMapTests {
     val userSessionMap = new UserSessionMap
     userSessionMap.map(sessionID, testUser)
     userSessionMap.delete(sessionID)
-    val testInvitationOption = userSessionMap.get(testUser)
-    Assert.assertTrue(testInvitationOption.isEmpty)
+    val testConferenceOption = userSessionMap.get(testUser)
+    Assert.assertTrue(testConferenceOption.isEmpty)
   }
 
   /**
@@ -61,8 +61,8 @@ class UserSessionMapTests {
     val userSessionMap = new UserSessionMap
     userSessionMap.map(sessionID, testUser)
     userSessionMap.delete(testUser)
-    val testInvitationOption = userSessionMap.get(sessionID)
-    Assert.assertTrue(testInvitationOption.isEmpty)
+    val testConferenceOption = userSessionMap.get(sessionID)
+    Assert.assertTrue(testConferenceOption.isEmpty)
   }
 
   /**
@@ -72,8 +72,8 @@ class UserSessionMapTests {
   def onMapTest(): Unit = {
     val userSessionMap = new UserSessionMap
     var run = false
-    userSessionMap.onMap((invitation, principal) => {
-      Assert.assertEquals(sessionID, invitation)
+    userSessionMap.onMap((Conference, principal) => {
+      Assert.assertEquals(sessionID, Conference)
       Assert.assertEquals(testUser, principal)
       run = true
     })
@@ -87,8 +87,8 @@ class UserSessionMapTests {
   def onDeleteTest(): Unit = {
     val userSessionMap = new UserSessionMap
     var run = false
-    userSessionMap.onDelete((invitation, principal) => {
-      Assert.assertEquals(sessionID, invitation)
+    userSessionMap.onDelete((Conference, principal) => {
+      Assert.assertEquals(sessionID, Conference)
       Assert.assertEquals(testUser, principal)
       run = true
     })

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
-import org.json.{JSONArray, JSONObject}
+import org.json.JSONArray
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.{MessageMapping, Payload}
@@ -31,19 +31,13 @@ class ClassroomController {
   implicit private val courseRegistrationService: CourseRegistrationService = null
   private val courseIdLiteral = "courseId";
 
-  private def userToJson(p: Participant): JSONObject = new JSONObject()
-    .put("username", p.user.username)
-    .put("prename", p.user.prename)
-    .put("surname", p.user.surname)
-    .put("role", p.role)
-
   // Removes users that lose connections
   UserSessionMap.onDelete((id: String, principal: Principal) => {
     Classroom.getAll.find(p => p._2.user.equals(principal)) match {
       case Some((cid, user)) =>
         Classroom.deleteByB(user)
         UserConferenceMap.delete(principal)
-        smt.convertAndSend("/topic/classroom/" + cid + "/left", userToJson(user).toString)
+        smt.convertAndSend("/topic/classroom/" + cid + "/left", user.toJson.toString)
       case None => // Nothing on purpose
     }
   })
@@ -59,7 +53,11 @@ class ClassroomController {
     val cid = m.get(courseIdLiteral).asInt();
     val user = headerAccessor.getUser
     this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(user)) match {
-      case Some(participant) => Classroom.join(cid, participant)
+      case Some(participant) =>
+        if (participant.role < CourseRole.STUDENT) {
+          participant.isVisible = true
+        }
+        Classroom.join(cid, participant)
         smt.convertAndSend("/topic/classroom/" + cid + "/joined", participant)
       case _ => logger.warn("User not registered in course")
     }
@@ -91,23 +89,49 @@ class ClassroomController {
   def allUser(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val cid = m.get(courseIdLiteral).asInt()
     val principal = headerAccessor.getUser
-    var participants = Classroom.getParticipants(cid);
+    var participants = Classroom.getParticipants(cid).filter(p => p.user.username != principal.getName || p.isVisible)
     (this.userService.find(principal.getName), this.courseRegistrationService.getParticipants(cid).find(p => p.user.equals(principal))) match {
       case (Some(globalUser), Some(localUser)) =>
         if (globalUser.globalRole > GlobalRole.MODERATOR && localUser.role > CourseRole.TUTOR) {
           participants = participants
-            .filter(u => u.role < CourseRole.TUTOR || UserConferenceMap.getA(u.user).nonEmpty)
+            .filter(u => u.isVisible)
         }
       case (Some(globalUser), None) =>
-        if (globalUser.globalRole <= GlobalRole.MODERATOR) {
+        if (globalUser.globalRole > GlobalRole.MODERATOR) {
           participants = participants
-            .filter(u => u.role < CourseRole.TUTOR)
+            .filter(u => u.isVisible)
         }
       case _ => throw new IllegalArgumentException()
     }
-    val filteredParticipants = participants.map(userToJson)
+    val filteredParticipants = participants.map(p => p.toJson)
       .foldLeft(new JSONArray())((a, u) => a.put(u))
       .toString()
     smt.convertAndSendToUser(principal.getName(), "/classroom/users", filteredParticipants)
+  }
+
+  /**
+    * Retrives all users messages
+    * @param m Message
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/user/show"))
+  def showConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val participant: Participant = Classroom.getParticipants(m.get("courseId").asText.toInt)
+    .find(p => p.user == headerAccessor.getUser).getOrElse(throw new NoSuchElementException)
+    participant.isVisible = true
+    smt.convertAndSend("/topic/classroom/" + m.get("courseId").asText.toInt + "/joined", {})
+  }
+
+  /**
+    * Removes user and related conference from map
+    * @param m Composed ticket message.
+    * @param headerAccessor Header information
+    */
+  @MessageMapping(value = Array("/classroom/user/hide"))
+  def hideConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val participant: Participant = Classroom.getParticipants(m.get("courseId").asText.toInt)
+    .find(p => p.user == headerAccessor.getUser).getOrElse(throw new NoSuchElementException)
+    participant.isVisible = false
+    smt.convertAndSend("/topic/classroom/" + m.get("courseId").asText.toInt + "/left", {})
   }
 }

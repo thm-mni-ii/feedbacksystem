@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.conferences
 import java.net.URI
 
 import de.thm.ii.fbs.model.User
+import org.json.JSONObject
 
 /**
   * A Conference created by a ConferenceService
@@ -19,6 +20,16 @@ abstract class Conference {
   val serviceName: String
 
   /**
+    * The courseid of the Conference
+    */
+  val courseId: Int
+
+  /**
+    * The visibility of the Conference
+    */
+  var isVisible: Boolean
+
+  /**
     * Gets the http URL for the conference
     * @param user the user for which to generate the URL
     * @param moderator the type of url to generate
@@ -31,4 +42,10 @@ abstract class Conference {
     * @return the map
     */
   def toMap: Map[String, String]
+
+  /**
+    * Creates a JSONObject containing information about the Conference
+    * @return the JSONObject
+    */
+  def toJson: JSONObject
 }
