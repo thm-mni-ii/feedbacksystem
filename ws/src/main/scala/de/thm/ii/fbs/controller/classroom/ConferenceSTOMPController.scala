@@ -3,6 +3,7 @@ package de.thm.ii.fbs.controller.classroom
 import java.security.Principal
 
 import com.fasterxml.jackson.databind.JsonNode
+import de.thm.ii.fbs.model.CourseRole
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap}
 import de.thm.ii.fbs.services.conferences.{BBBService, Conference, ConferenceServiceFactoryService, JitsiService}
 import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
@@ -83,8 +84,10 @@ class ConferenceSTOMPController {
     */
   @MessageMapping(value = Array("/classroom/conference/join"))
   def joinConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
+    val isAuthorized: Boolean = Classroom.getParticipants(m.get("courseId").asInt)
+      .find(p => p.user.username == headerAccessor.getUser.getName).get.role < CourseRole.STUDENT
     val conference: Conference = UserConferenceMap.get(userService.find(m.get("user").get("username").asText).get)
-      .filter(c => c.visibility == "true" || m.get("mid").asText == c.id) match {
+      .filter(c => c.visibility == "true" || m.get("mid").asText == c.id || isAuthorized) match {
       case Some(conference) => conference
       case None => throw new IllegalArgumentException("Unknown Conference Host")
     }
@@ -135,10 +138,14 @@ class ConferenceSTOMPController {
     @MessageMapping(value = Array("/classroom/conference/users"))
     def getUsers(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
       val courseId = m.get("courseId").asInt()
-      val user = this.userService.find(headerAccessor.getUser.getName)
-      smt.convertAndSendToUser(user.get.username, "/classroom/conference/users",
+      val user = this.userService.find(headerAccessor.getUser.getName).getOrElse(throw new NoSuchElementException)
+      val accessorParticipant = Classroom.getParticipants(courseId).find(p => p.user.username == user.username).get
+      val isAuthorized = accessorParticipant.role <= CourseRole.TUTOR
+
+      smt.convertAndSendToUser(user.username, "/classroom/conference/users",
         UserConferenceMap.getAll
-          .filter(c => (c._1.visibility == "true" || c._2 == headerAccessor.getUser) && c._1.courseId == courseId.toString)
+          .filter(c => (c._1.visibility == "true" || (isAuthorized && accessorParticipant.user.username != c._2.getName))
+            && c._1.courseId == courseId.toString)
           .map(c => userService.find(c._2.getName).get.toJson).foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
        /* UserConferenceMap.getConferences(courseId)

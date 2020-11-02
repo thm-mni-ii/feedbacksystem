@@ -2,7 +2,7 @@ import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
 import {Ticket, User} from '../../model/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {interval, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import { first } from 'rxjs/operators';
 import {UserService} from '../../service/user.service';
 import {ClassroomService} from '../../service/classroom.service';
@@ -10,7 +10,6 @@ import {ConferenceService} from '../../service/conference.service';
 import {AuthService} from "../../service/auth.service";
 import {Roles} from "../../model/Roles";
 import {UpdateCourseDialogComponent} from "../update-course-dialog/update-course-dialog.component";
-import {CloseTicketDialogComponent} from "../close-ticket-dialog/close-ticket-dialog.component";
 
 @Component({
   selector: 'app-assign-ticket-dialog',
@@ -65,10 +64,7 @@ export class AssignTicketDialogComponent implements OnInit {
   public isInConference(user: User) {
     return this.usersInConference.filter(u => u.username == user.username).length != 0;
   }
-  joinConference(user: User) {
+  public joinConference(user: User) {
     this.classroomService.joinConference(user)
-  }
-  public openUrlInNewWindow(url: string): Window {
-    return window.open(url, '_blank');
   }
 }
