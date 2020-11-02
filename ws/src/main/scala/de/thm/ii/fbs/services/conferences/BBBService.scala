@@ -31,7 +31,7 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     * @param courseid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(courseid: String): Conference = {
+  override def createConference(courseid: Int): Conference = {
     val cid = UUID.randomUUID().toString
     val participantPassword = UUID.randomUUID().toString
     val modPassword = UUID.randomUUID().toString
@@ -41,8 +41,8 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     new Conference {
       override val id: String = cid
       override val serviceName: String = BBBService.name
-      override var visibility: String = "false"
-      override val courseId: String = courseid
+      override var isVisible: Boolean = false
+      override val courseId: Int = courseid
       private val meetingPassword: String = participantPassword
       private val moderatorPassword: String = modPassword
 
@@ -61,7 +61,7 @@ class BBBService(templateBuilder: RestTemplateBuilder,
         .put("service", serviceName)
         .put("meetingPassword", meetingPassword)
         .put("moderatorPassword", moderatorPassword)
-        .put("visibility", visibility)
+        .put("visibility", isVisible)
     }
   }
 

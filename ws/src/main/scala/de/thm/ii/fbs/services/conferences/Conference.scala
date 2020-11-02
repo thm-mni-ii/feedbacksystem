@@ -22,12 +22,12 @@ abstract class Conference {
   /**
     * The courseid of the Conference
     */
-  val courseId: String
+  val courseId: Int
 
   /**
     * The visibility of the Conference
     */
-  var visibility: String
+  var isVisible: Boolean
 
   /**
     * Gets the http URL for the conference

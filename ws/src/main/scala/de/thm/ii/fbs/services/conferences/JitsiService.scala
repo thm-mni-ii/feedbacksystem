@@ -24,13 +24,13 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
     * @param courseid the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(courseid: String): Conference = {
+  override def createConference(courseid: Int): Conference = {
     val cid = UUID.randomUUID().toString
     val uri = this.registerJitsiConference(cid)
     new Conference {
       override val id: String = cid
       override val serviceName: String = JitsiService.name
-      override val courseId: String = courseid
+      override val courseId: Int = courseid
       private val meetingURL: URI = uri
 
       override def getURL(user: User, moderator: Boolean): URI = meetingURL
@@ -39,7 +39,7 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
       /**
         * The visibility of the Conference
         */
-      override var visibility: String = "false"
+      override var isVisible: Boolean = false
 
       /**
         * Creates a JSONObject containing information about the Conference
@@ -49,7 +49,7 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
       override def toJson: JSONObject = new JSONObject().put("meetingId", id)
         .put("courseId", courseId)
         .put("service", serviceName)
-        .put("visibility", visibility)
+        .put("visibility", isVisible)
 }
   }
 

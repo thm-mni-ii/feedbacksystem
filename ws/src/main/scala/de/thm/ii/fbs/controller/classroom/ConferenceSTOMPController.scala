@@ -44,13 +44,13 @@ class ConferenceSTOMPController {
     val inviter = headerAccessor.getUser
     val conference = UserConferenceMap.get(inviter).getOrElse(throw new Exception("Unkonwn Conference"))
     val invitees = p.get("users").elements()
-    if (courseAuthService.isPrivilegedInCourse(conference.courseId.toInt, userService.find(inviter.getName).get)) {
+    if (courseAuthService.isPrivilegedInCourse(conference.courseId, userService.find(inviter.getName).get)) {
       invitees.forEachRemaining(invitee => {
-        if (Classroom.getParticipants(conference.courseId.toInt).exists(p => p.user.username == invitee.get("username").asText())){
+        if (Classroom.getParticipants(conference.courseId).exists(p => p.user.username == invitee.get("username").asText())){
           conference.getURL(userService.find(invitee.get("username").asText()).get)
           smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite",
             new JSONObject()
-              .put("user", userService.find(inviter.getName).get.toJson)
+              .put("user", userService.find(inviter.getName).get.toJson())
               .put("cid", conference.id)
               .toString)
         }
@@ -70,7 +70,7 @@ class ConferenceSTOMPController {
       case Some(name) => throw new IllegalArgumentException(s"Unknown service: ${name}")
       case None => throw new IllegalArgumentException("Service name not provided")
     }
-    val courseId: String = m.retrive("courseId").asText().getOrElse(throw new IllegalArgumentException("Missing courseId"))
+    val courseId: Int = m.retrive("courseId").asInt().getOrElse(throw new IllegalArgumentException("Missing courseId"))
     val conference: Conference = conferenceService.createConference(courseId)
     UserConferenceMap.map(conference, headerAccessor.getUser)
     smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/opened",
@@ -87,7 +87,7 @@ class ConferenceSTOMPController {
     val isAuthorized: Boolean = Classroom.getParticipants(m.get("courseId").asInt)
       .find(p => p.user.username == headerAccessor.getUser.getName).get.role < CourseRole.STUDENT
     val conference: Conference = UserConferenceMap.get(userService.find(m.get("user").get("username").asText).get)
-      .filter(c => c.visibility == "true" || m.get("mid").asText == c.id || isAuthorized) match {
+      .filter(c => c.isVisible || m.get("mid").asText == c.id || isAuthorized) match {
       case Some(conference) => conference
       case None => throw new IllegalArgumentException("Unknown Conference Host")
     }
@@ -114,8 +114,8 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/show"))
   def showConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
-    conference.visibility = "true"
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", {})
+    conference.isVisible = true
+    smt.convertAndSend("/topic/classroom/" + conference.courseId.toString + "/conference/opened", {})
   }
 
   /**
@@ -126,8 +126,8 @@ class ConferenceSTOMPController {
   @MessageMapping(value = Array("/classroom/conference/hide"))
   def hideConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val conference: Conference = UserConferenceMap.get(headerAccessor.getUser).getOrElse(throw new Exception("No Conference Found"))
-    conference.visibility = "false"
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", {})
+    conference.isVisible = false
+    smt.convertAndSend("/topic/classroom/" + conference.courseId.toString + "/conference/closed", {})
   }
 
     /**
@@ -144,23 +144,17 @@ class ConferenceSTOMPController {
 
       smt.convertAndSendToUser(user.username, "/classroom/conference/users",
         UserConferenceMap.getAll
-          .filter(c => (c._1.visibility == "true" || (isAuthorized && accessorParticipant.user.username != c._2.getName))
-            && c._1.courseId == courseId.toString)
+          .filter(c => (c._1.isVisible || (isAuthorized && accessorParticipant.user.username != c._2.getName))
+            && c._1.courseId == courseId)
           .map(c => userService.find(c._2.getName).get.toJson).foldLeft(new JSONArray())((a, u) => a.put(u))
           .toString)
-       /* UserConferenceMap.getConferences(courseId)
-          .filter(conference => conference.isVisible)
-          .map(conference => UserConferenceMap.get(conference))
-          .map(principals => Classroom.getParticipants(courseId).find(p => p.user.username == principal.).get.toJson)
-           */
-
     }
 
   UserConferenceMap.onMap((conference: Conference, p: Principal) => {
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/opened", {})
+    smt.convertAndSend("/topic/classroom/" + conference.courseId.toString + "/conference/opened", {})
   })
 
   UserConferenceMap.onDelete((conference: Conference, p: Principal) => {
-    smt.convertAndSend("/topic/classroom/" + conference.courseId + "/conference/closed", {})
+    smt.convertAndSend("/topic/classroom/" + conference.courseId.toString + "/conference/closed", {})
   })
 }

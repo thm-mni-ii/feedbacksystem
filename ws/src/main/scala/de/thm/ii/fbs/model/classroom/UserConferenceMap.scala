@@ -88,7 +88,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     * @param courseId The course id
     * @return The Conferences in the course
     */
-  def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId.toString).toList
+  def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId).toList
 }
 
 /**

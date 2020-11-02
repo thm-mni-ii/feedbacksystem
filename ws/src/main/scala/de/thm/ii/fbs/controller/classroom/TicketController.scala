@@ -25,17 +25,15 @@ class TicketController {
   @Autowired
   private val courseAuthService: CourseAuthService = null
 
-  private val courseIdLiteral = "courseId"
-
   // Tickets
   Tickets.onCreate(ticket => {
-    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/create", ticketToJson(ticket))
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/create", ticket.toJson)
   })
   Tickets.onUpdate(ticket => {
-    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/update", ticketToJson(ticket))
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/update", ticket.toJson)
   })
   Tickets.onRemove(ticket => {
-    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/remove", ticketToJson(ticket))
+    smt.convertAndSend("/topic/classroom/" + ticket.courseId + "/ticket/remove", ticket.toJson)
   })
 
   /**
@@ -45,7 +43,7 @@ class TicketController {
     */
   @MessageMapping(value = Array("/classroom/tickets"))
   def listAllTickets(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
-    val courseIdOption = m.retrive(courseIdLiteral).asInt()
+    val courseIdOption = m.retrive("courseId").asInt()
     val userOption = courseAuthService.getGlobalUser(headerAccessor)
 
     if (courseIdOption.isEmpty) {
@@ -67,7 +65,7 @@ class TicketController {
     Tickets.get(courseID)
       .sortWith((a, b) => a.timestamp < b.timestamp)
       .zipWithIndex.map { case (t: Ticket, i: Int) => t.queuePosition = i + 1; t }
-      .map { t: Ticket => ticketToJson(t) }
+      .map { t: Ticket => t.toJson }
       .filter(filterFunction)
       .foldLeft(new JSONArray())((a, t) => a.put(t))
       .toString
@@ -92,7 +90,7 @@ class TicketController {
     }
     val ticketOpt = for {
       user <- courseAuthService.getCourseUser(headerAccessor, m)
-      courseId <- m.retrive(courseIdLiteral).asInt()
+      courseId <- m.retrive("courseId").asInt()
       desc <- m.retrive("desc").asText()
       status <- m.retrive("status").asText()
       timestamp <- m.retrive("timestamp").asLong()
@@ -114,7 +112,7 @@ class TicketController {
     val ticketAndUser = for {
       user <- courseAuthService.getCourseUser(headerAccessor, m)
       id <- m.retrive("id").asText()
-      courseId <- m.retrive(courseIdLiteral).asInt()
+      courseId <- m.retrive("courseId").asInt()
       desc <- m.retrive("desc").asText()
       creator <- m.retrive("creator").asObject()
       assignee <- m.retrive("assignee").asObject()
@@ -163,21 +161,4 @@ class TicketController {
       case None => throw new MessagingException("Invalid msg: " + m)
     }
   }
-
-  private def userToJson(user: User): JSONObject = new JSONObject()
-    .put("username", user.username)
-    .put("prename", user.prename)
-    .put("surname", user.surname)
-    .put("role", user.globalRole.id)
-
-  private def ticketToJson(ticket: Ticket): JSONObject = new JSONObject()
-    .put("id", ticket.id)
-    .put("desc", ticket.desc)
-    .put("creator", userToJson(ticket.creator))
-    .put("assignee", userToJson(ticket.assignee))
-    .put("priority", ticket.priority)
-    .put("status", ticket.status)
-    .put(courseIdLiteral, ticket.courseId)
-    .put("timestamp", ticket.timestamp)
-    .put("queuePosition", ticket.queuePosition)
 }
