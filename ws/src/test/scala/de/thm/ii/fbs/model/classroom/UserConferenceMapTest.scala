@@ -1,19 +1,43 @@
 package de.thm.ii.fbs.model.classroom
 
 import de.thm.ii.fbs.model.{GlobalRole, User}
-import org.junit.{Assert, Test}
+import de.thm.ii.fbs.services.conferences.{BBBService, ConferenceService, ConferenceServiceFactoryService}
+import org.junit.runner.RunWith
+import org.junit.{AfterClass, Assert, BeforeClass, Test}
+import org.mockserver.integration.ClientAndServer
+import org.mockserver.integration.ClientAndServer.startClientAndServer
+import org.mockserver.mock.action.ExpectationCallback
+import org.mockserver.model.{HttpRequest, HttpResponse}
+import org.mockserver.model.HttpRequest.request
+import org.mockserver.model.HttpResponse.response
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringRunner
 
 import scala.collection.mutable
 
 /**
   * Tests the UserConferenceMap
   */
+@RunWith(classOf[SpringRunner])
+@SpringBootTest(classes = Array(classOf[RestTemplateAutoConfiguration]))
+@ContextConfiguration(classes = Array(classOf[ConferenceServiceFactoryService]))
 class UserConferenceMapTest {
+  /**
+    * Factory for conference Services
+    */
+  @Autowired
+  private val conferenceServiceFactoryService: ConferenceServiceFactoryService = null
+
   /**
     * Tests the map method
     */
   @Test
   def mapTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     Assert.assertEquals(1, userConferenceMap.getAll.size)
@@ -24,6 +48,8 @@ class UserConferenceMapTest {
     */
   @Test
   def getByConferenceTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     val testUserOption = userConferenceMap.get(testConference)
@@ -35,6 +61,8 @@ class UserConferenceMapTest {
     */
   @Test
   def getByPrincipalTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     val testConferenceOption = userConferenceMap.get(testUser)
@@ -48,6 +76,8 @@ class UserConferenceMapTest {
     */
   @Test
   def deleteConferenceTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     userConferenceMap.delete(testConference)
@@ -60,6 +90,8 @@ class UserConferenceMapTest {
     */
   @Test
   def deletePrincipalTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     userConferenceMap.delete(testUser)
@@ -72,6 +104,8 @@ class UserConferenceMapTest {
     */
   @Test
   def onMapTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     var run = false
     userConferenceMap.onMap((Conference, principal) => {
@@ -87,6 +121,8 @@ class UserConferenceMapTest {
     * Tests the onDelete method
     */
   def onDeleteTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     var run = false
     userConferenceMap.onDelete((Conference, principal) => {
@@ -103,6 +139,8 @@ class UserConferenceMapTest {
     * Tests the exists method
     */
   def existsTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     val existingUser = userConferenceMap.exists(testUser)
@@ -115,6 +153,8 @@ class UserConferenceMapTest {
     * Tests the getConference method
     */
   def getConferencesTests(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
     val userConferenceMap = new UserConferenceMap
     userConferenceMap.map(testConference, testUser)
     val Conferences = userConferenceMap.getConferences(2)
@@ -123,7 +163,41 @@ class UserConferenceMapTest {
 
   private val testUser = new User("Test", "User",
     "test.user@example.org", "test", GlobalRole.USER, None, 0)
-  private val testConference = BBBConference(testUser, 2, true, "bbb", "1234", "12345678", "87654321")
   private val exampleUser = new User("Example", "User",
     "example.user@example.org", "example", GlobalRole.USER, None, 0)
+}
+object UserConferenceMapTest {
+  private var mockServer: ClientAndServer = _
+
+  /**
+    * Executed before the tests of this class are run
+    */
+  @BeforeClass def startServer(): Unit = {
+    mockServer = startClientAndServer(5080)
+    mockServer.when(request.withPath("/bbb/api/create")).callback(new ExpectationCallback() {
+      override def handle(httpRequest: HttpRequest): HttpResponse = {
+        val queryMap = new mutable.HashMap[String, String]()
+        for (i <- 0 until httpRequest.getQueryStringParameters.size()) {
+          val param = httpRequest.getQueryStringParameters.get(i)
+          val key = param.getName.getValue
+          val value = param.getValues.get(0).getValue
+          queryMap.put(key, value)
+        }
+        val missingParam = List("name", "meetingID", "attendeePW", "moderatorPW", "checksum")
+          .exists(paramName => !queryMap.contains(paramName))
+        if (missingParam) {
+          response().withStatusCode(400)
+        } else {
+          response().withStatusCode(200)
+        }
+      }
+    })
+  }
+
+  /**
+    * Executed after the tests of this class are run
+    */
+  @AfterClass def stopServer(): Unit = {
+    mockServer.stop
+  }
 }
