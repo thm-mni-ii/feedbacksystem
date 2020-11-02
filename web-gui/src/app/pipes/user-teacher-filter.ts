@@ -9,6 +9,6 @@ export class UserTeacherFilter implements PipeTransform {
     if (!items) {
       return items;
     }
-    return items.filter(item => item.role == "DOCENT" || item.role == "TUTOR");
+    return items.filter(item => item.courseRole == "DOCENT" || item.courseRole == "TUTOR");
   }
 }

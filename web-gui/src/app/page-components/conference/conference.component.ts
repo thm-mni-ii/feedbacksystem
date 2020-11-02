@@ -7,13 +7,11 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
-import {GeneralCourseInformation, Ticket, User} from '../../model/HttpInterfaces';
+import {Ticket, User} from '../../model/HttpInterfaces';
 import {Observable, Subscription, timer, interval, BehaviorSubject} from 'rxjs';
 import {ClassroomService} from '../../service/classroom.service';
 import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
 import {NewconferenceDialogComponent} from "../../dialogs/newconference-dialog/newconference-dialog.component";
-import {first, share} from 'rxjs/operators';
-import {IncomingCallDialogComponent} from "../../dialogs/incoming-call-dialog/incoming-call-dialog.component";
 import {AuthService} from "../../service/auth.service";
 import {Roles} from "../../model/Roles";
 import {InvitetoConferenceDialogComponent} from "../../dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component";
@@ -33,12 +31,13 @@ export class ConferenceComponent implements OnInit {
   }
   courseId: number;
   users: User[] = [];
+  usersInConference: User[] = [];
   tickets: Observable<Ticket[]>;
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
   username: string;
-  usersInConference: User[] = [];
+
   conferenceWindowOpen: Boolean = false;
 
   ngOnInit(): void {
@@ -86,7 +85,7 @@ export class ConferenceComponent implements OnInit {
     this.dialog.open(AssignTicketDialogComponent, {
       height: 'auto',
       width: 'auto',
-      data: {courseID: this.courseId, users: this.users, ticket: ticket}
+      data: {courseID: this.courseId, ticket: ticket}
     });
   }
 
@@ -103,15 +102,14 @@ export class ConferenceComponent implements OnInit {
       return a.timestamp > b.timestamp ? 1 : -1;
     });
   }
-
   public sortUsers(users) {
     return users.sort((a, b) => {
-      if (a.role > b.role) {
+      if (a.courseRole > b.courseRole) {
         return 1;
-      } else if ( a.role < b.role) {
+      } else if ( a.courseRole < b.courseRole) {
         return -1;
       } else {
-        if (a.surname > b.surname) {
+        if (a.courseRole > b.courseRole) {
           return 1;
         } else {
           return -1;
@@ -124,12 +122,10 @@ export class ConferenceComponent implements OnInit {
     Notification.requestPermission();
     this.classroomService.join(this.courseId);
   }
-
   leaveClassroom() {
     this.classroomService.leave();
     this.router.navigate(['courses', this.courseId]);
   }
-
   public parseCourseRole(role: String): String{
     switch(role) {
       case "DOCENT": return "Dozent"
@@ -137,7 +133,6 @@ export class ConferenceComponent implements OnInit {
       case "STUDENT": return "Student"
     }
   }
-
   public createTicket() {
     this.dialog.open(NewticketDialogComponent, {
       height: 'auto',
@@ -149,7 +144,6 @@ export class ConferenceComponent implements OnInit {
       }
     });
   }
-
   public isInConference(user: User) {
     return this.usersInConference.filter(u => u.username == user.username).length != 0;
   }

@@ -2,7 +2,6 @@ import {Component, Inject, OnInit, Pipe, PipeTransform} from '@angular/core';
 import {Ticket, User} from '../../model/HttpInterfaces';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable} from 'rxjs';
 import { first } from 'rxjs/operators';
 import {UserService} from '../../service/user.service';
 import {ClassroomService} from '../../service/classroom.service';
@@ -18,18 +17,28 @@ import {UpdateCourseDialogComponent} from "../update-course-dialog/update-course
   providers: [UserService]
 })
 export class AssignTicketDialogComponent implements OnInit {
+
+
+  ticket: Ticket;
+  courseID: number;
+  users: User[] = [];
+  usersInConference: User[] = [];
+
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
               private conferenceService: ConferenceService, private auth: AuthService, private dialog: MatDialog) {
-    this.users = this.data.users;
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
   }
-  users: Observable<User[]>;
-  ticket: Ticket;
-  courseID: number;
-  usersInConference: User[] = [];
 
+  ngOnInit(): void {
+    this.classroomService.getUsersInConference().subscribe((users) => {
+      this.usersInConference = users;
+    })
+    this.classroomService.getUsers().subscribe((users) => {
+      this.users = users;
+    })
+  }
   public assignTicket(assignee, ticket) {
       this.ticket.assignee = assignee;
       this.classroomService.updateTicket(ticket);
@@ -37,11 +46,7 @@ export class AssignTicketDialogComponent implements OnInit {
       this.dialogRef.close();
     }
 
-  ngOnInit(): void {
-    this.classroomService.getUsersInConference().subscribe((users) => {
-      this.usersInConference = users;
-    })
-  }
+
   public closeTicket(ticket) {
     this.classroomService.removeTicket(ticket);
     this.snackBar.open(`Das Ticket wurde geschlossen`, 'OK', {duration: 3000});
