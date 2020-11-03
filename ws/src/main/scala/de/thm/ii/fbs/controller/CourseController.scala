@@ -33,7 +33,6 @@ class CourseController {
   @Autowired
   private val storageService: StorageService = null
 
-
   /**
     * Get a course list
     *
