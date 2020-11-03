@@ -47,7 +47,7 @@ class ConferenceSTOMPController {
     if (courseAuthService.isPrivilegedInCourse(conference.courseId, userService.find(inviter.getName).get)) {
       invitees.forEachRemaining(invitee => {
         if (Classroom.getParticipants(conference.courseId).exists(p => p.user.username == invitee.get("username").asText())){
-          conference.getURL(userService.find(invitee.get("username").asText()).get)
+          conference.getURL(userService.find(invitee.get("username").asText()).get, true)
           smt.convertAndSendToUser(invitee.get("username").asText(), "/classroom/invite",
             new JSONObject()
               .put("user", userService.find(inviter.getName).get.toJson())
@@ -74,7 +74,7 @@ class ConferenceSTOMPController {
     val conference: Conference = conferenceService.createConference(courseId)
     UserConferenceMap.map(conference, headerAccessor.getUser)
     smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/opened",
-      new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
+      new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get, true).toString).toString)
   }
 
   /**
@@ -93,7 +93,7 @@ class ConferenceSTOMPController {
     }
     UserConferenceMap.map(conference, headerAccessor.getUser)
     smt.convertAndSendToUser(headerAccessor.getUser.getName, "/classroom/conference/joined",
-     new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get).toString).toString)
+     new JSONObject().put("href", conference.getURL(userService.find(headerAccessor.getUser.getName).get, true).toString).toString)
   }
 
     /**

@@ -27,13 +27,14 @@ export class ClassroomService {
   private courseId = 0;
   private service = "bigbluebutton"
   incomingCallSubscriptions: Subscription[] = [];
-
+  private heartbeatInterval: number;
+  private heartbeatTime: number = 5000
   private stompRx: RxStompClient = null;
 
   public constructor(private authService: AuthService, private conferenceService: ConferenceService, private mDialog: MatDialog) {
     this.users = new BehaviorSubject<User[]>([]);
     this.isWindowhandleOpen = new Subject<Boolean>();
-    this.isWindowhandleOpen.asObservable().subscribe((isOpen) => {
+    this.isWindowhandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {
       console.log(isOpen)
         if(!isOpen){
           this.closeConference();
@@ -57,8 +58,6 @@ export class ClassroomService {
         }
       }
     },1000)
-
-
   }
 
   /**
@@ -125,6 +124,10 @@ export class ClassroomService {
       this.requestUsersUpdate();
       this.requestConferenceUsersUpdate();
       this.requestTicketsUpdate();
+
+      this.heartbeatInterval = window.setInterval(()=>{
+        this.send('/websocket/classroom/heartbeat', {});
+      }, this.heartbeatTime)
     });
     this.stompRx.connect();
   }
@@ -135,6 +138,7 @@ export class ClassroomService {
    */
   public leave() {
     this.send('/websocket/classroom/leave', {courseId: this.courseId});
+    clearInterval(this.heartbeatInterval)
     return this.stompRx.disconnect();
   }
 

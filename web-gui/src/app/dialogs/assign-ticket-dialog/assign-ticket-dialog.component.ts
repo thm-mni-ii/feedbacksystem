@@ -23,6 +23,7 @@ export class AssignTicketDialogComponent implements OnInit {
   courseID: number;
   users: User[] = [];
   usersInConference: User[] = [];
+  disabled: boolean = false;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
@@ -38,6 +39,7 @@ export class AssignTicketDialogComponent implements OnInit {
     this.classroomService.getUsers().subscribe((users) => {
       this.users = users;
     })
+    this.dialogRef.afterOpened().subscribe(() => this.disabled = false)
   }
   public assignTicket(assignee, ticket) {
       this.ticket.assignee = assignee;
@@ -45,7 +47,6 @@ export class AssignTicketDialogComponent implements OnInit {
       this.snackBar.open(`${assignee.prename} ${assignee.surname} wurde dem Ticket als Bearbeiter zugewiesen`, 'OK', {duration: 3000});
       this.dialogRef.close();
     }
-
 
   public closeTicket(ticket) {
     this.classroomService.removeTicket(ticket);
@@ -59,6 +60,10 @@ export class AssignTicketDialogComponent implements OnInit {
   }
 
   public startCall(invitee) {
+    if(this.disabled){
+      return
+    }
+    this.disabled = true;
     this.classroomService.userInviter().pipe(first()).subscribe(() => {
       this.classroomService.inviteToConference(invitee);
     })
