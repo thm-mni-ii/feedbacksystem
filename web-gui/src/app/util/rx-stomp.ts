@@ -1,4 +1,4 @@
-import {CompatClient, Frame, IMessage, Stomp} from '@stomp/stompjs';
+import {Client, CompatClient, Frame, IMessage, Stomp} from '@stomp/stompjs';
 import {Observable} from 'rxjs';
 import * as SockJS from 'sockjs-client';
 
@@ -9,17 +9,14 @@ import * as SockJS from 'sockjs-client';
  * @author Andrej Sajenko
  */
 export class RxStompClient {
-  private client: CompatClient;
+  private client: Client;
 
   /**
    * Create a stomp client over a sockjs websocket.
    * @param uri The Endpoint of the websocket server.
    */
   public constructor(uri: string, connectHeaders) {
-    this.client = Stomp.over(new WebSocket(uri));
-    this.client.webSocketFactory = () => new WebSocket(uri);
-    this.client.connectHeaders = connectHeaders;
-    this.client.reconnectDelay = 2000; // 2 seconds
+    this.client = new Client({webSocketFactory: () => new WebSocket(uri), connectHeaders: connectHeaders, reconnectDelay: 10000})
   }
   /**
    * @return True if client is connected.
@@ -65,7 +62,7 @@ export class RxStompClient {
    * @param headers Optional headers.
    */
   public send(path: string, body: {} = {}, headers: {} = {}): any {
-    this.client.send(path, headers, JSON.stringify(body));
+    this.client.publish({destination:path , headers:headers, body: JSON.stringify(body)});
   }
 
   /**
