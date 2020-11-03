@@ -80,18 +80,6 @@ class TaskService {
     */
   def delete(cid: Int, tid: Int): Boolean = 1 == DB.update("DELETE FROM task WHERE task_id = ? AND course_id = ?", tid, cid)
 
-  /**
-    * Delete all files from a Task
-    *
-    * @param cid The curse id
-    * @param tid The task id
-    * @return True if successful
-    */
-  def deleteAllFiles(cid: Int, tid: Int): Boolean = {
-    submissionService.getAllByTask(cid, tid).forall(s => storageService.deleteSolutionFile(s.id)) &&
-      checkerConfigurationService.getAll(cid, tid).forall(cc => storageService.deleteConfiguration(cc.id))
-  }
-
   private def parseResult(res: ResultSet): Task = Task(
     name = res.getString("name"),
     mediaType = res.getString("media_type"),
