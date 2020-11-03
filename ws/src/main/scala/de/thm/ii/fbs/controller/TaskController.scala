@@ -29,6 +29,7 @@ class TaskController {
 
   /**
     * Get a task list
+    *
     * @param cid Course id
     * @param req http request
     * @param res http response
@@ -131,7 +132,10 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      taskService.delete(cid, tid)
+      val success = taskService.delete(cid, tid)
+
+      // If the configuration was deleted in the database -> delete all files
+      success && taskService.deleteAllFiles(cid, tid)
     } else {
       throw new ForbiddenException()
     }
