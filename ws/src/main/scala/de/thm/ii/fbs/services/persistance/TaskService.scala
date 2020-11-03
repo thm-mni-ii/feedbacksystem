@@ -18,12 +18,6 @@ import org.springframework.stereotype.Component
 class TaskService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
-  @Autowired
-  private val submissionService: SubmissionService = null
-  @Autowired
-  private val storageService: StorageService = null
 
   /**
     * Get all tasks of a course
