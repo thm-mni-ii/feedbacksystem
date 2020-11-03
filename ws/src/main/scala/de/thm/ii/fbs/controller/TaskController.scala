@@ -140,7 +140,6 @@ class TaskController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       // Save submissions and configurations
       val submissions = submissionService.getAllByTask(cid, tid)
-      print("submissions", submissions.length)
       val configurations = checkerConfigurationService.getAll(cid, tid)
 
       val success = taskService.delete(cid, tid)
