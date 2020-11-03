@@ -97,14 +97,7 @@ class StorageService {
     * @throws IOException If the i/o operation fails
     */
   def deleteConfiguration(tid: Int): Boolean = {
-    val confDir = tasksDir(tid).toFile
-
-    if (confDir.exists() && confDir.isDirectory) {
-      FileUtils.deleteDirectory(tasksDir(tid).toFile)
-      true
-    } else {
-      false
-    }
+    deleteFolder(tasksDir(tid))
   }
 
   /**
@@ -115,5 +108,16 @@ class StorageService {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteSolutionFile(sid: Int): Boolean = pathToSolutionFile(sid).exists(Files.deleteIfExists)
+  def deleteSolutionFile(sid: Int): Boolean = deleteFolder(submissionDir(sid))
+
+  private def deleteFolder(path: Path) = {
+    val confDir = path.toFile
+
+    if (confDir.exists() && confDir.isDirectory) {
+      FileUtils.deleteDirectory(confDir)
+      true
+    } else {
+      false
+    }
+  }
 }
