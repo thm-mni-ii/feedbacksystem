@@ -15,7 +15,7 @@ import {UpdateCourseDialogComponent} from "../update-course-dialog/update-course
 export class InvitetoConferenceDialogComponent implements OnInit {
   invitees: User[];
   form: FormGroup;
-
+  disabled: Boolean = false;
   conferenceSystem: string;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
               public dialogRef: MatDialogRef<UpdateCourseDialogComponent>,
@@ -25,10 +25,15 @@ export class InvitetoConferenceDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.invitees = this.data.users;
+    this.dialogRef.afterOpened().subscribe(() => this.disabled = false)
   }
 
   public startCall(invitee) {
-      this.classroomService.userInviter().pipe(first()).subscribe(() => {
+      if(this.disabled){
+        return
+      }
+       this.disabled = true;
+     this.classroomService.userInviter().pipe(first()).subscribe(() => {
         this.classroomService.inviteToConference(invitee);
       })
       this.classroomService.openConference()
