@@ -193,13 +193,13 @@ CREATE TABLE IF NOT EXISTS `fbs`.`checker_result` (
   CONSTRAINT `submussuibn_id_fk`
     FOREIGN KEY (`submission_id`)
     REFERENCES `fbs`.`user_task_submission` (`submission_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `configuration_id_fk`
     FOREIGN KEY (`configuration_id`)
     REFERENCES `fbs`.`checkrunner_configuration` (`configuration_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 LOCK TABLES `fbs`.`user` WRITE;
