@@ -18,9 +18,16 @@ import org.springframework.stereotype.Component
 class TaskService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
+  @Autowired
+  private val checkerConfigurationService: CheckerConfigurationService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
+  @Autowired
+  private val storageService: StorageService = null
 
   /**
     * Get all tasks of a course
+    *
     * @param cid Course id
     * @return List of tasks
     */
@@ -29,6 +36,7 @@ class TaskService {
 
   /**
     * Lookup task by id
+    *
     * @param id The users id
     * @return The found task
     */
@@ -65,11 +73,24 @@ class TaskService {
 
   /**
     * Delete a task by id
+    *
     * @param cid The curse id
     * @param tid The task id
     * @return True if successful
     */
   def delete(cid: Int, tid: Int): Boolean = 1 == DB.update("DELETE FROM task WHERE task_id = ? AND course_id = ?", tid, cid)
+
+  /**
+    * Delete all files from a Task
+    *
+    * @param cid The curse id
+    * @param tid The task id
+    * @return True if successful
+    */
+  def deleteAllFiles(cid: Int, tid: Int): Boolean = {
+    submissionService.getAllByTask(cid, tid).forall(s => storageService.deleteSolutionFile(s.id)) &&
+      checkerConfigurationService.getAll(cid, tid).forall(cc => storageService.deleteConfiguration(cc.id))
+  }
 
   private def parseResult(res: ResultSet): Task = Task(
     name = res.getString("name"),
