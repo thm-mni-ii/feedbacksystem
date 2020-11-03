@@ -3,8 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistance.CourseService
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseService}
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -25,12 +24,15 @@ class CourseController {
   private val courseRegistrationService: CourseRegistrationService = null
   @Autowired
   private val authService: AuthService = null
+  @Autowired
+  private val taskService: TaskService = null
 
   /**
     * Get a course list
+    *
     * @param ignoreHidden optional filter to filter only for visible courses
-    * @param req http request
-    * @param res http response
+    * @param req          http request
+    * @param res          http response
     * @return course list
     */
   @GetMapping(value = Array(""))
@@ -133,7 +135,11 @@ class CourseController {
     val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
 
     (user.globalRole, someCourseRole) match {
-      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) => courseService.delete(cid)
+      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
+        val success = courseService.delete(cid)
+
+        // If the Course was deleted in the database -> delete all files
+        success && taskService.getAll(cid).forall(t => taskService.deleteAllFiles(cid, t.id))
       case _ => throw new ForbiddenException()
     }
   }
