@@ -1,6 +1,7 @@
-import {Client, CompatClient, Frame, IMessage, Stomp} from '@stomp/stompjs';
-import {Observable} from 'rxjs';
+import {Client, CompatClient, Frame, IMessage, Stomp, StompSubscription} from '@stomp/stompjs';
+import {Observable, Subscriber} from 'rxjs';
 import * as SockJS from 'sockjs-client';
+import {Subscription} from "stompjs";
 
 
 /**
@@ -10,6 +11,7 @@ import * as SockJS from 'sockjs-client';
  */
 export class RxStompClient {
   private client: Client;
+  private subscriber: Subscriber<IMessage>[] = [];
 
   /**
    * Create a stomp client over a sockjs websocket.
@@ -40,6 +42,10 @@ export class RxStompClient {
    * @param cb Callback to be called when the client is connected
    */
   public onConnect(cb) {
+    this.client.onDisconnect = () => {
+      this.subscriber.forEach((subscriber)=> subscriber.complete())
+      this.subscriber = [];
+    }
     this.client.onConnect = cb;
   }
   /**
@@ -49,9 +55,10 @@ export class RxStompClient {
    */
   public subscribeToTopic(topic: string, headers: {} = {}): Observable<IMessage> {
     return new Observable((subj) => {
-      this.client.subscribe(topic, (msg: IMessage) => {
+     this.client.subscribe(topic, (msg: IMessage) => {
         subj.next(msg);
       }, headers);
+      this.subscriber.push(subj)
     });
   }
 
