@@ -76,8 +76,14 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     * @return boolean showing if creation of room was successful
     */
   def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Boolean = {
-    val response = getBBBAPI("create", Map("name" -> meetingName, "meetingID" -> id,
-      "attendeePW" -> password, "moderatorPW" -> moderatorPassword))
+    val request = Map(
+      "name" -> meetingName, "meetingID" -> id,
+      "attendeePW" -> password, "moderatorPW" -> moderatorPassword,
+      "meta_bbb-origin-version" -> "v2",
+      "meta_bbb-origin-server-name" -> "feedback.mni.thm.de",
+      "meta_bbb-origin" -> "Greenlight"
+    )
+    val response = getBBBAPI("create", request)
     response.getStatusCode.is2xxSuccessful()
   }
 
