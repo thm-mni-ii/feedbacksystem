@@ -79,7 +79,8 @@ object BBBServiceTest {
           val value = param.getValues.get(0).getValue
           queryMap.put(key, value)
         }
-        val missingParam = List("name", "meetingID", "attendeePW", "moderatorPW", "checksum")
+        val missingParam = List("name", "meetingID", "attendeePW", "moderatorPW", "checksum",
+          "meta_bbb-origin-version", "meta_bbb-origin-server-name", "meta_bbb-origin")
           .exists(paramName => !queryMap.contains(paramName))
         if (missingParam) {
           response().withStatusCode(400)

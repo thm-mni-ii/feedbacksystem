@@ -5,7 +5,7 @@ import java.security.MessageDigest
 import java.util.UUID
 
 import de.thm.ii.fbs.model.User
-import org.json.JSONObject
+import de.thm.ii.fbs.services.conferences.conference.{BBBConference, Conference}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
@@ -38,31 +38,7 @@ class BBBService(templateBuilder: RestTemplateBuilder,
 
     // actual registering of conference against BBB api
     this.registerBBBConference(cid, cid, participantPassword, modPassword)
-    new Conference {
-      override val id: String = cid
-      override val serviceName: String = BBBService.name
-      override var isVisible: Boolean = false
-      override val courseId: Int = courseid
-      private val meetingPassword: String = participantPassword
-      private val moderatorPassword: String = modPassword
-
-      override def getURL(user: User, moderator: Boolean): URI =
-        BBBService.this.getBBBConferenceLink(user, id, if (moderator) moderatorPassword else meetingPassword)
-
-      override def toMap: Map[String, String] = Map(
-        "meetingId" -> id,
-        "meetingPassword" -> meetingPassword,
-        "moderatorPassword" -> moderatorPassword,
-        "service" -> serviceName
-      )
-
-      override def toJson: JSONObject = new JSONObject().put("meetingId", id)
-        .put("courseId", courseId)
-        .put("service", serviceName)
-        .put("meetingPassword", meetingPassword)
-        .put("moderatorPassword", moderatorPassword)
-        .put("visibility", isVisible)
-    }
+    new BBBConference(cid, courseid, participantPassword, modPassword, this)
   }
 
   private val restTemplate = templateBuilder.build()
@@ -76,8 +52,14 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     * @return boolean showing if creation of room was successful
     */
   def registerBBBConference(id: String, meetingName: String, password: String, moderatorPassword: String): Boolean = {
-    val response = getBBBAPI("create", Map("name" -> meetingName, "meetingID" -> id,
-      "attendeePW" -> password, "moderatorPW" -> moderatorPassword))
+    val request = Map(
+      "name" -> meetingName, "meetingID" -> id,
+      "attendeePW" -> password, "moderatorPW" -> moderatorPassword,
+      "meta_bbb-origin-version" -> "v2",
+      "meta_bbb-origin-server-name" -> "feedback.mni.thm.de",
+      "meta_bbb-origin" -> "Greenlight"
+    )
+    val response = getBBBAPI("create", request)
     response.getStatusCode.is2xxSuccessful()
   }
 
@@ -92,6 +74,17 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     val link = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
     URI.create(link)
+  }
+
+  /**
+    * Ends the conference
+    * @param id the id of the meeting to end
+    * @param moderatorPassword the moderatorPassword of the meeting to end
+    * @return true if request succeeds
+    */
+  def endBBBConference(id: String, moderatorPassword: String): Boolean = {
+    val response = getBBBAPI("end", Map("meetingID" -> id, "password" -> moderatorPassword))
+    response.getStatusCode.is2xxSuccessful()
   }
 
   /**

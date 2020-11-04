@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.services.conferences
 
+import de.thm.ii.fbs.services.conferences.conference.Conference
+
 /**
   * A Service offering Web Conferences for example BigBlueButton or Jitsi
   */

@@ -4,6 +4,7 @@ import java.net.URI
 import java.util.{Calendar, UUID}
 
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.services.conferences.conference.Conference
 import io.jsonwebtoken.{Jwts, SignatureAlgorithm}
 import javax.xml.bind.DatatypeConverter
 import org.json.JSONObject
@@ -34,6 +35,8 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
       private val meetingURL: URI = uri
 
       override def getURL(user: User, moderator: Boolean): URI = meetingURL
+      override def end(): Unit = ???
+
       override def toMap: Map[String, String] = Map("id" -> id, "service" -> serviceName)
 
       /**
