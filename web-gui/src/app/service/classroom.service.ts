@@ -125,9 +125,10 @@ export class ClassroomService {
       this.requestConferenceUsersUpdate();
       this.requestTicketsUpdate();
 
-      this.heartbeatInterval = window.setInterval(()=>{
+      /* this.heartbeatInterval = window.setInterval(()=>{
         this.send('/websocket/classroom/heartbeat', {});
       }, this.heartbeatTime)
+      */
     });
     this.stompRx.connect();
   }
