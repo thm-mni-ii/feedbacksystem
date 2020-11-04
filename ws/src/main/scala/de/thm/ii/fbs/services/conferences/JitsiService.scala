@@ -35,7 +35,7 @@ class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceServi
       private val meetingURL: URI = uri
 
       override def getURL(user: User, moderator: Boolean): URI = meetingURL
-      override def end(): Unit = ???
+      override def end(): Unit = {}
 
       override def toMap: Map[String, String] = Map("id" -> id, "service" -> serviceName)
 

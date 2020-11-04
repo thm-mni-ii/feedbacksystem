@@ -19,12 +19,17 @@ import scala.language.postfixOps
   * @param templateBuilder Request template builder.
   * @param apiUrl the bbb api url
   * @param secret the bbb secret
+  * @param originName the bbb meta data that identifies the origin
+  * @param originVersion the bbb meta data the identifies the origin version
   * @author Simon Schniedenharn
   */
 @Service
 class BBBService(templateBuilder: RestTemplateBuilder,
                  @Value("${services.bbb.service-url}") private val apiUrl: String,
-                 @Value("${services.bbb.shared-secret}") private val secret: String)
+                 @Value("${services.bbb.shared-secret}") private val secret: String,
+                 @Value("${services.bbb.origin-name}") private val originName: String,
+                 @Value("${services.bbb.origin-version}") private val originVersion: String,
+                )
   extends ConferenceService {
   /**
     * Creates a new Conference using BBB
@@ -55,8 +60,8 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     val request = Map(
       "name" -> meetingName, "meetingID" -> id,
       "attendeePW" -> password, "moderatorPW" -> moderatorPassword,
-      "meta_bbb-origin-version" -> "v2",
-      "meta_bbb-origin-server-name" -> "feedback.mni.thm.de",
+      "meta_bbb-origin-server-name" -> originName,
+      "meta_bbb-origin-version" -> originVersion,
       "meta_bbb-origin" -> "Greenlight"
     )
     val response = getBBBAPI("create", request)

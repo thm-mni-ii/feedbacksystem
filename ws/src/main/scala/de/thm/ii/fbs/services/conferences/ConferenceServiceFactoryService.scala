@@ -16,6 +16,10 @@ class ConferenceServiceFactoryService() {
   private val apiUrl: String = null
   @Value("${services.bbb.shared-secret}")
   private val secret: String = null
+  @Value("${services.bbb.origin-name}")
+  private val originName: String = null
+  @Value("${services.bbb.origin-version}")
+  private val originVersion: String = null
 
   /**
     * Runs the factory
@@ -25,7 +29,7 @@ class ConferenceServiceFactoryService() {
   def apply(service: String): ConferenceService = {
     service match {
       case "jitsi" => new JitsiService(templateBuilder)
-      case "bigbluebutton" => new BBBService(templateBuilder, apiUrl, secret)
+      case "bigbluebutton" => new BBBService(templateBuilder, apiUrl, secret, originName, originVersion)
       case name: String => throw new IllegalArgumentException(s"unknown conference service: ${name}")
     }
   }
