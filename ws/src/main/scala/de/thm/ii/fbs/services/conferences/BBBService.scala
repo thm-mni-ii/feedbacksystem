@@ -28,7 +28,7 @@ class BBBService(templateBuilder: RestTemplateBuilder,
                  @Value("${services.bbb.service-url}") private val apiUrl: String,
                  @Value("${services.bbb.shared-secret}") private val secret: String,
                  @Value("${services.bbb.origin-name}") private val originName: String,
-                 @Value("${services.bbb.origin-version}") private val originVersion: String,
+                 @Value("${services.bbb.origin-version}") private val originVersion: String
                 )
   extends ConferenceService {
   /**
