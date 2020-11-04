@@ -120,6 +120,7 @@ class UserConferenceMapTest {
   /**
     * Tests the onDelete method
     */
+  @Test
   def onDeleteTest(): Unit = {
     val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
     val testConference = conferenceService.createConference(0)
@@ -132,6 +133,27 @@ class UserConferenceMapTest {
     })
     userConferenceMap.map(testConference, testUser)
     userConferenceMap.delete(testConference)
+    Assert.assertTrue(run)
+  }
+
+  /**
+    * Tests the onLastDelete method
+    */
+  @Test
+  def onLastDeleteTest(): Unit = {
+    val conferenceService: ConferenceService = conferenceServiceFactoryService(BBBService.name)
+    val testConference = conferenceService.createConference(0)
+    val userConferenceMap = new UserConferenceMap
+    var run = false
+    userConferenceMap.onLastDelete((Conference) => {
+      Assert.assertEquals(testConference, Conference)
+      run = true
+    })
+    userConferenceMap.map(testConference, testUser)
+    userConferenceMap.map(testConference, exampleUser)
+    userConferenceMap.delete(testUser)
+    Assert.assertFalse(run)
+    userConferenceMap.delete(exampleUser)
     Assert.assertTrue(run)
   }
 

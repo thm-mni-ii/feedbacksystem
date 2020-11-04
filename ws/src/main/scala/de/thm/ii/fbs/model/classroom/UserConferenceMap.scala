@@ -3,7 +3,7 @@ package de.thm.ii.fbs.model.classroom
 import java.security.Principal
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.services.conferences.Conference
+import de.thm.ii.fbs.services.conferences.conference.Conference
 import de.thm.ii.fbs.model.classroom.storage.OneToManyBidirectionalStorage
 
 import scala.collection.mutable
@@ -59,6 +59,7 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
 
   private val onMapListeners = mutable.Set[(Conference, Principal) => Unit]()
   private val onDeleteListeners = mutable.Set[(Conference, Principal) => Unit]()
+  private val onLastDeleteListeners = mutable.Set[(Conference) => Unit]()
 
   /**
     * @param cb Callback that gets executed on every map event
@@ -72,6 +73,13 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     */
   def onDelete(cb: (Conference, Principal) => Unit): Unit = {
     onDeleteListeners.add(cb)
+  }
+
+  /**
+    * @param cb Callback that gets called when the last Principal of a conference gets deleted
+    */
+  def onLastDelete(cb: (Conference) => Unit): Unit = {
+    onLastDeleteListeners.add(cb)
   }
 
   /**
@@ -89,6 +97,12 @@ class UserConferenceMap extends OneToManyBidirectionalStorage[Conference, Princi
     * @return The Conferences in the course
     */
   def getConferences(courseId: Int): List[Conference] = this.getAllA.filter(inv => inv.courseId == courseId).toList
+
+  onDelete((conference, _) => {
+    if (get(conference).isEmpty) {
+      onLastDeleteListeners.foreach(_(conference))
+    }
+  })
 }
 
 /**

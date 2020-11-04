@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.conferences
+package de.thm.ii.fbs.services.conferences.conference
 
 import java.net.URI
 
@@ -36,6 +36,11 @@ abstract class Conference {
     * @return the conference url
     */
   def getURL(user: User, moderator: Boolean = false): URI
+
+  /**
+    * Ends the Conferences
+    */
+  def end(): Unit
 
   /**
     * Creates a map containing information about the Conference
