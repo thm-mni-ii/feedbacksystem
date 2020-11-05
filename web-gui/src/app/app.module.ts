@@ -16,7 +16,7 @@ import {
   HttpInterceptor,
   HttpRequest, HttpResponse
 } from '@angular/common/http';
-import {JwtHelperService, JwtModule} from '@auth0/angular-jwt';
+import {JwtModule} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
 import {DataprivacyDialogComponent} from './dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dialog.component';
@@ -26,15 +26,12 @@ import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {MarkdownModule} from 'ngx-markdown';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-//import { ImportCourseComponent } from './components/courses/import-course/import-course.component';
 import { ImportCourseComponent } from "./page-components/import-course/import-course.component";
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { NewconferenceDialogComponent } from './dialogs/newconference-dialog/newconference-dialog.component';
-//import { ConferenceComponent } from './components/courses/detail-course/conference/conference.component';
 import {MatGridListModule} from '@angular/material/grid-list';
 import { NewticketDialogComponent } from './dialogs/newticket-dialog/newticket-dialog.component';
 import { IncomingCallDialogComponent } from './dialogs/incoming-call-dialog/incoming-call-dialog.component';
-// tslint:disable-next-line:max-line-length
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
