@@ -14,9 +14,9 @@ import {
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
-  HttpRequest
+  HttpRequest, HttpResponse
 } from '@angular/common/http';
-import {JwtModule} from '@auth0/angular-jwt';
+import {JwtHelperService, JwtModule} from '@auth0/angular-jwt';
 import {Observable} from 'rxjs';
 import {DataprivacyDialogComponent} from './dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dialog.component';
@@ -85,16 +85,24 @@ import {
   NgxMatTimepickerModule
 } from '@angular-material-components/datetime-picker';
 import { InfoComponent } from './tool-components/info/info.component';
+import { tap } from 'rxjs/operators';
+import {AuthService} from "./service/auth.service";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
+  constructor(private authService: AuthService) {}
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
       //url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
       //url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
-    return next.handle(clonedRequest);
+    return next.handle(clonedRequest).pipe(tap(event => {
+      if (event instanceof HttpResponse) {
+        const response = <HttpResponse<any>>event;
+        this.authService.renewToken(response)
+      }
+    }));
   }
 }
 

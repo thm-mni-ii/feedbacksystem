@@ -82,7 +82,10 @@ export class AuthService {
    */
   public renewToken(response: HttpResponse<any>) {
     const token = this.extractTokenFromHeader(response)
-    this.storeToken(token)
+    if (token && !this.jwtHelper.isTokenExpired(token)) {
+      this.storeToken(token)
+      console.log("Refresh token: " + token)
+    }
   }
 
   private login(username: string, password: string, uri: string): Observable<JWTToken> {
@@ -110,7 +113,7 @@ export class AuthService {
 
   private extractTokenFromHeader(response: HttpResponse<Succeeded>): string {
     const authHeader: string = response.headers.get('Authorization');
-    return authHeader.replace('Bearer ', '');
+    return authHeader ? authHeader.replace('Bearer ', '') : null;
   }
 
   /**
