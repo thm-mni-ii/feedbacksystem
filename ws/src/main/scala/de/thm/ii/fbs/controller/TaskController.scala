@@ -5,7 +5,7 @@ import java.util.Date
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, TaskService}
+import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -26,9 +26,16 @@ class TaskController {
   private val taskService: TaskService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
+  @Autowired
+  private val checkerConfigurationService: CheckerConfigurationService = null
+  @Autowired
+  private val storageService: StorageService = null
 
   /**
     * Get a task list
+    *
     * @param cid Course id
     * @param req http request
     * @param res http response
@@ -131,7 +138,15 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      taskService.delete(cid, tid)
+      // Save submissions and configurations
+      val submissions = submissionService.getAllByTask(cid, tid)
+      val configurations = checkerConfigurationService.getAll(cid, tid)
+
+      val success = taskService.delete(cid, tid)
+
+      // If the configuration was deleted in the database -> delete all files
+      success && submissions.forall(s => storageService.deleteSolutionFile(s.id)) &&
+        configurations.forall(cc => storageService.deleteConfiguration(cc.id))
     } else {
       throw new ForbiddenException()
     }

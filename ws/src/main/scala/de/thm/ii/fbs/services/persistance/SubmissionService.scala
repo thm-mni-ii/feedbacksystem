@@ -4,7 +4,7 @@ import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
 
-import de.thm.ii.fbs.model.{CheckResult, Submission, Task}
+import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -22,6 +22,7 @@ class SubmissionService {
 
   /**
     * Get all submission for a task by a user
+    *
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
@@ -34,8 +35,22 @@ class SubmissionService {
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
 
   /**
+    * Get all submission for a task
+    *
+    * @param cid Course id
+    * @param tid Task id
+    * @return List of submissions
+    */
+  def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
+    "SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
+      "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
+      "LEFT JOIN checkrunner_configuration using (configuration_id) " +
+      "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), cid, tid))
+
+  /**
     * Lookup a submission by id
-    * @param id The sumissions id
+    *
+    * @param id  The sumissions id
     * @param uid The users id
     * @return The found task
     */

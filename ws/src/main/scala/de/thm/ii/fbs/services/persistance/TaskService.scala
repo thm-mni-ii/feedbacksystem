@@ -21,6 +21,7 @@ class TaskService {
 
   /**
     * Get all tasks of a course
+    *
     * @param cid Course id
     * @return List of tasks
     */
@@ -29,6 +30,7 @@ class TaskService {
 
   /**
     * Lookup task by id
+    *
     * @param id The users id
     * @return The found task
     */
@@ -65,6 +67,7 @@ class TaskService {
 
   /**
     * Delete a task by id
+    *
     * @param cid The curse id
     * @param tid The task id
     * @return True if successful

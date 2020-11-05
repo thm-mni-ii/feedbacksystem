@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.persistance
 import java.io.IOException
 import java.nio.file._
 
+import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -80,6 +81,7 @@ class StorageService {
 
   /**
     * Delete a secondary file
+    *
     * @param tid Task id
     * @return True if deteled, false if not file exists
     * @throws IOException If the i/o operation fails
@@ -88,11 +90,34 @@ class StorageService {
   def deleteSecondaryFile(tid: Int): Boolean = pathToSecondaryFile(tid).exists(Files.deleteIfExists)
 
   /**
+    * Delete the Configuration Folder with all Files inside
+    *
+    * @param tid Task id
+    * @return True if deteled, false if not Directory exists
+    * @throws IOException If the i/o operation fails
+    */
+  def deleteConfiguration(tid: Int): Boolean = {
+    deleteFolder(tasksDir(tid))
+  }
+
+  /**
     * Delete a solution file
+    *
     * @param sid Submission id
     * @return True if deteled, false if not file exists
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteSolutionFile(sid: Int): Boolean = pathToSolutionFile(sid).exists(Files.deleteIfExists)
+  def deleteSolutionFile(sid: Int): Boolean = deleteFolder(submissionDir(sid))
+
+  private def deleteFolder(path: Path) = {
+    val confDir = path.toFile
+
+    if (confDir.exists() && confDir.isDirectory) {
+      FileUtils.deleteDirectory(confDir)
+      true
+    } else {
+      false
+    }
+  }
 }

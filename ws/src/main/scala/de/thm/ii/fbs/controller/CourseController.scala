@@ -3,8 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistance.CourseService
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseService}
+import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -25,12 +24,21 @@ class CourseController {
   private val courseRegistrationService: CourseRegistrationService = null
   @Autowired
   private val authService: AuthService = null
+  @Autowired
+  private val taskService: TaskService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
+  @Autowired
+  private val checkerConfigurationService: CheckerConfigurationService = null
+  @Autowired
+  private val storageService: StorageService = null
 
   /**
     * Get a course list
+    *
     * @param ignoreHidden optional filter to filter only for visible courses
-    * @param req http request
-    * @param res http response
+    * @param req          http request
+    * @param res          http response
     * @return course list
     */
   @GetMapping(value = Array(""))
@@ -133,7 +141,14 @@ class CourseController {
     val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
 
     (user.globalRole, someCourseRole) match {
-      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) => courseService.delete(cid)
+      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
+        // Save submissions and configurations
+        val tasks = taskService.getAll(cid).map(t => (submissionService.getAllByTask(cid, t.id), checkerConfigurationService.getAll(cid, t.id)))
+
+        val success = courseService.delete(cid)
+
+        // If the Course was deleted in the database -> delete all files
+        success && tasks.forall(t => t._1.forall(s => storageService.deleteSolutionFile(s.id)) && t._2.forall(cc => storageService.deleteConfiguration(cc.id)))
       case _ => throw new ForbiddenException()
     }
   }

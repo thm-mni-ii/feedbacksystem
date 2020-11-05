@@ -127,7 +127,10 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      this.ccs.delete(cid, tid, ccid)
+      val success = this.ccs.delete(cid, tid, ccid)
+
+      // If the configuration was deleted in the database -> delete all files
+      success && storageService.deleteConfiguration(ccid)
     } else {
       throw new ForbiddenException()
     }

@@ -19,8 +19,7 @@ ws/upload-dir/*
 ws/zip-dir/*
 data/
 
-secrettoken-checker/upload-dir/*
-sql-checker/upload-dir/*
+master-runner/upload-dir/*
 
 docker-config
 shared-messages
