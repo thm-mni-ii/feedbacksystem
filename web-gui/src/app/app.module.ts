@@ -51,7 +51,6 @@ import { NewTaskComponent } from './page-components/course-detail/new-task/new-t
 import { SubmissionChoiceComponent } from './page-components/task-detail/submission-choice/submission-choice.component';
 import { SubmissionFileComponent } from './page-components/task-detail/submission-file/submission-file.component';
 import { SubmissionTextComponent } from './page-components/task-detail/submission-text/submission-text.component';
-import { SubmissionResultComponent } from './page-components/task-detail/submission-result/submission-result.component';
 import { SingleSubmissionComponent } from './page-components/single-submission/single-submission.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
@@ -84,6 +83,7 @@ import {
 import { InfoComponent } from './tool-components/info/info.component';
 import { tap } from 'rxjs/operators';
 import {AuthService} from "./service/auth.service";
+import { ReversePipe } from './pipes/reverse.pipe';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -141,7 +141,6 @@ export const httpInterceptorProviders = [
     SubmissionChoiceComponent,
     SubmissionFileComponent,
     SubmissionTextComponent,
-    SubmissionResultComponent,
     SingleSubmissionComponent,
     DropzoneComponent,
     MyCoursesComponent,
@@ -165,6 +164,7 @@ export const httpInterceptorProviders = [
     NewCheckerDialogComponent,
     ConfirmDialogComponent,
     InfoComponent,
+    ReversePipe,
   ],
   imports: [
     BrowserModule,
