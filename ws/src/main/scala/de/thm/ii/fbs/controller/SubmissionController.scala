@@ -1,12 +1,11 @@
 package de.thm.ii.fbs.controller
 
-import java.io.FileOutputStream
 import java.nio.file.Files
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.Submission
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.RemoteCheckerService
-import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CourseRegistrationService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,6 +31,8 @@ class SubmissionController {
   private val checkerConfigurationService: CheckerConfigurationService = null
   @Autowired
   private val remoteCheckerService: RemoteCheckerService = null
+  @Autowired
+  private val courseRegistrationService: CourseRegistrationService = null
 
   /**
     * Get a list of all submissions for a task
@@ -48,7 +49,11 @@ class SubmissionController {
              req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
     val user = authService.authorize(req, res)
 
-    if (user.id == uid) {
+    val privileged = (user.id == uid
+      || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+
+    if (privileged) {
       submissionService.getAll(uid, cid, tid)
     } else {
       throw new ForbiddenException()
@@ -139,7 +144,11 @@ class SubmissionController {
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
 
-    if (user.id == uid) {
+    val privileged = (user.id == uid
+      || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+
+    if (privileged) {
       submissionService.getOne(sid, uid) match {
         case Some(submission) => submission
         case None => throw new ResourceNotFoundException()
