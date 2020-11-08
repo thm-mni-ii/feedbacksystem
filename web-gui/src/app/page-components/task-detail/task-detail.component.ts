@@ -17,6 +17,7 @@ import {tap, map, flatMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
 import {Roles} from "../../model/Roles";
+import {AllSubmissionsComponent} from "../all-submissions/all-submissions.component";
 
 /**
  * Shows a task in detail
@@ -78,8 +79,9 @@ export class TaskDetailComponent implements OnInit {
         }
 
         if (this.submissions.length != 0) {
-          let max = Math.max.apply(Math, this.submissions.map(sub => { return sub.submissionTime }));
-          this.lastSubmission = this.submissions.find(sub => sub.submissionTime == max);
+          this.lastSubmission = submissions[submissions.length-1]
+          // let max = Math.min.apply(Math, this.submissions.map(sub => { return sub.submissionTime }));
+          // this.lastSubmission = this.submissions.//.find(sub => sub.submissionTime == max);
         }
       })
     ).subscribe(ok => {}, error => console.error(error))
@@ -210,5 +212,16 @@ export class TaskDetailComponent implements OnInit {
         console.error(error)
         this.snackbar.open('Aufgabe konnte leider nicht gelöscht werden.', 'OK', {duration: 3000});
       })
+  }
+
+  allSubmissions() {
+    this.dialog.open(AllSubmissionsComponent, {
+      height: '80%',
+      width: '100%',
+      data: {
+        submission: this.submissions,
+        auth: false
+      },
+    })
   }
 }

@@ -33,16 +33,29 @@
         <app-submission-text *ngIf="submissionTypeOfTask() == 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
       </div>
 
-      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>
-
       <mat-card-actions>
         <button [disabled]="deadlinePassed || isSubmissionEmpty()" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
       </mat-card-actions>
+
+      <div *ngIf="lastSubmission != null" class="task-container">
+        <span>Letzte Abgabe: </span>
+        <span class="meta">
+          <button mat-icon-button matTooltip="Alle Abgaben" (click)="allSubmissions()"><mat-icon>dns</mat-icon></button>
+        </span>
+
+      </div>
+      <app-single-submission *ngIf="lastSubmission != null" [submission]="lastSubmission"></app-single-submission>
+<!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
+
+
     </mat-card-content>
   </mat-card>
 
-  <mat-card *ngFor="let result of lastSubmission?.results">
-    <h5>{{result?.checkerType}} (Exit Code: {{result.exitCode}})</h5>
-    <p>{{result.resultText}}</p>
-  </mat-card>
+<!--  <div *ngFor="let submission of submissions | reverse">-->
+<!--    {{submission.id}}-->
+<!--    <mat-card *ngFor="let result of submission.results">-->
+<!--      <h5>{{result?.checkerType}} (Exit Code: {{result.exitCode}})</h5>-->
+<!--      <p>{{result.resultText}}</p>-->
+<!--    </mat-card>-->
+<!--  </div>-->
 </div>

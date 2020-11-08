@@ -10,6 +10,7 @@ import {ActivatedRoute} from "@angular/router";
 import {CourseResultsService} from "../../../service/course-results.service";
 import {CourseResult} from "../../../model/CourseResult";
 import {Task} from "../../../model/Task";
+import {SubmissionService} from "../../../service/submission.service";
 
 /**
  * Matrix for every course docent a has
@@ -25,7 +26,7 @@ export class CourseResultsComponent implements OnInit {
   tasks: Observable<Task[]> = of()
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
-              private route: ActivatedRoute) {}
+              private route: ActivatedRoute, private submissionService: SubmissionService) {}
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -41,6 +42,10 @@ export class CourseResultsComponent implements OnInit {
   }
 
   showResult(uid: number, cid: number, tid: number) {
+    // this.submissionService.getAllSubmissions(uid, cid, tid)
+    //   .subscribe(res => {
+    //     console.log(res)
+    // })
     // TODO: show results
   }
 }
