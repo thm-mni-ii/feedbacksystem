@@ -74,13 +74,13 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
           vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", (res._3, Option(value._2)))))
 
-        case Failure(ex: SQLException) =>
-          // TODO not throw exception from config failures (not include informations)
-          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[1-9][0-9]*_[a-z0-9]+_db\\.", "")}")
-        case Failure(ex: RunnerException) =>
-          handleError(runArgs, ex.getMessage)
         case Failure(ex: SQLTimeoutException) =>
           handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
+        case Failure(ex: SQLException) =>
+          // TODO not throw exception from config failures (not include informations)
+          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[a-z]*\\.", "")}")
+        case Failure(ex: RunnerException) =>
+          handleError(runArgs, ex.getMessage)
         case Failure(ex) =>
           handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.")
       })
