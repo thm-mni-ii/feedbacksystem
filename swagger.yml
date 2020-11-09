@@ -1613,6 +1613,11 @@ components:
         configurationId:
           type: integer
           description: The configuration id of the checker configuration
+        extInfo:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Extended information of the check
     CheckerConfig:
       type: object
       required:
