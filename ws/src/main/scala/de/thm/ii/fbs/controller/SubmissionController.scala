@@ -5,7 +5,7 @@ import java.nio.file.Files
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.RemoteCheckerService
-import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CourseRegistrationService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,12 +49,12 @@ class SubmissionController {
              req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
     val user = authService.authorize(req, res)
 
-    val privileged = (user.id == uid
-      || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = user.id == uid || adminPrivileged
 
     if (privileged) {
-      submissionService.getAll(uid, cid, tid)
+      submissionService.getAll(uid, cid, tid, adminPrivileged)
     } else {
       throw new ForbiddenException()
     }
@@ -144,12 +144,12 @@ class SubmissionController {
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
 
-    val privileged = (user.id == uid
-      || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = user.id == uid || adminPrivileged
 
     if (privileged) {
-      submissionService.getOne(sid, uid) match {
+      submissionService.getOne(sid, uid, adminPrivileged) match {
         case Some(submission) => submission
         case None => throw new ResourceNotFoundException()
       }

@@ -4,6 +4,7 @@ import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,17 +20,19 @@ import scala.collection.mutable
 class SubmissionService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
+  private val objectMapper: ObjectMapper = new ObjectMapper()
 
   /**
     * Get all submission for a task by a user
     *
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
+    * @param uid        User id
+    * @param cid        Course id
+    * @param tid        Task id
+    * @param addExtInfo select Extended information if present?
     * @return List of submissions
     */
-  def getAll(uid: Int, cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
+  def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
+    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
@@ -50,15 +53,16 @@ class SubmissionService {
   /**
     * Lookup a submission by id
     *
-    * @param id  The sumissions id
-    * @param uid The users id
+    * @param id         The sumissions id
+    * @param uid        The users id
+    * @param addExtInfo select Extended information if present?
     * @return The found task
     */
-  def getOne(id: Int, uid: Int): Option[Submission] =
-    reduceSubmissions(DB.query("SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
+  def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
+    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
-      (res, _) => parseResult(res), id, uid)).headOption
+    (res, _) => parseResult(res), id, uid)).headOption
 
   /**
     * Create a new submission
@@ -109,11 +113,15 @@ class SubmissionService {
     submissionTime = new Date(res.getDate("submission_time").getTime),
     done = res.getObject("configuration_id") != null,
     results = if (res.getObject("configuration_id") != null) {
+      // Get Extended Information or null
+      val extInfo = getStringOrElse(res, "ext_info", null)
+
       Array(CheckResult(
         exitCode = res.getInt("exit_code"),
         resultText = res.getString("result_text"),
         checkerType = res.getString("checker_type"),
-        configurationId = res.getInt("configuration_id")
+        configurationId = res.getInt("configuration_id"),
+        extInfo = if (extInfo != null) objectMapper.readTree(extInfo) else null
       ))
     } else {Array[CheckResult]()}
   )
@@ -127,5 +135,13 @@ class SubmissionService {
       }
     })
     submissionsMap.values.toList
+  }
+
+  private def getStringOrElse(resultSet: ResultSet, key: String, defaultValue: String): String = {
+    try {
+      resultSet.getString(key)
+    } catch {
+      case _: SQLException => defaultValue
+    }
   }
 }
