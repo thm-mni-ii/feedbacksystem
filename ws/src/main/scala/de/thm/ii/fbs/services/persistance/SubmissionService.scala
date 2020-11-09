@@ -76,14 +76,16 @@ class SubmissionService {
 
   /**
     * Stores a result
-    * @param sid The submission id
-    * @param ccid The check runner configuration id
-    * @param exitCode The exit Code of the runner
+    *
+    * @param sid        The submission id
+    * @param ccid       The check runner configuration id
+    * @param exitCode   The exit Code of the runner
     * @param resultText The resultText of the runner
+    * @param extInfo    Extended runner information
     */
-  def storeResult(sid: Int, ccid: Int, exitCode: Int, resultText: String): Unit =
-    DB.insert("INSERT INTO checker_result (submission_id, configuration_id, exit_code, result_text) " +
-      "VALUES (?, ?, ?, ?)", sid, ccid, exitCode, resultText)
+  def storeResult(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit =
+    DB.insert("INSERT INTO checker_result (submission_id, configuration_id, exit_code, result_text, ext_info) " +
+      "VALUES (?, ?, ?, ?, ?)", sid, ccid, exitCode, resultText, extInfo)
 
   /**
     * Removes all results stored for this submission
