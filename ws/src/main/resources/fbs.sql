@@ -188,6 +188,7 @@ CREATE TABLE IF NOT EXISTS `fbs`.`checker_result` (
   `configuration_id` INT NOT NULL,
   `exit_code` INT NOT NULL DEFAULT 1,
   `result_text` TEXT NOT NULL DEFAULT '',
+  `ext_info` JSON,
   PRIMARY KEY (`submission_id`, `configuration_id`),
   INDEX `configuration_id_fk_idx` (`configuration_id` ASC) VISIBLE,
   CONSTRAINT `submussuibn_id_fk`
