@@ -130,6 +130,8 @@ components:
       type: object
       required:
         - exitCode
+        - stdout
+        - stderr
       properties:
         exitCode:
           type: integer
@@ -140,3 +142,6 @@ components:
         stderr:
           type: string
           description: The standart Error Output of the Runner
+        extInfo:
+          type: string
+          description: Extended Result informations
