@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.runner
 
 import java.util.regex.Pattern
 
-import de.thm.ii.fbs.services.FileService
+import de.thm.ii.fbs.services.{ExtendedResultsService, FileService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.RunnerException
 import io.vertx.core.json.{DecodeException, Json}
@@ -64,15 +64,20 @@ object SQLRunnerService {
     * @param success if the sql query matched
     * @param stdout  Runner standard Output
     * @param stderr  Runner standard error Output
+    * @param results The SQL Runner results
     * @return The Runner Results in a Map
     */
-  def transformResult(runArgs: RunArgs, success: Boolean, stdout: String, stderr: String): JsonObject = {
+  def transformResult(runArgs: RunArgs, success: Boolean, stdout: String, stderr: String, results: (Option[ResultSet], Option[ResultSet])): JsonObject = {
     val res = new JsonObject()
+    val extInfo = ExtendedResultsService.buildCompareTable(results)
+
     res.put("ccid", runArgs.runner.id)
       .put("sid", runArgs.submission.id)
       .put("exitCode", if (success) 0 else 1)
       .put("stdout", stdout)
       .put("stderr", stderr)
+
+    if (extInfo.isEmpty) res else res.put("extInfo", extInfo.get)
   }
 }
 
@@ -169,19 +174,25 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     * Compare the Runner and Submission results
     *
     * @param res the Querie Results
-    * @return (Status message, was Successfully)
+    * @return (Status message, was Successfully, the correct results set)
     */
-  def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean) = {
+  def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean, Option[ResultSet]) = {
     var msg = "Your Query didn't produce the correct result"
     var success = false
     var identified = false
     var foundIndex = -1
     val userRes = res._2.getResults
     val userResSorted = userRes.sorted(sortJsonArray)
+    var correctResults: Option[ResultSet] = None
 
     breakable {
       for (i <- res._1.indices) {
         val expectedRes = res._1(i).getResults
+
+        /* Save correct results to use them in the expected results */
+        if (correctResults.isEmpty && sqlRunArgs.section(i).description.equalsIgnoreCase("OK")) {
+          correctResults = Option(res._1(i))
+        }
 
         if (expectedRes.isEmpty && userRes.isEmpty) { // no result from original query, what should compared?
           identified = true
@@ -208,6 +219,6 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
       if (msg.equalsIgnoreCase("OK")) success = true
     }
 
-    (msg, success)
+    (msg, success, correctResults)
   }
 }

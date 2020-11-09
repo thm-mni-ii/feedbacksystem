@@ -72,7 +72,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
           val res = sqlRunner.compareResults(value)
           logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
-          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "")))
+          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", (res._3, Option(value._2)))))
 
         case Failure(ex: SQLException) =>
           // TODO not throw exception from config failures (not include informations)
@@ -92,6 +92,6 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
   private def handleError(runArgs: RunArgs, msg: String): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg")
-    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg)))
+    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, (None, None))))
   }
 }
