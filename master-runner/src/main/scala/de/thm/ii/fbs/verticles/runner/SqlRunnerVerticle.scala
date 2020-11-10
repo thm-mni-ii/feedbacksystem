@@ -78,7 +78,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
           handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
         case Failure(ex: SQLException) =>
           // TODO not throw exception from config failures (not include informations)
-          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[a-z]*\\.", "")}")
+          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}")
         case Failure(ex: RunnerException) =>
           handleError(runArgs, ex.getMessage)
         case Failure(ex) =>

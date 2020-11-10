@@ -5,6 +5,7 @@ import java.util.regex.Pattern
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.RunnerException
+import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
 import io.vertx.core.json.{DecodeException, Json}
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.{JsonArray, JsonObject}
@@ -88,8 +89,8 @@ object SQLRunnerService {
   * @param pool       an sql conection pool
   */
 class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
-  private val configDbExt = "c"
-  private val submissionDbExt = "s"
+  private val configDbExt = s"${getSHAStringFromNow()}_c"
+  private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
   private def sortJsonArray(x: JsonArray, y: JsonArray) = {
