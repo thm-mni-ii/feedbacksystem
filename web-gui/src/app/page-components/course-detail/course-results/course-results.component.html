@@ -7,10 +7,10 @@
 
   <mat-card class="content-container">
     <div class="card-options">
-<!--      <div class="actions">-->
-<!--        <span class="lb">Download: </span>-->
-<!--
-<!--      </div>-->
+      <div class="actions">
+        <span class="lb">Download: </span>
+        <button (click)="downloadResults()">Click</button>
+     </div>
 
 <!--      <mat-paginator [length]="userlength"-->
 <!--                     [pageSize]="limit"-->
@@ -41,7 +41,8 @@
             <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
                   (click)="showResult(result.user.id, this.courseId, taskResult.task.id)"
                   matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
-              <span>{{taskResult.attempts}}</span>
+              <span *ngIf="taskResult.attempts!=0">{{taskResult.attempts}}</span>
+              <span *ngIf="taskResult.attempts==0">-</span>
             </span>
           </span>
         </div>

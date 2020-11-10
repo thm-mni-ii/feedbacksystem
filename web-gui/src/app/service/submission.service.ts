@@ -18,9 +18,9 @@ export class SubmissionService {
    * @param passed Filters only passed submissions
    * @return Observable that succeeds with all submission of a user for a task
    */
-  getAllSubmissions(uid: number, cid: number, tid: number, passed?: boolean): Observable<Submission[]>{
+  getAllSubmissions(uid: number, cid: number, tid: number, passed?: boolean): Observable<any>{
     // TODO: do we need passed filter?
-    return this.http.get<Submission[]>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`)
+    return this.http.get<any>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`)
   }
 
   /**

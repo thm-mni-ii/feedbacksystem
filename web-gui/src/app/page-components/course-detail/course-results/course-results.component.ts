@@ -38,14 +38,22 @@ export class CourseResultsComponent implements OnInit {
   }
 
   downloadResults() {
-    // TODO: download results as CSV
+    let data: Object[]
+    this.tasks
+      .subscribe(tasks => {
+        const taskNames: String[] = tasks.map(task => task.name)
+        console.log(taskNames)
+        this.courseResults.subscribe(results => {
+         const temp = results.map(res => {})
+        })
+      })
   }
 
   showResult(uid: number, cid: number, tid: number) {
-    // this.submissionService.getAllSubmissions(uid, cid, tid)
-    //   .subscribe(res => {
-    //     console.log(res)
-    // })
+    this.submissionService.getAllSubmissions(uid, cid, tid)
+      .subscribe(res => {
+        console.log(res)
+    })
     // TODO: show results
   }
 }
