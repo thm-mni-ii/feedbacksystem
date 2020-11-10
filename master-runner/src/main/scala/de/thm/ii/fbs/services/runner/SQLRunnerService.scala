@@ -85,10 +85,11 @@ object SQLRunnerService {
 /**
   * Provides all functions to start a SQL Runner
   *
-  * @param sqlRunArgs the Runner arguments
-  * @param pool       an sql conection pool
+  * @param sqlRunArgs  the Runner arguments
+  * @param pool        an sql conection pool
+  * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val queryTimout: Int) {
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
@@ -126,6 +127,8 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
     pool.getConnectionFuture().flatMap(c => {
+      c.setQueryTimeout(queryTimout)
+
       createDatabase(configDbExt, c).flatMap[List[ResultSet]](_ => {
         val queries = sqlRunArgs.section
           .map(tq => c.queryFuture(tq.query))
@@ -146,6 +149,8 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
     pool.getConnectionFuture().flatMap(c => {
+      c.setQueryTimeout(queryTimout)
+
       createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
         executeComplexQuery(c)
       }).map(res => {

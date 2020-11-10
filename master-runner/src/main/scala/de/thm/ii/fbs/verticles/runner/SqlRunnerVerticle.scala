@@ -60,7 +60,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       // change file paths
       FileService.addUploadDir(runArgs)
 
-      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get)
+      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
       val results = for {
         f1Result <- sqlRunner.executeRunnerQueries()
