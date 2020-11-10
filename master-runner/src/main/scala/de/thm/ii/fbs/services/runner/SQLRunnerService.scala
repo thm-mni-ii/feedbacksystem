@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.runner
 
+import java.sql.SQLException
 import java.util.regex.Pattern
 
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService}
@@ -133,11 +134,19 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
         val queries = sqlRunArgs.section
           .map(tq => c.queryFuture(tq.query))
 
-        Future.sequence(queries.toList)
-      }).map(res => {
-        deleteDatabases(c, configDbExt)
-        c.close()
-        res
+        Future.sequence(queries.toList) transform {
+          case s@Success(_) =>
+            deleteDatabases(c, configDbExt)
+            s
+          case Failure(cause) =>
+            deleteDatabases(c, configDbExt)
+
+            cause match {
+              // Do not display Configuration SQL errors to the user
+              case _: SQLException => Failure(new RunnerException("invalid Runner configuration"))
+              case _ => Failure(throw cause)
+            }
+        }
       })
     })
   }
@@ -152,10 +161,14 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
       c.setQueryTimeout(queryTimout)
 
       createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery(c)
-      }).map(res => {
-        deleteDatabases(c, submissionDbExt)
-        res
+        executeComplexQuery(c) transform {
+          case s@Success(_) =>
+            deleteDatabases(c, submissionDbExt)
+            s
+          case Failure(cause) =>
+            deleteDatabases(c, submissionDbExt)
+            Failure(throw cause)
+        }
       })
     })
   }
