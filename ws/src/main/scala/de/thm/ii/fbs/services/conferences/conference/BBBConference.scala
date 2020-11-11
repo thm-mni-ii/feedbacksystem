@@ -24,7 +24,7 @@ class BBBConference(override val id: String, override val courseId: Int,
   /**
     * The visibility of the Conference
     */
-  override var isVisible: Boolean = false
+  override var isVisible: Boolean = true
 
   /**
     * Gets the url to the Conference

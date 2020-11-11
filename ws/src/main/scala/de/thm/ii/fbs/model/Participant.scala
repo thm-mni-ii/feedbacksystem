@@ -12,7 +12,7 @@ import org.json.JSONObject
   * @param visible visibility state
   * @author Andrej Sajenko
   */
-case class Participant(user: User, role: CourseRole.Value, visible: Boolean = false) {
+case class Participant(user: User, role: CourseRole.Value, visible: Boolean = true) {
   /**
     * visibility state of User in Conference component
     */
