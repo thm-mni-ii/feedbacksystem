@@ -1,10 +1,12 @@
 package de.thm.ii.fbs.services.runner
 
+import java.sql.SQLException
 import java.util.regex.Pattern
 
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.RunnerException
+import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
 import io.vertx.core.json.{DecodeException, Json}
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.{JsonArray, JsonObject}
@@ -84,12 +86,13 @@ object SQLRunnerService {
 /**
   * Provides all functions to start a SQL Runner
   *
-  * @param sqlRunArgs the Runner arguments
-  * @param pool       an sql conection pool
+  * @param sqlRunArgs  the Runner arguments
+  * @param pool        an sql conection pool
+  * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
-  private val configDbExt = "c"
-  private val submissionDbExt = "s"
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val queryTimout: Int) {
+  private val configDbExt = s"${getSHAStringFromNow()}_c"
+  private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
   private def sortJsonArray(x: JsonArray, y: JsonArray) = {
@@ -125,15 +128,25 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
     pool.getConnectionFuture().flatMap(c => {
+      c.setQueryTimeout(queryTimout)
+
       createDatabase(configDbExt, c).flatMap[List[ResultSet]](_ => {
         val queries = sqlRunArgs.section
           .map(tq => c.queryFuture(tq.query))
 
-        Future.sequence(queries.toList)
-      }).map(res => {
-        deleteDatabases(c, configDbExt)
-        c.close()
-        res
+        Future.sequence(queries.toList) transform {
+          case s@Success(_) =>
+            deleteDatabases(c, configDbExt)
+            s
+          case Failure(cause) =>
+            deleteDatabases(c, configDbExt)
+
+            cause match {
+              // Do not display Configuration SQL errors to the user
+              case _: SQLException => Failure(new RunnerException("invalid Runner configuration"))
+              case _ => Failure(throw cause)
+            }
+        }
       })
     })
   }
@@ -145,11 +158,17 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient) {
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
     pool.getConnectionFuture().flatMap(c => {
+      c.setQueryTimeout(queryTimout)
+
       createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery(c)
-      }).map(res => {
-        deleteDatabases(c, submissionDbExt)
-        res
+        executeComplexQuery(c) transform {
+          case s@Success(_) =>
+            deleteDatabases(c, submissionDbExt)
+            s
+          case Failure(cause) =>
+            deleteDatabases(c, submissionDbExt)
+            Failure(throw cause)
+        }
       })
     })
   }

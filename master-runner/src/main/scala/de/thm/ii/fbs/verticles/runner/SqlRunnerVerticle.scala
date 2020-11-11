@@ -60,7 +60,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       // change file paths
       FileService.addUploadDir(runArgs)
 
-      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get)
+      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
       val results = for {
         f1Result <- sqlRunner.executeRunnerQueries()
@@ -77,8 +77,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
         case Failure(ex: SQLTimeoutException) =>
           handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
         case Failure(ex: SQLException) =>
-          // TODO not throw exception from config failures (not include informations)
-          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[a-z]*\\.", "")}")
+          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}")
         case Failure(ex: RunnerException) =>
           handleError(runArgs, ex.getMessage)
         case Failure(ex) =>
