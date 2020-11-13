@@ -6,3 +6,18 @@
 .submission {
   margin-bottom: 10px;
 }
+
+#result {
+  float: left;
+  width: 30%;
+}
+
+#expected {
+  display: inline-block;
+  width: 30%;
+  margin-right: 10%;
+}
+
+table {
+  border: 1px solid;
+}

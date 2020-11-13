@@ -11,6 +11,8 @@ import {CourseResultsService} from "../../../service/course-results.service";
 import {CourseResult} from "../../../model/CourseResult";
 import {Task} from "../../../model/Task";
 import {SubmissionService} from "../../../service/submission.service";
+import {AllSubmissionsComponent} from "../../all-submissions/all-submissions.component";
+import {MatDialog} from "@angular/material/dialog";
 
 /**
  * Matrix for every course docent a has
@@ -26,7 +28,8 @@ export class CourseResultsComponent implements OnInit {
   tasks: Observable<Task[]> = of()
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
-              private route: ActivatedRoute, private submissionService: SubmissionService) {}
+              private route: ActivatedRoute, private submissionService: SubmissionService,
+              private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -38,21 +41,29 @@ export class CourseResultsComponent implements OnInit {
   }
 
   downloadResults() {
-    let data: Object[]
-    this.tasks
-      .subscribe(tasks => {
-        const taskNames: String[] = tasks.map(task => task.name)
-        console.log(taskNames)
-        this.courseResults.subscribe(results => {
-         const temp = results.map(res => {})
-        })
-      })
+    // TODO
+    // let data: Object[]
+    // this.tasks
+    //   .subscribe(tasks => {
+    //     const taskNames: String[] = tasks.map(task => task.name)
+    //     console.log(taskNames)
+    //     this.courseResults.subscribe(results => {
+    //      const temp = results.map(res => {})
+    //     })
+    //   })
   }
 
   showResult(uid: number, cid: number, tid: number) {
     this.submissionService.getAllSubmissions(uid, cid, tid)
       .subscribe(res => {
-        console.log(res)
+        this.dialog.open(AllSubmissionsComponent, {
+          height: '80%',
+          width: '100%',
+          data: {
+            submission: res,
+            auth: true
+          },
+        })
     })
     // TODO: show results
   }

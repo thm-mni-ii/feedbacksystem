@@ -136,11 +136,15 @@ export class TaskDetailComponent implements OnInit {
 
   private submit() {
     const token = this.authService.getToken()
-    this.submissionService.submitSolution(token.id, this.courseId, this.task.id, this.submissionData).subscribe(
-      ok => this.ngOnInit(), error => {
+    this.submissionService.submitSolution(token.id, this.courseId, this.task.id, this.submissionData)
+      .subscribe(ok => {
+        this.ngOnInit()
+        this.snackbar.open("Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.",'OK', {duration: 3000})
+      }, error => {
         console.error(error)
         this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
       })
+
   }
 
   public canEdit(): boolean {
