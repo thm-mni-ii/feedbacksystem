@@ -45,6 +45,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       .put("url", config.getString("SQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
       .put("max_pool_size", config.getInteger("SQL_MAX_POOL_SIZE", 15))
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
 
     client = Option(JDBCClient.createShared(vertx, sqlConfig))
 
