@@ -78,12 +78,6 @@ export class NewCheckerDialogComponent implements OnInit {
 
   updateMainFile(event) {
     this.mainFile = event['content'];
-
-    // var reader = new FileReader();
-    // reader.onload = function(event) {
-    //   console.log('File content:', event.target.result);
-    // };
-    // this.mainFile = reader.readAsText(event['content']);
   }
 
   updateSecondaryFile(event) {

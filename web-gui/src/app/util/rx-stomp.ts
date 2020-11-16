@@ -33,8 +33,6 @@ export class RxStompClient {
    */
   public connect() {
     this.client.activate();
-    this.client.onWebSocketError = e => console.log(e);
-    this.client.onStompError = e => console.log(e);
   }
 
   /**

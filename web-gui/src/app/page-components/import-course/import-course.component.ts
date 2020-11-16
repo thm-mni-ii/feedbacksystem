@@ -53,7 +53,6 @@ export class ImportCourseComponent {
 
   onFilesRejected(files: File[]) {
     // Todo need to remove it somehow
-    console.log(files);
   }
 }
 
