@@ -23,7 +23,6 @@ import {Task} from "../../model/Task";
 import {CourseService} from "../../service/course.service";
 import {CourseRegistrationService} from "../../service/course-registration.service";
 import {ConfirmDialogComponent} from "../../dialogs/confirm-dialog/confirm-dialog.component";
-import {CourseDeleteModalComponent} from "../../dialogs/course-delete-modal/course-delete-modal.component";
 
 @Component({
   selector: 'app-course-detail',
