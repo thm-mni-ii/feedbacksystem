@@ -6,4 +6,5 @@ export interface JWTToken {
   username: string;
   globalRole?: string; // ADMIN, MODERATOR, USER
   courseRoles: [];
+  exp: number;
 }

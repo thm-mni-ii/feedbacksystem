@@ -135,4 +135,14 @@ class LoginController extends CasClientConfigurerAdapter {
       case None => throw new UnauthorizedException()
     }
   }
+
+  /**
+    * Renews the token of the user
+    * @param req Http Request
+    * @param res Http Response
+    */
+  @RequestMapping(value = Array("/token"), method = Array(RequestMethod.GET))
+  def renew(req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    authService.authorize(req, res);
+  }
 }
