@@ -67,8 +67,10 @@ export class NewCheckerDialogComponent implements OnInit {
         .subscribe(checker => {
           this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)
             .subscribe(ok => {}, error => console.error(error))
-          this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
-            .subscribe(ok => {}, error => console.error(error))
+          if (this.secondaryFile) {
+            this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
+              .subscribe(ok => {}, error => console.error(error))
+          }
         });
       this.dialogRef.close({success: true});
     } else {
