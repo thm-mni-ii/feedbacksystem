@@ -22,7 +22,7 @@
         <span class="state passed tiny" *ngIf="status && !pending"><mat-icon>check_circle</mat-icon>&nbsp;bestanden</span>
         <span class="state failed tiny" *ngIf="!status && status != null && !pending"><mat-icon>not_interested</mat-icon>&nbsp;nicht bestanden</span>
         <span class="state tiny not-done" *ngIf="status == null && !pending"><mat-icon>error_outline</mat-icon></span>
-        <span class="state" *ngIf="pending"><mat-spinner [diameter]="24"></mat-spinner>in bearbeitung</span>
+        <span class="state" *ngIf="pending"><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span>
       </span>
     </div>
     <div class="description">

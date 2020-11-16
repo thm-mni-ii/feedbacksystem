@@ -78,12 +78,7 @@ export class TaskDetailComponent implements OnInit {
             const finalExitCode = submission.results.reduce((acc, value) => acc + value.exitCode, 0)
             return acc || done && finalExitCode == 0
           }, false)
-        }
-
-        if (this.submissions.length != 0) {
           this.lastSubmission = submissions[submissions.length-1]
-          // let max = Math.min.apply(Math, this.submissions.map(sub => { return sub.submissionTime }));
-          // this.lastSubmission = this.submissions.//.find(sub => sub.submissionTime == max);
         }
       })
     ).subscribe(ok => {this.refreshByPolling()}, error => console.error(error))
