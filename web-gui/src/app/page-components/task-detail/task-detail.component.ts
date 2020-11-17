@@ -33,6 +33,7 @@ export class TaskDetailComponent implements OnInit {
   status: boolean | null = null
   submissions: Submission[];
   lastSubmission: Submission;
+  pending: boolean = false;
 
   deadlinePassed: boolean = false;
 
@@ -71,20 +72,24 @@ export class TaskDetailComponent implements OnInit {
         if (submissions.length == 0) {
           this.status = <boolean>null
         } else {
+          this.pending = !submissions[submissions.length - 1].done
           this.status = submissions.reduce((acc, submission) => {
             const done = submission.done
             const finalExitCode = submission.results.reduce((acc, value) => acc + value.exitCode, 0)
             return acc || done && finalExitCode == 0
           }, false)
-        }
-
-        if (this.submissions.length != 0) {
           this.lastSubmission = submissions[submissions.length-1]
-          // let max = Math.min.apply(Math, this.submissions.map(sub => { return sub.submissionTime }));
-          // this.lastSubmission = this.submissions.//.find(sub => sub.submissionTime == max);
         }
       })
-    ).subscribe(ok => {}, error => console.error(error))
+    ).subscribe(ok => {this.refreshByPolling()}, error => console.error(error))
+  }
+
+  private refreshByPolling(force = false) {
+    setTimeout(() => {
+      if (force || this.pending) {
+        this.ngOnInit()
+      }
+    }, 30000) // 30 Sec
   }
 
   private reachedDeadline(now: number, deadline: number): boolean {
@@ -117,34 +122,20 @@ export class TaskDetailComponent implements OnInit {
       this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + this.task.name + ' abgegeben', 'Ups!');
       return;
     }
-    // if user submits but there is a pending submission
-    if (this.submissions.length != 0) {
-      if (this.submissions.find(submission => !submission.done)) {
-        this.snackbar.open('Für Aufgabe "' + this.task.name +
-          '" wird noch auf ein Ergebnis gewartet, trotzdem abgeben ?', 'Ja', {duration: 10000})
-          .onAction()
-          .subscribe(() => {
-            this.submit();
-          });
-        // TODO: reload submissions, to see if its done?
-        this.ngOnInit()
-        return;
-      }
-    }
     this.submit()
   }
 
   private submit() {
     const token = this.authService.getToken()
-    this.submissionService.submitSolution(token.id, this.courseId, this.task.id, this.submissionData)
-      .subscribe(ok => {
-        this.ngOnInit()
+    this.submissionService.submitSolution(token.id, this.courseId, this.task.id, this.submissionData).subscribe(
+      ok => {
+        this.pending = true
+        this.refreshByPolling(true)
         this.snackbar.open("Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.",'OK', {duration: 3000})
       }, error => {
         console.error(error)
         this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
       })
-
   }
 
   public canEdit(): boolean {

@@ -13,7 +13,6 @@ import io.vertx.lang.scala.json.{JsonArray, JsonObject}
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
-import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.Breaks.{break, breakable}
@@ -101,10 +100,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
 
   private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    val queries = mutable.Buffer(s"DROP database IF EXISTS $name", s"create database $name", s"use $name")
-    queries ++= sqlRunArgs.dbConfig.split(";").map(_.trim).filter(_.nonEmpty)
+    val queries = s"DROP database IF EXISTS $name; create database $name; use $name; ${sqlRunArgs.dbConfig}"
 
-    con.batchFuture(queries)
+    con.executeFuture(queries)
   }
 
   private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {

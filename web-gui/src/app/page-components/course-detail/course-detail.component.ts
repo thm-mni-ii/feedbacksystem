@@ -167,32 +167,25 @@ export class CourseDetailComponent implements OnInit {
   }
 
   deleteCourse() {
-        // this.dialog.open(CourseDeleteModalComponent, {
-        //   data: {coursename: this.courseDetail.name, courseID: this.courseID}
-        // }).afterClosed().pipe(
-        //   flatMap(value => {
-        //     if (value.exit) {
-        //       return this.courseService.deleteCourse(this.courseID);
-        //     }
-        //   })
-        // )
-        //   .toPromise()
-        //   .then( (value: Succeeded) => {
-        //     if (value.success) {
-        //       this.snackbar.open('Kurs mit der ID ' + this.courseID + ' wurde gelöscht', 'OK', {duration: 5000});
-        //       this.router.navigate(['courses', 'user']);
-        //     } else {
-        //       this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-        //         + ' nicht gelöscht werden. Dieser Kurs scheint nicht zu existieren.',
-        //         'OK', {duration: 5000});
-        //     }
-        //   })
-        //   .catch(() => {
-        //     this.snackbar.open('Leider konnte der Kurs ' + this.courseID
-        //       + ' nicht gelöscht werden. Wahrscheinlich hast du keine Berechtigung',
-        //       'OK', {duration: 5000});
-        //   });
-      }
+    this.course.subscribe(course => {
+      this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: "Kurs Löschen",
+          message: `Kurs ${course.name} wirklich löschen? (Alle zugehörigen Aufgaben werden damit auch gelöscht!)`
+        }
+      }).afterClosed().pipe(
+        flatMap(confirmed => {
+          if (confirmed) {
+            return this.courseService.deleteCourse(this.courseID);
+          } else {
+            return of()
+          }
+        })
+      ).subscribe(ok => {
+        this.router.navigate(['courses']);
+      }, error => console.error(error))
+    })
+  }
 
   //
   // user: string;

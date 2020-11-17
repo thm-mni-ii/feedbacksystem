@@ -1,7 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {DataprivacyDialogComponent} from './dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
 import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dialog.component';
+import {AuthService} from "./service/auth.service";
 
 /**
  * Component that routes from login to app
@@ -11,8 +12,8 @@ import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dia
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  constructor(private dialog: MatDialog) {
+export class AppComponent implements OnInit {
+  constructor(private dialog: MatDialog, private authService: AuthService) {
   }
   /**
    * Show data privay dialog
@@ -25,5 +26,9 @@ export class AppComponent {
    */
   showImpressum() {
     this.dialog.open(ImpressumDialogComponent);
+  }
+
+  ngOnInit(): void {
+    this.authService.startTokenAutoRefresh();
   }
 }

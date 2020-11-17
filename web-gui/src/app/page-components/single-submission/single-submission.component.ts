@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Submission} from "../../model/Submission";
 import {MatTableDataSource} from "@angular/material/table";
 import {CheckResult} from "../../model/CheckResult";
@@ -8,16 +8,11 @@ import {CheckResult} from "../../model/CheckResult";
   templateUrl: './single-submission.component.html',
   styleUrls: ['./single-submission.component.scss']
 })
-export class SingleSubmissionComponent implements OnInit {
-  @Input() submission: Submission;
-
+export class SingleSubmissionComponent {
   columns = ['checkerType', 'resultText', 'exitCode'];
   dataSource = new MatTableDataSource<CheckResult>();
 
-  constructor() { }
-
-  ngOnInit(): void {
-    this.dataSource.data = this.submission.results;
+  @Input() set submission(sub: Submission) {
+    this.dataSource.data = sub.results
   }
-
 }

@@ -60,7 +60,6 @@ import { FilterPipe } from "./page-components/course-authorization/course-author
 import { NotFoundComponent } from "./page-components/not-found/not-found.component";
 import {ParameterCourseModalComponent} from "./dialogs/parameter-course-modal/parameter-course-modal.component";
 import {ParameterUserModalComponent} from "./dialogs/parameter-user-modal/parameter-user-modal.component";
-import {CourseDeleteModalComponent} from "./dialogs/course-delete-modal/course-delete-modal.component";
 import {TaskDeleteModalComponent} from "./dialogs/task-delete-modal/task-delete-modal.component";
 import {UserDeleteModalComponent} from "./dialogs/user-delete-modal/user-delete-modal.component";
 import {TaskNewDialogComponent} from "./dialogs/task-new-dialog/task-new-dialog.component";
@@ -148,7 +147,6 @@ export const httpInterceptorProviders = [
     LoginComponent,
     ParameterCourseModalComponent,
     ParameterUserModalComponent,
-    CourseDeleteModalComponent,
     TaskDeleteModalComponent,
     UserDeleteModalComponent,
     TaskNewDialogComponent,

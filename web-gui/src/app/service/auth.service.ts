@@ -6,6 +6,7 @@ import {of, throwError} from 'rxjs'
 import {flatMap, map} from 'rxjs/operators'
 import {Succeeded} from '../model/HttpInterfaces';
 import {JWTToken} from "../model/JWTToken";
+import {Error} from "tslint/lib/error";
 
 const TOKEN_ID = 'token';
 
@@ -84,7 +85,6 @@ export class AuthService {
     const token = this.extractTokenFromHeader(response)
     if (token && !this.jwtHelper.isTokenExpired(token)) {
       this.storeToken(token)
-      console.log("Refresh token: " + token)
     }
   }
 
@@ -125,5 +125,20 @@ export class AuthService {
 
   private storeToken(token: string): void {
     localStorage.setItem(TOKEN_ID, token);
+  }
+
+  public requestNewToken(): Observable<void> {
+    return this.http.get('/api/v1/login/token', {}).pipe(map(() => null));
+  }
+
+  public startTokenAutoRefresh() {
+    setInterval(() => {
+      if (this.isAuthenticated()) {
+        const token = this.getToken();
+        if (Math.floor(new Date().getTime() / 1000) + 90 >= token.exp) {
+          this.requestNewToken().subscribe(() => {});
+        }
+      }
+    }, 60000);
   }
 }
