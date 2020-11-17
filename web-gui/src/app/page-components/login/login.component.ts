@@ -70,7 +70,6 @@ export class LoginComponent {
             .subscribe( data => {
               if(data.success) {
                 this.legalService.acceptTermsOfUse(uid).subscribe(res =>{
-                  console.log(res);
                   this.router.navigateByUrl('/courses');
                 });
               } else {

@@ -85,7 +85,6 @@ export class AuthService {
     const token = this.extractTokenFromHeader(response)
     if (token && !this.jwtHelper.isTokenExpired(token)) {
       this.storeToken(token)
-      console.log("Refresh token: " + token)
     }
   }
 

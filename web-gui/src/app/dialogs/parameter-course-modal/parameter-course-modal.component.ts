@@ -26,7 +26,6 @@ export class ParameterCourseModalComponent implements OnInit {
 
   loadParameters(){
     this.db.getAllCourseParameters(this.data.courseid).then((data: CourseParameter[]) => {
-      console.log(data);
       this.parameterList = data
     }).catch()
 

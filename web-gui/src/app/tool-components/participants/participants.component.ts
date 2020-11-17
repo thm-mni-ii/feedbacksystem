@@ -74,7 +74,6 @@ export class ParticipantsComponent implements OnInit {
     this.registrationService.deregisterCourse(this.courseID, userID).subscribe(()=>{
       this.registrationService.registerCourse(userID, this.courseID, role)
         .subscribe(res => {
-          console.log(res)
           this.snackBar.open("Benutzerrolle wurde geändert.","OK",{duration: 5000});
           this.refreshUserList()
         }, () => {

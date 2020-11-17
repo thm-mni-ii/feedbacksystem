@@ -64,7 +64,6 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   editConfig(checker: CheckerConfig) {
-    console.log(checker);
     // this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, "test").subscribe(
     // )
     this.dialog.open(NewCheckerDialogComponent, {

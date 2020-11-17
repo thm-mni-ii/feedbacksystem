@@ -35,7 +35,6 @@ export class ClassroomService {
     this.users = new BehaviorSubject<User[]>([]);
     this.isWindowhandleOpen = new Subject<Boolean>();
     this.isWindowhandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {
-      console.log(isOpen)
         if(!isOpen){
           this.closeConference();
         }
