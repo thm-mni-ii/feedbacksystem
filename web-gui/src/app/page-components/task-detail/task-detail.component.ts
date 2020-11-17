@@ -17,7 +17,7 @@ import {tap, map, flatMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
 import {Roles} from "../../model/Roles";
-import {AllSubmissionsComponent} from "../all-submissions/all-submissions.component";
+import {AllSubmissionsComponent} from "../../dialogs/all-submissions/all-submissions.component";
 
 /**
  * Shows a task in detail

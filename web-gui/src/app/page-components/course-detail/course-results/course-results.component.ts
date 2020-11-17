@@ -11,7 +11,7 @@ import {CourseResultsService} from "../../../service/course-results.service";
 import {CourseResult} from "../../../model/CourseResult";
 import {Task} from "../../../model/Task";
 import {SubmissionService} from "../../../service/submission.service";
-import {AllSubmissionsComponent} from "../../all-submissions/all-submissions.component";
+import {AllSubmissionsComponent} from "../../../dialogs/all-submissions/all-submissions.component";
 import {MatDialog} from "@angular/material/dialog";
 
 /**
@@ -57,11 +57,9 @@ export class CourseResultsComponent implements OnInit {
     this.submissionService.getAllSubmissions(uid, cid, tid)
       .subscribe(res => {
         this.dialog.open(AllSubmissionsComponent, {
-          height: '80%',
           width: '100%',
           data: {
-            submission: res,
-            auth: true
+            submission: res
           },
         })
     })

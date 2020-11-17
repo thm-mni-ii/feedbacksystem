@@ -44,14 +44,14 @@ import { TaskDetailComponent } from './page-components/task-detail/task-detail.c
 import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';
 import { UserManagementComponent } from './page-components/user-management/user-management.component';
 import { ChangePasswordComponent } from './page-components/change-password/change-password.component';
-import { AllSubmissionsComponent } from './page-components/all-submissions/all-submissions.component';
+import { AllSubmissionsComponent } from './dialogs/all-submissions/all-submissions.component';
 import { CourseResultsComponent } from './page-components/course-detail/course-results/course-results.component';
 import { TaskPreviewComponent } from './page-components/course-detail/task-preview/task-preview.component';
 import { NewTaskComponent } from './page-components/course-detail/new-task/new-task.component';
 import { SubmissionChoiceComponent } from './page-components/task-detail/submission-choice/submission-choice.component';
 import { SubmissionFileComponent } from './page-components/task-detail/submission-file/submission-file.component';
 import { SubmissionTextComponent } from './page-components/task-detail/submission-text/submission-text.component';
-import { SingleSubmissionComponent } from './page-components/single-submission/single-submission.component';
+import { ResultsComponent } from './page-components/results/results.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
 import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
@@ -90,7 +90,7 @@ export class ApiURIHttpInterceptor implements HttpInterceptor {
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
       //url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
-      url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest).pipe(tap(event => {
@@ -140,7 +140,7 @@ export const httpInterceptorProviders = [
     SubmissionChoiceComponent,
     SubmissionFileComponent,
     SubmissionTextComponent,
-    SingleSubmissionComponent,
+    ResultsComponent,
     DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
