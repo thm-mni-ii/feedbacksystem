@@ -10,6 +10,8 @@ buildscript {
 
 plugins {
     id "org.springframework.boot" version "2.2.5.RELEASE"
+    id 'jacoco'
+    id 'com.github.kt3k.coveralls' version '2.8.4'
 }
 
 apply plugin: 'scala'
@@ -106,4 +108,15 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8'
     testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+coveralls {
+    jacocoReportPath 'build/reports/jacoco/test/jacocoTestReport.xml'
 }
