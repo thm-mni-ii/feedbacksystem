@@ -27,8 +27,6 @@ services:
       - 80:80
     volumes:
       - ./data/upload-dir:/upload-dir
-      - ./data/zip-dir:/zip-dir
-      - ./data/shared-messages:/shared-messages
       - ./conf/ws:/usr/local/ws/conf
     environment:
       #- KEYSTORE_PATH=file:/usr/local/ws/conf/feedback.p12

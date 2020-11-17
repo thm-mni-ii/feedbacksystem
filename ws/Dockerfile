@@ -8,7 +8,6 @@ ADD build/install/ws /usr/local/ws
 VOLUME /usr/local/ws/markdown
 VOLUME /usr/local/ws/conf
 VOLUME /upload-dir
-VOLUME /shared-messages
 EXPOSE 433
 WORKDIR /usr/local/ws/bin
 ENV JAVA_OPTS=""
