@@ -11,6 +11,7 @@ buildscript {
 apply plugin: 'scala'
 apply plugin: 'scalaStyle'
 apply plugin: 'application'
+apply plugin: 'jacoco'
 
 def vertxVersion = '3.9.1'
 
