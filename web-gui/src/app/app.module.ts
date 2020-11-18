@@ -22,11 +22,10 @@ import {DataprivacyDialogComponent} from './dialogs/dataprivacy-dialog/datapriva
 import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
 import {MatDatepickerModule} from '@angular/material/datepicker';
-import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MarkdownModule} from 'ngx-markdown';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import { ImportCourseComponent } from "./page-components/import-course/import-course.component";
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { NewconferenceDialogComponent } from './dialogs/newconference-dialog/newconference-dialog.component';
 import {MatGridListModule} from '@angular/material/grid-list';
@@ -36,39 +35,30 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
 
-import {NewCourseComponent} from "./page-components/new-course/new-course.component";
+import {NewCourseComponent} from './page-components/new-course/new-course.component';
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
-import { CoursePreviewComponent} from "./page-components/course-preview/course-preview.component";
+import { CoursePreviewComponent} from './page-components/course-preview/course-preview.component';
 import { CourseDetailComponent } from './page-components/course-detail/course-detail.component';
 import { TaskDetailComponent } from './page-components/task-detail/task-detail.component';
-import { CourseAuthorizationComponent } from './page-components/course-authorization/course-authorization.component';
 import { UserManagementComponent } from './page-components/user-management/user-management.component';
 import { ChangePasswordComponent } from './page-components/change-password/change-password.component';
 import { AllSubmissionsComponent } from './dialogs/all-submissions/all-submissions.component';
 import { CourseResultsComponent } from './page-components/course-detail/course-results/course-results.component';
 import { TaskPreviewComponent } from './page-components/course-detail/task-preview/task-preview.component';
-import { NewTaskComponent } from './page-components/course-detail/new-task/new-task.component';
-import { SubmissionChoiceComponent } from './page-components/task-detail/submission-choice/submission-choice.component';
 import { SubmissionFileComponent } from './page-components/task-detail/submission-file/submission-file.component';
 import { SubmissionTextComponent } from './page-components/task-detail/submission-text/submission-text.component';
 import { ResultsComponent } from './page-components/results/results.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
-import { SidebarComponent } from "./page-components/sidebar/sidebar.component";
-import { MyCoursesComponent } from "./page-components/my-courses/my-courses.component";
-import {ConferenceComponent} from "./page-components/conference/conference.component";
-import { FilterPipe } from "./page-components/course-authorization/course-authorization.component";
-import { NotFoundComponent } from "./page-components/not-found/not-found.component";
-import {ParameterCourseModalComponent} from "./dialogs/parameter-course-modal/parameter-course-modal.component";
-import {ParameterUserModalComponent} from "./dialogs/parameter-user-modal/parameter-user-modal.component";
-import {TaskDeleteModalComponent} from "./dialogs/task-delete-modal/task-delete-modal.component";
-import {UserDeleteModalComponent} from "./dialogs/user-delete-modal/user-delete-modal.component";
-import {TaskNewDialogComponent} from "./dialogs/task-new-dialog/task-new-dialog.component";
-import {CourseUpdateDialogComponent} from "./dialogs/course-update-dialog/course-update-dialog.component";
-import {CreateGuestUserDialog} from "./dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
-import {ExitCourseDialogComponent} from "./dialogs/exit-course-dialog/exit-course-dialog.component";
-import {InvitetoConferenceDialogComponent} from "./dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component";
-import {UserTeacherFilter} from "./pipes/user-teacher-filter";
-import {AssignTicketDialogComponent} from "./dialogs/assign-ticket-dialog/assign-ticket-dialog.component";
+import { SidebarComponent } from './page-components/sidebar/sidebar.component';
+import { MyCoursesComponent } from './page-components/my-courses/my-courses.component';
+import {ConferenceComponent} from './page-components/conference/conference.component';
+import { NotFoundComponent } from './page-components/not-found/not-found.component';
+import {TaskNewDialogComponent} from './dialogs/task-new-dialog/task-new-dialog.component';
+import {CourseUpdateDialogComponent} from './dialogs/course-update-dialog/course-update-dialog.component';
+import {CreateGuestUserDialogComponent} from './dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
+import {InvitetoConferenceDialogComponent} from './dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component';
+import {UserTeacherFilter} from './pipes/user-teacher-filter';
+import {AssignTicketDialogComponent} from './dialogs/assign-ticket-dialog/assign-ticket-dialog.component';
 import { ParticipantsComponent } from './tool-components/participants/participants.component';
 import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
 import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
@@ -81,7 +71,7 @@ import {
 } from '@angular-material-components/datetime-picker';
 import { InfoComponent } from './tool-components/info/info.component';
 import { tap } from 'rxjs/operators';
-import {AuthService} from "./service/auth.service";
+import {AuthService} from './service/auth.service';
 import { ReversePipe } from './pipes/reverse.pipe';
 
 @Injectable()
@@ -89,14 +79,14 @@ export class ApiURIHttpInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const clonedRequest: HttpRequest<any> = req.clone({
-      //url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
+      // url: (req.url.search('localhost') >= 0) ? req.url : 'https://localhost'  + req.url // 'https://fk-server.mni.thm.de'
       // url: 'https://feedback.mni.thm.de/'  + req.url // 'https://fk-server.mni.thm.de'
     });
 
     return next.handle(clonedRequest).pipe(tap(event => {
       if (event instanceof HttpResponse) {
         const response = <HttpResponse<any>>event;
-        this.authService.renewToken(response)
+        this.authService.renewToken(response);
       }
     }));
   }
@@ -112,18 +102,15 @@ export const httpInterceptorProviders = [
 @NgModule({
   declarations: [
     AppComponent,
-    CreateGuestUserDialog,
+    CreateGuestUserDialogComponent,
     SidebarComponent,
     NewCourseComponent,
-    ExitCourseDialogComponent,
     DataprivacyDialogComponent,
     ImpressumDialogComponent,
     NotFoundComponent,
-    ImportCourseComponent,
     ChangePasswordComponent,
     NewconferenceDialogComponent,
     ConferenceComponent,
-    FilterPipe,
     UserTeacherFilter,
     NewticketDialogComponent,
     IncomingCallDialogComponent,
@@ -131,13 +118,10 @@ export const httpInterceptorProviders = [
     CoursePreviewComponent,
     CourseDetailComponent,
     TaskDetailComponent,
-    CourseAuthorizationComponent,
     UserManagementComponent,
     AllSubmissionsComponent,
     CourseResultsComponent,
     TaskPreviewComponent,
-    NewTaskComponent,
-    SubmissionChoiceComponent,
     SubmissionFileComponent,
     SubmissionTextComponent,
     ResultsComponent,
@@ -145,10 +129,6 @@ export const httpInterceptorProviders = [
     MyCoursesComponent,
     ConferenceComponent,
     LoginComponent,
-    ParameterCourseModalComponent,
-    ParameterUserModalComponent,
-    TaskDeleteModalComponent,
-    UserDeleteModalComponent,
     TaskNewDialogComponent,
     CourseUpdateDialogComponent,
     AssignTicketDialogComponent,
@@ -193,7 +173,7 @@ export const httpInterceptorProviders = [
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
   ],
-  entryComponents: [ExitCourseDialogComponent, DataprivacyDialogComponent, CreateGuestUserDialog, ImpressumDialogComponent,
+  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent,
     InvitetoConferenceDialogComponent, AssignTicketDialogComponent],
   providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]

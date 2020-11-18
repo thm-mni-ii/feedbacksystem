@@ -1,6 +1,8 @@
-import {User} from "./User";
+import {User} from './User';
 
 export interface Participant {
   user?: User;
-  role?: string; // Either DOCENT, TUTOR, or STUDENT
+  role?: {
+    value: string; // Either DOCENT, TUTOR, or STUDENT
+  };
 }

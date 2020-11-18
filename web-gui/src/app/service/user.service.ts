@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {User} from '../model/User';
 import {Observable} from 'rxjs';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class UserService {
    * Get a list of all users of the system.
    * @return Observable containing all users
    */
-  getAllUsers(): Observable<User[]>{
+  getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>('/api/v1/users');
   }
 
@@ -22,7 +22,7 @@ export class UserService {
    * @param user The user
    * @return Observable that succeeds if the user is created
    */
-  createUser(user: User): Observable<void>{
+  createUser(user: User): Observable<void> {
     return this.http.post<void>('/api/v1/users', user);
   }
 
@@ -30,16 +30,16 @@ export class UserService {
    * Get a user by its id
    * @param uid User id
    */
-  getUser(uid: number): Observable<User>{
-    return this.http.get<User>(`/api/v1/users/${uid}`)
+  getUser(uid: number): Observable<User> {
+    return this.http.get<User>(`/api/v1/users/${uid}`);
   }
 
   /**
    * Delete a user
    * @param uid The user id
    */
-  deleteUser(uid: number): Observable<void>{
-    return this.http.delete<void>(`/api/v1/users/${uid}`)
+  deleteUser(uid: number): Observable<void> {
+    return this.http.delete<void>(`/api/v1/users/${uid}`);
   }
 
   /**
@@ -48,11 +48,11 @@ export class UserService {
    * @param passwd Password
    * @param passwdRepeat Same password
    */
-  changePassword(uid: number, passwd: String, passwdRepeat: String): Observable<any>{
+  changePassword(uid: number, passwd: String, passwdRepeat: String): Observable<any> {
     return this.http.put<void>(`/api/v1/users/${uid}/passwd`, {
       passwd: passwd,
       passwdRepeat: passwdRepeat
-    })
+    });
   }
 
   /**
@@ -60,9 +60,9 @@ export class UserService {
    * @param uid User id
    * @param roleName Either ADMIN, MODERATOR, or USER
    */
-  changeRole(uid: number, roleName: string): Observable<any>{
+  changeRole(uid: number, roleName: string): Observable<any> {
     return this.http.put<void>(`/api/v1/users/${uid}/global-role`, {
       roleName: roleName
-    })
+    });
   }
 }

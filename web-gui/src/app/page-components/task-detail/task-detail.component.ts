@@ -1,4 +1,4 @@
-import {Component, Inject, Input, OnInit} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -6,18 +6,18 @@ import {DOCUMENT} from '@angular/common';
 import {DomSanitizer} from '@angular/platform-browser';
 import {TitlebarService} from '../../service/titlebar.service';
 import {UserService} from '../../service/user.service';
-import {TaskNewDialogComponent} from "../../dialogs/task-new-dialog/task-new-dialog.component";
-import {TaskService} from "../../service/task.service";
+import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
+import {TaskService} from '../../service/task.service';
 import { Task } from 'src/app/model/Task';
-import {CourseService} from "../../service/course.service";
-import {AuthService} from "../../service/auth.service";
-import {Submission} from "../../model/Submission";
-import {SubmissionService} from "../../service/submission.service";
-import {tap, map, flatMap} from "rxjs/operators";
-import {of} from "rxjs";
-import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
-import {Roles} from "../../model/Roles";
-import {AllSubmissionsComponent} from "../../dialogs/all-submissions/all-submissions.component";
+import {CourseService} from '../../service/course.service';
+import {AuthService} from '../../service/auth.service';
+import {Submission} from '../../model/Submission';
+import {SubmissionService} from '../../service/submission.service';
+import {tap, map, mergeMap} from 'rxjs/operators';
+import {of} from 'rxjs';
+import {Roles} from '../../model/Roles';
+import {AllSubmissionsComponent} from '../../dialogs/all-submissions/all-submissions.component';
+import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 
 /**
  * Shows a task in detail
@@ -28,14 +28,14 @@ import {AllSubmissionsComponent} from "../../dialogs/all-submissions/all-submiss
   styleUrls: ['./task-detail.component.scss']
 })
 export class TaskDetailComponent implements OnInit {
-  courseId: number
-  task: Task
-  status: boolean | null = null
+  courseId: number;
+  task: Task;
+  status: boolean | null = null;
   submissions: Submission[];
   lastSubmission: Submission;
-  pending: boolean = false;
+  pending = false;
 
-  deadlinePassed: boolean = false;
+  deadlinePassed = false;
 
   constructor(private route: ActivatedRoute, private titlebar: TitlebarService, private dialog: MatDialog,
               private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
@@ -55,41 +55,41 @@ export class TaskDetailComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.pipe(
-      flatMap(params => {
-        this.courseId = params.id
-        const taskId = params.tid
-        return this.taskService.getTask(this.courseId, taskId)
+      mergeMap(params => {
+        this.courseId = params.id;
+        const taskId = params.tid;
+        return this.taskService.getTask(this.courseId, taskId);
       }),
-      flatMap(task => {
-        this.task = task
-        const uid = this.authService.getToken().id
+      mergeMap(task => {
+        this.task = task;
+        const uid = this.authService.getToken().id;
         this.titlebar.emitTitle(this.task.name);
 
-        return this.submissionService.getAllSubmissions(uid, this.courseId, task.id)
+        return this.submissionService.getAllSubmissions(uid, this.courseId, task.id);
       }),
       tap(submissions => {
-        this.submissions = submissions
-        if (submissions.length == 0) {
-          this.status = <boolean>null
+        this.submissions = submissions;
+        if (submissions.length === 0) {
+          this.status = <boolean>null;
         } else {
-          this.pending = !submissions[submissions.length - 1].done
+          this.pending = !submissions[submissions.length - 1].done;
           this.status = submissions.reduce((acc, submission) => {
-            const done = submission.done
-            const finalExitCode = submission.results.reduce((acc, value) => acc + value.exitCode, 0)
-            return acc || done && finalExitCode == 0
-          }, false)
-          this.lastSubmission = submissions[submissions.length-1]
+            const done = submission.done;
+            const finalExitCode = submission.results.reduce((acc2, value) => acc2 + value.exitCode, 0);
+            return acc || done && finalExitCode === 0;
+          }, false);
+          this.lastSubmission = submissions[submissions.length - 1];
         }
       })
-    ).subscribe(ok => {this.refreshByPolling()}, error => console.error(error))
+    ).subscribe(ok => {this.refreshByPolling(); }, error => console.error(error));
   }
 
   private refreshByPolling(force = false) {
     setTimeout(() => {
       if (force || this.pending) {
-        this.ngOnInit()
+        this.ngOnInit();
       }
-    }, 30000) // 30 Sec
+    }, 30000); // 30 Sec
   }
 
   private reachedDeadline(now: number, deadline: number): boolean {
@@ -97,20 +97,19 @@ export class TaskDetailComponent implements OnInit {
   }
 
   public submissionTypeOfTask(): String {
-    let mediaType = this.task?.mediaType;
-    if (mediaType?.toLowerCase().includes("text")) return "text"
-    else return "file"
+    const mediaType = this.task?.mediaType;
+    if (mediaType?.toLowerCase().includes('text')) { return 'text'; } else { return 'file'; }
   }
 
   isSubmissionEmpty(): boolean {
-    let input = this.submissionData
+    const input = this.submissionData;
     if (!input) {
       return true;
     }
     if ((<any>input).name) {
-      return (<File>input).size == 0
+      return (<File>input).size === 0;
     } else {
-      return (<string>input).trim().length == 0
+      return (<string>input).trim().length === 0;
     }
   }
 
@@ -122,28 +121,29 @@ export class TaskDetailComponent implements OnInit {
       this.snackbar.open('Sie haben keine Lösung für die Aufgabe ' + this.task.name + ' abgegeben', 'Ups!');
       return;
     }
-    this.submit()
+    this.submit();
   }
 
   private submit() {
-    const token = this.authService.getToken()
+    const token = this.authService.getToken();
     this.submissionService.submitSolution(token.id, this.courseId, this.task.id, this.submissionData).subscribe(
       ok => {
-        this.pending = true
-        this.refreshByPolling(true)
-        this.snackbar.open("Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.",'OK', {duration: 3000})
+        this.pending = true;
+        this.refreshByPolling(true);
+        this.snackbar.open('Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.', 'OK', {duration: 3000});
       }, error => {
-        console.error(error)
-        this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});
-      })
+        console.error(error);
+        this.snackbar.open('Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.', 'OK', {duration: 3000});
+      });
   }
 
   public canEdit(): boolean {
-    const globalRole = this.authService.getToken().globalRole
-    if (Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole))
-      return true
+    const globalRole = this.authService.getToken().globalRole;
+    if (Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)) {
+      return true;
+    }
 
-    const courseRole = this.authService.getToken().courseRoles[this.courseId]
+    const courseRole = this.authService.getToken().courseRoles[this.courseId];
     return Roles.CourseRole.isTutor(courseRole) || Roles.CourseRole.isDocent(courseRole);
   }
 
@@ -157,10 +157,10 @@ export class TaskDetailComponent implements OnInit {
   // }
 
   reRun() {
-    if(this.lastSubmission != null) {
-      const token = this.authService.getToken()
+    if (this.lastSubmission != null) {
+      const token = this.authService.getToken();
       this.submissionService.restartSubmission(token.id, this.courseId, this.task.id, this.lastSubmission.id)
-        .subscribe(ok => { this.ngOnInit() }, error => console.error(error))
+        .subscribe(ok => { this.ngOnInit(); }, error => console.error(error));
     }
   }
 
@@ -177,12 +177,12 @@ export class TaskDetailComponent implements OnInit {
       }
     }).afterClosed().subscribe(
       res => {
-        if (res.success){
+        if (res.success) {
           this.snackbar.open('Update der Aufgabe ' + this.task.name + ' erfolgreich', 'OK', {duration: 3000});
-          this.ngOnInit()
+          this.ngOnInit();
         }
       }, error => {
-        console.error(error)
+        console.error(error);
         this.snackbar.open('Update der Aufgabe ' + this.task.name + ' hat leider nicht funktioniert.', 'OK', {duration: 3000});
       });
   }
@@ -193,20 +193,23 @@ export class TaskDetailComponent implements OnInit {
    * this task
    */
   deleteTask() {
-    this.dialog.open(TaskDeleteModalComponent, {
-      data: {taskname: this.task.name}
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Aufgabe löschen',
+        message: `Aufgabe ${this.task.name} wirklich löschen? (Alle zugehörigen Abgaben werden damit auch gelöscht!)`
+      }
     }).afterClosed()
-      .pipe(flatMap(confirmed => {
-        return confirmed ? this.taskService.deleteTask(this.courseId, this.task.id).pipe(map(e => true)) : of(false)
+      .pipe(mergeMap(confirmed => {
+        return confirmed ? this.taskService.deleteTask(this.courseId, this.task.id).pipe(map(e => true)) : of(false);
       }))
       .subscribe(res => {
         if (res) {
-          setTimeout(() => this.router.navigate(['courses', this.courseId]), 1000)
+          setTimeout(() => this.router.navigate(['courses', this.courseId]), 1000);
         }
       }, error => {
-        console.error(error)
+        console.error(error);
         this.snackbar.open('Aufgabe konnte leider nicht gelöscht werden.', 'OK', {duration: 3000});
-      })
+      });
   }
 
   allSubmissions() {
@@ -217,6 +220,6 @@ export class TaskDetailComponent implements OnInit {
         submission: this.submissions,
         auth: false
       },
-    })
+    });
   }
 }

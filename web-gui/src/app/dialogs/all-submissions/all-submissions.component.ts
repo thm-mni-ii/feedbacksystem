@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {Submission} from "../../model/Submission";
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Submission} from '../../model/Submission';
 
 @Component({
   selector: 'app-all-submissions',
@@ -11,6 +11,6 @@ export class AllSubmissionsComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: {submission: Submission[]}, public dialogRef: MatDialogRef<AllSubmissionsComponent>) { }
 
   close() {
-    this.dialogRef.close()
+    this.dialogRef.close();
   }
 }

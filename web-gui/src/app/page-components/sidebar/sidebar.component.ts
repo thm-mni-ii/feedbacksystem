@@ -1,13 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {AuthService} from '../../service/auth.service';
 import {TitlebarService} from '../../service/titlebar.service';
-import {Subscription, Observable, of} from 'rxjs';
-import {CookieService} from 'ngx-cookie-service';
-import {Roles} from "../../model/Roles";
-import {MatDialog} from "@angular/material/dialog";
-import {DataprivacyDialogComponent} from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
-import {ImpressumDialogComponent} from "../../dialogs/impressum-dialog/impressum-dialog.component";
+import {Observable, of} from 'rxjs';
+import {Roles} from '../../model/Roles';
+import {MatDialog} from '@angular/material/dialog';
+import {DataprivacyDialogComponent} from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
+import {ImpressumDialogComponent} from '../../dialogs/impressum-dialog/impressum-dialog.component';
 
 /**
  * Root component shows sidenav and titlebar
@@ -26,18 +25,18 @@ export class SidebarComponent implements OnInit {
 
   title: Observable<string> = of('');
   opened: boolean;
-  innerWidth:number;
+  innerWidth: number;
 
   username: string;
   isAdmin: boolean;
   isModerator: boolean;
 
   ngOnInit() {
-    this.username = this.auth.getToken().username
-    const globalRole = this.auth.getToken().globalRole
+    this.username = this.auth.getToken().username;
+    const globalRole = this.auth.getToken().globalRole;
     this.opened = true;
 
-    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole)
+    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
     this.isModerator = Roles.GlobalRole.isModerator(globalRole);
 
     this.title = this.titlebar.getTitle();
@@ -60,8 +59,8 @@ export class SidebarComponent implements OnInit {
    * Listen to onResize and update sidebar visibility settings
    * @param event
    */
-  onResize(event){
-    this.innerWidth = event.target.innerWidth
+  onResize(event) {
+    this.innerWidth = event.target.innerWidth;
   }
 
   /**

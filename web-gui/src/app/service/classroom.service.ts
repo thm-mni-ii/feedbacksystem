@@ -1,13 +1,14 @@
 import {Injectable} from '@angular/core';
 import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
-import {Ticket, User} from '../model/HttpInterfaces';
 import {RxStompClient} from '../util/rx-stomp';
-import {distinctUntilChanged} from 'rxjs/operators'
+import {distinctUntilChanged} from 'rxjs/operators';
 import {Message} from 'stompjs';
 import {ConferenceService} from './conference.service';
-import {AuthService} from "./auth.service";
-import {MatDialog} from "@angular/material/dialog";
-import {IncomingCallDialogComponent} from "../dialogs/incoming-call-dialog/incoming-call-dialog.component";
+import {AuthService} from './auth.service';
+import {MatDialog} from '@angular/material/dialog';
+import {IncomingCallDialogComponent} from '../dialogs/incoming-call-dialog/incoming-call-dialog.component';
+import {User} from '../model/User';
+import {Ticket} from '../model/Ticket';
 
 /**
  * Service that provides observables that asynchronacally updates tickets, users and privide Conferences to take
@@ -25,38 +26,38 @@ export class ClassroomService {
   private conferenceWindowHandle: Window;
   private isWindowhandleOpen: Subject<Boolean>;
   private courseId = 0;
-  private service = "bigbluebutton"
+  private service = 'bigbluebutton';
   incomingCallSubscriptions: Subscription[] = [];
   private heartbeatInterval: number;
-  private heartbeatTime: number = 5000
+  private heartbeatTime = 5000;
   private stompRx: RxStompClient = null;
 
   public constructor(private authService: AuthService, private conferenceService: ConferenceService, private mDialog: MatDialog) {
     this.users = new BehaviorSubject<User[]>([]);
     this.isWindowhandleOpen = new Subject<Boolean>();
     this.isWindowhandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {
-        if(!isOpen){
+        if (!isOpen) {
           this.closeConference();
         }
-    })
-    this.isWindowhandleOpen.next(true)
+    });
+    this.isWindowhandleOpen.next(true);
     this.tickets = new BehaviorSubject<Ticket[]>([]);
     this.usersInConference = new BehaviorSubject<User[]>([]);
     this.inviteUsers = new Subject<boolean>();
-    this.conferenceService.getSelectedConferenceSystem().subscribe((service :string) => {
-      this.service = service
-    })
+    this.conferenceService.getSelectedConferenceSystem().subscribe((service: string) => {
+      this.service = service;
+    });
     this.dialog = mDialog;
-    //this.conferenceWindowHandle = new Window();
-    setInterval(()=>{
-      if(this.conferenceWindowHandle) {
+    // this.conferenceWindowHandle = new Window();
+    setInterval(() => {
+      if (this.conferenceWindowHandle) {
         if (this.conferenceWindowHandle.closed) {
-          this.isWindowhandleOpen.next(false)
+          this.isWindowhandleOpen.next(false);
         } else {
-          this.isWindowhandleOpen.next(true)
+          this.isWindowhandleOpen.next(true);
         }
       }
-    },1000)
+    }, 1000);
   }
 
   /**
@@ -117,8 +118,10 @@ export class ClassroomService {
       this.listen('/topic/classroom/' + this.courseId + '/conference/opened').subscribe(_m => this.requestConferenceUsersUpdate());
       this.listen('/user/' + this.authService.getToken().username + '/classroom/opened').subscribe(m => this.handleConferenceOpenedMsg(m));
       this.listen('/topic/classroom/' + this.courseId + '/conference/closed').subscribe(_m => this.requestConferenceUsersUpdate());
-      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/users').subscribe(m => this.handleConferenceUsersMsg(m));
-      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/joined').subscribe(m => this.handleConferenceJoinedMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/users')
+        .subscribe(m => this.handleConferenceUsersMsg(m));
+      this.listen('/user/' + this.authService.getToken().username + '/classroom/conference/joined')
+        .subscribe(m => this.handleConferenceJoinedMsg(m));
       this.joinCourse();
       this.requestUsersUpdate();
       this.requestConferenceUsersUpdate();
@@ -138,7 +141,7 @@ export class ClassroomService {
    */
   public leave() {
     this.send('/websocket/classroom/leave', {courseId: this.courseId});
-    clearInterval(this.heartbeatInterval)
+    clearInterval(this.heartbeatInterval);
     return this.stompRx.disconnect();
   }
 
@@ -147,7 +150,7 @@ export class ClassroomService {
    * @param users The users to invite
    */
   public inviteToConference(users: User[]) {
-    this.send('/websocket/classroom/conference/invite', {users:users, 'courseid': this.courseId});
+    this.send('/websocket/classroom/conference/invite', {users: users, 'courseid': this.courseId});
   }
 
   /**
@@ -177,7 +180,7 @@ export class ClassroomService {
   }
 
   private handleInviteMsg(msg: Message) {
-    let body = JSON.parse(msg.body)
+    const body = JSON.parse(msg.body);
     this.dialog.open(IncomingCallDialogComponent, {
       height: 'auto',
       width: 'auto',
@@ -223,7 +226,7 @@ export class ClassroomService {
   }
 
   public closeConference() {
-    if(this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
+    if (this.conferenceWindowHandle && !this.conferenceWindowHandle.closed) {
       this.conferenceWindowHandle.close();
     }
     this.send('/websocket/classroom/conference/close', {});
@@ -235,19 +238,19 @@ export class ClassroomService {
   }
 
   private handleConferenceUsersMsg(msg: Message) {
-    this.usersInConference.next(JSON.parse(msg.body))
+    this.usersInConference.next(JSON.parse(msg.body));
   }
 
   private handleConferenceOpenedMsg(msg: Message) {
-    this.inviteUsers.next(true)
-    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href)
+    this.inviteUsers.next(true);
+    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href);
   }
 
   private handleConferenceJoinedMsg(msg: Message) {
-    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href)
+    this.conferenceWindowHandle = window.open(JSON.parse(msg.body).href);
   }
 
-  public joinConference(user: User, mid:number = 0) {
+  public joinConference(user: User, mid: number = 0) {
     this.send('/websocket/classroom/conference/join', {user: user, mid: mid, courseId: this.courseId});
   }
 

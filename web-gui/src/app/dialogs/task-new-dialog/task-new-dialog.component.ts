@@ -2,10 +2,10 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {MatDatepickerInputEvent} from "@angular/material/datepicker";
+import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 import { Task } from 'src/app/model/Task';
-import {CourseService} from "../../service/course.service";
-import {TaskService} from "../../service/task.service";
+import {CourseService} from '../../service/course.service';
+import {TaskService} from '../../service/task.service';
 
 /**
  * Dialog to create or update a task
@@ -17,7 +17,7 @@ import {TaskService} from "../../service/task.service";
 })
 export class TaskNewDialogComponent implements OnInit {
   taskForm = new FormGroup({
-    name: new FormControl('',[Validators.required]),
+    name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
     deadline: new FormControl(new Date()),
     mediaType: new FormControl(''),
@@ -30,7 +30,7 @@ export class TaskNewDialogComponent implements OnInit {
     description: '',
     mediaType: '',
     name: ''
-  }
+  };
 
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
               private courseService: CourseService, private taskService: TaskService,
@@ -40,13 +40,13 @@ export class TaskNewDialogComponent implements OnInit {
   ngOnInit() {
     if (this.data.task) {
       this.isUpdate = true;
-      this.task = this.data.task
+      this.task = this.data.task;
       this.taskForm.controls['name'].setValue(this.task.name);
       this.taskForm.controls['description'].setValue(this.task.description);
       this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
       this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
     }
-    this.courseId = this.data.courseId
+    this.courseId = this.data.courseId;
   }
 
   /**
@@ -57,7 +57,7 @@ export class TaskNewDialogComponent implements OnInit {
     this.dialogRef.close({success: false});
   }
 
-  getValues(){
+  getValues() {
     this.task.name = this.taskForm.get('name').value;
     this.task.description = this.taskForm.get('description').value;
     this.task.mediaType = this.taskForm.get('mediaType').value;
@@ -67,13 +67,13 @@ export class TaskNewDialogComponent implements OnInit {
    * and close dialog
    */
   createTask(value: any) {
-    this.getValues()
+    this.getValues();
     if (this.task.name) {
       this.taskService.createTask(this.courseId, this.task).subscribe(task => {
           this.dialogRef.close({success: true, task: task});
       });
     } else {
-      this.snackBar.open("Bitte ein valides Datum wählen.", "ok");
+      this.snackBar.open('Bitte ein valides Datum wählen.', 'ok');
     }
   }
 
@@ -82,18 +82,18 @@ export class TaskNewDialogComponent implements OnInit {
    * and close dialog
    */
   updateTask(value: any) {
-    this.getValues()
+    this.getValues();
     if (this.task.name) {
-      this.snackBar.open("Task bearbeitet.", "ok");
+      this.snackBar.open('Task bearbeitet.', 'ok');
       this.taskService.updateTask(this.courseId, this.task.id, this.task).subscribe(task => {
           this.dialogRef.close({success: true, task: task});
         });
     } else {
-      this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
+      this.snackBar.open('Das Datum sollte in der Zukunft liegen.', 'ok');
     }
   }
 
   addDate(event: MatDatepickerInputEvent<Date>) {
-    this.task.deadline = event.value.valueOf()
+    this.task.deadline = event.value.valueOf();
   }
 }

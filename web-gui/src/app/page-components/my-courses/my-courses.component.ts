@@ -1,11 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {TitlebarService} from '../../service/titlebar.service';
-import {Course} from "../../model/Course";
-import {AuthService} from "../../service/auth.service";
-import {flatMap, startWith} from "rxjs/operators";
-import {FormControl} from "@angular/forms";
-import {CourseRegistrationService} from "../../service/course-registration.service";
+import {Course} from '../../model/Course';
+import {AuthService} from '../../service/auth.service';
+import {mergeMap, startWith} from 'rxjs/operators';
+import {FormControl} from '@angular/forms';
+import {CourseRegistrationService} from '../../service/course-registration.service';
 
 /**
  * Show all registered courses
@@ -28,26 +28,26 @@ export class MyCoursesComponent implements OnInit {
 
   ngOnInit() {
     this.titlebar.emitTitle('Meine Kurse');
-    let userID = this.authService.getToken().id;
+    const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(''),
-      flatMap(value => this._filter(value))
+      mergeMap(value => this._filter(value))
     );
   }
 
   private _filter(value: string): Observable<Course[]> {
     const filterValue = this._normalizeValue(value);
     return this.courses.pipe(
-      flatMap(courseList => {
+      mergeMap(courseList => {
         if (filterValue.length > 0) {
-          return of(courseList.filter(course => this._normalizeValue(course.name).includes(filterValue)))
+          return of(courseList.filter(course => this._normalizeValue(course.name).includes(filterValue)));
         } else {
-          return this.courses
+          return this.courses;
         }
       })
-    )
+    );
   }
 
   private _normalizeValue(value: string): string {

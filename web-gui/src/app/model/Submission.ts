@@ -1,4 +1,4 @@
-import {CheckResult} from "./CheckResult";
+import {CheckResult} from './CheckResult';
 
 export interface Submission {
   submissionTime: number; // Unix time as long

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot} from '@angular/router';
-import {Roles} from "../model/Roles";
-import {AuthService} from "../service/auth.service";
+import {Roles} from '../model/Roles';
+import {AuthService} from '../service/auth.service';
 
 /**
  * Checks if user is admin
@@ -15,7 +15,7 @@ export class AdminGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     localStorage.setItem('route', state.url);
-    const globalRole = this.auth.getToken().globalRole
-    return Roles.GlobalRole.isAdmin(globalRole)
+    const globalRole = this.auth.getToken().globalRole;
+    return Roles.GlobalRole.isAdmin(globalRole);
   }
 }

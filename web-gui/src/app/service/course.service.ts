@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import {Course} from "../model/Course";
-import {HttpClient} from "@angular/common/http";
+import {Course} from '../model/Course';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -12,15 +12,15 @@ export class CourseService {
    * @return Observable with all courses
    */
   getCourseList(): Observable<Course[]> {
-    return this.http.get<Course[]>('/api/v1/courses')
+    return this.http.get<Course[]>('/api/v1/courses');
   }
 
   /**
    * Get a single course by its id, if it exits
    * @param cid The course id
    */
-  getCourse(cid: number): Observable<Course>{
-    return this.http.get<Course>(`/api/v1/courses/${cid}`)
+  getCourse(cid: number): Observable<Course> {
+    return this.http.get<Course>(`/api/v1/courses/${cid}`);
   }
 
   /**
@@ -38,7 +38,7 @@ export class CourseService {
    * @param course The new course state
    */
   updateCourse(cid: number, course: Course): Observable<void> {
-    return this.http.put<void>(`/api/v1/courses/${cid}`, course)
+    return this.http.put<void>(`/api/v1/courses/${cid}`, course);
   }
 
   /**
@@ -47,7 +47,7 @@ export class CourseService {
    * @return Observable that succeeds if the course does not exists after the operation
    */
   deleteCourse(cid: number): Observable<void> { // returns an Observable<Succeeded>
-    return this.http.delete<void>(`/api/v1/courses/${cid}`)
+    return this.http.delete<void>(`/api/v1/courses/${cid}`);
   }
 
   // TODO: export a course as zip format

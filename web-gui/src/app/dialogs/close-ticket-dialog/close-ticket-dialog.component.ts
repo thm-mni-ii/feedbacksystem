@@ -1,11 +1,11 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {ClassroomService} from '../../service/classroom.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Ticket} from '../../model/HttpInterfaces';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Observable} from 'rxjs';
 import {first} from 'rxjs/operators';
 import {UserService} from '../../service/user.service';
+import {Ticket} from '../../model/Ticket';
 
 @Component({
   selector: 'app-close-ticket-dialog',
@@ -16,8 +16,7 @@ export class CloseTicketDialogComponent implements OnInit {
   tickets: Observable<Ticket[]>;
   constructor(@Inject(MAT_DIALOG_DATA) public data: any,
               private classroomService: ClassroomService, private snackBar: MatSnackBar,
-              private dialogRef: MatDialogRef<any>, private user: UserService,
-              private dialog: MatDialog) { }
+              private dialogRef: MatDialogRef<any>, private user: UserService) { }
 
   ngOnInit(): void {
     this.tickets = this.classroomService.getTickets();
@@ -26,8 +25,7 @@ export class CloseTicketDialogComponent implements OnInit {
   public closeTickets() {
     this.tickets.pipe(first()).subscribe(t => {
       t.forEach(ticket => {
-        // @ts-ignore
-        if (ticket.assignee != undefined && ticket.assignee.username == this.user.getUsername()) {
+        if (ticket.assignee != undefined && ticket.assignee.username === this.user.getUsername()) {
           this.classroomService.removeTicket(ticket);
         }
       });

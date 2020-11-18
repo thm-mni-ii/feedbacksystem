@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {Observable} from "rxjs";
-import {HttpClient, HttpHeaders} from "@angular/common/http";
-import {CheckerConfig} from "../model/CheckerConfig";
-import {saveAs as importedSaveAs} from "file-saver";
+import {Observable} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {CheckerConfig} from '../model/CheckerConfig';
+import {saveAs as importedSaveAs} from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class CheckerService {
    * @return Observable that succeeds with the configured Checker
    */
   public getChecker(cid: number, tid: number): Observable<CheckerConfig[]> {
-    return this.http.get<CheckerConfig[]>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`)
+    return this.http.get<CheckerConfig[]>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`);
   }
 
   /**
@@ -28,7 +28,7 @@ export class CheckerService {
    * @return all Checker Configurations
    */
   public createChecker(cid: number, tid: number, checker: CheckerConfig): Observable<CheckerConfig> {
-    return this.http.post<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`, checker)
+    return this.http.post<CheckerConfig>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations`, checker);
   }
 
   /**
@@ -40,7 +40,7 @@ export class CheckerService {
    * @return Observable that succeeds with the configured Checker
    */
   public updateChecker(cid: number, tid: number, ccid: number, checker: CheckerConfig): Observable<void> {
-    return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`, checker)
+    return this.http.put<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`, checker);
   }
 
   /**
@@ -51,7 +51,7 @@ export class CheckerService {
    * @return Observable that succeeds if the Checker does not exists after this operation.
    */
   public deleteChecker(cid: number, tid: number, ccid: number): Observable<void> {
-    return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`)
+    return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}`);
   }
 
   /**
@@ -62,7 +62,7 @@ export class CheckerService {
    * @return Observable that succeeds with the Main File of configured Checker
    */
   public getMainFile(cid: number, tid: number, ccid: number) {
-    this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`,{responseType: 'arraybuffer'})
+    this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`, {responseType: 'arraybuffer'})
       .subscribe(response => {
         const blob = new Blob([response], {type: 'text/plain'});
         importedSaveAs(blob);
@@ -78,7 +78,7 @@ export class CheckerService {
    * @return Observable that succeeds with the upload of the main file
    */
   public updateMainFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
-    return this.uploadFile(file,`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`)
+    return this.uploadFile(file, `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`);
   }
 
   /**
@@ -88,7 +88,7 @@ export class CheckerService {
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the secondary File of configured Checker
    */
-  public getSecondaryFile(cid: number, tid: number, ccid: number){
+  public getSecondaryFile(cid: number, tid: number, ccid: number) {
     return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`, {responseType: 'arraybuffer'})
       .subscribe(response => {
         const blob = new Blob([response], {type: 'text/plain'});
@@ -105,15 +105,15 @@ export class CheckerService {
    * @return Observable that succeeds with the upload of the file
    */
   public updateSecondaryFile(cid: number, tid: number, ccid: number, file: File): Observable<void> {
-    return this.uploadFile(file,`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`)
+    return this.uploadFile(file, `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`);
   }
 
-  private uploadFile(file: File, url: string): Observable<void>{
-    let formData:FormData = new FormData();
+  private uploadFile(file: File, url: string): Observable<void> {
+    const formData: FormData = new FormData();
     formData.append('file', file);
     // let headers = new HttpHeaders({
     //   'Content-Type': ''
     // });
-    return this.http.put<void>(url, formData)
+    return this.http.put<void>(url, formData);
   }
 }

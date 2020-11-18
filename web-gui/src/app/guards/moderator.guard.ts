@@ -1,8 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot} from '@angular/router';
-import {UserService} from '../service/user.service';
-import {AuthService} from "../service/auth.service";
-import {Roles} from "../model/Roles";
+import {AuthService} from '../service/auth.service';
+import {Roles} from '../model/Roles';
 
 /**
  * Checks if user is moderator or admin
@@ -17,7 +16,7 @@ export class ModeratorGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     localStorage.setItem('route', state.url);
-    const globalRole = this.auth.getToken().globalRole
-    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
+    const globalRole = this.auth.getToken().globalRole;
+    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole);
   }
 }

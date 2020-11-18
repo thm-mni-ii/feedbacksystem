@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import {Observable, of} from "rxjs";
-import {Submission} from "../model/Submission";
-import {SUBMISSION} from "../mock-data/mock-submissions";
-import {HttpClient} from "@angular/common/http";
+import {Observable} from 'rxjs';
+import {Submission} from '../model/Submission';
+import {HttpClient} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +17,9 @@ export class SubmissionService {
    * @param passed Filters only passed submissions
    * @return Observable that succeeds with all submission of a user for a task
    */
-  getAllSubmissions(uid: number, cid: number, tid: number, passed?: boolean): Observable<any>{
+  getAllSubmissions(uid: number, cid: number, tid: number, passed?: boolean): Observable<any> {
     // TODO: do we need passed filter?
-    return this.http.get<any>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`)
+    return this.http.get<any>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`);
   }
 
   /**
@@ -32,7 +31,7 @@ export class SubmissionService {
    * @return Observable that succeeds if operation submission was restated
    */
   restartSubmission(uid: number, cid: number, tid: number, sid: number): Observable<void> {
-    return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`, {})
+    return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`, {});
   }
 
   /**
@@ -44,18 +43,18 @@ export class SubmissionService {
    * @return Observable that succeeds with the submission
    */
   getSubmission(uid: number, cid: number, tid: number, sid: number): Observable<Submission> {
-    return this.http.get<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`)
+    return this.http.get<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}`);
   }
 
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
   submitSolution(uid: number, cid: number, tid: number, solution: File | string): Observable<Submission> {
-    let formData:FormData = new FormData();
-    formData.append('file', (<any>solution).name ? solution : new Blob([solution]))
-    return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, formData)
+    const formData: FormData = new FormData();
+    formData.append('file', (<any>solution).name ? solution : new Blob([solution]));
+    return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, formData);
   }
 
   // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
-  restartAllSubmissions(uid: number, cid: number, tid: number, sid: number){
-    //TODO: this Route doesn't exist yet
+  restartAllSubmissions(uid: number, cid: number, tid: number, sid: number) {
+    // TODO: this Route doesn't exist yet
   }
 }
