@@ -6,18 +6,18 @@
   </app-menu-bar>
 
   <mat-card class="content-container">
-    <div class="card-options">
+<!--    <div class="card-options">-->
 <!--      <div class="actions">-->
 <!--        <span class="lb">Download: </span>-->
-<!--
-<!--      </div>-->
+<!--        <button (click)="downloadResults()">Click</button>-->
+<!--     </div>-->
 
 <!--      <mat-paginator [length]="userlength"-->
 <!--                     [pageSize]="limit"-->
 <!--                     [pageSizeOptions]="[5, 10, 20, 50, 100]"-->
 <!--                     (page)="pageEvent($event)">-->
 <!--      </mat-paginator>-->
-    </div>
+<!--    </div>-->
     <div class="card">
       <div class="name-column">
         <div class="name-container header">
@@ -39,9 +39,9 @@
         <div class="task-container" *ngFor="let result of courseResults | async">
           <span class="task-result" *ngFor="let taskResult of result.results">
             <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
-                  (click)="showResult(result.user.id, this.courseId, taskResult.task.id)"
                   matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
-              <span>{{taskResult.attempts}}</span>
+              <span *ngIf="taskResult.attempts!=0" (click)="showResult(result.user.id, this.courseId, taskResult.task.id)">{{taskResult.attempts}}</span>
+              <span *ngIf="taskResult.attempts==0">-</span>
             </span>
           </span>
         </div>

@@ -38,14 +38,7 @@
         <button [disabled]="deadlinePassed || isSubmissionEmpty()" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
       </mat-card-actions>
 
-      <div *ngIf="lastSubmission != null" class="task-container">
-        <span>Letzte Abgabe: </span>
-        <span class="meta">
-          <button mat-icon-button matTooltip="Alle Abgaben" (click)="allSubmissions()"><mat-icon>dns</mat-icon></button>
-        </span>
-
-      </div>
-      <app-single-submission *ngIf="lastSubmission != null" [submission]="lastSubmission"></app-single-submission>
+      <app-results *ngIf="submissions" [submissions]="submissions"></app-results>
 <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
 
 

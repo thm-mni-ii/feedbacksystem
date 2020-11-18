@@ -3,4 +3,5 @@ export interface CheckResult {
   resultText: string; // The output the check ???
   checkerType: string; // The type of the checker that checked the submission
   configurationId: number; // The configuration id of the checker configuration
+  extInfo?: object;
 }

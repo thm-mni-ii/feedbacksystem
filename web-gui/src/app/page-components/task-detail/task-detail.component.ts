@@ -17,7 +17,7 @@ import {tap, map, flatMap} from "rxjs/operators";
 import {of} from "rxjs";
 import {TaskDeleteModalComponent} from "../../dialogs/task-delete-modal/task-delete-modal.component";
 import {Roles} from "../../model/Roles";
-import {AllSubmissionsComponent} from "../all-submissions/all-submissions.component";
+import {AllSubmissionsComponent} from "../../dialogs/all-submissions/all-submissions.component";
 
 /**
  * Shows a task in detail
@@ -131,6 +131,7 @@ export class TaskDetailComponent implements OnInit {
       ok => {
         this.pending = true
         this.refreshByPolling(true)
+        this.snackbar.open("Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.",'OK', {duration: 3000})
       }, error => {
         console.error(error)
         this.snackbar.open("Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",'OK', {duration: 3000});

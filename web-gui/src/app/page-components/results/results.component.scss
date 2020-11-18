@@ -1,0 +1,41 @@
+.results {
+  display: flex;
+  flex-direction: column;
+  > * {
+    margin-bottom: 16px;
+  }
+}
+
+.submission-list {
+  margin: 16px 0 16px 0;
+  display: flex;
+  flex-wrap: wrap;
+  > span {
+    margin-left: 8px;
+    margin-bottom: 8px;
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
+  }
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.toogle {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: 8px;
+}
+
+.grid {
+  display: flex;
+  flex-direction: row;
+  > div {
+    width: 100%;
+  }
+  > div:last-child {
+    margin-left: 16px;
+  }
+}
