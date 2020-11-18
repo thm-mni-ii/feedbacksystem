@@ -40,3 +40,6 @@ deploy:
   on:
     all_branches: true
     condition: $TRAVIS_BRANCH =~ ^(master|dev)$
+
+after_success:
+  - ./gradlew jacocoRootReport coveralls

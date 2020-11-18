@@ -1,4 +1,4 @@
-# Feedbacksystem [![Build Status](https://travis-ci.org/thm-mni-ii/feedbacksystem.svg?branch=master)](https://travis-ci.org/thm-mni-ii/feedbacksystem) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+# Feedbacksystem [![Build Status](https://travis-ci.org/thm-mni-ii/feedbacksystem.svg?branch=master)](https://travis-ci.org/thm-mni-ii/feedbacksystem) [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/) [![Coverage Status](https://coveralls.io/repos/github/thm-mni-ii/feedbacksystem/badge.svg?branch=dev)](https://coveralls.io/github/thm-mni-ii/feedbacksystem?branch=dev)
 
 As a student you have to submit a lot of tasks
 for your lectures. Usually the only reply you
