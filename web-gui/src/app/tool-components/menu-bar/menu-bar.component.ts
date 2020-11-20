@@ -6,5 +6,4 @@ import { Component } from '@angular/core';
   styleUrls: ['./menu-bar.component.scss']
 })
 export class MenuBarComponent {
-  constructor() { }
 }

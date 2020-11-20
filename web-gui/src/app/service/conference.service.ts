@@ -1,9 +1,7 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, BehaviorSubject,  timer, Subscription} from 'rxjs';
-import {flatMap, first} from 'rxjs/operators';
+import {Observable, BehaviorSubject, Subscription} from 'rxjs';
 import {ConferenceSystems} from '../util/ConferenceSystems';
-import {Conference} from "../model/HttpInterfaces";
+import {Conference} from '../model/Conference';
 
 /**
  * Handles the creation and retrivement of conference links.
@@ -17,9 +15,8 @@ export class ConferenceService {
   private bbbConferenceLink: BehaviorSubject<object>;
   private conference: BehaviorSubject<Conference>;
   public selectedConferenceSystem: BehaviorSubject<string>;
-
-
   public conferenceTimeoutTimer: Subscription;
+
   public constructor() {
      this.personalConferenceLink = new BehaviorSubject<string>(null);
      this.bbbConferenceLink = new  BehaviorSubject<object>(null);

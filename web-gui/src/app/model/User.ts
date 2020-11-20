@@ -7,5 +7,5 @@ export interface User {
   password?: string;
   username: string;
   alias?: string;
-  globalRole?: string; //ADMIN, MODERATOR, or USER
+  globalRole?: string; // ADMIN, MODERATOR, or USER
 }

@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {TitlebarService} from "../../service/titlebar.service";
-import {FormControl, Validators} from "@angular/forms";
-import {AuthService} from "../../service/auth.service";
-import {UserService} from "../../service/user.service";
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {TitlebarService} from '../../service/titlebar.service';
+import {FormControl, Validators} from '@angular/forms';
+import {AuthService} from '../../service/auth.service';
+import {UserService} from '../../service/user.service';
 
 @Component({
   selector: 'app-change-password',
@@ -24,31 +24,30 @@ export class ChangePasswordComponent implements OnInit {
     this.titlebar.emitTitle('Passwort ändern');
   }
 
-  showOK(){
-    this.snackbar.open("Super, das Passwort wurde geändert", 'OK', {duration: 3000})
+  showOK() {
+    this.snackbar.open('Super, das Passwort wurde geändert', 'OK', {duration: 3000})
       .afterDismissed()
-      .subscribe()
+      .subscribe();
   }
 
-  showError(msg: string){
+  showError(msg: string) {
     this.snackbar.open(msg, 'OK', {duration: 3000});
   }
 
-  save(){
-    if(this.passwd.length == 0){
-      this.showError("Bitte ein Passwort eingeben")
-    }
-    else if(this.passwd != this.passwd_repeat) {
-      this.showError("Passwörter stimmen nicht überein")
+  save() {
+    if (this.passwd.length === 0) {
+      this.showError('Bitte ein Passwort eingeben');
+    } else if (this.passwd !== this.passwd_repeat) {
+      this.showError('Passwörter stimmen nicht überein');
     } else {
       this.userService.changePassword(this.auth.getToken().id, this.passwd, this.passwd_repeat).subscribe(
       res => {
-          this.showOK()
+          this.showOK();
           setTimeout(() => {
-            location.reload()
-          }, 2000)
+            location.reload();
+          }, 2000);
         }, error => {
-          this.showError("Leider gab es einen Fehler mit dem Update")
+          this.showError('Leider gab es einen Fehler mit dem Update');
         });
       }
     }

@@ -1,7 +1,7 @@
 import {Client, CompatClient, Frame, IMessage, Stomp, StompSubscription} from '@stomp/stompjs';
 import {Observable, Subscriber} from 'rxjs';
 import * as SockJS from 'sockjs-client';
-import {Subscription} from "stompjs";
+import {Subscription} from 'stompjs';
 
 
 /**
@@ -18,7 +18,7 @@ export class RxStompClient {
    * @param uri The Endpoint of the websocket server.
    */
   public constructor(uri: string, connectHeaders) {
-    this.client = new Client({webSocketFactory: () => new WebSocket(uri), connectHeaders: connectHeaders, reconnectDelay: 10000})
+    this.client = new Client({webSocketFactory: () => new WebSocket(uri), connectHeaders: connectHeaders, reconnectDelay: 10000});
   }
   /**
    * @return True if client is connected.
@@ -41,9 +41,9 @@ export class RxStompClient {
    */
   public onConnect(cb) {
     this.client.onDisconnect = () => {
-      this.subscriber.forEach((subscriber)=> subscriber.complete())
+      this.subscriber.forEach((subscriber) => subscriber.complete());
       this.subscriber = [];
-    }
+    };
     this.client.onConnect = cb;
   }
   /**
@@ -56,7 +56,7 @@ export class RxStompClient {
      this.client.subscribe(topic, (msg: IMessage) => {
         subj.next(msg);
       }, headers);
-      this.subscriber.push(subj)
+      this.subscriber.push(subj);
     });
   }
 
@@ -67,7 +67,7 @@ export class RxStompClient {
    * @param headers Optional headers.
    */
   public send(path: string, body: {} = {}, headers: {} = {}): any {
-    this.client.publish({destination:path , headers:headers, body: JSON.stringify(body)});
+    this.client.publish({destination: path , headers: headers, body: JSON.stringify(body)});
   }
 
   /**

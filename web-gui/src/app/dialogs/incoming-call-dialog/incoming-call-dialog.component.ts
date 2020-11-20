@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {User} from '../../model/HttpInterfaces';
-import {ClassroomService} from "../../service/classroom.service";
+import {ClassroomService} from '../../service/classroom.service';
+import {User} from '../../model/User';
 
 @Component({
   selector: 'app-incoming-call-dialog',
@@ -18,7 +18,7 @@ export class IncomingCallDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.inviter = this.data.inviter;
-    this.cid = this.data.cid
+    this.cid = this.data.cid;
     const notification = new Notification('Konferenzeinladung Feedbacksystem',
       {body: 'Sie werden zu einem Konferenzanruf eingeladen.'});
     notification.onclick = () => window.focus();
@@ -42,7 +42,7 @@ export class IncomingCallDialogComponent implements OnInit {
   }
   // todo: fix string constants ( enum didnt work)
   public acceptCall() {
-    this.classroomService.joinConference(this.inviter, this.cid)
+    this.classroomService.joinConference(this.inviter, this.cid);
     this.dialogRef.close();
   }
 

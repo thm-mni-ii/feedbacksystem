@@ -2,14 +2,8 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {FormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {Observable} from 'rxjs';
-import {DatabaseService} from '../../service/database.service';
-import {DetailedCourseInformation, Testsystem} from '../../model/HttpInterfaces';
-import {Course} from "../../model/Course";
-import {CourseService} from "../../service/course.service";
-import {TitlebarService} from "../../service/titlebar.service";
-import {Router} from "@angular/router";
-
+import {Course} from '../../model/Course';
+import {CourseService} from '../../service/course.service';
 
 /**
  * Updates course information in dialog
@@ -22,9 +16,8 @@ import {Router} from "@angular/router";
 export class CourseUpdateDialogComponent implements OnInit {
   name = new FormControl('', [Validators.required]);
   description = new FormControl('');
-  isVisible = true
-
-  isUpdateDialog: boolean = false;
+  isVisible = true;
+  isUpdateDialog = false;
 
   constructor(private courseService: CourseService,
               private snackBar: MatSnackBar,
@@ -33,12 +26,12 @@ export class CourseUpdateDialogComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isUpdateDialog = this.data.isUpdateDialog
+    this.isUpdateDialog = this.data.isUpdateDialog;
     if (this.isUpdateDialog) {
-      const course: Course = this.data.course
-      this.name.setValue(course.name)
-      this.description.setValue(course.description)
-      this.isVisible = course.visible
+      const course: Course = this.data.course;
+      this.name.setValue(course.name);
+      this.description.setValue(course.description);
+      this.isVisible = course.visible;
     }
   }
 
@@ -54,21 +47,21 @@ export class CourseUpdateDialogComponent implements OnInit {
       name: this.name.value,
       description: this.description.value,
       visible: this.isVisible
-    }
+    };
 
     if (this.isUpdateDialog) {
       this.courseService
         .updateCourse(this.data.course.id, course)
-        .subscribe(ok => this.dialogRef.close({success: true}), error => console.error(error))
+        .subscribe(ok => this.dialogRef.close({success: true}), error => console.error(error));
     } else {
       this.courseService
         .createCourse(course)
-        .subscribe(course => {
-          this.dialogRef.close({success: true, course: course})
+        .subscribe(createdCourse => {
+          this.dialogRef.close({success: true, course: createdCourse});
         }, error => {
-          console.error(error)
-          this.snackBar.open("Es ist ein fehler beim erstellen des Kurses aufgetreten", null, {duration: 3000});
-        })
+          console.error(error);
+          this.snackBar.open('Es ist ein fehler beim erstellen des Kurses aufgetreten', null, {duration: 3000});
+        });
     }
   }
 

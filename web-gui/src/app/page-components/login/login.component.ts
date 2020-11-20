@@ -1,12 +1,12 @@
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {DOCUMENT} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
-import {LegalService} from "../../service/legal.service";
-import {DataprivacyDialogComponent} from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
-import {CookieService} from "ngx-cookie-service";
+import {LegalService} from '../../service/legal.service';
+import {DataprivacyDialogComponent} from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
+import {CookieService} from 'ngx-cookie-service';
 
 /**
  * Manages the login page for Submissionchecker
@@ -16,7 +16,7 @@ import {CookieService} from "ngx-cookie-service";
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   username: string;
   password: string;
 
@@ -46,10 +46,10 @@ export class LoginComponent {
   localLogin() {
     this.auth.localLogin(this.username, this.password)
       .subscribe(token => {
-        this.checktermsOfUse(token.id)
+        this.checktermsOfUse(token.id);
       }, () => {
         this.snackbar.open('Prüfen Sie Ihren Benutzernamen und Ihr Passwort.', 'OK', {duration: 3000});
-      })
+      });
   }
 
   /**
@@ -61,24 +61,24 @@ export class LoginComponent {
     this.document.location.href = 'https://cas.thm.de/cas/login?service=' + baseUrl + '/api/v1/login/cas';
   }
 
-  private checktermsOfUse(uid: number){
+  private checktermsOfUse(uid: number) {
     this.legalService.getTermsOfUse(uid).subscribe(res => {
-        if(res.accepted){
-          this.router.navigateByUrl('/courses')
+        if (res.accepted) {
+          this.router.navigateByUrl('/courses');
         } else {
-          this.dialog.open(DataprivacyDialogComponent,{data: {onlyForShow: false}}).afterClosed()
+          this.dialog.open(DataprivacyDialogComponent, {data: {onlyForShow: false}}).afterClosed()
             .subscribe( data => {
-              if(data.success) {
-                this.legalService.acceptTermsOfUse(uid).subscribe(res =>{
+              if (data.success) {
+                this.legalService.acceptTermsOfUse(uid).subscribe(_ => {
                   this.router.navigateByUrl('/courses');
                 });
               } else {
-                this.auth.logout()
+                this.auth.logout();
               }
             }, error => {
-              this.auth.logout()
+              this.auth.logout();
             });
         }
-      })
+      });
   }
 }

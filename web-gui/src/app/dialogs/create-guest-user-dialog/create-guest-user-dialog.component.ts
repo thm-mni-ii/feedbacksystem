@@ -1,15 +1,20 @@
-import {Component} from "@angular/core";
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from "@angular/forms";
-import {MatDialog, MatDialogRef} from "@angular/material/dialog";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {User} from "../../model/User";
+import {Component} from '@angular/core';
+import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {User} from '../../model/User';
 
 @Component({
   selector: 'app-create-guest-user-dialog',
   templateUrl: 'create-guest-user-dialog.component.html',
   styleUrls: ['./create-guest-user-dialog.component.scss']
 })
-export class CreateGuestUserDialog{
+export class CreateGuestUserDialogComponent {
+
+  constructor(public dialog: MatDialog,
+              public dialogRef: MatDialogRef<CreateGuestUserDialogComponent>,
+              private snackBar: MatSnackBar) {
+  }
 
   pwRepeat: String = '';
   data: User = new class implements User {
@@ -17,31 +22,25 @@ export class CreateGuestUserDialog{
     email: string;
     globalRole: string;
     id: number;
-    password: string ='';
+    password = '';
     prename: string;
     surname: string;
     username: string;
   };
 
-  private passwordsMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-    return control.value == this.data.password ? null : {'notMatch': true};
-  };
-
-  passwordMatcher = new FormControl('', [Validators.required, this.passwordsMatchValidator]);
-
-  constructor(public dialog: MatDialog,
-              public dialogRef: MatDialogRef<CreateGuestUserDialog>,
-              private snackBar: MatSnackBar) {
-  }
+  passwordMatcher = new FormControl('', [Validators.required, (control: AbstractControl): ValidationErrors | null => {
+    return control.value === this.data.password ? null : {'notMatch': true};
+  }]);
 
   onCancel(): void {
     this.dialogRef.close(null);
   }
 
   onSubmit(): void {
-    if (this.data.password === this.pwRepeat)
+    if (this.data.password === this.pwRepeat) {
       this.dialogRef.close(this.data);
-    else
-      this.snackBar.open('Error: ' + "Die Passwörter müssen übereinstimmen", null, {duration: 5000});
+    } else {
+      this.snackBar.open('Error: ' + 'Die Passwörter müssen übereinstimmen', null, {duration: 5000});
+    }
   }
 }

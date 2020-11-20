@@ -1,16 +1,16 @@
 import {Component, Input} from '@angular/core';
-import {Course} from "../../model/Course";
-import {Router} from "@angular/router";
+import {Course} from '../../model/Course';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-course-preview',
   templateUrl: './course-preview.component.html',
   styleUrls: ['./course-preview.component.scss']
 })
-export class CoursePreviewComponent{
+export class CoursePreviewComponent {
   @Input() data: Course;
 
-  constructor(private router: Router,) {
+  constructor(private router: Router) {
   }
 
   /**

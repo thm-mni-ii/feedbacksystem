@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot} from '@angular/router';
-import {Roles} from "../model/Roles";
-import {AuthService} from "../service/auth.service";
+import {Roles} from '../model/Roles';
+import {AuthService} from '../service/auth.service';
 
 /**
  * Checks if user is docent or admin
@@ -15,6 +15,6 @@ export class DocentGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     localStorage.setItem('route', state.url);
-    return this.auth.getToken().courseRoles.find(o => o == Roles.CourseRole.DOCENT)
+    return this.auth.getToken().courseRoles.find(o => o === Roles.CourseRole.DOCENT);
   }
 }

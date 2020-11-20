@@ -1,16 +1,15 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {flatMap, startWith} from 'rxjs/operators';
+import {mergeMap, startWith} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
 import {Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
-import {CourseService} from "../../service/course.service";
-import {Course} from "../../model/Course";
-import {Roles} from "../../model/Roles";
-import {AuthService} from "../../service/auth.service";
-import {NewticketDialogComponent} from "../../dialogs/newticket-dialog/newticket-dialog.component";
-import {CourseUpdateDialogComponent} from "../../dialogs/course-update-dialog/course-update-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
+import {CourseService} from '../../service/course.service';
+import {Course} from '../../model/Course';
+import {Roles} from '../../model/Roles';
+import {AuthService} from '../../service/auth.service';
+import {CourseUpdateDialogComponent} from '../../dialogs/course-update-dialog/course-update-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 /**
  * Show all courses
@@ -34,11 +33,11 @@ export class SearchCoursesComponent implements OnInit {
 
   ngOnInit() {
     this.titlebar.emitTitle('Kurs suchen');
-    this.courses = this.courseService.getCourseList()
+    this.courses = this.courseService.getCourseList();
 
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(''),
-      flatMap(value => this._filter(value))
+      mergeMap(value => this._filter(value))
     );
   }
 
@@ -55,8 +54,8 @@ export class SearchCoursesComponent implements OnInit {
   }
 
   public isAuthorized() {
-    const globalRole = this.auth.getToken().globalRole
-    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole)
+    const globalRole = this.auth.getToken().globalRole;
+    return Roles.GlobalRole.isAdmin(globalRole) || Roles.GlobalRole.isModerator(globalRole);
   }
 
   /**
@@ -70,14 +69,14 @@ export class SearchCoursesComponent implements OnInit {
   private _filter(value: string): Observable<Course[]> {
     const filterValue = this._normalizeValue(value);
     return this.courses.pipe(
-      flatMap(courseList => {
+      mergeMap(courseList => {
         if (filterValue.length > 0) {
-          return of(courseList.filter(course => this._normalizeValue(course.name).includes(filterValue)))
+          return of(courseList.filter(course => this._normalizeValue(course.name).includes(filterValue)));
         } else {
-          return this.courses
+          return this.courses;
         }
       })
-    )
+    );
   }
 
   private _normalizeValue(value: string): string {

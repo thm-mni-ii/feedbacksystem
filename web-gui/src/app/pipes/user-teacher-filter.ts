@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from "@angular/core";
+import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'isTeacher',
@@ -9,6 +9,6 @@ export class UserTeacherFilter implements PipeTransform {
     if (!items) {
       return items;
     }
-    return items.filter(item => item.courseRole == "DOCENT" || item.courseRole == "TUTOR");
+    return items.filter(item => item.courseRole === 'DOCENT' || item.courseRole === 'TUTOR');
   }
 }

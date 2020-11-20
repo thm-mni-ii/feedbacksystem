@@ -1,24 +1,16 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Task} from "../../../model/Task";
+import {Component, EventEmitter, Output} from '@angular/core';
 
 @Component({
   selector: 'app-submission-file',
   templateUrl: './submission-file.component.html',
   styleUrls: ['./submission-file.component.scss']
 })
-export class SubmissionFileComponent implements OnInit {
-
+export class SubmissionFileComponent {
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
-
   submissionFile: File[] = [];
-  constructor() { }
-
-  ngOnInit() {
-
-  }
 
   updateSubmissionFile(event) {
     this.submissionFile = event['content'];
-    this.update.emit({content: this.submissionFile})
+    this.update.emit({content: this.submissionFile});
   }
 }

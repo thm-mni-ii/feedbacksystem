@@ -4,10 +4,10 @@ export const Roles = {
     MODERATOR: 'MODERATOR',
     USER: 'USER',
     isAdmin: (globalRole: string): boolean => {
-      return globalRole == Roles.GlobalRole.ADMIN
+      return globalRole === Roles.GlobalRole.ADMIN;
     },
     isModerator: (globalRole: string): boolean => {
-      return globalRole == Roles.GlobalRole.MODERATOR
+      return globalRole === Roles.GlobalRole.MODERATOR;
     }
   },
   CourseRole: {
@@ -15,10 +15,10 @@ export const Roles = {
     TUTOR: 'TUTOR',
     STUDENT: 'STUDENT',
     isDocent: (courseRole: string): boolean => {
-      return courseRole == Roles.CourseRole.DOCENT
+      return courseRole === Roles.CourseRole.DOCENT;
     },
     isTutor: (courseRole: string): boolean => {
-      return courseRole == Roles.CourseRole.TUTOR
+      return courseRole === Roles.CourseRole.TUTOR;
     }
   }
-}
+};

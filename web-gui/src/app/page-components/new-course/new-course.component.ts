@@ -3,8 +3,8 @@ import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, Validators} from '@angular/forms';
 import {TitlebarService} from '../../service/titlebar.service';
-import {Course} from "../../model/Course";
-import {CourseService} from "../../service/course.service";
+import {Course} from '../../model/Course';
+import {CourseService} from '../../service/course.service';
 
 /**
  * Create a new course
@@ -18,7 +18,7 @@ import {CourseService} from "../../service/course.service";
 export class NewCourseComponent implements OnInit {
   name = new FormControl('', [Validators.required]);
   description = new FormControl('');
-  isVisible = true
+  isVisible = true;
 
   constructor(private courseService: CourseService,
               private snackBar: MatSnackBar,
@@ -42,16 +42,16 @@ export class NewCourseComponent implements OnInit {
       name: this.name.value,
       description: this.description.value,
       visible: this.isVisible
-    }
+    };
 
     this.courseService
       .createCourse(course)
-      .subscribe(course => {
-        setTimeout( () => {this.router.navigate(['courses', course.id]); }, 100);
+      .subscribe(createdCourse => {
+        setTimeout( () => {this.router.navigate(['courses', createdCourse.id]); }, 100);
       }, error => {
-        console.error(error)
-        this.snackBar.open("Es ist ein fehler beim erstellen des Kurses aufgetreten", null, {duration: 3000});
-      })
+        console.error(error);
+        this.snackBar.open('Es ist ein fehler beim erstellen des Kurses aufgetreten', null, {duration: 3000});
+      });
   }
 
   isInputValid(): boolean {

@@ -1,25 +1,19 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Task} from "../../model/Task";
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector: 'app-dropzone',
   templateUrl: './dropzone.component.html',
   styleUrls: ['./dropzone.component.scss']
 })
-export class DropzoneComponent implements OnInit {
+export class DropzoneComponent {
   @Input() usage: String;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
   private submissionFile: any;
 
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
   updateSubmissionFile(event) {
-    this.submissionFile = event.addedFiles
-    this.update.emit({content: this.submissionFile[0]})
+    this.submissionFile = event.addedFiles;
+    this.update.emit({content: this.submissionFile[0]});
     // TODO: muss noch generisch gemacht werden
   }
 }
