@@ -68,7 +68,7 @@ object SQLRunnerService {
     * @param results The SQL Runner results
     * @return The Runner Results in a Map
     */
-  def transformResult(runArgs: RunArgs, success: Boolean, stdout: String, stderr: String, results: (Option[ResultSet], Option[ResultSet])): JsonObject = {
+  def transformResult(runArgs: RunArgs, success: Boolean, stdout: String, stderr: String, results: ExtResSql): JsonObject = {
     val res = new JsonObject()
     val extInfo = ExtendedResultsService.buildCompareTable(results)
 
@@ -97,6 +97,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
   private def sortJsonArray(x: JsonArray, y: JsonArray) = {
     x.encode().compareTo(y.encode())
   }
+
+  private def buildCorrectRes(res: ResultSet, variable: Boolean): Option[ResultSet] =
+    Option(if (variable) res.setResults(res.getResults.sorted(sortJsonArray)) else res)
 
   private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
@@ -193,22 +196,21 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     * @param res the Querie Results
     * @return (Status message, was Successfully, the correct results set)
     */
-  def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean, Option[ResultSet]) = {
+  def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean, ExtResSql) = {
     var msg = "Your Query didn't produce the correct result"
-    var success = false
-    var identified = false
-    var foundIndex = -1
+    var success = false; var identified = false; var foundIndex = -1; var variable = false
     val userRes = res._2.getResults
     val userResSorted = userRes.sorted(sortJsonArray)
-    var correctResults: Option[ResultSet] = None
+    val correctResults: ExtResSql = new ExtResSql(None, Option(res._2))
 
     breakable {
       for (i <- res._1.indices) {
         val expectedRes = res._1(i).getResults
+        variable = sqlRunArgs.section(i).order.equalsIgnoreCase("variable")
 
         /* Save correct results to use them in the expected results */
-        if (correctResults.isEmpty && sqlRunArgs.section(i).description.equalsIgnoreCase("OK")) {
-          correctResults = Option(res._1(i))
+        if (correctResults.expected.isEmpty && sqlRunArgs.section(i).description.equalsIgnoreCase("OK")) {
+          correctResults.expected = buildCorrectRes(res._1(i), variable)
         }
 
         if (expectedRes.isEmpty && userRes.isEmpty) { // no result from original query, what should compared?
@@ -218,7 +220,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
         } else {
           if (expectedRes.length == userRes.length) {
             // If the config says that the order of the elements is not imported sort elements and compare
-            if (if (sqlRunArgs.section(i).order != null && sqlRunArgs.section(i).order.equalsIgnoreCase("variable"))
+            if (if (sqlRunArgs.section(i).order != null && variable)
               expectedRes.sorted(sortJsonArray) == userResSorted else
               expectedRes == userRes
             ) {
@@ -234,6 +236,12 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     if (identified) {
       msg = sqlRunArgs.section(foundIndex).description
       if (msg.equalsIgnoreCase("OK")) success = true
+
+      /* Save correct results (get the correctResults that matched or sorted) to use them in the expected results */
+      if (success) {
+        correctResults.expected = buildCorrectRes(res._1(foundIndex), variable)
+        correctResults.result = buildCorrectRes(res._2, variable)
+      }
     }
 
     (msg, success, correctResults)
