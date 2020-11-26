@@ -26,7 +26,7 @@ export class TaskNewDialogComponent implements OnInit {
   isUpdate: boolean;
   courseId: number;
   task: Task = {
-    deadline: Date.now(),
+    deadline: new Date().toISOString(),
     description: '',
     mediaType: '',
     name: ''
@@ -94,6 +94,6 @@ export class TaskNewDialogComponent implements OnInit {
   }
 
   addDate(event: MatDatepickerInputEvent<Date>) {
-    this.task.deadline = event.value.valueOf();
+    this.task.deadline = event.value.toISOString();
   }
 }
