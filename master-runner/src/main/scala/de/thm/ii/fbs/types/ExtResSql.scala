@@ -7,5 +7,6 @@ import io.vertx.scala.ext.sql.ResultSet
   *
   * @param expected the expected SQL Results
   * @param result   the Submission SQL Results
+  * @param variable define if the Results will be compared without order
   */
-class ExtResSql(var expected: Option[ResultSet], var result: Option[ResultSet])
+class ExtResSql(var expected: Option[ResultSet], var result: Option[ResultSet], var variable: Boolean = false)

@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.runner
 import java.sql.SQLException
 import java.util.regex.Pattern
 
-import de.thm.ii.fbs.services.{ExtendedResultsService, FileService}
+import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.RunnerException
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
@@ -94,12 +94,14 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
-  private def sortJsonArray(x: JsonArray, y: JsonArray) = {
-    x.encode().compareTo(y.encode())
-  }
+  private def isVariable(taskQuery: TaskQuery): Boolean =
+    taskQuery.order != null && taskQuery.order.equalsIgnoreCase("variable")
 
-  private def buildCorrectRes(res: ResultSet, variable: Boolean): Option[ResultSet] =
-    Option(if (variable) res.setResults(res.getResults.sorted(sortJsonArray)) else res)
+  private def msgIsOk(msg: String): Boolean =
+    msg.equalsIgnoreCase("OK")
+
+  private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
+    msgIsOk(taskQuery.description)
 
   private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
@@ -180,7 +182,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     val p = Pattern.compile("UPDATE.*", 2)
 
     queries.foldLeft[Future[ResultSet]](Future {
-      ResultSet()
+      SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
       if (p.matcher(b).matches()) {
         con.callFuture(b)
@@ -199,31 +201,30 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
   def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean, ExtResSql) = {
     var msg = "Your Query didn't produce the correct result"
     var success = false; var identified = false; var foundIndex = -1; var variable = false
-    val userRes = res._2.getResults
-    val userResSorted = userRes.sorted(sortJsonArray)
+    val userRes = res._2
+    val userResSorted = SQLResultService.sortResult(SQLResultService.copyResult(res._2))
     val correctResults: ExtResSql = new ExtResSql(None, Option(res._2))
+    var expectedRes = SQLResultService.emptyResult()
 
     breakable {
       for (i <- res._1.indices) {
-        val expectedRes = res._1(i).getResults
-        variable = sqlRunArgs.section(i).order.equalsIgnoreCase("variable")
+        variable = isVariable(sqlRunArgs.section(i))
+        expectedRes = if (variable) SQLResultService.sortResult(res._1(i)) else res._1(i)
 
         /* Save correct results to use them in the expected results */
-        if (correctResults.expected.isEmpty && sqlRunArgs.section(i).description.equalsIgnoreCase("OK")) {
-          correctResults.expected = buildCorrectRes(res._1(i), variable)
+        if (correctResults.expected.isEmpty && taskQueryIsOk(sqlRunArgs.section(i))) {
+          SQLResultService.buildExpected(correctResults, res._1(i), variable)
         }
 
-        if (expectedRes.isEmpty && userRes.isEmpty) { // no result from original query, what should compared?
+        if (expectedRes.getResults.isEmpty && userRes.getResults.isEmpty) {
+          // no result from original query, what should compared?
           identified = true
           foundIndex = i
           break()
         } else {
-          if (expectedRes.length == userRes.length) {
-            // If the config says that the order of the elements is not imported sort elements and compare
-            if (if (sqlRunArgs.section(i).order != null && variable)
-              expectedRes.sorted(sortJsonArray) == userResSorted else
-              expectedRes == userRes
-            ) {
+          if (expectedRes.getResults.length == userRes.getResults.length) {
+            // If the config says that the order of the elements is not imported compare sorted elements
+            if (expectedRes.getResults == (if (variable) userResSorted else userRes).getResults) {
               identified = true
               foundIndex = i
               break()
@@ -235,13 +236,11 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
 
     if (identified) {
       msg = sqlRunArgs.section(foundIndex).description
-      if (msg.equalsIgnoreCase("OK")) success = true
+      if (msgIsOk(msg)) success = true
 
       /* Save correct results (get the correctResults that matched or sorted) to use them in the expected results */
-      if (success) {
-        correctResults.expected = buildCorrectRes(res._1(foundIndex), variable)
-        correctResults.result = buildCorrectRes(res._2, variable)
-      }
+      SQLResultService.buildResult(correctResults, userRes, userResSorted, variable)
+      if (success) SQLResultService.buildExpected(correctResults, expectedRes, variable)
     }
 
     (msg, success, correctResults)

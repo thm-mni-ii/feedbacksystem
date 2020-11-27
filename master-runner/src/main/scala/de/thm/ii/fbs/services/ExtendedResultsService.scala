@@ -44,6 +44,7 @@ object ExtendedResultsService {
 
     res
       .put("type", COMPARE_TABLE_TYPE)
+      .put("ignoreOrder", results.variable)
       .put("expected", expectedTable)
       .put("result", resultTable)
 
