@@ -42,4 +42,4 @@ deploy:
     condition: $TRAVIS_BRANCH =~ ^(master|dev)$
 
 after_success:
-  - ./gradlew jacocoRootReport coveralls
+  - CI_NAME=travis-ci ./gradlew jacocoRootReport coveralls
