@@ -4,7 +4,7 @@ import java.sql.{SQLException, SQLTimeoutException}
 
 import de.thm.ii.fbs.services.FileService
 import de.thm.ii.fbs.services.runner.SQLRunnerService
-import de.thm.ii.fbs.types.RunArgs
+import de.thm.ii.fbs.types.{ExtResSql, RunArgs}
 import de.thm.ii.fbs.util.RunnerException
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.RUN_ADDRESS
@@ -73,7 +73,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
           val res = sqlRunner.compareResults(value)
           logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
-          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", (res._3, Option(value._2)))))
+          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
 
         case Failure(ex: SQLTimeoutException) =>
           handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
@@ -92,6 +92,6 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
   private def handleError(runArgs: RunArgs, msg: String): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg")
-    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, (None, None))))
+    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
   }
 }

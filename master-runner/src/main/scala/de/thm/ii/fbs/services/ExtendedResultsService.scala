@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services
 
+import de.thm.ii.fbs.types.ExtResSql
 import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.json.JsonArray
 import io.vertx.scala.ext.sql.ResultSet
@@ -36,16 +37,17 @@ object ExtendedResultsService {
     * @param results SQL Runner results
     * @return Json structure
     */
-  def buildCompareTable(results: (Option[ResultSet], Option[ResultSet])): Option[JsonObject] = {
+  def buildCompareTable(results: ExtResSql): Option[JsonObject] = {
     val res = new JsonObject
-    val expectedTable = buildTableJson(results._1)
-    val resultTable = buildTableJson(results._2)
+    val expectedTable = buildTableJson(results.expected)
+    val resultTable = buildTableJson(results.result)
 
     res
       .put("type", COMPARE_TABLE_TYPE)
+      .put("ignoreOrder", results.variable)
       .put("expected", expectedTable)
       .put("result", resultTable)
 
-    if (results._1.isEmpty && results._2.isEmpty) None else Option(res)
+    if (results.expected.isEmpty && results.result.isEmpty) None else Option(res)
   }
 }
