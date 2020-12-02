@@ -3,13 +3,15 @@ package de.thm.ii.fbs.services.runner
 import java.sql.SQLException
 import java.util.regex.Pattern
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.RunnerException
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
-import io.vertx.core.json.{DecodeException, Json}
+import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.ScalaLogger
-import io.vertx.lang.scala.json.{JsonArray, JsonObject}
+import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
@@ -22,6 +24,7 @@ import scala.util.{Failure, Success}
   * Provides Helper functions for the SQLRunnerService
   */
 object SQLRunnerService {
+  private val yamlMapper = new ObjectMapper(new YAMLFactory)
   /**
     * Converts a Runner Configuration into an SQL Runner Configuration.
     *
@@ -38,9 +41,7 @@ object SQLRunnerService {
         throw new RunnerException("Config or Submission files are missing")
       }
 
-      val sectionString = FileService.fileToString(runArgs.runner.mainFile.toFile)
-      val sectionJson: JsonObject = Json.decodeValue(sectionString).asInstanceOf[JsonObject]
-      val section = sectionJson.mapTo(classOf[TaskQueries]).sections
+      val sections = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries]).sections
 
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
@@ -49,7 +50,7 @@ object SQLRunnerService {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      new SqlRunArgs(section, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
+      new SqlRunArgs(sections, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
     } catch {
       // TODO enhance messages
       case e: RunnerException => throw e
