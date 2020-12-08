@@ -189,7 +189,7 @@ export class CourseDetailComponent implements OnInit {
 
   goToFBA() {
     this.feedbackAppService.getToken().subscribe((token) => {
-      localStorage.authToken = token;
+      localStorage.setItem('flutter.authToken', JSON.stringify(token));
       window.open('/feedbackApp/')
     })
   }
