@@ -1,16 +1,15 @@
 package de.thm.ii.fbs.services.persistance
 
-import java.math.BigInteger
-import java.sql
-import java.sql.{ResultSet, SQLException, Timestamp}
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import de.thm.ii.fbs.model.Task
-import de.thm.ii.fbs.util.{DB, ISO8601}
+import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+
+import java.math.BigInteger
+import java.sql.{ResultSet, SQLException, Timestamp}
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 /**
   * Handles the persistant task state
@@ -48,7 +47,7 @@ class TaskService {
   def create(cid: Int, task: Task): Task =
     DB.insert("INSERT INTO task (name, media_type, description, deadline, course_id) VALUES (?, ?, ?, ?, ?);",
       task.name, task.mediaType, task.description,
-      new Timestamp(ISO8601.simpleDateFormat.parse(task.deadline).getTime), cid)
+      parseTimestamp(task.deadline), cid)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
@@ -64,7 +63,7 @@ class TaskService {
     */
   def update(cid: Int, tid: Int, task: Task): Boolean =
     1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ? WHERE task_id = ? AND course_id = ?",
-      task.name, task.mediaType, task.description, new Timestamp(ISO8601.simpleDateFormat.parse(task.deadline).getTime), tid, cid)
+      task.name, task.mediaType, task.description, parseTimestamp(task.deadline), tid, cid)
 
   /**
     * Delete a task by id
@@ -79,7 +78,9 @@ class TaskService {
     name = res.getString("name"),
     mediaType = res.getString("media_type"),
     description = res.getString("description"),
-    deadline = ISO8601.simpleDateFormat.format(new Date(res.getTimestamp("deadline").getTime)),
+    deadline = res.getTimestamp("deadline").toInstant.toString,
     id = res.getInt("task_id")
   )
+
+  private def parseTimestamp(timestamp: String): Timestamp = Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)))
 }

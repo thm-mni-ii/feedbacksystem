@@ -1,16 +1,17 @@
 package de.thm.ii.fbs.controller
 
-import java.nio.file.Files
-
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.RemoteCheckerService
 import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
+import java.nio.file.Files
+import java.time.Instant
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -82,6 +83,9 @@ class SubmissionController {
         case Some(task) =>
           val expectedMediaType = task.mediaType
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
+          if (Instant.now().isAfter(Instant.parse(task.deadline))) {
+            throw new BadRequestException("Deadline Before Now")
+          }
           if (true) { // TODO: Check media type compatibility
             val tempDesc = Files.createTempFile("fbs", ".tmp")
             file.transferTo(tempDesc)
@@ -90,6 +94,7 @@ class SubmissionController {
             checkerConfigurationService.getAll(cid, tid).foreach(cc =>
               remoteCheckerService.notify(tid, submission.id, cc, user))
             submission
+
           } else {
             throw new BadRequestException("Unsupported Media Type")
           }
