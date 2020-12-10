@@ -21,6 +21,7 @@ import {Task} from '../../model/Task';
 import {CourseService} from '../../service/course.service';
 import {CourseRegistrationService} from '../../service/course-registration.service';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
+import {FeedbackAppService} from "../../service/feedback-app.service";
 
 @Component({
   selector: 'app-course-detail',
@@ -36,6 +37,7 @@ export class CourseDetailComponent implements OnInit {
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router,
               private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
+              private feedbackAppService: FeedbackAppService,
               @Inject(DOCUMENT) document) {
   }
 
@@ -183,5 +185,12 @@ export class CourseDetailComponent implements OnInit {
         this.router.navigate(['courses']);
       }, error => console.error(error));
     });
+  }
+
+  goToFBA() {
+    this.feedbackAppService.getToken().subscribe((token) => {
+      localStorage.setItem('flutter.authToken', JSON.stringify(token));
+      window.open('/feedbackApp/')
+    })
   }
 }
