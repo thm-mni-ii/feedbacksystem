@@ -1,5 +1,5 @@
 <div class="container">
-  <app-menu-bar *ngIf="role">
+  <app-menu-bar *ngIf="role || isAuthorized()">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
         <span *ngIf="role == 'DOCENT'">Dozent/in</span>

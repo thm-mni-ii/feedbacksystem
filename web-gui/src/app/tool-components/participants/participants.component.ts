@@ -24,6 +24,7 @@ export class ParticipantsComponent implements OnInit {
   user: User[];
   participants: Participant[];
   allUser: User[];
+  searchedUser: User[];
 
   constructor(private snackBar: MatSnackBar, private userService: UserService,
               private registrationService: CourseRegistrationService,

@@ -6,6 +6,19 @@
   </app-menu-bar>
 
   <mat-card class="content-container">
+    <mat-list role="list" class="legend">
+      <mat-list-item role="listitem">
+        <mat-icon class="state passed">check_circle</mat-icon>: Kurs bestanden
+      </mat-list-item>
+      <mat-list-item role="listitem">
+        <mat-icon class="state failed">add_circle</mat-icon>: Kurs nicht bestanden
+      </mat-list-item>
+      <mat-list-item role="listitem">3 : Aufgabe bestanden</mat-list-item>
+      <mat-list-item role="listitem">- : Aufgabe nicht bearbeitet</mat-list-item>
+      <mat-list-item role="listitem">
+        <span class="task-result"><span class="task-result-example">4</span></span>: Aufgabe nicht bestanden
+      </mat-list-item>
+    </mat-list>
 <!--    <div class="card-options">-->
 <!--      <div class="actions">-->
 <!--        <span class="lb">Download: </span>-->
@@ -25,7 +38,7 @@
         </div>
         <div class="name-container" *ngFor="let result of courseResults | async">
           <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
-          <span class="state failed" *ngIf="result.passed"><mat-icon>add_circle</mat-icon></span>
+          <span class="state failed" *ngIf="!result.passed"><mat-icon>add_circle</mat-icon></span>
           <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
         </div>
       </div>
