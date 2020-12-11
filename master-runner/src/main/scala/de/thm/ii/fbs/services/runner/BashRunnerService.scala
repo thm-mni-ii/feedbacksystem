@@ -28,7 +28,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   def getDockerCmd: DockerCmdConfig = {
     /*Get Docker Options*/
     // Read the first line of the Script File to check if is a php script TODO May improve/remove
-    val scriptContent = FileService.fileToString(submission.solutionFileLocation.toFile)
+    val scriptContent = FileService.fileToString(runner.mainFile.toFile)
     val interpreter = if (scriptContent.split("\n").head.matches("#!.*php.*")) "php" else "bash"
 
     val submissionMount = s"$SOURCE_FOLDER/${submission.solutionFileLocation.getFileName}"
