@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "dist": "ng build --prod",
     "test": "ng test",
     "clean": "rimraf dist",
     "lint": "ng lint",

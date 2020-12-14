@@ -25,7 +25,7 @@ export class AssignTicketDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<AssignTicketDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
-              private conferenceService: ConferenceService, private auth: AuthService, private dialog: MatDialog) {
+              private conferenceService: ConferenceService, public auth: AuthService, private dialog: MatDialog) {
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
   }
