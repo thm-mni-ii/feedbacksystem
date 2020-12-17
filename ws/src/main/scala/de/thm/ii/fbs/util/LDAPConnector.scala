@@ -6,6 +6,7 @@ import java.util.Properties
 import javax.naming.Context
 import javax.naming.directory.InitialDirContext
 import org.ldaptive._
+
 import scala.jdk.CollectionConverters._
 
 /**
@@ -18,8 +19,8 @@ object LDAPConnector {
     * A very simple, still in development, method to access THMs LDAP Service
     *
     * @author Benjamin Manns
-    * @param uid user Id where we want to get more information /attributes of
-    * @param LDAP_URL ldap URL is the ldap server we we want to connect us and this has to be loaded from config file
+    * @param uid          user Id where we want to get more information /attributes of
+    * @param LDAP_URL     ldap URL is the ldap server we we want to connect us and this has to be loaded from config file
     * @param LDAP_BASE_DN ldap base distinguish name, has to be loaded from config file
     * @return Attribute Set
     */
@@ -29,9 +30,16 @@ object LDAPConnector {
     executor.setBaseDn(LDAP_BASE_DN)
     val TIME_OUT = 5
     executor.setTimeLimit(Duration.ofSeconds(TIME_OUT))
-    val entries = executor.search(cf, "(uid=" + uid + ")").getResult.getEntries
+    executor.setDerefAliases(DerefAliases.ALWAYS)
 
-    entries.asScala.find(e => e.getAttribute("cn") != null)
+    val entries = executor.search(cf, "(uid=" + uid + ")").getResult.getEntries.asScala
+
+    if (entries.size > 1) {
+      throw new IllegalArgumentException(s"The user could not be identified by the UID ('$uid') " +
+        s"because several entries were found with this UDI. Found '${entries.size}' expected 1.")
+    }
+
+    if (entries.nonEmpty) Option(entries.head) else None
   }
 
   /**
