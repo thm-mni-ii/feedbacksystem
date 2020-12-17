@@ -19,8 +19,8 @@ node {
 }
 
 clean.dependsOn npm_run_clean
-assemble.dependsOn npm_run_build
-installDist.dependsOn npm_run_build
+assemble.dependsOn npm_run_dist
+installDist.dependsOn npm_run_dist
 
 defaultTasks "build"
 

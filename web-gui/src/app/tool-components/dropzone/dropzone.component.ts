@@ -9,7 +9,7 @@ export class DropzoneComponent {
   @Input() usage: String;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
-  private submissionFile: any;
+  public submissionFile: any;
 
   updateSubmissionFile(event) {
     this.submissionFile = event.addedFiles;
