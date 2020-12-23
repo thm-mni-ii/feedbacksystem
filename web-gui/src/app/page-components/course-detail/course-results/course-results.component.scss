@@ -129,3 +129,20 @@
 .spacer {
   flex: 1 1 auto;
 }
+
+.legend {
+  font-size: small;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.task-result-example{
+  background-color: red;
+  border-radius: 25px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

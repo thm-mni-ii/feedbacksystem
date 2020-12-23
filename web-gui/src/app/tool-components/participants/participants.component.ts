@@ -24,6 +24,7 @@ export class ParticipantsComponent implements OnInit {
   user: User[];
   participants: Participant[];
   allUser: User[];
+  searchedUser: User[];
 
   constructor(private snackBar: MatSnackBar, private userService: UserService,
               private registrationService: CourseRegistrationService,
@@ -37,6 +38,7 @@ export class ParticipantsComponent implements OnInit {
         this.userService.getAllUsers().subscribe(
           user => {
             this.allUser = user;
+            this.searchedUser = user;
             this.refreshUserList();
           }
         );
@@ -101,6 +103,12 @@ export class ParticipantsComponent implements OnInit {
    */
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.searchedUser = this.allUser.filter((user) => {
+      return (
+        user.prename.toLocaleLowerCase().includes(filterValue.trim().toLowerCase()) ||
+        user.surname.toLocaleLowerCase().includes(filterValue.trim().toLocaleLowerCase())
+      );
+    });
   }
 
   addParticipant(user: User) {

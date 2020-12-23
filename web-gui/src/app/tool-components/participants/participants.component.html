@@ -5,7 +5,7 @@
    <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)" [matAutocomplete]="auto">
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)='addParticipant($event.option.value)' [displayWith]="displayFn">
-      <mat-option *ngFor="let user of allUser" [value]="user">
+      <mat-option *ngFor="let user of searchedUser" [value]="user">
         {{user.prename}} {{user.surname}}
       </mat-option>
     </mat-autocomplete>
