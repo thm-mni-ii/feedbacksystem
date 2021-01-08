@@ -89,7 +89,7 @@ export class TaskDetailComponent implements OnInit {
       if (force || this.pending) {
         this.ngOnInit();
       }
-    }, 5000); // 30 Sec
+    }, 5000); // 5 Sec
   }
 
   private reachedDeadline(now: number, deadline: number): boolean {
