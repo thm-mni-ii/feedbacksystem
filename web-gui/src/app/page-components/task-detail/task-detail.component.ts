@@ -89,7 +89,7 @@ export class TaskDetailComponent implements OnInit {
       if (force || this.pending) {
         this.ngOnInit();
       }
-    }, 30000); // 30 Sec
+    }, 5000); // 30 Sec
   }
 
   private reachedDeadline(now: number, deadline: number): boolean {
@@ -130,7 +130,7 @@ export class TaskDetailComponent implements OnInit {
       ok => {
         this.pending = true;
         this.refreshByPolling(true);
-        this.snackbar.open('Abgabe erfolgreich. Das Ergebnis kann ein paar Minuten dauern.', 'OK', {duration: 3000});
+        this.snackbar.open('Deine Abgabe wird ausgewertet.', 'OK', {duration: 3000});
       }, error => {
         console.error(error);
         this.snackbar.open('Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.', 'OK', {duration: 3000});
