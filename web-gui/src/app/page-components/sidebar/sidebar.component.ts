@@ -1,12 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {AuthService} from '../../service/auth.service';
-import {TitlebarService} from '../../service/titlebar.service';
-import {Observable, of} from 'rxjs';
-import {Roles} from '../../model/Roles';
-import {MatDialog} from '@angular/material/dialog';
-import {DataprivacyDialogComponent} from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
-import {ImpressumDialogComponent} from '../../dialogs/impressum-dialog/impressum-dialog.component';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../service/auth.service';
+import { TitlebarService } from '../../service/titlebar.service';
+import { Observable, of } from 'rxjs';
+import { Roles } from '../../model/Roles';
+import { MatDialog } from '@angular/material/dialog';
+import { DataprivacyDialogComponent } from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
+import { ImpressumDialogComponent } from '../../dialogs/impressum-dialog/impressum-dialog.component';
+import { FeedbackAppService } from "../../service/feedback-app.service";
 
 /**
  * Root component shows sidenav and titlebar
@@ -18,9 +19,10 @@ import {ImpressumDialogComponent} from '../../dialogs/impressum-dialog/impressum
 })
 export class SidebarComponent implements OnInit {
   constructor(private router: Router,
-              private auth: AuthService,
-              private titlebar: TitlebarService,
-              private dialog: MatDialog) {
+    private auth: AuthService,
+    private titlebar: TitlebarService,
+    private dialog: MatDialog,
+    private feedbackAppService: FeedbackAppService) {
   }
 
   title: Observable<string> = of('');
@@ -67,12 +69,22 @@ export class SidebarComponent implements OnInit {
    * Show data privay dialog
    */
   showDataprivacy() {
-    this.dialog.open(DataprivacyDialogComponent, {data: {onlyForShow: true}});
+    this.dialog.open(DataprivacyDialogComponent, { data: { onlyForShow: true } });
   }
   /**
    * Show impressum dialog
    */
   showImpressum() {
     this.dialog.open(ImpressumDialogComponent);
+  }
+
+  /**
+   * Link to Feedback App
+   */
+  goToFBA() {
+    this.feedbackAppService.getToken().subscribe((token) => {
+      localStorage.setItem('flutter.authToken', JSON.stringify(token));
+      window.open('/feedbackApp/')
+    })
   }
 }

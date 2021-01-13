@@ -1,5 +1,6 @@
 <mat-sidenav-container class="container">
-  <mat-sidenav class="sidenav" #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
+  <mat-sidenav class="sidenav" #sidenav mode="side" [(opened)]="opened" [style.width]="showSidebarMenu ? '100%' : null"
+    (window:resize)="onResize($event)">
     <div class="sidenav-group">
       <div class="logo">
         <h1>Feedbacksystem <i class="material-icons">feedback</i>
@@ -29,6 +30,11 @@
           <mat-icon class="">help</mat-icon>
           <p>Wiki</p>
         </a>
+
+        <a mat-list-item (click)="goToFBA()">
+          <mat-icon>question_answer</mat-icon>
+          <p>Feedback App</p>
+        </a>
       </mat-nav-list>
 
       <span class="filler"></span>
@@ -51,8 +57,12 @@
         <mat-icon>account_circle</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="logout()"><mat-icon class="logout-icon">power_settings_new</mat-icon> Logout</button>
-        <button mat-menu-item routerLink="/users/password" *ngIf="isAdmin || isModerator"><mat-icon>settings</mat-icon>Passwort ändern</button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
+        </button>
+        <button mat-menu-item routerLink="/users/password" *ngIf="isAdmin || isModerator">
+          <mat-icon>settings</mat-icon>Passwort ändern
+        </button>
       </mat-menu>
     </mat-toolbar>
     <div class="content-container">
@@ -60,7 +70,3 @@
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
-
-
-
-
