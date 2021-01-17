@@ -19,6 +19,8 @@ tags:
     description: The course registration api
   - name: Task
     description: The task api
+  - name: Course evaluation
+    description: Course evaluation api
   - name: Checker Configuration
     description: Checker configuration api
   - name: Submission
@@ -814,6 +816,242 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/courses/evaluation/formula/validate":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Validate a evaluation formula
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                formula:
+                  type: string
+      responses:
+        "200":
+          description: Formula is valid
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+        "400":
+          description: Formula is invalid
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/evaluation/container":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Get all Course evaluation Containers
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EvaluationContainerResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Create a Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationContainer'
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainerResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+
+  "/courses/{cid}/evaluation/container/{ctid}":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Get a Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: ctid
+          in: path
+          description: Container id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainerResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Update a Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: ctid
+          in: path
+          description: Container id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvaluationContainer'
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainerResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    delete:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Delete a Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: ctid
+          in: path
+          description: Container id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainerResponse'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
 
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
@@ -1667,3 +1905,45 @@ components:
             value:
               type: integer
               description: "The course role "
+    EvaluationContainer:
+      type: object
+      required:
+        - tasks
+      properties:
+        tasks:
+          type: array
+          description: "List of task ids"
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+        toPass:
+          type: integer
+          description: The formula that defines when the container is passed
+        bonusFormula:
+          type: string
+          description: The formula that defines when you get the bonus points of the container
+        hidePoints:
+          type: boolean
+    EvaluationContainerResponse:
+      type: object
+      required:
+        - id
+        - tasks
+      properties:
+        id:
+          type: integer
+        tasks:
+          type: array
+          description: "List of tasks"
+          items:
+            $ref: "#/components/schemas/Task"
+        toPass:
+          type: integer
+          description: The number of tasks that need to be passed
+        bonusFormula:
+          type: string
+          description: The formula that defines when you get the bonus points of the container
+        hidePoints:
+          type: boolean
