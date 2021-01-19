@@ -27,6 +27,7 @@
     <button mat-icon-button *ngIf="isAuthorized() || role" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="isAuthorized()" (click)="updateCourse()"><mat-icon class="logout-icon">edit</mat-icon><span>Kurs bearbeiten</span></button>
+      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()"><mat-icon class="logout-icon">add_task</mat-icon><span>Punkte</span></button>
       <button mat-menu-item *ngIf="isAuthorized()" (click)="createConference()"><mat-icon class="logout-icon">video_settings</mat-icon><span>Konferenzeinstellungen</span></button>
       <button mat-menu-item (click)="showGoLinks()"><mat-icon class="logout-icon">link</mat-icon><span>Kurs Kurzlinks anzeigen</span></button>
       <button mat-menu-item color="warn" *ngIf="role" (click)="exitCourse()" matTooltip="Kurs verlassen"><mat-icon>exit_to_app</mat-icon>Kurs verlassen</button>
