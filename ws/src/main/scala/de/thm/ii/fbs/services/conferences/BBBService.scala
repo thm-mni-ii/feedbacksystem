@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 
 import scala.language.postfixOps
+import scala.collection.mutable;
 
 /**
   * Handles BBB requests.
@@ -111,13 +112,16 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     */
   private def buildBBBRequestURL(method: String, params: Map[String, String]): String = {
     val queryBuilder = UriComponentsBuilder.newInstance()
+    val values = mutable.Buffer[String]();
     for ((key, value) <- params) {
-      queryBuilder.queryParam(key, value);
+      queryBuilder.queryParam(key, s"{$key}");
+      values += value
     }
-    var query = queryBuilder.toUriString.substring(1)
+    var query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
     val checksum = computeHexSha1Hash(s"$method$query$secret")
-    queryBuilder.queryParam("checksum", checksum)
-    query = queryBuilder.toUriString.substring(1)
+    queryBuilder.queryParam("checksum", "{checksum}")
+    values += checksum
+    query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
     s"$apiUrl/api/$method?$query"
   }
 
