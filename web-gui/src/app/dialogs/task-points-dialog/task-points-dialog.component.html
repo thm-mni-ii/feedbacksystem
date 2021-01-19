@@ -1,3 +1,46 @@
+<div matDialogTitle>Punkte vergeben</div>
+<div matDialogContent>
+<div class="flexBox">
+  <div class="taskBox">
+    <div
+      id="allTasks"
+      cdkDropList
+      [cdkDropListData]="tasks"
+      cdkDropListConnectedTo="addedTasks"
+      class="example-list"
+      (cdkDragDropListDropped)="drop($event)"
+      [cdkDropListEnterPredicate]="noReturnPredicate">
+      <div
+        class="example-box"
+        *ngFor="let task of tasks"
+        [cdkDragData]="task"
+        cdkDrag>{{task.name}}</div>
+    </div>
+<!--    <mat-card *ngFor="let task of tasks" class="task-container" id="{{task.id}}">-->
+<!--      <span>{{task.name}}</span>-->
+<!--    </mat-card>-->
+  </div>
+  <div class="criteriaBox">
+    <mat-tab-group>
+      <mat-tab label="First">
+          <div
+            id="addedTasks"
+            cdkDropList
+            [cdkDropListData]="addedTasks"
+            cdkDropListConnectedTo="allTasks"
+            class="example-list"
+            (cdkDropListDropped)="drop($event)">
+            <div
+              class="example-box"
+              *ngFor="let task of addedTasks"
+              cdkDrag
+              [cdkDragData]="task">{{task.name}}</div>
+          </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+</div>
 <div class="dialog-content">
   <div id="task-points-title" matDialogTitle>Punkte vergeben</div>
   <div matDialogContent class="flex-container">
