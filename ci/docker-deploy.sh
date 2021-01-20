@@ -17,9 +17,10 @@ function dockerPush(){
 }
 
 echo "START DOCKER DEPLOY"
-docker-compose build
 
-docker login --password $DOCKER_PWD  --username $DOCKER_LOGIN
+echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+
+docker-compose build
 
 echo "DOCKER IMAGES"
 docker images
