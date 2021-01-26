@@ -1,7 +1,53 @@
 <div matDialogTitle>Punkte vergeben</div>
 <div matDialogContent>
-<div class="flexBox">
-  <div class="taskBox">
+  <div class="example-container">
+    <div
+      cdkDropList
+      #taskList="cdkDropList"
+      [cdkDropListData]="tasks"
+      [cdkDropListConnectedTo]="[critList]"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)"
+      [cdkDropListEnterPredicate]="noReturnPredicate">
+      <div class="example-box" *ngFor="let task of tasks" cdkDrag>{{ task.name }}</div>
+    </div>
+  </div>
+
+  <div class="example-container">
+    <mat-tab-group>
+      <mat-tab label="First"> <!-- *ngFor="let tab of tabs; let index = index" [label]="tab" -->
+        <div
+          cdkDropList
+          #critList="cdkDropList"
+          [cdkDropListData]="addedTasks"
+          [cdkDropListConnectedTo]="[taskList]"
+          class="example-list"
+          (cdkDropListDropped)="drop($event)">
+       <div class="example-box" *ngFor="let task of addedTasks" cdkDrag>{{ task.name }}</div>
+       <mat-list class="pointInputList">
+        <mat-list-item>
+          <mat-form-field>
+            <input class="" type="text" placeholder="Punkte zum Bestehen" matInput formControlName="pointsToPass" required>
+          </mat-form-field>
+        </mat-list-item>
+        <mat-list-item>
+          <mat-form-field>
+            <input class="" type="text" placeholder="Bonus Formel" matInput formControlName="bonusFormel">
+          </mat-form-field>
+        </mat-list-item>
+      </mat-list>
+    </div>
+      </mat-tab>
+      <mat-tab disabled>
+        <ng-template mat-tab-label class="create-course">
+          <button mat-raised-button color="accent" (click)="addTab()" matTooltip="neuer Tab"><mat-icon>add</mat-icon></button>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+
+  <div class="flexBox">
+    <div class="taskBox">
     <div
       id="allTasks"
       cdkDropList
@@ -9,7 +55,7 @@
       cdkDropListConnectedTo="addedTasks"
       class="example-list"
       (cdkDragDropListDropped)="drop($event)"
-      [cdkDropListEnterPredicate]="noReturnPredicate">
+      [cdkDropListEnterPredicate]="noReturnPredicate"> <!-- cdkDragDropListDrooped?? -->
       <div
         class="example-box"
         *ngFor="let task of tasks"
@@ -19,25 +65,25 @@
 <!--    <mat-card *ngFor="let task of tasks" class="task-container" id="{{task.id}}">-->
 <!--      <span>{{task.name}}</span>-->
 <!--    </mat-card>-->
-  </div>
-  <div class="criteriaBox">
-    <mat-tab-group>
-      <mat-tab label="First">
-          <div
-            id="addedTasks"
-            cdkDropList
-            [cdkDropListData]="addedTasks"
-            cdkDropListConnectedTo="allTasks"
-            class="example-list"
-            (cdkDropListDropped)="drop($event)">
+    </div>
+    <div class="criteriaBox">
+      <mat-tab-group>
+        <mat-tab>
             <div
-              class="example-box"
-              *ngFor="let task of addedTasks"
-              cdkDrag
-              [cdkDragData]="task">{{task.name}}</div>
-          </div>
-      </mat-tab>
-    </mat-tab-group>
+              id="addedTasks"
+              cdkDropList
+              [cdkDropListData]="addedTasks"
+              cdkDropListConnectedTo="allTasks"
+              class="example-list"
+              (cdkDropListDropped)="drop($event)">
+              <div
+                class="example-box"
+                *ngFor="let task of addedTasks"
+                cdkDrag
+                [cdkDragData]="task">{{task.name}}</div>
+            </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
   </div>
-</div>
 </div>

@@ -28,7 +28,7 @@
 
 .example-list {
   border: solid 1px #ccc;
-  min-height: 60px;
+  min-height: 100px;
   background: white;
   border-radius: 4px;
   overflow: hidden;
@@ -47,6 +47,10 @@
   cursor: move;
   background: white;
   font-size: 14px;
+}
+
+input {
+  width: 100%
 }
 
 .cdk-drag-preview {
@@ -71,4 +75,11 @@
 
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+button .mat-tab-labels :last-child.mat-tab-label {
+  min-width: 0;
+  padding: 0 12px;
+  color: unset;
+  opacity: unset;
 }

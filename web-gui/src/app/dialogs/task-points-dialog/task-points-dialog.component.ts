@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Task} from '../../model/Task';
-import {CdkDragDrop, moveItemInArray, copyArrayItem, CdkDrag} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, moveItemInArray, copyArrayItem, CdkDrag, transferArrayItem} from '@angular/cdk/drag-drop';
 
 
 @Component({
@@ -15,6 +15,8 @@ export class TaskPointsDialogComponent implements OnInit {
 
   tasks: Task[];
   addedTasks: Task[] = [];
+  tabs = ['First', 'ghg', 'nnnnnnnnnnnnnnnnn'];
+
   ngOnInit(): void {
     this.tasks = this.data.tasks;
     this.addedTasks.push(this.tasks.pop());
@@ -23,7 +25,10 @@ export class TaskPointsDialogComponent implements OnInit {
 
   drop(event: CdkDragDrop<number[]>) {
     if (event.previousContainer === event.container) {
-      // do nothing?
+      transferArrayItem(event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex);
     } else {
       copyArrayItem(event.previousContainer.data,
         event.container.data,
@@ -38,7 +43,11 @@ export class TaskPointsDialogComponent implements OnInit {
   }
 
   /** Predicate function that doesn't allow items to be dropped into a list. */
-  noReturnPredicate() {
+  noReturnPredicate(): boolean {
     return false;
+  }
+
+  addTab() {
+    this.tabs.push('New');
   }
 }
