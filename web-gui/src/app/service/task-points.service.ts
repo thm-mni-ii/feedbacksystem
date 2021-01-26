@@ -19,7 +19,8 @@ export class TaskPointsService {
         description: 'string',
         deadline: 'st'
       }],
-      bonusFormula: 'example1'
+      bonusFormula: 'example1',
+      hidePoints: false
     },
     {
       id: 2,
@@ -36,7 +37,8 @@ export class TaskPointsService {
           description: 'string',
           deadline: 'st'
         }],
-      bonusFormula: 'example2'
+      bonusFormula: 'example2',
+      hidePoints: false
     },
     {
       id: 3,
@@ -47,7 +49,8 @@ export class TaskPointsService {
         description: 'string',
         deadline: 'st'
       }],
-      bonusFormula: 'example3'
+      bonusFormula: 'example3',
+      hidePoints: true
     }
   ];
 
@@ -59,6 +62,7 @@ export class TaskPointsService {
    * @return Observable that succeeds with all requirements of the course
    */
   getAllRequirements(cid: number): Observable<Requirement[]> {
+    // /courses/{cid}/evaluation/container
     return of(this.requirements);
   }
 
@@ -73,11 +77,36 @@ export class TaskPointsService {
   }
 
   /**
+   * Get requirement bý id
+   */
+  getRquirement(cid: number, ctid: number): Observable<Requirement> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(this.requirements[1]);
+  }
+
+  /**
+   * Update requirement bý id
+   */
+  updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(this.requirements[1]);
+  }
+
+  /**
+   * Update requirement bý id
+   */
+  deleteRquirement(cid: number, ctid: number): Observable<any> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(true);
+  }
+
+  /**
    * Check the bonus Formula
    * @param bonusFormula The formula for bonus points
-   * @return Observable that succeeds with the state of the formula // TODO
+   * @return Observable that succeeds with the status of the formula
    */
   checkBonusFormula(bonusFormula: string): Observable<boolean> {
+    // /courses/evaluation/formula/validate body: formula as string
     if (bonusFormula === 'true') {
       return of(true);
     } else {

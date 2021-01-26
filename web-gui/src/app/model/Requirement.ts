@@ -5,4 +5,5 @@ export interface Requirement {
   toPass: number;
   bonusFormula: string;
   tasks: Task[];
+  hidePoints: boolean;
 }
