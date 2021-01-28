@@ -51,7 +51,7 @@
       (cdkDropListDropped)="drop($event)">
       <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
         {{ task.name }}
-        <button mat-icon-button (click)="unselect(index)">
+        <button mat-icon-button (click)="unselect(i)">
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -60,5 +60,5 @@
 </div>
 <mat-dialog-actions class="dialog-actions" align="end">
   <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-  <button mat-flat-button  color="accent">Erstellen</button>
+  <button mat-flat-button  color="accent" (click)="save()">Erstellen</button>
 </mat-dialog-actions>

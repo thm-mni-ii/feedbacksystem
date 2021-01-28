@@ -81,8 +81,8 @@ export class TaskPointsDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  unselect(index: number) {
-    this.addedTasks.splice(index, 1);
+  unselect(i: number) {
+    this.allRequirements[this.index].tasks.splice(i, 1);
   }
 
   checkFormula(formula: string) {
@@ -105,7 +105,7 @@ export class TaskPointsDialogComponent implements OnInit {
               }, error => this.snackbar.open('Es ist ein Fehler aufgetreten.'));
           } else {
             this.allRequirements.splice(this.allRequirements.indexOf(requirement), 1);
-            this.snackbar.open('Das Löschen war erfolgreich', 'ok', {duration: 5000});
+            this.snackbar.open('Das Löschen war erfolgreich.', 'OK', {duration: 5000});
           }
         }
       });
@@ -125,7 +125,9 @@ export class TaskPointsDialogComponent implements OnInit {
         } else {
           newReq.push(req);
         }
-      } else { break; }
+      } else {
+        break;
+      }
     }
     if (checked) {
       for (const req of newReq) {
@@ -134,8 +136,10 @@ export class TaskPointsDialogComponent implements OnInit {
       for (const req of oldReq) {
         this.taskPointsService.updateRquirement(this.data.courseID, req.id, req).subscribe();
       }
+      this.snackbar.open('Änderungen wurden gespeichert.', 'OK', {duration: 5000});
+      this.dialogRef.close();
     } else {
-      console.log('not valid');
+      this.snackbar.open('Nicht alle Bonusformeln sind richtig.', 'OK', {duration: 5000});
     }
   }
 }
