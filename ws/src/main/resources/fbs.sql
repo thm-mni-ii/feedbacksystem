@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS `fbs`.`course` (
   PRIMARY KEY (`course_id`),
   UNIQUE INDEX `courses_courseid_uindex` (`course_id` ASC) VISIBLE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 154
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -73,7 +72,6 @@ CREATE TABLE IF NOT EXISTS `fbs`.`task` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 327
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -96,7 +94,6 @@ CREATE TABLE IF NOT EXISTS `fbs`.`user` (
   `global_role` INT NOT NULL DEFAULT 2 COMMENT '0 Admin 1 Moderator 2 User',
   PRIMARY KEY (`user_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 788
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -125,7 +122,6 @@ CREATE TABLE IF NOT EXISTS `fbs`.`user_task_submission` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB
-AUTO_INCREMENT = 19198
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci;
 
@@ -175,8 +171,9 @@ CREATE TABLE IF NOT EXISTS `fbs`.`checkrunner_configuration` (
     REFERENCES `fbs`.`task` (`task_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
 
 -- -----------------------------------------------------
 -- Table `fbs`.`checker_result`
@@ -201,7 +198,56 @@ CREATE TABLE IF NOT EXISTS `fbs`.`checker_result` (
     REFERENCES `fbs`.`checkrunner_configuration` (`configuration_id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `fbs`.`evaluation_container`
+-- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `fbs`.`evaluation_container`;
+CREATE TABLE IF NOT EXISTS `fbs`.`evaluation_container` (
+    `evaluation_container_id` int NOT NULL AUTO_INCREMENT,
+    `to_pass` int NOT NULL DEFAULT '0',
+    `bonus_formula` varchar(45) DEFAULT NULL,
+    `hide_points` tinyint DEFAULT '0',
+    `course_id` int NOT NULL,
+    PRIMARY KEY (`evaluation_container_id`),
+    UNIQUE KEY `evlaution_container_id_UNIQUE` (`evaluation_container_id`),
+    KEY `evaluation_container_1_fk_idx` (`course_id`),
+    CONSTRAINT `evaluation_container_1_fk`
+        FOREIGN KEY (`course_id`)
+        REFERENCES `fbs`.`course` (`course_id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE)
+ENGINE=InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table structure for table `evaluation_container_tasks`
+-- -----------------------------------------------------
+
+DROP TABLE IF EXISTS `fbs`.`evaluation_container_tasks`;
+CREATE TABLE IF NOT EXISTS `fbs`.`evaluation_container_tasks` (
+    `evaluation_container_id` int NOT NULL,
+    `task_id` int NOT NULL,
+    PRIMARY KEY (`evaluation_container_id`,`task_id`),
+    KEY `evaluation_container_tasks_2_fk_idx` (`task_id`),
+    CONSTRAINT `evaluation_container_tasks_1_fk`
+      FOREIGN KEY (`evaluation_container_id`)
+      REFERENCES `fbs`.`evaluation_container` (`evaluation_container_id`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+    CONSTRAINT `evaluation_container_tasks_2_fk`
+      FOREIGN KEY (`task_id`)
+      REFERENCES `fbs`.`task` (`task_id`)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE)
+ENGINE=InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
 
 LOCK TABLES `fbs`.`user` WRITE;
 INSERT INTO `fbs`.`user` VALUES (1, 'Admin','Admin','','2c8e25270865a74e374db1ad6e7005b406f23cb6','admin',1, 0, null, 0);
