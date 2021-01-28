@@ -1,16 +1,13 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Task} from '../../model/Task';
 import {
   CdkDragDrop,
-  moveItemInArray,
   copyArrayItem,
-  CdkDrag,
-  transferArrayItem,
-  CdkDropList
 } from '@angular/cdk/drag-drop';
 import {TaskPointsService} from '../../service/task-points.service';
 import {Requirement} from '../../model/Requirement';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 @Component({
@@ -20,7 +17,11 @@ import {Requirement} from '../../model/Requirement';
 })
 export class TaskPointsDialogComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private taskPointsService: TaskPointsService) { }
+  // tslint:disable-next-line:max-line-length
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private taskPointsService: TaskPointsService,
+              public dialogRef: MatDialogRef<TaskPointsDialogComponent>, private dialog: MatDialog,
+              private snackBar: MatSnackBar) {
+  }
 
   tasks: Task[];
   addedTasks: Task[] = [];
@@ -35,7 +36,7 @@ export class TaskPointsDialogComponent implements OnInit {
     this.taskPointsService.getAllRequirements(6).subscribe(res => {
       this.allRequirements = res;
       this.selected = res[0];
-      });
+    });
   }
 
   drop(event: CdkDragDrop<number[]>) {
@@ -48,10 +49,6 @@ export class TaskPointsDialogComponent implements OnInit {
         event.previousIndex,
         event.currentIndex);
     }
-  }
-  /** Predicate function that only allows even numbers to be dropped into a list. */
-  evenPredicate(item: CdkDrag<number>) {
-    return true;
   }
 
   /** Predicate function that doesn't allow items to be dropped into a list. */
@@ -72,5 +69,16 @@ export class TaskPointsDialogComponent implements OnInit {
   changeIndex(i: any) {
     this.index = i;
     this.selected = this.allRequirements[i];
+  }
+
+  /**
+   * Close dialog without changing data
+   */
+  closeDialog() {
+    this.dialogRef.close();
+  }
+
+  unselect(index: number) {
+    this.addedTasks.splice(index, 1);
   }
 }

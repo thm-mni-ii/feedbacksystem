@@ -1,19 +1,21 @@
 <div matDialogTitle>Punkte vergeben</div>
-<div matDialogContent>
-  <div class="example-container">
+<div matDialogContent class="flex-container">
+  <div class="flex-item">
     <div
       cdkDropList
       #taskList="cdkDropList"
       [cdkDropListData]="tasks"
       [cdkDropListConnectedTo]="[dropzone]"
-      class="example-list"
+      class="example-list task-list"
       (cdkDropListDropped)="drop($event)"
       [cdkDropListEnterPredicate]="noReturnPredicate">
-      <div class="example-box" *ngFor="let task of tasks" cdkDrag>{{ task.name }}</div>
+      <div class="flex-container make-scroll">
+        <div class="example-box" *ngFor="let task of tasks" cdkDrag>{{ task.name }}</div>
+      </div>
     </div>
   </div>
 
-  <div class="example-container">
+  <div class="flex-item">
     <mat-tab-group (selectedIndexChange)="changeIndex($event)">
       <mat-tab *ngFor="let element of allRequirements; let i = index" [label]="'Kategorie '+ (i+1)">
        <mat-list class="pointInputList">
@@ -35,14 +37,26 @@
         </ng-template>
       </mat-tab>
     </mat-tab-group>
+    <div class="toggle-box">
+      <mat-slide-toggle>Punkte verbergen</mat-slide-toggle>
+    </div>
     <div
-      #dropzone = "cdkDropList"
+      #dropzone="cdkDropList"
       cdkDropList
       [cdkDropListData]="selected.tasks"
       [cdkDropListConnectedTo]="[taskList]"
-      class="example-list"
+      class="task-list"
       (cdkDropListDropped)="drop($event)">
-      <div class="example-box" *ngFor="let task of selected.tasks" cdkDrag>{{ task.name }}</div>
+      <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
+        {{ task.name }}
+        <button mat-icon-button (click)="unselect(index)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
+<mat-dialog-actions class="dialog-actions" align="end">
+  <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+  <button mat-flat-button  color="accent">Erstellen</button>
+</mat-dialog-actions>
