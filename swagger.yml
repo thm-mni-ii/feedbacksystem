@@ -845,6 +845,9 @@ paths:
               schema:
                 type: object
                 properties:
+                  valid:
+                    type: Boolean
+                    default: true
                   message:
                     type: string
 
@@ -855,6 +858,9 @@ paths:
               schema:
                 type: object
                 properties:
+                  valid:
+                    type: Boolean
+                    default: false
                   message:
                     type: string
         "401":
