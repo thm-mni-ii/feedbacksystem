@@ -10,48 +10,48 @@ import {Requirement} from '../model/Requirement';
 export class TaskPointsService {
 
   requirements: Requirement[] = [
-    {
-      id: 1,
-      toPass: 1,
-      tasks: [{
-        id: 2,
-        name: 'Aufgabe 1',
-        description: 'string',
-        deadline: 'st'
-      }],
-      bonusFormula: 'example1',
-      hidePoints: false
-    },
-    {
-      id: 2,
-      toPass: 2,
-      tasks: [{
-        id: 2,
-        name: 'Aufgabe 2',
-        description: 'string',
-        deadline: 'st'
-      },
-        {
-          id: 1,
-          name: 'Aufgabe 1',
-          description: 'string',
-          deadline: 'st'
-        }],
-      bonusFormula: 'example2',
-      hidePoints: false
-    },
-    {
-      id: 3,
-      toPass: 1,
-      tasks: [{
-        id: 2,
-        name: 'Aufgabe 1',
-        description: 'string',
-        deadline: 'st'
-      }],
-      bonusFormula: 'example3',
-      hidePoints: true
-    }
+    // {
+    //   id: 1,
+    //   toPass: 1,
+    //   tasks: [{
+    //     id: 2,
+    //     name: 'Aufgabe 1',
+    //     description: 'string',
+    //     deadline: 'st'
+    //   }],
+    //   bonusFormula: 'example1',
+    //   hidePoints: false
+    // },
+    // {
+    //   id: 2,
+    //   toPass: 2,
+    //   tasks: [{
+    //     id: 2,
+    //     name: 'Aufgabe 2',
+    //     description: 'string',
+    //     deadline: 'st'
+    //   },
+    //     {
+    //       id: 1,
+    //       name: 'Aufgabe 1',
+    //       description: 'string',
+    //       deadline: 'st'
+    //     }],
+    //   bonusFormula: 'example2',
+    //   hidePoints: false
+    // },
+    // {
+    //   id: 3,
+    //   toPass: 1,
+    //   tasks: [{
+    //     id: 2,
+    //     name: 'Aufgabe 1',
+    //     description: 'string',
+    //     deadline: 'st'
+    //   }],
+    //   bonusFormula: 'example3',
+    //   hidePoints: true
+    // }
   ];
 
   constructor(private http: HttpClient) { }
