@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.BadRequestException
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.{CourseRole, EvaluationContainer, GlobalRole}
 import de.thm.ii.fbs.services.evaluation.FormulaService
-import de.thm.ii.fbs.services.persistance.CourseRegistrationService
+import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,9 +23,19 @@ class CourseEvaluationController {
   @Autowired
   private val authService: AuthService = null
   @Autowired
-  private val courseRegistration: CourseRegistrationService = null
-  @Autowired
   private val formulaService: FormulaService = null
+  @Autowired
+  private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val evaluationContainerService: EvaluationContainerService = null
+
+  private def isAuthorized(cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+    val privileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+
+    if (!privileged) throw new ForbiddenException()
+  }
 
   /**
     * Validate a evaluation formula
@@ -32,7 +43,7 @@ class CourseEvaluationController {
     * @param req  http request
     * @param res  http response
     * @param body contains JSON request
-    * @return List of courses
+    * @return is the formula valid
     */
   @GetMapping(value = Array("/evaluation/formula/validate"))
   @ResponseBody
@@ -46,5 +57,92 @@ class CourseEvaluationController {
         valid.toJson
       case _ => throw new BadRequestException("Malformed Request Body")
     }
+  }
+
+  /**
+    * Get all Evaluation Container
+    *
+    * @param cid Course id
+    * @param req http request
+    * @param res http response
+    * @return is the formula valid
+    */
+  @GetMapping(value = Array("/{cid}/evaluation/container"))
+  @ResponseBody
+  def getAllContainer(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): List[EvaluationContainer] = {
+    isAuthorized(cid, req, res)
+    evaluationContainerService.getAll(cid)
+  }
+
+  /**
+    * Creating an evaluation container
+    *
+    * @param cid  Course id
+    * @param req  http request
+    * @param res  http response
+    * @param body contains JSON request
+    * @return is the formula valid
+    */
+  @PostMapping(value = Array("/{cid}/evaluation/container"))
+  @ResponseBody
+  def createContainer(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+    isAuthorized(cid, req, res)
+    //TODO
+  }
+
+  /**
+    * Get an evaluation container
+    *
+    * @param cid  Course id
+    * @param ctid Container id
+    * @param req  http request
+    * @param res  http response
+    * @return is the formula valid
+    */
+  @GetMapping(value = Array("/{cid}/evaluation/container/{ctid}"))
+  @ResponseBody
+  def getContainer(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, req: HttpServletRequest,
+                   res: HttpServletResponse): EvaluationContainer = {
+    isAuthorized(cid, req, res)
+    evaluationContainerService.getOne(cid, ctid) match {
+      case Some(container) => container
+      case _ => throw new ResourceNotFoundException()
+    }
+  }
+
+  /**
+    * Updating an evaluation container
+    *
+    * @param cid  Course id
+    * @param ctid Container id
+    * @param req  http request
+    * @param res  http response
+    * @param body contains JSON request
+    * @return is the formula valid
+    */
+  @PutMapping(value = Array("/{cid}/evaluation/container/{ctid}"))
+  @ResponseBody
+  def updateContainer(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, req: HttpServletRequest,
+                      res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+    isAuthorized(cid, req, res)
+    //TODO
+  }
+
+  /**
+    * Deleting an evaluation container
+    *
+    * @param cid  Course id
+    * @param ctid Container id
+    * @param req  http request
+    * @param res  http response
+    * @param body contains JSON request
+    * @return is the formula valid
+    */
+  @DeleteMapping(value = Array("/{cid}/evaluation/container/{ctid}"))
+  @ResponseBody
+  def deleteContainer(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, req: HttpServletRequest,
+                      res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+    isAuthorized(cid, req, res)
+    //TODO
   }
 }
