@@ -54,7 +54,7 @@ class CourseEvaluationController {
     * @param body contains JSON request
     * @return is the formula valid
     */
-  @GetMapping(value = Array("/evaluation/formula/validate"))
+  @PostMapping(value = Array("/evaluation/formula/validate"))
   @ResponseBody
   def validateFormula(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): JsonNode = {
     authService.authorize(req, res)
