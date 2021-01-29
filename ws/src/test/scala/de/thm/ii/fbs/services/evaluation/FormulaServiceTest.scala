@@ -28,7 +28,7 @@ class FormulaServiceTest {
   }
 
   private def evalFormula(formula: String, excepted: BigDecimal, variables: Map[String, String] = Map.empty): Unit = {
-    val res = formulaService.evaluate(formula, variables)
+    val res = if (variables.isEmpty) formulaService.evaluate(formula) else formulaService.evaluate(formula, variables)
     val withMsg = if (variables.nonEmpty) s"(with ${variables.mkString(", ")})" else ""
     Assert.assertEquals(s"$formula $withMsg should be evaluated to $excepted \n", excepted, res)
   }
