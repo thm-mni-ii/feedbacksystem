@@ -26,7 +26,8 @@ class EvaluationContainerService {
   def getAll(cid: Integer): List[EvaluationContainer] = {
     DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
-      "JOIN evaluation_container_tasks using (evaluation_container_id) JOIN task as t using (task_id) where ec.course_id = ? group by evaluation_container_id;",
+      "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
+      "where ec.course_id = ? group by evaluation_container_id;",
       (res, _) => parseResult(res), cid)
   }
 
@@ -40,12 +41,12 @@ class EvaluationContainerService {
   def getOne(cid: Integer, ctid: Integer): Option[EvaluationContainer] = {
     val container = DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
-      "JOIN evaluation_container_tasks using (evaluation_container_id) JOIN task as t using (task_id) " +
+      "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
       "where ec.course_id = ? and ec.evaluation_container_id = ? group by evaluation_container_id;",
-      (res, _) => parseResult(res), cid, ctid).head
+      (res, _) => parseResult(res), cid, ctid).headOption
 
     // If a container with this ID does not exist, the query returns a container with default values
-    if (container.id != ctid) None else Option(container)
+    if (container.isDefined && container.get.id != ctid) None else container
   }
 
   /**
@@ -55,13 +56,14 @@ class EvaluationContainerService {
     * @param tid  Task id
     * @return the new Task
     */
-  def addTask(cid: Integer, ctid: Integer, tid: Integer): EvaluationContainer =
-    DB.insert("insert into evaluation_container_tasks(evaluation_container_id, task_id) values (?, ?)", ctid, tid)
-      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-      .flatMap(id => getOne(cid, id)) match {
-      case Some(task) => task
+  def addTask(cid: Integer, ctid: Integer, tid: Integer): EvaluationContainer = {
+    DB.insert("insert ignore into evaluation_container_tasks(evaluation_container_id, task_id) values (?, ?);", ctid, tid)
+
+    getOne(cid, ctid) match {
+      case Some(container) => container
       case None => throw new SQLException("Task could not be added")
     }
+  }
 
   /**
     * Delete a Task from an Evaluation Container
@@ -79,11 +81,11 @@ class EvaluationContainerService {
     * @return the created Container
     */
   def createContainer(cid: Integer, container: EvaluationContainer): EvaluationContainer =
-    DB.insert("insert into evaluation_container(to_pass, bonus_formula, hide_points, course_id) values (1, \"20 + 10\", false, 156);"
+    DB.insert("insert into evaluation_container(to_pass, bonus_formula, hide_points, course_id) values (?, ?, ?, ?);"
       , container.toPass, container.bonusFormula, container.hidePoints, cid)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(cid, id)) match {
-      case Some(task) => task
+      case Some(container) => container
       case None => throw new SQLException("Evaluation Container could not be created")
     }
 
@@ -127,7 +129,7 @@ class EvaluationContainerService {
     if (tasks == null) {
       List.empty[Task]
     } else {
-      tasks.split(",").map(parseTaskResult).toList
+      tasks.split(",").filter(s => !s.isBlank).map(parseTaskResult).toList
     }
   }
 
