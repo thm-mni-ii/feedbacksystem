@@ -40,7 +40,7 @@
       </mat-tab>
     </mat-tab-group>
     <div class="toggle-box">
-      <mat-slide-toggle>Punkte verbergen</mat-slide-toggle>
+      <mat-slide-toggle [(ngModel)]="checked" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
     </div>
     <div
       #dropzone="cdkDropList"
