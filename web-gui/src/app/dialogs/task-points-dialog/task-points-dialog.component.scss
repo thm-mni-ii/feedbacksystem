@@ -8,9 +8,9 @@
 }
 
 .flex-item {
-  padding: 1rem;
+  padding: 0;
   width: 40%;
-  height: 500px;
+  height: 100%;
   margin-top: 2rem;
 
   .task-list {
@@ -26,6 +26,7 @@
 
 .pointInputList {
   overflow: hidden;
+  padding: 2rem 0;
 }
 
 .example-box {
@@ -77,5 +78,13 @@ input {
 
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+#task-points-title {
+  margin: 0;
+}
+
+.dialog-actions {
+  float: right;
 }
 

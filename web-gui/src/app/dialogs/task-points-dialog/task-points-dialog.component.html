@@ -1,4 +1,4 @@
-<div matDialogTitle>Punkte vergeben</div>
+<div id="task-points-title" matDialogTitle>Punkte vergeben</div>
 <div matDialogContent class="flex-container">
   <div class="flex-item">
     <div
@@ -21,14 +21,14 @@
       <mat-tab *ngFor="let element of allRequirements; let i = index" [label]="'Kategorie '+ (i+1)">
        <mat-list class="pointInputList">
         <mat-list-item>
-          <mat-form-field>
-            <input class="" type="number" placeholder="Punkte zum Bestehen" matInput required [(ngModel)]="element.toPass">
+          <mat-form-field class="mat-input-element">
+            <input type="number" placeholder="Punkte zum Bestehen" matInput required [(ngModel)]="element.toPass">
           </mat-form-field>
         </mat-list-item>
         <mat-list-item>
-          <mat-form-field>
-            <input class="" type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonus Formel" matInput>
-            <mat-hint [hidden]="valid">Scenario name should have at least 3 symbols</mat-hint>
+          <mat-form-field class="mat-input-element">
+            <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel" matInput>
+            <mat-hint [hidden]="valid">Bonusformel muss aus mindestens 3 Zeichen bestehen</mat-hint>
           </mat-form-field>
         </mat-list-item>
       </mat-list>
@@ -49,6 +49,9 @@
       [cdkDropListConnectedTo]="[taskList]"
       class="task-list"
       (cdkDropListDropped)="drop($event)">
+      <div class="example-box" *ngIf="selected.tasks.length === 0">
+        <span>Ziehe die Aufgaben hier hin</span>
+      </div>
       <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
         {{ task.name }}
         <button mat-icon-button (click)="unselect(i)">

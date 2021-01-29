@@ -27,6 +27,8 @@ export class TaskPointsDialogComponent implements OnInit {
   selected: Requirement;
   index = 0;
   valid: boolean;
+  checked = false;
+  toggleColor = 'warn';
 
   ngOnInit(): void {
     this.tasks = this.data.tasks.map(element => element);
@@ -142,4 +144,9 @@ export class TaskPointsDialogComponent implements OnInit {
       this.snackbar.open('Nicht alle Bonusformeln sind richtig.', 'OK', {duration: 5000});
     }
   }
+
+  toggleChange() {
+    console.log(this.checked);
+  }
+
 }
