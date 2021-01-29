@@ -37,6 +37,13 @@ class CourseEvaluationController {
     if (!privileged) throw new ForbiddenException()
   }
 
+  private def buildContainer(ctid: Integer, body: JsonNode): EvaluationContainer = {
+    EvaluationContainer(ctid,
+      toPass = body.get("toPass").asInt(0),
+      bonusFormula = body.get("bonusFormula").asText(null),
+      hidePoints = body.get("hidePoints").asBoolean(false))
+  }
+
   /**
     * Validate a evaluation formula
     *
@@ -85,9 +92,12 @@ class CourseEvaluationController {
     */
   @PostMapping(value = Array("/{cid}/evaluation/container"))
   @ResponseBody
-  def createContainer(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+  def createContainer(@PathVariable("cid") cid: Integer,
+                      req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): EvaluationContainer = {
     isAuthorized(cid, req, res)
-    //TODO
+
+    val container = buildContainer(-1, body)
+    evaluationContainerService.createContainer(cid, container)
   }
 
   /**
@@ -123,9 +133,48 @@ class CourseEvaluationController {
   @PutMapping(value = Array("/{cid}/evaluation/container/{ctid}"))
   @ResponseBody
   def updateContainer(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, req: HttpServletRequest,
-                      res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+                      res: HttpServletResponse, @RequestBody body: JsonNode): EvaluationContainer = {
     isAuthorized(cid, req, res)
-    //TODO
+
+    val container = buildContainer(ctid, body)
+    evaluationContainerService.updateContainer(cid, ctid, container)
+  }
+
+  /**
+    * Add an evaluation container task
+    *
+    * @param cid  Course id
+    * @param ctid Container id
+    * @param tid Task id
+    * @param req  http request
+    * @param res  http response
+    * @return is the formula valid
+    */
+  @PostMapping(value = Array("/{cid}/evaluation/container/{ctid}/task/{tid}"))
+  @ResponseBody
+  def addTask(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, @PathVariable("tid") tid: Integer, req: HttpServletRequest,
+                      res: HttpServletResponse): EvaluationContainer = {
+    isAuthorized(cid, req, res)
+    evaluationContainerService.addTask(cid, ctid, tid)
+  }
+
+  /**
+    * Delete an evaluation container task
+    *
+    * @param cid  Course id
+    * @param ctid Container id
+    * @param tid Task id
+    * @param req  http request
+    * @param res  http response
+    * @param body contains JSON request
+    * @return is the formula valid
+    */
+  @DeleteMapping(value = Array("/{cid}/evaluation/container/{ctid}/task/{tid}"))
+  @ResponseBody
+  def deleteTask(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, @PathVariable("tid") tid: Integer, req: HttpServletRequest,
+              res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
+    isAuthorized(cid, req, res)
+    evaluationContainerService.removeTask(ctid, tid)
   }
 
   /**
@@ -143,6 +192,6 @@ class CourseEvaluationController {
   def deleteContainer(@PathVariable("cid") cid: Integer, @PathVariable("ctid") ctid: Integer, req: HttpServletRequest,
                       res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     isAuthorized(cid, req, res)
-    //TODO
+    evaluationContainerService.deleteContainer(cid, ctid)
   }
 }
