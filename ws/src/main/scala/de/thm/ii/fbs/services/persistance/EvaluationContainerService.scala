@@ -135,12 +135,7 @@ class EvaluationContainerService {
 
   private def parseTaskResult(task: String): Task = {
     val taskList = task.split(";")
-    Task(
-      id = Integer.parseInt(taskList(0)),
-      name = taskList(1),
-      description = taskList(2),
-      deadline = taskList(3),
-      mediaType = if (taskList.length > 4) taskList(4) else "",
-    )
+
+    Task(taskList(1), if (taskList.length > 4) taskList(4) else "", taskList(2), taskList(3), Integer.parseInt(taskList(0)))
   }
 }
