@@ -9,6 +9,6 @@ package de.thm.ii.fbs.model
   * @param bonusFormula formula that calculate bonus Points
   * @param hidePoints   hide points
   */
-case class EvaluationContainer(id: Integer, tasks: List[Task],
+case class EvaluationContainer(id: Integer = -1, tasks: List[Task] = List.empty,
                                toPass: Integer,
                                bonusFormula: String, hidePoints: Boolean)
