@@ -846,7 +846,7 @@ paths:
                 type: object
                 properties:
                   valid:
-                    type: Boolean
+                    type: boolean
                     default: true
                   message:
                     type: string
@@ -859,7 +859,7 @@ paths:
                 type: object
                 properties:
                   valid:
-                    type: Boolean
+                    type: boolean
                     default: false
                   message:
                     type: string
@@ -896,7 +896,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EvaluationContainerResponse'
+                  $ref: '#/components/schemas/EvaluationContainer'
         "401":
           description: Unauthorized
         "403":
@@ -920,7 +920,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EvaluationContainer'
+              $ref: '#/components/schemas/AddEvaluationContainer'
       responses:
         "200":
           description: OK
@@ -932,7 +932,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainerResponse'
+                $ref: '#/components/schemas/EvaluationContainer'
         "401":
           description: Unauthorized
         "403":
@@ -971,7 +971,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainerResponse'
+                $ref: '#/components/schemas/EvaluationContainer'
         "401":
           description: Unauthorized
         "403":
@@ -1002,7 +1002,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EvaluationContainer'
+              $ref: '#/components/schemas/AddEvaluationContainer'
       responses:
         "200":
           description: OK
@@ -1014,7 +1014,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainerResponse'
+                $ref: '#/components/schemas/EvaluationContainer'
         "401":
           description: Unauthorized
         "403":
@@ -1051,7 +1051,94 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainerResponse'
+                $ref: '#/components/schemas/EvaluationContainer'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/courses/{cid}/evaluation/container/{ctid}/task/{tid}":
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Add a Task to an Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: ctid
+          in: path
+          description: Container id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: Task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainer'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+    delete:
+      security:
+        - JWT: []
+      tags:
+        - Course evaluation
+      summary: Delate a Task from an Course evaluation Container
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: ctid
+          in: path
+          description: Container id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: Task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/EvaluationContainer'
         "401":
           description: Unauthorized
         "403":
@@ -1911,28 +1998,22 @@ components:
             value:
               type: integer
               description: "The course role "
-    EvaluationContainer:
+    AddEvaluationContainer:
       type: object
       required:
-        - tasks
+        - id
       properties:
-        tasks:
-          type: array
-          description: "List of task ids"
-          items:
-            type: object
-            properties:
-              id:
-                type: number
+        id:
+          type: integer
         toPass:
           type: integer
-          description: The formula that defines when the container is passed
+          description: The number of tasks that need to be passed
         bonusFormula:
           type: string
           description: The formula that defines when you get the bonus points of the container
         hidePoints:
           type: boolean
-    EvaluationContainerResponse:
+    EvaluationContainer:
       type: object
       required:
         - id
