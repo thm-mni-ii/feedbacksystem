@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
-import java.sql.ResultSet
+import java.math.BigInteger
+import java.sql.{ResultSet, SQLException}
 
 /**
   * Handles Course Evaluation
@@ -46,6 +47,71 @@ class EvaluationContainerService {
     // If a container with this ID does not exist, the query returns a container with default values
     if (container.id != ctid) None else Option(container)
   }
+
+  /**
+    * Add a Task to an Evaluation Container
+    * @param cid Course id
+    * @param ctid Evaluation container id
+    * @param tid  Task id
+    * @return the new Task
+    */
+  def addTask(cid: Integer, ctid: Integer, tid: Integer): EvaluationContainer =
+    DB.insert("insert into evaluation_container_tasks(evaluation_container_id, task_id) values (?, ?)", ctid, tid)
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+      .flatMap(id => getOne(cid, id)) match {
+      case Some(task) => task
+      case None => throw new SQLException("Task could not be added")
+    }
+
+  /**
+    * Delete a Task from an Evaluation Container
+    * @param ctid Evaluation Container id
+    * @param tid Evaluation container id
+    * @return if the Task was Removed
+    */
+  def removeTask(ctid: Integer, tid: Integer): Boolean =
+    1 == DB.update("DELETE FROM evaluation_container_tasks WHERE task_id = ? and evaluation_container_id = ?", tid, ctid)
+
+  /**
+    * Create an Evaluation Container
+    * @param cid Course id
+    * @param container Container to Create
+    * @return the created Container
+    */
+  def createContainer(cid: Integer, container: EvaluationContainer): EvaluationContainer =
+    DB.insert("insert into evaluation_container(to_pass, bonus_formula, hide_points, course_id) values (1, \"20 + 10\", false, 156);"
+      , container.toPass, container.bonusFormula, container.hidePoints, cid)
+      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+      .flatMap(id => getOne(cid, id)) match {
+      case Some(task) => task
+      case None => throw new SQLException("Evaluation Container could not be created")
+    }
+
+  /**
+    * Update an Evaluation Container
+    * @param cid Course id
+    * @param ctid Evaluation Container id
+    * @param container Container update
+    * @return was the Container Updated
+    */
+  def updateContainer(cid: Integer, ctid: Integer, container: EvaluationContainer): EvaluationContainer = {
+    val updated =
+      1 == DB.update("UPDATE evaluation_container SET to_pass = ?, bonus_formula = ?, hide_points = ? WHERE course_id = ? and evaluation_container_id = ?",
+      container.toPass, container.bonusFormula, container.hidePoints, cid, ctid)
+
+    if (!updated) throw new SQLException("Evaluation Container could not be updated")
+
+    container
+  }
+
+  /**
+    * Delete an Evaluation Container
+    * @param cid Course id
+    * @param ctid Course id
+    * @return if the Task was Removed
+    */
+  def deleteContainer(cid: Integer, ctid: Integer): Boolean =
+    1 == DB.update("DELETE FROM evaluation_container WHERE course_id = ? and evaluation_container_id = ?", cid, ctid)
 
   private def parseResult(res: ResultSet): EvaluationContainer = {
     EvaluationContainer(
