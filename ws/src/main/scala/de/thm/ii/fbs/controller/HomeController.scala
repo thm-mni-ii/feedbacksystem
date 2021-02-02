@@ -24,6 +24,13 @@ class HomeController {
   def loginPage: String = "forward:/"
 
   /**
+    * Return go index page.
+    * @return index page.
+    */
+  @RequestMapping(Array ("/go/**"))
+  def goPage: String = "forward:/"
+
+  /**
     * Handles rest api access.
     * @return Rest ressource.
     */

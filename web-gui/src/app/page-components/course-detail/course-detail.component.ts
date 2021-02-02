@@ -21,7 +21,8 @@ import {Task} from '../../model/Task';
 import {CourseService} from '../../service/course.service';
 import {CourseRegistrationService} from '../../service/course-registration.service';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
-import {FeedbackAppService} from "../../service/feedback-app.service";
+import {FeedbackAppService} from '../../service/feedback-app.service';
+import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
 
 @Component({
   selector: 'app-course-detail',
@@ -187,10 +188,15 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
+  showGoLinks() {
+    this.dialog.open(GotoLinksDialogComponent, {
+      height: 'auto',
+      width: 'auto',
+      data: {courseID: this.courseID}
+    });
+  }
+
   goToFBA() {
-    this.feedbackAppService.getToken().subscribe((token) => {
-      localStorage.setItem('flutter.authToken', JSON.stringify(token));
-      window.open('/feedbackApp/')
-    })
+    this.feedbackAppService.open(this.courseID, true).subscribe(() => {});
   }
 }
