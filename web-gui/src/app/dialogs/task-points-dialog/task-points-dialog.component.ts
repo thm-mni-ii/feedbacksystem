@@ -167,19 +167,4 @@ export class TaskPointsDialogComponent implements OnInit {
     this.allChecked = this.selected.tasks != null && this.selected.tasks.every(t => this.selected.tasks[t.id]);
   }
 
-  someComplete(): boolean {
-    if (this.selected.tasks == null) {
-      return false;
-    }
-    return this.selected.tasks.filter(t => this.selected.tasks[t.id]).length > 0 && !this.allChecked;
-  }
-
-  setAll(completed: boolean) {
-    this.allChecked = completed;
-    if (this.selected.tasks == null) {
-      return;
-    }
-    this.selected.tasks.forEach(t => this.selected.tasks[t.id]);
-  }
-
 }
