@@ -24,7 +24,7 @@ export class TaskPointsDialogComponent implements OnInit {
   index = 0;
   valid: boolean;
   hidePoints = false;
-  toggleColor = 'warn';
+  toggleColor = 'primary';
 
   checked = false;
   allChecked = false;

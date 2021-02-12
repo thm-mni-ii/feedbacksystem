@@ -1,26 +1,32 @@
 .flex-container {
   display: flex;
   flex-flow: row wrap;
-  //justify-content: space-evenly;
+  justify-content: space-between;
   padding: 0;
   margin: 0;
   list-style: none;
+  .task-box {
+    width: 60%;
+  }
+  .category-box {
+    width: 40%
+  }
 }
 
 .flex-item {
   padding: 0;
-  width: 40%;
   height: 100%;
   margin-top: 2rem;
 
-  .task-list {
+  .task-item {
     margin: 0 1rem;
     border: 2px #ccc;
     min-height: 50px;
     max-height: 100%;
+    width: 37%;
     background: white;
     border-radius: 4px;
-    display: block;
+    justify-content: space-between;
   }
 }
 
@@ -53,8 +59,8 @@
   font-size: 14px;
 }
 
-input {
-  width: 100%
+.mat-input-element {
+  width: 90%;
 }
 
 #task-points-title {
@@ -62,14 +68,12 @@ input {
 }
 
 .scroll-box {
+  display: flex;
+  flex-flow: row wrap;
   margin-top: 1rem;
   overflow: scroll;
   overflow-x: hidden; //horizontal
   height: 55vh;
-}
-
-.scroll-box.disabled {
-  //overflow-y: scroll; //vertical
 }
 
 .mat-dialog-content {
@@ -77,11 +81,21 @@ input {
 }
 
 .mat-btn-element {
-  margin-top: 3vh;
   padding: 0;
   color: #f44336;
   background-color: inherit;
-  align-items: center;
+  width: auto;
+}
+
+.delete-icon {
+  margin-top: 3vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.bonus-formula-info {
+  color: #333333;
 }
 
 .actions {
@@ -112,7 +126,7 @@ input {
   justify-content: space-between;
 }
 .card:hover {
-  background-color: #819ca9;
+  background-color: #c5d9e3;
   cursor: pointer;
 }
 
