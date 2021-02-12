@@ -7,12 +7,6 @@ import {Requirement} from '../../model/Requirement';
 import {ConfirmDialogComponent} from '../confirm-dialog/confirm-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
-/*export interface All {
-  label: string;
-  allChecked: boolean;
-  subtasks?: Task[];
-}*/
-
 @Component({
   selector: 'app-task-points-dialog',
   templateUrl: './task-points-dialog.component.html',
@@ -25,7 +19,6 @@ export class TaskPointsDialogComponent implements OnInit {
               public dialogRef: MatDialogRef<TaskPointsDialogComponent>) { }
 
   tasks: Task[];
-  // allTasks: All;
   allRequirements: Requirement[];
   selected: Requirement;
   index = 0;
@@ -36,6 +29,7 @@ export class TaskPointsDialogComponent implements OnInit {
   checked = false;
   allChecked = false;
   labelPosition: 'before' | 'after' = 'after';
+
   disabled = false;
 
   ngOnInit(): void {
@@ -49,15 +43,10 @@ export class TaskPointsDialogComponent implements OnInit {
         this.addTab();
       }
       });
-    /*this.allTasks = {
-      label: 'Alle Markieren',
-      allChecked: false,
-      subtasks: this.tasks
-    };*/
   }
 
   drop(event: CdkDragDrop<number[]>) {
-    /* checks if element is already in destination block */
+    /* checks if element already is in dropzone */
     const idx = event.container.data.indexOf(event.previousContainer.data[event.previousIndex]);
     if (idx !== -1) {
       return;
