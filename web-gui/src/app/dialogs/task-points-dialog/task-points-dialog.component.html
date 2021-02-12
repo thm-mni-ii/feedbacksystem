@@ -1,92 +1,58 @@
-<div id="task-points-title" matDialogTitle>Punkte vergeben</div>
-<div matDialogContent class="flex-container">
-  <div class="flex-item">
-    <mat-checkbox [(ngModel)]="checked"
-                  (ngModelChange)="updateAllComplete()"
-                  [labelPosition]="labelPosition">
-      Alle markieren
-    </mat-checkbox>
-    <div
-      cdkDropList
-      #taskList="cdkDropList"
-      [cdkDropListData]="tasks"
-      [cdkDropListConnectedTo]="[dropzone]"
-      class="example-list task-list"
-      (cdkDropListDropped)="drop($event)"
-      [cdkDropListEnterPredicate]="noReturnPredicate">
-      <div class="flex-container make-scroll">
-        <div class="example-box" *ngFor="let task of tasks" cdkDrag>
-          <ng-template [ngIf]="selected.tasks[this.task.id] ? checked : true">
-            <mat-checkbox
-              [labelPosition]="labelPosition"
-              [(ngModel)]="checked">
-              {{ task.name }}
-            </mat-checkbox>
-          </ng-template>
-        </div>
-        <div class="example-box" *ngFor="let task of selected.tasks">
-          <mat-checkbox
-            [labelPosition]="labelPosition"
-            [(ngModel)]="checked"
-            (ngModelChange)="updateAllComplete()">
-            {{ task.name }}
-          </mat-checkbox>
+<div class="dialog-content">
+  <div id="task-points-title" matDialogTitle>Punkte vergeben</div>
+  <div matDialogContent class="flex-container">
+    <div class="flex-item">
+      <mat-checkbox [(ngModel)]="checked"
+                    (ngModelChange)="updateAllComplete()"
+                    [labelPosition]="labelPosition">
+        Alle markieren
+      </mat-checkbox>
+      <div class="scroll-box">
+        <div class="task-list" *ngFor="let task of tasks">
+          <mat-card class="card">
+            <span>{{task.name}}</span>
+          </mat-card>
         </div>
       </div>
     </div>
-    <div
-      #dropzone="cdkDropList"
-      cdkDropList
-      [cdkDropListData]="selected.tasks"
-      [cdkDropListConnectedTo]="[taskList]"
-      class="task-list"
-      (cdkDropListDropped)="drop($event)">
-      <div class="example-box" *ngIf="selected.tasks.length === 0">
-        <span>Ziehe die Aufgaben hier hin</span>
-      </div>
-      <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
-        {{ task.name }}
-        <button mat-icon-button (click)="unselect(i)">
-          <mat-icon>close</mat-icon>
-        </button>
+
+    <div class="flex-item">
+      <mat-tab-group (selectedIndexChange)="changeIndex($event)"
+                     [selectedIndex]="index">
+        <mat-tab *ngFor="let element of allRequirements; let i = index" [label]="'Kategorie '+ (i+1)">
+         <mat-list class="pointInputList">
+          <mat-list-item>
+            <mat-form-field class="mat-input-element">
+              <input type="number" placeholder="Punkte zum Bestehen" matInput required [(ngModel)]="element.toPass">
+            </mat-form-field>
+          </mat-list-item>
+          <mat-list-item>
+            <mat-form-field class="mat-input-element">
+              <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel" matInput>
+              <mat-hint [hidden]="valid">Bonusformel muss aus mindestens 3 Zeichen bestehen</mat-hint>
+            </mat-form-field>
+          </mat-list-item>
+           <mat-list-item>
+             <button class="mat-btn-element" mat-flat-button color="warn" (click)="delete(element)">
+               Kategorie {{ i+1 }} löschen</button >
+           </mat-list-item>
+        </mat-list>
+        </mat-tab>
+        <mat-tab disabled>
+          <ng-template mat-tab-label class="create-course">
+            <button mat-raised-button color="accent" (click)="addTab()" matTooltip="neuer Tab"><mat-icon>add</mat-icon></button>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+      <div class="toggle-box">
+        <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
       </div>
     </div>
   </div>
+  <div class="spacer"></div>
 
-  <div class="flex-item">
-    <mat-tab-group (selectedIndexChange)="changeIndex($event)"
-                   [selectedIndex]="index">
-      <mat-tab *ngFor="let element of allRequirements; let i = index" [label]="'Kategorie '+ (i+1)">
-       <mat-list class="pointInputList">
-        <mat-list-item>
-          <mat-form-field class="mat-input-element">
-            <input type="number" placeholder="Punkte zum Bestehen" matInput required [(ngModel)]="element.toPass">
-          </mat-form-field>
-        </mat-list-item>
-        <mat-list-item>
-          <mat-form-field class="mat-input-element">
-            <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel" matInput>
-            <mat-hint [hidden]="valid">Bonusformel muss aus mindestens 3 Zeichen bestehen</mat-hint>
-          </mat-form-field>
-        </mat-list-item>
-         <mat-list-item>
-           <button class="mat-btn-element" mat-flat-button color="warn" (click)="delete(element)">
-             Kategorie {{ i+1 }} löschen</button >
-         </mat-list-item>
-      </mat-list>
-      </mat-tab>
-      <mat-tab disabled>
-        <ng-template mat-tab-label class="create-course">
-          <button mat-raised-button color="accent" (click)="addTab()" matTooltip="neuer Tab"><mat-icon>add</mat-icon></button>
-        </ng-template>
-      </mat-tab>
-    </mat-tab-group>
-    <div class="toggle-box">
-      <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
-    </div>
+  <div mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
+    <button mat-flat-button  color="accent" (click)="save()">Erstellen</button>
   </div>
 </div>
-<mat-dialog-actions class="dialog-actions" align="end">
-  <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-  <button mat-flat-button  color="accent" (click)="save()">Erstellen</button>
-</mat-dialog-actions>

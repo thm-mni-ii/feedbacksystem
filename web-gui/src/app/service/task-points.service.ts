@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {Requirement} from '../model/Requirement';
+import {Task} from '../model/Task';
 
 @Injectable({
   providedIn: 'root'
@@ -71,7 +72,7 @@ export class TaskPointsService {
    * @param requirement
    * @return Observable that succeeds with all requirements of the course
    */
-  createRequirement(cid: number, requirement: Requirement): Observable<Requirement> {
+  createRequirement(cid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
     // return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container`, requirement);
     return of(this.requirements[1]);
   }
@@ -94,7 +95,7 @@ export class TaskPointsService {
    * @param requirement Updated Requirement
    * @return Observable that succeeds with the updated requirement of the course
    */
-  updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> {
+  updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
     // return this.http.put<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`, requirement);
     return of(this.requirements[1]);
   }
@@ -111,16 +112,45 @@ export class TaskPointsService {
   }
 
   /**
+   * Add a task to a requirement
+   * @param cid Course id
+   * @param requirementID The id of the requirement
+   * @param taskId The id of the task to be added
+   * @return Observable that succeeds with the changed requirement
+   */
+  addTask(cid: number, requirementID: string, taskId: string): Observable<Requirement> {
+    // return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
+    return of(this.requirements[1]);
+  }
+
+  /**
+   * Remove a task from a requirement
+   * @param cid Course id
+   * @param requirementID The id of the requirement
+   * @param taskId The id of the task to be removed
+   * @return Observable that succeeds with the changed requirement
+   */
+  removeTask(cid: number, requirementID: string, taskId: string): Observable<Requirement> {
+    // return this.http.delete<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
+    return of(this.requirements[1]);
+  }
+  /**
    * Check the bonus Formula
    * @param bonusFormula The formula for bonus points
    * @return Observable that succeeds with the status of the formula
    */
-  checkBonusFormula(bonusFormula: string): Observable<boolean> { // todo: string?
-    // return this.http.get<string>(`/api/v1/courses/evaluation/formula/validate`, bonusFormula);
+  checkBonusFormula(bonusFormula: string): Observable<any> { // todo: string?
+    // return this.http.post<any>(`/api/v1/courses/evaluation/formula/validate`, bonusFormula);
     if (bonusFormula === 'true') {
-      return of(true);
+      return of({
+        valid: true,
+        message: 'Korrekt'
+      });
     } else {
-      return of(false);
+      return of({
+        valid: false,
+        message: 'Fehler'
+      });
     }
   }
 }

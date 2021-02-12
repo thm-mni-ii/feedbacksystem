@@ -1,7 +1,7 @@
 .flex-container {
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-evenly;
+  //justify-content: space-evenly;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -14,8 +14,8 @@
   margin-top: 2rem;
 
   .task-list {
-    overflow: -moz-scrollbars-vertical;
-    border: dashed 2px #ccc;
+    margin: 0 1rem;
+    border: 2px #ccc;
     min-height: 50px;
     max-height: 100%;
     background: white;
@@ -24,24 +24,25 @@
   }
 }
 
+
 .pointInputList {
   overflow: hidden;
   padding: 2rem 0;
 }
 
-.example-box {
-  padding: 20px 10px;
-  color: rgba(0, 0, 0, 0.87);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
-  cursor: move;
-  background: white;
-  font-size: 14px;
-  min-width: 10rem;
-}
+//.example-box {
+//  padding: 20px 10px;
+//  color: rgba(0, 0, 0, 0.87);
+//  display: flex;
+//  flex-direction: row;
+//  align-items: center;
+//  justify-content: space-between;
+//  box-sizing: border-box;
+//  cursor: move;
+//  background: white;
+//  font-size: 14px;
+//  min-width: 10rem;
+//}
 
 .toggle-box {
   padding: 20px 10px;
@@ -56,36 +57,23 @@ input {
   width: 100%
 }
 
-.cdk-drag-preview {
-  box-sizing: border-box;
-  border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-  0 8px 10px 1px rgba(0, 0, 0, 0.14),
-  0 3px 14px 2px rgba(0, 0, 0, 0.12);
-}
-
-.cdk-drag-placeholder {
-  opacity: 0;
-}
-
-.cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.example-box:last-child {
-  border: none;
-}
-
-.example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
 #task-points-title {
   margin: 0;
 }
 
-.dialog-actions {
-  float: right;
+.scroll-box {
+  margin-top: 1rem;
+  overflow: scroll;
+  overflow-x: hidden; //horizontal
+  height: 55vh;
+}
+
+.scroll-box.disabled {
+  //overflow-y: scroll; //vertical
+}
+
+.mat-dialog-content {
+  overflow: visible;
 }
 
 .mat-btn-element {
@@ -94,5 +82,37 @@ input {
   color: #f44336;
   background-color: inherit;
   align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    margin-left: 16px;
+  }
+  align-self: flex-end;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/***** TASKS *****/
+.card {
+  margin: 8px 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card:hover {
+  background-color: #819ca9;
+  cursor: pointer;
 }
 
