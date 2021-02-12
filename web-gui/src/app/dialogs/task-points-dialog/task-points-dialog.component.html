@@ -1,6 +1,11 @@
 <div id="task-points-title" matDialogTitle>Punkte vergeben</div>
 <div matDialogContent class="flex-container">
   <div class="flex-item">
+    <mat-checkbox [(ngModel)]="checked"
+                  (ngModelChange)="updateAllComplete()"
+                  [labelPosition]="labelPosition">
+      Alle markieren
+    </mat-checkbox>
     <div
       cdkDropList
       #taskList="cdkDropList"
@@ -10,7 +15,40 @@
       (cdkDropListDropped)="drop($event)"
       [cdkDropListEnterPredicate]="noReturnPredicate">
       <div class="flex-container make-scroll">
-        <div class="example-box" *ngFor="let task of tasks" cdkDrag>{{ task.name }}</div>
+        <div class="example-box" *ngFor="let task of tasks" cdkDrag>
+          <ng-template [ngIf]="selected.tasks[this.task.id] ? checked : true">
+            <mat-checkbox
+              [labelPosition]="labelPosition"
+              [(ngModel)]="checked">
+              {{ task.name }}
+            </mat-checkbox>
+          </ng-template>
+        </div>
+        <div class="example-box" *ngFor="let task of selected.tasks">
+          <mat-checkbox
+            [labelPosition]="labelPosition"
+            [(ngModel)]="checked"
+            (ngModelChange)="updateAllComplete()">
+            {{ task.name }}
+          </mat-checkbox>
+        </div>
+      </div>
+    </div>
+    <div
+      #dropzone="cdkDropList"
+      cdkDropList
+      [cdkDropListData]="selected.tasks"
+      [cdkDropListConnectedTo]="[taskList]"
+      class="task-list"
+      (cdkDropListDropped)="drop($event)">
+      <div class="example-box" *ngIf="selected.tasks.length === 0">
+        <span>Ziehe die Aufgaben hier hin</span>
+      </div>
+      <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
+        {{ task.name }}
+        <button mat-icon-button (click)="unselect(i)">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
     </div>
   </div>
@@ -31,6 +69,10 @@
             <mat-hint [hidden]="valid">Bonusformel muss aus mindestens 3 Zeichen bestehen</mat-hint>
           </mat-form-field>
         </mat-list-item>
+         <mat-list-item>
+           <button class="mat-btn-element" mat-flat-button color="warn" (click)="delete(element)">
+             Kategorie {{ i+1 }} löschen</button >
+         </mat-list-item>
       </mat-list>
       </mat-tab>
       <mat-tab disabled>
@@ -40,24 +82,7 @@
       </mat-tab>
     </mat-tab-group>
     <div class="toggle-box">
-      <mat-slide-toggle [(ngModel)]="checked" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
-    </div>
-    <div
-      #dropzone="cdkDropList"
-      cdkDropList
-      [cdkDropListData]="selected.tasks"
-      [cdkDropListConnectedTo]="[taskList]"
-      class="task-list"
-      (cdkDropListDropped)="drop($event)">
-      <div class="example-box" *ngIf="selected.tasks.length === 0">
-        <span>Ziehe die Aufgaben hier hin</span>
-      </div>
-      <div class="example-box" *ngFor="let task of selected.tasks, let i = index" cdkDrag>
-        {{ task.name }}
-        <button mat-icon-button (click)="unselect(i)">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+      <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
     </div>
   </div>
 </div>

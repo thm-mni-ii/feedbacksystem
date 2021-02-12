@@ -1,15 +1,17 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Task} from '../../model/Task';
-import {
-  CdkDragDrop,
-  copyArrayItem,
-} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, copyArrayItem } from '@angular/cdk/drag-drop';
 import {TaskPointsService} from '../../service/task-points.service';
 import {Requirement} from '../../model/Requirement';
 import {ConfirmDialogComponent} from '../confirm-dialog/confirm-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
+/*export interface All {
+  label: string;
+  allChecked: boolean;
+  subtasks?: Task[];
+}*/
 
 @Component({
   selector: 'app-task-points-dialog',
@@ -23,12 +25,18 @@ export class TaskPointsDialogComponent implements OnInit {
               public dialogRef: MatDialogRef<TaskPointsDialogComponent>) { }
 
   tasks: Task[];
+  // allTasks: All;
   allRequirements: Requirement[];
   selected: Requirement;
   index = 0;
   valid: boolean;
-  checked = false;
+  hidePoints = false;
   toggleColor = 'warn';
+
+  checked = false;
+  allChecked = false;
+  labelPosition: 'before' | 'after' = 'after';
+  disabled = false;
 
   ngOnInit(): void {
     this.tasks = this.data.tasks.map(element => element);
@@ -41,9 +49,15 @@ export class TaskPointsDialogComponent implements OnInit {
         this.addTab();
       }
       });
+    /*this.allTasks = {
+      label: 'Alle Markieren',
+      allChecked: false,
+      subtasks: this.tasks
+    };*/
   }
 
   drop(event: CdkDragDrop<number[]>) {
+    /* checks if element is already in destination block */
     const idx = event.container.data.indexOf(event.previousContainer.data[event.previousIndex]);
     if (idx !== -1) {
       return;
@@ -146,7 +160,26 @@ export class TaskPointsDialogComponent implements OnInit {
   }
 
   toggleChange() {
-    console.log(this.checked);
+    console.log(this.hidePoints);
+  }
+
+  updateAllComplete() {
+    this.allChecked = this.selected.tasks != null && this.selected.tasks.every(t => this.selected.tasks[t.id]);
+  }
+
+  someComplete(): boolean {
+    if (this.selected.tasks == null) {
+      return false;
+    }
+    return this.selected.tasks.filter(t => this.selected.tasks[t.id]).length > 0 && !this.allChecked;
+  }
+
+  setAll(completed: boolean) {
+    this.allChecked = completed;
+    if (this.selected.tasks == null) {
+      return;
+    }
+    this.selected.tasks.forEach(t => this.selected.tasks[t.id]);
   }
 
 }
