@@ -7,6 +7,7 @@ import {AuthService} from '../../service/auth.service';
 import {LegalService} from '../../service/legal.service';
 import {DataprivacyDialogComponent} from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
 import {CookieService} from 'ngx-cookie-service';
+import {GoToService} from '../../service/goto.service';
 
 /**
  * Manages the login page for Submissionchecker
@@ -22,7 +23,8 @@ export class LoginComponent implements OnInit {
 
   constructor(private router: Router, private auth: AuthService, private dialog: MatDialog,
               @Inject(DOCUMENT) private document: Document, private snackbar: MatSnackBar,
-              private legalService: LegalService, private cookieService: CookieService) {
+              private legalService: LegalService, private cookieService: CookieService,
+              private goToService: GoToService) {
   }
 
   ngOnInit() {
@@ -31,13 +33,20 @@ export class LoginComponent implements OnInit {
       localStorage.setItem('token', token);
     }
 
-    const extraRoute = localStorage.getItem('route');
-    if (extraRoute) {
-      localStorage.removeItem('route');
-      this.router.navigateByUrl('' + extraRoute);
-    } else {
-      this.router.navigate(['/courses']);
+    if (this.auth.isAuthenticated()) {
+      const goneTo = this.goToService.goTo();
+      if (!goneTo) {
+        const extraRoute = localStorage.getItem('route');
+        if (extraRoute) {
+          localStorage.removeItem('route');
+          this.router.navigateByUrl('' + extraRoute);
+        } else {
+          this.router.navigate(['/courses']);
+        }
+      }
     }
+
+    this.goToService.clearGoTo();
   }
 
   /**

@@ -15,6 +15,7 @@ import {TaskDetailComponent} from './page-components/task-detail/task-detail.com
 import {CourseResultsComponent} from './page-components/course-detail/course-results/course-results.component';
 import {ConfigurationListComponent} from './page-components/configuration-list/configuration-list.component';
 import {ParticipantsComponent} from './tool-components/participants/participants.component';
+import {GoToComponent} from './page-components/goto/goto.component';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -39,6 +40,10 @@ const routes: Routes = [
       {path: '404', component: NotFoundComponent},
     ]
   },
+  // Goto
+  {path: 'go/:id', component: GoToComponent},
+  {path: 'go/:id/:target', component: GoToComponent},
+
   { path: '**', redirectTo: '404' }
 ];
 

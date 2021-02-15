@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {AuthService} from './service/auth.service';
+import {GoToService} from './service/goto.service';
 
 /**
  * Component that routes from login to app

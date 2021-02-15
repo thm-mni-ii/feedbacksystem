@@ -73,6 +73,8 @@ import { InfoComponent } from './tool-components/info/info.component';
 import { tap } from 'rxjs/operators';
 import {AuthService} from './service/auth.service';
 import { ReversePipe } from './pipes/reverse.pipe';
+import {GoToComponent} from './page-components/goto/goto.component';
+import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -143,6 +145,8 @@ export const httpInterceptorProviders = [
     ConfirmDialogComponent,
     InfoComponent,
     ReversePipe,
+    GoToComponent,
+    GotoLinksDialogComponent
   ],
   imports: [
     BrowserModule,
