@@ -3,13 +3,13 @@
   <div matDialogContent class="flex-container">
     <div class="flex-item task-box">
       <mat-checkbox [(ngModel)]="checked"
-                    (ngModelChange)="updateAllComplete()"
+                    (ngModelChange)="selectAll()"
                     [labelPosition]="labelPosition">
         Alle markieren
       </mat-checkbox>
       <div class="scroll-box">
         <div class="task-item" *ngFor="let task of tasks">
-          <mat-card class="card">
+          <mat-card class="card" [ngClass]="getClass(task)" (click)="select(task)">
             <span>{{task.name}}</span>
           </mat-card>
         </div>
@@ -19,7 +19,12 @@
     <div class="flex-item category-box">
       <mat-tab-group (selectedIndexChange)="changeIndex($event)"
                      [selectedIndex]="index">
-        <mat-tab *ngFor="let element of allRequirements; let i = index" [label]="'Kategorie '+ (i+1)">
+        <mat-tab *ngFor="let element of allRequirements; let i = index" >
+          <ng-template mat-tab-label>
+            Kategorie {{i + 1}} &nbsp;
+            <mat-icon class='close-icon' (click)="delete(element)" matTooltip="löschen">close</mat-icon>
+          </ng-template>
+<!--                 [label]="'">-->
          <mat-list class="pointInputList">
           <mat-list-item>
             <mat-form-field class="mat-input-element">
@@ -29,20 +34,18 @@
           <mat-list-item>
             <mat-form-field class="mat-input-element">
               <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel" matInput>
-              <mat-hint [hidden]="valid">Bonusformel muss aus mindestens 3 Zeichen bestehen</mat-hint>
+              <mat-hint [className]="bonusFormular.valid ? 'valid ' : 'invalid'">{{bonusFormular.message}}</mat-hint>
             </mat-form-field>
+
             <mat-icon class="bonus-formula-info" matTooltip="Tooooooltip">help</mat-icon>
           </mat-list-item>
-           <div class="delete-icon">
-             <button class="mat-btn-element" mat-flat-button (click)="delete(element)" matTooltip="Kategorie {{ i+1 }} löschen">
-               <mat-icon color="warn">delete</mat-icon>
-             </button>
-           </div>
         </mat-list>
         </mat-tab>
         <mat-tab disabled>
           <ng-template mat-tab-label class="create-course">
-            <button mat-raised-button color="accent" (click)="addTab()" matTooltip="neuer Tab"><mat-icon>add</mat-icon></button>
+            <button mat-raised-button color="accent" (click)="addTab()" matTooltip="Kategorie hinzufügen">
+              <mat-icon>add</mat-icon>
+            </button>
           </ng-template>
         </mat-tab>
       </mat-tab-group>

@@ -6,17 +6,17 @@
   margin: 0;
   list-style: none;
   .task-box {
-    width: 60%;
+    width: 54%;
   }
   .category-box {
-    width: 40%
+    width: 44%
   }
 }
 
 .flex-item {
   padding: 0;
   height: 100%;
-  margin-top: 2rem;
+  margin-top: 1rem;
 
   .task-item {
     margin: 0 1rem;
@@ -30,25 +30,10 @@
   }
 }
 
-
 .pointInputList {
   overflow: hidden;
   padding: 2rem 0;
 }
-
-//.example-box {
-//  padding: 20px 10px;
-//  color: rgba(0, 0, 0, 0.87);
-//  display: flex;
-//  flex-direction: row;
-//  align-items: center;
-//  justify-content: space-between;
-//  box-sizing: border-box;
-//  cursor: move;
-//  background: white;
-//  font-size: 14px;
-//  min-width: 10rem;
-//}
 
 .toggle-box {
   padding: 20px 10px;
@@ -62,7 +47,13 @@
 .mat-input-element {
   width: 90%;
 }
+.mat-list-item {
+  margin-bottom: 1rem;
+}
 
+.mat-list-item-content {
+  justify-content: space-between;
+}
 #task-points-title {
   margin: 0;
 }
@@ -74,6 +65,7 @@
   overflow: scroll;
   overflow-x: hidden; //horizontal
   height: 55vh;
+  align-content: flex-start;
 }
 
 .mat-dialog-content {
@@ -86,18 +78,9 @@
   background-color: inherit;
   width: auto;
 }
-
-.delete-icon {
-  margin-top: 3vh;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+.close-icon {
+  font-size: 14pt;
 }
-
-.bonus-formula-info {
-  color: #333333;
-}
-
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -123,10 +106,30 @@
   height: 30px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 .card:hover {
-  background-color: #c5d9e3;
+  background-color: #e9e9ee;
   cursor: pointer;
 }
 
+.selected {
+  background-color: #c5d9e3;
+}
+
+.selected:hover {
+  background-color: #bad1dd;
+}
+
+/***** BONUS FORMULA *****/
+
+.bonus-formula-info {
+  color: #333333;
+}
+
+.invalid  {
+  color: red;
+}
+
+.valid {
+  color: green;
+}

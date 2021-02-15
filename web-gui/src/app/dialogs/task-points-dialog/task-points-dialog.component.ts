@@ -32,35 +32,34 @@ export class TaskPointsDialogComponent implements OnInit {
 
   disabled = false;
 
+  bonusFormular: {
+    message: string,
+    valid: boolean
+  };
+
   ngOnInit(): void {
     this.tasks = this.data.tasks.map(element => element);
-    // this.addedTasks.push(this.tasks.pop());
+    this.tasks.push({
+      id: 2,
+      name: 'Aufgabe 2a',
+      description: 'string',
+      deadline: 'st'
+    },
+      {
+        id: 1,
+        name: 'Aufgabe 1a',
+        description: 'string',
+        deadline: 'st'
+      });
     this.taskPointsService.getAllRequirements(6).subscribe(res => {
       this.allRequirements = res;
       if (res && res.length > 0) {
         this.selected = res[0];
+        this.checkFormula(this.selected.bonusFormula);
       } else {
         this.addTab();
       }
       });
-  }
-
-  drop(event: CdkDragDrop<number[]>) {
-    /* checks if element already is in dropzone */
-    const idx = event.container.data.indexOf(event.previousContainer.data[event.previousIndex]);
-    if (idx !== -1) {
-      return;
-    } else {
-      copyArrayItem(event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex);
-    }
-  }
-
-  /** Predicate function that doesn't allow items to be dropped into a list. */
-  noReturnPredicate(): boolean {
-    return false;
   }
 
   addTab() {
@@ -77,6 +76,7 @@ export class TaskPointsDialogComponent implements OnInit {
   changeIndex(i: any) {
     this.index = i;
     this.selected = this.allRequirements[i];
+    this.checkFormula(this.selected.bonusFormula);
   }
 
   /**
@@ -86,13 +86,9 @@ export class TaskPointsDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  unselect(i: number) {
-    this.allRequirements[this.index].tasks.splice(i, 1);
-  }
-
   checkFormula(formula: string) {
     this.taskPointsService.checkBonusFormula(formula).subscribe(res => {
-      this.valid = res;
+      this.bonusFormular = res;
     });
   }
 
@@ -156,4 +152,22 @@ export class TaskPointsDialogComponent implements OnInit {
     this.allChecked = this.selected.tasks != null && this.selected.tasks.every(t => this.selected.tasks[t.id]);
   }
 
+  getClass(task: Task): string {
+    if (this.selected.tasks.find(el => el.id === task.id))  { return 'selected'; } else { return 'none'; }
+  }
+
+  selectAll() {
+    if (this.checked) {
+      this.selected.tasks = this.tasks.map(el => el);
+    } else { this.selected.tasks = []; }
+  }
+
+  select(task: Task) {
+    if (this.selected.tasks.find(el => el.id === task.id)) {
+      this.selected.tasks.splice(this.selected.tasks.map(e => e.id).indexOf(task.id), 1);
+      this.checked = false;
+    } else {
+      this.selected.tasks.push(task);
+    }
+  }
 }

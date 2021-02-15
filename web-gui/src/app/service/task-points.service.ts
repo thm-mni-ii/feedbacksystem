@@ -14,7 +14,7 @@ export class TaskPointsService {
       id: 1,
       toPass: 1,
       tasks: [{
-        id: 2,
+        id: 5,
         name: 'Aufgabe 1',
         description: 'string',
         deadline: 'st'
@@ -27,13 +27,13 @@ export class TaskPointsService {
       toPass: 2,
       tasks: [{
         id: 2,
-        name: 'Aufgabe 2',
+        name: 'Aufgabe 2a',
         description: 'string',
         deadline: 'st'
       },
         {
           id: 1,
-          name: 'Aufgabe 1',
+          name: 'Aufgabe 1a',
           description: 'string',
           deadline: 'st'
         }],
@@ -44,7 +44,7 @@ export class TaskPointsService {
       id: 3,
       toPass: 1,
       tasks: [{
-        id: 2,
+        id: 5,
         name: 'Aufgabe 1',
         description: 'string',
         deadline: 'st'
