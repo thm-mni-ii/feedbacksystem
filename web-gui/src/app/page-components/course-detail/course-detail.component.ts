@@ -83,19 +83,6 @@ export class CourseDetailComponent implements OnInit {
   reloadTasks() {
     this.taskService.getAllTasks(this.courseID).subscribe(tasks => {
       this.tasks = tasks;
-
-      this.dialog.open(TaskPointsDialogComponent, { // TODO
-        height: '85%',
-        width: '80rem',
-        data: {
-          courseID: this.courseID,
-          tasks: this.tasks
-        }
-      }).afterClosed().subscribe(res => {
-        if (res) {
-          this.snackbar.open('erfolgreich');
-        }
-      });
     });
   }
 
@@ -224,12 +211,15 @@ export class CourseDetailComponent implements OnInit {
 
   editPoints() {
     this.dialog.open(TaskPointsDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
+      height: '85%',
+      width: '80rem',
+      data: {
+        courseID: this.courseID,
+        tasks: this.tasks
+      }
     }).afterClosed().subscribe(res => {
       if (res) {
-        this.snackbar.open('erfolgreich');
+        this.snackbar.open('Punktevergabe abgeschlossen');
       }
     });
   }

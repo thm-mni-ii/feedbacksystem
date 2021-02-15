@@ -19,12 +19,11 @@
     <div class="flex-item category-box">
       <mat-tab-group (selectedIndexChange)="changeIndex($event)"
                      [selectedIndex]="index">
-        <mat-tab *ngFor="let element of allRequirements; let i = index" >
+        <mat-tab *ngFor="let element of allRequirements; let i = index">
           <ng-template mat-tab-label>
             Kategorie {{i + 1}} &nbsp;
-            <mat-icon class='close-icon' (click)="delete(element)" matTooltip="löschen">close</mat-icon>
+            <mat-icon class='close-icon' [matTooltipPosition]="'above'" (click)="delete(element)" matTooltip="löschen">close</mat-icon>
           </ng-template>
-<!--                 [label]="'">-->
          <mat-list class="pointInputList">
           <mat-list-item>
             <mat-form-field class="mat-input-element">

@@ -1,7 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {Task} from '../../model/Task';
-import {CdkDragDrop, copyArrayItem } from '@angular/cdk/drag-drop';
 import {TaskPointsService} from '../../service/task-points.service';
 import {Requirement} from '../../model/Requirement';
 import {ConfirmDialogComponent} from '../confirm-dialog/confirm-dialog.component';
@@ -77,6 +76,7 @@ export class TaskPointsDialogComponent implements OnInit {
     this.index = i;
     this.selected = this.allRequirements[i];
     this.checkFormula(this.selected.bonusFormula);
+    this.checked = false;
   }
 
   /**

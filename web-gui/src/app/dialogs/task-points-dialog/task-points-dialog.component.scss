@@ -1,3 +1,17 @@
+.mat-dialog-content {
+  overflow: visible;
+}
+
+#task-points-title {
+  margin: 0;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .flex-container {
   display: flex;
   flex-flow: row wrap;
@@ -30,18 +44,31 @@
   }
 }
 
+.scroll-box {
+  display: flex;
+  flex-flow: row wrap;
+  margin-top: 1rem;
+  overflow: scroll;
+  overflow-x: hidden; //horizontal
+  height: 55vh;
+  align-content: flex-start;
+}
+
+/***** MAT TAB GROUP *****/
+.mat-tab-label {
+  align-content: baseline;
+}
+
+.close-icon {
+  font-size: 14pt;
+  height: inherit;
+  align-self: baseline;
+}
+
+/***** MAT INPUT *****/
 .pointInputList {
   overflow: hidden;
   padding: 2rem 0;
-}
-
-.toggle-box {
-  padding: 20px 10px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
 }
 
 .mat-input-element {
@@ -54,22 +81,18 @@
 .mat-list-item-content {
   justify-content: space-between;
 }
-#task-points-title {
-  margin: 0;
+
+/***** BONUS FORMULA *****/
+.bonus-formula-info {
+  color: #333333;
 }
 
-.scroll-box {
-  display: flex;
-  flex-flow: row wrap;
-  margin-top: 1rem;
-  overflow: scroll;
-  overflow-x: hidden; //horizontal
-  height: 55vh;
-  align-content: flex-start;
+.invalid  {
+  color: red;
 }
 
-.mat-dialog-content {
-  overflow: visible;
+.valid {
+  color: green;
 }
 
 .mat-btn-element {
@@ -78,9 +101,11 @@
   background-color: inherit;
   width: auto;
 }
-.close-icon {
-  font-size: 14pt;
-}
+
+
+
+/***** FOOTER *****/
+
 .actions {
   display: flex;
   justify-content: flex-end;
@@ -94,10 +119,13 @@
   flex-grow: 1;
 }
 
-.dialog-content {
+.toggle-box {
+  padding: 20px 10px;
   display: flex;
-  flex-direction: column;
-  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
 }
 
 /***** TASKS *****/
@@ -118,18 +146,4 @@
 
 .selected:hover {
   background-color: #bad1dd;
-}
-
-/***** BONUS FORMULA *****/
-
-.bonus-formula-info {
-  color: #333333;
-}
-
-.invalid  {
-  color: red;
-}
-
-.valid {
-  color: green;
 }
