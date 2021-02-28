@@ -31,7 +31,7 @@ export class TaskPointsDialogComponent implements OnInit {
 
   disabled = false;
 
-  bonusFormular: {
+  bonusFormula: {
     message: string,
     valid: boolean
   };
@@ -88,7 +88,7 @@ export class TaskPointsDialogComponent implements OnInit {
 
   checkFormula(formula: string) {
     this.taskPointsService.checkBonusFormula(formula).subscribe(res => {
-      this.bonusFormular = res;
+      this.bonusFormula = res;
     });
   }
 

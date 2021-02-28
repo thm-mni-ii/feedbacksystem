@@ -19,7 +19,7 @@ export class TaskPointsService {
         description: 'string',
         deadline: 'st'
       }],
-      bonusFormula: 'example1',
+      bonusFormula: 'true',
       hidePoints: false
     },
     {
@@ -37,7 +37,7 @@ export class TaskPointsService {
           description: 'string',
           deadline: 'st'
         }],
-      bonusFormula: 'example2',
+      bonusFormula: 'Wrong Formula',
       hidePoints: false
     },
     {
@@ -50,7 +50,7 @@ export class TaskPointsService {
         deadline: 'st'
       }],
       bonusFormula: 'example3',
-      hidePoints: true
+      hidePoints: false
     }
   ];
 
@@ -144,7 +144,7 @@ export class TaskPointsService {
     if (bonusFormula === 'true') {
       return of({
         valid: true,
-        message: 'Korrekt'
+        message: 'Valider Ausdruck'
       });
     } else {
       return of({

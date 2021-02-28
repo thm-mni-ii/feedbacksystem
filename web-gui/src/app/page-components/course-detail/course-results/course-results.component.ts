@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Observable, of} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {TitlebarService} from '../../../service/titlebar.service';
 import {ActivatedRoute} from '@angular/router';
 import {CourseResultsService} from '../../../service/course-results.service';
@@ -34,6 +34,7 @@ export class CourseResultsComponent implements OnInit {
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
     });
+    // TODO: material progress spinner (cause the page might load for a while)
   }
 
   downloadResults() {

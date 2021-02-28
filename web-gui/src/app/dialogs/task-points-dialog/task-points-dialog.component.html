@@ -1,45 +1,4 @@
-<div matDialogTitle>Punkte vergeben</div>
 <div matDialogContent>
-<div class="flexBox">
-  <div class="taskBox">
-    <div
-      id="allTasks"
-      cdkDropList
-      [cdkDropListData]="tasks"
-      cdkDropListConnectedTo="addedTasks"
-      class="example-list"
-      (cdkDragDropListDropped)="drop($event)"
-      [cdkDropListEnterPredicate]="noReturnPredicate">
-      <div
-        class="example-box"
-        *ngFor="let task of tasks"
-        [cdkDragData]="task"
-        cdkDrag>{{task.name}}</div>
-    </div>
-<!--    <mat-card *ngFor="let task of tasks" class="task-container" id="{{task.id}}">-->
-<!--      <span>{{task.name}}</span>-->
-<!--    </mat-card>-->
-  </div>
-  <div class="criteriaBox">
-    <mat-tab-group>
-      <mat-tab label="First">
-          <div
-            id="addedTasks"
-            cdkDropList
-            [cdkDropListData]="addedTasks"
-            cdkDropListConnectedTo="allTasks"
-            class="example-list"
-            (cdkDropListDropped)="drop($event)">
-            <div
-              class="example-box"
-              *ngFor="let task of addedTasks"
-              cdkDrag
-              [cdkDragData]="task">{{task.name}}</div>
-          </div>
-      </mat-tab>
-    </mat-tab-group>
-  </div>
-</div>
 </div>
 <div class="dialog-content">
   <div id="task-points-title" matDialogTitle>Punkte vergeben</div>
@@ -65,21 +24,20 @@
         <mat-tab *ngFor="let element of allRequirements; let i = index">
           <ng-template mat-tab-label>
             Kategorie {{i + 1}} &nbsp;
-            <mat-icon class='close-icon' [matTooltipPosition]="'above'" (click)="delete(element)" matTooltip="löschen">close</mat-icon>
+            <mat-icon class='close-icon' [matTooltipPosition]="'above'" (click)="delete(element)" matTooltip="Löschen">close</mat-icon>
           </ng-template>
          <mat-list class="pointInputList">
           <mat-list-item>
             <mat-form-field class="mat-input-element">
-              <input type="number" placeholder="Punkte zum Bestehen" matInput required [(ngModel)]="element.toPass">
+              <input type="number" placeholder="Anzahl richtiger Aufgaben zum Bestehen" matInput required [(ngModel)]="element.toPass">
             </mat-form-field>
           </mat-list-item>
           <mat-list-item>
             <mat-form-field class="mat-input-element">
-              <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel" matInput>
-              <mat-hint [className]="bonusFormular.valid ? 'valid ' : 'invalid'">{{bonusFormular.message}}</mat-hint>
+              <input type="text" [(ngModel)]="element.bonusFormula" (keyup)="checkFormula(element.bonusFormula)" placeholder="Bonusformel (x: Richtige)" matInput>
+              <mat-hint [className]="bonusFormula.valid ? 'valid ' : 'invalid'">{{bonusFormula.message}}</mat-hint>
             </mat-form-field>
-
-            <mat-icon class="bonus-formula-info" matTooltip="Tooooooltip">help</mat-icon>
+            <mat-icon class="bonus-formula-info" matTooltip="Verwende x für die Anzahl der richtigen Aufgaben in der Formel, z.B. 'abrunden(x/4)'">help</mat-icon>
           </mat-list-item>
         </mat-list>
         </mat-tab>
@@ -97,7 +55,7 @@
 
   <div mat-dialog-actions class="actions">
     <div class="toggle-box">
-      <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte verbergen</mat-slide-toggle>
+      <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte für den gesamten Kurs verbergen</mat-slide-toggle>
     </div>
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
     <button mat-flat-button  color="accent" (click)="save()">Erstellen</button>
