@@ -58,7 +58,7 @@ export class CourseDetailComponent implements OnInit {
       }
     );
     this.role = this.auth.getToken().courseRoles[this.courseID];
-    if (!this.role && this.goToService.getAndClearAutoJoin()) {
+    if (this.goToService.getAndClearAutoJoin() && !this.role) {
       this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
         .subscribe(() => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit())
         , error => console.error(error));
