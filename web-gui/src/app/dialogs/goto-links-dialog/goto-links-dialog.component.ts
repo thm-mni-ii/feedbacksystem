@@ -24,6 +24,10 @@ export class GotoLinksDialogComponent {
     this.appLink = gotoService.buildLink(data.courseID, true);
   }
 
+  copy(text: string) {
+    navigator.clipboard.writeText(text);
+  }
+
   close() {
     this.dialogRef.close();
   }
