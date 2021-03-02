@@ -23,6 +23,7 @@ import {CourseRegistrationService} from '../../service/course-registration.servi
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {FeedbackAppService} from '../../service/feedback-app.service';
 import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
+import {GoToService} from '../../service/goto.service';
 
 @Component({
   selector: 'app-course-detail',
@@ -38,7 +39,7 @@ export class CourseDetailComponent implements OnInit {
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router,
               private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
-              private feedbackAppService: FeedbackAppService,
+              private feedbackAppService: FeedbackAppService, private goToService: GoToService,
               @Inject(DOCUMENT) document) {
   }
 
@@ -57,6 +58,11 @@ export class CourseDetailComponent implements OnInit {
       }
     );
     this.role = this.auth.getToken().courseRoles[this.courseID];
+    if (!this.role && this.goToService.getAndClearAutoJoin()) {
+      this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
+        .subscribe(() => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit())
+        , error => console.error(error));
+    }
   }
 
   private reloadCourse() {
