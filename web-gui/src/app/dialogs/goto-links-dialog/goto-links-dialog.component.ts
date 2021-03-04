@@ -19,13 +19,14 @@ export class GotoLinksDialogComponent {
   appLink: string;
 
   constructor(public dialogRef: MatDialogRef<GotoLinksDialogComponent>, @Inject(MAT_DIALOG_DATA) data: {courseID: number},
-              gotoService: GoToService) {
+              private gotoService: GoToService, private snackBar: MatSnackBar) {
     this.courseLink = gotoService.buildLink(data.courseID);
     this.appLink = gotoService.buildLink(data.courseID, true);
   }
 
-  copy(text: string) {
-    navigator.clipboard.writeText(text);
+  async copy(text: string) {
+    await navigator.clipboard.writeText(text);
+    this.snackBar.open('Link kopiert', 'Schließen', {duration: 2000});
   }
 
   close() {

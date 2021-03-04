@@ -1,14 +1,24 @@
 <mat-dialog-content>
   <mat-form-field>
     <mat-label>Kurs Link</mat-label>
-    <input matInput [value]="courseLink" readonly>
-    <button mat-icon-button matSuffix (click)="copy(courseLink)"><mat-icon>content_copy</mat-icon></button>
+    <input matInput [value]="courseLink" readonly matTooltip="Ein Link, der auf externen Seiten wie z. B. Moodle
+                eingebunden werden kann und Studierenden, welche diesem folgen zur Kursseite weiterleitet">
+    <button mat-icon-button matSuffix
+            (click)="copy(courseLink)"
+            matTooltip="Kopiert den Kurs Link">
+      <mat-icon>content_copy</mat-icon>
+    </button>
   </mat-form-field>
   <br>
   <mat-form-field>
-    <mat-label>App Kurs Link</mat-label>
-    <input matInput [value]="appLink" readonly>
-    <button mat-icon-button matSuffix (click)="copy(appLink)"><mat-icon>content_copy</mat-icon></button>
+    <mat-label>App Link</mat-label>
+    <input matInput [value]="appLink" readonly matTooltip="Ein Link, der auf externen Seiten wie z. B. Moodle
+              eingebunden werden kann und Studierenden, welche diesem folgen zur Feedback-App weiterleitet">
+    <button mat-icon-button matSuffix
+            (click)="copy(appLink)"
+            matTooltip="Kopiert den App Link">
+      <mat-icon>content_copy</mat-icon>
+    </button>
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions class="dialog-actions">
