@@ -73,8 +73,8 @@ export class TaskPointsService {
    * @return Observable that succeeds with all requirements of the course
    */
   createRequirement(cid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
-    // return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container`, requirement);
-    return of(this.requirements[1]);
+    return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container`, requirement);
+    // return of(this.requirements[1]);
   }
 
   /**
@@ -84,8 +84,8 @@ export class TaskPointsService {
    * @return Observable that succeeds with the requirement
    */
   getRquirement(cid: number, ctid: number): Observable<Requirement> {
-    // return this.http.get<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
-    return of(this.requirements[1]);
+    return this.http.get<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
+    // return of(this.requirements[1]);
   }
 
   /**
@@ -96,8 +96,8 @@ export class TaskPointsService {
    * @return Observable that succeeds with the updated requirement of the course
    */
   updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
-    // return this.http.put<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`, requirement);
-    return of(this.requirements[1]);
+    return this.http.put<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`, requirement);
+    // return of(this.requirements[1]);
   }
 
   /**
@@ -107,8 +107,8 @@ export class TaskPointsService {
    * @return Observable that succeeds if the requirement does not exists after the operation
    */
   deleteRquirement(cid: number, ctid: number): Observable<void> {
-    // return this.http.delete<void>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
-    return of();
+    return this.http.delete<void>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
+    // return of();
   }
 
   /**
@@ -131,8 +131,8 @@ export class TaskPointsService {
    * @return Observable that succeeds with the changed requirement
    */
   removeTask(cid: number, requirementID: string, taskId: string): Observable<Requirement> {
-    // return this.http.delete<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
-    return of(this.requirements[1]);
+    return this.http.delete<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
+    // return of(this.requirements[1]);
   }
   /**
    * Check the bonus Formula
