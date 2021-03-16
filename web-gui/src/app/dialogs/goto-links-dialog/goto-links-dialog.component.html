@@ -2,7 +2,7 @@
   <p>Kopiere den Link, um ihn in Moodle oder anderen externen Seiten einzubinden. Er leitet Studierende zu der Kursseite bzw. der Feedback App weiter.</p>
   <mat-form-field class="max-width">
     <mat-label>Kurs Link</mat-label>
-    <input matInput [value]="courseLink">
+    <input matInput [value]="courseLink" readonly>
     <button mat-icon-button matSuffix
             (click)="copy(courseLink)"
             matTooltip="Kopiert den Kurs Link">
