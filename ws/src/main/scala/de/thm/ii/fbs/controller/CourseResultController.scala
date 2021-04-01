@@ -20,9 +20,13 @@ class CourseResultController {
   @Autowired
   private val authService: AuthService = null
   @Autowired
-  private val coureResultService: CourseResultService = null
+  private val courseResultService: CourseResultService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  @Autowired
+  private val evaluationResultService: EvaluationResultService = null
+  @Autowired
+  private val evaluationContainerService: EvaluationContainerService = null
 
   /**
     * Returns the course results of all participants of a course.
@@ -40,7 +44,29 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      coureResultService.getAll(cid)
+      courseResultService.getAll(cid)
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
+    * Returns the course evaluation results of all participants of a course.
+    * @param cid Course id
+    * @param req request
+    * @param res response
+    * @return A list of course results
+    */
+  @GetMapping(value = Array("/{cid}/evaluation/results"))
+  @ResponseBody
+  def getAllEvaluation(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseEvaluationResult] = {
+    val user = authService.authorize(req, res)
+
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid))
     } else {
       throw new ForbiddenException()
     }
