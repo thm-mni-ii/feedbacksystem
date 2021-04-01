@@ -21,6 +21,8 @@ tags:
     description: The task api
   - name: Course evaluation
     description: Course evaluation api
+  - name: Course Results
+    description: Course Results api
   - name: Checker Configuration
     description: Checker configuration api
   - name: Submission
@@ -1146,6 +1148,39 @@ paths:
         "404":
           description: Not Found
 
+  "/courses/{cid}/results":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - Course Results
+      summary: Get the Results for a Course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/CourseResult'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
       security:
@@ -2034,3 +2069,36 @@ components:
           description: The formula that defines when you get the bonus points of the container
         hidePoints:
           type: boolean
+    CourseResult:
+      type: array
+      items:
+        type: object
+        required:
+          - user
+          - passed
+          - reqPassed
+          - pointScore
+          - bonusScore
+          - results
+        properties:
+          user:
+            $ref: "#/components/schemas/User"
+          passed:
+            type: boolean
+          pointScore:
+            type: integer
+          bonusScore:
+            type: integer
+          results:
+            type: object
+            required:
+              - task
+              - attempts
+              - passed
+            properties:
+              task:
+                $ref: "#/components/schemas/Task"
+              attempts:
+                type: integer
+              passed:
+                type: boolean
