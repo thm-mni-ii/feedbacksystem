@@ -75,7 +75,12 @@ class CourseRegistrationService {
     id = res.getInt("course_id")
   )
 
-  private def parseUserResult(res: ResultSet): User = new User(
+  /**
+    * Parse SQL Query user result
+    * @param res SQL Query result
+    * @return User Object
+    */
+  def parseUserResult(res: ResultSet): User = new User(
     prename = res.getString("prename"),
     surname = res.getString("surname"),
     email = res.getString("email"),
