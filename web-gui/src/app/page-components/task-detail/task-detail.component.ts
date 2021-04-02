@@ -97,8 +97,15 @@ export class TaskDetailComponent implements OnInit {
   }
 
   public submissionTypeOfTask(): String {
+    return 'spreadsheet'; // For debugging ToDo: remove
     const mediaType = this.task?.mediaType;
-    if (mediaType?.toLowerCase().includes('text')) { return 'text'; } else { return 'file'; }
+    if (mediaType?.toLowerCase().includes('text')) {
+      return 'text';
+    } else if (mediaType?.toLowerCase().includes('spreadsheet')) {
+      return 'spreadsheet';
+    } else {
+      return 'file';
+    }
   }
 
   isSubmissionEmpty(): boolean {

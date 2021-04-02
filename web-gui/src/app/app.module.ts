@@ -77,6 +77,7 @@ import { TaskPointsDialogComponent } from './dialogs/task-points-dialog/task-poi
 import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
 import { EvaluationResultsComponent } from './page-components/course-detail/course-results/evaluation-results/evaluation-results.component';
+import {SubmissionSpreadsheetComponent} from './page-components/task-detail/submission-spreadsheet/submission-spreadsheet.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -128,6 +129,7 @@ export const httpInterceptorProviders = [
     TaskPreviewComponent,
     SubmissionFileComponent,
     SubmissionTextComponent,
+    SubmissionSpreadsheetComponent,
     ResultsComponent,
     DropzoneComponent,
     MyCoursesComponent,

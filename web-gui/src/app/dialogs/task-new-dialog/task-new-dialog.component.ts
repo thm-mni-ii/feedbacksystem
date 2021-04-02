@@ -21,6 +21,10 @@ export class TaskNewDialogComponent implements OnInit {
     description: new FormControl(''),
     deadline: new FormControl(new Date()),
     mediaType: new FormControl(''),
+    exelFile: new FormControl(''),
+    userID: new FormControl(''),
+    input: new FormControl(''),
+    result: new FormControl(''),
   });
 
   isUpdate: boolean;
@@ -95,5 +99,11 @@ export class TaskNewDialogComponent implements OnInit {
 
   addDate(event: MatDatepickerInputEvent<Date>) {
     this.task.deadline = event.value.toISOString();
+  }
+
+  uploadExel(event: Event) {
+    const file = (event.currentTarget as any).files[0];
+    console.log(file.name);
+    this.taskForm.patchValue({exelFile: file.name});
   }
 }

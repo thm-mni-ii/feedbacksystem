@@ -35,8 +35,29 @@
         <mat-select formControlName="mediaType">
           <mat-option value="text/plain">Text</mat-option>
           <mat-option value="application/zip">Zip-Datei</mat-option>
+          <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
         </mat-select>
       </mat-form-field>
+
+      <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
+        <mat-form-field class="col" (click)="fileInput.click()">
+          <input matInput type="text" placeholder="Exel-Datei" formControlName="exelFile" required readonly>
+          <input hidden #fileInput type="file" required (change)="uploadExel($event)">
+          <mat-icon matSuffix>folder</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
+          <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userID" required>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col">
+          <input matInput type="text" placeholder="Einhabeparameter Felder" formControlName="input" required>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
+          <input matInput type="text" placeholder="Ergebniss Felder" formControlName="result" required>
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
       <br>
     </form>
   <mat-dialog-actions class="actions">
