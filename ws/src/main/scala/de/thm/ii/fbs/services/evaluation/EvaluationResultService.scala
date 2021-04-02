@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{CourseEvaluationResult, CourseResult,
-  EvaluationContainer, EvaluationContainerResult, EvaluationContainerWithTaskResults, TaskResult}
+import de.thm.ii.fbs.model.{CourseEvaluationResult, CourseResult, EvaluationContainer,
+  EvaluationContainerResult, EvaluationContainerWithTaskResults, Task, TaskResult}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -31,25 +31,41 @@ class EvaluationResultService {
     var bonusPoints = 0
 
     val evaluationResult = container.map(c => {
-      var passedTasks = 0
-      val tasks = c.tasks.map(t => {
-        val tRes = taskResults(t.id)
-        if (tRes.passed) passedTasks += 1
-        tRes
-      })
-      val cPassed = passedTasks >= c.toPass
-      val bonusPointsVariables = Map("x" -> passedTasks.toString, "y" -> c.toPass.toString)
-
-      // TODO to negative to round?
-      val cBonusPoints =
-        if (c.bonusFormula != null) formulaService.evaluate(c.bonusFormula, bonusPointsVariables).setScale(0, RoundingMode.HALF_UP).toInt else 0
+      val (passedTasks, tasksResults) = getTaskResults(c.tasks, taskResults)
+      val cPassed = wasPassed(passedTasks, c.toPass)
+      val cBonusPoints = calculateBonusPoints(c.bonusFormula, passedTasks, c.toPass)
 
       bonusPoints += cBonusPoints
       if (!cPassed) passed = false
 
-      EvaluationContainerResult(cPassed, cBonusPoints, passedTasks, EvaluationContainerWithTaskResults(c.id, tasks, c.toPass, c.bonusFormula, c.hidePoints))
+      EvaluationContainerResult(cPassed, cBonusPoints, passedTasks,
+        EvaluationContainerWithTaskResults(c.id, tasksResults, c.toPass, c.bonusFormula, c.hidePoints))
     })
 
     CourseEvaluationResult(result.user, passed, bonusPoints, evaluationResult)
+  }
+
+  private def getTaskResults(tasks: List[Task], taskResults: Map[Int, TaskResult]) = {
+    var passedTasks = 0
+    val tasksResults = tasks.map(t => {
+      val tRes = taskResults(t.id)
+      if (tRes.passed) passedTasks += 1
+      tRes
+    })
+
+    (passedTasks, tasksResults)
+  }
+
+  private def wasPassed(passedTasks: Int, toPass: Int) = passedTasks >= toPass
+
+  private def calculateBonusPoints(bonusFormula: String, passedTasks: Int, toPass: Int) = {
+    val bonusPointsVariables = Map("x" -> passedTasks.toString, "y" -> toPass.toString)
+
+    try {
+      if (bonusFormula != null) formulaService.evaluate(bonusFormula, bonusPointsVariables).setScale(0, RoundingMode.HALF_UP).toInt else 0
+    } catch {
+      // If the bonus formula is invalid, the entire calculation should not fail
+      case _: Exception => 0
+    }
   }
 }
