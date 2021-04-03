@@ -61,11 +61,14 @@ class EvaluationResultService {
   private def calculateBonusPoints(bonusFormula: String, passedTasks: Int, toPass: Int) = {
     val bonusPointsVariables = Map("x" -> passedTasks.toString, "y" -> toPass.toString)
 
-    try {
+    val bonusPoints = try {
       if (bonusFormula != null) formulaService.evaluate(bonusFormula, bonusPointsVariables).setScale(0, RoundingMode.HALF_UP).toInt else 0
     } catch {
       // If the bonus formula is invalid, the entire calculation should not fail
       case _: Exception => 0
     }
+
+    // Convert negative numbers to zero
+    if (bonusPoints >= 0) bonusPoints else 0
   }
 }
