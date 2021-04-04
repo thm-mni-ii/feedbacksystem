@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {Observable, of, from, throwError} from 'rxjs';
+import {catchError, mergeMap, map, filter, toArray} from 'rxjs/operators';
 import {Requirement} from '../model/Requirement';
 import {Task} from '../model/Task';
 
@@ -19,7 +20,7 @@ export class TaskPointsService {
         description: 'string',
         deadline: 'st'
       }],
-      bonusFormula: 'true',
+      bonusFormula: 'example1',
       hidePoints: false
     },
     {
@@ -29,7 +30,7 @@ export class TaskPointsService {
         id: 2,
         name: 'Aufgabe 2a',
         description: 'string',
-        deadline: 'st'
+        deadline: 'st',
       },
         {
           id: 1,
@@ -37,8 +38,9 @@ export class TaskPointsService {
           description: 'string',
           deadline: 'st'
         }],
-      bonusFormula: 'Wrong Formula',
+      bonusFormula: 'example2',
       hidePoints: false
+
     },
     {
       id: 3,
@@ -73,7 +75,14 @@ export class TaskPointsService {
    * @return Observable that succeeds with all requirements of the course
    */
   createRequirement(cid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
-    return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container`, requirement);
+    return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container`, requirement).pipe(
+      mergeMap((responseRequirement) => this.setTasks(cid, responseRequirement.id, requirement.tasks).pipe(
+        map((tasksResponse) => {
+          responseRequirement.tasks = tasksResponse;
+          return responseRequirement;
+        }),
+      )),
+    );
     // return of(this.requirements[1]);
   }
 
@@ -83,9 +92,8 @@ export class TaskPointsService {
    * @param ctid Id of the criteria/requirement
    * @return Observable that succeeds with the requirement
    */
-  getRquirement(cid: number, ctid: number): Observable<Requirement> {
+  getRequirement(cid: number, ctid: number): Observable<Requirement> {
     return this.http.get<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
-    // return of(this.requirements[1]);
   }
 
   /**
@@ -95,9 +103,15 @@ export class TaskPointsService {
    * @param requirement Updated Requirement
    * @return Observable that succeeds with the updated requirement of the course
    */
-  updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
-    return this.http.put<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`, requirement);
-    // return of(this.requirements[1]);
+  updateRequirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> { // TODO: input ändern
+    return this.http.put<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`, requirement).pipe(
+      mergeMap((responseRequirement) => this.setTasks(cid, responseRequirement.id, requirement.tasks).pipe(
+        map((tasksResponse) => {
+          responseRequirement.tasks = tasksResponse;
+          return responseRequirement;
+        }),
+      )),
+    );
   }
 
   /**
@@ -106,9 +120,28 @@ export class TaskPointsService {
    * @param ctid Id of the criteria/requirement
    * @return Observable that succeeds if the requirement does not exists after the operation
    */
-  deleteRquirement(cid: number, ctid: number): Observable<void> {
+  deleteRequirement(cid: number, ctid: number): Observable<void> {
     return this.http.delete<void>(`/api/v1/courses/${cid}/evaluation/container/${ctid}`);
-    // return of();
+  }
+
+  /**
+   * Sets the tasks to the given state
+   * @param cid course id
+   * @param requirementID The id of the requirement
+   * @param tasks The tasks to be added
+   */
+  setTasks(cid: number, requirementID: number, tasks: Task[]): Observable<Task[]> {
+    return this.getRequirement(cid, requirementID).pipe(
+      mergeMap((requirement) => from(requirement.tasks).pipe(
+        filter((task) => tasks.find((reqTask) => task.id === reqTask.id) === undefined),
+        mergeMap((task) => this.removeTask(cid, requirementID, task.id)),
+        toArray(),
+      )),
+      mergeMap(() => from(tasks).pipe(
+        mergeMap((task) => this.addTask(cid, requirementID, task.id)),
+        toArray(),
+      )),
+    );
   }
 
   /**
@@ -118,9 +151,8 @@ export class TaskPointsService {
    * @param taskId The id of the task to be added
    * @return Observable that succeeds with the changed requirement
    */
-  addTask(cid: number, requirementID: string, taskId: string): Observable<Requirement> {
-    // return this.http.post<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
-    return of(this.requirements[1]);
+  addTask(cid: number, requirementID: number, taskId: number): Observable<Task> {
+    return this.http.post<Task>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`, {});
   }
 
   /**
@@ -130,27 +162,55 @@ export class TaskPointsService {
    * @param taskId The id of the task to be removed
    * @return Observable that succeeds with the changed requirement
    */
-  removeTask(cid: number, requirementID: string, taskId: string): Observable<Requirement> {
-    return this.http.delete<Requirement>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
-    // return of(this.requirements[1]);
+  removeTask(cid: number, requirementID: number, taskId: number): Observable<Task> {
+    return this.http.delete<Task>(`/api/v1/courses/${cid}/evaluation/container/${requirementID}/task/${taskId}`);
   }
+
+  /**
+   * Get requirement bý id
+   */
+  getRquirement(cid: number, ctid: number): Observable<Requirement> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(this.requirements[1]);
+  }
+
+  /**
+   * Update requirement bý id
+   */
+  updateRquirement(cid: number, ctid: number, requirement: Requirement): Observable<Requirement> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(this.requirements[1]);
+  }
+
+  /**
+   * Update requirement bý id
+   */
+  deleteRquirement(cid: number, ctid: number): Observable<any> {
+    // /courses/{cid}/evaluation/container/{ctid}
+    return of(true);
+  }
+
   /**
    * Check the bonus Formula
    * @param bonusFormula The formula for bonus points
-   * @return Observable that succeeds with the status of the formula
+   * @return Observable<string|undefined> that succeeds with the status of the formula
    */
-  checkBonusFormula(bonusFormula: string): Observable<any> { // todo: string?
-    // return this.http.post<any>(`/api/v1/courses/evaluation/formula/validate`, bonusFormula);
-    if (bonusFormula === 'true') {
-      return of({
-        valid: true,
-        message: 'Valider Ausdruck'
-      });
-    } else {
-      return of({
-        valid: false,
-        message: 'Fehler'
-      });
-    }
+  checkBonusFormula(bonusFormula: string): Observable<{valid: boolean, message: string}> {
+    return this.http.post<any>(
+      `/api/v1/courses/evaluation/formula/validate`,
+      {'formula': bonusFormula}
+    ).pipe(
+      catchError((err) => {
+        if (err instanceof HttpErrorResponse && err.status === 400) {
+          return of(err.error);
+        }
+        return throwError(err);
+      }),
+    );
+    /* if (bonusFormula === 'true') {
+       return of(true);
+     } else {
+       return of(false);
+     }*/
   }
 }

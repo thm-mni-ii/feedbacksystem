@@ -34,38 +34,28 @@ export class TaskPointsDialogComponent implements OnInit {
   bonusFormula: {
     message: string,
     valid: boolean
-  };
+  } = {message: '', valid: true};
 
   ngOnInit(): void {
     this.tasks = this.data.tasks.map(element => element);
-    this.tasks.push({
-      id: 2,
-      name: 'Aufgabe 2a',
-      description: 'string',
-      deadline: 'st'
-    },
-      {
-        id: 1,
-        name: 'Aufgabe 1a',
-        description: 'string',
-        deadline: 'st'
-      });
-    this.taskPointsService.getAllRequirements(6).subscribe(res => {
+    this.taskPointsService.getAllRequirements(this.data.courseID).subscribe(res => {
       this.allRequirements = res;
       if (res && res.length > 0) {
-        this.selected = res[0];
-        this.checkFormula(this.selected.bonusFormula);
+        // Workaround for default tab selection not working
+        this.index = -1;
+        setTimeout(() => this.changeIndex(0), 0);
       } else {
         this.addTab();
       }
-      });
+    });
+    this.allRequirements = [];
   }
 
   addTab() {
     this.allRequirements.push({
-      tasks: [],
-      bonusFormula: '',
       toPass: 0,
+      bonusFormula: '',
+      tasks: [],
       hidePoints: false
     });
     this.selected = this.allRequirements[this.allRequirements.length - 1];
@@ -87,8 +77,8 @@ export class TaskPointsDialogComponent implements OnInit {
   }
 
   checkFormula(formula: string) {
-    this.taskPointsService.checkBonusFormula(formula).subscribe(res => {
-      this.bonusFormula = res;
+    this.taskPointsService.checkBonusFormula(formula).subscribe((response) => {
+      this.bonusFormula = response;
     });
   }
 
@@ -99,7 +89,7 @@ export class TaskPointsDialogComponent implements OnInit {
       .subscribe(confirmed => {
         if (confirmed) {
           if (requirement.id) {
-            this.taskPointsService.deleteRquirement(this.data.courseID, requirement.id)
+            this.taskPointsService.deleteRequirement(this.data.courseID, requirement.id)
               .subscribe(() => {
                 this.allRequirements.splice(this.allRequirements.indexOf(requirement), 1);
                 this.snackbar.open('Das Löschen war erfolgreich');
@@ -117,8 +107,8 @@ export class TaskPointsDialogComponent implements OnInit {
     const newReq = [];
     const oldReq = [];
     for (const req of this.allRequirements) {
-      this.taskPointsService.checkBonusFormula(req.bonusFormula).subscribe(res => {
-        checked = res;
+      this.taskPointsService.checkBonusFormula(req.bonusFormula).subscribe(response => {
+        checked = response.valid;
       });
       if (checked) {
         if (req.id) {
@@ -135,7 +125,7 @@ export class TaskPointsDialogComponent implements OnInit {
         this.taskPointsService.createRequirement(this.data.courseID, req).subscribe();
       }
       for (const req of oldReq) {
-        this.taskPointsService.updateRquirement(this.data.courseID, req.id, req).subscribe();
+        this.taskPointsService.updateRequirement(this.data.courseID, req.id, req).subscribe();
       }
       this.snackbar.open('Änderungen wurden gespeichert.', 'OK', {duration: 5000});
       this.dialogRef.close();
@@ -153,12 +143,12 @@ export class TaskPointsDialogComponent implements OnInit {
   }
 
   getClass(task: Task): string {
-    if (this.selected.tasks.find(el => el.id === task.id))  { return 'selected'; } else { return 'none'; }
+    if (this.selected !== undefined && this.selected.tasks.find(el => el.id === task.id))  { return 'selected'; } else { return 'none'; }
   }
 
   selectAll() {
     if (this.checked) {
-      this.selected.tasks = this.tasks.map(el => el);
+      this.selected.tasks = this.tasks.map(el => el); // TODO: map??
     } else { this.selected.tasks = []; }
   }
 
