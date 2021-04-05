@@ -24,7 +24,7 @@ class CourseResultService {
     * @return all Course Results
     */
   def getAll(cid: Int): List[CourseResult] = DB.query("SELECT user_id, prename, surname, email, username, global_role, alias, " +
-    "group_concat(CONCAT_WS(\";\", attempts, passed, task_id, name, description, deadline, media_type) ORDER BY task_id) as results, " +
+    "group_concat(CONCAT_WS(\"ţ\", attempts, passed, task_id, name, description, deadline, media_type) ORDER BY task_id SEPARATOR 'ŧ') as results, " +
     "(count(CASE WHEN passed >= 1 THEN 1 END) = count(task_id)) as \"passed\" from (SELECT *, count(DISTINCT submission_id) as \"attempts\", " +
     "count(CASE WHEN passed_checker >= 1 THEN 1 END) as passed " +
     "from (SELECT *, count(CASE WHEN exit_code = 0 THEN 1 END) = count(Distinct configuration_id) as \"passed_checker\" " +
@@ -44,12 +44,12 @@ class CourseResultService {
     if (tasks == null) {
       List.empty[TaskResult]
     } else {
-      tasks.split(",").map(parseTaskResult).toList
+      tasks.split("ŧ").map(parseTaskResult).toList
     }
   }
 
   private def parseTaskResult(taskResult: String): TaskResult = {
-    val taskList = taskResult.split(";")
+    val taskList = taskResult.split("ţ")
     val task = Task(
       id = Integer.parseInt(taskList(2)),
       name = taskList(3),
