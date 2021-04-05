@@ -59,17 +59,19 @@
               </ng-container>
             </div>
             <div>
-              <div class="task-container" *ngFor="let result of courseResults | async">
+              <div class="task-container" *ngFor="let result of requirementResults | async">
                 <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
                 <span class="state failed" *ngIf="!result.passed"><mat-icon>add_circle</mat-icon></span>
 
                 <ng-container class="ngContainer" *ngIf="showDetails">
                    <span class="task-result" *ngFor="let taskResult of result.results">
-                     <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
+                     <!--<span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
                            matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
                        <span *ngIf="taskResult.attempts!=0" (click)="showResult(result.user.id, this.courseId, taskResult.task.id)">{{taskResult.attempts}}</span>
                        <span *ngIf="taskResult.attempts==0">-</span>
                      </span>
+                   </span>-->
+                     <span class="task-result-backpane">??</span>
                    </span>
                 </ng-container>
               </div>
