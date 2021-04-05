@@ -24,7 +24,7 @@ class EvaluationContainerService {
     * @return a List of Evaluation Containers
     */
   def getAll(cid: Integer): List[EvaluationContainer] = {
-    DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
+    DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\"ţ\", task_id, name, description, deadline, media_type) SEPARATOR 'ŧ') as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
       "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
       "where ec.course_id = ? group by evaluation_container_id;",
@@ -39,7 +39,8 @@ class EvaluationContainerService {
     * @return the Evaluation container Id
     */
   def getOne(cid: Integer, ctid: Integer): Option[EvaluationContainer] = {
-    val container = DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
+    val container = DB.query("select evaluation_container_id, " +
+      "GROUP_CONCAT(CONCAT_WS(\"ţ\", task_id, name, description, deadline, media_type)  SEPARATOR 'ŧ') as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
       "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
       "where ec.course_id = ? and ec.evaluation_container_id = ? group by evaluation_container_id;",
@@ -129,12 +130,12 @@ class EvaluationContainerService {
     if (tasks == null) {
       List.empty[Task]
     } else {
-      tasks.split(",").filter(s => !s.isBlank).map(parseTaskResult).toList
+      tasks.split("ŧ").filter(s => !s.isBlank).map(parseTaskResult).toList
     }
   }
 
   private def parseTaskResult(task: String): Task = {
-    val taskList = task.split(";")
+    val taskList = task.split("ţ")
 
     Task(taskList(1), if (taskList.length > 4) taskList(4) else "", taskList(2), taskList(3), Integer.parseInt(taskList(0)))
   }
