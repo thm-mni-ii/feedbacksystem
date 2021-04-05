@@ -27,7 +27,7 @@
     text-align: left;
   }
   .task-column {
-    flex-grow: 8;
+    flex-grow: 1;
   }
   .task-container {
     display: flex;
@@ -45,7 +45,7 @@
   }
   .task-result, .category-tasks, .title {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
   .task-result > .title, .category-tasks > .title {
