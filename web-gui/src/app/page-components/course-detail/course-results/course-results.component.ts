@@ -9,6 +9,9 @@ import {Task} from '../../../model/Task';
 import {SubmissionService} from '../../../service/submission.service';
 import {AllSubmissionsComponent} from '../../../dialogs/all-submissions/all-submissions.component';
 import {MatDialog} from '@angular/material/dialog';
+import {TaskPointsService} from '../../../service/task-points.service';
+import {Requirement} from '../../../model/Requirement';
+import {TaskPointsDialogComponent} from '../../../dialogs/task-points-dialog/task-points-dialog.component';
 
 /**
  * Matrix for every course docent a has
@@ -22,10 +25,13 @@ export class CourseResultsComponent implements OnInit {
   courseId: number;
   courseResults: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
+  requirements: Observable<Requirement[]> = of();
+  bonusPoints = true;
+  showDetails: boolean;
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
               private route: ActivatedRoute, private submissionService: SubmissionService,
-              private dialog: MatDialog) {}
+              private dialog: MatDialog, private taskPointsService: TaskPointsService) {}
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -33,6 +39,10 @@ export class CourseResultsComponent implements OnInit {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
+      this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
+      this.requirements.subscribe(req => {
+        console.log(req);
+      });
     });
     // TODO: material progress spinner (cause the page might load for a while)
   }
@@ -59,7 +69,11 @@ export class CourseResultsComponent implements OnInit {
             submission: res
           },
         });
-    });
+      });
     // TODO: show results
+  }
+
+  toggleDetails() {
+      this.showDetails = !this.showDetails;
   }
 }

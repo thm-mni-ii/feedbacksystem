@@ -24,7 +24,7 @@
   }
   .title {
     width: 100%;
-    text-align: center;
+    text-align: left;
   }
   .task-column {
     flex-grow: 8;
@@ -34,7 +34,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    .task-result {
+    .task-result, .category-tasks {
       width: 30px;
       min-height: 30px;
       text-align: right;
@@ -43,16 +43,20 @@
   .name-container, .task-container {
     height: 30px;
   }
-  .task-result, .title {
+  .task-result, .category-tasks, .title {
     display: flex;
     justify-content: center;
     align-items: center;
   }
-  .task-result > .title {
+  .task-result > .title, .category-tasks > .title {
     transform: rotate(270deg);
     overflow: visible;
     text-overflow: ellipsis;
     white-space: nowrap
+  }
+  .task-result > .title:hover {
+    cursor: pointer;
+    font-weight: bold;
   }
   .header {
     min-height: 130px;
@@ -73,6 +77,9 @@
   box-sizing: border-box;
   width: 24px;
   height: 24px;
+}
+.task-container > .state {
+  margin-right: 2.5vw;
 }
 
 .passed {
@@ -96,6 +103,10 @@
   width: 100%;
   display: flex;
   overflow-x: auto;
+
+  div {
+    margin-right: 2vw;
+  }
 }
 
 .task-result-backpane {
