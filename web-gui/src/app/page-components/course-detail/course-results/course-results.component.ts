@@ -12,6 +12,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {TaskPointsService} from '../../../service/task-points.service';
 import {Requirement} from '../../../model/Requirement';
 import {TaskPointsDialogComponent} from '../../../dialogs/task-points-dialog/task-points-dialog.component';
+import {RequirementCourseResult} from "../../../model/RequirementCourseResult";
 
 /**
  * Matrix for every course docent a has
@@ -26,6 +27,7 @@ export class CourseResultsComponent implements OnInit {
   courseResults: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
   requirements: Observable<Requirement[]> = of();
+  requirementResults: Observable<RequirementCourseResult[]> = of();
   bonusPoints = true;
   showDetails: boolean;
 
@@ -38,11 +40,18 @@ export class CourseResultsComponent implements OnInit {
     this.route.params.subscribe(param => {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
+      this.requirementResults = this.courseResultService.getRequirementResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
       this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
-      this.requirements.subscribe(req => {
-        console.log(req);
-      });
+
+      console.log('courseResults: ');
+      this.courseResults.subscribe(result => console.log(result));
+      console.log('tasks: ');
+      this.tasks.subscribe(task => console.log(task));
+      console.log('reqs: ');
+      this.requirements.subscribe(req => console.log(req));
+      console.log('EvalCOntResults: ');
+      this.requirementResults.subscribe(reqRes => console.log(reqRes));
     });
     // TODO: material progress spinner (cause the page might load for a while)
   }
