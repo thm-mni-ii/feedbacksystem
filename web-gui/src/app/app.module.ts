@@ -78,6 +78,8 @@ import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
 import { EvaluationResultsComponent } from './page-components/course-detail/course-results/evaluation-results/evaluation-results.component';
 import {SubmissionSpreadsheetComponent} from './page-components/task-detail/submission-spreadsheet/submission-spreadsheet.component';
+import {SpreadsheetComponent} from './dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component';
+import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadsheet-dialog.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -154,6 +156,8 @@ export const httpInterceptorProviders = [
     GotoLinksDialogComponent,
     TaskPointsDialogComponent,
     EvaluationResultsComponent,
+    SpreadsheetComponent,
+    SpreadsheetDialogComponent,
   ],
   imports: [
     BrowserModule,

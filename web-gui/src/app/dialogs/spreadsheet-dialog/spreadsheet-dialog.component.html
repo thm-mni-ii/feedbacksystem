@@ -1,0 +1,8 @@
+<h2 matDialogTitle>Auswahl</h2>
+<mat-dialog-content>
+  <app-spreadsheet [spreadsheet]="data.spreadsheet" (select)="select($event)"></app-spreadsheet>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="accent" (click)="confirm(false)">Abbrechen</button> &nbsp; &nbsp;
+  <button mat-flat-button color="warn" (click)="confirm(true)">Auswählen</button>
+</mat-dialog-actions>

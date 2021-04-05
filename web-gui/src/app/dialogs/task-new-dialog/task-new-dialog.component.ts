@@ -1,11 +1,12 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 import { Task } from 'src/app/model/Task';
 import {CourseService} from '../../service/course.service';
 import {TaskService} from '../../service/task.service';
+import {SpreadsheetDialogComponent} from '../spreadsheet-dialog/spreadsheet-dialog.component';
 
 /**
  * Dialog to create or update a task
@@ -36,9 +37,12 @@ export class TaskNewDialogComponent implements OnInit {
     name: ''
   };
 
+  spreadsheet: File = null;
+
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
               private courseService: CourseService, private taskService: TaskService,
-              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) {
+              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar,
+              private dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -103,7 +107,27 @@ export class TaskNewDialogComponent implements OnInit {
 
   uploadExel(event: Event) {
     const file = (event.currentTarget as any).files[0];
-    console.log(file.name);
+    this.spreadsheet = file;
     this.taskForm.patchValue({exelFile: file.name});
+  }
+
+  getFromSpreadsheet(field: string) {
+    if (this.spreadsheet === null) {
+      return;
+    }
+    this.dialog.open(SpreadsheetDialogComponent,  {
+      height: 'auto',
+      width: '50%',
+      data: {
+        spreadsheet: this.spreadsheet,
+      }
+    }).afterClosed().subscribe((fields) => {
+      if (fields === null) {
+        return;
+      }
+      const values = {};
+      values[field] = fields.join(':');
+      this.taskForm.patchValue(values);
+    });
   }
 }

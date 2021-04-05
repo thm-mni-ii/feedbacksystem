@@ -42,20 +42,20 @@
       <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
         <mat-form-field class="col" (click)="fileInput.click()">
           <input matInput type="text" placeholder="Exel-Datei" formControlName="exelFile" required readonly>
-          <input hidden #fileInput type="file" required (change)="uploadExel($event)">
+          <input hidden #fileInput type="file" required (change)="uploadExel($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
           <mat-icon matSuffix>folder</mat-icon>
         </mat-form-field>
         <mat-form-field class="col pad">
           <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userID" required>
-          <mat-icon matSuffix>search</mat-icon>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('userID')">search</mat-icon>
         </mat-form-field>
         <mat-form-field class="col">
           <input matInput type="text" placeholder="Einhabeparameter Felder" formControlName="input" required>
-          <mat-icon matSuffix>search</mat-icon>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('input')">search</mat-icon>
         </mat-form-field>
         <mat-form-field class="col pad">
           <input matInput type="text" placeholder="Ergebniss Felder" formControlName="result" required>
-          <mat-icon matSuffix>search</mat-icon>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('result')">search</mat-icon>
         </mat-form-field>
       </div>
       <br>
