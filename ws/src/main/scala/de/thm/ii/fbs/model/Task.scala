@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 import java.util.Date
 
 /**
@@ -10,4 +12,8 @@ import java.util.Date
   * @param description The description of that task
   * @param id The id of the task, if 0,  then no id was assigned
   */
-case class Task(name: String, deadline: String, mediaType: String, description: String = "", id: Int = 0)
+case class Task(@JsonProperty("name") name: String,
+                @JsonProperty("deadline") deadline: String,
+                @JsonProperty("mediaType") mediaType: String,
+                @JsonProperty("description") description: String = "",
+                @JsonProperty("id") id: Int = 0)
