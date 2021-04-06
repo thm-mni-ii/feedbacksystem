@@ -38,7 +38,7 @@ class CourseResultService {
     "LEFT join checkrunner_configuration using (task_id) " +
     "LEFT JOIN checker_result using (submission_id, configuration_id) " +
     "where course_id = ? group by user_id, task_id, submission_id order by task_id, user_id) " +
-    "results_by_submission group by user_id, task_id) results  group by user_id;", (res, _) => parseResult(res), cid)
+    "results_by_submission where passed_checker group by user_id, task_id) results  group by user_id;", (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = {
     val tasks = mapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList
