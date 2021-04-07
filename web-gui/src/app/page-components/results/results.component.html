@@ -13,7 +13,7 @@
 
       <ng-container matColumnDef="resultText">
         <th mat-header-cell *matHeaderCellDef>Antworttext</th>
-        <td mat-cell *matCellDef="let checker"> {{checker.resultText}} </td>
+        <td mat-cell *matCellDef="let checker" [innerHTML]="checker.resultText | allowLineBreak"></td>
       </ng-container>
 
       <ng-container matColumnDef="exitCode">
