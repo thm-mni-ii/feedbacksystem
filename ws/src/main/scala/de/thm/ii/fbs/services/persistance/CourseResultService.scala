@@ -1,14 +1,12 @@
 package de.thm.ii.fbs.services.persistance
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{CourseResult, Task, TaskResult}
+import de.thm.ii.fbs.model.{CourseResult, TaskResult}
 import de.thm.ii.fbs.util.DB
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
-import java.io.Reader
 import java.sql.ResultSet
 
 /**
@@ -21,6 +19,7 @@ class CourseResultService {
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
   private val mapper = new ObjectMapper
+
   /**
     * Get All Course Results
     * @param cid Course id
@@ -37,11 +36,11 @@ class CourseResultService {
     "LEFT JOIN user_task_submission using (user_id, task_id) " +
     "LEFT join checkrunner_configuration using (task_id) " +
     "LEFT JOIN checker_result using (submission_id, configuration_id) " +
-    "where course_id = ? group by user_id, task_id, submission_id order by task_id, user_id) " +
+    "where course_id = ? group by user_id, task_id, submission_id order by user_id, task_id) " +
     "results_by_submission group by user_id, task_id) results  group by user_id;", (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = {
-    val tasks = mapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList
+    val tasks = mapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList.sortBy(f => f.task.id)
     CourseResult(
       courseRegistration.parseUserResult(res), res.getBoolean("passed"), tasks
     )
