@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
   name: 'allowLineBreak'
 })
 export class AllowLineBreakPipe implements PipeTransform {
-  constructor(protected sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer) {}
 
   transform(input: string): unknown {
     const lineBroken = input.replace(/\n/g, '<br>');
