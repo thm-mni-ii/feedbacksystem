@@ -2,6 +2,7 @@ package de.thm.ii.fbs.services
 
 import de.thm.ii.fbs.types.DockerCmdConfig
 
+import scala.collection.mutable.ArrayBuffer
 import scala.sys.process.{Process, ProcessLogger}
 import scala.util.Properties
 
@@ -41,14 +42,14 @@ object DockerService {
   def runContainer(config: DockerCmdConfig): (Int, String, String) = {
     val cmd = buildCmd(config)
 
-    val stdoutStream = new StringBuilder
-    val stderrStream = new StringBuilder
-    val procLogger = ProcessLogger((o: String) => stdoutStream.append(o), (e: String) => stderrStream.append(e))
+    val stdoutStream = new ArrayBuffer[String]
+    val stderrStream = new ArrayBuffer[String]
+    val procLogger = ProcessLogger(stdoutStream.append(_), stderrStream.append(_))
 
     // Run Docker Container
     val exitCode = Process(cmd).!(procLogger)
 
-    (exitCode, stdoutStream.toString(), stderrStream.toString())
+    (exitCode, stdoutStream.mkString("\n"), stderrStream.mkString("\n"))
   }
 
   /**
