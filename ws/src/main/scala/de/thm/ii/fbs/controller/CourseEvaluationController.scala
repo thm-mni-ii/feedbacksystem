@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, EvaluationContainer, GlobalRole}
 import de.thm.ii.fbs.services.evaluation.FormulaService
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, EvaluationContainerService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired

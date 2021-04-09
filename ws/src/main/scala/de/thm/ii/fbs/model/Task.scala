@@ -10,4 +10,9 @@ import java.util.Date
   * @param description The description of that task
   * @param id The id of the task, if 0,  then no id was assigned
   */
-case class Task(name: String, deadline: String, mediaType: String, description: String = "", id: Int = 0)
+case class Task(name: String, deadline: String, mediaType: String, description: String = "", id: Int = 0) {
+  /**
+    * Default constructor required by Jackson
+    */
+  def this() = this("", "", "", "", 0)
+}

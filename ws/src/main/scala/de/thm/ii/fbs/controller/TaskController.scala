@@ -6,7 +6,7 @@ import java.util.Date
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
-import de.thm.ii.fbs.services.persistance._
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

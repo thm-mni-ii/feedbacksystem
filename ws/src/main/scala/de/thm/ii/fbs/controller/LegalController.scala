@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.AuthService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
