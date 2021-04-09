@@ -1,7 +1,10 @@
 package de.thm.ii.fbs.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 /**
   * A Task for a course
+  *
   * @param name Name of the task
   * @param deadline The deadline up to that a solution may be emitted
   * @param mediaType The media type occording to RFC 4288

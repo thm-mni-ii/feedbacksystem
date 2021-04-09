@@ -9,6 +9,4 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @param attempts The attempts made to solve it
   * @param passed True if task was passed
   */
-case class TaskResult(@JsonProperty("task") task: Task,
-                      @JsonProperty("attempts") attempts: Int,
-                      @JsonProperty("passed") passed: Boolean)
+case class TaskResult(task: Task, attempts: Int, passed: Boolean)
