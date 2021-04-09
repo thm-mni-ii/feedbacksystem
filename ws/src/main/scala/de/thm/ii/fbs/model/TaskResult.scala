@@ -6,9 +6,4 @@ package de.thm.ii.fbs.model
   * @param attempts The attempts made to solve it
   * @param passed True if task was passed
   */
-case class TaskResult(task: Task, attempts: Int, passed: Boolean) {
-  /**
-    * Default constructor required by Jackson
-    */
-  def this() = this(new Task(), 0, false)
-}
+case class TaskResult(task: Task, attempts: Int, passed: Boolean)
