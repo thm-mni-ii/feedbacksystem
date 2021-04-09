@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.persistance
+package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.model.{EvaluationContainer, Task}
 import de.thm.ii.fbs.util.DB

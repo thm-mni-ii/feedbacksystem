@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.persistance
+package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.model.{CourseResult, Task, TaskResult}
 import de.thm.ii.fbs.util.DB
