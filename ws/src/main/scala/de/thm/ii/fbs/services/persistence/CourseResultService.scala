@@ -37,7 +37,7 @@ class CourseResultService {
     |     ,JSON_ARRAYAGG(JSON_OBJECT("task", JSON_OBJECT("id", t.task_id,
     |                                                    "name", t.name,
     |                                                    "deadline", t.deadline,
-    |                                                    "media_type", t.media_type,
+    |                                                    "mediaType", t.media_type,
     |                                                    "description", t.description),
     |                                                    "attempts", coalesce(submissions.attempts, 0),
     |                                                    "passed", coalesce(submissions.passed, 0)
@@ -61,6 +61,6 @@ class CourseResultService {
     |""".stripMargin, (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = CourseResult(
-    courseRegistration.parseUserResult(res), res.getBoolean("passed"), objectMapper.readValue(res.getString("results"), classOf[List[TaskResult]])
+    courseRegistration.parseUserResult(res), res.getBoolean("passed"), objectMapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList
   )
 }
