@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.model
 
-import java.util.Date
-
 /**
   * A Task for a course
   * @param name Name of the task
