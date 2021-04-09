@@ -55,12 +55,13 @@ class CourseResultService {
     |                     left join checkrunner_configuration cc using (task_id)
     |                     left join checker_result cr using (submission_id, configuration_id)
     |            group by uts.user_id, uts.task_id
+    |            order by uts.task_id
     |) as submissions using (user_id, task_id)
     |where course_id = ?
     |group by u.user_id;
     |""".stripMargin, (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = CourseResult(
-    courseRegistration.parseUserResult(res), res.getBoolean("passed"), objectMapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList
+    courseRegistration.parseUserResult(res), res.getBoolean("passed"), objectMapper.readValue(res.getString("results"), classOf[List[TaskResult]])
   )
 }
