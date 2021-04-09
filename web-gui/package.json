@@ -27,6 +27,7 @@
     "@auth0/angular-jwt": "^4.0.0",
     "@stomp/stompjs": "^5.4.4",
     "core-js": "^3.6.4",
+    "dompurify": "^2.2.7",
     "file-saver": "^2.0.2",
     "net": "^1.0.2",
     "ngx-cookie-service": "^2.3.0",

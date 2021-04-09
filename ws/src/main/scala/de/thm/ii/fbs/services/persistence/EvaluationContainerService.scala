@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{EvaluationContainer, Task}
+import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.model.{EvaluationContainer, Task, TaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -16,6 +17,7 @@ import java.sql.{ResultSet, SQLException}
 class EvaluationContainerService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
+  private val mapper = new ObjectMapper
 
   /**
     * Get all Evaluation container from a Course
@@ -24,7 +26,8 @@ class EvaluationContainerService {
     * @return a List of Evaluation Containers
     */
   def getAll(cid: Integer): List[EvaluationContainer] = {
-    DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
+    DB.query("select evaluation_container_id, JSON_ARRAYAGG(JSON_OBJECT(\"id\", task_id, \"name\", name, " +
+      "\"deadline\", deadline, \"mediaType\", media_type, \"description\", description)) as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
       "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
       "where ec.course_id = ? group by evaluation_container_id;",
@@ -39,7 +42,9 @@ class EvaluationContainerService {
     * @return the Evaluation container Id
     */
   def getOne(cid: Integer, ctid: Integer): Option[EvaluationContainer] = {
-    val container = DB.query("select evaluation_container_id, GROUP_CONCAT(CONCAT_WS(\";\", task_id, name, description, deadline, media_type)) as tasks, " +
+    val container = DB.query("select evaluation_container_id, " +
+      "JSON_ARRAYAGG(JSON_OBJECT(\"id\", task_id, \"name\", name, " +
+      "\"deadline\", deadline, \"mediaType\", media_type, \"description\", description)) as tasks, " +
       "to_pass, bonus_formula, hide_points from evaluation_container as ec " +
       "LEFT JOIN evaluation_container_tasks using (evaluation_container_id) LEFT JOIN task as t using (task_id) " +
       "where ec.course_id = ? and ec.evaluation_container_id = ? group by evaluation_container_id;",
@@ -126,16 +131,8 @@ class EvaluationContainerService {
   }
 
   private def parseTasksResult(tasks: String): List[Task] = {
-    if (tasks == null) {
-      List.empty[Task]
-    } else {
-      tasks.split(",").filter(s => !s.isBlank).map(parseTaskResult).toList
-    }
-  }
+    val taskList = mapper.readValue(tasks, classOf[Array[Task]]).toList
 
-  private def parseTaskResult(task: String): Task = {
-    val taskList = task.split(";")
-
-    Task(taskList(1), if (taskList.length > 4) taskList(4) else "", taskList(2), taskList(3), Integer.parseInt(taskList(0)))
+    if (taskList.head.id == 0) List.empty[Task] else taskList
   }
 }
