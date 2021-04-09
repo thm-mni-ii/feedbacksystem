@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{EvaluationContainer, Task, TaskResult}
+import de.thm.ii.fbs.model.{EvaluationContainer, Task}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -17,7 +17,8 @@ import java.sql.{ResultSet, SQLException}
 class EvaluationContainerService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
-  private val mapper = new ObjectMapper
+  @Autowired
+  private val objectMapper: ObjectMapper = null
 
   /**
     * Get all Evaluation container from a Course
@@ -131,7 +132,7 @@ class EvaluationContainerService {
   }
 
   private def parseTasksResult(tasks: String): List[Task] = {
-    val taskList = mapper.readValue(tasks, classOf[Array[Task]]).toList
+    val taskList = objectMapper.readValue(tasks, classOf[Array[Task]]).toList
 
     if (taskList.head.id == 0) List.empty[Task] else taskList
   }
