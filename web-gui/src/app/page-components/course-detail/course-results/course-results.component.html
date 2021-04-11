@@ -4,23 +4,23 @@
     <span class="spacer"></span>
     <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
+  <mat-list role="list" class="legend">
+    <mat-list-item role="listitem">
+      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;Kurs bestanden
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <mat-icon class="state failed">add_circle</mat-icon>&nbsp;Kurs nicht bestanden
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <span class="task-result"><span class="task-result-example">n</span></span>&nbsp;Nicht bestanden
+    </mat-list-item>
+    <mat-list-item role="listitem"> - &nbsp;Nicht bearbeitet</mat-list-item>
+    <mat-list-item role="listitem"><!-- &#060;Zahl&#062;-->n &nbsp;Bestanden</mat-list-item>
+  </mat-list>
 
   <mat-tab-group>
     <mat-tab label="Kategorien">
       <mat-card class="content-container">
-        <mat-list role="list" class="legend">
-          <mat-list-item role="listitem">
-            <mat-icon class="state passed">check_circle</mat-icon>: Kurs bestanden
-          </mat-list-item>
-          <mat-list-item role="listitem">
-            <mat-icon class="state failed">add_circle</mat-icon>: Kurs nicht bestanden
-          </mat-list-item>
-          <mat-list-item role="listitem">3 : Aufgabe bestanden</mat-list-item>
-          <mat-list-item role="listitem">- : Aufgabe nicht bearbeitet</mat-list-item>
-          <mat-list-item role="listitem">
-            <span class="task-result"><span class="task-result-example">4</span></span>: Aufgabe nicht bestanden
-          </mat-list-item>
-        </mat-list>
         <!--    <div class="card-options">-->
         <!--      <div class="actions">-->
         <!--        <span class="lb">Download: </span>-->
@@ -110,19 +110,6 @@
     </mat-tab>
     <mat-tab label="Alle Aufgaben">
       <mat-card class="content-container">
-      <mat-list role="list" class="legend">
-        <mat-list-item role="listitem">
-          <mat-icon class="state passed">check_circle</mat-icon>: Kurs bestanden
-        </mat-list-item>
-        <mat-list-item role="listitem">
-          <mat-icon class="state failed">add_circle</mat-icon>: Kurs nicht bestanden
-        </mat-list-item>
-        <mat-list-item role="listitem">3 : Aufgabe bestanden</mat-list-item>
-        <mat-list-item role="listitem">- : Aufgabe nicht bearbeitet</mat-list-item>
-        <mat-list-item role="listitem">
-          <span class="task-result"><span class="task-result-example">4</span></span>: Aufgabe nicht bestanden
-        </mat-list-item>
-      </mat-list>
       <!--    <div class="card-options">-->
       <!--      <div class="actions">-->
       <!--        <span class="lb">Download: </span>-->

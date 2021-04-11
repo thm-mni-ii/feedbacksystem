@@ -70,7 +70,7 @@
 .content-container {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-top: 20px;
 }
 
 .state {
@@ -121,8 +121,14 @@
   border-radius: 20px;
 }
 
-.task-result .failed-task {
+.failed-task {
   background-color: $red;
+  color: white;
+  font-size: small;
+}
+
+.not-tried {
+  font-size: small;
 }
 
 .card-options {
@@ -146,13 +152,15 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
+  margin: 1rem 0;
 }
 
-.task-result-example{
-  background-color: red;
-  border-radius: 25px;
-  width: 25px;
-  height: 25px;
+.task-result-example {
+  background-color: $red;
+  color: white;
+  border-radius: 24px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
