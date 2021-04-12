@@ -75,7 +75,6 @@ import {AuthService} from './service/auth.service';
 import { ReversePipe } from './pipes/reverse.pipe';
 import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
-import { AllowLineBreakPipe } from './pipes/allow-line-break.pipe';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -148,7 +147,6 @@ export const httpInterceptorProviders = [
     ReversePipe,
     GoToComponent,
     GotoLinksDialogComponent,
-    AllowLineBreakPipe,
   ],
   imports: [
     BrowserModule,
