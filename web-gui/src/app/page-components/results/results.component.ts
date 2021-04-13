@@ -2,6 +2,10 @@ import {Component, Input} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
+import {SubmissionService} from '../../service/submission.service';
+import {AuthService} from '../../service/auth.service';
+import {ActivatedRoute} from '@angular/router';
+import {mergeMap} from 'rxjs/operators';
 
 @Component({
   selector: 'app-results',
@@ -30,6 +34,8 @@ export class ResultsComponent {
 
   @Input() displayTables: boolean;
 
+  constructor(private authService: AuthService, private submissionService: SubmissionService, private route: ActivatedRoute) {}
+
   display(submission: Submission) {
     this.displayedSubmission = submission;
     this.dataSource.data = submission.results;
@@ -57,5 +63,18 @@ export class ResultsComponent {
 
   toggleTableView() {
     this.tableViewAsGrid = !this.tableViewAsGrid;
+  }
+
+  retry() {
+    this.route.params.pipe(
+      mergeMap((params) => {
+        console.log(params);
+        const courseId = params.id;
+        const taskId = params.tid;
+        const token = this.authService.getToken();
+        const retryID = this.displayedSubmission.id;
+        return this.submissionService.restartSubmission(token.id, courseId, taskId, retryID);
+      })
+    ).subscribe(() => {});
   }
 }
