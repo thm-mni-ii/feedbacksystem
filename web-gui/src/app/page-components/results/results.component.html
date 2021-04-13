@@ -4,7 +4,7 @@
     <div class="submission-list">
       <span *ngFor="let submission of allSubmissions; let i = index" (click)="display(submission)">{{i+1}}. Abgabe (ID: {{submission.id}})</span>
     </div>
-    <button mat-icon-button (click)="retry()" matTooltip="Erneut überprüfen" style="display: inline;"><mat-icon>refresh</mat-icon></button>
+    <button *ngIf="allowRetry" mat-icon-button (click)="start_retry()" matTooltip="Erneut überprüfen" style="display: inline;"><mat-icon>refresh</mat-icon></button>
   </div>
 
   <div class="container">

@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
@@ -34,6 +34,9 @@ export class ResultsComponent {
 
   @Input() displayTables: boolean;
 
+  @Input() allowRetry: boolean;
+  @Output() retry = new EventEmitter<void>();
+
   constructor(private authService: AuthService, private submissionService: SubmissionService, private route: ActivatedRoute) {}
 
   display(submission: Submission) {
@@ -65,7 +68,7 @@ export class ResultsComponent {
     this.tableViewAsGrid = !this.tableViewAsGrid;
   }
 
-  retry() {
+  start_retry() {
     this.route.params.pipe(
       mergeMap((params) => {
         console.log(params);
@@ -75,6 +78,8 @@ export class ResultsComponent {
         const retryID = this.displayedSubmission.id;
         return this.submissionService.restartSubmission(token.id, courseId, taskId, retryID);
       })
-    ).subscribe(() => {});
+    ).subscribe(() => {
+      this.retry.emit();
+    });
   }
 }
