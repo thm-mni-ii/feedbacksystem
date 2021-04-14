@@ -22,6 +22,10 @@ import {RequirementCourseResult} from '../../../model/RequirementCourseResult';
   styleUrls: ['./course-results.component.scss'],
 })
 export class CourseResultsComponent implements OnInit {
+
+  constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
+              private route: ActivatedRoute, private submissionService: SubmissionService,
+              private dialog: MatDialog, private taskPointsService: TaskPointsService) {}
   courseId: number;
   courseResults: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
@@ -29,10 +33,7 @@ export class CourseResultsComponent implements OnInit {
   requirementResults: Observable<RequirementCourseResult[]> = of();
   bonusPoints = true;
   showDetails: boolean;
-
-  constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
-              private route: ActivatedRoute, private submissionService: SubmissionService,
-              private dialog: MatDialog, private taskPointsService: TaskPointsService) {}
+  opened = -1;
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -76,8 +77,8 @@ export class CourseResultsComponent implements OnInit {
       });
     // TODO: show results
   }
-
-  toggleDetails() {
-      this.showDetails = !this.showDetails;
+  toggleDetails(item: number) {
+    this.opened = item;
+      // this.showDetails = !this.showDetails;
   }
 }
