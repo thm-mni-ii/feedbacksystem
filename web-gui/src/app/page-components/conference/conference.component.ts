@@ -162,7 +162,7 @@ export class ConferenceComponent implements OnInit {
   }
 
   private refresh() {
-    this.users = JSON.parse(JSON.stringify(this.tmpUsers));
-    this.usersInConference = JSON.parse(JSON.stringify(this.tmpUsersInConference));
+    this.users = this.sortUsers(JSON.parse(JSON.stringify(this.tmpUsers)));
+    this.usersInConference = this.sortUsers(JSON.parse(JSON.stringify(this.tmpUsersInConference)));
   }
 }
