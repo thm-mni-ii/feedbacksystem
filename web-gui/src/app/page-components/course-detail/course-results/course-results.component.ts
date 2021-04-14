@@ -78,7 +78,14 @@ export class CourseResultsComponent implements OnInit {
     // TODO: show results
   }
   toggleDetails(item: number) {
-    this.opened = item;
-      // this.showDetails = !this.showDetails;
+    // Only opens clicked category at a time
+    if (this.opened === 0) {
+      this.opened = -1;
+    } else if ((this.opened > 0) && (this.opened === this.opened)) {
+      this.opened = this.opened - (this.opened + 1);
+    } else {
+      this.opened = item;
+    }
+    // this.showDetails = !this.showDetails;
   }
 }
