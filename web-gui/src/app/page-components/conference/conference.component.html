@@ -19,7 +19,7 @@
   <div class="ticketColumn users">
     <h3 >Online Nutzer</h3>
     <mat-list>
-      <mat-card class="user" mat-list-item *ngFor="let user of sortUsers(this.classroomService.getUsers() | async)">
+      <mat-card class="user" mat-list-item *ngFor="let user of sortUsers(this.users)">
         <p class="user-item">{{user.prename}} {{user.surname}}<span class="subtext-role"><sub>{{parseCourseRole(user.courseRole)}}</sub></span></p>
         <span class="meta">
           <mat-icon *ngIf="isAuthorized() && this.auth.getToken().username != user.username" class="material-icons call" color="accent" (click)="inviteToConference([user])">call</mat-icon>
