@@ -1,12 +1,9 @@
 package de.thm.ii.fbs.controller
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, Task}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -86,10 +83,21 @@ class TaskController {
       ( body.retrive("name").asText(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
-        body.retrive("description").asText()
+        body.retrive("description").asText(),
+        body.retrive("mediaInformation").asObject(),
       ) match {
-        case (Some(name), Some(deadline), Some(mediaType), desc) => taskService.create(cid,
-          Task(name, deadline, mediaType, desc.getOrElse("")))
+        case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
+          mediaInformation.retrive("idField").asText(),
+          mediaInformation.retrive("inputFields").asText(),
+          mediaInformation.retrive("outputFields").asText(),
+        ) match {
+          case (Some(idField), Some(inputFields), Some(outputFields)) => taskService.create(cid,
+            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields))))
+          case _ => throw new BadRequestException("Malformed media information")
+        }
+        case (Some(name), Some(deadline), Some(mediaType), desc, None) => taskService.create(cid,
+          Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -119,7 +127,7 @@ class TaskController {
         body.retrive("description").asText()
       ) match {
         case (Some(name), Some(deadline), Some(mediaType), desc) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, desc.getOrElse("")))
+          Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {

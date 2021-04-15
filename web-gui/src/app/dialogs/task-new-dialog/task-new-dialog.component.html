@@ -46,16 +46,16 @@
           <mat-icon matSuffix>folder</mat-icon>
         </mat-form-field>
         <mat-form-field class="col pad">
-          <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userID" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('userID')">search</mat-icon>
+          <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userIDField" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('userIDField')">search</mat-icon>
         </mat-form-field>
         <mat-form-field class="col">
-          <input matInput type="text" placeholder="Einhabeparameter Felder" formControlName="input" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('input')">search</mat-icon>
+          <input matInput type="text" placeholder="Einhabeparameter Felder" formControlName="inputFields" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('inputFields')">search</mat-icon>
         </mat-form-field>
         <mat-form-field class="col pad">
-          <input matInput type="text" placeholder="Ergebniss Felder" formControlName="result" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('result')">search</mat-icon>
+          <input matInput type="text" placeholder="Ergebniss Felder" formControlName="outputFields" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('outputFields')">search</mat-icon>
         </mat-form-field>
       </div>
       <br>

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `fbs`.`task` (
   `course_id` INT NOT NULL,
   `deadline` DATETIME NOT NULL,
   `media_type` VARCHAR(255) NOT NULL,
+  `media_information` JSON NULL,
   PRIMARY KEY (`task_id`),
   INDEX `task_courses_courseid_fk` (`course_id` ASC) VISIBLE,
   CONSTRAINT `task_course_course_id_fk`

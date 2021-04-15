@@ -1970,6 +1970,33 @@ components:
         mediaType:
           type: string
           description: The media type for the submissions according to RFC 4288
+        mediaInformation:
+          description: Media type spezific Information
+          oneOf:
+            - $ref: '#/components/schemas/SpreadsheetInformationRequest'
+    SpreadsheetInformationRequest:
+      type: object
+      properties:
+        idField:
+          type: string
+        inputFields:
+          type: string
+        outputFields:
+          type: string
+    SpreadsheetInformationResponse:
+      type: object
+      properties:
+        fields:
+          type: object
+          properties:
+            inputs:
+              type: array
+              items:
+                type: object
+            outputs:
+              type: array
+              items:
+                type: string
     Submission:
       type: object
       required:

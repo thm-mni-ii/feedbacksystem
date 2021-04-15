@@ -4,4 +4,9 @@ export interface Task {
   description?: string;
   deadline: string;
   mediaType?: string;
+  mediaInformation?: {
+    idField: string;
+    inputFields: string;
+    outputFields: string;
+  };
 }

@@ -7,6 +7,10 @@ import { Task } from 'src/app/model/Task';
 import {CourseService} from '../../service/course.service';
 import {TaskService} from '../../service/task.service';
 import {SpreadsheetDialogComponent} from '../spreadsheet-dialog/spreadsheet-dialog.component';
+import {of} from 'rxjs';
+import {mergeMap, map} from 'rxjs/operators';
+import {CheckerService} from '../../service/checker.service';
+import {CheckerConfig} from '../../model/CheckerConfig';
 
 /**
  * Dialog to create or update a task
@@ -34,13 +38,14 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new Date().toISOString(),
     description: '',
     mediaType: '',
-    name: ''
+    name: '',
+    mediaInformation: null,
   };
 
   spreadsheet: File = null;
 
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
-              private courseService: CourseService, private taskService: TaskService,
+              private courseService: CourseService, private taskService: TaskService, private checkerService: CheckerService,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar,
               private dialog: MatDialog) {
   }
@@ -69,6 +74,13 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.name = this.taskForm.get('name').value;
     this.task.description = this.taskForm.get('description').value;
     this.task.mediaType = this.taskForm.get('mediaType').value;
+    if (this.task.mediaType === 'application/x-spreadsheet') {
+      this.task.mediaInformation = {
+        idField: this.taskForm.get('userIDField').value,
+        inputFields: this.taskForm.get('inputFields').value,
+        outputFields: this.taskForm.get('outputFields').value,
+      };
+    }
   }
   /**
    * Create a new task
@@ -77,7 +89,25 @@ export class TaskNewDialogComponent implements OnInit {
   createTask(value: any) {
     this.getValues();
     if (this.task.name) {
-      this.taskService.createTask(this.courseId, this.task).subscribe(task => {
+      this.taskService.createTask(this.courseId, this.task).pipe(
+        mergeMap((task) => {
+          if (this.task.mediaType === 'application/x-spreadsheet') {
+            const checkerConfig: CheckerConfig = {
+              checkerType: 'spreadsheet',
+              ord: 0
+            };
+            const infoFile = new File([JSON.stringify(this.task.mediaInformation)], 'info.json');
+            return this.checkerService.createChecker(this.courseId, task.id, checkerConfig).pipe(
+              mergeMap((checker) =>
+                this.checkerService.updateMainFile(this.courseId, task.id, checker.id, this.spreadsheet).pipe(map(() => checker))),
+              mergeMap((checker) => this.checkerService.updateSecondaryFile(this.courseId, task.id, checker.id, infoFile)),
+              map(() => task)
+            );
+          } else {
+            return of(task);
+          }
+        })
+      ).subscribe(task => {
           this.dialogRef.close({success: true, task: task});
       });
     } else {
