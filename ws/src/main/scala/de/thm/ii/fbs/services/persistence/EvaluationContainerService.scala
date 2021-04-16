@@ -132,7 +132,7 @@ class EvaluationContainerService {
   }
 
   private def parseTasksResult(tasks: String): List[Task] = {
-    val taskList = objectMapper.readValue(tasks, classOf[Array[Task]]).toList
+    val taskList = objectMapper.readValue[List[Task]](tasks, classOf[List[Task]])
 
     if (taskList.head.id == 0) List.empty[Task] else taskList
   }
