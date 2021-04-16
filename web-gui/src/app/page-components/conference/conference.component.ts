@@ -30,13 +30,16 @@ export class ConferenceComponent implements OnInit {
   }
   courseId: number;
   users: User[] = [];
+  tmpUsers: User[] = [];
   usersInConference: User[] = [];
+  tmpUsersInConference: User[] = [];
   tickets: Observable<Ticket[]>;
   self: User;
   isCourseSubscriber: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   subscriptions: Subscription[] = [];
   username: string;
   conferenceWindowOpen: Boolean = false;
+  intervalID;
 
   ngOnInit(): void {
     this.username = this.auth.getToken().username;
@@ -45,10 +48,10 @@ export class ConferenceComponent implements OnInit {
         this.courseId = param.id;
       });
     this.classroomService.getUsersInConference().subscribe((users) => {
-      this.usersInConference = users;
+      this.tmpUsersInConference = users;
     });
     this.classroomService.getUsers().subscribe((users) => {
-      this.users = users;
+      this.tmpUsers = users;
     });
     if (!this.classroomService.isJoined()) {
       this.joinClassroom();
@@ -56,6 +59,12 @@ export class ConferenceComponent implements OnInit {
     this.classroomService.getConferenceWindowHandle().subscribe(isOpen => {
       this.conferenceWindowOpen = isOpen;
     });
+    setTimeout(() => this.refresh(), 1000);
+    this.intervalID = setInterval(() => this.refresh(), 10000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalID);
   }
 
   public isAuthorized() {
@@ -150,5 +159,10 @@ export class ConferenceComponent implements OnInit {
   }
   public isInClassroom(username: string) {
     return this.users.filter(u => u.username === username).length !== 0;
+  }
+
+  private refresh() {
+    this.users = this.sortUsers(JSON.parse(JSON.stringify(this.tmpUsers)));
+    this.usersInConference = this.sortUsers(JSON.parse(JSON.stringify(this.tmpUsersInConference)));
   }
 }
