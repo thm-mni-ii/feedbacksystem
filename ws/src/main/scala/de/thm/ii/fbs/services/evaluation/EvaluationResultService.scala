@@ -26,8 +26,7 @@ class EvaluationResultService {
   }
 
   private def evaluateOne(container: List[EvaluationContainer], result: CourseResult): CourseEvaluationResult = {
-    val taskResultsRaw = result.results
-    val taskResults = taskResultsRaw.foldLeft(Map[Int, TaskResult]()) { (m, s) => m + (s.task.id -> s) }
+    val taskResults = result.results.foldLeft(Map[Int, TaskResult]()) { (m, s) => m + (s.task.id -> s) }
     var passed = true
     var bonusPoints = 0
 
