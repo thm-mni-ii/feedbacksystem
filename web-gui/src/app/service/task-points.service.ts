@@ -10,52 +10,6 @@ import {Task} from '../model/Task';
 })
 export class TaskPointsService {
 
-  requirements: Requirement[] = [
-    {
-      id: 1,
-      toPass: 1,
-      tasks: [{
-        id: 5,
-        name: 'Aufgabe 1',
-        description: 'string',
-        deadline: 'st'
-      }],
-      bonusFormula: 'example1',
-      hidePoints: false
-    },
-    {
-      id: 2,
-      toPass: 2,
-      tasks: [{
-        id: 2,
-        name: 'Aufgabe 2a',
-        description: 'string',
-        deadline: 'st',
-      },
-        {
-          id: 1,
-          name: 'Aufgabe 1a',
-          description: 'string',
-          deadline: 'st'
-        }],
-      bonusFormula: 'example2',
-      hidePoints: false
-
-    },
-    {
-      id: 3,
-      toPass: 1,
-      tasks: [{
-        id: 5,
-        name: 'Aufgabe 1',
-        description: 'string',
-        deadline: 'st'
-      }],
-      bonusFormula: 'example3',
-      hidePoints: false
-    }
-  ];
-
   constructor(private http: HttpClient) { }
 
   /**
@@ -65,7 +19,6 @@ export class TaskPointsService {
    */
   getAllRequirements(cid: number): Observable<Requirement[]> {
     return this.http.get<Requirement[]>(`/api/v1/courses/${cid}/evaluation/container`);
-    // return of(this.requirements);
   }
 
   /**
@@ -183,10 +136,5 @@ export class TaskPointsService {
         return throwError(err);
       }),
     );
-    /* if (bonusFormula === 'true') {
-       return of(true);
-     } else {
-       return of(false);
-     }*/
   }
 }

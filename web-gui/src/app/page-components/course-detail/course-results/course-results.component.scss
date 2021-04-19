@@ -54,7 +54,7 @@
     text-overflow: ellipsis;
     white-space: nowrap
   }
-  .task-result > .title:hover {
+  .task-result > .title:hover.title-hoverable {
     cursor: pointer;
     font-weight: bold;
   }
@@ -85,6 +85,10 @@
 .category-bonus {
   width: 30px;
   height: 30px;
+}
+
+.bonus {
+  color: $green;
 }
 
 .passed {

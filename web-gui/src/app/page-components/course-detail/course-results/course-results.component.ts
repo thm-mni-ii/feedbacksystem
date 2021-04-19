@@ -31,7 +31,9 @@ export class CourseResultsComponent implements OnInit {
   tasks: Observable<Task[]> = of();
   requirements: Observable<Requirement[]> = of();
   requirementResults: Observable<RequirementCourseResult[]> = of();
+  requirementTaskNames: void;
   bonusPoints = true;
+  courseBonusPoints = 0;
   showDetails: boolean;
   opened = -1;
 
@@ -43,6 +45,7 @@ export class CourseResultsComponent implements OnInit {
       this.requirementResults = this.courseResultService.getRequirementResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
       this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
+      // this.requirementTaskNames = this.requirements.pipe(map(bp => bp[0].tasks.map(task => task.name)));
 
       console.log('reqs: ');
       this.requirements.subscribe(req => console.log(req));
