@@ -32,7 +32,7 @@ export class CourseResultsComponent implements OnInit {
   requirements: Observable<Requirement[]> = of();
   requirementResults: Observable<RequirementCourseResult[]> = of();
   requirementTaskNames: void;
-  bonusPoints = true;
+  allBonusPoints: Observable<Number[]>;
   courseBonusPoints = 0;
   showDetails: boolean;
   opened = -1;

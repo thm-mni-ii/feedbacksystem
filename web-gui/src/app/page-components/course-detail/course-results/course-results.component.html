@@ -34,19 +34,31 @@
         <!--      </mat-paginator>-->
         <!--    </div>-->
         <div class="card">
+          <div class="bonus-column">
+            <div class="task-container header">
+              <div class="task-result">
+                <span class="title">Kurs-Bonus</span>
+              </div>
+            </div>
+            <div class="bonus-container" *ngFor="let result of requirementResults | async">
+              <span class="category-result-backpane" matTooltipPosition="above"
+                    matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
+                       <span class="category-bonus bonus" *ngIf="result.bonusPoints==0">{{ result.bonusPoints }}</span>
+                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
+                </span>
+            </div>
+          </div>
+
           <div class="name-column">
             <div class="task-container header">
               <div class="task-result">
                 <span class="title">Kurs-Status</span>
-                <span class="title">Kurs-Bonus</span>
                 <h2 class="title">Namen</h2>
               </div>
             </div>
             <div class="name-container" *ngFor="let result of courseResults | async">
               <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
               <span class="state failed" *ngIf="!result.passed"><mat-icon>add_circle</mat-icon></span>
-              <span class="state passed" *ngIf="bonusPoints"><mat-icon>check_circle</mat-icon></span>
-              <span class="state failed" *ngIf="!bonusPoints"><mat-icon>add_circle</mat-icon></span>
               <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
             </div>
           </div>
@@ -57,7 +69,7 @@
                 <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ requirement.id }} &#9660; <!--&dArr; --></span>
                 <span class="title">Bonus</span>
                 <ng-container *ngIf="showDetails">
-                  <span class="title" *ngFor="let task of requirementResults | async">{{ task.results }}}</span>
+                  <span class="title" *ngFor="let reqRes of requirementResults | async">{{ reqRes.results }}}</span>
                 </ng-container>
               </div>
               <ng-container *ngIf="showDetails">
@@ -76,7 +88,7 @@
                        <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
                 </span>
 
-                <ng-container class="ngContainer" *ngIf="opened===requirement.id"> <!--*ngIf="showDetails"-->
+                <ng-container class="ngContainer" *ngIf="opened === requirement.id">
                    <span class="task-result" *ngFor="let taskResult of result.results">
                      <!--<span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
                            matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
