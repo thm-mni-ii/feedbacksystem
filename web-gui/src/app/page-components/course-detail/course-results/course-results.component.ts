@@ -77,8 +77,9 @@ export class CourseResultsComponent implements OnInit {
       });
     // TODO: show results
   }
+
   toggleDetails(item: number) {
-    // Only opens clicked category at a time
+    // Only opens clicked category
     if (this.opened === 0) {
       this.opened = -1;
     } else if ((this.opened > 0) && (this.opened === this.opened)) {

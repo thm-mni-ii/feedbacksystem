@@ -79,7 +79,12 @@
   height: 24px;
 }
 .task-container > .state {
-  margin-right: 2.5vw;
+  margin-right: 1vw;
+}
+
+.category-bonus {
+  width: 30px;
+  height: 30px;
 }
 
 .passed {
@@ -118,6 +123,14 @@
   cursor: pointer;
   border: 3px solid white;
   box-sizing: border-box;
+  border-radius: 20px;
+}
+
+.category-result-backpane {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  cursor: pointer;
   border-radius: 20px;
 }
 

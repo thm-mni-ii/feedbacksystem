@@ -35,8 +35,12 @@
         <!--    </div>-->
         <div class="card">
           <div class="name-column">
-            <div class="name-container header">
-              <span class="title"><h2>Names</h2></span>
+            <div class="task-container header">
+              <div class="task-result">
+                <span class="title">Status</span>
+                <span class="title">Bonus</span>
+                <h2 class="title">Namen</h2>
+              </div>
             </div>
             <div class="name-container" *ngFor="let result of courseResults | async">
               <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
@@ -60,8 +64,13 @@
             </div>
             <div>
               <div class="task-container" *ngFor="let result of requirementResults | async">
-                <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
+                <span class="state passed" *ngIf="result.results"><mat-icon>check_circle</mat-icon></span>
                 <span class="state failed" *ngIf="!result.passed"><mat-icon>add_circle</mat-icon></span>
+                <span class="category-result-backpane" matTooltipPosition="above"
+                      matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
+                       <span class="category-bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
+                       <span class="category-bonus" *ngIf="result.bonusPoints==0">-</span>
+                </span>
 
                 <ng-container class="ngContainer" *ngIf="opened===requirement.id"> <!--*ngIf="showDetails"-->
                    <span class="task-result" *ngFor="let taskResult of result.results">
