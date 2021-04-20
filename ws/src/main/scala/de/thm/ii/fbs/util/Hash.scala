@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.util
 
+import java.math.BigInteger
 import java.security.MessageDigest
 
 /**
@@ -13,4 +14,7 @@ object Hash {
     */
   def hash(text: String): String = MessageDigest.getInstance("SHA-1")
     .digest(text.getBytes("UTF-8")).map("%02x".format(_)).mkString
+
+  def decimalHash(text: String): BigInteger = new BigInteger(MessageDigest.getInstance("SHA-1")
+    .digest(text.getBytes("UTF-8")))
 }

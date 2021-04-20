@@ -1974,6 +1974,7 @@ components:
           description: Media type spezific Information
           oneOf:
             - $ref: '#/components/schemas/SpreadsheetInformationRequest'
+            - $ref: '#/components/schemas/SpreadsheetInformationResponse'
     SpreadsheetInformationRequest:
       type: object
       properties:

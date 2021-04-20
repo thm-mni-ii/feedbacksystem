@@ -1,10 +1,13 @@
 package de.thm.ii.fbs.controller
 
+import de.thm.ii.fbs.services.persistence._
+import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, Task}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, Task}
+import de.thm.ii.fbs.services.checker.SpreadsheetService
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +33,8 @@ class TaskController {
   private val checkerConfigurationService: CheckerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val spreadsheetService: SpreadsheetService = null
 
   /**
     * Get a task list
@@ -57,9 +62,19 @@ class TaskController {
   @GetMapping(value = Array("/{cid}/tasks/{tid}"))
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
-    authService.authorize(req, res)
+    val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
-      case Some(task) => task
+      case Some(task) => task.mediaInformation match {
+        case Some(SpreadsheetMediaInformation(idField, inputFields, outputFields)) =>
+          val config = this.checkerConfigurationService.getAll(cid, tid)(0)
+          val path = this.storageService.pathToMainFile(config.id).get.toString
+          val spreadsheetFile = new File(path)
+          val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
+          val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
+          val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
+          task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1))))
+        case _ => task
+      }
       case _ => throw new ResourceNotFoundException()
     }
   }

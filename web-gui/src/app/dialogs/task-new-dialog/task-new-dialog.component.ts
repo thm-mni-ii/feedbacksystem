@@ -27,9 +27,9 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new FormControl(new Date()),
     mediaType: new FormControl(''),
     exelFile: new FormControl(''),
-    userID: new FormControl(''),
-    input: new FormControl(''),
-    result: new FormControl(''),
+    userIDField: new FormControl(''),
+    inputFields: new FormControl(''),
+    outputFields: new FormControl(''),
   });
 
   isUpdate: boolean;
@@ -156,7 +156,11 @@ export class TaskNewDialogComponent implements OnInit {
         return;
       }
       const values = {};
-      values[field] = fields.join(':');
+      if (fields[0] === fields[1]) {
+        values[field] = fields[0];
+      } else {
+        values[field] = fields.join(':');
+      }
       this.taskForm.patchValue(values);
     });
   }
