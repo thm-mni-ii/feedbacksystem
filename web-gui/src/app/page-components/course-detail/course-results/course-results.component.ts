@@ -22,6 +22,8 @@ import {RequirementCourseResult} from '../../../model/RequirementCourseResult';
   styleUrls: ['./course-results.component.scss'],
 })
 export class CourseResultsComponent implements OnInit {
+  // tslint:disable-next-line:max-line-length
+  requirementResultData: { hidePoints: boolean; toPass: number; bonusFormula: number; id: number; tasks: { task: { name: string; mediaType: string; deadline: string }; passed: boolean; attempts: number } }[];
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
               private route: ActivatedRoute, private submissionService: SubmissionService,
@@ -46,7 +48,7 @@ export class CourseResultsComponent implements OnInit {
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
       this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
       // this.requirementTaskNames = this.requirements.pipe(map(bp => bp[0].tasks.map(task => task.name)));
-
+      this.requirementResultData = this.courseResultService.getRequirementResultData(this.courseId);
       console.log('reqs: ');
       this.requirements.subscribe(req => console.log(req));
       console.log('EvalCOntResults: ');
