@@ -55,6 +55,7 @@ class CourseResultService {
     |                     left join checkrunner_configuration cc using (task_id)
     |                     left join checker_result cr using (submission_id, configuration_id)
     |            group by uts.user_id, uts.task_id
+    |            order by uts.task_id
     |) as submissions using (user_id, task_id)
     |where course_id = ?
     |group by u.user_id
