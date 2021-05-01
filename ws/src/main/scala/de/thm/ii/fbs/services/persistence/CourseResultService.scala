@@ -63,6 +63,7 @@ class CourseResultService {
     |""".stripMargin, (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = CourseResult(
-    courseRegistration.parseUserResult(res), res.getBoolean("passed"), objectMapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList
+    courseRegistration.parseUserResult(res), res.getBoolean("passed"),
+    objectMapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList.sorted
   )
 }
