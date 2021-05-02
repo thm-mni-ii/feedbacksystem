@@ -15,6 +15,11 @@ object Hash {
   def hash(text: String): String = MessageDigest.getInstance("SHA-1")
     .digest(text.getBytes("UTF-8")).map("%02x".format(_)).mkString
 
+  /**
+    * Hash the plain text to a decimal numnber
+    * @param text the plain text
+    * @return the decimal
+    */
   def decimalHash(text: String): BigInteger = new BigInteger(MessageDigest.getInstance("SHA-1")
     .digest(text.getBytes("UTF-8")))
 }

@@ -33,7 +33,10 @@
       <div class="user-input">
         <app-submission-file *ngIf="submissionTypeOfTask() == 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>
         <app-submission-text *ngIf="submissionTypeOfTask() == 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
-        <app-submission-spreadsheet *ngIf="submissionTypeOfTask() == 'spreadsheet'" (update)="updateSubmissionContent($event)"></app-submission-spreadsheet>
+        <app-submission-spreadsheet *ngIf="submissionTypeOfTask() == 'spreadsheet'" (update)="updateSubmissionContent($event)"
+                                    [inputFields]="task.mediaInformation.inputs"
+                                    [outputFields]="task.mediaInformation.outputs"
+        ></app-submission-spreadsheet>
       </div>
 
       <mat-card-actions>

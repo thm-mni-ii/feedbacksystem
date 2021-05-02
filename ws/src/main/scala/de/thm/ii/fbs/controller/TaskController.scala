@@ -66,7 +66,7 @@ class TaskController {
     taskService.getOne(tid) match {
       case Some(task) => task.mediaInformation match {
         case Some(SpreadsheetMediaInformation(idField, inputFields, outputFields)) =>
-          val config = this.checkerConfigurationService.getAll(cid, tid)(0)
+          val config = this.checkerConfigurationService.getAll(cid, tid).head
           val path = this.storageService.pathToMainFile(config.id).get.toString
           val spreadsheetFile = new File(path)
           val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
@@ -99,12 +99,12 @@ class TaskController {
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
         body.retrive("description").asText(),
-        body.retrive("mediaInformation").asObject(),
+        body.retrive("mediaInformation").asObject()
       ) match {
         case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
-          mediaInformation.retrive("outputFields").asText(),
+          mediaInformation.retrive("outputFields").asText()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),

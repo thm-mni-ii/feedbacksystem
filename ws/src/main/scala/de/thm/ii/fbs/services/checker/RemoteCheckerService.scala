@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate
   * @param insecure if true the tls certificate of the remote checker will not be validated
   */
 @Service
-class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) {
+class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService {
   private val restTemplate = makeRestTemplate(insecure)
 
   @Autowired

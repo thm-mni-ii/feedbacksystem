@@ -15,15 +15,14 @@ import scala.util.matching.Regex
 class SpreadsheetService {
   private case class Cords(row: Int, col: Int)
 
-  def initSheet(spreadsheet: File, userIDField: String, userID: String): XSSFSheet = {
-    val input = new FileInputStream(spreadsheet)
-    val workbook = new XSSFWorkbook(input)
-    val sheet = workbook.getSheetAt(0)
-    this.setCell(sheet, this.parseCellAddress(userIDField), userID)
-    XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
-    sheet
-  }
-
+  /**
+    * Gets the values in the selected field range
+    * @param spreadsheet the spreadsheet field
+    * @param userIDField the field id of the field in which the userID should be inserted
+    * @param userID      the userID to insert
+    * @param fields      the field for which to get the values
+    * @return the values
+    */
   def getFields(spreadsheet: File, userIDField: String, userID: String, fields: String): Seq[(String, String)] = {
     val sheet = this.initSheet(spreadsheet, userIDField, userID)
     val (start, end) = this.parseCellRange(fields)
@@ -32,9 +31,17 @@ class SpreadsheetService {
     labels.zip(values)
   }
 
+  private def initSheet(spreadsheet: File, userIDField: String, userID: String): XSSFSheet = {
+    val input = new FileInputStream(spreadsheet)
+    val workbook = new XSSFWorkbook(input)
+    val sheet = workbook.getSheetAt(0)
+    this.setCell(sheet, this.parseCellAddress(userIDField), userID)
+    XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
+    sheet
+  }
+
   private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[String] =
     (start to end).map(i => {
-      println("row:" + i + " col:" + col)
       val cell = sheet.getRow(i).getCell(col)
       val res = if (cell == null) {
         ""
@@ -50,7 +57,6 @@ class SpreadsheetService {
           case _ => ""
         }
       }
-      println(res)
       res
     })
 

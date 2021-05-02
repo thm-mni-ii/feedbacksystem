@@ -47,9 +47,21 @@ export class SubmissionService {
   }
 
   // POST /users/{uid}/courses/{cid}/tasks/{tid}/submissions
-  submitSolution(uid: number, cid: number, tid: number, solution: File | string): Observable<Submission> {
+  submitSolution(uid: number, cid: number, tid: number, solution: File | object | string): Observable<Submission> {
     const formData: FormData = new FormData();
-    formData.append('file', (<any>solution).name ? solution : new Blob([solution]));
+    let formSolution;
+    if (typeof solution === 'object') {
+      if (solution instanceof File) {
+        formSolution = solution;
+      } else {
+        formSolution = new Blob([JSON.stringify(solution)]);
+      }
+    } else if (typeof solution === 'string') {
+      formSolution = new Blob([solution]);
+    } else {
+      throw new Error('solution is of invalid type');
+    }
+    formData.append('file', formSolution);
     return this.http.post<Submission>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`, formData);
   }
 

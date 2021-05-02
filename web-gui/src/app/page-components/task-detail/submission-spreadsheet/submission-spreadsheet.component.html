@@ -1,14 +1,14 @@
 <div>
   <div class="flex-container">
-    <mat-form-field *ngFor="let inputValue of inputValues">
-      <input matInput type="text" [placeholder]="inputValue.name" [value]="inputValue.value" readonly>
+    <mat-form-field *ngFor="let inputField of inputFields">
+      <input matInput type="text" [placeholder]="inputField[0]" [value]="inputField[1]" readonly>
     </mat-form-field>
   </div>
   <hr>
   <form [formGroup]="resultForm">
     <div class="flex-container">
-        <mat-form-field *ngFor="let resultValue of resultValues">
-          <input matInput type="text" [placeholder]="resultValue.name" [formControlName]="resultValue.name" required>
+        <mat-form-field *ngFor="let outputField of outputFields">
+          <input matInput type="text" [placeholder]="outputField" [formControlName]="outputField" (input)="updateSubmission()" required>
         </mat-form-field>
     </div>
   </form>

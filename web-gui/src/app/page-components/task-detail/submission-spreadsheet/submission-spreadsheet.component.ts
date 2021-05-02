@@ -11,18 +11,34 @@ export class SubmissionSpreadsheetComponent {
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
   @Input()
-  inputValues = [{name: 'l[m]', value: '12'}, {name: 'a[m]', value: '16'}, {name: 'b[m]', value: '12'}, {name: 'h[m]', value: '18'}];
+  inputFields: string[][] = [];
 
+  _outputFields: string[] = [];
   @Input()
-  resultValues = [{name: 'm (Steigung der Tagente)'}, {name: 'x2 (Nullstelle)'}, {name: 'γ (3. Parameter von f(x))'},
-    {name: 'β (2. Parameter von f(x))'}, {name: 'm (Steigung von G(x))'}, {name: 'x0 (Nullstelle von f(x))'},
-    {name: 'd'}, {name: 'xD'}, {name: 'max. Durchgang'}];
+  set outputFields(outputFields: string[]) {
+    this._outputFields = outputFields;
+    this.resultForm = new FormGroup(this.outputFields.reduce((acc, val) => {
+      acc[val] = new FormControl('');
+      return acc;
+    }, {}));
+  }
 
-  resultForm = new FormGroup(this.resultValues.reduce((acc, val) => {acc[val.name] = new FormControl(''); return acc; }, {}));
+  get outputFields(): string[] {
+    return this._outputFields;
+  }
+  resultForm = new FormGroup({});
 
   constructor() { }
 
-  updateSubmission(event) {
-    this.update.emit({content: event});
+  updateSubmission() {
+    const enteredCount = Object.values(this.resultForm.value).reduce((acc: number, field: string) => {
+      if (field) {
+        acc++;
+      }
+      return acc;
+    }, 0);
+    const content = this.resultForm.value;
+    content['complete'] = enteredCount === this.outputFields.length;
+    this.update.emit({content});
   }
 }

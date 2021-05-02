@@ -8,5 +8,8 @@ export interface Task {
     idField: string;
     inputFields: string;
     outputFields: string;
+  } | {
+    inputs: string[][],
+    outputs: string[],
   };
 }

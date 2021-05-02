@@ -4,13 +4,15 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.RemoteCheckerService
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.checker.{CheckerServiceFactoryService, RemoteCheckerService}
+import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
-
 import java.nio.file.Files
 import java.time.Instant
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
@@ -31,7 +33,7 @@ class SubmissionController {
   @Autowired
   private val checkerConfigurationService: CheckerConfigurationService = null
   @Autowired
-  private val remoteCheckerService: RemoteCheckerService = null
+  private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
 
@@ -91,8 +93,10 @@ class SubmissionController {
             file.transferTo(tempDesc)
             val submission = submissionService.create(uid, tid)
             storageService.storeSolutionFile(submission.id, tempDesc)
-            checkerConfigurationService.getAll(cid, tid).foreach(cc =>
-              remoteCheckerService.notify(tid, submission.id, cc, user))
+            checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+              val checkerService = checkerServiceFactoryService(cc.checkerType)
+              checkerService.notify(tid, submission.id, cc, user)
+            })
             submission
 
           } else {
@@ -124,8 +128,10 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(_) =>
           submissionService.clearResults(sid, uid)
-          checkerConfigurationService.getAll(cid, tid).foreach(cc =>
-            remoteCheckerService.notify(tid, sid, cc, user))
+          checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+            val checkerService = checkerServiceFactoryService(cc.checkerType)
+            checkerService.notify(tid, sid, cc, user)
+          })
         case None => throw new ResourceNotFoundException()
       }
     } else {

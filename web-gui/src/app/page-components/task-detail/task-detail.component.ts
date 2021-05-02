@@ -113,9 +113,14 @@ export class TaskDetailComponent implements OnInit {
     if (!input) {
       return true;
     }
-    if ((<any>input).name) {
-      return (<File>input).size === 0;
-    } else {
+    if (typeof input === 'object') {
+      const inputObject = <any> input;
+      if (inputObject.name) {
+        return (<File>input).size === 0;
+      } else if (inputObject.complete !== undefined) {
+        return inputObject.complete === false;
+      }
+    } else if (typeof input === 'string') {
       return (<string>input).trim().length === 0;
     }
   }

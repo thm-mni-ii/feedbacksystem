@@ -25,7 +25,8 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id FROM task WHERE course_id = ?", (res, _) => parseResult(res), cid)
+    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id FROM task WHERE course_id = ?",
+      (res, _) => parseResult(res), cid)
 
   /**
     * Lookup task by id
@@ -74,7 +75,10 @@ class TaskService {
     */
   def delete(cid: Int, tid: Int): Boolean = 1 == DB.update("DELETE FROM task WHERE task_id = ? AND course_id = ?", tid, cid)
 
-  private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"), deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"), description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)), id = res.getInt("task_id"))
+  private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
+    deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),
+    description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
+    id = res.getInt("task_id"))
 
   private def parseTimestamp(timestamp: String): Timestamp = Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)))
 }

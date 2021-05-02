@@ -9,7 +9,15 @@ import org.json.JSONObject
   */
 abstract sealed class MediaInformation
 
+/**
+  * The companion object for MediaInformation
+  */
 object MediaInformation {
+  /**
+    * Gets a MediaInformation fromJSON
+    * @param json the JSON
+    * @return the MediaInformation
+    */
   def fromJSONString(json: String): MediaInformation = {
     val obj = new JSONObject(json)
     if (obj.getString("type") == "spreadsheetMediaInformation") {
@@ -18,6 +26,12 @@ object MediaInformation {
       throw new IllegalArgumentException()
     }
   }
+
+  /**
+    * Converts a MediaInformation to JSON
+    * @param obj The MediaInformation
+    * @return The JSON
+    */
   def toJSONString(obj: MediaInformation): String =
     obj match {
       case sobj: SpreadsheetMediaInformation =>
@@ -48,5 +62,10 @@ case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
                                        outputFields: String) extends MediaInformation
 
+/**
+  * The Spreadsheet Media Information
+  * @param inputs the inputs
+  * @param outputs the outputs
+  */
 case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String]) extends MediaInformation
 
