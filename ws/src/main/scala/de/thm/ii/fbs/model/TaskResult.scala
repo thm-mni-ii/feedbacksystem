@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
-
 /**
   * A summarized result of a student for a task
   *
