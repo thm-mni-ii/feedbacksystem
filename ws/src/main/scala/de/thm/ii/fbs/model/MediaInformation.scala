@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.model
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.json.JSONObject
 
 /**
@@ -59,6 +57,7 @@ object MediaInformation {
   * @param idField the idField
   * @param inputFields the inputFields
   * @param outputFields the outputFields
+  * @param decimals the amount of decimals to round to
   */
 case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
@@ -69,6 +68,7 @@ case class SpreadsheetMediaInformation(idField: String,
   * The Spreadsheet Media Information
   * @param inputs the inputs
   * @param outputs the outputs
+  * @param decimals the amount of decimals to round to
   */
 case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], decimals: Int) extends MediaInformation
 
