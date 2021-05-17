@@ -65,14 +65,14 @@ class TaskController {
     val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
       case Some(task) => task.mediaInformation match {
-        case Some(SpreadsheetMediaInformation(idField, inputFields, outputFields)) =>
+        case Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, decimals)) =>
           val config = this.checkerConfigurationService.getAll(cid, tid).head
           val path = this.storageService.pathToMainFile(config.id).get.toString
           val spreadsheetFile = new File(path)
           val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
           val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
           val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-          task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1))))
+          task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1), decimals)))
         case _ => task
       }
       case _ => throw new ResourceNotFoundException()
@@ -104,11 +104,12 @@ class TaskController {
         case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
-          mediaInformation.retrive("outputFields").asText()
+          mediaInformation.retrive("outputFields").asText(),
+          mediaInformation.retrive("decimals").asInt(),
         ) match {
-          case (Some(idField), Some(inputFields), Some(outputFields)) => taskService.create(cid,
+          case (Some(idField), Some(inputFields), Some(outputFields), Some(decimals)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields))))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")
         }
         case (Some(name), Some(deadline), Some(mediaType), desc, None) => taskService.create(cid,

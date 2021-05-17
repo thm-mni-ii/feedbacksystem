@@ -57,6 +57,9 @@
           <input matInput type="text" placeholder="Ergebniss Felder" formControlName="outputFields" required>
           <mat-icon matSuffix (click)="getFromSpreadsheet('outputFields')">search</mat-icon>
         </mat-form-field>
+        <mat-form-field class="col">
+          <input matInput type="number" placeholder="Nachkommastellen" formControlName="decimals" required>
+        </mat-form-field>
       </div>
       <br>
     </form>

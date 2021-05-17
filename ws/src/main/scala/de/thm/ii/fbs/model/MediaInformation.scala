@@ -21,7 +21,7 @@ object MediaInformation {
   def fromJSONString(json: String): MediaInformation = {
     val obj = new JSONObject(json)
     if (obj.getString("type") == "spreadsheetMediaInformation") {
-      SpreadsheetMediaInformation(obj.getString("idField"), obj.getString("inputFields"), obj.getString("outputFields"))
+      SpreadsheetMediaInformation(obj.getString("idField"), obj.getString("inputFields"), obj.getString("outputFields"), obj.getInt("decimals"))
     } else {
       throw new IllegalArgumentException()
     }
@@ -40,11 +40,13 @@ object MediaInformation {
           .put("idField", sobj.idField)
           .put("inputFields", sobj.inputFields)
           .put("outputFields", sobj.outputFields)
+          .put("decimals", sobj.decimals)
           .toString
       case sobj: SpreadsheetResponseInformation =>
         new JSONObject()
           .put("inputs", sobj.inputs)
           .put("outputs", sobj.outputs)
+          .put("decimals", sobj.decimals)
           .toString
       case _ =>
         throw new IllegalArgumentException()
@@ -60,12 +62,13 @@ object MediaInformation {
   */
 case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
-                                       outputFields: String) extends MediaInformation
+                                       outputFields: String,
+                                       decimals: Int) extends MediaInformation
 
 /**
   * The Spreadsheet Media Information
   * @param inputs the inputs
   * @param outputs the outputs
   */
-case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String]) extends MediaInformation
+case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], decimals: Int) extends MediaInformation
 

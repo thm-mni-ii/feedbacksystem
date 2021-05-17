@@ -8,8 +8,10 @@ export interface Task {
     idField: string;
     inputFields: string;
     outputFields: string;
+    decimals: number;
   } | {
     inputs: string[][],
     outputs: string[],
+    decimals: number,
   };
 }

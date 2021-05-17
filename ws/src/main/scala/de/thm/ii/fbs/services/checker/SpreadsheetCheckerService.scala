@@ -33,21 +33,21 @@ class SpreadsheetCheckerService extends CheckerService {
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     val task = this.taskService.getOne(taskID).get
+    val spreadsheetMediaInformation = task.mediaInformation.get.asInstanceOf[SpreadsheetMediaInformation]
     val submission = this.submissionService.getOne(submissionID, fu.id).get
 
-    val fields = this.getFields(cc.id, task.mediaInformation.get, fu.username)
+    val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username)
     val submittedFields = this.getSubmittedFields(submission.id)
 
-    val (exitCode, resulText) = this.check(fields, submittedFields)
+    val (exitCode, resulText) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
     submissionService.storeResult(submission.id, cc.id, exitCode, resulText, null)
   }
 
-  private def getFields(ccID: Int, mediaInformation: MediaInformation, username: String): Seq[(String, String)] = {
+  private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String): Seq[(String, String)] = {
     val path = this.storageService.pathToMainFile(ccID).get.toString
     val spreadsheetFile = new File(path)
 
-    val spreadsheetMediaInformation = mediaInformation.asInstanceOf[SpreadsheetMediaInformation]
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
     val fields = this.spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, spreadsheetMediaInformation.outputFields)
@@ -63,14 +63,14 @@ class SpreadsheetCheckerService extends CheckerService {
     resultFields
   }
 
-  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String]): (Int, String) = {
+  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, String) = {
     val result = new StringBuilder()
     var correctCount = 0
 
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
       result ++= key + " = " + enteredValue
-      if (roundIfNumber(enteredValue) == roundIfNumber(value)) {
+      if (roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
         result ++= " RICHTIG"
         correctCount += 1
       } else {
@@ -84,9 +84,9 @@ class SpreadsheetCheckerService extends CheckerService {
     (exitCode, result.toString())
   }
 
-  private def roundIfNumber(input: String): String = {
+  private def roundIfNumber(input: String, toDecimals: Int): String = {
     input.toDoubleOption match {
-      case Some(double) => BigDecimal(double).setScale(2, BigDecimal.RoundingMode.HALF_UP).toString()
+      case Some(double) => BigDecimal(double).setScale(toDecimals, BigDecimal.RoundingMode.HALF_UP).toString()
       case None => input
     }
   }

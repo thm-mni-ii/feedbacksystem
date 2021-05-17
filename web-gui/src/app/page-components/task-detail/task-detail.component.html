@@ -36,6 +36,7 @@
         <app-submission-spreadsheet *ngIf="submissionTypeOfTask() == 'spreadsheet'" (update)="updateSubmissionContent($event)"
                                     [inputFields]="task.mediaInformation.inputs"
                                     [outputFields]="task.mediaInformation.outputs"
+                                    [decimals]="task.mediaInformation.decimals"
         ></app-submission-spreadsheet>
       </div>
 

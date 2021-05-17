@@ -30,6 +30,7 @@ export class TaskNewDialogComponent implements OnInit {
     userIDField: new FormControl(''),
     inputFields: new FormControl(''),
     outputFields: new FormControl(''),
+    decimals: new FormControl(2),
   });
 
   isUpdate: boolean;
@@ -79,6 +80,7 @@ export class TaskNewDialogComponent implements OnInit {
         idField: this.taskForm.get('userIDField').value,
         inputFields: this.taskForm.get('inputFields').value,
         outputFields: this.taskForm.get('outputFields').value,
+        decimals: this.taskForm.get('decimals').value,
       };
     }
   }

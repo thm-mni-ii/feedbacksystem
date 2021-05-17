@@ -26,6 +26,8 @@ export class SubmissionSpreadsheetComponent {
   get outputFields(): string[] {
     return this._outputFields;
   }
+  @Input()
+  decimals: number;
   resultForm = new FormGroup({});
 
   constructor() { }
