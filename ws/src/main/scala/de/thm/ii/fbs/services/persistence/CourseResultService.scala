@@ -39,27 +39,27 @@ class CourseResultService {
     |                                                    "deadline", t.deadline,
     |                                                    "mediaType", t.media_type,
     |                                                    "description", t.description),
-    |                                                    "attempts", coalesce(submissions.attempts, 0),
-    |                                                    "passed", coalesce(submissions.passed, 0)
+    |                                "attempts", coalesce(submissions.attempts, 0),
+    |                                "passed", coalesce(submissions.passed, 0)
     |    )) as results
-    |     ,IF(sum(passed) = count(distinct t.task_id), 1, 0) as passed
+    |     ,IF(sum(submissions.passed) = count(distinct t.task_id), 1, 0) as passed
     |from user u
     |         left join user_course uc using (user_id)
     |         inner join task t using (course_id)
     |         left join (
-    |            select uts.user_id
-    |                 ,uts.task_id
-    |                 ,count(distinct uts.submission_id) as attempts
-    |                 ,max(IF(cr.exit_code = 0, 1, 0)) as passed
-    |            from user_task_submission uts
-    |                     left join checkrunner_configuration cc using (task_id)
-    |                     left join checker_result cr using (submission_id, configuration_id)
-    |            group by uts.user_id, uts.task_id
-    |            order by uts.task_id
+    |    select uts.user_id
+    |         ,uts.task_id
+    |         ,count(distinct uts.submission_id) as attempts
+    |         ,FLOOR(SUM(IF(cr.exit_code = 0, 1, 0)) / COUNT(cr.exit_code)) as passed
+    |    from user_task_submission uts
+    |             left join checkrunner_configuration cc using (task_id)
+    |             left join checker_result cr using (submission_id, configuration_id)
+    |    group by uts.user_id, uts.task_id
+    |    order by uts.task_id
     |) as submissions using (user_id, task_id)
     |where course_id = ?
     |group by u.user_id
-    |order by u.user_id, t.task_id;
+    |order by u.user_id;
     |""".stripMargin, (res, _) => parseResult(res), cid)
 
   private def parseResult(res: ResultSet): CourseResult = CourseResult(
