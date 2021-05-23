@@ -52,13 +52,7 @@ class CourseResultService {
     |         ,count(distinct uts.submission_id) as attempts
     |         ,FLOOR(SUM(IF(cr.exit_code = 0, 1, 0)) / COUNT(distinct cr.configuration_id)) as passed
     |    from user_task_submission uts
-    |        left join checkrunner_configuration cc using (task_id)
-    |        left join checker_result cr using (submission_id, configuration_id)
-    |        inner join (select cr.configuration_id, max(cr.submission_id) as submission_id
-    |                      from checker_result cr
-    |                  group by cr.submission_id, cr.configuration_id) as maxSubs
-    |            on maxSubs.submission_id = cr.submission_id and maxSubs.configuration_id = cr.configuration_id
-    |
+    |        left join checker_result cr using (submission_id)
     |    group by uts.user_id, uts.task_id
     |    order by uts.task_id
     |) as submissions using (user_id, task_id)
