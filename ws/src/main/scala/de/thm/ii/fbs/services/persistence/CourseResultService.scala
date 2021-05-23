@@ -26,7 +26,7 @@ class CourseResultService {
     * @param cid Course id
     * @return all Course Results
     */
-  def getAll(cid: Int): List[CourseResult] = DB.query("""
+def getAll(cid: Int): List[CourseResult] = DB.query("""
     |select u.user_id
     |     ,u.prename
     |     ,u.surname
@@ -42,20 +42,27 @@ class CourseResultService {
     |                                "attempts", coalesce(submissions.attempts, 0),
     |                                "passed", coalesce(submissions.passed, 0)
     |    )) as results
-    |     ,IF(sum(submissions.passed) = count(distinct t.task_id), 1, 0) as passed
+    |     ,COALESCE(FLOOR(SUM(submissions.passed) / COUNT(DISTINCT t.task_id)), 0) as passed
     |from user u
     |         left join user_course uc using (user_id)
-    |         inner join task t using (course_id)
+    |         left join task t using (course_id)
     |         left join (
-    |    select uts.user_id
-    |         ,uts.task_id
-    |         ,count(distinct uts.submission_id) as attempts
-    |         ,FLOOR(SUM(IF(cr.exit_code = 0, 1, 0)) / COUNT(distinct cr.configuration_id)) as passed
-    |    from user_task_submission uts
-    |        left join checker_result cr using (submission_id)
-    |    group by uts.user_id, uts.task_id
-    |    order by uts.task_id
-    |) as submissions using (user_id, task_id)
+    |             select temp.user_id
+    |                   ,temp.task_id
+    |                   ,count(distinct temp.submission_id) as attempts
+    |                   ,max(temp.passed) as passed
+    |             from (
+    |                select uts.user_id
+    |                      ,uts.task_id
+    |                      ,uts.submission_id
+    |                      ,IF(SUM(cr.exit_code) = 0, 1, 0) as passed
+    |                from user_task_submission uts
+    |                left join checker_result cr using (submission_id)
+    |                group by uts.user_id, uts.task_id, uts.submission_id
+    |                order by uts.user_id
+    |             ) as temp
+    |             group by temp.user_id, temp.task_id
+    |         ) as submissions using (user_id, task_id)
     |where course_id = ?
     |group by u.user_id
     |order by u.user_id;
