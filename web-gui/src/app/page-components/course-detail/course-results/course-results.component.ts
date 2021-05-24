@@ -12,6 +12,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {TaskPointsService} from '../../../service/task-points.service';
 import {Requirement} from '../../../model/Requirement';
 import {RequirementCourseResult} from '../../../model/RequirementCourseResult';
+import {EvaluationUserResults} from '../../../model/EvaluationUserResults';
 
 /**
  * Matrix for every course docent a has
@@ -32,27 +33,20 @@ export class CourseResultsComponent implements OnInit {
   courseResults: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
   requirements: Observable<Requirement[]> = of();
-  requirementResults: Observable<RequirementCourseResult[]> = of();
+  evaluationUserResults: Observable<EvaluationUserResults[]> = of();
   requirementTaskNames: void;
   allBonusPoints: Observable<Number[]>;
   courseBonusPoints = 0;
-  showDetails: boolean;
-  opened = -1;
+  results;
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
     this.route.params.subscribe(param => {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
-      this.requirementResults = this.courseResultService.getRequirementResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
       this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
       // this.requirementTaskNames = this.requirements.pipe(map(bp => bp[0].tasks.map(task => task.name)));
-      this.requirementResultData = this.courseResultService.getRequirementResultData(this.courseId);
-      console.log('reqs: ');
-      this.requirements.subscribe(req => console.log(req));
-      console.log('EvalCOntResults: ');
-      this.requirementResults.subscribe(reqRes => console.log(reqRes));
     });
     // TODO: material progress spinner (cause the page might load for a while)
   }
@@ -83,15 +77,5 @@ export class CourseResultsComponent implements OnInit {
     // TODO: show results
   }
 
-  toggleDetails(item: number) {
-    // Only opens clicked category
-    if (this.opened === 0) {
-      this.opened = -1;
-    } else if ((this.opened > 0) && (this.opened === this.opened)) {
-      this.opened = this.opened - (this.opened + 1);
-    } else {
-      this.opened = item;
-    }
-    // this.showDetails = !this.showDetails;
-  }
+
 }

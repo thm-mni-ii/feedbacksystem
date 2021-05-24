@@ -76,6 +76,7 @@ import { ReversePipe } from './pipes/reverse.pipe';
 import { TaskPointsDialogComponent } from './dialogs/task-points-dialog/task-points-dialog.component';
 import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
+import { EvaluationResultsComponent } from './page-components/course-detail/course-results/evaluation-results/evaluation-results.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -150,6 +151,7 @@ export const httpInterceptorProviders = [
     GoToComponent,
     GotoLinksDialogComponent,
     TaskPointsDialogComponent,
+    EvaluationResultsComponent,
   ],
   imports: [
     BrowserModule,

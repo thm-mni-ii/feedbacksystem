@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {CourseResult} from '../model/CourseResult';
 import {RequirementCourseResult} from '../model/RequirementCourseResult';
+import {EvaluationUserResults} from '../model/EvaluationUserResults';
 
 @Injectable({
   providedIn: 'root'
@@ -39,8 +40,8 @@ export class CourseResultsService {
    * @param cid Course id
    * @return All category results
    */
-  getRequirementResults(cid: number): Observable<RequirementCourseResult[]> {
-    return this.http.get<RequirementCourseResult[]>(`/api/v1/courses/${cid}/evaluation/results`);
+  getRequirementCourseResults(cid: number): Observable<EvaluationUserResults[]> {
+    return this.http.get<EvaluationUserResults[]>(`/api/v1/courses/${cid}/evaluation/results`);
   }
 
   /**
