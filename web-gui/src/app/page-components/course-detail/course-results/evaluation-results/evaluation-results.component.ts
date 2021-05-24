@@ -36,10 +36,8 @@ export class EvaluationResultsComponent implements OnInit {
 
   toggleDetails(item: number) {
     // Only opens clicked category
-    if (this.opened === 0) {
+    if (this.opened === item) {
       this.opened = -1;
-    } else if ((this.opened > 0) && (this.opened === this.opened)) {
-      this.opened = this.opened - (this.opened + 1);
     } else {
       this.opened = item;
     }
