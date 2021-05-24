@@ -4,7 +4,7 @@ import java.util.Date
 
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.{CourseRole, User}
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

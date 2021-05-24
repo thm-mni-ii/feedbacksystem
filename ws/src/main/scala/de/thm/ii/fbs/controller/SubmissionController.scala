@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.RemoteCheckerService
-import de.thm.ii.fbs.services.persistance._
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._

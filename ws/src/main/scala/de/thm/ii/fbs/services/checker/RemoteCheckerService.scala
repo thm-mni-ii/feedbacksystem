@@ -4,7 +4,7 @@ import java.nio.file.Path
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.CheckrunnerConfiguration
-import de.thm.ii.fbs.services.persistance.StorageService
+import de.thm.ii.fbs.services.persistence.StorageService
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service

@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.security
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor

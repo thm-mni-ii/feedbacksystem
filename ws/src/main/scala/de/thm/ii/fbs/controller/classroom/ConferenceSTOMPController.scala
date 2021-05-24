@@ -7,7 +7,7 @@ import de.thm.ii.fbs.model.CourseRole
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap}
 import de.thm.ii.fbs.services.conferences.conference.Conference
 import de.thm.ii.fbs.services.conferences.{BBBService, ConferenceServiceFactoryService, JitsiService}
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.{AuthService, CourseAuthService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}

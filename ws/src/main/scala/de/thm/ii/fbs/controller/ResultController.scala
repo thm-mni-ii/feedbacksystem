@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.services.persistance.SubmissionService
+import de.thm.ii.fbs.services.persistence.SubmissionService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._

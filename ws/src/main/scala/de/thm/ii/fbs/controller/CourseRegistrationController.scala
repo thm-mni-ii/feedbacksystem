@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole, Participant}
-import de.thm.ii.fbs.services.persistance.CourseRegistrationService
+import de.thm.ii.fbs.services.persistence.CourseRegistrationService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

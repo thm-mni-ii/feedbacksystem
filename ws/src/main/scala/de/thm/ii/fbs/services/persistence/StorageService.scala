@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.persistance
+package de.thm.ii.fbs.services.persistence
 
 import java.io.IOException
 import java.nio.file._

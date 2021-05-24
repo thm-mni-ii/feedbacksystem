@@ -5,7 +5,7 @@ import java.security.Principal
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap, UserSessionMap}
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import org.json.JSONArray
 import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
