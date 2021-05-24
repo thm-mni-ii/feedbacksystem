@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult, CourseRole, GlobalRole, TaskResult}
 import de.thm.ii.fbs.services.evaluation.EvaluationResultService
-import de.thm.ii.fbs.services.persistance.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

@@ -6,7 +6,7 @@ import java.nio.file.{Files, Path}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CourseRegistrationService, StorageService}
+import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}

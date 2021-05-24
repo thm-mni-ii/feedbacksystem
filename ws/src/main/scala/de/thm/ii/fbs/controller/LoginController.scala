@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.{GlobalRole, User}
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import de.thm.ii.fbs.util.LDAPConnector

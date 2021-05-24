@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller.classroom
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.classroom.{Ticket, Tickets}
 import de.thm.ii.fbs.model.{User, classroom}
-import de.thm.ii.fbs.services.persistance.UserService
+import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.CourseAuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.json.{JSONArray, JSONObject}
