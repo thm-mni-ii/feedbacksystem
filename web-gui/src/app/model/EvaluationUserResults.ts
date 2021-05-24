@@ -5,5 +5,5 @@ export interface EvaluationUserResults {
   user: User;
   bonusPoints: number;
   passed: boolean;
-  containerResults: EvaluationContainerResults[];
+  results: EvaluationContainerResults[];
 }

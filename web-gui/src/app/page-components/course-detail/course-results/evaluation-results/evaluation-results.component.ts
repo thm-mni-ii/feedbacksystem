@@ -15,12 +15,11 @@ import {EvaluationContainerResult} from "../../../../model/EvaluationContainerRe
 export class EvaluationResultsComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;
 
-  evaluationUserResults: Observable<EvaluationUserResults[]> = of();
-  courseResults: Observable<CourseResult[]> = of();
+  evaluationUserResults: Observable<EvaluationUserResults[]>;
+  courseResults: Observable<CourseResult[]>;
   courseId: number;
   showDetails: boolean;
   opened = -1;
-  containers: EvaluationContainerResult[] = [];
   log(val) { console.log(val); }
 
   constructor(private route: ActivatedRoute,
@@ -31,8 +30,6 @@ export class EvaluationResultsComponent implements OnInit {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
       this.evaluationUserResults = this.courseResultService.getRequirementCourseResults(this.courseId);
-      this.evaluationUserResults.subscribe(results => console.log(results));
-      this.evaluationUserResults.subscribe(results => results[0].containerResults.forEach(r => this.containers.push(r.container)));
     });
 
   }

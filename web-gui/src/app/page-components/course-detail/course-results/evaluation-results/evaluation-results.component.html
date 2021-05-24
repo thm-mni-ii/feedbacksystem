@@ -64,10 +64,11 @@
                        <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
                 </span>
         <ng-container class="ngContainer" *ngIf="opened === requirement.id">
-          <div *ngFor="let userResults of containers">
-            {{ userResults }}
-          </div>
+          <ng-container *ngFor="let container of result.results">
+            {{ container.container.id }}
+          </ng-container>
         </ng-container>
+
           <!--<ng-container class="ngContainer" *ngIf="opened === requirement.id">
             <ng-container *ngFor="let userResults of evaluationUserResults | async">
                    <span class="task-container" *ngFor="let containerResult of userResults.containerResults">
