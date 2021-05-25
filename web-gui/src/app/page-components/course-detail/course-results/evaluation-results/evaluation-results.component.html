@@ -45,15 +45,13 @@
         <div class="task-result">
           <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ requirement.id }} &#9660; <!--&dArr; --></span>
           <span class="title">Bonus</span>
-          <ng-container *ngIf="showDetails">
-            <span class="title" *ngFor="let reqRes of evaluationUserResults | async"><!--{{ reqRes.results }}--></span>
+          <!-- Not showing when showDetails is true -->
+          <ng-container *ngIf="!showDetails">
+            <span class="category-tasks" *ngFor="let task of requirement.tasks">
+              <span class="title">{{task.name}}</span>
+            </span>
           </ng-container>
         </div>
-        <ng-container *ngIf="showDetails">
-              <span class="category-tasks" *ngFor="let task of requirement.tasks">
-                <span class="title">{{task.name}}</span>
-              </span>
-        </ng-container>
       </div>
       <div class="task-container" *ngFor="let result of evaluationUserResults | async">
           <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
@@ -64,8 +62,15 @@
                        <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
                 </span>
         <ng-container class="ngContainer" *ngIf="opened === requirement.id">
-          <ng-container *ngFor="let container of result.results">
+          <ng-container class="task-container" *ngFor="let container of result.results; let j = index">
             {{ container.container.id }}
+              <span class="task-result-backpane {{(container.bonusPoints == 0) ? 'not-tried' : (container.bonusPoints) ? '' : 'failed-task'}}"
+                                 matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{container.passed}} {{ container.container.tasks[0].attempts }} {{ container.container.tasks[0].task.name }}">
+<!--                        <span *ngIf="taskResult.attempts!=0">{{taskResult.attempts}}</span>-->
+                <span>-</span>
+              </span>
+            <span class="task-result-backpane">{{ container.container.toPass }}</span>
+            <span class="task-result-backpane">{{ container.container.tasks[0].id }}</span>
           </ng-container>
         </ng-container>
 
