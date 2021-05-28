@@ -1,8 +1,8 @@
-import {Task} from './Task';
+import {EvaluationTask} from './EvaluationTask';
 
 export interface EvaluationContainerResult {
   id: number;
-  tasks: Task[]; // new Type TaskResult needed: { attempts: number; passed: boolean; task: Task }
+  tasks: EvaluationTask[];
   toPass: number;
   bonusFormula: string;
   hidePoints: boolean;

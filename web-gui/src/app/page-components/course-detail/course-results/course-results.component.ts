@@ -11,7 +11,6 @@ import {AllSubmissionsComponent} from '../../../dialogs/all-submissions/all-subm
 import {MatDialog} from '@angular/material/dialog';
 import {TaskPointsService} from '../../../service/task-points.service';
 import {Requirement} from '../../../model/Requirement';
-import {RequirementCourseResult} from '../../../model/RequirementCourseResult';
 import {EvaluationUserResults} from '../../../model/EvaluationUserResults';
 
 /**
@@ -23,8 +22,6 @@ import {EvaluationUserResults} from '../../../model/EvaluationUserResults';
   styleUrls: ['./course-results.component.scss'],
 })
 export class CourseResultsComponent implements OnInit {
-  // tslint:disable-next-line:max-line-length
-  requirementResultData: { hidePoints: boolean; toPass: number; bonusFormula: number; id: number; tasks: { task: { name: string; mediaType: string; deadline: string }; passed: boolean; attempts: number } }[];
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
               private route: ActivatedRoute, private submissionService: SubmissionService,

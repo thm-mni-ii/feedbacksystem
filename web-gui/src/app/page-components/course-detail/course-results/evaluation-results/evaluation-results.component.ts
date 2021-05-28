@@ -46,4 +46,8 @@ export class EvaluationResultsComponent implements OnInit {
     // this.showDetails = !this.showDetails;
   }
 
+  /*filterContainer(reqId: number) {
+    return this.evaluationUserResults.subscribe(result => )
+  }*/
+
 }
