@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
 @Component({
@@ -6,28 +6,20 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
   templateUrl: './submission-spreadsheet.component.html',
   styleUrls: ['./submission-spreadsheet.component.scss']
 })
-export class SubmissionSpreadsheetComponent {
+export class SubmissionSpreadsheetComponent implements OnChanges {
   toSubmit = '';
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
   @Input()
   inputFields: string[][] = [];
 
-  _outputFields: string[] = [];
   @Input()
-  set outputFields(outputFields: string[]) {
-    this._outputFields = outputFields;
-    this.resultForm = new FormGroup(this.outputFields.reduce((acc, val) => {
-      acc[val] = new FormControl('');
-      return acc;
-    }, {}));
-  }
+  outputFields: string[] = [];
+  @Input()
+  decimals: number = 2;
+  @Input()
+  content: object = {};
 
-  get outputFields(): string[] {
-    return this._outputFields;
-  }
-  @Input()
-  decimals: number;
   resultForm = new FormGroup({});
 
   constructor() { }
@@ -40,7 +32,18 @@ export class SubmissionSpreadsheetComponent {
       return acc;
     }, 0);
     const content = this.resultForm.value;
-    content['complete'] = enteredCount === this.outputFields.length;
+    content['complete'] = this.outputFields.length > 0;
     this.update.emit({content});
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    for (const propName in changes) {
+      if (propName === 'outputFields' || propName === 'content') {
+        this.resultForm = new FormGroup(this.outputFields.reduce((acc, val) => {
+          acc[val] = new FormControl(this.content[val] ?? '');
+          return acc;
+        }, {}));
+      }
+    }
   }
 }

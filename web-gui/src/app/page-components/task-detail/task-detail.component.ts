@@ -37,6 +37,13 @@ export class TaskDetailComponent implements OnInit {
 
   deadlinePassed = false;
 
+  get latestResult() {
+    if (this.submissions?.length > 0) {
+      const submission = this.submissions[this.submissions.length - 1];
+      return submission.results[submission.results.length - 1];
+    }
+  }
+
   constructor(private route: ActivatedRoute, private titlebar: TitlebarService, private dialog: MatDialog,
               private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, private taskService: TaskService, private courseService: CourseService,

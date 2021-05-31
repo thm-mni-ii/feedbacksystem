@@ -31,6 +31,9 @@ export class ResultsComponent {
   @Input() displayTables: boolean;
 
   display(submission: Submission) {
+    if (submission === undefined) {
+      return;
+    }
     this.displayedSubmission = submission;
     this.dataSource.data = submission.results;
 

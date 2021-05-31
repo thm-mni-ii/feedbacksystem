@@ -34,9 +34,10 @@
         <app-submission-file *ngIf="submissionTypeOfTask() == 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>
         <app-submission-text *ngIf="submissionTypeOfTask() == 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
         <app-submission-spreadsheet *ngIf="submissionTypeOfTask() == 'spreadsheet'" (update)="updateSubmissionContent($event)"
-                                    [inputFields]="task.mediaInformation.inputs"
-                                    [outputFields]="task.mediaInformation.outputs"
-                                    [decimals]="task.mediaInformation.decimals"
+                                    [inputFields]="task?.mediaInformation.inputs || []"
+                                    [outputFields]="task?.mediaInformation.outputs || []"
+                                    [decimals]="task?.mediaInformation.decimals || 2"
+                                    [content]="latestResult?.extInfo || {}"
         ></app-submission-spreadsheet>
       </div>
 

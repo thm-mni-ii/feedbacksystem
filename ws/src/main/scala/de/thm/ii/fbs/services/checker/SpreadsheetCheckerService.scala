@@ -41,7 +41,8 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val (exitCode, resulText) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
-    submissionService.storeResult(submission.id, cc.id, exitCode, resulText, null)
+    val extInfo = new JsonMapper().writeValueAsString(submittedFields)
+    submissionService.storeResult(submission.id, cc.id, exitCode, resulText, extInfo)
   }
 
   private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String): Seq[(String, String)] = {
@@ -69,12 +70,16 @@ class SpreadsheetCheckerService extends CheckerService {
 
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
-      result ++= key + " = " + enteredValue
-      if (roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
-        result ++= " RICHTIG"
-        correctCount += 1
+      if (enteredValue == null || enteredValue == "") {
+        result ++= key + " Keine Abgabe"
       } else {
-        result ++= " FALSCH"
+        result ++= key + " = " + enteredValue
+        if (enteredValue != null && roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
+          result ++= " RICHTIG"
+          correctCount += 1
+        } else {
+          result ++= " FALSCH"
+        }
       }
       result ++= "\n"
     }

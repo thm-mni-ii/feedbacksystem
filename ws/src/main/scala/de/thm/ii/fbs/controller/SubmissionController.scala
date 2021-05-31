@@ -51,13 +51,14 @@ class SubmissionController {
   def getAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
              req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
     val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
     val privileged = user.id == uid || adminPrivileged
 
     if (privileged) {
-      submissionService.getAll(uid, cid, tid, adminPrivileged)
+      submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
     } else {
       throw new ForbiddenException()
     }
