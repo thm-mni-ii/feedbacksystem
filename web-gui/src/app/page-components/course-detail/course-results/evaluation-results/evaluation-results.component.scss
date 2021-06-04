@@ -1,4 +1,4 @@
-@import '../../../../colors';
+@import '../../../../../colors';
 
 .container {
   display: block;
@@ -8,10 +8,6 @@
     margin-top: 32px;
     display: block;
   }
-
-  .username {
-    margin-left: 8px;
-  }
 }
 
 .card {
@@ -19,7 +15,6 @@
   flex-direction: row;
 
   .name-column {
-    flex-grow: 1;
     display: block;
   }
   .title {
@@ -27,11 +22,10 @@
     text-align: left;
   }
   .task-column {
-    flex-grow: 5;
+    margin: 0 1vh;
   }
   .bonus-column {
-    flex-grow: 0;
-    width: auto;
+    margin-right: -20px;
   }
   .task-container {
     display: flex;
@@ -85,9 +79,9 @@
   width: 24px;
   height: 24px;
 }
-.task-container > .state {
+/*.task-container > .state {
   margin-right: 1vw;
-}
+}*/
 
 .category-bonus {
   width: 30px;
@@ -106,7 +100,10 @@
 }
 
 .failed {
+  //background: $red;
   color: $red;
+  border-radius: 100%;
+  //transform: rotate(45deg);
 }
 
 .name-container, .bonus-container {
@@ -127,7 +124,7 @@
 }
 
 .task-result-backpane {
-  width: 100%;
+  width: 30px;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -149,7 +146,7 @@
 .failed-task {
   background-color: $red;
   color: white;
-  font-size: small;
+  font-size: smaller;
 }
 
 .not-tried {

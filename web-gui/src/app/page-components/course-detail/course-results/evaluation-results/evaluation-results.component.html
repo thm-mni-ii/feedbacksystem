@@ -1,0 +1,76 @@
+<mat-card class="content-container">
+  <!--    <div class="card-options">-->
+  <!--      <div class="actions">-->
+  <!--        <span class="lb">Download: </span>-->
+  <!--        <button (click)="downloadResults()">Click</button>-->
+  <!--     </div>-->
+
+  <!--      <mat-paginator [length]="userlength"-->
+  <!--                     [pageSize]="limit"-->
+  <!--                     [pageSizeOptions]="[5, 10, 20, 50, 100]"-->
+  <!--                     (page)="pageEvent($event)">-->
+  <!--      </mat-paginator>-->
+  <!--    </div>-->
+  <div class="card">
+    <div class="bonus-column">
+      <div class="task-container header">
+        <div class="task-result">
+          <span class="title">Kurs-Bonus</span>
+        </div>
+      </div>
+      <div class="bonus-container" *ngFor="let result of evaluationUserResults | async">
+              <span class="category-result-backpane" matTooltipPosition="above"
+                    matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
+                       <span class="category-bonus bonus" *ngIf="result.bonusPoints==0">{{ result.bonusPoints }}</span>
+                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
+                </span>
+      </div>
+    </div>
+    <div class="name-column">
+      <div class="task-container header">
+        <div class="task-result">
+          <span class="title">Kurs-Status</span>
+          <h2 class="title">Namen</h2>
+        </div>
+      </div>
+      <div class="name-container" *ngFor="let result of courseResults | async">
+        <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
+        <span class="state failed" *ngIf="!result.passed"><mat-icon>cancel</mat-icon></span>&nbsp;
+        <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
+      </div>
+    </div>
+
+    <div class="task-column" *ngFor="let requirement of requirements | async; index as i">
+      <div class="task-container header">
+        <div class="task-result">
+          <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ requirement.id }} &#9660; <!--&dArr; --></span>
+          <span class="title">Bonus</span>
+          <!-- Not showing when showDetails is true -->
+          <ng-container *ngIf="opened === requirement.id">
+            <span class="category-tasks" *ngFor="let task of requirement.tasks">
+              <span class="title">{{task.name}}</span>
+            </span>
+          </ng-container>
+        </div>
+      </div>
+      <div class="task-container" *ngFor="let userResult of evaluationUserResults | async">
+          <span class="state passed" *ngIf="userResult.passed"><mat-icon>check_circle</mat-icon></span>
+          <span class="state failed" *ngIf="!userResult.passed"><mat-icon class="close-icon">cancel</mat-icon></span>
+          <span class="category-result-backpane" matTooltipPosition="above"
+                matTooltip="{{userResult.user.surname}}, {{userResult.user.prename}}, {{userResult.bonusPoints}}">
+             <span class="category-bonus bonus" *ngIf="userResult.bonusPoints==0">{{ userResult.bonusPoints }}</span>
+             <span class="category-bonus no-bonus" *ngIf="userResult.bonusPoints!=0">-</span>
+          </span>
+          <ng-container class="task-container" *ngIf="opened === requirement.id">
+            <ng-container class="task-result" *ngFor="let taskResult of userResult.results[i].container.tasks">
+                <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
+                                   matTooltipPosition="above" matTooltip="{{ userResult.user.surname }}, {{ userResult.user.prename }} {{ taskResult.attempts }}">
+                  <span *ngIf="taskResult.attempts!=0">{{ taskResult.attempts }}</span>
+                  <span *ngIf="taskResult.attempts == 0">-</span>
+                </span>
+            </ng-container>
+          </ng-container>
+        </div>
+    </div>
+  </div>
+</mat-card>

@@ -50,6 +50,7 @@
     justify-content: center;
     .mat-icon {
       height: 25px;
+      color: #333333;
     }
   }
   span {
@@ -58,6 +59,7 @@
   }
   .mat-icon {
     cursor: pointer;
+    color: #333333;
   }
 }
 
@@ -113,7 +115,7 @@
   margin-top: 16px;
 }
 
-.task-list {
+.task-item {
   display: block;
   margin-top: 16px;
   margin-bottom: 30px;

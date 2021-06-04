@@ -1,0 +1,149 @@
+.mat-dialog-content {
+  overflow: visible;
+}
+
+#task-points-title {
+  margin: 0;
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  .task-box {
+    width: 54%;
+  }
+  .category-box {
+    width: 44%
+  }
+}
+
+.flex-item {
+  padding: 0;
+  height: 100%;
+  margin-top: 1rem;
+
+  .task-item {
+    margin: 0 1rem;
+    border: 2px #ccc;
+    min-height: 50px;
+    max-height: 100%;
+    width: 37%;
+    background: white;
+    border-radius: 4px;
+    justify-content: space-between;
+  }
+}
+
+.scroll-box {
+  display: flex;
+  flex-flow: row wrap;
+  margin-top: 1rem;
+  overflow: scroll;
+  overflow-x: hidden; //horizontal
+  height: 55vh;
+  align-content: flex-start;
+}
+
+/***** MAT TAB GROUP *****/
+.mat-tab-label {
+  align-content: baseline;
+}
+
+.close-icon {
+  font-size: 14pt;
+  height: inherit;
+  align-self: baseline;
+}
+
+/***** MAT INPUT *****/
+.pointInputList {
+  overflow: hidden;
+  padding: 2rem 0;
+}
+
+.mat-input-element {
+  width: 90%;
+}
+.mat-list-item {
+  margin-bottom: 1rem;
+}
+
+.mat-list-item-content {
+  justify-content: space-between;
+}
+
+/***** BONUS FORMULA *****/
+.bonus-formula-info {
+  color: #333333;
+}
+
+.invalid  {
+  color: red;
+}
+
+.valid {
+  color: green;
+}
+
+.mat-btn-element {
+  padding: 0;
+  color: #f44336;
+  background-color: inherit;
+  width: auto;
+}
+
+
+
+/***** FOOTER *****/
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    margin-left: 16px;
+  }
+  align-self: flex-end;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.toggle-box {
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+/***** TASKS *****/
+.card {
+  margin: 8px 0;
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+.card:hover {
+  background-color: #e9e9ee;
+  cursor: pointer;
+}
+
+.selected {
+  background-color: #c5d9e3;
+}
+
+.selected:hover {
+  background-color: #bad1dd;
+}

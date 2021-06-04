@@ -7,4 +7,4 @@ package de.thm.ii.fbs.model
   * @param bonusPoints earned bonus points
   * @param results Evaluation Container with results
   */
-case class  CourseEvaluationResult(user: User, passed: Boolean, bonusPoints: Int, results: List[EvaluationContainerResult])
+case class EvaluationUserResult(user: User, passed: Boolean, bonusPoints: Int, results: List[EvaluationContainerResult])

@@ -2,54 +2,60 @@
   <app-menu-bar>
     <button mat-icon-button [routerLink]="['/', 'courses', courseId]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
     <span class="spacer"></span>
-<!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
+    <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
+  <mat-list role="list" class="legend">
+    <mat-list-item role="listitem">
+      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;<small>Kurs bestanden</small>
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <mat-icon class="state failed">cancel</mat-icon>&nbsp;<small>Kurs nicht bestanden</small>
+    </mat-list-item>
+    <mat-list-item role="listitem">
+      <span class="task-result"><span class="task-result-example">n</span></span>&nbsp;<small>Nicht bestanden</small>
+    </mat-list-item>
+    <mat-list-item role="listitem"><small> - &nbsp;Nicht bearbeitet</small></mat-list-item>
+    <mat-list-item role="listitem"><!-- &#060;Zahl&#062;-->n &nbsp;<small>Bestanden</small></mat-list-item>
+  </mat-list>
 
-  <mat-card class="content-container">
-    <mat-list role="list" class="legend">
-      <mat-list-item role="listitem">
-        <mat-icon class="state passed">check_circle</mat-icon>: Kurs bestanden
-      </mat-list-item>
-      <mat-list-item role="listitem">
-        <mat-icon class="state failed">add_circle</mat-icon>: Kurs nicht bestanden
-      </mat-list-item>
-      <mat-list-item role="listitem">3 : Aufgabe bestanden</mat-list-item>
-      <mat-list-item role="listitem">- : Aufgabe nicht bearbeitet</mat-list-item>
-      <mat-list-item role="listitem">
-        <span class="task-result"><span class="task-result-example">4</span></span>: Aufgabe nicht bestanden
-      </mat-list-item>
-    </mat-list>
-<!--    <div class="card-options">-->
-<!--      <div class="actions">-->
-<!--        <span class="lb">Download: </span>-->
-<!--        <button (click)="downloadResults()">Click</button>-->
-<!--     </div>-->
+  <mat-tab-group>
+    <ng-container *ngIf="requirements | async; let list">
+      <mat-tab label="Kategorien" *ngIf="list.length>0">
+        <app-evaluation-results [requirements]="requirements"></app-evaluation-results>
+      </mat-tab>
+    </ng-container>
+    <mat-tab label="Alle Aufgaben">
+      <mat-card class="content-container">
+      <!--    <div class="card-options">-->
+      <!--      <div class="actions">-->
+      <!--        <span class="lb">Download: </span>-->
+      <!--        <button (click)="downloadResults()">Click</button>-->
+      <!--     </div>-->
 
-<!--      <mat-paginator [length]="userlength"-->
-<!--                     [pageSize]="limit"-->
-<!--                     [pageSizeOptions]="[5, 10, 20, 50, 100]"-->
-<!--                     (page)="pageEvent($event)">-->
-<!--      </mat-paginator>-->
-<!--    </div>-->
-    <div class="card">
-      <div class="name-column">
-        <div class="name-container header">
-          <span class="title"><h2>Names</h2></span>
+      <!--      <mat-paginator [length]="userlength"-->
+      <!--                     [pageSize]="limit"-->
+      <!--                     [pageSizeOptions]="[5, 10, 20, 50, 100]"-->
+      <!--                     (page)="pageEvent($event)">-->
+      <!--      </mat-paginator>-->
+      <!--    </div>-->
+      <div class="card">
+        <div class="name-column">
+          <div class="name-container header">
+            <span class="title"><h2>Names</h2></span>
+          </div>
+          <div class="name-container" *ngFor="let result of courseResults | async">
+            <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
+            <span class="state failed" *ngIf="!result.passed"><mat-icon>cancel</mat-icon></span>
+            <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
+          </div>
         </div>
-        <div class="name-container" *ngFor="let result of courseResults | async">
-          <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
-          <span class="state failed" *ngIf="!result.passed"><mat-icon>add_circle</mat-icon></span>
-          <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
-        </div>
-      </div>
-
-      <div class="task-column">
-        <div class="task-container header">
+        <div class="task-column">
+          <div class="task-container header">
           <span class="task-result" *ngFor="let task of tasks | async">
             <span class="title">{{task.name}}</span>
           </span>
-        </div>
-        <div class="task-container" *ngFor="let result of courseResults | async">
+          </div>
+          <div class="task-container" *ngFor="let result of courseResults | async">
           <span class="task-result" *ngFor="let taskResult of result.results">
             <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
                   matTooltipPosition="above" matTooltip="{{result.user.surname}}, {{result.user.prename}} {{taskResult.task.name}}">
@@ -57,8 +63,13 @@
               <span *ngIf="taskResult.attempts==0">-</span>
             </span>
           </span>
+          </div>
         </div>
       </div>
-    </div>
-  </mat-card>
+    </mat-card>
+    </mat-tab>
+<!--    <mat-tab label="Statistiken">-->
+<!--      <mat-card class="content-container">Leer</mat-card>-->
+<!--    </mat-tab>-->
+  </mat-tab-group>
 </div>
