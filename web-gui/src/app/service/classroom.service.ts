@@ -3,7 +3,7 @@ import {Observable, Subject, BehaviorSubject, Subscription} from 'rxjs';
 import {RxStompClient} from '../util/rx-stomp';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {Message} from 'stompjs';
-import {ConferenceService} from './conference.service';
+import {ExternalClassroomHandlingService} from './external-classroom-handling-service';
 import {AuthService} from './auth.service';
 import {MatDialog} from '@angular/material/dialog';
 import {IncomingCallDialogComponent} from '../dialogs/incoming-call-dialog/incoming-call-dialog.component';
@@ -32,7 +32,7 @@ export class ClassroomService {
   private heartbeatTime = 5000;
   private stompRx: RxStompClient = null;
 
-  public constructor(private authService: AuthService, private conferenceService: ConferenceService, private mDialog: MatDialog) {
+  public constructor(private authService: AuthService, private conferenceService: ExternalClassroomHandlingService, private mDialog: MatDialog) {
     this.users = new BehaviorSubject<User[]>([]);
     this.isWindowhandleOpen = new Subject<Boolean>();
     this.isWindowhandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {

@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
-import {ConferenceService} from '../../service/conference.service';
+import {ExternalClassroomHandlingService} from '../../service/external-classroom-handling-service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer} from '@angular/platform-browser';
@@ -24,7 +24,7 @@ import {Ticket} from '../../model/Ticket';
 })
 export class ConferenceComponent implements OnInit {
   constructor(private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ConferenceService, public classroomService: ClassroomService,
+              private conferenceService: ExternalClassroomHandlingService, public classroomService: ClassroomService,
               private dialog: MatDialog, public auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router, @Inject(DOCUMENT) document) {
   }

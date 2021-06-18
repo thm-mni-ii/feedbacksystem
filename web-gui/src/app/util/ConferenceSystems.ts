@@ -1,4 +1,5 @@
 export enum ConferenceSystems {
     BigBlueButton = 'bigbluebutton',
-    Jitsi = 'jitsi'
+    Jitsi = 'jitsi',
+    DigitalClassroom = 'digital-classroom'
 }

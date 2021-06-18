@@ -4,7 +4,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import { first } from 'rxjs/operators';
 import {UserService} from '../../service/user.service';
 import {ClassroomService} from '../../service/classroom.service';
-import {ConferenceService} from '../../service/conference.service';
+import {ExternalClassroomHandlingService} from '../../service/external-classroom-handling-service';
 import {AuthService} from '../../service/auth.service';
 import {Roles} from '../../model/Roles';
 import {User} from '../../model/User';
@@ -25,7 +25,7 @@ export class AssignTicketDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<AssignTicketDialogComponent>,
               private snackBar: MatSnackBar, private classroomService: ClassroomService,
-              private conferenceService: ConferenceService, public auth: AuthService, private dialog: MatDialog) {
+              private conferenceService: ExternalClassroomHandlingService, public auth: AuthService, private dialog: MatDialog) {
     this.ticket = this.data.ticket;
     this.courseID = this.data.courseID;
   }

@@ -5,12 +5,12 @@ import {Conference} from '../model/Conference';
 
 /**
  * Handles the creation and retrivement of conference links.
- * @author Andrej Sajenko
+ * @author Andrej Sajenko & Dominik Kröll
  */
 @Injectable({
   providedIn: 'root'
 })
-export class ConferenceService {
+export class ExternalClassroomHandlingService {
   private personalConferenceLink: BehaviorSubject<string>;
   private bbbConferenceLink: BehaviorSubject<object>;
   private conference: BehaviorSubject<Conference>;
@@ -20,7 +20,7 @@ export class ConferenceService {
   public constructor() {
      this.personalConferenceLink = new BehaviorSubject<string>(null);
      this.bbbConferenceLink = new  BehaviorSubject<object>(null);
-     this.selectedConferenceSystem = new BehaviorSubject<string>(ConferenceSystems.BigBlueButton);
+     this.selectedConferenceSystem = new BehaviorSubject<string>(ConferenceSystems.DigitalClassroom);
      this.conference = new BehaviorSubject<Conference>(null);
   }
 

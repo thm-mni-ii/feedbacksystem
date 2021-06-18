@@ -7,7 +7,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
 import {mergeMap} from 'rxjs/operators';
 import {of, Observable} from 'rxjs';
-import {ConferenceService} from '../../service/conference.service';
+import {ExternalClassroomHandlingService} from '../../service/external-classroom-handling-service';
 import {ClassroomService} from '../../service/classroom.service';
 import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
 import {NewconferenceDialogComponent} from '../../dialogs/newconference-dialog/newconference-dialog.component';
@@ -35,7 +35,7 @@ export class CourseDetailComponent implements OnInit {
   constructor(private taskService: TaskService,
               private authService: AuthService,
               private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ConferenceService, private classroomService: ClassroomService,
+              private conferenceService: ExternalClassroomHandlingService, private classroomService: ClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router,
               private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
@@ -147,30 +147,10 @@ export class CourseDetailComponent implements OnInit {
       || Roles.CourseRole.isDocent(courseRole) || (Roles.CourseRole.isTutor(courseRole) && !ignoreTutor);
   }
 
-  createConference() {
-    this.dialog.open(NewconferenceDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
-    });
-  }
-
   joinClassroom() {
     // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     this.classroomService.join(this.courseID);
     this.router.navigate(['courses', this.courseID, 'tickets']);
-  }
-
-  createTicket() {
-    this.dialog.open(NewticketDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
-    }).afterClosed().subscribe(ticket => {
-      if (ticket) {
-        this.classroomService.createTicket(ticket);
-      }
-    });
   }
 
   deleteCourse() {
