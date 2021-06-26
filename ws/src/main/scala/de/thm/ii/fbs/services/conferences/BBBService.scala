@@ -3,9 +3,9 @@ package de.thm.ii.fbs.services.conferences
 import java.net.URI
 import java.security.MessageDigest
 import java.util.UUID
-
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services.conferences.conference.{BBBConference, Conference}
+import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
@@ -118,23 +118,11 @@ class BBBService(templateBuilder: RestTemplateBuilder,
       values += value
     }
     var query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
-    val checksum = computeHexSha1Hash(s"$method$query$secret")
+    val checksum = DigestUtils.sha1Hex(s"$method$query$secret")
     queryBuilder.queryParam("checksum", "{checksum}")
     values += checksum
     query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
     s"$apiUrl/api/$method?$query"
-  }
-
-  /**
-    * Hashes input
-    * @param input the input to hash
-    * @return the hex-encoeded hash
-    */
-  private def computeHexSha1Hash(input: String): String = {
-    val digest = MessageDigest.getInstance("SHA-1")
-    digest.update(input.getBytes("utf8"))
-    val hash = digest.digest()
-    toHexString(hash)
   }
 
   /**

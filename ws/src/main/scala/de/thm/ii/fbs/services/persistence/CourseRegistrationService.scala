@@ -57,11 +57,11 @@ class CourseRegistrationService {
     (res, _) => Participant(parseUserResult(res), CourseRole.parse(res.getInt("course_role"))), cid)
 
   /**
-    * Get the course priviledges of a user.
+    * Get the course privileges of a user.
     * @param uid The user id
     * @return Map of course id to its course role. Note that courses where the user is a student are not listed here.
     */
-  def getCoursePriviledges(uid: Int): Map[Int, CourseRole.Value] = {
+  def getCoursePrivileges(uid: Int): Map[Int, CourseRole.Value] = {
     DB.query("SELECT course_id, course_role FROM user_course WHERE user_id = ?", (res, _) => {
       (res.getInt("course_id"), CourseRole.parse(res.getInt("course_role")))
     }, uid)

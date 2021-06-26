@@ -91,7 +91,7 @@ class AuthService {
     * @return new token
     */
     def createToken(user: User): String = {
-    val privileges = crs.getCoursePriviledges(user.id)
+    val privileges = crs.getCoursePrivileges(user.id)
     val mapper = new ScalaObjectMapper
 
     val courseRoles = privileges match {

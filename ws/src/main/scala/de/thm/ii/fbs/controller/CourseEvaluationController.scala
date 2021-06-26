@@ -32,7 +32,7 @@ class CourseEvaluationController {
   private def isAuthorized(cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
     if (!privileged) throw new ForbiddenException()
   }
