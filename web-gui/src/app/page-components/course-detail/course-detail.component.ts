@@ -8,11 +8,8 @@ import {DOCUMENT} from '@angular/common';
 import {mergeMap} from 'rxjs/operators';
 import {of, Observable} from 'rxjs';
 import {ExternalClassroomHandlingService} from '../../service/external-classroom-handling-service';
-import {ClassroomService} from '../../service/classroom.service';
 import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
-import {NewconferenceDialogComponent} from '../../dialogs/newconference-dialog/newconference-dialog.component';
 import {CourseUpdateDialogComponent} from '../../dialogs/course-update-dialog/course-update-dialog.component';
-import {NewticketDialogComponent} from '../../dialogs/newticket-dialog/newticket-dialog.component';
 import {AuthService} from '../../service/auth.service';
 import {Roles} from '../../model/Roles';
 import {TaskService} from '../../service/task.service';
@@ -24,6 +21,7 @@ import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialo
 import {FeedbackAppService} from '../../service/feedback-app.service';
 import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
 import {GoToService} from '../../service/goto.service';
+import {ExternalClassroomService} from "../../service/external-classroom.service";
 
 @Component({
   selector: 'app-course-detail',
@@ -35,7 +33,8 @@ export class CourseDetailComponent implements OnInit {
   constructor(private taskService: TaskService,
               private authService: AuthService,
               private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ExternalClassroomHandlingService, private classroomService: ClassroomService,
+              private conferenceService: ExternalClassroomHandlingService,
+              private externalClassroomService: ExternalClassroomService,
               private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
               private router: Router,
               private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
@@ -149,8 +148,7 @@ export class CourseDetailComponent implements OnInit {
 
   joinClassroom() {
     // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
-    this.classroomService.join(this.courseID);
-    this.router.navigate(['courses', this.courseID, 'tickets']);
+    this.externalClassroomService.join(this.courseID);
   }
 
   deleteCourse() {

@@ -4,7 +4,7 @@ import {distinctUntilChanged} from 'rxjs/operators';
 import {ExternalClassroomHandlingService} from './external-classroom-handling-service';
 import {AuthService} from './auth.service';
 import {MatDialog} from '@angular/material/dialog';
-
+import {HttpClient} from "@angular/common/http";
 /**
  * Service that provides observables that asynchronacally updates tickets, users and privide Conferences to take
  * part in a conference.
@@ -12,7 +12,7 @@ import {MatDialog} from '@angular/material/dialog';
 @Injectable({
   providedIn: 'root'
 })
-export class ClassroomService {
+export class ExternalClassroomService {
   private dialog: MatDialog;
   private conferenceWindowHandle: Window;
   private isWindowHandleOpen: Subject<Boolean>;
@@ -21,7 +21,8 @@ export class ClassroomService {
 
   public constructor(private authService: AuthService,
                      private classRoomHandlingService: ExternalClassroomHandlingService,
-                     private mDialog: MatDialog) {
+                     private mDialog: MatDialog,
+                     private http: HttpClient) {
     this.isWindowHandleOpen = new Subject<Boolean>();
     this.isWindowHandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {
         if (!isOpen) {
@@ -50,18 +51,28 @@ export class ClassroomService {
     return this.isWindowHandleOpen.asObservable();
   }
 
+  public isJoined() {
+    return this.conferenceWindowHandle != undefined && !this.conferenceWindowHandle.closed
+  }
+
   /**
    * Connect to backend
    * @param courseId The course, e.g., classroom id
    * @return Observable that completes if connected.
    */
   public join(courseId: number) {
-    this.authService.getToken().id
-    this.courseId = courseId;
-  };
-
-  public leaveClassroom() {
-
+    if (this.conferenceWindowHandle == undefined || this.conferenceWindowHandle.closed) {
+      this.authService.getToken().id;
+      this.courseId = courseId;
+      this.http.get<string>(`/api/v1/classroom/${this.courseId}/join`).subscribe(url => {
+        this.conferenceWindowHandle = open(url)
+      })
+    } else {
+      this.conferenceWindowHandle.focus()
+    }
   }
 
+  public leaveClassroom() {
+    this.http.get<string>(`/api/v1/classroom/${this.courseId}/leave`)
+  }
 }
