@@ -83,8 +83,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
-    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+    implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     implementation 'org.scala-lang:scala-library:2.13.1'
     implementation 'mysql:mysql-connector-java:8.0.19'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'

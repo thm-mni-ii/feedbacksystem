@@ -1,9 +1,11 @@
 package de.thm.ii.fbs.services.classroom
 
+import de.thm.ii.fbs.model.CourseRole.STUDENT
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.services.conferences.ConferenceService
 import de.thm.ii.fbs.services.conferences.conference.{BBBConference, Conference}
-import de.thm.ii.fbs.services.persistence.CourseService
+import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
+import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
@@ -11,10 +13,10 @@ import org.springframework.stereotype.Service
 import org.springframework.web.util.UriComponentsBuilder
 
 import java.net.URI
-import java.security.MessageDigest
 import java.util.UUID
 import scala.collection.mutable
-import scala.language.postfixOps;
+import scala.language.postfixOps
+import scala.xml.XML
 
 /**
   * Handles BBB requests.
@@ -24,6 +26,8 @@ import scala.language.postfixOps;
   * @param originName the bbb meta data that identifies the origin
   * @param originVersion the bbb meta data the identifies the origin version
   * @param courseService the CourseService
+  * @param courseRegistrationService the CourseRegistrationService
+
   * @author Dominik Kröll
   */
 @Service
@@ -32,9 +36,29 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        @Value("${services.bbb.shared-secret}") private val secret: String,
                        @Value("${services.bbb.origin-name}") private val originName: String,
                        @Value("${services.bbb.origin-version}") private val originVersion: String,
-                       courseService: CourseService
+                       courseService: CourseService,
+                       courseRegistrationService: CourseRegistrationService
                 ) extends ConferenceService {
+
   private val restTemplate = templateBuilder.build()
+  private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
+
+  def joinUser(courseId: Int, user: User): URI = {
+    val courseRole = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(courseId, STUDENT)
+    val classroom = classrooms.getOrElseUpdate(courseId, createConference(courseId).asInstanceOf[DigitalClassroom])
+    classroom.getURL(user, courseRole)
+  }
+
+  /**
+    * Future feature? currently there is no attendance tracking in FBS
+    * @param courseId the courseId
+    * @param user the user
+    * @return
+    */
+  def leaveUser(courseId: Int, user: User): Boolean = {
+    true
+  }
+
 
   /**
     * Creates a new Conference using BBB
@@ -51,7 +75,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
     // actual registering of conference against BBB api
     this.registerDigitalClassroom(classroomId, course.name, studentPassword, teacherPassword, tutorPassword)
-    new DigitalClassroom(classroomId, courseId, studentPassword, teacherPassword, this)
+    new DigitalClassroom(classroomId, courseId, studentPassword, tutorPassword, teacherPassword, this)
   }
 
   /**
@@ -68,6 +92,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
       "name" -> meetingName,
       "meetingID" -> id,
       "attendeePW" -> studentPassword,
+      "tutorPW" -> tutorPassword,
       "moderatorPW" -> moderatorPassword,
       "tutorPW" -> tutorPassword,
       "meta_bbb-origin-server-name" -> originName,
@@ -86,9 +111,12 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @return The uri of the registered conference
     */
   def getBBBConferenceLink(user: User, id: String, password: String): URI = {
-    val link = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
+    val url = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
-    URI.create(link)
+    val xmlString = restTemplate.getForEntity(url, classOf[String]).getBody
+    val xml = XML.loadString(xmlString)
+    val joinUrl = xml.attribute("url").get.toString()
+    URI.create(joinUrl)
   }
 
   /**
@@ -126,35 +154,13 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
       queryBuilder.queryParam(key, s"{$key}");
       values += value
     }
-    var query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
-    val checksum = computeHexSha1Hash(s"$method$query$secret")
-    queryBuilder.queryParam("checksum", "{checksum}")
+    var query = queryBuilder.cloneBuilder().encode.build.expand(values.toArray: _*).toString.substring(1)
+    val checksum = DigestUtils.sha1Hex(s"$method$query$secret")
+    queryBuilder.queryParam("checksum", s"$checksum")
     values += checksum
-    query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
+    query = queryBuilder.build.expand(values.toArray: _*).toString.substring(1)
     s"$apiUrl/api/$method?$query"
   }
-
-  /**
-    * Hashes input
-    * @param input the input to hash
-    * @return the hex-encoeded hash
-    */
-  private def computeHexSha1Hash(input: String): String = {
-    val digest = MessageDigest.getInstance("SHA-1")
-    digest.update(input.getBytes("utf8"))
-    val hash = digest.digest()
-    toHexString(hash)
-  }
-
-  /**
-    * Hex encodes input
-    * @param input the input to encode
-    * @return the encoded input
-    */
-  private def toHexString(input: Array[Byte]): String = input
-    .map(b => String.format("%02x", b))
-    .reduce((sb, s) => sb + s)
-
 }
 
 /**

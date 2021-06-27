@@ -124,15 +124,6 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     query = queryBuilder.encode.build.expand(values.toArray: _*).toString.substring(1)
     s"$apiUrl/api/$method?$query"
   }
-
-  /**
-    * Hex encodes input
-    * @param input the input to encode
-    * @return the encoded input
-    */
-  private def toHexString(input: Array[Byte]): String = input
-    .map(b => String.format("%02x", b))
-    .reduce((sb, s) => sb + s)
 }
 
 /**

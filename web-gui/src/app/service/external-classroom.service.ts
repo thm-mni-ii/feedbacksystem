@@ -64,8 +64,8 @@ export class ExternalClassroomService {
     if (this.conferenceWindowHandle == undefined || this.conferenceWindowHandle.closed) {
       this.authService.getToken().id;
       this.courseId = courseId;
-      this.http.get<string>(`/api/v1/classroom/${this.courseId}/join`).subscribe(url => {
-        this.conferenceWindowHandle = open(url)
+      this.http.get<String>(`/api/v1/classroom/${this.courseId}/join`).subscribe(url => {
+        this.conferenceWindowHandle = open(url.toString())
       })
     } else {
       this.conferenceWindowHandle.focus()
