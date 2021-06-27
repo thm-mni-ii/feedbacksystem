@@ -75,6 +75,7 @@ import {AuthService} from './service/auth.service';
 import { ReversePipe } from './pipes/reverse.pipe';
 import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
+import {ClassroomService} from "./service/classroom.service";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -112,7 +113,6 @@ export const httpInterceptorProviders = [
     NotFoundComponent,
     ChangePasswordComponent,
     NewconferenceDialogComponent,
-    ConferenceComponent,
     UserTeacherFilter,
     NewticketDialogComponent,
     IncomingCallDialogComponent,
@@ -127,7 +127,6 @@ export const httpInterceptorProviders = [
     SubmissionFileComponent,
     SubmissionTextComponent,
     ResultsComponent,
-    DropzoneComponent,
     MyCoursesComponent,
     ConferenceComponent,
     LoginComponent,
@@ -136,8 +135,6 @@ export const httpInterceptorProviders = [
     AssignTicketDialogComponent,
     InvitetoConferenceDialogComponent,
     DropzoneComponent,
-    MyCoursesComponent,
-    ConferenceComponent,
     ParticipantsComponent,
     ConfigurationListComponent,
     MenuBarComponent,
@@ -146,7 +143,7 @@ export const httpInterceptorProviders = [
     InfoComponent,
     ReversePipe,
     GoToComponent,
-    GotoLinksDialogComponent,
+    GotoLinksDialogComponent
   ],
   imports: [
     BrowserModule,
