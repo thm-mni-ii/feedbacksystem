@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
   * @author Andrej Sajenko
   */
 @Service
+@deprecated
 class JitsiService(templateBuilder: RestTemplateBuilder) extends ConferenceService {
   /**
     * Creates a new Conference using Jitsi

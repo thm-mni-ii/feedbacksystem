@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller
 /**
   * WebSocket Controller which allows users to manage Tickets
   */
-@Controller
+
 class TicketController {
   @Autowired
   private val smt: SimpMessagingTemplate = null

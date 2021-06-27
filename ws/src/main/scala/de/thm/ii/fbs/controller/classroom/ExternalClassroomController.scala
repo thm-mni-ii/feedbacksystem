@@ -1,11 +1,7 @@
 package de.thm.ii.fbs.controller.classroom
 
-import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
-import de.thm.ii.fbs.model.{Course, GlobalRole}
 import de.thm.ii.fbs.services.classroom.ClassroomService
 import de.thm.ii.fbs.services.security.AuthService
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, PostMapping, RequestBody, RequestMapping, ResponseBody, RestController}
 
 import java.net.URI

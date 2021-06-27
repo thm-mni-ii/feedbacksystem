@@ -2,6 +2,7 @@ package de.thm.ii.fbs.services.classroom
 
 import de.thm.ii.fbs.model.CourseRole.STUDENT
 import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
 import de.thm.ii.fbs.services.conferences.ConferenceService
 import de.thm.ii.fbs.services.conferences.conference.{BBBConference, Conference}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
@@ -16,7 +17,7 @@ import java.net.URI
 import java.util.UUID
 import scala.collection.mutable
 import scala.language.postfixOps
-import scala.xml.XML
+import scala.xml.{Elem, XML}
 
 /**
   * Handles BBB requests.
@@ -113,10 +114,8 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
   def getBBBConferenceLink(user: User, id: String, password: String): URI = {
     val url = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
-    val xmlString = restTemplate.getForEntity(url, classOf[String]).getBody
-    val xml = XML.loadString(xmlString)
-    val joinUrl = xml.attribute("url").get.toString()
-    URI.create(joinUrl)
+    val xml = restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse]).getBody
+    URI.create(xml.url)
   }
 
   /**

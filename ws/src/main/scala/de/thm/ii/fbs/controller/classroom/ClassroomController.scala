@@ -18,7 +18,7 @@ import org.springframework.stereotype.Controller
   * WebSocket controller that allows users to appear as logged in user.
   * @author Andrej Sajenko
   */
-@Controller
+
 class ClassroomController {
   @Autowired
   private val sur: SimpUserRegistry = null

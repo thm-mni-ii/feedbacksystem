@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
   * Factory that creates ConferenceServices
   */
 @Service
+@deprecated
 class ConferenceServiceFactoryService() {
   @Autowired
   private val templateBuilder: RestTemplateBuilder = null
