@@ -72,6 +72,9 @@ export class ExternalClassroomService {
     }
   }
 
+  /**
+   * Not called
+   */
   public leaveClassroom() {
     this.http.get<string>(`/api/v1/classroom/${this.courseId}/leave`)
   }

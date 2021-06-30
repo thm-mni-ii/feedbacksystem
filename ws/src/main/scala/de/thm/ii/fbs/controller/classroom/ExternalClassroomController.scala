@@ -2,6 +2,7 @@ package de.thm.ii.fbs.controller.classroom
 
 import de.thm.ii.fbs.services.classroom.ClassroomService
 import de.thm.ii.fbs.services.security.AuthService
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, PostMapping, RequestBody, RequestMapping, ResponseBody, RestController}
 
 import java.net.URI
@@ -17,6 +18,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @RequestMapping(path = Array("/api/v1/classroom"))
 class ExternalClassroomController(private val authService: AuthService,
                                   private val classroomService: ClassroomService) {
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
   /**
     * Let's a user join a classroom. An instance is created on demand.
     * @param req http request
@@ -27,6 +29,7 @@ class ExternalClassroomController(private val authService: AuthService,
   @GetMapping(value = Array("/{courseId}/join"))
   def joinClassroom(req: HttpServletRequest, res: HttpServletResponse, @PathVariable courseId: Int): URI = {
     val user = authService.authorize(req, res)
+    logger.info("User {} joined classroom of course {}!", user.getName, courseId)
     classroomService.joinUser(courseId, user)
   }
 
@@ -40,6 +43,7 @@ class ExternalClassroomController(private val authService: AuthService,
   @GetMapping(value = Array("/{courseId}/leave"))
   def leaveClassroom(req: HttpServletRequest, res: HttpServletResponse, @PathVariable courseId: Int): Boolean = {
     val user = authService.authorize(req, res)
+    logger.info("User {} left classroom of course {}!", user.getName, courseId)
     classroomService.leaveUser(courseId, user)
   }
 

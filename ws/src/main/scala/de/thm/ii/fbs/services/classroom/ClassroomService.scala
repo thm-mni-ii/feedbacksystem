@@ -17,7 +17,6 @@ import java.net.URI
 import java.util.UUID
 import scala.collection.mutable
 import scala.language.postfixOps
-import scala.xml.{Elem, XML}
 
 /**
   * Handles BBB requests.
