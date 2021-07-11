@@ -1,17 +1,14 @@
 package de.thm.ii.fbs.services.classroom
 
-import de.thm.ii.fbs.model.CourseRole.STUDENT
-import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.CourseRole.{DOCENT, STUDENT, TUTOR}
+import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
-import de.thm.ii.fbs.services.conferences.ConferenceService
-import de.thm.ii.fbs.services.conferences.conference.{BBBConference, Conference}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
 import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.client.{HttpClientErrorException, HttpServerErrorException}
 import org.springframework.web.util.UriComponentsBuilder
 
 import java.net.URI
@@ -47,7 +44,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
   def joinUser(courseId: Int, user: User): URI = {
     val courseRole = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(courseId, STUDENT)
     val classroom = classrooms.getOrElseUpdate(courseId, createClassroom(courseId))
-    classroom.getURL(user, courseRole)
+    getBBBConferenceLink(user, classroom, courseRole)
   }
 
   /**
@@ -67,17 +64,21 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     */
   def createClassroom(courseId: Int): DigitalClassroom = {
     // TODO: Custom Exception
+    val classroomId = UUID.randomUUID().toString
     val course = courseService.find(courseId).get
     val studentPassword = UUID.randomUUID().toString
     val tutorPassword = UUID.randomUUID().toString
     val teacherPassword = UUID.randomUUID().toString
 
     // actual registering of conference against BBB api
-    this.registerDigitalClassroom(courseId.toString, course.name, studentPassword, teacherPassword, tutorPassword)
-    new DigitalClassroom(courseId, studentPassword, tutorPassword, teacherPassword, this)
+    this.registerDigitalClassroom(classroomId, course.name, studentPassword, teacherPassword, tutorPassword)
+    new DigitalClassroom(classroomId, courseId, studentPassword, tutorPassword, teacherPassword)
   }
 
   def recreateClassroom(courseId: Int): Unit = {
+    val course = courseService.find(courseId).get
+    val classroom = this.classrooms(courseId)
+    this.registerDigitalClassroom(classroom.classroomId, course.name, classroom.studentPassword, classroom.tutorPassword, classroom.teacherPassword)
     this.classrooms.update(courseId, createClassroom(courseId))
   }
 
@@ -107,16 +108,20 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Get join Link for conference users conference.
-    * @param courseId courseId to register a classroom for.
     * @param user user name to join to classroom.
-    * @param password password to join the user with.
+    * @param digitalClassroom the digitalClassroomInstance to join a user to.
+    * @param courseRole The role (Docent, Tutor, Student) of the user within the course.
     * @return The join URI for the specified user.
     */
-  def getBBBConferenceLink(user: User, courseId: Int, password: String): URI = {
+  def getBBBConferenceLink(user: User, digitalClassroom: DigitalClassroom, courseRole: CourseRole.Value): URI = {
     val paramMap = Map(
       "fullName" -> s"${user.prename} ${user.surname}",
-      "meetingID" -> courseId.toString,
-      "password" -> password
+      "meetingID" -> digitalClassroom.classroomId,
+      "password" -> (courseRole match {
+        case DOCENT => digitalClassroom.teacherPassword
+        case TUTOR => digitalClassroom.tutorPassword
+        case _ => digitalClassroom.studentPassword
+      })
     )
     val url = buildClassroomApiRequestUri("join", paramMap)
     var response: JoinRoomBBBResponse = null
@@ -124,7 +129,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
       response = getJoinRoomResponse(url)
     } catch {
       case _: Throwable =>
-        recreateClassroom(courseId)
+        recreateClassroom(digitalClassroom.courseId)
         response = getJoinRoomResponse(buildClassroomApiRequestUri("join", paramMap))
     }
     URI.create(response.url)
@@ -141,7 +146,8 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @return true if request succeeds
     */
   def endClassroom(courseId: Int, teacherPassword: String): Boolean = {
-    val response = getClassroomApi("end", Map("meetingID" -> courseId.toString, "password" -> teacherPassword))
+    val classroom = classrooms(courseId)
+    val response = getClassroomApi("end", Map("meetingID" -> classroom.classroomId, "password" -> teacherPassword))
     response.getStatusCode.is2xxSuccessful()
   }
 
