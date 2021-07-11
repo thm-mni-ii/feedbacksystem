@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import org.springframework.web.client.{HttpClientErrorException, HttpServerErrorException}
 import org.springframework.web.util.UriComponentsBuilder
 
 import java.net.URI
@@ -38,14 +39,14 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        @Value("${services.bbb.origin-version}") private val originVersion: String,
                        courseService: CourseService,
                        courseRegistrationService: CourseRegistrationService
-                ) extends ConferenceService {
+                ) {
 
   private val restTemplate = templateBuilder.build()
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
 
   def joinUser(courseId: Int, user: User): URI = {
     val courseRole = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(courseId, STUDENT)
-    val classroom = classrooms.getOrElseUpdate(courseId, createConference(courseId).asInstanceOf[DigitalClassroom])
+    val classroom = classrooms.getOrElseUpdate(courseId, createClassroom(courseId))
     classroom.getURL(user, courseRole)
   }
 
@@ -59,14 +60,12 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     true
   }
 
-
   /**
     * Creates a new Conference using BBB
     * @param courseId the id for the new conference
     * @return the newly created conference
     */
-  override def createConference(courseId: Int): Conference = {
-    val classroomId = UUID.randomUUID().toString
+  def createClassroom(courseId: Int): DigitalClassroom = {
     // TODO: Custom Exception
     val course = courseService.find(courseId).get
     val studentPassword = UUID.randomUUID().toString
@@ -74,8 +73,12 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     val teacherPassword = UUID.randomUUID().toString
 
     // actual registering of conference against BBB api
-    this.registerDigitalClassroom(classroomId, course.name, studentPassword, teacherPassword, tutorPassword)
-    new DigitalClassroom(classroomId, courseId, studentPassword, tutorPassword, teacherPassword, this)
+    this.registerDigitalClassroom(courseId.toString, course.name, studentPassword, teacherPassword, tutorPassword)
+    new DigitalClassroom(courseId, studentPassword, tutorPassword, teacherPassword, this)
+  }
+
+  def recreateClassroom(courseId: Int): Unit = {
+    this.classrooms.update(courseId, createClassroom(courseId))
   }
 
   /**
@@ -94,37 +97,51 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
       "attendeePW" -> studentPassword,
       "tutorPW" -> tutorPassword,
       "moderatorPW" -> moderatorPassword,
-      "tutorPW" -> tutorPassword,
       "meta_bbb-origin-server-name" -> originName,
       "meta_bbb-origin-version" -> originVersion,
       "meta_bbb-origin" -> "Greenlight"
     )
-    val response = getBBBAPI("create", request)
+    val response = getClassroomApi("create", request)
     response.getStatusCode.is2xxSuccessful()
   }
 
   /**
     * Get join Link for conference users conference.
-    * @param id Conference id to register.
-    * @param user user name to register.
-    * @param password password to register.
-    * @return The uri of the registered conference
+    * @param courseId courseId to register a classroom for.
+    * @param user user name to join to classroom.
+    * @param password password to join the user with.
+    * @return The join URI for the specified user.
     */
-  def getBBBConferenceLink(user: User, id: String, password: String): URI = {
-    val url = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
-      "meetingID" -> id, "password" -> password))
-    val xml = restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse]).getBody
-    URI.create(xml.url)
+  def getBBBConferenceLink(user: User, courseId: Int, password: String): URI = {
+    val paramMap = Map(
+      "fullName" -> s"${user.prename} ${user.surname}",
+      "meetingID" -> courseId.toString,
+      "password" -> password
+    )
+    val url = buildClassroomApiRequestUri("join", paramMap)
+    var response: JoinRoomBBBResponse = null
+    try {
+      response = getJoinRoomResponse(url)
+    } catch {
+      case _: Throwable =>
+        recreateClassroom(courseId)
+        response = getJoinRoomResponse(buildClassroomApiRequestUri("join", paramMap))
+    }
+    URI.create(response.url)
+  }
+
+  private def getJoinRoomResponse(url: String): JoinRoomBBBResponse = {
+    restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse]).getBody
   }
 
   /**
     * Ends the conference
-    * @param id the id of the meeting to end
-    * @param moderatorPassword the moderatorPassword of the meeting to end
+    * @param courseId the id of the meeting to end
+    * @param teacherPassword the teacherPassword of the meeting to end
     * @return true if request succeeds
     */
-  def endBBBConference(id: String, moderatorPassword: String): Boolean = {
-    val response = getBBBAPI("end", Map("meetingID" -> id, "password" -> moderatorPassword))
+  def endClassroom(courseId: Int, teacherPassword: String): Boolean = {
+    val response = getClassroomApi("end", Map("meetingID" -> courseId.toString, "password" -> teacherPassword))
     response.getStatusCode.is2xxSuccessful()
   }
 
@@ -134,8 +151,8 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @param params The params to send
     * @return The ResponseEntity
     */
-  private def getBBBAPI(method: String, params: Map[String, String]): ResponseEntity[String] = {
-    val url = buildBBBRequestURL(method, params)
+  private def getClassroomApi(method: String, params: Map[String, String]): ResponseEntity[String] = {
+    val url = buildClassroomApiRequestUri(method, params)
     restTemplate.getForEntity(url, classOf[String])
   }
 
@@ -145,7 +162,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @param params The params of the url
     * @return The BBB API with checksum
     */
-  private def buildBBBRequestURL(method: String, params: Map[String, String]): String = {
+  private def buildClassroomApiRequestUri(method: String, params: Map[String, String]): String = {
     val queryBuilder = UriComponentsBuilder.newInstance()
     val values = mutable.Buffer[String]();
     for ((key, value) <- params) {
@@ -160,15 +177,4 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     s"$apiUrl/api/$method?$query"
   }
 }
-
-/**
-Companion object carrying name attribute
-  */
-object ClassroomService {
-  /**
-    * name attribute
-    */
-  val name = "digital-classroom"
-}
-
 

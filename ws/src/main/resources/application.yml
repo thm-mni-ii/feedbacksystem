@@ -37,7 +37,7 @@ services:
     shared-secret: ${JITSI_SECRET:8Dsupersecurekeydf0}
     user: ${JITSI_USER:fbs}
   bbb:
-    service-url: ${BBB_URI:https://fk-vv.mni.thm.de/bigbluebutton/api}
+    service-url: ${BBB_URI:http://localhost:8085}
     shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}
     origin-name: ${BBB_ORIGIN_NAME:feedback.mni.thm.de}
     origin-version: ${BBB_ORIGIN_VERSION:v2}
