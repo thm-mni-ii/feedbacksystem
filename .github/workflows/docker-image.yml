@@ -22,7 +22,7 @@ jobs:
     - name: Build WS
       run: ./gradlew dist
     - name: Build the Docker image
-      run: docker build ./ws --file Dockerfile --tag thmmniii/http:classroom
+      run: docker build ws --tag thmmniii/http:classroom
     - name: Docker login
       run: echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
     - name: Push the Docker image
