@@ -40,6 +40,7 @@ services:
       - JITSI_USER=fbs
       - JWT_SECRET=8Dsupersecurekeydf0
       - BBB_SECRET
+      - BBB_URI=http://host.docker.internal:8085
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
 

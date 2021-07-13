@@ -87,17 +87,17 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @param id Conference id to register.
     * @param meetingName Conference id to register.
     * @param studentPassword password to register.
-    * @param moderatorPassword moderator password to register.
+    * @param teacherPassword moderator password to register.
     * @param tutorPassword tutor passwort to register
     * @return boolean showing if creation of room was successful
     */
-  def registerDigitalClassroom(id: String, meetingName: String, studentPassword: String, moderatorPassword: String, tutorPassword: String): Boolean = {
+  def registerDigitalClassroom(id: String, meetingName: String, studentPassword: String, tutorPassword: String, teacherPassword: String): Boolean = {
     val request = Map(
       "name" -> meetingName,
       "meetingID" -> id,
       "attendeePW" -> studentPassword,
       "tutorPW" -> tutorPassword,
-      "moderatorPW" -> moderatorPassword,
+      "moderatorPW" -> teacherPassword,
       "meta_bbb-origin-server-name" -> originName,
       "meta_bbb-origin-version" -> originVersion,
       "meta_bbb-origin" -> "Greenlight"
@@ -130,7 +130,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     } catch {
       case _: Throwable =>
         recreateClassroom(digitalClassroom.courseId)
-        response = getJoinRoomResponse(buildClassroomApiRequestUri("join", paramMap))
+        response = getJoinRoomResponse(url)
     }
     URI.create(response.url)
   }

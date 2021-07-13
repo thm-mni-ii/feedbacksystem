@@ -31,15 +31,6 @@ class ConferenceServiceFactoryServiceTests {
     * Tests the creation of a bbb service
     */
   @Test
-  def createJitsiServiceTest(): Unit = {
-    val bbbService = ConferenceServiceFactoryService("jitsi")
-    Assert.assertTrue(bbbService.isInstanceOf[JitsiService])
-  }
-
-  /**
-    * Tests the creation of a bbb service
-    */
-  @Test
   def createNonExistingServiceTest(): Unit = {
     var exception = false
     try {

@@ -17,6 +17,8 @@ ldap:
 logging:
   level:
     root: INFO
+    sql: debug
+    de.thm: debug
 message:
   topic:
     name: java
@@ -32,10 +34,6 @@ server:
     key-store-password: passwd
     key-store-type: PKCS12
 services:
-  jitsi:
-    service-url: ${JITSI_URI:https://fk-conf.mni.thm.de/newConf/rooms.php}
-    shared-secret: ${JITSI_SECRET:8Dsupersecurekeydf0}
-    user: ${JITSI_USER:fbs}
   bbb:
     service-url: ${BBB_URI:http://localhost:8085}
     shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}

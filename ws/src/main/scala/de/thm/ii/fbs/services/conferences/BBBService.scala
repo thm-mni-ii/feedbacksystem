@@ -77,7 +77,8 @@ class BBBService(templateBuilder: RestTemplateBuilder,
     * @return The uri of the registered conference
     */
   def getBBBConferenceLink(user: User, id: String, password: String): URI = {
-    val link = buildBBBRequestURL("join", Map("fullName" -> s"${user.prename} ${user.surname}",
+    val link = buildBBBRequestURL("join",
+      Map("fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> id, "password" -> password))
     URI.create(link)
   }

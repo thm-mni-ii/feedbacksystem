@@ -75,7 +75,6 @@ import {AuthService} from './service/auth.service';
 import { ReversePipe } from './pipes/reverse.pipe';
 import {GoToComponent} from './page-components/goto/goto.component';
 import {GotoLinksDialogComponent} from './dialogs/goto-links-dialog/goto-links-dialog.component';
-import {ClassroomService} from "./service/classroom.service";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {

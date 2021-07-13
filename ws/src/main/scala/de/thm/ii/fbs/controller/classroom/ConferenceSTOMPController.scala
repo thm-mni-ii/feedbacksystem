@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.model.CourseRole
 import de.thm.ii.fbs.model.classroom.{Classroom, UserConferenceMap}
 import de.thm.ii.fbs.services.conferences.conference.Conference
-import de.thm.ii.fbs.services.conferences.{BBBService, ConferenceServiceFactoryService, JitsiService}
+import de.thm.ii.fbs.services.conferences.{BBBService, ConferenceServiceFactoryService}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.{AuthService, CourseAuthService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -67,7 +67,6 @@ class ConferenceSTOMPController {
   def openConference(@Payload m: JsonNode, headerAccessor: SimpMessageHeaderAccessor): Unit = {
     val conferenceService = m.retrive("service").asText() match {
       case Some(BBBService.name) => conferenceServiceFactoryService(BBBService.name)
-      case Some(JitsiService.name) => conferenceServiceFactoryService(JitsiService.name)
       case Some(name) => throw new IllegalArgumentException(s"Unknown service: ${name}")
       case None => throw new IllegalArgumentException("Service name not provided")
     }
