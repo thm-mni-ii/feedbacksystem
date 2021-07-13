@@ -29,4 +29,4 @@ jobs:
         username: ${{ secrets.DOCKER_LOGIN }}
         password: ${{ secrets.DOCKER_PWD }}
     - name: Push the Docker image
-      run: docker push thmmniii/digital-classroom:latest
+      run: docker push thmmniii/http:classroom
