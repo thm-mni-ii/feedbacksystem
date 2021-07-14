@@ -1,7 +1,6 @@
 #!/bin/bash
 
 branch=$1
-tag=$2
 
 function dockerPush(){
     tag=$1
@@ -18,16 +17,19 @@ function dockerPush(){
 
 echo "START DOCKER DEPLOY"
 
-echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-
 docker-compose build
 
 echo "DOCKER IMAGES"
 docker images
 
-if [[ -z "$tag" || "dev" == "$branch" ]]
-    then
-      dockerPush dev-latest
-    else
-      dockerPush $tag
-    fi
+echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+
+if [[ "dev" == "$branch" ]]
+then
+    dockerPush dev-latest
+elif [[ "master" == "$branch" ]]
+then
+    dockerPush latest
+else
+    dockerPush $branch
+fi
