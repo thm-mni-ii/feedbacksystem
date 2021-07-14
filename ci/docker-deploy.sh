@@ -22,6 +22,8 @@ docker-compose build
 echo "DOCKER IMAGES"
 docker images
 
+echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+
 if [[ "dev" == "$branch" ]]
 then
     dockerPush dev-latest
