@@ -51,7 +51,7 @@ jobs:
           contains(github.ref, 'master') ||
           contains(github.ref, 'dev') ||
           startsWith(github.ref, 'refs/tags/v')
-        run: sh ./ci/docker-deploy.sh ${GITHUB_REF##*/}
+        run: bash ./ci/docker-deploy.sh ${GITHUB_REF##*/}
         env:
           DOCKER_LOGIN: ${{ secrets.DOCKER_LOGIN }}
           DOCKER_PWD: ${{ secrets.DOCKER_PWD }}
