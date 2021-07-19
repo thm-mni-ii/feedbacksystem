@@ -38,6 +38,9 @@ const routes: Routes = [
 
       // General Sites
       {path: '404', component: NotFoundComponent},
+
+      // Redirect `/` to courses
+      {path: '', redirectTo: 'courses', pathMatch: 'full' },
     ]
   },
   // Goto
