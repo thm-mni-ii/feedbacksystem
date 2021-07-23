@@ -14,6 +14,7 @@ import scala.jdk.CollectionConverters._
 object DB {
   // The timout to terminate a query after TIMEOUT_IN_SEC seconds.
   private val TIMEOUT_IN_SEC = 5;
+  private val BATCH_TIMEOUT_IN_SEC = 60;
 
   /**
     * See @JdbcTemplate::query
@@ -101,7 +102,7 @@ object DB {
     */
   @throws[DataAccessException]
   def batchUpdate (sql: String*)(implicit jdbc: JdbcTemplate): Boolean = {
-    jdbc.setQueryTimeout(TIMEOUT_IN_SEC)
+    jdbc.setQueryTimeout(BATCH_TIMEOUT_IN_SEC)
     jdbc.execute((conn: Connection) => {
       conn.setAutoCommit(false)
       val stmt = conn.createStatement

@@ -1,11 +1,13 @@
 package de.thm.ii.fbs
 
+import de.thm.ii.fbs.services.persistance.DatabaseMigrationService
+
 import java.io.FileNotFoundException
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
 import de.thm.ii.fbs.util.DB
+
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,6 +18,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
+
 import javax.servlet.MultipartConfigElement
 import org.springframework.util.unit.DataSize
 
@@ -30,37 +33,14 @@ import scala.io.Source
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
-  private implicit val jdbc: JdbcTemplate = null
-
-  private val initSQLPath = "/usr/local/ws/fbs.sql"
-  private val initSQLClasspath = "fbs.sql"
-
-  private def loadDBSchema(): (Source, String) =
-    try {
-      (Source.fromFile(initSQLPath), initSQLPath)
-    } catch {
-      case _: FileNotFoundException => try {
-        (Source.fromResource(initSQLClasspath), "classpath")
-      } catch {
-        case _: FileNotFoundException =>
-          logger.error("Initialization sql-file not found in classpath")
-          System.exit(1)
-          null
-      }
-    }
+  private implicit val migrationService: DatabaseMigrationService = null
 
   /**
     * Initialize the database schema if none exists.
     */
   @EventListener(value = Array(classOf[ApplicationReadyEvent]))
   private def ensureDBSchema(): Unit = {
-    val results = DB.query("SELECT * FROM information_schema.tables WHERE table_name = 'course' LIMIT 1;", (_, _) => 1)
-    if (results.isEmpty) {
-      val (sqlSource, sqlSourcePath) = loadDBSchema()
-      logger.info("Database schema not found -> Initialize a database schema with script in " + sqlSourcePath)
-      val sql = sqlSource.mkString.split(';').filterNot(_.isBlank)
-      DB.batchUpdate(sql.toSeq: _*)
-    }
+    migrationService.migrate()
     logger.info("Feedbacksystem started.")
   }
 }
