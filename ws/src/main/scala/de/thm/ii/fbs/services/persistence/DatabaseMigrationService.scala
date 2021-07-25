@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.persistance
+package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.util.DB
 import org.slf4j.LoggerFactory
@@ -27,7 +27,7 @@ class DatabaseMigrationService {
     */
   def migrate(): Unit = {
     val migrationNumber = try {
-      val results = DB.query("SELECT MAX(migration_number) FROM migrations", (res, _) => res.getInt(0))
+      val results = DB.query("SELECT MAX(number) FROM migration", (res, _) => res.getInt(1))
       if (results.isEmpty) {
         -1
       } else {
@@ -40,10 +40,11 @@ class DatabaseMigrationService {
     val migrations = listMigrations()
 
     migrations.filter(migration => migration.getFilename.split("_")(0).toInt > migrationNumber)
-      .map(migration => loadMigration(migration))
       .map(migration => {
-        System.out.println(migration)
-        migration})
+        logger.info("Running migration " + migration.getFilename + "...")
+        migration
+      })
+      .map(migration => loadMigration(migration))
       .foreach(migration => DB.batchUpdate(migration: _*))
   }
 
