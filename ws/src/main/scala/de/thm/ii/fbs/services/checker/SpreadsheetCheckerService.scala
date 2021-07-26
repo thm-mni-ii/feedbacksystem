@@ -2,13 +2,15 @@ package de.thm.ii.fbs.services.checker
 
 import java.io.File
 import java.util.{Map => UtilMap}
-
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, MediaInformation, SpreadsheetMediaInformation, User}
-import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.Hash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+
+import java.util
+import scala.collection.mutable
 
 /**
   * A Spreadsheet Checker
@@ -23,6 +25,8 @@ class SpreadsheetCheckerService extends CheckerService {
   private val spreadsheetService: SpreadsheetService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val subTaskService: CheckrunnerSubTaskService = null
 
   /**
     * Handles the submission notification
@@ -39,10 +43,14 @@ class SpreadsheetCheckerService extends CheckerService {
     val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username)
     val submittedFields = this.getSubmittedFields(submission.id)
 
-    val (exitCode, resulText) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
+    val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
+    this.submittSubTasks(cc.id, submissionID, results)
+
+    val exitCode = if (correctCount == fields.length) {0} else {1}
+    val resultText = this.generateResultText(results)
 
     val extInfo = new JsonMapper().writeValueAsString(submittedFields)
-    submissionService.storeResult(submission.id, cc.id, exitCode, resulText, extInfo)
+    submissionService.storeResult(submission.id, cc.id, exitCode, resultText, extInfo)
   }
 
   private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String): Seq[(String, String)] = {
@@ -64,29 +72,50 @@ class SpreadsheetCheckerService extends CheckerService {
     resultFields
   }
 
-  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, String) = {
-    val result = new StringBuilder()
+  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
+    val result = mutable.ListBuffer[CheckResult]()
     var correctCount = 0
 
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
-      if (enteredValue == null || enteredValue == "") {
-        result ++= key + " Keine Abgabe"
-      } else {
-        result ++= key + " = " + enteredValue
-        if (enteredValue != null && roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
-          result ++= " RICHTIG"
-          correctCount += 1
-        } else {
-          result ++= " FALSCH"
-        }
+      var correct = false
+      if (enteredValue != null && roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
+        correct = true
+        correctCount += 1
       }
-      result ++= "\n"
+      result.appended(CheckResult(key, value, enteredValue, correct))
     }
 
-    val exitCode = if (correctCount == fields.size) 0 else 1
+    (correctCount, result.toList)
+  }
 
-    (exitCode, result.toString())
+  private def generateResultText(results: Seq[CheckResult]): String = {
+    val resultString = new StringBuilder()
+
+    for (CheckResult(key, _, enteredValue, correct) <- results) {
+      if (enteredValue == null || enteredValue == "") {
+        resultString ++= key + " Keine Abgabe"
+      } else {
+        resultString ++= key + " = " + enteredValue
+        if (correct) {
+          resultString ++= " RICHTIG"
+        } else {
+          resultString ++= " FALSCH"
+        }
+      }
+      resultString ++= "\n"
+    }
+
+    resultString.toString()
+  }
+
+  private def submittSubTasks(configurationId: Int, submissionId: Int, results: Seq[SpreadsheetCheckerService.this.CheckResult]): Unit = {
+    for (CheckResult(key, _, _, correct) <- results) {
+      val points = if (correct) {1} else {0}
+
+      val subTask = subTaskService.getOrCrate(configurationId, key, 1)
+      subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
+    }
   }
 
   private def roundIfNumber(input: String, toDecimals: Int): String = {
@@ -95,4 +124,6 @@ class SpreadsheetCheckerService extends CheckerService {
       case None => input
     }
   }
+
+  private case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
 }
