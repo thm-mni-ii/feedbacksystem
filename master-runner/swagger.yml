@@ -107,6 +107,7 @@ components:
         - id
         - user
         - solutionFileLocation
+        - subTaskFileLocation
       properties:
         id:
           type: integer
@@ -116,6 +117,9 @@ components:
         solutionFileLocation:
           type: string
           description: The relativ path (form the upload-dir) to the solution File
+        subTaskFileLocation:
+          type: string
+          description: The relative path (from the upload-dir) to the subtask File
     user:
       type: object
       required:

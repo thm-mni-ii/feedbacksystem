@@ -71,6 +71,13 @@ class StorageService {
   def pathToSolutionFile(sid: Int): Option[Path] = Option(submissionDir(sid).resolve("solution-file")).filter(Files.exists(_))
 
   /**
+    * Get the path to the subtask file of a submission
+    * @param sid Submission id
+    * @return The path to the file
+    */
+  def pathToSubTaskFile(sid: Int): Option[Path] = Option(submissionDir(sid).resolve("subtask-file"))
+
+  /**
     * Delete a main file
     * @param tid Task id
     * @return True if deteled, false if not file exists

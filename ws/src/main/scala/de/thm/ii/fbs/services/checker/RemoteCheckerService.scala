@@ -1,17 +1,16 @@
 package de.thm.ii.fbs.services.checker
 
-import java.nio.file.Path
-
+import java.nio.file.{Files, Path, Paths}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.CheckrunnerConfiguration
-import de.thm.ii.fbs.services.persistence.StorageService
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResults, User => FBSUser}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import de.thm.ii.fbs.model.{User => FBSUser}
 import org.apache.http.conn.ssl.{NoopHostnameVerifier, SSLConnectionSocketFactory, TrustSelfSignedStrategy}
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.ssl.SSLContextBuilder
+import org.json.JSONArray
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 
@@ -25,6 +24,10 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
 
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
+  @Autowired
+  private val subTaskServier: CheckrunnerSubTaskService = null
 
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
@@ -42,12 +45,28 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
     val submission = Submission(submissionID, User(fu.id, fu.username),
-      storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get)
+      storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
+      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
+    )
     val request = RunnerRequest(taskID, rcFromCC(cc), submission)
     val res = restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
     if (res.getStatusCode != HttpStatus.ACCEPTED) {
       throw new Exception(s"invalid status code from runner: ${res.getStatusCode}")
     }
+  }
+
+  /**
+    * Handles a result
+    *
+    * @param sid        The submission id
+    * @param ccid       The check runner configuration id
+    * @param exitCode   The exit Code of the runner
+    * @param resultText The resultText of the runner
+    * @param extInfo    Extended runner information
+    */
+  def handle(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit = {
+    submissionService.storeResult(sid, ccid, exitCode, resultText, extInfo)
+    handleSubTasks(sid, ccid)
   }
 
   private def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(
@@ -94,7 +113,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class Submission(id: Int, user: User, solutionFileLocation: String) {
+  private case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String) {
     /**
       * Transforms RunnerConfiguration to JsonNode
       * @return json representation
@@ -104,6 +123,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
       json.put("id", this.id)
       json.set("user", this.user.toJson)
       json.put("solutionFileLocation", this.solutionFileLocation)
+      json.put("subTaskFileLocation", this.subTaskFileLocation)
       json
     }
   }
@@ -121,6 +141,17 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
       json.set("runner", this.runnerConfiguration.toJson)
       json.set("submission", this.submission.toJson)
       json
+    }
+  }
+
+  private def handleSubTasks(sid: Int, ccid: Int): Unit = {
+    val solutionPath = storageService.pathToSolutionFile(sid).get
+    val content = Files.readString(solutionPath)
+    val tasks = new JSONArray(content)
+    val results = (0 to tasks.length()).map(i => SubTaskResults.fromJSON(tasks.getJSONObject(i)))
+    for (SubTaskResults(name, maxPoints, points) <- results) {
+      val subTask = subTaskServier.getOrCrate(ccid, name, maxPoints)
+      subTaskServier.createResult(ccid, subTask.subTaskId, sid, points)
     }
   }
 
