@@ -23,7 +23,6 @@ class CourseResultService {
   @Autowired
   private val storageService: StorageService = null
 
-
   /**
     * Get All Course Results
     * @param cid Course id
