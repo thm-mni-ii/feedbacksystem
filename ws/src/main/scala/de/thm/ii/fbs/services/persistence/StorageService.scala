@@ -1,11 +1,12 @@
 package de.thm.ii.fbs.services.persistence
 
-import java.io.IOException
+import java.io.{File, IOException}
 import java.nio.file._
-
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+import scala.io.Source
 
 /**
   * Handles file of tasks and submissions.
@@ -18,6 +19,20 @@ class StorageService {
 
   private def tasksDir(tid: Int) = uploadDirPath.resolve("tasks").resolve(String.valueOf(tid))
   private def submissionDir(sid: Int) = uploadDirPath.resolve("submissions").resolve(String.valueOf(sid))
+
+  private def getFileContent(path: Option[Path]): String = {
+    if (path.isDefined) {
+      val source = Source.fromFile(path.get.toFile)
+
+      try {
+        source.mkString
+      } finally {
+        source.close()
+      }
+    } else {
+      ""
+    }
+  }
 
   /**
     * Store (replace if exists) the main file of a task
@@ -69,6 +84,13 @@ class StorageService {
     * @return The path to the file
     */
   def pathToSolutionFile(sid: Int): Option[Path] = Option(submissionDir(sid).resolve("solution-file")).filter(Files.exists(_))
+
+  /**
+    * Gets the Content of the solution file
+    * @param sid Submission id
+    * @return The Solution file content
+    */
+  def getSolutionFile(sid: Int): String = getFileContent(pathToSolutionFile(sid))
 
   /**
     * Delete a main file
