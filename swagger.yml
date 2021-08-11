@@ -1315,6 +1315,58 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Get all subresults for a submission
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: sid
+          in: path
+          description: submission id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubTaskResult"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
     put:
       security:
@@ -2219,3 +2271,12 @@ components:
                   type: integer
                 passed:
                   type: boolean
+    SubTaskResult:
+      type: object
+      properties:
+        name:
+          type: string
+        points:
+          type: number
+        maxPoints:
+          type: number

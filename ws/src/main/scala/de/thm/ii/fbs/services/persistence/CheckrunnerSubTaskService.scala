@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult, Course}
+import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult, Course, SubTaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -94,10 +94,9 @@ class CheckrunnerSubTaskService {
   def createResult(configurationId: Int, subTaskId: Int, submissionId: Int, points: Int): CheckrunnerSubTaskResult = DB.insert(
     "INSERT INTO checkrunner_sub_task_result (configuration_id, sub_task_id, submission_id, points) VALUES (?, ?, ?, ?)",
     configurationId, subTaskId, submissionId, points
-  ).map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-    .flatMap(_ => getResult(configurationId, subTaskId, submissionId)) match {
-    case Some(course) => course
-    case None => throw new SQLException("Course could not be created")
+  ).flatMap(_ => getResult(configurationId, subTaskId, submissionId)) match {
+    case Some(result) => result
+    case None => throw new SQLException("result could not be created")
   }
 
   /**
@@ -109,6 +108,20 @@ class CheckrunnerSubTaskService {
     */
   def getOrCrate(configurationId: Int, name: String, maxPoints: Int): CheckrunnerSubTask = get(configurationId, name)
     .getOrElse(create(configurationId, name, maxPoints))
+
+  /**
+    * Get a list of all subtask results with task information
+    * @param configurationId The configuration id for which to get the results
+    * @param submissionId The id of the submission to get the subtasks results
+    * @return List of subtasks results with tasks
+    */
+  def listResultsWithTasks(configurationId: Int, submissionId: Int): List[SubTaskResult] = DB.query(
+    "SELECT st.name, st.points AS max_points, str.points FROM checkrunner_sub_task_result str JOIN " +
+      "checkrunner_sub_task st ON str.sub_task_id = st.sub_task_id " +
+      "WHERE str.configuration_id = ? AND str.submission_id = ?",
+    (res, _) => parseSubTaskResultWithSubTask(res),
+    configurationId, submissionId
+  )
 
   /**
     * Parse SQL Query sub task results
@@ -130,7 +143,18 @@ class CheckrunnerSubTaskService {
   private def parseSubTaskResultResult(res: ResultSet) = CheckrunnerSubTaskResult(
     configurationId = res.getInt("configuration_id"),
     subTaskId = res.getInt("sub_task_id"),
-    submissionId = res.getInt("submissionId"),
+    submissionId = res.getInt("submission_id"),
     points = res.getInt("points"),
+  )
+
+  /**
+    * Parse SQL Query sub task result + sub task result
+    * @param res SQL Query result
+    * @return SubTaskResult
+    */
+  private def parseSubTaskResultWithSubTask(res: ResultSet) = SubTaskResult(
+    name = res.getString("name"),
+    points = res.getInt("points"),
+    maxPoints = res.getInt("max_points"),
   )
 }

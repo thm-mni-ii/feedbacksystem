@@ -1,18 +1,16 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
-import de.thm.ii.fbs.services.checker.RemoteCheckerService
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.services.checker.{CheckerServiceFactoryService, RemoteCheckerService}
-import de.thm.ii.fbs.services.persistance._
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
 import java.nio.file.Files
 import java.time.Instant
-
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
@@ -36,6 +34,10 @@ class SubmissionController {
   private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val checkrunnerService: CheckerConfigurationService = null
+  @Autowired
+  private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
 
   /**
     * Get a list of all submissions for a task
@@ -63,6 +65,39 @@ class SubmissionController {
       throw new ForbiddenException()
     }
   }
+
+  /**
+    * Get a list of all submissions for a task
+    * @param uid User id
+    * @param cid Course id
+    * @param tid Task id
+    * @param sid Submission id
+    * @param req Http request
+    * @param res Http response
+    * @return Submission results
+    */
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults"))
+  @ResponseBody
+  def getSubresults(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+             @PathVariable("sid") sid: Int, req: HttpServletRequest, res: HttpServletResponse): List[SubTaskResult] = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = user.id == uid || adminPrivileged
+
+    if (privileged) {
+      checkerConfigurationService.getAll(cid, tid).headOption match {
+        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(cc.id, sid)
+        case None => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+
 
   /**
     * Submit a file for a task

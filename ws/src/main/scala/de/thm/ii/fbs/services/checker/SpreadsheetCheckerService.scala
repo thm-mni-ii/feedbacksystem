@@ -44,13 +44,13 @@ class SpreadsheetCheckerService extends CheckerService {
     val submittedFields = this.getSubmittedFields(submission.id)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
-    this.submittSubTasks(cc.id, submissionID, results)
 
     val exitCode = if (correctCount == fields.length) {0} else {1}
     val resultText = this.generateResultText(results)
 
     val extInfo = new JsonMapper().writeValueAsString(submittedFields)
     submissionService.storeResult(submission.id, cc.id, exitCode, resultText, extInfo)
+    this.submittSubTasks(cc.id, submissionID, results)
   }
 
   private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String): Seq[(String, String)] = {
@@ -73,7 +73,7 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
-    val result = mutable.ListBuffer[CheckResult]()
+    var result = mutable.ListBuffer[CheckResult]()
     var correctCount = 0
 
     for ((key, value) <- fields) {
@@ -83,7 +83,7 @@ class SpreadsheetCheckerService extends CheckerService {
         correct = true
         correctCount += 1
       }
-      result.appended(CheckResult(key, value, enteredValue, correct))
+      result = result.appended(CheckResult(key, value, enteredValue, correct))
     }
 
     (correctCount, result.toList)

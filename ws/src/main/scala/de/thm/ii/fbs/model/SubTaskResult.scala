@@ -8,17 +8,17 @@ import org.json.JSONObject
   * @param maxPoints The maximal amount of points the subtask can give
   * @param points The amount of points given for this result
   */
-case class SubTaskResults(name: String, maxPoints: Int, points: Int)
+case class SubTaskResult(name: String, maxPoints: Int, points: Int)
 
 /**
   * The companion object for SubTaskResults
   */
-object SubTaskResults {
+object SubTaskResult {
   /**
     * Gets a SubTaskResults fromJSON
     * @param obj the JSON Object
     * @return the SubTaskResults
     */
-  def fromJSON(obj: JSONObject): SubTaskResults =
-    SubTaskResults(obj.getString("name"), obj.getInt("maxPoints"), obj.getInt("points"))
+  def fromJSON(obj: JSONObject): SubTaskResult =
+    SubTaskResult(obj.getString("name"), obj.getInt("maxPoints"), obj.getInt("points"))
 }

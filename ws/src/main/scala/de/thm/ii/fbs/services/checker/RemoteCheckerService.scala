@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, Path, Paths}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResults, User => FBSUser}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
@@ -148,8 +148,8 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     val solutionPath = storageService.pathToSolutionFile(sid).get
     val content = Files.readString(solutionPath)
     val tasks = new JSONArray(content)
-    val results = (0 to tasks.length()).map(i => SubTaskResults.fromJSON(tasks.getJSONObject(i)))
-    for (SubTaskResults(name, maxPoints, points) <- results) {
+    val results = (0 to tasks.length()).map(i => SubTaskResult.fromJSON(tasks.getJSONObject(i)))
+    for (SubTaskResult(name, maxPoints, points) <- results) {
       val subTask = subTaskServier.getOrCrate(ccid, name, maxPoints)
       subTaskServier.createResult(ccid, subTask.subTaskId, sid, points)
     }
