@@ -41,6 +41,7 @@ export class CourseResultsComponent implements OnInit {
     this.route.params.subscribe(param => {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
+      this.evaluationUserResults = this.courseResultService.getRequirementCourseResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
       this.requirements = this.taskPointsService.getAllRequirements(this.courseId);
       // this.requirementTaskNames = this.requirements.pipe(map(bp => bp[0].tasks.map(task => task.name)));
