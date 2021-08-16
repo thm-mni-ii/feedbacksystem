@@ -21,8 +21,8 @@
       <div class="bonus-container" *ngFor="let result of evaluationUserResults | async">
               <span class="category-result-backpane" matTooltipPosition="above"
                     matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
-                       <span class="category-bonus bonus" *ngIf="result.bonusPoints==0">{{ result.bonusPoints }}</span>
-                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints!=0">-</span>
+                       <span class="category-bonus bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
+                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints==0">-</span>
                 </span>
       </div>
     </div>
