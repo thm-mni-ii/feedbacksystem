@@ -1,15 +1,14 @@
 package de.thm.ii.fbs.services.checker
 
-import java.io.File
-import java.util.{Map => UtilMap}
 import com.fasterxml.jackson.databind.json.JsonMapper
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, MediaInformation, SpreadsheetMediaInformation, User}
-import de.thm.ii.fbs.services.persistance.{CheckerConfigurationService, CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.Hash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-import java.util
+import java.io.File
+import java.util.{Map => UtilMap}
 import scala.collection.mutable
 
 /**

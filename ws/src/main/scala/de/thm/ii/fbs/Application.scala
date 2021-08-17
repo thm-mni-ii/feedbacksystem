@@ -1,19 +1,15 @@
 package de.thm.ii.fbs
 
-import de.thm.ii.fbs.services.persistance.DatabaseMigrationService
-
-import java.io.FileNotFoundException
+import de.thm.ii.fbs.services.persistence.DatabaseMigrationService
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-import de.thm.ii.fbs.util.DB
 
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.SpringApplication
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.boot.web.servlet.MultipartConfigFactory
