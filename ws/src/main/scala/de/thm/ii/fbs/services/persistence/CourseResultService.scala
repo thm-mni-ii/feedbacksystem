@@ -40,9 +40,11 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |                                                    "mediaType", t.media_type,
     |                                                    "description", t.description),
     |                                "attempts", coalesce(submissions.attempts, 0),
-    |                                "passed", coalesce(submissions.passed, 0)
+    |                                "passed", coalesce(submissions.passed, 0),
+    |                                "points", coalesce(subtasks.points, 0)
     |    )) as results
     |     ,COALESCE(FLOOR(SUM(submissions.passed) / COUNT(DISTINCT t.task_id)), 0) as passed
+    |     ,COALESCE(SUM(subtasks.points), 0) as points
     |from user u
     |         left join user_course uc using (user_id)
     |         left join task t using (course_id)
@@ -50,7 +52,8 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |             select temp.user_id
     |                   ,temp.task_id
     |                   ,count(distinct temp.submission_id) as attempts
-    |                   ,max(temp.passed) as passed
+    |                   ,max(temp.passed) as passed,
+    |                    temp.submission_id
     |             from (
     |                select uts.user_id
     |                      ,uts.task_id
@@ -63,6 +66,9 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |             ) as temp
     |             group by temp.user_id, temp.task_id
     |         ) as submissions using (user_id, task_id)
+    |         left join (
+    |             select str.submission_id, str.sub_task_id, cst.name, SUM(str.points) as points from checkrunner_sub_task_result str join checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id
+    |         ) as subtasks on submissions.submission_id = subtasks.submission_id
     |where course_id = ?
     |group by u.user_id
     |order by u.user_id;
