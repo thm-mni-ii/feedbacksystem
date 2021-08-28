@@ -19,6 +19,8 @@ export class EvaluationResultsComponent implements OnInit {
   courseId: number;
   showDetails: boolean;
   opened = -1;
+  showPoints = false;
+
   log(val) { console.log(val); }
   error(val) { console.error(val); }
 

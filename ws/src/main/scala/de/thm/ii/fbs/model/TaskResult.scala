@@ -6,8 +6,9 @@ package de.thm.ii.fbs.model
   * @param task The task
   * @param attempts The attempts made to solve it
   * @param passed True if task was passed
+  * @param points Points archived in last attempt
   */
-case class TaskResult(task: Task, attempts: Int, passed: Boolean) extends Ordered[TaskResult] {
+case class TaskResult(task: Task, attempts: Int, passed: Boolean, points: Int) extends Ordered[TaskResult] {
   /**
     * Compares TaskResults by Task Id.
     * @param that TaskResult to be compared with

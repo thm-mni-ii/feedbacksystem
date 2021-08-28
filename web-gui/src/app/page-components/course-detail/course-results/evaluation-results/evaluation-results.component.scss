@@ -191,3 +191,9 @@
   align-items: center;
   justify-content: center;
 }
+
+.align-right-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+}
