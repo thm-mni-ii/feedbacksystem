@@ -2036,6 +2036,8 @@ components:
           type: string
         outputFields:
           type: string
+        pointFields:
+          type: string
     SpreadsheetInformationResponse:
       type: object
       properties:
