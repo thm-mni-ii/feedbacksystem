@@ -52,8 +52,8 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |             select temp.user_id
     |                   ,temp.task_id
     |                   ,count(distinct temp.submission_id) as attempts
-    |                   ,max(temp.passed) as passed,
-    |                    temp.submission_id
+    |                   ,max(temp.passed) as passed
+    |                   ,max(temp.submission_id) as submission_id
     |             from (
     |                select uts.user_id
     |                      ,uts.task_id
@@ -67,7 +67,8 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |             group by temp.user_id, temp.task_id
     |         ) as submissions using (user_id, task_id)
     |         left join (
-    |             select str.submission_id, str.sub_task_id, cst.name, SUM(str.points) as points from checkrunner_sub_task_result str join checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id
+    |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
+    |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
     |         ) as subtasks on submissions.submission_id = subtasks.submission_id
     |where course_id = ?
     |group by u.user_id
