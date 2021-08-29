@@ -30,6 +30,7 @@ import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialo
 export class TaskDetailComponent implements OnInit {
   courseId: number;
   task: Task;
+  uid: number;
   status: boolean | null = null;
   submissions: Submission[];
   lastSubmission: Submission;
@@ -69,10 +70,10 @@ export class TaskDetailComponent implements OnInit {
       }),
       mergeMap(task => {
         this.task = task;
-        const uid = this.authService.getToken().id;
+        this.uid = this.authService.getToken().id;
         this.titlebar.emitTitle(this.task.name);
         this.deadlinePassed = this.reachedDeadline(Date.now(), Date.parse(task.deadline));
-        return this.submissionService.getAllSubmissions(uid, this.courseId, task.id);
+        return this.submissionService.getAllSubmissions(this.uid, this.courseId, task.id);
       }),
       tap(submissions => {
         this.submissions = submissions;

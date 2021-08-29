@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable} from 'rxjs';
 import {Submission} from '../model/Submission';
 import {HttpClient} from '@angular/common/http';
+import {SubTaskResult} from '../model/SubTaskResult';
 
 @Injectable({
   providedIn: 'root'
@@ -68,5 +69,10 @@ export class SubmissionService {
   // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
   restartAllSubmissions(uid: number, cid: number, tid: number, sid: number) {
     // TODO: this Route doesn't exist yet
+  }
+
+  // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults
+  getSubTaskResults(uid: number, cid: number, tid: number, sid: number): Observable<SubTaskResult[]> {
+    return this.http.get<SubTaskResult[]>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/subresults`);
   }
 }
