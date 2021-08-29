@@ -19,7 +19,8 @@ object MediaInformation {
   def fromJSONString(json: String): MediaInformation = {
     val obj = new JSONObject(json)
     if (obj.getString("type") == "spreadsheetMediaInformation") {
-      SpreadsheetMediaInformation(obj.getString("idField"), obj.getString("inputFields"), obj.getString("outputFields"), obj.getInt("decimals"))
+      SpreadsheetMediaInformation(obj.getString("idField"), obj.getString("inputFields"),
+        obj.getString("outputFields"), obj.getString("pointFields"), obj.getInt("decimals"))
     } else {
       throw new IllegalArgumentException()
     }
@@ -38,12 +39,14 @@ object MediaInformation {
           .put("idField", sobj.idField)
           .put("inputFields", sobj.inputFields)
           .put("outputFields", sobj.outputFields)
+          .put("pointFields", sobj.pointFields)
           .put("decimals", sobj.decimals)
           .toString
       case sobj: SpreadsheetResponseInformation =>
         new JSONObject()
           .put("inputs", sobj.inputs)
           .put("outputs", sobj.outputs)
+          .put("points", sobj.points)
           .put("decimals", sobj.decimals)
           .toString
       case _ =>
@@ -57,11 +60,13 @@ object MediaInformation {
   * @param idField the idField
   * @param inputFields the inputFields
   * @param outputFields the outputFields
+  * @param pointFields the pointFields
   * @param decimals the amount of decimals to round to
   */
 case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
                                        outputFields: String,
+                                       pointFields: String,
                                        decimals: Int) extends MediaInformation
 
 /**
@@ -70,5 +75,5 @@ case class SpreadsheetMediaInformation(idField: String,
   * @param outputs the outputs
   * @param decimals the amount of decimals to round to
   */
-case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], decimals: Int) extends MediaInformation
+case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], points: Seq[String], decimals: Int) extends MediaInformation
 

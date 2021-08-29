@@ -91,13 +91,10 @@ class CheckrunnerSubTaskService {
     * @param points the max points
     * @return The new Checkrunner
     */
-  def createResult(configurationId: Int, subTaskId: Int, submissionId: Int, points: Int): CheckrunnerSubTaskResult = DB.insert(
+  def createResult(configurationId: Int, subTaskId: Int, submissionId: Int, points: Int): Unit = DB.insert(
     "INSERT INTO checkrunner_sub_task_result (configuration_id, sub_task_id, submission_id, points) VALUES (?, ?, ?, ?)",
     configurationId, subTaskId, submissionId, points
-  ).flatMap(_ => getResult(configurationId, subTaskId, submissionId)) match {
-    case Some(result) => result
-    case None => throw new SQLException("result could not be created")
-  }
+  )
 
   /**
     * Gets or creates a subtask

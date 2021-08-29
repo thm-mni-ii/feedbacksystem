@@ -58,6 +58,10 @@
           <mat-icon matSuffix (click)="getFromSpreadsheet('outputFields')">search</mat-icon>
         </mat-form-field>
         <mat-form-field class="col">
+          <input matInput type="text" placeholder="Punkte Felder" formControlName="pointFields" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('pointFields')">search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
           <input matInput type="number" placeholder="Nachkommastellen" formControlName="decimals" required>
         </mat-form-field>
       </div>

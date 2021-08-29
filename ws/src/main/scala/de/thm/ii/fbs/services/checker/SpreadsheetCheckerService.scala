@@ -39,7 +39,8 @@ class SpreadsheetCheckerService extends CheckerService {
     val spreadsheetMediaInformation = task.mediaInformation.get.asInstanceOf[SpreadsheetMediaInformation]
     val submission = this.submissionService.getOne(submissionID, fu.id).get
 
-    val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username)
+    val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
+    val pointFields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.pointFields)
     val submittedFields = this.getSubmittedFields(submission.id)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
@@ -49,17 +50,16 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val extInfo = new JsonMapper().writeValueAsString(submittedFields)
     submissionService.storeResult(submission.id, cc.id, exitCode, resultText, extInfo)
-    this.submittSubTasks(cc.id, submissionID, results)
+    this.submittSubTasks(cc.id, submissionID, results, pointFields)
   }
 
-  private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String): Seq[(String, String)] = {
+  private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String, fields: String): Seq[(String, String)] = {
     val path = this.storageService.pathToMainFile(ccID).get.toString
     val spreadsheetFile = new File(path)
 
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
-    val fields = this.spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, spreadsheetMediaInformation.outputFields)
-    fields
+    this.spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
   }
 
   private def getSubmittedFields(submissionID: Int): UtilMap[String, String] = {
@@ -108,11 +108,16 @@ class SpreadsheetCheckerService extends CheckerService {
     resultString.toString()
   }
 
-  private def submittSubTasks(configurationId: Int, submissionId: Int, results: Seq[SpreadsheetCheckerService.this.CheckResult]): Unit = {
+  private def submittSubTasks(configurationId: Int, submissionId: Int, results: Seq[SpreadsheetCheckerService.this.CheckResult],
+                              points: Seq[(String, String)]): Unit = {
+    val pointsMap = points.toMap
     for (CheckResult(key, _, _, correct) <- results) {
-      val points = if (correct) {1} else {0}
+      val maxPoints = pointsMap.get(key)
+        .flatMap(str => str.toFloatOption).map(flo => flo.toInt)
+        .getOrElse(1)
+      val points = if (correct) {maxPoints} else {0}
 
-      val subTask = subTaskService.getOrCrate(configurationId, key, 1)
+      val subTask = subTaskService.getOrCrate(configurationId, key, maxPoints)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
     }
   }
