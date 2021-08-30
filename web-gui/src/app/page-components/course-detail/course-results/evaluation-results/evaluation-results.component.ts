@@ -19,10 +19,7 @@ export class EvaluationResultsComponent implements OnInit {
   courseId: number;
   showDetails: boolean;
   opened = -1;
-  showPoints = false;
-
-  log(val) { console.log(val); }
-  error(val) { console.error(val); }
+  showPoints = true;
 
   constructor(private route: ActivatedRoute,
               private courseResultService: CourseResultsService) { }
@@ -32,10 +29,7 @@ export class EvaluationResultsComponent implements OnInit {
       this.courseId = param.id;
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
       this.evaluationUserResults = this.courseResultService.getRequirementCourseResults(this.courseId);
-      this.courseResultService.getRequirementCourseResults(this.courseId).subscribe(res => this.log(res));
-      this.requirements.subscribe(req => this.log(req));
     });
-
   }
 
   toggleDetails(item: number) {
