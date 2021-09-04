@@ -149,8 +149,10 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
   }
 
   private def getJoinRoomResponse(url: String): JoinRoomBBBResponse = {
-    restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse]).getBody
+    val response = restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse])
+    return response.getBody
   }
+
 
   /**
     * Ends the conference

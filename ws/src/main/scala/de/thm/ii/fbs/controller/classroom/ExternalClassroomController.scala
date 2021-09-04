@@ -46,5 +46,4 @@ class ExternalClassroomController(private val authService: AuthService,
     logger.info("User {} left classroom of course {}!", user.getName, courseId)
     classroomService.leaveUser(courseId, user)
   }
-
 }

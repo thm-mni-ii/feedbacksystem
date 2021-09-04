@@ -6,7 +6,6 @@ import {ChangePasswordComponent} from './page-components/change-password/change-
 import {MyCoursesComponent} from './page-components/my-courses/my-courses.component';
 import {SearchCoursesComponent} from './page-components/search-courses/search-courses.component';
 import {CourseDetailComponent} from './page-components/course-detail/course-detail.component';
-import {ConferenceComponent} from './page-components/conference/conference.component';
 import {UserManagementComponent} from './page-components/user-management/user-management.component';
 import {NotFoundComponent} from './page-components/not-found/not-found.component';
 import {LoginComponent} from './page-components/login/login.component';
@@ -24,7 +23,6 @@ const routes: Routes = [
       {path: 'courses', component: MyCoursesComponent, canActivate: [AuthGuard]},
       {path: 'courses/search', component: SearchCoursesComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id', component: CourseDetailComponent, canActivate: [AuthGuard]},
-      {path: 'courses/:id/tickets', component: ConferenceComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/task/:tid', component: TaskDetailComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},

@@ -27,10 +27,7 @@ import {MarkdownModule} from 'ngx-markdown';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
-import { NewconferenceDialogComponent } from './dialogs/newconference-dialog/newconference-dialog.component';
 import {MatGridListModule} from '@angular/material/grid-list';
-import { NewticketDialogComponent } from './dialogs/newticket-dialog/newticket-dialog.component';
-import { IncomingCallDialogComponent } from './dialogs/incoming-call-dialog/incoming-call-dialog.component';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
@@ -51,14 +48,11 @@ import { ResultsComponent } from './page-components/results/results.component';
 import { DropzoneComponent } from './tool-components/dropzone/dropzone.component';
 import { SidebarComponent } from './page-components/sidebar/sidebar.component';
 import { MyCoursesComponent } from './page-components/my-courses/my-courses.component';
-import {ConferenceComponent} from './page-components/conference/conference.component';
 import { NotFoundComponent } from './page-components/not-found/not-found.component';
 import {TaskNewDialogComponent} from './dialogs/task-new-dialog/task-new-dialog.component';
 import {CourseUpdateDialogComponent} from './dialogs/course-update-dialog/course-update-dialog.component';
 import {CreateGuestUserDialogComponent} from './dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
-import {InvitetoConferenceDialogComponent} from './dialogs/inviteto-conference-dialog/inviteto-conference-dialog.component';
 import {UserTeacherFilter} from './pipes/user-teacher-filter';
-import {AssignTicketDialogComponent} from './dialogs/assign-ticket-dialog/assign-ticket-dialog.component';
 import { ParticipantsComponent } from './tool-components/participants/participants.component';
 import { ConfigurationListComponent } from './page-components/configuration-list/configuration-list.component';
 import { MenuBarComponent } from './tool-components/menu-bar/menu-bar.component';
@@ -111,10 +105,7 @@ export const httpInterceptorProviders = [
     ImpressumDialogComponent,
     NotFoundComponent,
     ChangePasswordComponent,
-    NewconferenceDialogComponent,
     UserTeacherFilter,
-    NewticketDialogComponent,
-    IncomingCallDialogComponent,
     SearchCoursesComponent,
     CoursePreviewComponent,
     CourseDetailComponent,
@@ -127,12 +118,9 @@ export const httpInterceptorProviders = [
     SubmissionTextComponent,
     ResultsComponent,
     MyCoursesComponent,
-    ConferenceComponent,
     LoginComponent,
     TaskNewDialogComponent,
     CourseUpdateDialogComponent,
-    AssignTicketDialogComponent,
-    InvitetoConferenceDialogComponent,
     DropzoneComponent,
     ParticipantsComponent,
     ConfigurationListComponent,
@@ -173,8 +161,7 @@ export const httpInterceptorProviders = [
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
   ],
-  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent,
-    InvitetoConferenceDialogComponent, AssignTicketDialogComponent],
+  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent],
   providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })

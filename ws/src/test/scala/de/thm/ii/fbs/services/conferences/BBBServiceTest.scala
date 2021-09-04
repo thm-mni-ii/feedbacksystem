@@ -1,8 +1,10 @@
 package de.thm.ii.fbs.services.conferences
-import java.util.UUID
 
-import de.thm.ii.fbs.model.{GlobalRole, User}
-import org.junit.{AfterClass, BeforeClass, Test, Assert}
+import java.util.UUID
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
+import de.thm.ii.fbs.services.classroom.ClassroomService
+import de.thm.ii.fbs.services.classroom.DigitalClassroom
+import org.junit.{AfterClass, Assert, BeforeClass, Test}
 import org.junit.runner.RunWith
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
@@ -29,17 +31,18 @@ class BBBServiceTest {
   private val apiUrl: String = null
 
   @Autowired
-  private val bbbService: BBBService = null;
+  private val classroomService: ClassroomService = null;
 
   /**
     * Tests the conference registration
     */
   @Test
-  def registerBBBConferenceTest: Unit = {
+  def createClassroomTest(): Unit = {
     val id = UUID.randomUUID().toString
-    val password = UUID.randomUUID().toString
-    val moderatorPassword = UUID.randomUUID().toString
-    val success = bbbService.registerBBBConference(id, "Test Meeting", password, moderatorPassword)
+    val studentPassword = UUID.randomUUID().toString
+    val tutorPassword = UUID.randomUUID().toString
+    val teacherPassword = UUID.randomUUID().toString
+    val success = classroomService.registerDigitalClassroom(id, "Test Meeting", studentPassword, tutorPassword, teacherPassword)
 
     Assert.assertTrue(success)
   }
@@ -52,7 +55,8 @@ class BBBServiceTest {
     val user = new User( "test", "Test", "test@example.org", "User", GlobalRole.USER, Option.empty[String], 0) ;
     val id = UUID.randomUUID().toString
     val password = UUID.randomUUID().toString
-    val conferenceLink = bbbService.getBBBConferenceLink(user, id, password)
+    val classroom = new DigitalClassroom("ClassroomMock", 1, "s", "tu", "te")
+    val conferenceLink = classroomService.getBBBConferenceLink(user, classroom, CourseRole.TUTOR)
 
     val uri = conferenceLink.toString
     Assert.assertTrue(uri.startsWith(apiUrl))

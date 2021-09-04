@@ -3,7 +3,6 @@ package de.thm.ii.fbs.config
 import java.security.Principal
 
 import de.thm.ii.fbs.model.User
-import de.thm.ii.fbs.model.classroom.UserSessionMap
 import de.thm.ii.fbs.services.security.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,7 +88,6 @@ class JWTAuthenticationChannelInterceptor(registry: DefaultSimpUserRegistry, aut
    override def preSend(message: Message[_], channel: MessageChannel): Message[_] = {
     val accessor = StompHeaderAccessor.wrap(message)
     if (accessor.getMessageType == SimpMessageType.DISCONNECT) {
-      UserSessionMap.delete(accessor.getSessionId)
       registry.onApplicationEvent(new SessionDisconnectEvent(this, message.asInstanceOf[Message[Array[Byte]]], accessor.getSessionId, CloseStatus.NORMAL))
       message
     } else {
@@ -105,7 +103,6 @@ class JWTAuthenticationChannelInterceptor(registry: DefaultSimpUserRegistry, aut
       accessor.setLeaveMutable(true)
 
       if (accessor.getMessageType == SimpMessageType.CONNECT) {
-        UserSessionMap.map(accessor.getSessionId, user)
       }
 
       if (accessor.getMessageType match {

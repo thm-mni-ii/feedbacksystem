@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject, BehaviorSubject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {ExternalClassroomHandlingService} from './external-classroom-handling-service';
 import {AuthService} from './auth.service';
 import {MatDialog} from '@angular/material/dialog';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient} from '@angular/common/http';
 /**
  * Service that provides observables that asynchronacally updates tickets, users and privide Conferences to take
  * part in a conference.
@@ -47,12 +47,8 @@ export class ExternalClassroomService {
     }, 1000);
   }
 
-  public getClassroomWindowHandle() {
-    return this.isWindowHandleOpen.asObservable();
-  }
-
   public isJoined() {
-    return this.conferenceWindowHandle != undefined && !this.conferenceWindowHandle.closed
+    return this.conferenceWindowHandle !== undefined && !this.conferenceWindowHandle.closed;
   }
 
   /**
@@ -61,14 +57,13 @@ export class ExternalClassroomService {
    * @return Observable that completes if connected.
    */
   public join(courseId: number) {
-    if (this.conferenceWindowHandle == undefined || this.conferenceWindowHandle.closed) {
-      this.authService.getToken().id;
+    if (this.conferenceWindowHandle === undefined || this.conferenceWindowHandle.closed) {
       this.courseId = courseId;
       this.http.get<String>(`/api/v1/classroom/${this.courseId}/join`).subscribe(url => {
-        this.conferenceWindowHandle = open(url.toString())
-      })
+        this.conferenceWindowHandle = open(url.toString());
+      });
     } else {
-      this.conferenceWindowHandle.focus()
+      this.conferenceWindowHandle.focus();
     }
   }
 
@@ -76,6 +71,6 @@ export class ExternalClassroomService {
    * Not called
    */
   public leaveClassroom() {
-    this.http.get<string>(`/api/v1/classroom/${this.courseId}/leave`)
+    this.http.get<string>(`/api/v1/classroom/${this.courseId}/leave`);
   }
 }
