@@ -5,10 +5,15 @@ import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.conn.ssl.{NoopHostnameVerifier, SSLConnectionSocketFactory, TrustSelfSignedStrategy}
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.ssl.SSLContextBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 
 import java.net.URI
@@ -19,7 +24,7 @@ import scala.language.postfixOps
 /**
   * Handles BBB requests.
   * @param templateBuilder Request template builder.
-  * @param apiUrl the bbb api url
+  * @param classroomUrl the bbb api url
   * @param secret the bbb secret
   * @param originName the bbb meta data that identifies the origin
   * @param originVersion the bbb meta data the identifies the origin version
@@ -30,15 +35,25 @@ import scala.language.postfixOps
   */
 @Service
 class ClassroomService(templateBuilder: RestTemplateBuilder,
-                       @Value("${services.bbb.service-url}") private val apiUrl: String,
-                       @Value("${services.bbb.shared-secret}") private val secret: String,
-                       @Value("${services.bbb.origin-name}") private val originName: String,
-                       @Value("${services.bbb.origin-version}") private val originVersion: String,
+                       @Value("${services.classroom.classroom-url}") private val classroomUrl: String,
+                       @Value("${services.classroom.classroom-secret}") private val secret: String,
+                       @Value("${services.classroom.insecure}") private val insecure: Boolean,
                        courseService: CourseService,
                        courseRegistrationService: CourseRegistrationService
                 ) {
 
-  private val restTemplate = templateBuilder.build()
+  private val restTemplate: RestTemplate = {
+    val requestFactory = new HttpComponentsClientHttpRequestFactory()
+    if (insecure) {
+      val sslContextBuilder = new SSLContextBuilder()
+      sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy)
+      val socketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build, NoopHostnameVerifier.INSTANCE)
+      val httpClient = HttpClients.custom.setSSLSocketFactory(socketFactory).build()
+      requestFactory.setHttpClient(httpClient)
+    }
+    new RestTemplate(requestFactory)
+  }
+
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
 
   def joinUser(courseId: Int, user: User): URI = {
@@ -98,8 +113,6 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
       "attendeePW" -> studentPassword,
       "tutorPW" -> tutorPassword,
       "moderatorPW" -> teacherPassword,
-      "meta_bbb-origin-server-name" -> originName,
-      "meta_bbb-origin-version" -> originVersion,
       "meta_bbb-origin" -> "Greenlight"
     )
     val response = getClassroomApi("create", request)
@@ -180,7 +193,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     queryBuilder.queryParam("checksum", s"$checksum")
     values += checksum
     query = queryBuilder.build.expand(values.toArray: _*).toString.substring(1)
-    s"$apiUrl/api/$method?$query"
+    s"$classroomUrl/api/$method?$query"
   }
-}
 
+}
