@@ -69,20 +69,3 @@ jobs:
         run: |
           rm -f ~/.gradle/caches/modules-2/modules-2.lock
           rm -f ~/.gradle/caches/modules-2/gc.properties
-  deploy:
-    name: Deploy to test system
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event == 'push'
-
-    steps:
-    - name: Redeploy testsystem via ssh.
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        proxy_host: ${{ secrets.DEPLOY_PROXY_HOST }}
-        proxy_username: ${{ secrets.DEPLOY_PROXY_USER }}
-        proxy_key: ${{ secrets.DEPLOY_PROXY_KEY }}
-        script: deployment/restart-feedbacksystem.sh
