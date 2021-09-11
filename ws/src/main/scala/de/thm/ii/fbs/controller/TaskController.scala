@@ -1,14 +1,16 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.services.persistence._
+
 import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, Task}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, Task, UserTaskResult}
 import de.thm.ii.fbs.services.checker.SpreadsheetService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -52,6 +54,21 @@ class TaskController {
   }
 
   /**
+    * Get a task list
+    *
+    * @param cid Course id
+    * @param req http request
+    * @param res http response
+    * @return course list
+    */
+  @GetMapping(value = Array("/{cid}/tasks/results"))
+  @ResponseBody
+  def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
+    val auth = authService.authorize(req, res)
+    taskService.getTaskResults(cid, auth.id)
+  }
+
+  /**
     * Get a single task
     * @param cid Course id
     * @param tid Task id
@@ -79,6 +96,21 @@ class TaskController {
       }
       case _ => throw new ResourceNotFoundException()
     }
+  }
+
+  /**
+    * Get a task list
+    *
+    * @param tid Course id
+    * @param req http request
+    * @param res http response
+    * @return course list
+    */
+  @GetMapping(value = Array("/{cid}/tasks/{tid}/result"))
+  @ResponseBody
+  def getTaskResult(@PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Option[UserTaskResult] = {
+    val auth = authService.authorize(req, res)
+    taskService.getTaskResult(tid, auth.id)
   }
 
   /**
