@@ -3,8 +3,6 @@
   <span class="meta">
     <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
     <span class="tiny">{{task.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-    <span class="state passed" *ngIf="status | async"><mat-icon>check_circle</mat-icon></span>
-    <span class="state failed" *ngIf="!(status | async) && (status | async) != null"><mat-icon>not_interested</mat-icon></span>
-    <span class="state not-done" *ngIf="(status | async) == null"><mat-icon>error_outline</mat-icon></span>
+    <span class="state">{{taskResult.points}}/{{taskResult.maxPoints}} Punkte</span>
   </span>
 </mat-card>

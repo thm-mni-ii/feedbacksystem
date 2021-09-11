@@ -4,6 +4,7 @@ import {Task} from '../../../model/Task';
 import {SubmissionService} from '../../../service/submission.service';
 import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {UserTaskResult} from '../../../model/UserTaskResult';
 
 @Component({
   selector: 'app-task-preview',
@@ -13,6 +14,7 @@ import {map} from 'rxjs/operators';
 export class TaskPreviewComponent implements OnInit {
   @Input() courseId: number;
   @Input() task: Task;
+  @Input() taskResult: UserTaskResult;
   status: Observable<boolean | null> = of(null);
 
   constructor(private authService: AuthService, private submissionService: SubmissionService) {}
