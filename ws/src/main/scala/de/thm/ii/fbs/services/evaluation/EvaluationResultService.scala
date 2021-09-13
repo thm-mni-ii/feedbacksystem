@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{CourseEvaluationResult, CourseResult, EvaluationContainer,
+import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult, EvaluationContainer,
   EvaluationContainerResult, EvaluationContainerWithTaskResults, Task, TaskResult}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -21,11 +21,11 @@ class EvaluationResultService {
     * @param results the Course Results
     * @return Evaluation Course results for a User
     */
-  def evaluate(container: List[EvaluationContainer], results: List[CourseResult]): List[CourseEvaluationResult] = {
+  def evaluate(container: List[EvaluationContainer], results: List[CourseResult]): List[EvaluationUserResult] = {
     results.map(r => evaluateOne(container, r))
   }
 
-  private def evaluateOne(container: List[EvaluationContainer], result: CourseResult): CourseEvaluationResult = {
+  private def evaluateOne(container: List[EvaluationContainer], result: CourseResult): EvaluationUserResult = {
     val taskResults = result.results.foldLeft(Map[Int, TaskResult]()) { (m, s) => m + (s.task.id -> s) }
     var passed = true
     var bonusPoints = 0
@@ -42,7 +42,7 @@ class EvaluationResultService {
         EvaluationContainerWithTaskResults(c.id, tasksResults, c.toPass, c.bonusFormula, c.hidePoints))
     })
 
-    CourseEvaluationResult(result.user, passed, bonusPoints, evaluationResult)
+    EvaluationUserResult(result.user, passed, bonusPoints, evaluationResult)
   }
 
   private def getTaskResults(tasks: List[Task], taskResults: Map[Int, TaskResult]) = {
