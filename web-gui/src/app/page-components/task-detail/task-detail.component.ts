@@ -18,6 +18,7 @@ import {of} from 'rxjs';
 import {Roles} from '../../model/Roles';
 import {AllSubmissionsComponent} from '../../dialogs/all-submissions/all-submissions.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
+import {UserTaskResult} from '../../model/UserTaskResult';
 
 /**
  * Shows a task in detail
@@ -30,6 +31,7 @@ import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialo
 export class TaskDetailComponent implements OnInit {
   courseId: number;
   task: Task;
+  taskResult: UserTaskResult;
   uid: number;
   status: boolean | null = null;
   submissions: Submission[];
@@ -69,7 +71,12 @@ export class TaskDetailComponent implements OnInit {
         return this.taskService.getTask(this.courseId, taskId);
       }),
       mergeMap(task => {
+        return this.taskService.getTaskResult(this.courseId, task.id)
+          .pipe(map(taskResult => ({task, taskResult})));
+      }),
+      mergeMap(({task, taskResult}) => {
         this.task = task;
+        this.taskResult = taskResult;
         this.uid = this.authService.getToken().id;
         this.titlebar.emitTitle(this.task.name);
         this.deadlinePassed = this.reachedDeadline(Date.now(), Date.parse(task.deadline));

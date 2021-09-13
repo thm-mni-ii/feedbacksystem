@@ -99,8 +99,8 @@ class TaskService {
     "COALESCE(SUM(cst.points), 0) AS max_points FROM task LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id " +
     "LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id LEFT JOIN checkrunner_sub_task_result cstr " +
     "on cst.configuration_id = cstr.configuration_id and cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = " +
-    "(SELECT MAX(uts.submission_id) FROM user_task_submission uts WHERE uts.task_id = task.task_id AND uts.user_id = :userID) " +
-    "WHERE task_id = :taskID GROUP BY task.task_id;", (res, _) => parseUserTaskResult(res), uid, tid).headOption
+    "(SELECT MAX(uts.submission_id) FROM user_task_submission uts WHERE uts.task_id = task.task_id AND uts.user_id = ?) " +
+    "WHERE task.task_id = ? GROUP BY task.task_id;", (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
     deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),

@@ -20,9 +20,7 @@
         <span *ngIf="deadlinePassed" class="tiny failed">Abgabeende erreicht!</span>
         <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
         <span class="tiny">{{task?.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-        <span class="state passed tiny" *ngIf="status && !pending"><mat-icon>check_circle</mat-icon>&nbsp;bestanden</span>
-        <span class="state failed tiny" *ngIf="!status && status != null && !pending"><mat-icon>not_interested</mat-icon>&nbsp;nicht bestanden</span>
-        <span class="state tiny not-done" *ngIf="status == null && !pending"><mat-icon>error_outline</mat-icon></span>
+        <span class="state" *ngIf="!pending">{{taskResult.points}}/{{taskResult.maxPoints}} Punkte</span>
         <span class="state" *ngIf="pending"><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span>
       </span>
     </div>
