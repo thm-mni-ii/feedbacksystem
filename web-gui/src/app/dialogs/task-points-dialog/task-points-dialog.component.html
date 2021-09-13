@@ -54,9 +54,6 @@
   <div class="spacer"></div>
 
   <div mat-dialog-actions class="actions">
-    <div class="toggle-box">
-      <mat-slide-toggle [(ngModel)]="hidePoints" [color]="toggleColor" (change)="toggleChange()">Punkte für den gesamten Kurs verbergen</mat-slide-toggle>
-    </div>
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
     <button mat-flat-button  color="accent" (click)="save()">Erstellen</button>
   </div>
