@@ -31,6 +31,8 @@ tags:
     description: Legally obligatory documents and checks
   - name: Result
     description: Incomming checker results
+  - name: Analysis
+    description: Routes to query data for analysis purposes
 paths:
   /login/cas:
     post:
@@ -1883,6 +1885,42 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/analysis/courses/{cid}/results/{tid}":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - Analysis
+      summary: Get anonymised results of a course from an task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: Task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/AnalysisCourseResult'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -2131,6 +2169,32 @@ components:
                 type: integer
               passed:
                 type: boolean
+    AnalysisCourseResult:
+      type: array
+      items:
+        type: object
+        required:
+          - submission
+          - passed
+          - resultText
+          - userId
+          - attempt
+        properties:
+          submission:
+            type: string
+            description: The submission of the user
+          passed:
+            type: boolean
+            description: Was the task passed?
+          resultText:
+            type: string
+            description: The result of the test
+          userId:
+            type: integer
+            description: An identification number for the user. However, this does not correspond to the correct userId, but is incremented during creation.
+          attempt:
+            type: integer
+            description: Attempt number
     EvaluationResults:
       type: array
       items:

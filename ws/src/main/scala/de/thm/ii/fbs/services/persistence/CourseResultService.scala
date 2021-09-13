@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{CourseResult, TaskResult}
+import de.thm.ii.fbs.model.{CourseResult, AnalysisCourseResult, TaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -20,13 +20,15 @@ class CourseResultService {
   private val courseRegistration: CourseRegistrationService = null
   @Autowired
   private val objectMapper: ObjectMapper = null
+  @Autowired
+  private val storageService: StorageService = null
 
   /**
     * Get All Course Results
     * @param cid Course id
     * @return all Course Results
     */
-def getAll(cid: Int): List[CourseResult] = DB.query("""
+  def getAll(cid: Int): List[CourseResult] = DB.query("""
     |select u.user_id
     |     ,u.prename
     |     ,u.surname
@@ -68,8 +70,31 @@ def getAll(cid: Int): List[CourseResult] = DB.query("""
     |order by u.user_id;
     |""".stripMargin, (res, _) => parseResult(res), cid)
 
+  /**
+    * Get All Course Results by a Task
+    * @param cid Course id
+    * @param tid Task id
+    * @return all Course Results
+    */
+  def getAllByTask(cid: Int, tid: Int): List[AnalysisCourseResult] = DB.query("""
+      |select submission_id, task_id, DENSE_RANK() OVER(order by user_id) as user_id,
+      |ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY submission_time) as attempt,
+      |not exit_code as passed, result_text from user_task_submission
+      |join checker_result using (submission_id)
+      |join task using (task_id) where course_id = ? and task_id = ?
+      |group by submission_id order by submission_time;
+      |""".stripMargin, (res, _) => parseByTaskResult(res), cid, tid)
+
   private def parseResult(res: ResultSet): CourseResult = CourseResult(
     courseRegistration.parseUserResult(res), res.getBoolean("passed"),
     objectMapper.readValue(res.getString("results"), classOf[Array[TaskResult]]).toList.sorted
+  )
+
+  private def parseByTaskResult(res: ResultSet): AnalysisCourseResult = AnalysisCourseResult(
+    submission = storageService.getSolutionFile(res.getInt("submission_id")),
+    passed = res.getBoolean("passed"),
+    resultText = res.getString("result_text"),
+    userId = res.getInt("user_id"),
+    attempt = res.getInt("attempt")
   )
 }
