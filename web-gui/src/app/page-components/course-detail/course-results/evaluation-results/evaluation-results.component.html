@@ -19,10 +19,10 @@
         </div>
       </div>
       <div class="bonus-container" *ngFor="let result of evaluationUserResults | async">
-              <span class="category-result-backpane" matTooltipPosition="above"
+              <span class="category-result-backpane {{(result.bonusPoints == 0) ? 'not-tried' : ''}}" matTooltipPosition="above"
                     matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
-                       <span class="category-bonus bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
-                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints==0">-</span>
+                       <span class="bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
+                       <span class="no-bonus" *ngIf="result.bonusPoints==0">-</span>
                 </span>
       </div>
     </div>
@@ -56,7 +56,7 @@
       <div class="task-container" *ngFor="let userResult of evaluationUserResults | async">
           <span class="state passed" *ngIf="userResult.passed"><mat-icon>check_circle</mat-icon></span>
           <span class="state failed" *ngIf="!userResult.passed"><mat-icon class="close-icon">cancel</mat-icon></span>
-          <span class="category-result-backpane" matTooltipPosition="above"
+          <span class="category-result-backpane {{(userResult.bonusPoints == 0) ? 'not-tried' : ''}}" matTooltipPosition="above"
                 matTooltip="{{userResult.user.surname}}, {{userResult.user.prename}}, {{userResult.bonusPoints}}">
              <span class="category-bonus bonus" *ngIf="userResult.bonusPoints!=0">{{ userResult.bonusPoints }}</span>
              <span class="category-bonus no-bonus" *ngIf="userResult.bonusPoints==0">-</span>
