@@ -43,6 +43,8 @@ export class TaskPointsDialogComponent implements OnInit {
         // Workaround for default tab selection not working
         this.index = -1;
         setTimeout(() => this.changeIndex(0), 0);
+      } else {
+        this.addTab();
       }
     });
     this.allRequirements = [];
@@ -55,7 +57,8 @@ export class TaskPointsDialogComponent implements OnInit {
       tasks: [],
       hidePoints: false
     });
-    this.changeIndex(this.allRequirements.length - 1);
+    this.index = -1;
+    setTimeout(() => this.changeIndex(this.allRequirements.length - 1), 0);
   }
 
   changeIndex(i: any) {
