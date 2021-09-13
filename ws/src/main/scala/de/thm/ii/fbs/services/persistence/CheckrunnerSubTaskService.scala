@@ -25,7 +25,7 @@ class CheckrunnerSubTaskService {
   def getAll(configurationId: Int): List[CheckrunnerSubTask] = DB.query(
     "SELECT configuration_id, sub_task_id, submission_id, points FROM checkrunner_sub_task WHERE configuration_id = ?",
     (res, _) => parseSubTaskResult(res),
-    configurationId,
+    configurationId
   )
 
   /**
@@ -38,7 +38,6 @@ class CheckrunnerSubTaskService {
     "SELECT configuration_id, sub_task_id, name, points FROM checkrunner_sub_task WHERE configuration_id = ? AND name = ?",
     (res, _) => parseSubTaskResult(res),
     configurationId, name
-
   ).headOption
 
   /**
@@ -129,7 +128,7 @@ class CheckrunnerSubTaskService {
     configurationId = res.getInt("configuration_id"),
     subTaskId = res.getInt("sub_task_id"),
     name = res.getString("name"),
-    points = res.getInt("points"),
+    points = res.getInt("points")
   )
 
   /**
@@ -141,7 +140,7 @@ class CheckrunnerSubTaskService {
     configurationId = res.getInt("configuration_id"),
     subTaskId = res.getInt("sub_task_id"),
     submissionId = res.getInt("submission_id"),
-    points = res.getInt("points"),
+    points = res.getInt("points")
   )
 
   /**
@@ -152,6 +151,6 @@ class CheckrunnerSubTaskService {
   private def parseSubTaskResultWithSubTask(res: ResultSet) = SubTaskResult(
     name = res.getString("name"),
     points = res.getInt("points"),
-    maxPoints = res.getInt("max_points"),
+    maxPoints = res.getInt("max_points")
   )
 }

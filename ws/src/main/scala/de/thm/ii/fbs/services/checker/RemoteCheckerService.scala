@@ -46,7 +46,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
     val submission = Submission(submissionID, User(fu.id, fu.username),
       storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
-      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
+      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get
     )
     val request = RunnerRequest(taskID, rcFromCC(cc), submission)
     val res = restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])

@@ -73,6 +73,7 @@ case class SpreadsheetMediaInformation(idField: String,
   * The Spreadsheet Media Information
   * @param inputs the inputs
   * @param outputs the outputs
+  * @param points the points
   * @param decimals the amount of decimals to round to
   */
 case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], points: Seq[String], decimals: Int) extends MediaInformation

@@ -97,8 +97,6 @@ class SubmissionController {
     }
   }
 
-
-
   /**
     * Submit a file for a task
     * @param uid User id
