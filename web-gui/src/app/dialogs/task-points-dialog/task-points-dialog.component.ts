@@ -22,7 +22,6 @@ export class TaskPointsDialogComponent implements OnInit {
   selected: Requirement;
   index = 0;
   valid: boolean;
-  hidePoints = false;
   toggleColor = 'primary';
 
   checked = false;
@@ -37,7 +36,7 @@ export class TaskPointsDialogComponent implements OnInit {
   } = {message: '', valid: true};
 
   ngOnInit(): void {
-    this.tasks = this.data.tasks.map(element => element);
+    this.tasks = this.data.tasks;
     this.taskPointsService.getAllRequirements(this.data.courseID).subscribe(res => {
       this.allRequirements = res;
       if (res && res.length > 0) {
@@ -58,8 +57,8 @@ export class TaskPointsDialogComponent implements OnInit {
       tasks: [],
       hidePoints: false
     });
-    this.selected = this.allRequirements[this.allRequirements.length - 1];
-    this.index = this.allRequirements.length - 1;
+    this.index = -1;
+    setTimeout(() => this.changeIndex(this.allRequirements.length - 1), 0);
   }
 
   changeIndex(i: any) {
@@ -132,10 +131,6 @@ export class TaskPointsDialogComponent implements OnInit {
     } else {
       this.snackbar.open('Nicht alle Bonusformeln sind richtig.', 'OK', {duration: 5000});
     }
-  }
-
-  toggleChange() {
-    console.log(this.hidePoints);
   }
 
   updateAllComplete() {

@@ -57,12 +57,12 @@
         </div>
       </div>
       <div class="task-container" *ngFor="let userResult of evaluationUserResults | async">
-          <span class="state passed" *ngIf="userResult.passed"><mat-icon>check_circle</mat-icon></span>
-          <span class="state failed" *ngIf="!userResult.passed"><mat-icon class="close-icon">cancel</mat-icon></span>
+          <span class="state passed" *ngIf="userResult.results[i].passed"><mat-icon>check_circle</mat-icon></span>
+          <span class="state failed" *ngIf="!userResult.results[i].passed"><mat-icon class="close-icon">cancel</mat-icon></span>
           <span class="category-result-backpane" matTooltipPosition="above"
-                matTooltip="{{userResult.user.surname}}, {{userResult.user.prename}}, {{userResult.bonusPoints}}">
-             <span class="category-bonus bonus" *ngIf="userResult.bonusPoints!=0">{{ userResult.bonusPoints }}</span>
-             <span class="category-bonus no-bonus" *ngIf="userResult.bonusPoints==0">-</span>
+                matTooltip="{{userResult.user.surname}}, {{userResult.user.prename}}, {{userResult.results[i].bonusPoints}}">
+             <span class="category-bonus bonus" *ngIf="userResult.results[i].bonusPoints!=0">{{ userResult.results[i].bonusPoints }}</span>
+             <span class="category-bonus no-bonus" *ngIf="userResult.results[i].bonusPoints==0">-</span>
           </span>
           <ng-container class="task-container" *ngIf="opened === requirement.id">
             <ng-container class="task-result" *ngFor="let taskResult of userResult.results[i].container.tasks">

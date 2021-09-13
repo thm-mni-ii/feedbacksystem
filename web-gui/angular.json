@@ -51,6 +51,14 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           }
         },
@@ -62,6 +70,10 @@
           "configurations": {
             "production": {
               "browserTarget": "web-gui:build:production"
+            },
+            "development": {
+              "browserTarget": "web-gui:build:development",
+              "proxyConfig": "proxy.config.json"
             }
           }
         },

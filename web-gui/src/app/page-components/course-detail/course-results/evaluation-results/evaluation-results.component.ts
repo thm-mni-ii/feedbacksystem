@@ -30,6 +30,7 @@ export class EvaluationResultsComponent implements OnInit {
       this.courseResults = this.courseResultService.getAllResults(this.courseId);
       this.evaluationUserResults = this.courseResultService.getRequirementCourseResults(this.courseId);
     });
+
   }
 
   toggleDetails(item: number) {
