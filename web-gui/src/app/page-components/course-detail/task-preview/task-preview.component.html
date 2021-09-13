@@ -3,6 +3,7 @@
   <span class="meta">
     <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
     <span class="tiny">{{task.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-    <span class="state">{{taskResult.points}}/{{taskResult.maxPoints}} Punkte</span>
+    <span class="state" *ngIf="taskResult.maxPoints !== 0">{{taskResult.points}}/{{taskResult.maxPoints}} Punkte</span>
+    <span class="state" *ngIf="taskResult.maxPoints === 0">-</span>
   </span>
 </mat-card>
