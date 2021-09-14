@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
-import { Task } from 'src/app/model/Task';
+import {SpreadsheetResponseMediaInformation, Task} from 'src/app/model/Task';
 import {CourseService} from '../../service/course.service';
 import {TaskService} from '../../service/task.service';
 import {SpreadsheetDialogComponent} from '../spreadsheet-dialog/spreadsheet-dialog.component';
@@ -45,6 +45,7 @@ export class TaskNewDialogComponent implements OnInit {
   };
 
   spreadsheet: File = null;
+  disableTypeChange = false;
 
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
               private courseService: CourseService, private taskService: TaskService, private checkerService: CheckerService,
@@ -56,10 +57,7 @@ export class TaskNewDialogComponent implements OnInit {
     if (this.data.task) {
       this.isUpdate = true;
       this.task = this.data.task;
-      this.taskForm.controls['name'].setValue(this.task.name);
-      this.taskForm.controls['description'].setValue(this.task.description);
-      this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
-      this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
+      this.setValues();
     }
     this.courseId = this.data.courseId;
   }
@@ -86,6 +84,26 @@ export class TaskNewDialogComponent implements OnInit {
       };
     }
   }
+
+  setValues() {
+    this.taskForm.controls['name'].setValue(this.task.name);
+    this.taskForm.controls['description'].setValue(this.task.description);
+    this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
+    this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
+    if (this.task.mediaType === 'application/x-spreadsheet') {
+      let mediaInformation = this.data.task.mediaInformation;
+      if (typeof mediaInformation.mediaInformation === 'object') {
+        mediaInformation = (mediaInformation as SpreadsheetResponseMediaInformation).mediaInformation;
+      }
+      this.taskForm.controls['userIDField'].setValue(mediaInformation.idField);
+      this.taskForm.controls['inputFields'].setValue(mediaInformation.inputFields);
+      this.taskForm.controls['outputFields'].setValue(mediaInformation.outputFields);
+      this.taskForm.controls['pointFields'].setValue(mediaInformation.pointFields);
+      this.taskForm.controls['decimals'].setValue(mediaInformation.decimals);
+      this.disableTypeChange = true;
+    }
+  }
+
   /**
    * Create a new task
    * and close dialog

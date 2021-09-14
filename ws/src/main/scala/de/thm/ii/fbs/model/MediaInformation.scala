@@ -46,8 +46,8 @@ object MediaInformation {
         new JSONObject()
           .put("inputs", sobj.inputs)
           .put("outputs", sobj.outputs)
-          .put("points", sobj.points)
           .put("decimals", sobj.decimals)
+          .put("mediaInformation", toJSONString(sobj.mediaInformation))
           .toString
       case _ =>
         throw new IllegalArgumentException()
@@ -73,8 +73,8 @@ case class SpreadsheetMediaInformation(idField: String,
   * The Spreadsheet Media Information
   * @param inputs the inputs
   * @param outputs the outputs
-  * @param points the points
   * @param decimals the amount of decimals to round to
+  * @param mediaInformation the mediaInformation
   */
-case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], points: Seq[String], decimals: Int) extends MediaInformation
-
+case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], decimals: Int,
+                                          mediaInformation: SpreadsheetMediaInformation) extends MediaInformation

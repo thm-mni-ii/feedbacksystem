@@ -82,7 +82,8 @@ class TaskController {
     val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
       case Some(task) => task.mediaInformation match {
-        case Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)) =>
+        case Some(smi: SpreadsheetMediaInformation) =>
+          val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
           val config = this.checkerConfigurationService.getAll(cid, tid).head
           val path = this.storageService.pathToMainFile(config.id).get.toString
           val spreadsheetFile = new File(path)
@@ -91,7 +92,7 @@ class TaskController {
           val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
           val points = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, pointFields)
           task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
-            points.map(it => it._1), decimals)))
+            decimals, smi)))
         case _ => task
       }
       case _ => throw new ResourceNotFoundException()
@@ -175,9 +176,22 @@ class TaskController {
       ( body.retrive("name").asText(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
-        body.retrive("description").asText()
+        body.retrive("description").asText(),
+        body.retrive("mediaInformation").asObject()
       ) match {
-        case (Some(name), Some(deadline), Some(mediaType), desc) => taskService.update(cid, tid,
+        case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
+          mediaInformation.retrive("idField").asText(),
+          mediaInformation.retrive("inputFields").asText(),
+          mediaInformation.retrive("outputFields").asText(),
+          mediaInformation.retrive("pointFields").asText(),
+          mediaInformation.retrive("decimals").asInt()
+        ) match {
+          case (Some(idField), Some(inputFields), Some(outputFields), Some(pointFields), Some(decimals)) => taskService.update(cid, tid,
+            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
+          case _ => throw new BadRequestException("Malformed media information")
+        }
+        case (Some(name), Some(deadline), Some(mediaType), desc, _) => taskService.update(cid, tid,
           Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }

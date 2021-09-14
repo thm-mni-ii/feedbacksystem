@@ -64,8 +64,9 @@ class TaskService {
     * @return True if successful
     */
   def update(cid: Int, tid: Int, task: Task): Boolean =
-    1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ? WHERE task_id = ? AND course_id = ?",
-      task.name, task.mediaType, task.description, parseTimestamp(task.deadline), tid, cid)
+    1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ? WHERE task_id = ? AND course_id = ?",
+      task.name, task.mediaType, task.description, parseTimestamp(task.deadline),
+      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, tid, cid)
 
   /**
     * Delete a task by id

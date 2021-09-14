@@ -32,7 +32,7 @@
       <!-- Task Mediatype -->
       <mat-form-field class="col pad">
         <mat-label>Medientyp</mat-label>
-        <mat-select formControlName="mediaType">
+        <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
           <mat-option value="text/plain">Text</mat-option>
           <mat-option value="application/zip">Zip-Datei</mat-option>
           <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
