@@ -20,11 +20,9 @@ export class SubtaskResultsComponent {
 
   @Input()
   set displayedSubmission(submission: Submission) {
-    console.log(submission);
     this._displayedSubmission = submission;
     const {uid, cid, tid} = this.context;
     this.submissionService.getSubTaskResults(uid, cid, tid, submission.id).subscribe((stres) => {
-      console.log(stres);
       this.dataSource = new MatTableDataSource(stres);
     });
   }
