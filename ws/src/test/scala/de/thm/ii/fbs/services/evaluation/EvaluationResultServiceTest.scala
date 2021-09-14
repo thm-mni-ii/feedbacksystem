@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{CourseEvaluationResult, CourseResult,
+import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult,
   EvaluationContainer, EvaluationContainerResult, EvaluationContainerWithTaskResults, Task, TaskResult}
 import org.junit.{Assert, Test}
 import org.junit.runner.RunWith
@@ -41,7 +41,7 @@ class EvaluationResultServiceTest {
   def noContainerTest(): Unit = {
     val (_, taskResult) = buildTask(res = true)
     val courseResult = buildCourseRes(tasksRes = List(taskResult))
-    val expectedRes = List(CourseEvaluationResult(null, passed = true, bonusPoints = 0, List.empty[EvaluationContainerResult]))
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 0, List.empty[EvaluationContainerResult]))
 
     val res = evaluationResultService.evaluate(List.empty[EvaluationContainer], results = List(courseResult))
 
@@ -55,7 +55,7 @@ class EvaluationResultServiceTest {
   def noTasksTest(): Unit = {
     val courseResult = buildCourseRes()
     val container = buildContainer(toPass = 0)
-    val expectedRes = List(CourseEvaluationResult(null, passed = true, bonusPoints = 0,
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 0,
       List(EvaluationContainerResult(passed = true, 0, 0,
         EvaluationContainerWithTaskResults(container.id, List.empty[TaskResult], container.toPass, container.bonusFormula, container.hidePoints)))))
 
@@ -70,7 +70,7 @@ class EvaluationResultServiceTest {
   @Test
   def noTasksAndContainerTest(): Unit = {
     val courseResult = buildCourseRes()
-    val expectedRes = List(CourseEvaluationResult(null, passed = true, bonusPoints = 0, List.empty[EvaluationContainerResult]))
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 0, List.empty[EvaluationContainerResult]))
 
     val res = evaluationResultService.evaluate(List.empty[EvaluationContainer], results = List(courseResult))
 
@@ -89,7 +89,7 @@ class EvaluationResultServiceTest {
     val containerWithTaskRes =
       EvaluationContainerWithTaskResults(container.id, List(taskResult), container.toPass, container.bonusFormula, container.hidePoints)
     val containerRes = EvaluationContainerResult(passed = true, 0, 1, containerWithTaskRes)
-    val expectedRes = List(CourseEvaluationResult(null, passed = true, bonusPoints = 0, List(containerRes)))
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 0, List(containerRes)))
 
     val res = evaluationResultService.evaluate(List(container), results = List(courseResult))
 
@@ -108,7 +108,7 @@ class EvaluationResultServiceTest {
     val containerWithTaskRes =
       EvaluationContainerWithTaskResults(container.id, List(taskResult), container.toPass, container.bonusFormula, container.hidePoints)
     val containerRes = EvaluationContainerResult(passed = true, 2, 1, containerWithTaskRes)
-    val expectedRes = List(CourseEvaluationResult(null, passed = true, bonusPoints = 2, List(containerRes)))
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 2, List(containerRes)))
 
     val res = evaluationResultService.evaluate(List(container), results = List(courseResult))
 

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CourseEvaluationResult, CourseResult, CourseRole, GlobalRole, TaskResult}
+import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult, CourseRole, GlobalRole, TaskResult}
 import de.thm.ii.fbs.services.evaluation.EvaluationResultService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -59,7 +59,7 @@ class CourseResultController {
     */
   @GetMapping(value = Array("/{cid}/evaluation/results"))
   @ResponseBody
-  def getAllEvaluation(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseEvaluationResult] = {
+  def getAllEvaluation(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[EvaluationUserResult] = {
     val user = authService.authorize(req, res)
 
     val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)

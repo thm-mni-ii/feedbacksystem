@@ -21,6 +21,7 @@ import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialo
 import {FeedbackAppService} from '../../service/feedback-app.service';
 import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
 import {GoToService} from '../../service/goto.service';
+import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
 import {ExternalClassroomService} from "../../service/external-classroom.service";
 
 @Component({
@@ -79,7 +80,9 @@ export class CourseDetailComponent implements OnInit {
   }
 
   reloadTasks() {
-    this.taskService.getAllTasks(this.courseID).subscribe(tasks => this.tasks = tasks);
+    this.taskService.getAllTasks(this.courseID).subscribe(tasks => {
+      this.tasks = tasks;
+    });
   }
 
   updateCourse() {
@@ -182,5 +185,20 @@ export class CourseDetailComponent implements OnInit {
 
   goToFBA() {
     this.feedbackAppService.open(this.courseID, true).subscribe(() => {});
+  }
+
+  editPoints() {
+    this.dialog.open(TaskPointsDialogComponent, {
+      height: '85%',
+      width: '80rem',
+      data: {
+        courseID: this.courseID,
+        tasks: this.tasks
+      }
+    }).afterClosed().subscribe(res => {
+      if (res) {
+        this.snackbar.open('Punktevergabe abgeschlossen');
+      }
+    });
   }
 }
