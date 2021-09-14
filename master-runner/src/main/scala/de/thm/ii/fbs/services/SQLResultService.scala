@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.services
 
 import de.thm.ii.fbs.types.ExtResSql
-import io.vertx.core.json.JsonArray
 import io.vertx.lang.scala.json.JsonArray
 import io.vertx.scala.ext.sql.ResultSet
 

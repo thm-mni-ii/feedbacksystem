@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+plugins {
+    id 'io.github.cosmicsilence.scalafix' version '0.1.11'
+}
+
 apply plugin: 'scala'
 apply plugin: 'application'
 apply plugin: 'jacoco'
@@ -38,9 +42,13 @@ sourceSets {
     }
 }
 
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = [ "-Ywarn-unused" ]
+}
+
 
 dependencies {
-    implementation 'org.scala-lang:scala-library:2.13.1'
+    implementation 'org.scala-lang:scala-library:2.13.6'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"
