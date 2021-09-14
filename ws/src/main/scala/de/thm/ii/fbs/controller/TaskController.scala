@@ -147,7 +147,7 @@ class TaskController {
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), Some(deadline), Some(mediaType), desc, None) => taskService.create(cid,
+        case (Some(name), Some(deadline), Some(mediaType), desc, _) => taskService.create(cid,
           Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }

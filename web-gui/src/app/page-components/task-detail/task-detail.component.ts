@@ -37,6 +37,7 @@ export class TaskDetailComponent implements OnInit {
   submissions: Submission[];
   lastSubmission: Submission;
   pending = false;
+  ready = false;
 
   deadlinePassed = false;
 
@@ -80,6 +81,7 @@ export class TaskDetailComponent implements OnInit {
         this.uid = this.authService.getToken().id;
         this.titlebar.emitTitle(this.task.name);
         this.deadlinePassed = this.reachedDeadline(Date.now(), Date.parse(task.deadline));
+        this.ready = true;
         return this.submissionService.getAllSubmissions(this.uid, this.courseId, task.id);
       }),
       tap(submissions => {
@@ -112,7 +114,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   public submissionTypeOfTask(): String {
-    return 'spreadsheet'; // For debugging ToDo: remove
     const mediaType = this.task?.mediaType;
     if (mediaType?.toLowerCase().includes('text')) {
       return 'text';
@@ -251,6 +252,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   checkersConfigurable() {
-    return this.submissionTypeOfTask() !== 'spreadsheet';
+    return this.ready && this.submissionTypeOfTask() !== 'spreadsheet';
   }
 }

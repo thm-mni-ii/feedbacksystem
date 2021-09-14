@@ -13,7 +13,7 @@
     </mat-menu>
   </app-menu-bar>
 
-  <mat-card class="details">
+  <mat-card class="details" *ngIf="ready">
     <div class="task-container">
       <span>{{task?.name}}</span>
       <span class="meta">
