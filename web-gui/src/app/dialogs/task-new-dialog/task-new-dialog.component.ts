@@ -79,9 +79,11 @@ export class TaskNewDialogComponent implements OnInit {
         idField: this.taskForm.get('userIDField').value,
         inputFields: this.taskForm.get('inputFields').value,
         outputFields: this.taskForm.get('outputFields').value,
-        pointFields: this.taskForm.get('pointFields').value,
         decimals: this.taskForm.get('decimals').value,
       };
+      if (this.taskForm.get('pointFields').value) {
+        this.task.mediaInformation.pointFields = this.taskForm.get('pointFields').value;
+      }
     }
   }
 

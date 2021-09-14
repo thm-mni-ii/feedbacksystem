@@ -90,7 +90,6 @@ class TaskController {
           val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
           val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
           val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-          val points = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, pointFields)
           task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
             decimals, smi)))
         case _ => task
@@ -143,7 +142,7 @@ class TaskController {
           mediaInformation.retrive("pointFields").asText(),
           mediaInformation.retrive("decimals").asInt()
         ) match {
-          case (Some(idField), Some(inputFields), Some(outputFields), Some(pointFields), Some(decimals)) => taskService.create(cid,
+          case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")
@@ -186,7 +185,7 @@ class TaskController {
           mediaInformation.retrive("pointFields").asText(),
           mediaInformation.retrive("decimals").asInt()
         ) match {
-          case (Some(idField), Some(inputFields), Some(outputFields), Some(pointFields), Some(decimals)) => taskService.update(cid, tid,
+          case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
             Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")

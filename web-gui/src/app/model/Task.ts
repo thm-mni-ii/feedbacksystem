@@ -11,7 +11,7 @@ export interface SpreadsheetMediaInformation {
   idField: string;
   inputFields: string;
   outputFields: string;
-  pointFields: string;
+  pointFields?: string;
   decimals: number;
 }
 

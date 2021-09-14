@@ -41,7 +41,7 @@ class SpreadsheetCheckerService extends CheckerService {
     val submission = this.submissionService.getOne(submissionID, fu.id).get
 
     val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
-    val pointFields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.pointFields)
+    val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc.id, spreadsheetMediaInformation, fu.username, pointsFields))
     val submittedFields = this.getSubmittedFields(submission.id)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
@@ -110,10 +110,10 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def submittSubTasks(configurationId: Int, submissionId: Int, results: Seq[SpreadsheetCheckerService.this.CheckResult],
-                              points: Seq[(String, String)]): Unit = {
-    val pointsMap = points.toMap
+                              points: Option[Seq[(String, String)]]): Unit = {
+    val pointsMap = points.map(p => p.toMap)
     for (CheckResult(key, _, _, correct) <- results) {
-      val maxPoints = pointsMap.get(key)
+      val maxPoints = pointsMap.flatMap(pm => pm.get(key))
         .flatMap(str => str.toFloatOption).map(flo => flo.toInt)
         .getOrElse(1)
       val points = if (correct) {maxPoints} else {0}

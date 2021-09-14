@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model
 
-import org.json.JSONObject
+import org.json.{JSONException, JSONObject}
 
 /**
   * The MediaInformation
@@ -20,7 +20,9 @@ object MediaInformation {
     val obj = new JSONObject(json)
     if (obj.getString("type") == "spreadsheetMediaInformation") {
       SpreadsheetMediaInformation(obj.getString("idField"), obj.getString("inputFields"),
-        obj.getString("outputFields"), obj.getString("pointFields"), obj.getInt("decimals"))
+        obj.getString("outputFields"), try Some(obj.getString("pointFields")) catch {
+          case _: JSONException => None
+        }, obj.getInt("decimals"))
     } else {
       throw new IllegalArgumentException()
     }
@@ -39,7 +41,7 @@ object MediaInformation {
           .put("idField", sobj.idField)
           .put("inputFields", sobj.inputFields)
           .put("outputFields", sobj.outputFields)
-          .put("pointFields", sobj.pointFields)
+          .putOpt("pointFields", sobj.pointFields.orNull)
           .put("decimals", sobj.decimals)
           .toString
       case sobj: SpreadsheetResponseInformation =>
@@ -66,7 +68,7 @@ object MediaInformation {
 case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
                                        outputFields: String,
-                                       pointFields: String,
+                                       pointFields: Option[String],
                                        decimals: Int) extends MediaInformation
 
 /**
