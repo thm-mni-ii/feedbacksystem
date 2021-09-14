@@ -54,12 +54,12 @@ export class TaskNewDialogComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.courseId = this.data.courseId;
     if (this.data.task) {
       this.isUpdate = true;
       this.task = this.data.task;
       this.setValues();
     }
-    this.courseId = this.data.courseId;
   }
 
   /**
@@ -93,6 +93,12 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
     this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
     if (this.task.mediaType === 'application/x-spreadsheet') {
+      this.taskForm.controls['exelFile'].setValue('loading...');
+      this.checkerService.getChecker(this.courseId, this.task.id).pipe(map(checkers => checkers[0])).subscribe(checker => {
+        this.checkerService.fetchMainFile(this.courseId, this.task.id, checker.id).subscribe(spreadsheet =>
+          this.spreadsheet = new File([spreadsheet], 'spreadsheet.xlsx'));
+        this.taskForm.controls['exelFile'].setValue('not changed');
+      });
       let mediaInformation = this.data.task.mediaInformation;
       if (typeof mediaInformation.mediaInformation === 'object') {
         mediaInformation = (mediaInformation as SpreadsheetResponseMediaInformation).mediaInformation;

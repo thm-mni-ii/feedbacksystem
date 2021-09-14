@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {CheckerConfig} from '../model/CheckerConfig';
 import {saveAs as importedSaveAs} from 'file-saver';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -55,18 +56,27 @@ export class CheckerService {
   }
 
   /**
-   * Get the main file of the configuration
+   * Download the main file of the configuration
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the Main File of configured Checker
    */
   public getMainFile(cid: number, tid: number, ccid: number) {
-    this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`, {responseType: 'arraybuffer'})
-      .subscribe(response => {
-        const blob = new Blob([response], {type: 'text/plain'});
-        importedSaveAs(blob);
-      });
+    this.fetchMainFile(cid, tid, ccid)
+      .subscribe(blob => importedSaveAs(blob));
+  }
+
+  /**
+   * Fetch the main file of the configuration
+   * @param cid Course id
+   * @param tid Task id
+   * @param ccid Checker Configuration id
+   * @return Observable that succeeds with the Main File of configured Checker
+   */
+  public fetchMainFile(cid: number, tid: number, ccid: number): Observable<Blob> {
+    return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`, {responseType: 'arraybuffer'})
+      .pipe(map(response => new Blob([response], {type: 'application/octet-stream'})));
   }
 
   /**
