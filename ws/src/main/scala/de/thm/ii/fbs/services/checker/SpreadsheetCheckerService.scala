@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
-import java.util.{Map => UtilMap}
+import java.text.{DecimalFormat, DecimalFormatSymbols, NumberFormat, ParseException}
+import java.util.{Locale, Map => UtilMap}
 import scala.collection.mutable
 
 /**
@@ -78,7 +79,7 @@ class SpreadsheetCheckerService extends CheckerService {
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
       var correct = false
-      if (enteredValue != null && roundIfNumber(enteredValue, decimals) == roundIfNumber(value, decimals)) {
+      if (enteredValue != null && compare(enteredValue, value, decimals)) {
         correct = true
         correctCount += 1
       }
@@ -122,12 +123,24 @@ class SpreadsheetCheckerService extends CheckerService {
     }
   }
 
-  private def roundIfNumber(input: String, toDecimals: Int): String = {
-    input.toDoubleOption match {
-      case Some(double) => BigDecimal(double).setScale(toDecimals, BigDecimal.RoundingMode.HALF_UP).toString()
-      case None => input
+  private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
+    (parseDouble(enteredValue, germanFormat), parseDouble(value, englishFormat)) match {
+      case (Some(enteredValue), Some(value)) =>
+        round(enteredValue, decimals) == round(value, decimals)
+      case _ => false
     }
   }
+
+  private def round(input: Double, toDecimals: Int): String =
+    BigDecimal(input).setScale(toDecimals, BigDecimal.RoundingMode.HALF_UP).toString()
+
+  private def parseDouble(input: String, format: NumberFormat): Option[Double] =
+    try Some(format.parse(input).doubleValue()) catch {
+      case _: ParseException => None
+    }
+
+  private val englishFormat = NumberFormat.getNumberInstance(Locale.ENGLISH)
+  private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
   private case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
 }
