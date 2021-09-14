@@ -107,11 +107,7 @@ export const httpInterceptorProviders = [
     ImpressumDialogComponent,
     NotFoundComponent,
     ChangePasswordComponent,
-    NewconferenceDialogComponent,
-    ConferenceComponent,
     UserTeacherFilter,
-    NewticketDialogComponent,
-    IncomingCallDialogComponent,
     SearchCoursesComponent,
     CoursePreviewComponent,
     CourseDetailComponent,
@@ -169,8 +165,7 @@ export const httpInterceptorProviders = [
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
   ],
-  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent,
-    InvitetoConferenceDialogComponent, AssignTicketDialogComponent],
+  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent],
   providers: [CookieService, httpInterceptorProviders],
   bootstrap: [AppComponent]
 })
