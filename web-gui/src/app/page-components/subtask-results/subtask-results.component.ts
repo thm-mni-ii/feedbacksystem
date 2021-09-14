@@ -17,12 +17,16 @@ export class SubtaskResultsComponent {
 
   @Input()
   context: {uid: number, cid: number, tid: number};
+  display = false;
 
   @Input()
   set displayedSubmission(submission: Submission) {
     this._displayedSubmission = submission;
     const {uid, cid, tid} = this.context;
     this.submissionService.getSubTaskResults(uid, cid, tid, submission.id).subscribe((stres) => {
+      if (stres.length > 0) {
+        this.display = true;
+      }
       this.dataSource = new MatTableDataSource(stres);
     });
   }
