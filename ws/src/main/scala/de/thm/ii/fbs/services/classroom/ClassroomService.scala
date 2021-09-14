@@ -4,14 +4,11 @@ import de.thm.ii.fbs.model.CourseRole.{DOCENT, STUDENT, TUTOR}
 import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
+import de.thm.ii.fbs.util.RestTemplateFactory
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.conn.ssl.{NoopHostnameVerifier, SSLConnectionSocketFactory, TrustSelfSignedStrategy}
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.ssl.SSLContextBuilder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.ResponseEntity
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
@@ -26,8 +23,6 @@ import scala.language.postfixOps
   * @param templateBuilder Request template builder.
   * @param classroomUrl the bbb api url
   * @param secret the bbb secret
-  * @param originName the bbb meta data that identifies the origin
-  * @param originVersion the bbb meta data the identifies the origin version
   * @param courseService the CourseService
   * @param courseRegistrationService the CourseRegistrationService
 
@@ -42,17 +37,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        courseRegistrationService: CourseRegistrationService
                 ) {
 
-  private val restTemplate: RestTemplate = {
-    val requestFactory = new HttpComponentsClientHttpRequestFactory()
-    if (insecure) {
-      val sslContextBuilder = new SSLContextBuilder()
-      sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy)
-      val socketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build, NoopHostnameVerifier.INSTANCE)
-      val httpClient = HttpClients.custom.setSSLSocketFactory(socketFactory).build()
-      requestFactory.setHttpClient(httpClient)
-    }
-    new RestTemplate(requestFactory)
-  }
+  private val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
 
@@ -150,7 +135,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   private def getJoinRoomResponse(url: String): JoinRoomBBBResponse = {
     val response = restTemplate.getForEntity(url, classOf[JoinRoomBBBResponse])
-    return response.getBody
+    response.getBody
   }
 
 
@@ -185,9 +170,9 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     */
   private def buildClassroomApiRequestUri(method: String, params: Map[String, String]): String = {
     val queryBuilder = UriComponentsBuilder.newInstance()
-    val values = mutable.Buffer[String]();
+    val values = mutable.Buffer[String]()
     for ((key, value) <- params) {
-      queryBuilder.queryParam(key, s"{$key}");
+      queryBuilder.queryParam(key, s"{$key}")
       values += value
     }
     var query = queryBuilder.cloneBuilder().encode.build.expand(values.toArray: _*).toString.substring(1)
