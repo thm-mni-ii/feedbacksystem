@@ -4,12 +4,10 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
     }
 }
 
 apply plugin: 'scala'
-apply plugin: 'scalaStyle'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
@@ -19,6 +17,7 @@ mainClassName = "io.vertx.core.Launcher"
 def mainVerticle = "scala:de.thm.ii.fbs.MainVerticle"
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
@@ -39,17 +38,9 @@ sourceSets {
     }
 }
 
-scalaStyle {
-    configLocation = scalaStyleConfig
-    includeTestSourceDirectory = true
-    source = 'src/main/scala'
-    testSource = 'src/test/scala'
-}
-
-test.dependsOn scalaStyle
 
 dependencies {
-    implementation 'org.scala-lang:scala-library:2.12.12'
+    implementation 'org.scala-lang:scala-library:2.13.1'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"

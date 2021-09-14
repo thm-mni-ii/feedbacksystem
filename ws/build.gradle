@@ -1,20 +1,19 @@
 buildscript {
     repositories {
-        jcenter()
     }
 
     dependencies {
-        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
     }
 }
 
 plugins {
     id "org.springframework.boot" version "2.2.5.RELEASE"
     id 'jacoco'
+    id 'scala'
+    id 'io.github.cosmicsilence.scalafix' version '0.1.11'
+    id 'idea'
 }
 
-apply plugin: 'scala'
-apply plugin: 'scalaStyle'
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -29,10 +28,6 @@ jar {
     enabled = true
 }
 
-bootJar {
-    classifier = 'boot'
-}
-
 bootRun {
     def confidir = new File(".").absolutePath + "/docker-config/"
     print("CONFDIR: " + confidir)
@@ -44,8 +39,8 @@ bootRun {
 }
 
 repositories {
-    jcenter()
     mavenCentral()
+    jcenter()
 }
 
 sourceSets {
@@ -61,17 +56,13 @@ sourceSets {
     }
 }
 
-scalaStyle {
-    configLocation = scalaStyleConfig
-    includeTestSourceDirectory = true
-    source = 'src/main/scala'
-    testSource = 'src/test/scala'
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = [ "-Ywarn-unused" ]
 }
 
 clean.doFirst {
     delete "$projectDir/src/main/resources/static"
 }
-test.dependsOn scalaStyle
 
 // customize start scripts
 startScripts {
@@ -80,13 +71,11 @@ startScripts {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
-    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
-    implementation 'org.scala-lang:scala-library:2.13.1'
-    implementation 'mysql:mysql-connector-java:8.0.19'
+    implementation 'org.scala-lang:scala-library:2.13.6'
+    implementation 'mysql:mysql-connector-java:8.0.25'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -95,10 +84,6 @@ dependencies {
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     implementation('org.json:json:20190722')
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
-    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
-    //compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.2.1.RELEASE'
-    //compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.0.RELEASE'
-    //compile "org.springframework.boot:spring-boot-starter-security:$springVersion"
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '1.2.4'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation group: 'au.com.bytecode', name: 'opencsv', version: '2.4'

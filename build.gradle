@@ -12,8 +12,8 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    scalaStyleConfig = "$rootDir/scalastyle_config.xml"
+dependencies {
+    implementation 'org.scala-lang:scala-library:2.13.1'
 }
 
 subprojects { subproject ->

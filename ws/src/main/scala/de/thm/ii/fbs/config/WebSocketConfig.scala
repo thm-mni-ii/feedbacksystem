@@ -1,7 +1,5 @@
 package de.thm.ii.fbs.config
 
-import java.security.Principal
-
 import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.classroom.UserSessionMap
 import de.thm.ii.fbs.services.security.AuthService
@@ -24,8 +22,8 @@ import org.springframework.web.socket.messaging._
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig extends WebSocketMessageBrokerConfigurer {
-  private val registry: DefaultSimpUserRegistry = new DefaultSimpUserRegistry();
-  private val resolver: DefaultUserDestinationResolver = new DefaultUserDestinationResolver(registry);
+  private val registry: DefaultSimpUserRegistry = new DefaultSimpUserRegistry()
+  private val resolver: DefaultUserDestinationResolver = new DefaultUserDestinationResolver(registry)
 
   @Autowired
   private val authService: AuthService = null
