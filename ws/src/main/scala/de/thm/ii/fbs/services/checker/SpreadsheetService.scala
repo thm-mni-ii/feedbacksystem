@@ -1,11 +1,12 @@
 package de.thm.ii.fbs.services.checker
 
 import java.io.{File, FileInputStream}
-
 import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook, XSSFFormulaEvaluator}
+import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
 
+import java.text.NumberFormat
+import java.util.Locale
 import scala.util.matching.Regex
 
 /**
@@ -48,11 +49,11 @@ class SpreadsheetService {
       } else {
         cell.getCellType match {
           case CellType.FORMULA => try {
-            cell.getNumericCellValue.toString
+            germanFormat.format(cell.getNumericCellValue)
           } catch {
             case e: IllegalStateException => cell.getStringCellValue
           }
-          case CellType.NUMERIC => cell.getNumericCellValue.toString
+          case CellType.NUMERIC => germanFormat.format(cell.getNumericCellValue)
           case CellType.STRING => cell.getStringCellValue
           case _ => ""
         }
@@ -84,4 +85,6 @@ class SpreadsheetService {
 
   private def colToInt(col: Char): Int =
     col.toInt - 64
+
+  private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 }

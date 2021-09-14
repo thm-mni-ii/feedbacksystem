@@ -124,7 +124,7 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
-    (parseDouble(enteredValue, germanFormat), parseDouble(value, englishFormat)) match {
+    (parseDouble(enteredValue, germanFormat), parseDouble(value, germanFormat)) match {
       case (Some(enteredValue), Some(value)) =>
         round(enteredValue, decimals) == round(value, decimals)
       case _ => false
@@ -139,7 +139,6 @@ class SpreadsheetCheckerService extends CheckerService {
       case _: ParseException => None
     }
 
-  private val englishFormat = NumberFormat.getNumberInstance(Locale.ENGLISH)
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
   private case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
