@@ -5,7 +5,7 @@
     <span class="spacer"></span>
 
     <!--<button mat-icon-button (click)="reRun()" [disabled]="this.lastSubmission == null" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>-->
-    <button mat-icon-button *ngIf="canEdit()" [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']" matTooltip="Überprüfung konfigurieren"><mat-icon class="logout-icon">engineering</mat-icon></button>
+    <button mat-icon-button *ngIf="canEdit() && checkersConfigurable()" [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']" matTooltip="Überprüfung konfigurieren"><mat-icon class="logout-icon">engineering</mat-icon></button>
     <button mat-icon-button *ngIf="canEdit()" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()"><mat-icon class="logout-icon">edit</mat-icon><span>Aufgabe bearbeiten</span></button>

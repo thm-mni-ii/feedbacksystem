@@ -249,4 +249,8 @@ export class TaskDetailComponent implements OnInit {
       },
     });
   }
+
+  checkersConfigurable() {
+    return this.submissionTypeOfTask() !== 'spreadsheet';
+  }
 }
