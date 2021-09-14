@@ -22,6 +22,13 @@ class DatabaseMigrationService {
   private implicit val jdbc: JdbcTemplate = null
   private val resourceResolver = new PathMatchingResourcePatternResolver()
 
+  private def oldStyleInstallationFallback(): Unit =
+    DB.batchUpdate(
+      "CREATE TABLE migration (number int, PRIMARY KEY (number))",
+      "INSERT INTO migration (number) VALUES (0)",
+      "INSERT INTO migration (number) VALUES (1)"
+    )
+
   /**
     * Run Migration
     */
@@ -34,7 +41,13 @@ class DatabaseMigrationService {
         results.head
       }
     } catch {
-      case _: BadSqlGrammarException => -1
+      case _: BadSqlGrammarException => try {
+        DB.query("SELECT * FROM `fbs`.`submission`", (_, _) => ())
+        oldStyleInstallationFallback()
+        1
+      } catch {
+        case _: BadSqlGrammarException => -1
+      }
     }
 
     val migrations = listMigrations()
