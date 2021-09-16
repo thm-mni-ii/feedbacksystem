@@ -90,23 +90,14 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def generateResultText(results: Seq[CheckResult]): String = {
-    val resultString = new StringBuilder()
+    val count = results.size
+    val correct = results.foldLeft(0)((acc: Int, result: CheckResult) => if (result.correct) {
+      acc + 1
+    } else {
+      acc
+    })
 
-    for (CheckResult(key, _, enteredValue, correct) <- results) {
-      if (enteredValue == null || enteredValue == "") {
-        resultString ++= key + " Keine Abgabe"
-      } else {
-        resultString ++= key + " = " + enteredValue
-        if (correct) {
-          resultString ++= " RICHTIG"
-        } else {
-          resultString ++= " FALSCH"
-        }
-      }
-      resultString ++= "\n"
-    }
-
-    resultString.toString()
+    s"$correct von $count Eingaben richtig."
   }
 
   private def submittSubTasks(configurationId: Int, submissionId: Int, results: Seq[SpreadsheetCheckerService.this.CheckResult],
