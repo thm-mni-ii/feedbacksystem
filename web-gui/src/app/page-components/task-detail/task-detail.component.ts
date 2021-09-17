@@ -33,7 +33,6 @@ export class TaskDetailComponent implements OnInit {
   task: Task;
   taskResult: UserTaskResult;
   uid: number;
-  status: boolean | null = null;
   submissions: Submission[];
   lastSubmission: Submission;
   pending = false;
@@ -86,15 +85,8 @@ export class TaskDetailComponent implements OnInit {
       }),
       tap(submissions => {
         this.submissions = submissions;
-        if (submissions.length === 0) {
-          this.status = <boolean>null;
-        } else {
+        if (submissions.length !== 0) {
           this.pending = !submissions[submissions.length - 1].done;
-          this.status = submissions.reduce((acc, submission) => {
-            const done = submission.done;
-            const finalExitCode = submission.results.reduce((acc2, value) => acc2 + value.exitCode, 0);
-            return acc || done && finalExitCode === 0;
-          }, false);
           this.lastSubmission = submissions[submissions.length - 1];
         }
       })

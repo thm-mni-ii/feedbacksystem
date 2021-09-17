@@ -83,12 +83,20 @@ class TaskService {
     * @param uid The uid of the user to get the user id for
     * @return UserTaskResult The UserTaskResult Array
     */
-  def getTaskResults(cid: Int, uid: Int): Seq[UserTaskResult] = DB.query("SELECT task.task_id, COALESCE(SUM(cstr.points), 0) AS points, " +
-    "COALESCE(SUM(cst.points), 0) AS max_points FROM task LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id " +
-    "LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id LEFT JOIN checkrunner_sub_task_result cstr " +
-    "on cst.configuration_id = cstr.configuration_id and cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = " +
-    "(SELECT MAX(uts.submission_id) FROM user_task_submission uts WHERE uts.task_id = task.task_id AND uts.user_id = ?) " +
-    "WHERE course_id = ? GROUP BY task.task_id;", (res, _) => parseUserTaskResult(res), uid, cid)
+  def getTaskResults(cid: Int, uid: Int): Seq[UserTaskResult] = DB.query(
+    """SELECT task.task_id, uts.submission_id, COALESCE(SUM(cstr.points), 0) AS points, COALESCE(SUM(cst.points), 0) AS max_points,
+      |       COALESCE(LEAST(cr.exit_code, 1), 1) AS status FROM task
+      |    LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id
+      |    LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
+      |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
+      |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
+      |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
+      |    LEFT JOIN checker_result cr ON cst.configuration_id = cr.configuration_id AND
+      |                                   uts.submission_id = cr.submission_id
+      |    WHERE course_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
+      |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
+      |    )) GROUP BY task.task_id;
+      """.stripMargin, (res, _) => parseUserTaskResult(res), uid, cid)
 
   /**
     * Get The task result for a task
@@ -96,12 +104,20 @@ class TaskService {
     * @param uid The uid of the user to get the user id for
     * @return UserTaskResult The UserTaskResult Array
     */
-  def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query("SELECT task.task_id, COALESCE(SUM(cstr.points), 0) AS points, " +
-    "COALESCE(SUM(cst.points), 0) AS max_points FROM task LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id " +
-    "LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id LEFT JOIN checkrunner_sub_task_result cstr " +
-    "on cst.configuration_id = cstr.configuration_id and cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = " +
-    "(SELECT MAX(uts.submission_id) FROM user_task_submission uts WHERE uts.task_id = task.task_id AND uts.user_id = ?) " +
-    "WHERE task.task_id = ? GROUP BY task.task_id;", (res, _) => parseUserTaskResult(res), uid, tid).headOption
+  def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query(
+  """SELECT task.task_id, uts.submission_id, COALESCE(SUM(cstr.points), 0) AS points, COALESCE(SUM(cst.points), 0) AS max_points,
+    |       COALESCE(LEAST(cr.exit_code, 1), 1) AS status FROM task
+    |    LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id
+    |    LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
+    |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
+    |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
+    |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
+    |    LEFT JOIN checker_result cr ON cst.configuration_id = cr.configuration_id AND
+    |                                   uts.submission_id = cr.submission_id
+    |    WHERE task.task_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
+    |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
+    |    )) GROUP BY task.task_id;
+    |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
     deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),
@@ -109,7 +125,7 @@ class TaskService {
     id = res.getInt("task_id"))
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
-    res.getInt("points"), res.getInt("max_points"))
+    res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null)
 
   private def parseTimestamp(timestamp: String): Timestamp = Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)))
 }

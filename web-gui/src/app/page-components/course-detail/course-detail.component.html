@@ -57,6 +57,8 @@
 
 <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
   <div class="task-list">
-    <app-task-preview *ngFor="let task of tasks" [courseId]="courseID" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview>
+    <div *ngFor="let task of tasks">
+      <app-task-preview [courseId]="courseID" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview>
+    </div>
   </div>
 </div>

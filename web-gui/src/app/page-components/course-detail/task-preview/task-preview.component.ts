@@ -14,24 +14,11 @@ import {UserTaskResult} from '../../../model/UserTaskResult';
 export class TaskPreviewComponent implements OnInit {
   @Input() courseId: number;
   @Input() task: Task;
-  @Input() taskResult: UserTaskResult;
-  status: Observable<boolean | null> = of(null);
+  @Input() taskResult: UserTaskResult = null;
 
-  constructor(private authService: AuthService, private submissionService: SubmissionService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
     const uid = this.authService.getToken().id;
-    this.status = this.submissionService.getAllSubmissions(uid, this.courseId, this.task.id)
-      .pipe(map(submissions => {
-        if (submissions.length === 0) {
-          return <boolean>null;
-        } else {
-          return submissions.reduce((acc, submission) => {
-            const done = submission.done;
-            const finalExitCode = submission.results.reduce((acc2, value) => acc2 + value.exitCode, 0);
-            return acc || done && finalExitCode === 0;
-          }, false);
-        }
-      }));
   }
 }
