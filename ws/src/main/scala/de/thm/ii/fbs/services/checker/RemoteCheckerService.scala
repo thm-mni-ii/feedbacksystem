@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, NoSuchFileException, Path, Paths}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
@@ -145,13 +145,17 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   }
 
   private def handleSubTasks(sid: Int, ccid: Int): Unit = {
-    val solutionPath = storageService.pathToSolutionFile(sid).get
-    val content = Files.readString(solutionPath)
-    val tasks = new JSONArray(content)
-    val results = (0 to tasks.length()).map(i => SubTaskResult.fromJSON(tasks.getJSONObject(i)))
-    for (SubTaskResult(name, maxPoints, points) <- results) {
-      val subTask = subTaskServier.getOrCrate(ccid, name, maxPoints)
-      subTaskServier.createResult(ccid, subTask.subTaskId, sid, points)
+    val subTaskPath = storageService.pathToSubTaskFile(sid).get
+    try {
+      val content = Files.readString(subTaskPath)
+      val tasks = new JSONArray(content)
+      val results = (0 to tasks.length()).map(i => SubTaskResult.fromJSON(tasks.getJSONObject(i)))
+      for (SubTaskResult(name, maxPoints, points) <- results) {
+        val subTask = subTaskServier.getOrCrate(ccid, name, maxPoints)
+        subTaskServier.createResult(ccid, subTask.subTaskId, sid, points)
+      }
+    } catch {
+      case _: NoSuchFileException =>
     }
   }
 
