@@ -91,7 +91,7 @@ class TaskService {
       |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
       |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
       |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
-      |    LEFT JOIN checker_result cr ON cst.configuration_id = cr.configuration_id AND
+      |    LEFT JOIN checker_result cr ON cc.configuration_id = cr.configuration_id AND
       |                                   uts.submission_id = cr.submission_id
       |    WHERE course_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
       |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
@@ -112,7 +112,7 @@ class TaskService {
     |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
     |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
     |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
-    |    LEFT JOIN checker_result cr ON cst.configuration_id = cr.configuration_id AND
+    |    LEFT JOIN checker_result cr ON cc.configuration_id = cr.configuration_id AND
     |                                   uts.submission_id = cr.submission_id
     |    WHERE task.task_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
     |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
