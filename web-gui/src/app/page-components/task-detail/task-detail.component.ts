@@ -18,6 +18,7 @@ import {of} from 'rxjs';
 import {Roles} from '../../model/Roles';
 import {AllSubmissionsComponent} from '../../dialogs/all-submissions/all-submissions.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
+import {UserTaskResult} from '../../model/UserTaskResult';
 
 /**
  * Shows a task in detail
@@ -30,12 +31,21 @@ import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialo
 export class TaskDetailComponent implements OnInit {
   courseId: number;
   task: Task;
-  status: boolean | null = null;
+  taskResult: UserTaskResult;
+  uid: number;
   submissions: Submission[];
   lastSubmission: Submission;
   pending = false;
+  ready = false;
 
   deadlinePassed = false;
+
+  get latestResult() {
+    if (this.submissions?.length > 0) {
+      const submission = this.submissions[this.submissions.length - 1];
+      return submission.results[submission.results.length - 1];
+    }
+  }
 
   constructor(private route: ActivatedRoute, private titlebar: TitlebarService, private dialog: MatDialog,
               private user: UserService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
@@ -61,23 +71,22 @@ export class TaskDetailComponent implements OnInit {
         return this.taskService.getTask(this.courseId, taskId);
       }),
       mergeMap(task => {
+        return this.taskService.getTaskResult(this.courseId, task.id)
+          .pipe(map(taskResult => ({task, taskResult})));
+      }),
+      mergeMap(({task, taskResult}) => {
         this.task = task;
-        const uid = this.authService.getToken().id;
+        this.taskResult = taskResult;
+        this.uid = this.authService.getToken().id;
         this.titlebar.emitTitle(this.task.name);
         this.deadlinePassed = this.reachedDeadline(Date.now(), Date.parse(task.deadline));
-        return this.submissionService.getAllSubmissions(uid, this.courseId, task.id);
+        this.ready = true;
+        return this.submissionService.getAllSubmissions(this.uid, this.courseId, task.id);
       }),
       tap(submissions => {
         this.submissions = submissions;
-        if (submissions.length === 0) {
-          this.status = <boolean>null;
-        } else {
+        if (submissions.length !== 0) {
           this.pending = !submissions[submissions.length - 1].done;
-          this.status = submissions.reduce((acc, submission) => {
-            const done = submission.done;
-            const finalExitCode = submission.results.reduce((acc2, value) => acc2 + value.exitCode, 0);
-            return acc || done && finalExitCode === 0;
-          }, false);
           this.lastSubmission = submissions[submissions.length - 1];
         }
       })
@@ -98,7 +107,13 @@ export class TaskDetailComponent implements OnInit {
 
   public submissionTypeOfTask(): String {
     const mediaType = this.task?.mediaType;
-    if (mediaType?.toLowerCase().includes('text')) { return 'text'; } else { return 'file'; }
+    if (mediaType?.toLowerCase().includes('text')) {
+      return 'text';
+    } else if (mediaType?.toLowerCase().includes('spreadsheet')) {
+      return 'spreadsheet';
+    } else {
+      return 'file';
+    }
   }
 
   isSubmissionEmpty(): boolean {
@@ -106,9 +121,14 @@ export class TaskDetailComponent implements OnInit {
     if (!input) {
       return true;
     }
-    if ((<any>input).name) {
-      return (<File>input).size === 0;
-    } else {
+    if (typeof input === 'object') {
+      const inputObject = <any> input;
+      if (inputObject.name) {
+        return (<File>input).size === 0;
+      } else if (inputObject.complete !== undefined) {
+        return inputObject.complete === false;
+      }
+    } else if (typeof input === 'string') {
       return (<string>input).trim().length === 0;
     }
   }
@@ -221,5 +241,9 @@ export class TaskDetailComponent implements OnInit {
         auth: false
       },
     });
+  }
+
+  checkersConfigurable() {
+    return this.ready && this.submissionTypeOfTask() !== 'spreadsheet';
   }
 }

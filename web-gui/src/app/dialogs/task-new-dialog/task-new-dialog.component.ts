@@ -1,11 +1,16 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
-import { Task } from 'src/app/model/Task';
+import {SpreadsheetResponseMediaInformation, Task} from 'src/app/model/Task';
 import {CourseService} from '../../service/course.service';
 import {TaskService} from '../../service/task.service';
+import {SpreadsheetDialogComponent} from '../spreadsheet-dialog/spreadsheet-dialog.component';
+import {of} from 'rxjs';
+import {mergeMap, map} from 'rxjs/operators';
+import {CheckerService} from '../../service/checker.service';
+import {CheckerConfig} from '../../model/CheckerConfig';
 
 /**
  * Dialog to create or update a task
@@ -21,6 +26,12 @@ export class TaskNewDialogComponent implements OnInit {
     description: new FormControl(''),
     deadline: new FormControl(new Date()),
     mediaType: new FormControl(''),
+    exelFile: new FormControl(''),
+    userIDField: new FormControl(''),
+    inputFields: new FormControl(''),
+    outputFields: new FormControl(''),
+    pointFields: new FormControl(''),
+    decimals: new FormControl(2),
   });
 
   isUpdate: boolean;
@@ -29,24 +40,26 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new Date().toISOString(),
     description: '',
     mediaType: '',
-    name: ''
+    name: '',
+    mediaInformation: null,
   };
 
+  spreadsheet: File = null;
+  disableTypeChange = false;
+
   constructor(public dialogRef: MatDialogRef<TaskNewDialogComponent>,
-              private courseService: CourseService, private taskService: TaskService,
-              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) {
+              private courseService: CourseService, private taskService: TaskService, private checkerService: CheckerService,
+              @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar,
+              private dialog: MatDialog) {
   }
 
   ngOnInit() {
+    this.courseId = this.data.courseId;
     if (this.data.task) {
       this.isUpdate = true;
       this.task = this.data.task;
-      this.taskForm.controls['name'].setValue(this.task.name);
-      this.taskForm.controls['description'].setValue(this.task.description);
-      this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
-      this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
+      this.setValues();
     }
-    this.courseId = this.data.courseId;
   }
 
   /**
@@ -61,7 +74,44 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.name = this.taskForm.get('name').value;
     this.task.description = this.taskForm.get('description').value;
     this.task.mediaType = this.taskForm.get('mediaType').value;
+    if (this.task.mediaType === 'application/x-spreadsheet') {
+      this.task.mediaInformation = {
+        idField: this.taskForm.get('userIDField').value,
+        inputFields: this.taskForm.get('inputFields').value,
+        outputFields: this.taskForm.get('outputFields').value,
+        decimals: this.taskForm.get('decimals').value,
+      };
+      if (this.taskForm.get('pointFields').value) {
+        this.task.mediaInformation.pointFields = this.taskForm.get('pointFields').value;
+      }
+    }
   }
+
+  setValues() {
+    this.taskForm.controls['name'].setValue(this.task.name);
+    this.taskForm.controls['description'].setValue(this.task.description);
+    this.taskForm.controls['mediaType'].setValue(this.task.mediaType);
+    this.taskForm.controls['deadline'].setValue(new Date(this.task.deadline));
+    if (this.task.mediaType === 'application/x-spreadsheet') {
+      this.taskForm.controls['exelFile'].setValue('loading...');
+      this.checkerService.getChecker(this.courseId, this.task.id).pipe(map(checkers => checkers[0])).subscribe(checker => {
+        this.checkerService.fetchMainFile(this.courseId, this.task.id, checker.id).subscribe(spreadsheet =>
+          this.spreadsheet = new File([spreadsheet], 'spreadsheet.xlsx'));
+        this.taskForm.controls['exelFile'].setValue('not changed');
+      });
+      let mediaInformation = this.data.task.mediaInformation;
+      if (typeof mediaInformation.mediaInformation === 'object') {
+        mediaInformation = (mediaInformation as SpreadsheetResponseMediaInformation).mediaInformation;
+      }
+      this.taskForm.controls['userIDField'].setValue(mediaInformation.idField);
+      this.taskForm.controls['inputFields'].setValue(mediaInformation.inputFields);
+      this.taskForm.controls['outputFields'].setValue(mediaInformation.outputFields);
+      this.taskForm.controls['pointFields'].setValue(mediaInformation.pointFields);
+      this.taskForm.controls['decimals'].setValue(mediaInformation.decimals);
+      this.disableTypeChange = true;
+    }
+  }
+
   /**
    * Create a new task
    * and close dialog
@@ -69,7 +119,25 @@ export class TaskNewDialogComponent implements OnInit {
   createTask(value: any) {
     this.getValues();
     if (this.task.name) {
-      this.taskService.createTask(this.courseId, this.task).subscribe(task => {
+      this.taskService.createTask(this.courseId, this.task).pipe(
+        mergeMap((task) => {
+          if (this.task.mediaType === 'application/x-spreadsheet') {
+            const checkerConfig: CheckerConfig = {
+              checkerType: 'spreadsheet',
+              ord: 0
+            };
+            const infoFile = new File([JSON.stringify(this.task.mediaInformation)], 'info.json');
+            return this.checkerService.createChecker(this.courseId, task.id, checkerConfig).pipe(
+              mergeMap((checker) =>
+                this.checkerService.updateMainFile(this.courseId, task.id, checker.id, this.spreadsheet).pipe(map(() => checker))),
+              mergeMap((checker) => this.checkerService.updateSecondaryFile(this.courseId, task.id, checker.id, infoFile)),
+              map(() => task)
+            );
+          } else {
+            return of(task);
+          }
+        })
+      ).subscribe(task => {
           this.dialogRef.close({success: true, task: task});
       });
     } else {
@@ -95,5 +163,35 @@ export class TaskNewDialogComponent implements OnInit {
 
   addDate(event: MatDatepickerInputEvent<Date>) {
     this.task.deadline = event.value.toISOString();
+  }
+
+  uploadExel(event: Event) {
+    const file = (event.currentTarget as any).files[0];
+    this.spreadsheet = file;
+    this.taskForm.patchValue({exelFile: file.name});
+  }
+
+  getFromSpreadsheet(field: string) {
+    if (this.spreadsheet === null) {
+      return;
+    }
+    this.dialog.open(SpreadsheetDialogComponent,  {
+      height: 'auto',
+      width: '50%',
+      data: {
+        spreadsheet: this.spreadsheet,
+      }
+    }).afterClosed().subscribe((fields) => {
+      if (fields === null) {
+        return;
+      }
+      const values = {};
+      if (fields[0] === fields[1]) {
+        values[field] = fields[0];
+      } else {
+        values[field] = fields.join(':');
+      }
+      this.taskForm.patchValue(values);
+    });
   }
 }

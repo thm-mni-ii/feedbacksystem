@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from '../model/Task';
 import {HttpClient} from '@angular/common/http';
+import {UserTaskResult} from '../model/UserTaskResult';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,15 @@ export class TaskService {
    */
   getAllTasks(cid: number): Observable<Task[]> {
     return this.http.get<Task[]>(`/api/v1/courses/${cid}/tasks`);
+  }
+
+  /**
+   * Get all taskResults for this Course
+   * @param cid Course id
+   * @return Observable that succeeds with all task Results of the course
+   */
+  getTaskResults(cid: number): Observable<UserTaskResult[]> {
+    return this.http.get<UserTaskResult[]>(`/api/v1/courses/${cid}/tasks/results`);
   }
 
   /**
@@ -36,6 +46,16 @@ export class TaskService {
    */
   getTask(cid: number, tid: number): Observable<Task> {
     return this.http.get<Task>(`/api/v1/courses/${cid}/tasks/${tid}`);
+  }
+
+  /**
+   * Get a taskResults for this Task
+   * @param cid Course id
+   * @param tid Task id
+   * @return Observable that succeeds with the task Result of the the
+   */
+  getTaskResult(cid: number, tid: number): Observable<UserTaskResult> {
+    return this.http.get<UserTaskResult>(`/api/v1/courses/${cid}/tasks/${tid}/result`);
   }
 
   /**

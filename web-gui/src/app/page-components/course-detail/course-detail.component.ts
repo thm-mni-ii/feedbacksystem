@@ -23,6 +23,7 @@ import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-lin
 import {GoToService} from '../../service/goto.service';
 import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
 import {ExternalClassroomService} from "../../service/external-classroom.service";
+import {UserTaskResult} from '../../model/UserTaskResult';
 
 @Component({
   selector: 'app-course-detail',
@@ -45,6 +46,7 @@ export class CourseDetailComponent implements OnInit {
 
   courseID: number;
   tasks: Task[];
+  taskResults: Record<number, UserTaskResult>;
   role: string = null;
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
@@ -81,7 +83,10 @@ export class CourseDetailComponent implements OnInit {
 
   reloadTasks() {
     this.taskService.getAllTasks(this.courseID).subscribe(tasks => {
-      this.tasks = tasks;
+      this.taskService.getTaskResults(this.courseID).subscribe(taskResults => {
+        this.tasks = tasks;
+        this.taskResults = taskResults.reduce((acc, res) => {acc[res.taskID] = res; return acc; }, {});
+      });
     });
   }
 

@@ -712,6 +712,40 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+  "/courses/{cid}/tasks/results":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Get all the result for the tasks
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserTaskResult"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   "/courses/{cid}/tasks/{tid}":
     get:
       security:
@@ -820,6 +854,44 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/courses/{cid}/tasks/{tid}/result":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Task
+      summary: Gets the task result by id
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserTaskResult"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   "/courses/evaluation/formula/validate":
     post:
       security:
@@ -1311,6 +1383,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Submission"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Submission
+      summary: Get all subresults for a submission
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: sid
+          in: path
+          description: submission id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubTaskResult"
         "401":
           description: Unauthorized
         "403":
@@ -2008,6 +2132,36 @@ components:
         mediaType:
           type: string
           description: The media type for the submissions according to RFC 4288
+        mediaInformation:
+          description: Media type spezific Information
+          oneOf:
+            - $ref: '#/components/schemas/SpreadsheetInformationRequest'
+            - $ref: '#/components/schemas/SpreadsheetInformationResponse'
+    SpreadsheetInformationRequest:
+      type: object
+      properties:
+        idField:
+          type: string
+        inputFields:
+          type: string
+        outputFields:
+          type: string
+        pointFields:
+          type: string
+    SpreadsheetInformationResponse:
+      type: object
+      properties:
+        fields:
+          type: object
+          properties:
+            inputs:
+              type: array
+              items:
+                type: object
+            outputs:
+              type: array
+              items:
+                type: string
     Submission:
       type: object
       required:
@@ -2255,3 +2409,23 @@ components:
                   type: integer
                 passed:
                   type: boolean
+    SubTaskResult:
+      type: object
+      properties:
+        name:
+          type: string
+        points:
+          type: number
+        maxPoints:
+          type: number
+    UserTaskResult:
+      type: object
+      properties:
+        points:
+          type: number
+        maxPoints:
+          type: number
+        passed:
+          type: boolean
+        submission:
+          type: boolean

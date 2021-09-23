@@ -1,0 +1,16 @@
+<div>
+  <div class="flex-container">
+    <mat-form-field *ngFor="let inputField of inputFields">
+      <input matInput type="text" [placeholder]="inputField[0]" [value]="inputField[1]" readonly>
+    </mat-form-field>
+  </div>
+  <hr>
+  <form [formGroup]="resultForm">
+    <div class="flex-container">
+        <mat-form-field *ngFor="let outputField of outputFields">
+          <input matInput type="text" [placeholder]="outputField" [formControlName]="outputField" (input)="updateSubmission()" required>
+        </mat-form-field>
+    </div>
+  </form>
+  <small>Alle Eingaben werden auf {{decimals}} Nachkommastellen gerundet.</small>
+</div>

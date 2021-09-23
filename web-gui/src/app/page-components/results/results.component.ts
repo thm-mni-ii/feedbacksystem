@@ -30,7 +30,12 @@ export class ResultsComponent {
 
   @Input() displayTables: boolean;
 
+  @Input() context: {uid: number, cid: number, tid: number};
+
   display(submission: Submission) {
+    if (submission === undefined) {
+      return;
+    }
     this.displayedSubmission = submission;
     this.dataSource.data = submission.results;
 

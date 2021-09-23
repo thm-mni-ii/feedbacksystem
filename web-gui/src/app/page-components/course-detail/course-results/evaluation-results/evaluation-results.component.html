@@ -11,6 +11,9 @@
   <!--                     (page)="pageEvent($event)">-->
   <!--      </mat-paginator>-->
   <!--    </div>-->
+  <div class="align-right-container">
+    <mat-slide-toggle class="align-right-child" [checked]="showPoints" (change)="showPoints = $event.checked">Show Points</mat-slide-toggle>
+  </div>
   <div class="card">
     <div class="bonus-column">
       <div class="task-container header">
@@ -19,10 +22,10 @@
         </div>
       </div>
       <div class="bonus-container" *ngFor="let result of evaluationUserResults | async">
-              <span class="category-result-backpane {{(result.bonusPoints == 0) ? 'not-tried' : ''}}" matTooltipPosition="above"
+              <span class="category-result-backpane" matTooltipPosition="above"
                     matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
-                       <span class="bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
-                       <span class="no-bonus" *ngIf="result.bonusPoints==0">-</span>
+                       <span class="category-bonus bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
+                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints==0">-</span>
                 </span>
       </div>
     </div>
@@ -63,9 +66,12 @@
           </span>
           <ng-container class="task-container" *ngIf="opened === requirement.id">
             <ng-container class="task-result" *ngFor="let taskResult of userResult.results[i].container.tasks">
-                <span class="task-result-backpane {{(taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
+                <span class="task-result-backpane {{(showPoints || taskResult.attempts == 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
                                    matTooltipPosition="above" matTooltip="{{ userResult.user.surname }}, {{ userResult.user.prename }} {{ taskResult.attempts }}">
-                  <span *ngIf="taskResult.attempts!=0">{{ taskResult.attempts }}</span>
+                  <span *ngIf="taskResult.attempts!=0">
+                    <span *ngIf="showPoints">{{ taskResult.points }}</span>
+                    <span *ngIf="!showPoints">{{ taskResult.attempts }}</span>
+                  </span>
                   <span *ngIf="taskResult.attempts == 0">-</span>
                 </span>
             </ng-container>

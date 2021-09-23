@@ -32,11 +32,39 @@
       <!-- Task Mediatype -->
       <mat-form-field class="col pad">
         <mat-label>Medientyp</mat-label>
-        <mat-select formControlName="mediaType">
+        <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
           <mat-option value="text/plain">Text</mat-option>
           <mat-option value="application/zip">Zip-Datei</mat-option>
+          <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
         </mat-select>
       </mat-form-field>
+
+      <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
+        <mat-form-field class="col" (click)="fileInput.click()">
+          <input matInput type="text" placeholder="Exel-Datei" formControlName="exelFile" required readonly>
+          <input hidden #fileInput type="file" required (change)="uploadExel($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          <mat-icon matSuffix class="clickable">folder</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
+          <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userIDField" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('userIDField')" class="clickable">search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col">
+          <input matInput type="text" placeholder="Eingabeparameter Felder" formControlName="inputFields" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('inputFields')" class="clickable">search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
+          <input matInput type="text" placeholder="Ergebniss Felder" formControlName="outputFields" required>
+          <mat-icon matSuffix (click)="getFromSpreadsheet('outputFields')" class="clickable">search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col">
+          <input matInput type="text" placeholder="Punkte Felder" formControlName="pointFields">
+          <mat-icon matSuffix (click)="getFromSpreadsheet('pointFields')" class="clickable">search</mat-icon>
+        </mat-form-field>
+        <mat-form-field class="col pad">
+          <input matInput type="number" placeholder="Nachkommastellen" formControlName="decimals" required>
+        </mat-form-field>
+      </div>
       <br>
     </form>
   <mat-dialog-actions class="actions">

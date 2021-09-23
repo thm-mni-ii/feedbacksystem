@@ -26,6 +26,7 @@
     "@angular/router": "~10.1.4",
     "@auth0/angular-jwt": "^4.0.0",
     "@stomp/stompjs": "^5.4.4",
+    "canvas-datagrid": "^0.3.4",
     "core-js": "^3.6.4",
     "dompurify": "^2.2.7",
     "file-saver": "^2.0.2",
@@ -35,6 +36,7 @@
     "ngx-markdown": "10.1.1",
     "sockjs-client": "^1.3.3",
     "stompjs": "^2.3.3",
+    "xlsx": "^0.16.9",
     "zone.js": "~0.10.3"
   },
   "devDependencies": {
