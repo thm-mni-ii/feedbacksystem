@@ -84,19 +84,20 @@ class TaskService {
     * @return UserTaskResult The UserTaskResult Array
     */
   def getTaskResults(cid: Int, uid: Int): Seq[UserTaskResult] = DB.query(
-    """SELECT task.task_id, uts.submission_id, COALESCE(SUM(cstr.points), 0) AS points, COALESCE(SUM(cst.points), 0) AS max_points,
-      |       COALESCE(LEAST(cr.exit_code, 1), 1) AS status FROM task
-      |    LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id
-      |    LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
-      |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
-      |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
-      |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
-      |    LEFT JOIN checker_result cr ON cc.configuration_id = cr.configuration_id AND
-      |                                   uts.submission_id = cr.submission_id
-      |    WHERE course_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
-      |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
-      |    )) GROUP BY task.task_id;
-      """.stripMargin, (res, _) => parseUserTaskResult(res), uid, cid)
+    """
+      |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
+      |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
+      |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
+      |        LEFT JOIN checkrunner_sub_task_result cstr on cr.configuration_id = cstr.configuration_id and cr.submission_id = cstr.submission_id
+      |    WHERE uts.user_id = ? GROUP BY uts.submission_id
+      |) AS submission ON task.task_id = submission.task_id
+      |LEFT JOIN (
+      |    SELECT cc.task_id, SUM(cst.points) AS points FROM checkrunner_configuration cc
+      |        LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
+      |        GROUP BY cc.task_id
+      |) AS subtask ON task.task_id = subtask.task_id WHERE task.course_id = ? GROUP BY task.task_id;
+      |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, cid)
 
   /**
     * Get The task result for a task
@@ -105,18 +106,19 @@ class TaskService {
     * @return UserTaskResult The UserTaskResult Array
     */
   def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query(
-  """SELECT task.task_id, uts.submission_id, COALESCE(SUM(cstr.points), 0) AS points, COALESCE(SUM(cst.points), 0) AS max_points,
-    |       COALESCE(LEAST(cr.exit_code, 1), 1) AS status FROM task
-    |    LEFT JOIN checkrunner_configuration cc on task.task_id = cc.task_id
-    |    LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
-    |    LEFT JOIN user_task_submission uts ON uts.task_id = task.task_id AND uts.user_id = ?
-    |    LEFT JOIN checkrunner_sub_task_result cstr ON cst.configuration_id = cstr.configuration_id AND
-    |                                                  cst.sub_task_id = cstr.sub_task_id AND cstr.submission_id = uts.submission_id
-    |    LEFT JOIN checker_result cr ON cc.configuration_id = cr.configuration_id AND
-    |                                   uts.submission_id = cr.submission_id
-    |    WHERE task.task_id = ? AND (uts.submission_id IS NULL OR uts.submission_id = (
-    |        SELECT MAX(sub.submission_id) FROM user_task_submission sub WHERE sub.task_id = task.task_id AND sub.user_id = uts.user_id
-    |    )) GROUP BY task.task_id;
+  """
+    |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+    |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
+    |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
+    |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
+    |        LEFT JOIN checkrunner_sub_task_result cstr on cr.configuration_id = cstr.configuration_id and cr.submission_id = cstr.submission_id
+    |    WHERE uts.user_id = ? GROUP BY uts.submission_id
+    |) AS submission ON task.task_id = submission.task_id
+    |LEFT JOIN (
+    |    SELECT cc.task_id, SUM(cst.points) AS points FROM checkrunner_configuration cc
+    |        LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
+    |        GROUP BY cc.task_id
+    |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id;
     |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
