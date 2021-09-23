@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
-import de.thm.ii.fbs.services.checker.RemoteCheckerService
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,9 +31,13 @@ class SubmissionController {
   @Autowired
   private val checkerConfigurationService: CheckerConfigurationService = null
   @Autowired
-  private val remoteCheckerService: RemoteCheckerService = null
+  private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val checkrunnerService: CheckerConfigurationService = null
+  @Autowired
+  private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
 
   /**
     * Get a list of all submissions for a task
@@ -49,13 +53,45 @@ class SubmissionController {
   def getAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
              req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
     val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
     val privileged = user.id == uid || adminPrivileged
 
     if (privileged) {
-      submissionService.getAll(uid, cid, tid, adminPrivileged)
+      submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
+    * Get a list of all submissions for a task
+    * @param uid User id
+    * @param cid Course id
+    * @param tid Task id
+    * @param sid Submission id
+    * @param req Http request
+    * @param res Http response
+    * @return Submission results
+    */
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults"))
+  @ResponseBody
+  def getSubresults(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+             @PathVariable("sid") sid: Int, req: HttpServletRequest, res: HttpServletResponse): List[SubTaskResult] = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = user.id == uid || adminPrivileged
+
+    if (privileged) {
+      checkerConfigurationService.getAll(cid, tid).headOption match {
+        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(cc.id, sid)
+        case None => throw new ResourceNotFoundException()
+      }
     } else {
       throw new ForbiddenException()
     }
@@ -91,8 +127,10 @@ class SubmissionController {
             file.transferTo(tempDesc)
             val submission = submissionService.create(uid, tid)
             storageService.storeSolutionFile(submission.id, tempDesc)
-            checkerConfigurationService.getAll(cid, tid).foreach(cc =>
-              remoteCheckerService.notify(tid, submission.id, cc, user))
+            checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+              val checkerService = checkerServiceFactoryService(cc.checkerType)
+              checkerService.notify(tid, submission.id, cc, user)
+            })
             submission
 
           } else {
@@ -124,8 +162,10 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(_) =>
           submissionService.clearResults(sid, uid)
-          checkerConfigurationService.getAll(cid, tid).foreach(cc =>
-            remoteCheckerService.notify(tid, sid, cc, user))
+          checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+            val checkerService = checkerServiceFactoryService(cc.checkerType)
+            checkerService.notify(tid, sid, cc, user)
+          })
         case None => throw new ResourceNotFoundException()
       }
     } else {
