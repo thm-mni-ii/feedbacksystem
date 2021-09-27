@@ -127,7 +127,7 @@ export class CourseDetailComponent implements OnInit {
       .subscribe(confirmed => {
         if (confirmed) {
           this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
-            .subscribe(ok => this.ngOnInit(), error => console.error(error));
+            .subscribe(ok => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()), error => console.error(error));
         }
       });
   }
