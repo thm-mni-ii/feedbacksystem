@@ -81,6 +81,7 @@ import {SubmissionSpreadsheetComponent} from './page-components/task-detail/subm
 import {SpreadsheetComponent} from './dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component';
 import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadsheet-dialog.component';
 import {SubtaskResultsComponent} from './page-components/subtask-results/subtask-results.component';
+import {ChartsModule} from 'ng2-charts';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -189,6 +190,7 @@ export const httpInterceptorProviders = [
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
+    ChartsModule,
   ],
   entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent,
     InvitetoConferenceDialogComponent, AssignTicketDialogComponent],
