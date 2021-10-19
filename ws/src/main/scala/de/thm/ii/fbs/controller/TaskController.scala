@@ -5,7 +5,7 @@ import de.thm.ii.fbs.services.persistence._
 import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, Task, UserTaskResult}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, SubtaskStatisticsTask, Task, UserTaskResult}
 import de.thm.ii.fbs.services.checker.SpreadsheetService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
@@ -66,6 +66,30 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     taskService.getTaskResults(cid, auth.id)
+  }
+
+  /**
+    * Get subtask statistics
+    *
+    * @param cid Course id
+    * @param req http request
+    * @param res http response
+    * @return the subtask statistics
+    */
+  @GetMapping(value = Array("/{cid}/statistics/subtasks"))
+  @ResponseBody
+  def getSubtaskStatistics(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[SubtaskStatisticsTask] = {
+    val auth = authService.authorize(req, res)
+
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == auth.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privileged = privilegedByCourse || auth.globalRole == GlobalRole.ADMIN || auth.globalRole == GlobalRole.MODERATOR
+
+    if (!privileged) {
+      throw new ForbiddenException()
+    }
+
+    taskService.getCourseSubtaskStatistics(cid)
   }
 
   /**
