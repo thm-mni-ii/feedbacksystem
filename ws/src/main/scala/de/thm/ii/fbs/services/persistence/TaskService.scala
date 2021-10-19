@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{MediaInformation, Task, TaskResult, UserTaskResult}
+import de.thm.ii.fbs.model.{MediaInformation, SubtaskStatisticsSubtask, SubtaskStatisticsTask, Task, TaskResult, UserTaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -121,6 +121,32 @@ class TaskService {
     |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id;
     |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
+  /**
+    * Get the subtask statistics for a single course
+    * @param cid the id of the course to get the statistics for
+    * @return the statistics
+    */
+  def getCourseSubtaskStatistics(cid: Int): Seq[SubtaskStatisticsTask] = DB.query(
+    """
+      |SELECT task.task_id, task.name, (
+      |    SELECT JSON_ARRAYAGG(JSON_OBJECT('name', cst.name, 'maxPoints', cst.points, 'avgPoints', (
+      |            SELECT AVG(cstr.points) FROM (SELECT MAX(cstr.points) AS points
+      |                                          FROM checkrunner_sub_task_result cstr
+      |                                                   JOIN checker_result cr
+      |                                                        on cstr.configuration_id = cr.configuration_id and
+      |                                                           cstr.submission_id = cr.submission_id
+      |                                                   JOIN user_task_submission uts on cr.submission_id = uts.submission_id
+      |                                          WHERE cst.configuration_id = cstr.configuration_id
+      |                                            AND cst.sub_task_id = cstr.sub_task_id
+      |                                          GROUP BY uts.user_id
+      |                                         ) cstr
+      |        ))) FROM checkrunner_sub_task cst
+      |    WHERE cc.configuration_id = cst.configuration_id
+      |) AS subtasks FROM task
+      |    JOIN checkrunner_configuration cc ON task.task_id = cc.task_id
+      |WHERE course_id = ?;
+      |""".stripMargin, (res, _) => parseSubtaskStatics(res), cid)
+
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
     deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
@@ -129,5 +155,7 @@ class TaskService {
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
     res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null)
 
+  private def parseSubtaskStatics(res: ResultSet): SubtaskStatisticsTask = SubtaskStatisticsTask(res.getInt("task_id"),
+    res.getString("name"), Option(res.getString("subtasks")).map(SubtaskStatisticsSubtask.fromJSONString).getOrElse(Seq()))
   private def parseTimestamp(timestamp: String): Timestamp = Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)))
 }
