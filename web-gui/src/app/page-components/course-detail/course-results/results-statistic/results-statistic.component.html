@@ -1,11 +1,24 @@
 <div class="statistic-container">
-<canvas baseChart width="400" height="400"
+  <canvas baseChart width="400" height="400"
         [datasets]="barChartData"
         [labels]="barChartLabels"
         [options]="barChartOptions"
         [colors]="barChartColors"
         [legend]="barChartLegend"
         [chartType]="barChartType"
-        [plugins]="barChartPlugins">
-</canvas>
+        [plugins]="barChartPlugins"
+        (chartClick)="chartClicked($event)">
+  </canvas>
+</div>
+@SuppressWarnings("SpellCheckingInspection")
+<div class="info" *ngIf="this.isTextVisible">
+  <h4>Aufgabe anklicken, um Unteraufgaben anzuzeigen</h4>
+</div>
+<div class="info" *ngIf="this.isMissingSubTextVisible">
+  <h4>Die Aufgabe besitzt keine Unteraufgaben</h4>
+</div>
+<div style="text-align:left" *ngIf="this.isButtonVisible">
+  <br>
+  <button  (click)="standardEvent()" >
+    Zurück zur Aufgabenübersicht</button>
 </div>
