@@ -81,6 +81,8 @@ import {SubmissionSpreadsheetComponent} from './page-components/task-detail/subm
 import {SpreadsheetComponent} from './dialogs/spreadsheet-dialog/spreadsheet/spreadsheet.component';
 import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadsheet-dialog.component';
 import {SubtaskResultsComponent} from './page-components/subtask-results/subtask-results.component';
+import {ChartsModule} from 'ng2-charts';
+import {ResultsStatisticComponent} from './page-components/course-detail/course-results/results-statistic/results-statistic.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -160,6 +162,7 @@ export const httpInterceptorProviders = [
     SpreadsheetComponent,
     SpreadsheetDialogComponent,
     SubtaskResultsComponent,
+    ResultsStatisticComponent,
   ],
   imports: [
     BrowserModule,
@@ -189,6 +192,7 @@ export const httpInterceptorProviders = [
     NgxMatDatetimePickerModule,
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
+    ChartsModule,
   ],
   entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent,
     InvitetoConferenceDialogComponent, AssignTicketDialogComponent],

@@ -41,7 +41,7 @@
       <div class="card">
         <div class="name-column">
           <div class="name-container header">
-            <span class="title"><h2>Names</h2></span>
+            <div class="title"><h2>Names</h2></div>
           </div>
           <div class="name-container" *ngFor="let result of evaluationUserResults | async">
             <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
@@ -68,8 +68,10 @@
       </div>
     </mat-card>
     </mat-tab>
-<!--    <mat-tab label="Statistiken">-->
-<!--      <mat-card class="content-container">Leer</mat-card>-->
-<!--    </mat-tab>-->
+    <mat-tab label="Statistiken">
+      <mat-card class="content-container">
+          <app-results-statistic></app-results-statistic>
+      </mat-card>
+    </mat-tab>
   </mat-tab-group>
 </div>
