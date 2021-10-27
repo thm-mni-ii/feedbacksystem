@@ -10,14 +10,13 @@
         (chartClick)="chartClicked($event)">
   </canvas>
 </div>
-@SuppressWarnings("SpellCheckingInspection")
 <div class="info" *ngIf="this.isTextVisible">
   <h4>Aufgabe anklicken, um Unteraufgaben anzuzeigen</h4>
 </div>
 <div class="info" *ngIf="this.isMissingSubTextVisible">
   <h4>Die Aufgabe besitzt keine Unteraufgaben</h4>
 </div>
-<div style="text-align:left" *ngIf="this.isButtonVisible">
+<div class="info" *ngIf="this.isButtonVisible">
   <br>
   <button  (click)="standardEvent()" >
     Zurück zur Aufgabenübersicht</button>
