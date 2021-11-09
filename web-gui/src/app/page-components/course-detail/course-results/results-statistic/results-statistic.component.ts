@@ -20,7 +20,8 @@ import {SubtaskStatisticService} from "../../../../service/subtask-statistic.ser
 export class ResultsStatisticComponent implements OnInit {
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
-              private route: ActivatedRoute, private subtaskStatisticService: SubtaskStatisticService) {}
+              private route: ActivatedRoute, private subtaskStatisticService: SubtaskStatisticService) {
+  }
 
   courseId: number;
   courseResults: Observable<CourseResult[]> = of();
@@ -36,13 +37,15 @@ export class ResultsStatisticComponent implements OnInit {
   isButtonVisible = false;
   isTextVisible = true;
   isMissingSubTextVisible = false;
+  cResults = [];
 
-public barChartData: ChartDataSets[] = [
-    { data: [], label: 'Durchschnittliche Versuche zum Bestehen einer Aufgabe' },
-    { data: [], label: 'Durchschnittliche Versuche einer Aufgabe' },
+  //Bar-chart Config
+  public barChartData: ChartDataSets[] = [
+    {data: [], label: 'Durchschnittliche Versuche zum Bestehen einer Aufgabe'},
+    {data: [], label: 'Durchschnittliche Versuche einer Aufgabe'},
   ];
-public barChartLabels: Label[] = [];
-public barChartOptions: (ChartOptions & {annotation ?: any}) = {
+  public barChartLabels: Label[] = [];
+  public barChartOptions: (ChartOptions & { annotation?: any }) = {
     responsive: true,
     scales: {
       yAxes: [
@@ -54,23 +57,60 @@ public barChartOptions: (ChartOptions & {annotation ?: any}) = {
       ],
       xAxes: [
         {
-          ticks: {
-
-          }
+          ticks: {}
         }
       ]
     }
   };
 
-public barChartColors: Color[] = [
+  public barChartColors: Color[] = [
+    { backgroundColor: '#405e9a'},
+    { backgroundColor: '#aab6fe'},
+  ];
+  public barChartLegend = true;
+  public barChartType: ChartType = 'bar';
+  public barChartPlugins = [];
+
+
+  //Line-chart Config
+  lineChartData: ChartDataSets[] = [
+    {data: [], label: 'Bearbeitungsquote %'},
+  ];
+
+  lineChartLabels: Label[] = [];
+
+  lineChartOptions = {
+    responsive: true,
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            callback: function(value){
+              return value + '%';
+            }
+          }
+        }
+      ],
+      xAxes: [
+        {
+          ticks: {}
+        }
+      ]
+    }
+  };
+
+
+  lineChartColors: Color[] = [
     {
       borderColor: 'black',
-      backgroundColor: 'rgba(255,0,0,0.3)',
+      backgroundColor: '#405e9a',
     },
   ];
-public barChartLegend = true;
-public barChartType: ChartType = 'bar';
-public barChartPlugins = [];
+
+  lineChartLegend = true;
+  lineChartPlugins = [];
+  lineChartType: ChartType = 'line';
+
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -81,17 +121,18 @@ public barChartPlugins = [];
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
     });
     this.standardEvent();
+    this.showRate();
   }
-  public chartClicked(e: any): void {
-    if(this.choosedTask == ""){
+
+  public chartClicked(e: any): void { //Show statistics of the subtasks After a task has been clicked
+    if (this.choosedTask == "") {
       return;
-    }
-    else {
+    } else {
       this.isTextVisible = false;
       this.isButtonVisible = true;
       this.isMissingSubTextVisible = true;
     }
-    if(this.checker == 1){
+    if (this.checker == 1) {
       return;
     }
     this.choosedTask = e.active[0]._model.label;
@@ -103,7 +144,7 @@ public barChartPlugins = [];
     this.barChartData[1].data = [];
     this.subtaskStatistic.subscribe(extractedSResults => {
       extractedSResults.forEach(extractedSResult => {
-        if(extractedSResult.name == this.choosedTask) {
+        if (extractedSResult.name == this.choosedTask) {
           extractedSResult.subtasks.forEach(t => {
             this.barChartData[0].data.push(t.maxPoints);
             this.barChartData[1].data.push(t.avgPoints);
@@ -111,12 +152,12 @@ public barChartPlugins = [];
             this.isMissingSubTextVisible = false;
           })
         }
-        })
+      })
     });
   }
 
-  standardEvent(){
-  this.isButtonVisible = false;
+  standardEvent() { //Statistics of the tasks are calculated
+    this.isButtonVisible = false;
     this.isMissingSubTextVisible = false;
     this.isTextVisible = true;
     this.checker = 0;
@@ -163,6 +204,31 @@ public barChartPlugins = [];
           const sum = resultsObj[key].reduce((a, b) => a + b, 0);
           const avg = sum / count;
           this.barChartData[1].data.push(Number(avg));
+        });
+      })
+    )
+      .subscribe();
+  }
+
+  showRate() { //Rate of tasks that have been edited at least once
+    this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.lineChartLabels = names);
+    this.courseResults.pipe(map((extractedCResult2) => { //Calculation of the rate
+        return extractedCResult2.reduce((acc, extractedCResult) => {
+          extractedCResult.results.forEach((t) => {
+            if (acc[t.task.name] == null) acc[t.task.name] = [];
+            if(t.attempts > 0) acc[t.task.name].push(1);
+            else{acc[t.task.name].push(0);}
+          });
+          return acc;
+        }, {});
+      }),
+      map((resultsObj) => {
+        return Object.keys(resultsObj).map((key) => {
+          const count = resultsObj[key].length;
+          const sum = resultsObj[key].reduce((a, b) => a + b, 0);
+          const avg = sum / count;
+          const rate = avg * 100;
+          this.lineChartData[0].data.push(Number(rate));
         });
       })
     )
