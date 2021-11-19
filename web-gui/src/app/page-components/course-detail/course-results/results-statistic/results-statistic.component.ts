@@ -38,6 +38,8 @@ export class ResultsStatisticComponent implements OnInit {
   isTextVisible = true;
   isMissingSubTextVisible = false;
   cResults = [];
+  taskChecker;
+  taskCounter;
 
   //Bar-chart Config
   public barChartData: ChartDataSets[] = [
@@ -124,17 +126,23 @@ export class ResultsStatisticComponent implements OnInit {
     this.showRate();
   }
 
-  public chartClicked(e: any): void { //Show statistics of the subtasks After a task has been clicked
-    if (this.choosedTask == "") {
-      return;
-    } else {
-      this.isTextVisible = false;
-      this.isButtonVisible = true;
-      this.isMissingSubTextVisible = true;
-    }
+  public chartClicked(e: any): void { //Show statistics of the subtasks after a task has been clicked
     if (this.checker == 1) {
       return;
     }
+    this.choosedTask = e.active[0]._model.label;
+        this.tasks.subscribe(extractedTasks => {
+          extractedTasks.forEach(extractedTasks =>{
+            if(extractedTasks.name == this.choosedTask){
+              this.taskChecker = 1;
+            }
+          })
+          if(this.taskChecker != 1) return;
+        });
+      this.isTextVisible = false;
+      this.isButtonVisible = true;
+      this.isMissingSubTextVisible = true;
+
     this.choosedTask = e.active[0]._model.label;
     this.checker = 1;
     this.barChartData[0].label = 'Maximale Punktzahl';
@@ -156,7 +164,7 @@ export class ResultsStatisticComponent implements OnInit {
     });
   }
 
-  standardEvent() { //Statistics of the tasks are calculated
+  standardEvent() { //Statistics of the tasks get calculated
     this.isButtonVisible = false;
     this.isMissingSubTextVisible = false;
     this.isTextVisible = true;
@@ -170,9 +178,13 @@ export class ResultsStatisticComponent implements OnInit {
     this.courseResults.pipe(map((extractedCResult) => { //Calculation average attempts to pass a task
         return extractedCResult.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (t.passed == true) {
-              if (acc[t.task.name] == null) acc[t.task.name] = [];
+            if (t.passed) {
+              if (!acc[t.task.name]) acc[t.task.name] = [];
               acc[t.task.name].push(t.attempts);
+            }
+            if (!t.passed){
+              if (!acc[t.task.name]) acc[t.task.name] = [];
+              acc[t.task.name].push(0);
             }
           });
           return acc;
@@ -180,10 +192,15 @@ export class ResultsStatisticComponent implements OnInit {
       }),
       map((resultsObj) => {
         return Object.keys(resultsObj).map((key) => {
-          const count = resultsObj[key].length;
+          this.taskCounter = 0;
+         resultsObj[key].forEach((t) =>{
+           if(t != 0){
+             this.taskCounter++;
+           }
+         });
           const sum = resultsObj[key].reduce((a, b) => a + b, 0);
-          const avg = sum / count;
-          this.barChartData[0].data.push(Number(avg));
+          const avg = sum / this.taskCounter;
+          this.barChartData[0].data.push(Number(avg.toFixed(2)));
         });
       })
     )
@@ -192,7 +209,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.courseResults.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (acc[t.task.name] == null) acc[t.task.name] = [];
+            if (!acc[t.task.name]) acc[t.task.name] = [];
             acc[t.task.name].push(t.attempts);
           });
           return acc;
@@ -203,7 +220,7 @@ export class ResultsStatisticComponent implements OnInit {
           const count = resultsObj[key].length;
           const sum = resultsObj[key].reduce((a, b) => a + b, 0);
           const avg = sum / count;
-          this.barChartData[1].data.push(Number(avg));
+          this.barChartData[1].data.push(Number(avg.toFixed(2)));
         });
       })
     )
@@ -215,7 +232,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.courseResults.pipe(map((extractedCResult2) => { //Calculation of the rate
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (acc[t.task.name] == null) acc[t.task.name] = [];
+            if (!acc[t.task.name]) acc[t.task.name] = [];
             if(t.attempts > 0) acc[t.task.name].push(1);
             else{acc[t.task.name].push(0);}
           });
