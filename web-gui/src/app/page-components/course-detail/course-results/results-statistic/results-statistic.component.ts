@@ -127,7 +127,7 @@ export class ResultsStatisticComponent implements OnInit {
   }
 
   public chartClicked(e: any): void { //Show statistics of the subtasks after a task has been clicked
-    if (this.checker == 1) {
+    if (this.checker === 1) {
       return;
     }
     this.choosedTask = e.active[0]._model.label;
