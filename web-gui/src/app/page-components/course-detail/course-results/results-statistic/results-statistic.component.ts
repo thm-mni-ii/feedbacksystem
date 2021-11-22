@@ -133,7 +133,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.choosedTask = e.active[0]._model.label;
         this.tasks.subscribe(extractedTasks => {
           extractedTasks.forEach(extractedTasks =>{
-            if(extractedTasks.name == this.choosedTask){
+            if(extractedTasks.name === this.choosedTask){
               this.taskChecker = 1;
             }
           })
