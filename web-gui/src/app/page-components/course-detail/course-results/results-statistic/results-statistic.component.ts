@@ -152,7 +152,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.barChartData[1].data = [];
     this.subtaskStatistic.subscribe(extractedSResults => {
       extractedSResults.forEach(extractedSResult => {
-        if (extractedSResult.name == this.choosedTask) {
+        if (extractedSResult.name === this.choosedTask) {
           extractedSResult.subtasks.forEach(t => {
             this.barChartData[0].data.push(t.maxPoints);
             this.barChartData[1].data.push(t.avgPoints);
