@@ -179,12 +179,12 @@ export class ResultsStatisticComponent implements OnInit {
         return extractedCResult.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
             if (t.passed) {
-              if (!acc[t.task.name]) acc[t.task.name] = [];
-              acc[t.task.name].push(t.attempts);
+              if (!acc[t.task.id]) acc[t.task.id] = [];
+              acc[t.task.id].push(t.attempts);
             }
             if (!t.passed){
-              if (!acc[t.task.name]) acc[t.task.name] = [];
-              acc[t.task.name].push(0);
+              if (!acc[t.task.id]) acc[t.task.id] = [];
+              acc[t.task.id].push(0);
             }
           });
           return acc;
@@ -209,8 +209,8 @@ export class ResultsStatisticComponent implements OnInit {
     this.courseResults.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (!acc[t.task.name]) acc[t.task.name] = [];
-            acc[t.task.name].push(t.attempts);
+            if (!acc[t.task.id]) acc[t.task.id] = [];
+            acc[t.task.id].push(t.attempts);
           });
           return acc;
         }, {});
@@ -232,9 +232,9 @@ export class ResultsStatisticComponent implements OnInit {
     this.courseResults.pipe(map((extractedCResult2) => { //Calculation of the rate
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (!acc[t.task.name]) acc[t.task.name] = [];
-            if(t.attempts > 0) acc[t.task.name].push(1);
-            else{acc[t.task.name].push(0);}
+            if (!acc[t.task.id]) acc[t.task.id] = [];
+            if(t.attempts > 0) acc[t.task.id].push(1);
+            else{acc[t.task.id].push(0);}
           });
           return acc;
         }, {});
