@@ -137,7 +137,7 @@ export class ResultsStatisticComponent implements OnInit {
               this.taskChecker = 1;
             }
           })
-          if(this.taskChecker != 1) return;
+          if(this.taskChecker !== 1) return;
         });
       this.isTextVisible = false;
       this.isButtonVisible = true;
