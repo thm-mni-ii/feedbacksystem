@@ -152,6 +152,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.barChartLabels = [];
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];
+    console.log(this.choosedTask);
     this.subtaskStatistic.subscribe(extractedSResults => {
       extractedSResults.forEach(extractedSResult => {
         if (extractedSResult.taskID === this.choosedTask) {
