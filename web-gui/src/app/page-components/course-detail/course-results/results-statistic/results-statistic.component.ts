@@ -33,6 +33,7 @@ export class ResultsStatisticComponent implements OnInit {
   results;
   avg;
   choosedTask;
+  choosedIndex;
   checker = 0;
   isButtonVisible = false;
   isTextVisible = true;
@@ -40,6 +41,7 @@ export class ResultsStatisticComponent implements OnInit {
   cResults = [];
   taskChecker;
   taskCounter;
+  idStore;
 
   //Bar-chart Config
   public barChartData: ChartDataSets[] = [
@@ -130,10 +132,11 @@ export class ResultsStatisticComponent implements OnInit {
     if (this.checker === 1) {
       return;
     }
-    this.choosedTask = e.active[0]._model.label;
+    this.choosedIndex = e.active[0]._index;
+    this.choosedTask = this.idStore[this.choosedIndex];
         this.tasks.subscribe(extractedTasks => {
           extractedTasks.forEach(extractedTasks =>{
-            if(extractedTasks.name === this.choosedTask){
+            if(extractedTasks.id === this.choosedTask){
               this.taskChecker = 1;
             }
           })
@@ -143,7 +146,6 @@ export class ResultsStatisticComponent implements OnInit {
       this.isButtonVisible = true;
       this.isMissingSubTextVisible = true;
 
-    this.choosedTask = e.active[0]._model.label;
     this.checker = 1;
     this.barChartData[0].label = 'Maximale Punktzahl';
     this.barChartData[1].label = 'Durchschnittliche Punktzahl';
@@ -152,7 +154,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.barChartData[1].data = [];
     this.subtaskStatistic.subscribe(extractedSResults => {
       extractedSResults.forEach(extractedSResult => {
-        if (extractedSResult.name === this.choosedTask) {
+        if (extractedSResult.taskID === this.choosedTask) {
           extractedSResult.subtasks.forEach(t => {
             this.barChartData[0].data.push(t.maxPoints);
             this.barChartData[1].data.push(t.avgPoints);
@@ -175,6 +177,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];
     this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.barChartLabels = names);
+    this.tasks.pipe(map(t => t.map(t => t.id))).subscribe(ids => this.idStore = ids);
     this.courseResults.pipe(map((extractedCResult) => { //Calculation average attempts to pass a task
         return extractedCResult.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
