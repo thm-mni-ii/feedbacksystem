@@ -9,8 +9,8 @@ import {Task} from '../../../../model/Task';
 import {EvaluationUserResults} from '../../../../model/EvaluationUserResults';
 import {ChartDataSets, ChartOptions, ChartType} from 'chart.js';
 import { Color, Label } from 'ng2-charts';
-import {SubTaskStatistic} from "../../../../model/SubTaskStatistic";
-import {SubtaskStatisticService} from "../../../../service/subtask-statistic.service";
+import {SubTaskStatistic} from '../../../../model/SubTaskStatistic';
+import {SubtaskStatisticService} from '../../../../service/subtask-statistic.service';
 
 @Component({
   selector: 'app-results-statistic',
@@ -20,7 +20,8 @@ import {SubtaskStatisticService} from "../../../../service/subtask-statistic.ser
 export class ResultsStatisticComponent implements OnInit {
 
   constructor(private courseResultService: CourseResultsService, private tb: TitlebarService,
-              private route: ActivatedRoute, private subtaskStatisticService: SubtaskStatisticService) {}
+              private route: ActivatedRoute, private subtaskStatisticService: SubtaskStatisticService) {
+  }
 
   courseId: number;
   courseResults: Observable<CourseResult[]> = of();
@@ -32,17 +33,23 @@ export class ResultsStatisticComponent implements OnInit {
   results;
   avg;
   choosedTask;
+  choosedIndex;
   checker = 0;
   isButtonVisible = false;
   isTextVisible = true;
   isMissingSubTextVisible = false;
+  cResults = [];
+  taskChecker;
+  taskCounter;
+  idStore;
 
-public barChartData: ChartDataSets[] = [
-    { data: [], label: 'Durchschnittliche Versuche zum Bestehen einer Aufgabe' },
-    { data: [], label: 'Durchschnittliche Versuche einer Aufgabe' },
+  // Bar-chart Config
+  public barChartData: ChartDataSets[] = [
+    {data: [], label: 'Durchschnittliche Versuche zum Bestehen einer Aufgabe'},
+    {data: [], label: 'Durchschnittliche Versuche einer Aufgabe'},
   ];
-public barChartLabels: Label[] = [];
-public barChartOptions: (ChartOptions & {annotation ?: any}) = {
+  public barChartLabels: Label[] = [];
+  public barChartOptions: (ChartOptions & { annotation?: any }) = {
     responsive: true,
     scales: {
       yAxes: [
@@ -54,23 +61,60 @@ public barChartOptions: (ChartOptions & {annotation ?: any}) = {
       ],
       xAxes: [
         {
-          ticks: {
-
-          }
+          ticks: {}
         }
       ]
     }
   };
 
-public barChartColors: Color[] = [
+  public barChartColors: Color[] = [
+    { backgroundColor: '#405e9a'},
+    { backgroundColor: '#aab6fe'},
+  ];
+  public barChartLegend = true;
+  public barChartType: ChartType = 'bar';
+  public barChartPlugins = [];
+
+
+  // Line-chart Config
+  lineChartData: ChartDataSets[] = [
+    {data: [], label: 'Bearbeitungsquote %'},
+  ];
+
+  lineChartLabels: Label[] = [];
+
+  lineChartOptions = {
+    responsive: true,
+    scales: {
+      yAxes: [
+        {
+          ticks: {
+            callback: function(value){
+              return value + '%';
+            }
+          }
+        }
+      ],
+      xAxes: [
+        {
+          ticks: {}
+        }
+      ]
+    }
+  };
+
+
+  lineChartColors: Color[] = [
     {
       borderColor: 'black',
-      backgroundColor: 'rgba(255,0,0,0.3)',
+      backgroundColor: '#405e9a',
     },
   ];
-public barChartLegend = true;
-public barChartType: ChartType = 'bar';
-public barChartPlugins = [];
+
+  lineChartLegend = true;
+  lineChartPlugins = [];
+  lineChartType: ChartType = 'line';
+
 
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
@@ -81,42 +125,50 @@ public barChartPlugins = [];
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
     });
     this.standardEvent();
+    this.showRate();
   }
-  public chartClicked(e: any): void {
-    if(this.choosedTask == ""){
+
+  public chartClicked(e: any): void { // Show statistics of the subtasks after a task has been clicked
+    if (this.checker === 1) {
       return;
     }
-    else {
-      this.isTextVisible = false;
-      this.isButtonVisible = true;
-      this.isMissingSubTextVisible = true;
-    }
-    if(this.checker == 1){
-      return;
-    }
-    this.choosedTask = e.active[0]._model.label;
+    this.choosedIndex = e.active[0]._index;
+    this.choosedTask = this.idStore[this.choosedIndex];
+    this.tasks.subscribe((extractedTasks) => {
+      extractedTasks.forEach((extractedTasks) => {
+        if (extractedTasks.id === this.choosedTask) {
+          this.taskChecker = 1;
+        }
+      });
+      if (this.taskChecker !== 1) return;
+    });
+
+    this.isTextVisible = false;
+    this.isButtonVisible = true;
+    this.isMissingSubTextVisible = true;
     this.checker = 1;
     this.barChartData[0].label = 'Maximale Punktzahl';
     this.barChartData[1].label = 'Durchschnittliche Punktzahl';
     this.barChartLabels = [];
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];
-    this.subtaskStatistic.subscribe(extractedSResults => {
-      extractedSResults.forEach(extractedSResult => {
-        if(extractedSResult.name == this.choosedTask) {
-          extractedSResult.subtasks.forEach(t => {
+
+    this.subtaskStatistic.subscribe((extractedSResults) => {
+      extractedSResults.forEach((extractedSResult) => {
+        if (extractedSResult.taskID === this.choosedTask) {
+          extractedSResult.subtasks.forEach((t) => {
             this.barChartData[0].data.push(t.maxPoints);
             this.barChartData[1].data.push(t.avgPoints);
             this.barChartLabels.push(String(t.name));
             this.isMissingSubTextVisible = false;
-          })
+          });
         }
-        })
+      });
     });
   }
 
-  standardEvent(){
-  this.isButtonVisible = false;
+  standardEvent() { // Statistics of the tasks get calculated
+    this.isButtonVisible = false;
     this.isMissingSubTextVisible = false;
     this.isTextVisible = true;
     this.checker = 0;
@@ -126,12 +178,67 @@ public barChartPlugins = [];
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];
     this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.barChartLabels = names);
-    this.courseResults.pipe(map((extractedCResult) => { //Calculation average attempts to pass a task
+    this.tasks.pipe(map(t => t.map(t => t.id))).subscribe(ids => this.idStore = ids);
+    this.courseResults.pipe(map((extractedCResult) => { // Calculation average attempts to pass a task
         return extractedCResult.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
-            if (t.passed == true) {
-              if (acc[t.task.name] == null) acc[t.task.name] = [];
-              acc[t.task.name].push(t.attempts);
+            if (t.passed) {
+              if (!acc[t.task.id]) acc[t.task.id] = [];
+              acc[t.task.id].push(t.attempts);
+            }
+            if (!t.passed){
+              if (!acc[t.task.id]) acc[t.task.id] = [];
+              acc[t.task.id].push(0);
+            }
+          });
+          return acc;
+        }, {});
+      }),
+      map((resultsObj) => {
+        return Object.keys(resultsObj).map((key) => {
+          this.taskCounter = 0;
+         resultsObj[key].forEach((t) =>{
+           if(t != 0){
+             this.taskCounter++;
+           }
+         });
+          const sum = resultsObj[key].reduce((a, b) => a + b, 0);
+          const avg = sum / this.taskCounter;
+          this.barChartData[0].data.push(Number(avg.toFixed(2)));
+        });
+      })
+    ).subscribe();
+
+    this.courseResults.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
+        return extractedCResult2.reduce((acc, extractedCResult) => {
+          extractedCResult.results.forEach((t) => {
+            if (!acc[t.task.id]) acc[t.task.id] = [];
+            acc[t.task.id].push(t.attempts);
+          });
+          return acc;
+        }, {});
+      }),
+      map((resultsObj) => {
+        return Object.keys(resultsObj).map((key) => {
+          const count = resultsObj[key].length;
+          const sum = resultsObj[key].reduce((a, b) => a + b, 0);
+          const avg = sum / count;
+          this.barChartData[1].data.push(Number(avg.toFixed(2)));
+        });
+      })
+    )
+      .subscribe();
+  }
+
+  showRate() { // Rate of tasks that have been edited at least once
+    this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.lineChartLabels = names);
+    this.courseResults.pipe(map((extractedCResult2) => { // Calculation of the rate
+        return extractedCResult2.reduce((acc, extractedCResult) => {
+          extractedCResult.results.forEach((t) => {
+            if (!acc[t.task.id]) acc[t.task.id] = [];
+            if (t.attempts > 0) acc[t.task.id].push(1);
+            else {
+              acc[t.task.id].push(0);
             }
           });
           return acc;
@@ -142,30 +249,10 @@ public barChartPlugins = [];
           const count = resultsObj[key].length;
           const sum = resultsObj[key].reduce((a, b) => a + b, 0);
           const avg = sum / count;
-          this.barChartData[0].data.push(Number(avg));
+          const rate = avg * 100;
+          this.lineChartData[0].data.push(Number(rate));
         });
       })
-    )
-      .subscribe();
-
-    this.courseResults.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
-        return extractedCResult2.reduce((acc, extractedCResult) => {
-          extractedCResult.results.forEach((t) => {
-            if (acc[t.task.name] == null) acc[t.task.name] = [];
-            acc[t.task.name].push(t.attempts);
-          });
-          return acc;
-        }, {});
-      }),
-      map((resultsObj) => {
-        return Object.keys(resultsObj).map((key) => {
-          const count = resultsObj[key].length;
-          const sum = resultsObj[key].reduce((a, b) => a + b, 0);
-          const avg = sum / count;
-          this.barChartData[1].data.push(Number(avg));
-        });
-      })
-    )
-      .subscribe();
+    ).subscribe();
   }
 }
