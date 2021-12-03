@@ -70,16 +70,14 @@ export class ParticipantsComponent implements OnInit {
    * @param userID The id of user
    * @param role Selected role
    */
-  roleChange(userID: number, role: string) { // TODO
-    this.registrationService.deregisterCourse(this.courseID, userID).subscribe(() => {
-      this.registrationService.registerCourse(userID, this.courseID, role)
-        .subscribe(res => {
-          this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
-          this.refreshUserList();
-        }, () => {
-          this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
-        });
-    });
+  roleChange(userID: number, role: string) {
+    this.registrationService.registerCourse(userID, this.courseID, role)
+      .subscribe(res => {
+        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+        this.refreshUserList();
+      }, () => {
+        this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
+      });
   }
 
   /**
