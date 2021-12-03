@@ -89,7 +89,7 @@ export class ParticipantsComponent implements OnInit {
   unregister(user: User) {
     this.snackBar.open('Soll der Benutzer ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
       .subscribe(() => {
-        this.registrationService.deregisterCourse(this.courseID, user.id).subscribe(
+        this.registrationService.deregisterCourse(user.id, this.courseID).subscribe(
         () => {
           this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
           this.refreshUserList();
