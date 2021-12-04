@@ -58,6 +58,21 @@ export class ParticipantsComponent implements OnInit {
         this.dataSource.data = this.user;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
+        this.dataSource.sortingDataAccessor = (user: User, field: string) => {
+          if (field === 'globalRole') {
+            const role = this.getRole(user.id);
+            switch (role) {
+              case 'STUDENT': return 0;
+              case 'TUTOR': return 1;
+              case 'DOCENT': return 2;
+              default:
+                console.error(`unknown role: ${role}`);
+                return -1;
+            }
+          }
+
+          return user[field];
+        };
       });
   }
 
