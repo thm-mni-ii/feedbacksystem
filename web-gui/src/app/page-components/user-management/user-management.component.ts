@@ -9,6 +9,7 @@ import {UserService} from '../../service/user.service';
 import {User} from '../../model/User';
 import {CreateGuestUserDialogComponent} from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
+import {Roles} from '../../model/Roles';
 
 /**
  * This component is for admins managing users
@@ -39,6 +40,13 @@ export class UserManagementComponent implements OnInit {
       this.dataSource.data = users;
       this.dataSource.sort = this.sort;
       this.dataSource.paginator = this.paginator;
+      this.dataSource.sortingDataAccessor = (user: User, field: string) => {
+        if (field === 'globalRole') {
+          return Roles.GlobalRole.getSortOrder(user.globalRole);
+        }
+
+        return user[field];
+      };
     });
   }
 

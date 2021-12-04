@@ -8,6 +8,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UserService} from '../../service/user.service';
 import {ActivatedRoute} from '@angular/router';
+import {Roles} from '../../model/Roles';
 
 @Component({
   selector: 'app-participants',
@@ -60,15 +61,7 @@ export class ParticipantsComponent implements OnInit {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sortingDataAccessor = (user: User, field: string) => {
           if (field === 'globalRole') {
-            const role = this.getRole(user.id);
-            switch (role) {
-              case 'STUDENT': return 0;
-              case 'TUTOR': return 1;
-              case 'DOCENT': return 2;
-              default:
-                console.error(`unknown role: ${role}`);
-                return -1;
-            }
+            return Roles.CourseRole.getSortOrder(this.getRole(user.id));
           }
 
           return user[field];
@@ -76,7 +69,7 @@ export class ParticipantsComponent implements OnInit {
       });
   }
 
-  getRole(userID: number): String {
+  getRole(userID: number): string {
     return this.participants.find(participant => participant.user.id === userID).role.value;
   }
 
