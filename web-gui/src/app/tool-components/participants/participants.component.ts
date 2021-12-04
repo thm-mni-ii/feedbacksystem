@@ -8,6 +8,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UserService} from '../../service/user.service';
 import {ActivatedRoute} from '@angular/router';
+import {Roles} from '../../model/Roles';
 
 @Component({
   selector: 'app-participants',
@@ -58,10 +59,17 @@ export class ParticipantsComponent implements OnInit {
         this.dataSource.data = this.user;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
+        this.dataSource.sortingDataAccessor = (user: User, field: string) => {
+          if (field === 'globalRole') {
+            return Roles.CourseRole.getSortOrder(this.getRole(user.id));
+          }
+
+          return user[field];
+        };
       });
   }
 
-  getRole(userID: number): String {
+  getRole(userID: number): string {
     return this.participants.find(participant => participant.user.id === userID).role.value;
   }
 
