@@ -36,7 +36,7 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyle
+test.dependsOn scalastyleCheck
 
 dependencies {
     implementation 'org.scala-lang:scala-library:2.12.12'

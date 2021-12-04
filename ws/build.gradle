@@ -54,7 +54,7 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyle
+test.dependsOn scalastyleCheck
 
 // customize start scripts
 startScripts {
