@@ -1,15 +1,8 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
-    }
+plugins {
+    id "com.github.alisiikh.scalastyle" version "3.4.1"
 }
 
 apply plugin: 'scala'
-apply plugin: 'scalaStyle'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
@@ -39,14 +32,11 @@ sourceSets {
     }
 }
 
-scalaStyle {
-    configLocation = scalaStyleConfig
-    includeTestSourceDirectory = true
-    source = 'src/main/scala'
-    testSource = 'src/test/scala'
+scalastyle {
+    config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalaStyle
+test.dependsOn scalastyle
 
 dependencies {
     implementation 'org.scala-lang:scala-library:2.12.12'
