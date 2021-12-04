@@ -1,20 +1,10 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'org.github.ngbinh.scalastyle:gradle-scalastyle-plugin_2.11:1.0.1'
-    }
-}
-
 plugins {
     id "org.springframework.boot" version "2.2.5.RELEASE"
     id 'jacoco'
+    id "com.github.alisiikh.scalastyle" version "3.4.1"
 }
 
 apply plugin: 'scala'
-apply plugin: 'scalaStyle'
 apply plugin: 'application'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -44,7 +34,6 @@ bootRun {
 }
 
 repositories {
-    jcenter()
     mavenCentral()
 }
 
@@ -61,17 +50,11 @@ sourceSets {
     }
 }
 
-scalaStyle {
-    configLocation = scalaStyleConfig
-    includeTestSourceDirectory = true
-    source = 'src/main/scala'
-    testSource = 'src/test/scala'
+scalastyle {
+    config = file(scalaStyleConfig)
 }
 
-clean.doFirst {
-    delete "$projectDir/src/main/resources/static"
-}
-test.dependsOn scalaStyle
+test.dependsOn scalastyleCheck
 
 // customize start scripts
 startScripts {
