@@ -70,16 +70,14 @@ export class ParticipantsComponent implements OnInit {
    * @param userID The id of user
    * @param role Selected role
    */
-  roleChange(userID: number, role: string) { // TODO
-    this.registrationService.deregisterCourse(this.courseID, userID).subscribe(() => {
-      this.registrationService.registerCourse(userID, this.courseID, role)
-        .subscribe(res => {
-          this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
-          this.refreshUserList();
-        }, () => {
-          this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
-        });
-    });
+  roleChange(userID: number, role: string) {
+    this.registrationService.registerCourse(userID, this.courseID, role)
+      .subscribe(res => {
+        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+        this.refreshUserList();
+      }, () => {
+        this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
+      });
   }
 
   /**
@@ -89,7 +87,7 @@ export class ParticipantsComponent implements OnInit {
   unregister(user: User) {
     this.snackBar.open('Soll der Benutzer ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
       .subscribe(() => {
-        this.registrationService.deregisterCourse(this.courseID, user.id).subscribe(
+        this.registrationService.deregisterCourse(user.id, this.courseID).subscribe(
         () => {
           this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
           this.refreshUserList();
