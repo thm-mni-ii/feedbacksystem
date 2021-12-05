@@ -68,14 +68,14 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     val teacherPassword = UUID.randomUUID().toString
 
     // actual registering of conference against BBB api
-    this.registerDigitalClassroom(classroomId, s"FBS: ${course.name}", studentPassword, teacherPassword, tutorPassword)
+    this.registerDigitalClassroom(classroomId, s"FBS: ${course.name}", studentPassword, tutorPassword, teacherPassword)
     new DigitalClassroom(classroomId, courseId, studentPassword, tutorPassword, teacherPassword)
   }
 
   def recreateClassroom(courseId: Int): Unit = {
     val course = courseService.find(courseId).get
     val classroom = this.classrooms(courseId)
-    this.registerDigitalClassroom(classroom.classroomId, course.name, classroom.studentPassword, classroom.tutorPassword, classroom.teacherPassword)
+    this.registerDigitalClassroom(classroom.classroomId, s"FBS: ${course.name}", classroom.studentPassword, classroom.tutorPassword, classroom.teacherPassword)
     this.classrooms.update(courseId, createClassroom(courseId))
   }
 
@@ -84,8 +84,8 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @param id Conference id to register.
     * @param meetingName Conference id to register.
     * @param studentPassword password to register.
-    * @param teacherPassword moderator password to register.
     * @param tutorPassword tutor passwort to register
+    * @param teacherPassword moderator password to register.
     * @return boolean showing if creation of room was successful
     */
   def registerDigitalClassroom(id: String, meetingName: String, studentPassword: String, tutorPassword: String, teacherPassword: String): Boolean = {
@@ -166,16 +166,13 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     */
   private def buildClassroomApiRequestUri(method: String, params: Map[String, String]): String = {
     val queryBuilder = UriComponentsBuilder.newInstance()
-    val values = mutable.Buffer[String]()
     for ((key, value) <- params) {
-      queryBuilder.queryParam(key, s"{$key}")
-      values += value
+      queryBuilder.queryParam(key, value.replace(" ", "+"))
     }
-    var query = queryBuilder.cloneBuilder().encode.build.expand(values.toArray: _*).toString.substring(1)
+    var query = queryBuilder.cloneBuilder().encode.build.toString.substring(1)
     val checksum = DigestUtils.sha1Hex(s"$method$query$secret")
     queryBuilder.queryParam("checksum", s"$checksum")
-    values += checksum
-    query = queryBuilder.build.expand(values.toArray: _*).toString.substring(1)
+    query = queryBuilder.build.toString.substring(1)
     s"$classroomUrl/api/$method?$query"
   }
 }

@@ -4,7 +4,7 @@ services:
   mysql1:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
       MYSQL_DATABASE: fbs
@@ -12,13 +12,15 @@ services:
       - ./data/mysql1:/var/lib/mysql
     ports:
       - "3306:3306"
+    networks:
+      fbs:
 
   bashenv:
     build: bash
 
   http:
     build: ws
-    restart: always
+    restart: unless-stopped
     depends_on:
       - mysql1
       - master-runner
@@ -36,20 +38,25 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - JWT_SECRET=8Dsupersecurekeydf0
-      - CLASSROOM_URL=https://localhost:8085
-      - CLASSROOM_SECRET=8D8Dsupersecurekeydf0
+      - CLASSROOM_URL=http://digital-classroom:8085
+      - CLASSROOM_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
+    networks:
+      classroom:
+      fbs:
 
   mysql2:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
       - ./data/mysql2:/var/lib/mysql
+    networks:
+      fbs:
 
   master-runner:
     build: master-runner
@@ -69,4 +76,28 @@ services:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/upload-dir:/upload-dir
+    networks:
+      fbs:
 
+  digital-classroom:
+    image: ghcr.io/thm-mni-ii/digital-classroom:latest
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - CLASSROOM_SSL_ENABLED=false
+      - CLASSROOM_BBB_UPSTREAM_URL=https://localhost/bbb
+      - CLASSROOM_BBB_UPSTREAM_SECRET=8Dsupersecurekeydf0
+      - CLASSROOM_SECRET=8Dsupersecurekeydf0
+      - CLASSROOM_HOST=http://localhost:8085
+      - CLASSROOM_PORT=8085
+      - CLASSROOM_JWT_SECRET=8Dsupersecurekeydf0
+      - CLASSROOM_JWT_EXPIRATION=900
+    networks:
+      classroom:
+
+networks:
+  classroom:
+    driver: bridge
+  fbs:
+    driver: bridge
