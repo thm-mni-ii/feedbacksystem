@@ -36,7 +36,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
       - JWT_SECRET=8Dsupersecurekeydf0
-      - CLASSROOM_URL=https://classroom.host:8085
+      - CLASSROOM_URL=https://localhost:8085
       - CLASSROOM_SECRET=8D8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
       - BBB_URI=http://host.docker.internal:8085
