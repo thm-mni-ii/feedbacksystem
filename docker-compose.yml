@@ -23,8 +23,8 @@ services:
       - mysql1
       - master-runner
     ports:
-      - 443:443
-      - 80:80
+      - "443:443"
+      - "80:80"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/ws:/usr/local/ws/conf
@@ -39,7 +39,6 @@ services:
       - CLASSROOM_URL=https://localhost:8085
       - CLASSROOM_SECRET=8D8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
-      - BBB_URI=http://host.docker.internal:8085
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
 
