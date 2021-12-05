@@ -25,7 +25,6 @@ import scala.language.postfixOps
   * @param secret the bbb secret
   * @param courseService the CourseService
   * @param courseRegistrationService the CourseRegistrationService
-
   * @author Dominik Kröll
   */
 @Service
@@ -36,7 +35,6 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        courseService: CourseService,
                        courseRegistrationService: CourseRegistrationService
                 ) {
-
   private val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
@@ -63,7 +61,6 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @return the newly created conference
     */
   def createClassroom(courseId: Int): DigitalClassroom = {
-    // TODO: Custom Exception
     val classroomId = UUID.randomUUID().toString
     val course = courseService.find(courseId).get
     val studentPassword = UUID.randomUUID().toString
@@ -71,7 +68,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     val teacherPassword = UUID.randomUUID().toString
 
     // actual registering of conference against BBB api
-    this.registerDigitalClassroom(classroomId, course.name, studentPassword, teacherPassword, tutorPassword)
+    this.registerDigitalClassroom(classroomId, s"FBS: ${course.name}", studentPassword, teacherPassword, tutorPassword)
     new DigitalClassroom(classroomId, courseId, studentPassword, tutorPassword, teacherPassword)
   }
 
@@ -138,7 +135,6 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     response.getBody
   }
 
-
   /**
     * Ends the conference
     * @param courseId the id of the meeting to end
@@ -182,5 +178,4 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     query = queryBuilder.build.expand(values.toArray: _*).toString.substring(1)
     s"$classroomUrl/api/$method?$query"
   }
-
 }
