@@ -6,7 +6,7 @@
             <parameter name="maxFileLength"><![CDATA[1000]]></parameter>
         </parameters>
     </check>
-    <check enabled="true" class="org.scalastyle.scalariform.ScalaDocChecker" level="error">
+    <check enabled="false" class="org.scalastyle.scalariform.ScalaDocChecker" level="error">
         <!--<parameters>
             <parameter name="ignoreRegex">(.*Spec$)|(.*SpecIT$)</parameter>
             <parameter name="ignoreTokenTypes">PatDefOrDcl,TypeDefOrDcl,FunDefOrDcl,TmplDef</parameter>
