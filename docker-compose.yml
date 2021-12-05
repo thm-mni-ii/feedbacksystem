@@ -35,11 +35,10 @@ services:
       - MYSQL_URI=jdbc:mysql://mysql1:3306
       - MYSQL_USER=root
       - MYSQL_PASSWORD=twRuvi2ejllDdA4nnQLa08O
-      - JITSI_URI=https://fk-conf.mni.thm.de/newConf/rooms.php
-      - JITSI_SECRET=8Dsupersecurekeydf0
-      - JITSI_USER=fbs
       - JWT_SECRET=8Dsupersecurekeydf0
-      - BBB_SECRET
+      - CLASSROOM_URL=https://classroom.host:8085
+      - CLASSROOM_SECRET=8D8Dsupersecurekeydf0
+      - CLASSROOM_TLS_INSECURE=true
       - BBB_URI=http://host.docker.internal:8085
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
