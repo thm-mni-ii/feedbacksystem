@@ -19,7 +19,7 @@ export class EvaluationResultsComponent implements OnInit {
   courseId: number;
   showDetails: boolean;
   opened = -1;
-  showPoints = true;
+  showPoints = false;
 
   constructor(private route: ActivatedRoute,
               private courseResultService: CourseResultsService) { }

@@ -1,0 +1,36 @@
+<div class="info" *ngIf="this.isTextVisible">
+  <h4>Aufgabe anklicken, um Unteraufgaben anzuzeigen</h4>
+</div>
+<div class="info" *ngIf="this.isMissingSubTextVisible">
+  <h4>Die Aufgabe besitzt keine Unteraufgaben</h4>
+</div>
+<div class="info" *ngIf="this.isButtonVisible">
+  <br>
+  <button mat-button (click)="standardEvent()" >
+    Zurück zur Aufgabenübersicht</button>
+</div>
+<div class="statistic-container">
+<div class="statistic">
+  <canvas baseChart width="400" height="250"
+        [datasets]="barChartData"
+        [labels]="barChartLabels"
+        [options]="barChartOptions"
+        [colors]="barChartColors"
+        [legend]="barChartLegend"
+        [chartType]="barChartType"
+        [plugins]="barChartPlugins"
+        (chartClick)="chartClicked($event)">
+  </canvas>
+</div>
+<div class="statistic">
+  <canvas baseChart width="400" height="100"
+          [datasets]="lineChartData"
+          [labels]="lineChartLabels"
+          [options]="lineChartOptions"
+          [colors]="lineChartColors"
+          [legend]="lineChartLegend"
+          [chartType]="lineChartType"
+          [plugins]="lineChartPlugins">
+  </canvas>
+</div>
+</div>

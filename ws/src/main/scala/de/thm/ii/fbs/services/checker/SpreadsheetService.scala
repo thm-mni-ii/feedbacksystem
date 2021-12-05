@@ -51,7 +51,12 @@ class SpreadsheetService {
           case CellType.FORMULA => try {
             germanFormat.format(cell.getNumericCellValue)
           } catch {
-            case e: IllegalStateException => cell.getStringCellValue
+            case e: IllegalStateException => try {
+              cell.getStringCellValue
+            } catch {
+              case e: IllegalStateException =>
+                throw new Exception(i, col, cell.getErrorCellString)
+            }
           }
           case CellType.NUMERIC => germanFormat.format(cell.getNumericCellValue)
           case CellType.STRING => cell.getStringCellValue
@@ -87,4 +92,11 @@ class SpreadsheetService {
     col.toInt - 64
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+
+  /**
+    * @param row the row where the errror occured
+    * @param col the col where the error occured
+    * @param message the error returned by the spreadsheet
+    */
+  class Exception(row: Int, col: Int, message: String) extends RuntimeException("SpreadsheetException@" + row.toString + "," + col.toString + ": " + message)
 }

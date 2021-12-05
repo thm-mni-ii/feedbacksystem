@@ -8,6 +8,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UserService} from '../../service/user.service';
 import {ActivatedRoute} from '@angular/router';
+import {Roles} from '../../model/Roles';
 
 @Component({
   selector: 'app-participants',
@@ -58,10 +59,17 @@ export class ParticipantsComponent implements OnInit {
         this.dataSource.data = this.user;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
+        this.dataSource.sortingDataAccessor = (user: User, field: string) => {
+          if (field === 'globalRole') {
+            return Roles.CourseRole.getSortOrder(this.getRole(user.id));
+          }
+
+          return user[field];
+        };
       });
   }
 
-  getRole(userID: number): String {
+  getRole(userID: number): string {
     return this.participants.find(participant => participant.user.id === userID).role.value;
   }
 
@@ -70,16 +78,14 @@ export class ParticipantsComponent implements OnInit {
    * @param userID The id of user
    * @param role Selected role
    */
-  roleChange(userID: number, role: string) { // TODO
-    this.registrationService.deregisterCourse(this.courseID, userID).subscribe(() => {
-      this.registrationService.registerCourse(userID, this.courseID, role)
-        .subscribe(res => {
-          this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
-          this.refreshUserList();
-        }, () => {
-          this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
-        });
-    });
+  roleChange(userID: number, role: string) {
+    this.registrationService.registerCourse(userID, this.courseID, role)
+      .subscribe(res => {
+        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+        this.refreshUserList();
+      }, () => {
+        this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
+      });
   }
 
   /**
@@ -89,7 +95,7 @@ export class ParticipantsComponent implements OnInit {
   unregister(user: User) {
     this.snackBar.open('Soll der Benutzer ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
       .subscribe(() => {
-        this.registrationService.deregisterCourse(this.courseID, user.id).subscribe(
+        this.registrationService.deregisterCourse(user.id, this.courseID).subscribe(
         () => {
           this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
           this.refreshUserList();
