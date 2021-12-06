@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
 import {ExternalClassroomHandlingService} from './external-classroom-handling-service';
 import {AuthService} from './auth.service';
@@ -17,7 +17,6 @@ export class ExternalClassroomService {
   private conferenceWindowHandle: Window;
   private isWindowHandleOpen: Subject<Boolean>;
   private courseId = 0;
-  private service = 'digital-classroom';
 
   public constructor(private authService: AuthService,
                      private classRoomHandlingService: ExternalClassroomHandlingService,
@@ -30,10 +29,6 @@ export class ExternalClassroomService {
         }
     });
     this.isWindowHandleOpen.next(true);
-    this.classRoomHandlingService
-      .getSelectedConferenceSystem().subscribe((service: string) => {
-      this.service = service;
-    });
     this.dialog = mDialog;
     // this.conferenceWindowHandle = new Window();
     setInterval(() => {
