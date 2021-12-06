@@ -155,7 +155,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   joinClassroom() {
-    // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
     this.externalClassroomService.join(this.courseID);
   }
 
