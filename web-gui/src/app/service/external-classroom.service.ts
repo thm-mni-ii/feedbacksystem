@@ -30,7 +30,6 @@ export class ExternalClassroomService {
     });
     this.isWindowHandleOpen.next(true);
     this.dialog = mDialog;
-    // this.conferenceWindowHandle = new Window();
     setInterval(() => {
       if (this.conferenceWindowHandle) {
         if (this.conferenceWindowHandle.closed) {
