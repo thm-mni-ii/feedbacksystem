@@ -19,19 +19,6 @@ run {
     args = ["run", mainVerticle]
 }
 
-sourceSets {
-    main {
-        scala {
-            srcDirs = ['src/main/scala']
-        }
-    }
-    test {
-        scala {
-            srcDirs = ['src/test/scala']
-        }
-    }
-}
-
 scalastyle {
     config = file(scalaStyleConfig)
 }
@@ -39,7 +26,7 @@ scalastyle {
 test.dependsOn scalastyleCheck
 
 dependencies {
-    implementation 'org.scala-lang:scala-library:2.12.12'
+    compileOnly 'org.scala-lang:scala-library:2.12.12'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"

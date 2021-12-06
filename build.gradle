@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
 plugins {
     id 'idea'
     id 'distribution'
@@ -38,7 +40,7 @@ distributions {
                             from "${sub.buildDir}/install/${sub.name}"
                             include '*/**'
                         }
-                        break;
+                        break
                     case 'ws':
                         into('') {
                             from "${sub.buildDir}/install/"
@@ -48,7 +50,7 @@ distributions {
                             from "${sub.projectDir}"
                             include 'Dockerfile'
                         }
-                        break;
+                        break
                 }
             }
         }
@@ -72,3 +74,8 @@ coveralls {
     sourceDirs = ['ws/src/main/scala', 'master-runner/src/main/scala']
     jacocoReportPath "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
 }
+
+dependencies {
+    compileOnly 'org.scala-lang:scala-library:2.13.1'
+}
+
