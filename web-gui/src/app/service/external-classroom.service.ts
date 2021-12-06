@@ -1,8 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs';
 import {distinctUntilChanged} from 'rxjs/operators';
-import {ExternalClassroomHandlingService} from './external-classroom-handling-service';
-import {AuthService} from './auth.service';
 import {MatDialog} from '@angular/material/dialog';
 import {HttpClient} from '@angular/common/http';
 /**
@@ -13,14 +11,11 @@ import {HttpClient} from '@angular/common/http';
   providedIn: 'root'
 })
 export class ExternalClassroomService {
-  private dialog: MatDialog;
   private conferenceWindowHandle: Window;
   private isWindowHandleOpen: Subject<Boolean>;
   private courseId = 0;
 
-  public constructor(private authService: AuthService,
-                     private classRoomHandlingService: ExternalClassroomHandlingService,
-                     private mDialog: MatDialog,
+  public constructor(private dialog: MatDialog,
                      private http: HttpClient) {
     this.isWindowHandleOpen = new Subject<Boolean>();
     this.isWindowHandleOpen.asObservable().pipe(distinctUntilChanged()).subscribe((isOpen) => {
@@ -29,7 +24,6 @@ export class ExternalClassroomService {
         }
     });
     this.isWindowHandleOpen.next(true);
-    this.dialog = mDialog;
     setInterval(() => {
       if (this.conferenceWindowHandle) {
         if (this.conferenceWindowHandle.closed) {

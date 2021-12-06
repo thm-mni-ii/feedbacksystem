@@ -3,11 +3,9 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
 import {mergeMap} from 'rxjs/operators';
 import {of, Observable} from 'rxjs';
-import {ExternalClassroomHandlingService} from '../../service/external-classroom-handling-service';
 import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
 import {CourseUpdateDialogComponent} from '../../dialogs/course-update-dialog/course-update-dialog.component';
 import {AuthService} from '../../service/auth.service';
@@ -22,7 +20,7 @@ import {FeedbackAppService} from '../../service/feedback-app.service';
 import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
 import {GoToService} from '../../service/goto.service';
 import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
-import {ExternalClassroomService} from "../../service/external-classroom.service";
+import {ExternalClassroomService} from '../../service/external-classroom.service';
 import {UserTaskResult} from '../../model/UserTaskResult';
 
 @Component({
@@ -34,13 +32,17 @@ export class CourseDetailComponent implements OnInit {
 
   constructor(private taskService: TaskService,
               private authService: AuthService,
-              private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ExternalClassroomHandlingService,
-              private externalClassroomService: ExternalClassroomService,
-              private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
+              private route: ActivatedRoute,
+              private titlebar: TitlebarService,
+              public externalClassroomService: ExternalClassroomService,
+              private dialog: MatDialog,
+              private auth: AuthService,
+              private snackbar: MatSnackBar,
               private router: Router,
-              private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
-              private feedbackAppService: FeedbackAppService, private goToService: GoToService,
+              private courseService: CourseService,
+              private courseRegistrationService: CourseRegistrationService,
+              private feedbackAppService: FeedbackAppService,
+              private goToService: GoToService,
               @Inject(DOCUMENT) document) {
   }
 
@@ -111,7 +113,7 @@ export class CourseDetailComponent implements OnInit {
     }).afterClosed()
       .subscribe(result => {
         if (result.success) {
-          this.router.navigate(['courses', this.courseID, 'task', result.task.id]);
+          this.router.navigate(['courses', this.courseID, 'task', result.task.id]).then();
         }
       }, error => console.error(error));
   }
@@ -126,7 +128,7 @@ export class CourseDetailComponent implements OnInit {
       .subscribe(confirmed => {
         if (confirmed) {
           this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
-            .subscribe(ok => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()), error => console.error(error));
+            .subscribe(_ => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()), error => console.error(error));
         }
       });
   }
@@ -138,10 +140,10 @@ export class CourseDetailComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       data: {title: 'Kurs verlassen?', message: 'Wollen Sie diesen Kurs verlassen? Alle ihre Abgaben könnten verloren gehen!'}
     }).afterClosed()
-      .subscribe(confirmed => {
+      .subscribe(_ => {
         this.courseRegistrationService.deregisterCourse(this.authService.getToken().id, this.courseID)
           .subscribe(ok => {
-            this.router.navigate(['/courses']);
+            this.router.navigate(['/courses']).then();
           }, error => console.error(error));
       });
   }
@@ -174,7 +176,7 @@ export class CourseDetailComponent implements OnInit {
           }
         })
       ).subscribe(ok => {
-        this.router.navigate(['courses']);
+        this.router.navigate(['courses']).then();
       }, error => console.error(error));
     });
   }
