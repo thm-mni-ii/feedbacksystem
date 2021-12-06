@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.util
 
-import java.sql.{Connection, ResultSet, Statement}
+import java.sql.{Connection, Statement}
 
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._
