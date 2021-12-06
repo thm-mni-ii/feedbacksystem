@@ -49,12 +49,14 @@ dependencies {
     compileOnly 'org.scala-lang:scala-library:2.13.1'
     implementation 'mysql:mysql-connector-java:8.0.19'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation "com.sun.xml.bind:jaxb-core:3.0.1"
+    implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
-    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.13.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
-    implementation('org.json:json:20190722')
+    implementation('org.json:json:20210307')
     implementation 'org.apache.poi:poi:5.0.0'
     implementation 'org.apache.poi:poi-ooxml:5.0.0'
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
