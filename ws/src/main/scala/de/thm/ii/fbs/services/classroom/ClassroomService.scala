@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.classroom
 
 import de.thm.ii.fbs.model.CourseRole.{DOCENT, STUDENT, TUTOR}
+import de.thm.ii.fbs.model.GlobalRole.{ADMIN, MODERATOR}
 import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
@@ -112,10 +113,12 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     val paramMap = Map(
       "fullName" -> s"${user.prename} ${user.surname}",
       "meetingID" -> digitalClassroom.classroomId,
-      "password" -> (courseRole match {
-        case DOCENT => digitalClassroom.teacherPassword
-        case TUTOR => digitalClassroom.tutorPassword
-        case _ => digitalClassroom.studentPassword
+      "password" -> ((courseRole, user.globalRole) match {
+        case (_, ADMIN) => digitalClassroom.teacherPassword
+        case (DOCENT, _) => digitalClassroom.teacherPassword
+        case (_, MODERATOR) => digitalClassroom.tutorPassword
+        case (TUTOR, _) => digitalClassroom.tutorPassword
+        case (_, _) => digitalClassroom.studentPassword
       })
     )
     val url = buildClassroomApiRequestUri("join", paramMap)
