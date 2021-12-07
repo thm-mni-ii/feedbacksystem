@@ -36,7 +36,7 @@ export class ExternalClassroomService {
   }
 
   public isJoined() {
-    return this.conferenceWindowHandle !== undefined && !this.conferenceWindowHandle.closed;
+    return this.conferenceWindowHandle && !this.conferenceWindowHandle.closed;
   }
 
   /**
@@ -45,7 +45,7 @@ export class ExternalClassroomService {
    * @return Observable that completes if connected.
    */
   public join(courseId: number) {
-    if (this.conferenceWindowHandle === undefined || this.conferenceWindowHandle.closed) {
+    if (!this.conferenceWindowHandle || this.conferenceWindowHandle.closed) {
       this.courseId = courseId;
       this.http.get<String>(`/api/v1/classroom/${this.courseId}/join`).subscribe(url => {
         this.conferenceWindowHandle = open(url.toString());
