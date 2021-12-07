@@ -47,7 +47,7 @@ class CourseController {
              req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     val user = authService.authorize(req, res)
     val courses = courseService.getAll(false)
-    val courseRights = courseRegistrationService.getCoursePriviledges(user.id)
+    val courseRights = courseRegistrationService.getCoursePrivileges(user.id)
     user.globalRole match {
       case GlobalRole.ADMIN | GlobalRole.MODERATOR => courses
       case _ => courses

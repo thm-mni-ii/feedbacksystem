@@ -17,6 +17,8 @@ ldap:
 logging:
   level:
     root: INFO
+    sql: debug
+    de.thm: debug
 message:
   topic:
     name: java
@@ -32,15 +34,10 @@ server:
     key-store-password: passwd
     key-store-type: PKCS12
 services:
-  jitsi:
-    service-url: ${JITSI_URI:https://fk-conf.mni.thm.de/newConf/rooms.php}
-    shared-secret: ${JITSI_SECRET:8Dsupersecurekeydf0}
-    user: ${JITSI_USER:fbs}
-  bbb:
-    service-url: ${BBB_URI:https://fk-vv.mni.thm.de/bigbluebutton/api}
-    shared-secret: ${BBB_SECRET:8Dsupersecurekeydf0}
-    origin-name: ${BBB_ORIGIN_NAME:feedback.mni.thm.de}
-    origin-version: ${BBB_ORIGIN_VERSION:v2}
+  classroom:
+    classroom-url: ${CLASSROOM_URL:http://localhost:8085}
+    classroom-secret: ${CLASSROOM_SECRET:8Dsupersecurekeydf0}
+    insecure: ${CLASSROOM_TLS_INSECURE:false}
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}

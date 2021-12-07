@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.util
 
-import java.sql.{Connection, ResultSet, Statement}
+import java.sql.{Connection, Statement}
 
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core._
@@ -13,8 +13,8 @@ import scala.jdk.CollectionConverters._
   */
 object DB {
   // The timout to terminate a query after TIMEOUT_IN_SEC seconds.
-  private val TIMEOUT_IN_SEC = 5;
-  private val BATCH_TIMEOUT_IN_SEC = 60;
+  private val TIMEOUT_IN_SEC = 5
+  private val BATCH_TIMEOUT_IN_SEC = 60
 
   /**
     * See @JdbcTemplate::query

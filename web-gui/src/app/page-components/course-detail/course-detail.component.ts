@@ -3,16 +3,11 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {DomSanitizer} from '@angular/platform-browser';
 import {DOCUMENT} from '@angular/common';
 import {mergeMap} from 'rxjs/operators';
 import {of, Observable} from 'rxjs';
-import {ConferenceService} from '../../service/conference.service';
-import {ClassroomService} from '../../service/classroom.service';
 import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
-import {NewconferenceDialogComponent} from '../../dialogs/newconference-dialog/newconference-dialog.component';
 import {CourseUpdateDialogComponent} from '../../dialogs/course-update-dialog/course-update-dialog.component';
-import {NewticketDialogComponent} from '../../dialogs/newticket-dialog/newticket-dialog.component';
 import {AuthService} from '../../service/auth.service';
 import {Roles} from '../../model/Roles';
 import {TaskService} from '../../service/task.service';
@@ -25,6 +20,7 @@ import {FeedbackAppService} from '../../service/feedback-app.service';
 import {GotoLinksDialogComponent} from '../../dialogs/goto-links-dialog/goto-links-dialog.component';
 import {GoToService} from '../../service/goto.service';
 import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
+import {ExternalClassroomService} from '../../service/external-classroom.service';
 import {UserTaskResult} from '../../model/UserTaskResult';
 
 @Component({
@@ -36,12 +32,17 @@ export class CourseDetailComponent implements OnInit {
 
   constructor(private taskService: TaskService,
               private authService: AuthService,
-              private route: ActivatedRoute, private titlebar: TitlebarService,
-              private conferenceService: ConferenceService, private classroomService: ClassroomService,
-              private dialog: MatDialog, private auth: AuthService, private snackbar: MatSnackBar, private sanitizer: DomSanitizer,
+              private route: ActivatedRoute,
+              private titlebar: TitlebarService,
+              public externalClassroomService: ExternalClassroomService,
+              private dialog: MatDialog,
+              private auth: AuthService,
+              private snackbar: MatSnackBar,
               private router: Router,
-              private courseService: CourseService, private courseRegistrationService: CourseRegistrationService,
-              private feedbackAppService: FeedbackAppService, private goToService: GoToService,
+              private courseService: CourseService,
+              private courseRegistrationService: CourseRegistrationService,
+              private feedbackAppService: FeedbackAppService,
+              private goToService: GoToService,
               @Inject(DOCUMENT) document) {
   }
 
@@ -112,7 +113,7 @@ export class CourseDetailComponent implements OnInit {
     }).afterClosed()
       .subscribe(result => {
         if (result.success) {
-          this.router.navigate(['courses', this.courseID, 'task', result.task.id]);
+          this.router.navigate(['courses', this.courseID, 'task', result.task.id]).then();
         }
       }, error => console.error(error));
   }
@@ -127,7 +128,7 @@ export class CourseDetailComponent implements OnInit {
       .subscribe(confirmed => {
         if (confirmed) {
           this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
-            .subscribe(ok => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()), error => console.error(error));
+            .subscribe(_ => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()), error => console.error(error));
         }
       });
   }
@@ -139,10 +140,10 @@ export class CourseDetailComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       data: {title: 'Kurs verlassen?', message: 'Wollen Sie diesen Kurs verlassen? Alle ihre Abgaben könnten verloren gehen!'}
     }).afterClosed()
-      .subscribe(confirmed => {
+      .subscribe(_ => {
         this.courseRegistrationService.deregisterCourse(this.authService.getToken().id, this.courseID)
           .subscribe(ok => {
-            this.router.navigate(['/courses']);
+            this.router.navigate(['/courses']).then();
           }, error => console.error(error));
       });
   }
@@ -155,30 +156,8 @@ export class CourseDetailComponent implements OnInit {
       || Roles.CourseRole.isDocent(courseRole) || (Roles.CourseRole.isTutor(courseRole) && !ignoreTutor);
   }
 
-  createConference() {
-    this.dialog.open(NewconferenceDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
-    });
-  }
-
   joinClassroom() {
-    // this.db.subscribeCourse(this.courseID).subscribe(); // TODO: why?
-    this.classroomService.join(this.courseID);
-    this.router.navigate(['courses', this.courseID, 'tickets']);
-  }
-
-  createTicket() {
-    this.dialog.open(NewticketDialogComponent, {
-      height: 'auto',
-      width: 'auto',
-      data: {courseID: this.courseID}
-    }).afterClosed().subscribe(ticket => {
-      if (ticket) {
-        this.classroomService.createTicket(ticket);
-      }
-    });
+    this.externalClassroomService.join(this.courseID);
   }
 
   deleteCourse() {
@@ -197,7 +176,7 @@ export class CourseDetailComponent implements OnInit {
           }
         })
       ).subscribe(ok => {
-        this.router.navigate(['courses']);
+        this.router.navigate(['courses']).then();
       }, error => console.error(error));
     });
   }

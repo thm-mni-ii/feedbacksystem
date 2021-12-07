@@ -1,4 +1,3 @@
-// export?
 export interface User {
   id?: number;
   prename: string;

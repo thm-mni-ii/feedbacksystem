@@ -83,7 +83,7 @@ class CourseRegistrationController {
     val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+      courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
     (privileged, user.id) match {
       case (true, _) => courseRegistrationService.register(cid, uid, role)
@@ -104,7 +104,7 @@ class CourseRegistrationController {
     val user = authService.authorize(req, res)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      courseRegistrationService.getCoursePriviledges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+      courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
     (privileged, user.id) match {
       case (true, _) | (_, `uid`) => courseRegistrationService.deregister(cid, uid)

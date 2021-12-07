@@ -1,18 +1,15 @@
 package de.thm.ii.fbs.services.checker
 
-import java.nio.file.{Files, NoSuchFileException, Path, Paths}
+import java.nio.file.{Files, NoSuchFileException, Path}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, User => FBSUser}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.apache.http.conn.ssl.{NoopHostnameVerifier, SSLConnectionSocketFactory, TrustSelfSignedStrategy}
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.ssl.SSLContextBuilder
+import de.thm.ii.fbs.model.{User => FBSUser}
+import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONArray
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.web.client.RestTemplate
 
 /**
   * Communicate with an remote checker to notify him about new submissions
@@ -20,7 +17,7 @@ import org.springframework.web.client.RestTemplate
   */
 @Service
 class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService {
-  private val restTemplate = makeRestTemplate(insecure)
+  private val restTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   @Autowired
   private val storageService: StorageService = null
@@ -157,17 +154,5 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     } catch {
       case _: NoSuchFileException =>
     }
-  }
-
-  private def makeRestTemplate(insecure: Boolean = false): RestTemplate = {
-    val requestFactory = new HttpComponentsClientHttpRequestFactory()
-    if (insecure) {
-      val sslContextBuilder = new SSLContextBuilder()
-      sslContextBuilder.loadTrustMaterial(null, new TrustSelfSignedStrategy)
-      val socketFactory = new SSLConnectionSocketFactory(sslContextBuilder.build, NoopHostnameVerifier.INSTANCE)
-      val httpClient = HttpClients.custom.setSSLSocketFactory(socketFactory).build()
-      requestFactory.setHttpClient(httpClient)
-    }
-    new RestTemplate(requestFactory)
   }
 }
