@@ -77,7 +77,6 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     val course = courseService.find(courseId).get
     val classroom = this.classrooms(courseId)
     this.registerDigitalClassroom(classroom.classroomId, s"FBS: ${course.name}", classroom.studentPassword, classroom.tutorPassword, classroom.teacherPassword)
-    this.classrooms.update(courseId, createClassroom(courseId))
   }
 
   /**
