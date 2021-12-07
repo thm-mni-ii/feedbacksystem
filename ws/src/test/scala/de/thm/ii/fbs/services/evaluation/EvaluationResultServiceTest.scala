@@ -22,9 +22,9 @@ class EvaluationResultServiceTest {
   @Autowired
   private val evaluationResultService: EvaluationResultService = null
 
-  private def buildTask(res: Boolean, id: Int = 1) = {
+  private def buildTask(res: Boolean, id: Int = 1, passedSubTasks: Int = 0) = {
     val task = Task("", "", "", "", None, id)
-    val taskResult = TaskResult(task, 2, passed = true, 1)
+    val taskResult = TaskResult(task, 2, passed = true, passedSubTasks)
 
     (task, taskResult)
   }
@@ -83,6 +83,25 @@ class EvaluationResultServiceTest {
   @Test
   def containerWithOnTask(): Unit = {
     val (task, taskResult) = buildTask( res = true)
+    val container = buildContainer(List(task))
+    val courseResult = buildCourseRes(tasksRes = List(taskResult))
+
+    val containerWithTaskRes =
+      EvaluationContainerWithTaskResults(container.id, List(taskResult), container.toPass, container.bonusFormula, container.hidePoints)
+    val containerRes = EvaluationContainerResult(passed = true, 0, 1, containerWithTaskRes)
+    val expectedRes = List(EvaluationUserResult(null, passed = true, bonusPoints = 0, List(containerRes)))
+
+    val res = evaluationResultService.evaluate(List(container), results = List(courseResult))
+
+    Assert.assertEquals(expectedRes, res)
+  }
+
+  /**
+    * Test evaluation with a Container with on Task that has Passed subtasks
+    */
+  @Test
+  def containerWithOnTaskAndSubTasks(): Unit = {
+    val (task, taskResult) = buildTask( res = true, passedSubTasks = 2)
     val container = buildContainer(List(task))
     val courseResult = buildCourseRes(tasksRes = List(taskResult))
 
