@@ -46,7 +46,7 @@
     <div class="task-column" *ngFor="let requirement of requirements | async; index as i">
       <div class="task-container header">
         <div class="task-result">
-          <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ requirement.id }} &#9660; <!--&dArr; --></span>
+          <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ i + 1 }} &#9660; <!--&dArr; --></span>
           <span class="title">Bonus</span>
           <!-- Not showing when showDetails is true -->
           <ng-container *ngIf="opened === requirement.id">
