@@ -49,7 +49,15 @@ class EvaluationResultService {
     var passedTasks = 0
     val tasksResults = tasks.map(t => {
       val tRes = taskResults(t.id)
-      if (tRes.passed) passedTasks += 1
+
+      // If it has subtasks -> add all passed Subtasks
+      if (tRes.points > 0) {
+        passedTasks += tRes.points
+      }
+      else if (tRes.passed) {
+        passedTasks += 1
+      }
+
       tRes
     })
 
