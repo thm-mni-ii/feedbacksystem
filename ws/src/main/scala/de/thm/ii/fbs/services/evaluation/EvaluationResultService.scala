@@ -31,14 +31,14 @@ class EvaluationResultService {
     var bonusPoints = 0
 
     val evaluationResult = container.map(c => {
-      val (points, tasksResults) = getTaskResults(c.tasks, taskResults)
-      val cPassed = wasPassed(points, c.toPass)
-      val cBonusPoints = calculateBonusPoints(c.bonusFormula, points, c.toPass)
+      val (passedTasks, tasksResults) = getTaskResults(c.tasks, taskResults)
+      val cPassed = wasPassed(passedTasks, c.toPass)
+      val cBonusPoints = calculateBonusPoints(c.bonusFormula, passedTasks, c.toPass)
 
       bonusPoints += cBonusPoints
       if (!cPassed) passed = false
 
-      EvaluationContainerResult(cPassed, cBonusPoints, points,
+      EvaluationContainerResult(cPassed, cBonusPoints, passedTasks,
         EvaluationContainerWithTaskResults(c.id, tasksResults, c.toPass, c.bonusFormula, c.hidePoints))
     })
 
@@ -46,14 +46,22 @@ class EvaluationResultService {
   }
 
   private def getTaskResults(tasks: List[Task], taskResults: Map[Int, TaskResult]) = {
-    var points = 0
+    var passedTasks = 0
     val tasksResults = tasks.map(t => {
       val tRes = taskResults(t.id)
-      points += tRes.points
+
+      // If it has subtasks -> add all passed Subtasks
+      if (tRes.points > 0) {
+        passedTasks += tRes.points
+      }
+      else if (tRes.passed) {
+        passedTasks += 1
+      }
+
       tRes
     })
 
-    (points, tasksResults)
+    (passedTasks, tasksResults)
   }
 
   private def wasPassed(passedTasks: Int, toPass: Int) = passedTasks >= toPass
