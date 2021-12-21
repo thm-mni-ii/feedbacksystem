@@ -36,6 +36,15 @@ class CourseRegistrationService {
     1 == DB.update("DELETE FROM user_course WHERE course_id = ? AND user_id = ?", cid, uid)
 
   /**
+      * Deregister all users with a specific role from a course.
+      * @param cid The course id
+      * @param role The role
+      * @return True if sucessfully deregistered
+      */
+    def deregisterRole(cid: Int, role: CourseRole.Value): Boolean =
+      1 == DB.update("DELETE FROM user_course WHERE course_id = ? AND course_role = ?", cid, role.id)
+
+  /**
     * Get all course for that the user with the user id uid is registered
     * @param uid User id
     * @param ignoreHidden True if hidden courses should be ignored
