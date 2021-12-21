@@ -16,3 +16,13 @@
   margin-bottom: 30px;
   padding: 16px;
 }
+
+.button{
+  margin: 10px;
+  background-color: red;
+}
+
+.buttongroup{
+  display: flex;
+  flex-direction: row;
+}

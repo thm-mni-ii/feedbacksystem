@@ -57,5 +57,11 @@
     <tr mat-row *matRowDef="let row; columns: columns;"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" showFirstLastButtons></mat-paginator>
+
+    <div class="buttongroup">
+      <button mat-raised-button color="accent" (click)="unregisterStudent()" class="button"><mat-icon>group_remove</mat-icon> Alle Studierenden entfernen</button>
+      <button mat-raised-button color="accent" (click)="unregisterTutor()" class="button"><mat-icon>group_remove</mat-icon> Alle Tutoren entfernen</button>
+    </div>
+
 </div>
 

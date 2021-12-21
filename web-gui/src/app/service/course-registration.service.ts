@@ -45,4 +45,7 @@ export class CourseRegistrationService {
   deregisterCourse(uid: number, cid: number): Observable<void> {
     return this.http.delete<void>(`/api/v1/users/${uid}/courses/${cid}`);
   }
+  deregisterRole(cid: number, roleName: string): Observable<void> {
+    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterRole`, {roleName: roleName});
+  }
 }

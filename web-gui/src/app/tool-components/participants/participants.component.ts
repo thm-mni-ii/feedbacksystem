@@ -103,6 +103,28 @@ export class ParticipantsComponent implements OnInit {
       });
     }
 
+  unregisterStudent() {
+    this.snackBar.open('Sollen alle Studierenden ausgetragen werden?', 'Ja', {duration: 5000})
+      .onAction().subscribe( () => {
+      this.registrationService.deregisterRole(this.courseID, 'STUDENT')
+        .subscribe(() => {
+          this.snackBar.open('Alle Studierenden wurden entfernt', 'ok', {duration: 3000});
+          this.refreshUserList();
+        });
+      });
+  }
+
+  unregisterTutor() {
+    this.snackBar.open('Sollen alle Tutoren ausgetragen werden?', 'Ja', {duration: 5000})
+      .onAction().subscribe( () => {
+      this.registrationService.deregisterRole(this.courseID, 'TUTOR')
+        .subscribe(() => {
+          this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
+          this.refreshUserList();
+        });
+    });
+  }
+
   /**
    * Docent searches for user
    * @param filterValue String the admin provides to search for
