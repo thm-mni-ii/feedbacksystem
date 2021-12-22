@@ -145,6 +145,7 @@ class CourseRegistrationController {
      def deregisterAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
        val user = authService.authorize(req, res)
        val uid = user.id
+
        val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
          courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
