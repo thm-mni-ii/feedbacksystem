@@ -51,7 +51,6 @@ export class CourseRegistrationService {
    * @param roleName Role name
    * @param cid Course id
    */
-
   deregisterRole(cid: number, roleName: string): Observable<void> {
     return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {roleName});
   }
