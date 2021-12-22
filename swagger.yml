@@ -460,7 +460,7 @@ paths:
       security:
         - JWT: [ ]
       tags:
-        - Deregister Role
+        - Course Registration
       summary: Deregister all users with a specific role
       parameters:
         - name: cid
@@ -499,7 +499,7 @@ paths:
       security:
         - JWT: [ ]
       tags:
-        - Deregister all
+        - Course Registration
       summary: Deregister all users except the current user from the course
       parameters:
         - name: cid
