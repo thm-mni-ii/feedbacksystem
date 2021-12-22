@@ -130,7 +130,6 @@ class CourseRegistrationController {
 
       (privileged, user.id) match {
         case (true, _) => courseRegistrationService.deregisterRole(cid, role)
-        case (false, _) => throw new ForbiddenException()
         case _ => throw new ForbiddenException()
       }
     }
@@ -150,7 +149,7 @@ class CourseRegistrationController {
          courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
        (privileged, user.id) match {
-         case (true, _) | (_) => courseRegistrationService.deregisterAll(cid, uid)
+         case (true, _) => courseRegistrationService.deregisterAll(cid, uid)
          case _ => throw new ForbiddenException()
        }
      }
