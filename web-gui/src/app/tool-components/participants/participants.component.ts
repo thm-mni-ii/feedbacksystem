@@ -154,6 +154,17 @@ export class ParticipantsComponent implements OnInit {
     });
   }
 
+  unregisterAll() {
+    this.snackBar.open('Sollen alle teilnehmenden Personen ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
+      .subscribe(() => {
+        this.registrationService.deregisterAll(this.courseID).subscribe(
+          () => {
+            this.snackBar.open('Alle teilnehmenden Personen wurden ausgetragen.', 'OK', {duration: 5000});
+            this.refreshUserList();
+          });
+      });
+  }
+
   displayFn(user?: User): string | undefined {
     return user ? user.surname : undefined;
   }
