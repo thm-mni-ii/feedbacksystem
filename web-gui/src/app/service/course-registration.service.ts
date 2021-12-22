@@ -53,7 +53,7 @@ export class CourseRegistrationService {
    */
 
   deregisterRole(cid: number, roleName: string): Observable<void> {
-    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {roleName: roleName});
+    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {roleName});
   }
 
   /**
