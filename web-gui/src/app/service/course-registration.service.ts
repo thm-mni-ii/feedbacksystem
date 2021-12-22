@@ -60,7 +60,6 @@ export class CourseRegistrationService {
    * De-register all user except the current user from a course
    * @param cid Course id
    */
-
   deregisterAll(cid: number): Observable<void> {
     return this.http.get<void>(`/api/v1/courses/${cid}/deregisterall`);
   }
