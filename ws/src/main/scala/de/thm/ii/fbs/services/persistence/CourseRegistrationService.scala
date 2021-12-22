@@ -45,7 +45,7 @@ class CourseRegistrationService {
       1 == DB.update("DELETE FROM user_course WHERE course_id = ? AND course_role = ?", cid, role.id)
 
   /**
-      * Deregister all users except the current user .
+      * Deregister all users except the current user.
       * @param cid The course id
       * @param uid The user id
       * @return True if sucessfully deregistered
