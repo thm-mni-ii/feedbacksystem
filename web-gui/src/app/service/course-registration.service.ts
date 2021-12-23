@@ -45,4 +45,21 @@ export class CourseRegistrationService {
   deregisterCourse(uid: number, cid: number): Observable<void> {
     return this.http.delete<void>(`/api/v1/users/${uid}/courses/${cid}`);
   }
+
+  /**
+   * De-register all user with a specific role from a course
+   * @param roleName Role name
+   * @param cid Course id
+   */
+  deregisterRole(cid: number, roleName: string): Observable<void> {
+    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {roleName});
+  }
+
+  /**
+   * De-register all user except the current user from a course
+   * @param cid Course id
+   */
+  deregisterAll(cid: number): Observable<void> {
+    return this.http.get<void>(`/api/v1/courses/${cid}/deregisterall`);
+  }
 }

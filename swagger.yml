@@ -455,6 +455,73 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/courses/{cid}/deregisterrole":
+    put:
+      security:
+        - JWT: [ ]
+      tags:
+        - Course Registration
+      summary: Deregister all users with a specific role
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - roleName
+              properties:
+                roleName:
+                  type: string
+        description: "All users with the roleName role get deregistered from the course with uid"
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/deregisterall":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - Course Registration
+      summary: Deregister all users except the current user from the course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   /courses:
     get:
       security:
