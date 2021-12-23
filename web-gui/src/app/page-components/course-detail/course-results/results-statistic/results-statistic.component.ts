@@ -181,6 +181,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.tasks.pipe(map(t => t.map(t => t.id))).subscribe(ids => this.idStore = ids);
     this.courseResults.pipe(map((extractedCResult) => { // Calculation average attempts to pass a task
         return extractedCResult.reduce((acc, extractedCResult) => {
+          if(extractedCResult)
           extractedCResult.results.forEach((t) => {
             if (t.passed) {
               if (!acc[t.task.id]) acc[t.task.id] = [];
