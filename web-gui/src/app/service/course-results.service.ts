@@ -51,4 +51,12 @@ export class CourseResultsService {
   tasks: { task: { name: string; mediaType: string; deadline: string }; passed: boolean; attempts: number } }[] {
     return this.results;
   }
+
+  /**
+   * @param cid User id
+   * @return All course results
+   */
+  getStudentResults(cid: number): Observable<CourseResult[]> {
+    return this.http.get<CourseResult[]>(`/api/v1/courses/${cid}/results/student`);
+  }
 }

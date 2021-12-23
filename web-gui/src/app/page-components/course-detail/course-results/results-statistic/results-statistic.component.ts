@@ -120,7 +120,7 @@ export class ResultsStatisticComponent implements OnInit {
     this.tb.emitTitle('Dashboard');
     this.route.params.subscribe(param => {
       this.courseId = param.id;
-      this.courseResults = this.courseResultService.getAllResults(this.courseId);
+      this.courseResults = this.courseResultService.getStudentResults(this.courseId);
       this.subtaskStatistic = this.subtaskStatisticService.getAllResults(this.courseId);
       this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
     });
