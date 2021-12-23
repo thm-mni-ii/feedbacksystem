@@ -1,8 +1,13 @@
+:host ::ng-deep .mat-form-field-wrapper {
+  padding: 0;
+}
+
 .mat-row:nth-child(even) {
   background-color: #f0f0fa;
 }
 
-.search, .mat-table {
+.search,
+.mat-table {
   width: 100%;
 }
 
@@ -17,12 +22,13 @@
   padding: 16px;
 }
 
-.button{
+.button {
   margin: 10px;
   background-color: #405e9a;
 }
 
-.buttongroup{
+.buttongroup {
   display: flex;
   flex-direction: row;
+  margin-bottom: 0.25em;
 }
