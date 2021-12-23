@@ -54,7 +54,7 @@ export class CourseResultsService {
 
   /**
    * @param cid User id
-   * @return All course results
+   * @return Course results only students
    */
   getStudentResults(cid: number): Observable<CourseResult[]> {
     return this.http.get<CourseResult[]>(`/api/v1/courses/${cid}/results/student`);

@@ -154,7 +154,7 @@ class CourseResultService {
       |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
       |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
       |         ) as subtasks on submissions.submission_id = subtasks.submission_id
-      |where course_id = ? and uc.course_role = 'STUDENT'
+      |where course_id = ? and uc.course_role = "STUDENT"
       |group by u.user_id
       |order by u.user_id;
       |""".stripMargin, (res, _) => parseResult(res), cid)
