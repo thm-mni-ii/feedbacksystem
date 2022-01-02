@@ -73,7 +73,7 @@ class CourseResultController {
   }
 
   /**
-      * Returns the course results of all participants of a course.
+      * Returns the course results exlude tutor and docent.
       * @param cid Course id
       * @param req request
       * @param res response
@@ -88,7 +88,7 @@ class CourseResultController {
         .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
       if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-        courseResultService.getAll(cid)
+        courseResultService.getStudResult(cid)
       } else {
         throw new ForbiddenException()
       }
