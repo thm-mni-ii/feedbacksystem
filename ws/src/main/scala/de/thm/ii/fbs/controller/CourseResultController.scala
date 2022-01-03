@@ -44,7 +44,7 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid)
+      courseResultService.getAll(cid, 0, 2)
     } else {
       throw new ForbiddenException()
     }
@@ -66,7 +66,7 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid))
+      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid, 0, 2))
     } else {
       throw new ForbiddenException()
     }
@@ -88,7 +88,7 @@ class CourseResultController {
         .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
       if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-        courseResultService.getStudResult(cid)
+        courseResultService.getAll(cid, 2, 2)
       } else {
         throw new ForbiddenException()
       }

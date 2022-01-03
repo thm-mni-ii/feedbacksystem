@@ -28,7 +28,7 @@ class CourseResultService {
     * @param cid Course id
     * @return all Course Results
     */
-  def getAll(cid: Int): List[CourseResult] = DB.query("""
+  def getAll(cid: Int, from: Int, to: Int): List[CourseResult] = DB.query("""
     |select u.user_id
     |     ,u.prename
     |     ,u.surname
@@ -72,10 +72,10 @@ class CourseResultService {
     |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
     |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
     |         ) as subtasks on submissions.submission_id = subtasks.submission_id
-    |where course_id = ?
+    |where course_id = ? and uc.course_role between ? and ?
     |group by u.user_id
     |order by u.user_id;
-    |""".stripMargin, (res, _) => parseResult(res), cid)
+    |""".stripMargin, (res, _) => parseResult(res), cid, from, to)
 
   /**
     * Get All Course Results by a Task
@@ -104,58 +104,4 @@ class CourseResultService {
     userId = res.getInt("user_id"),
     attempt = res.getInt("attempt")
   )
-
-  /**
-      * Get All Course Results exclude Tutor and Docent
-      * @param cid Course id
-      * @return all Course Results
-      */
-    def getStudResult(cid: Int): List[CourseResult] = DB.query("""
-      |select u.user_id
-      |     ,u.prename
-      |     ,u.surname
-      |     ,u.email
-      |     ,u.username
-      |     ,u.global_role
-      |     ,u.alias
-      |     ,JSON_ARRAYAGG(JSON_OBJECT("task", JSON_OBJECT("id", t.task_id,
-      |                                                    "name", t.name,
-      |                                                    "deadline", t.deadline,
-      |                                                    "mediaType", t.media_type,
-      |                                                    "description", t.description),
-      |                                "attempts", coalesce(submissions.attempts, 0),
-      |                                "passed", coalesce(submissions.passed, 0),
-      |                                "points", coalesce(subtasks.points, 0)
-      |    )) as results
-      |     ,COALESCE(FLOOR(SUM(submissions.passed) / COUNT(DISTINCT t.task_id)), 0) as passed
-      |     ,COALESCE(SUM(subtasks.points), 0) as points
-      |from user u
-      |         left join user_course uc using (user_id)
-      |         left join task t using (course_id)
-      |         left join (
-      |             select temp.user_id
-      |                   ,temp.task_id
-      |                   ,count(distinct temp.submission_id) as attempts
-      |                   ,max(temp.passed) as passed
-      |                   ,max(temp.submission_id) as submission_id
-      |             from (
-      |                select uts.user_id
-      |                      ,uts.task_id
-      |                      ,uts.submission_id
-      |                      ,IF(SUM(cr.exit_code) = 0, 1, 0) as passed
-      |                from user_task_submission uts
-      |                left join checker_result cr using (submission_id)
-      |                group by uts.user_id, uts.task_id, uts.submission_id
-      |                order by uts.user_id
-      |             ) as temp
-      |             group by temp.user_id, temp.task_id
-      |         ) as submissions using (user_id, task_id)
-      |         left join (
-      |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
-      |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
-      |         ) as subtasks on submissions.submission_id = subtasks.submission_id
-      |where course_id = ? and uc.course_role = 2
-      |group by u.user_id
-      |order by u.user_id;
-      |""".stripMargin, (res, _) => parseResult(res), cid)
 }
