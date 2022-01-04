@@ -44,7 +44,7 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid, 0, 2)
+      courseResultService.getAll(cid)
     } else {
       throw new ForbiddenException()
     }
