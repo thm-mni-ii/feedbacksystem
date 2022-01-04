@@ -66,7 +66,7 @@ class CourseResultController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid, 0, 2))
+      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid))
     } else {
       throw new ForbiddenException()
     }
