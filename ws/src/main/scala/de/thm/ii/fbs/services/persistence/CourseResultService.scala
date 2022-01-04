@@ -28,7 +28,7 @@ class CourseResultService {
     * @param cid Course id
     * @return all Course Results
     */
-  def getAll(cid: Int, from: Int, to: Int): List[CourseResult] = DB.query("""
+  def getAll(cid: Int, minRole: Int = 0, maxRole: Int = 2): List[CourseResult] = DB.query("""
     |select u.user_id
     |     ,u.prename
     |     ,u.surname
