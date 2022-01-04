@@ -75,7 +75,7 @@ class CourseResultService {
     |where course_id = ? and uc.course_role between ? and ?
     |group by u.user_id
     |order by u.user_id;
-    |""".stripMargin, (res, _) => parseResult(res), cid, from, to)
+    |""".stripMargin, (res, _) => parseResult(res), cid, minRole, maxRole)
 
   /**
     * Get All Course Results by a Task
