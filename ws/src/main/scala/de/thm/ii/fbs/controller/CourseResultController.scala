@@ -71,4 +71,26 @@ class CourseResultController {
       throw new ForbiddenException()
     }
   }
+
+  /**
+      * Returns the course results exlude tutor and docent.
+      * @param cid Course id
+      * @param req request
+      * @param res response
+      * @return A list of course results
+      */
+    @GetMapping(value = Array("/{cid}/results/student"))
+    @ResponseBody
+    def getStudentResult(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
+      val user = authService.authorize(req, res)
+
+      val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
+        .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+      if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+        courseResultService.getAll(cid, 2, 2)
+      } else {
+        throw new ForbiddenException()
+      }
+    }
 }
