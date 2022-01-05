@@ -24,7 +24,7 @@ export class ResultsStatisticComponent implements OnInit {
   }
 
   courseId: number;
-  courseResults: Observable<CourseResult[]> = of();
+  courseResultsStudent: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
   evaluationUserResults: Observable<EvaluationUserResults[]> = of();
   subtaskStatistic: Observable<SubTaskStatistic[]> = of();
@@ -120,9 +120,9 @@ export class ResultsStatisticComponent implements OnInit {
     this.tb.emitTitle('Dashboard');
     this.route.params.subscribe(param => {
       this.courseId = param.id;
-      this.courseResults = this.courseResultService.getAllResults(this.courseId);
+      this.courseResultsStudent = this.courseResultService.getStudentResults(this.courseId);
       this.subtaskStatistic = this.subtaskStatisticService.getAllResults(this.courseId);
-      this.tasks = this.courseResults.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
+      this.tasks = this.courseResultsStudent.pipe(map(results => (results.length === 0) ? [] : results[0].results.map(result => result.task)));
     });
     this.standardEvent();
     this.showRate();
@@ -179,8 +179,9 @@ export class ResultsStatisticComponent implements OnInit {
     this.barChartData[1].data = [];
     this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.barChartLabels = names);
     this.tasks.pipe(map(t => t.map(t => t.id))).subscribe(ids => this.idStore = ids);
-    this.courseResults.pipe(map((extractedCResult) => { // Calculation average attempts to pass a task
+    this.courseResultsStudent.pipe(map((extractedCResult) => { // Calculation average attempts to pass a task
         return extractedCResult.reduce((acc, extractedCResult) => {
+          if(extractedCResult)
           extractedCResult.results.forEach((t) => {
             if (t.passed) {
               if (!acc[t.task.id]) acc[t.task.id] = [];
@@ -209,7 +210,7 @@ export class ResultsStatisticComponent implements OnInit {
       })
     ).subscribe();
 
-    this.courseResults.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
+    this.courseResultsStudent.pipe(map((extractedCResult2) => { //Calculation average attempts of a task
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
             if (!acc[t.task.id]) acc[t.task.id] = [];
@@ -232,7 +233,7 @@ export class ResultsStatisticComponent implements OnInit {
 
   showRate() { // Rate of tasks that have been edited at least once
     this.tasks.pipe(map(t => t.map(t => t.name))).subscribe(names => this.lineChartLabels = names);
-    this.courseResults.pipe(map((extractedCResult2) => { // Calculation of the rate
+    this.courseResultsStudent.pipe(map((extractedCResult2) => { // Calculation of the rate
         return extractedCResult2.reduce((acc, extractedCResult) => {
           extractedCResult.results.forEach((t) => {
             if (!acc[t.task.id]) acc[t.task.id] = [];
@@ -250,7 +251,7 @@ export class ResultsStatisticComponent implements OnInit {
           const sum = resultsObj[key].reduce((a, b) => a + b, 0);
           const avg = sum / count;
           const rate = avg * 100;
-          this.lineChartData[0].data.push(Number(rate));
+          this.lineChartData[0].data.push(Number(rate.toFixed(2)));
         });
       })
     ).subscribe();

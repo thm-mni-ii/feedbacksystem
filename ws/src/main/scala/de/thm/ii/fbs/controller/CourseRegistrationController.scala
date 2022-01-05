@@ -111,4 +111,46 @@ class CourseRegistrationController {
       case _ => throw new ForbiddenException()
     }
   }
+
+   /**
+      * Deregister all users with a specific role from a course
+      * @param cid Course id
+      * @param req http request
+      * @param res http response
+      * @param body Content
+      */
+    @PutMapping(value = Array("/courses/{cid}/deregisterrole"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+    def deregisterRole(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse,
+                 @RequestBody body: JsonNode): Unit = {
+      val user = authService.authorize(req, res)
+      val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
+
+      val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+        courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+
+      (privileged, user.id) match {
+        case (true, _) => courseRegistrationService.deregisterRole(cid, role)
+        case _ => throw new ForbiddenException()
+      }
+    }
+
+   /**
+       * Deregister all user except the current user
+       * @param cid Course id
+       * @param req http request
+       * @param res http response
+       */
+     @GetMapping(value = Array("/courses/{cid}/deregisterall"))
+     def deregisterAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+       val user = authService.authorize(req, res)
+       val uid = user.id
+
+       val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+         courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+
+       (privileged, user.id) match {
+         case (true, _) => courseRegistrationService.deregisterAll(cid, uid)
+         case _ => throw new ForbiddenException()
+       }
+     }
 }
