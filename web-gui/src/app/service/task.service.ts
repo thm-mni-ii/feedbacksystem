@@ -3,12 +3,14 @@ import {Observable, of} from 'rxjs';
 import {Task} from '../model/Task';
 import {HttpClient} from '@angular/common/http';
 import {UserTaskResult} from '../model/UserTaskResult';
+import {Container} from '../model/Container'
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   /**
    * Get all tasks of a course
@@ -87,5 +89,14 @@ export class TaskService {
   // PUT /courses/{cid}/tasks/{tid}/secondary-file
   updateSecondaryFile(cid: number, tid: number, file: String): Observable<any> {
     return of(true); // TODO upload file
+  }
+
+  /**
+   * Get all container of a course
+   * @param cid Course id
+   * @return Observable of type Container
+   */
+  getAllContainer(cid: number): Observable<Container> {
+    return this.http.get<Container>(`/api/v1/${cid}/evaluation/container`);
   }
 }
