@@ -22,6 +22,10 @@ import {GoToService} from '../../service/goto.service';
 import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
 import {ExternalClassroomService} from '../../service/external-classroom.service';
 import {UserTaskResult} from '../../model/UserTaskResult';
+import {MatTreeModule} from '@angular/material/tree';
+import {NestedTreeControl} from '@angular/cdk/tree';
+import {MatTreeNestedDataSource} from '@angular/material/tree';
+
 
 @Component({
   selector: 'app-course-detail',
