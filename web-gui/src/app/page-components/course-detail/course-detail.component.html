@@ -33,7 +33,6 @@
       <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteCourse()"><mat-icon class="logout-icon">delete</mat-icon><span>Kurs löschen</span></button>
     </mat-menu>
   </app-menu-bar>
-
   <app-info class="info" *ngIf="!role">
     <p class="mat-body">
       Liebe/r Nutzer/in, Sie betrachten einen Kurs in dem Sie nicht als Teilnehmer/in geführt werden.
