@@ -69,7 +69,7 @@ export class CourseDetailComponent implements OnInit {
         this.courseID = param.id;
         this.reloadCourse();
         this.reloadTasks();
-        this.container.getAllContainer(this.courseID).subscribe((container) => this.container = container );
+        this.taskService.getAllContainer(this.courseID).subscribe((container) => this.container = container);
 
       }
     );
