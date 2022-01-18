@@ -51,6 +51,7 @@ export class CourseDetailComponent implements OnInit {
               private courseRegistrationService: CourseRegistrationService,
               private feedbackAppService: FeedbackAppService,
               private goToService: GoToService,
+
               @Inject(DOCUMENT) document) {
   }
   container: Container[];
