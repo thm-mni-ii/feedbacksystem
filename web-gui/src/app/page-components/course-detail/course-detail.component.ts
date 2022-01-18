@@ -13,6 +13,7 @@ import {Roles} from '../../model/Roles';
 import {TaskService} from '../../service/task.service';
 import {Course} from '../../model/Course';
 import {Task} from '../../model/Task';
+import {Container} from '../../model/Container';
 import {CourseService} from '../../service/course.service';
 import {CourseRegistrationService} from '../../service/course-registration.service';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
@@ -25,6 +26,8 @@ import {UserTaskResult} from '../../model/UserTaskResult';
 import {MatTreeModule} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTreeNestedDataSource} from '@angular/material/tree';
+import {FlatTreeControl} from '@angular/cdk/tree';
+import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 
 
 @Component({
@@ -32,6 +35,7 @@ import {MatTreeNestedDataSource} from '@angular/material/tree';
   templateUrl: './course-detail.component.html',
   styleUrls: ['./course-detail.component.scss']
 })
+
 export class CourseDetailComponent implements OnInit {
 
   constructor(private taskService: TaskService,
@@ -49,7 +53,7 @@ export class CourseDetailComponent implements OnInit {
               private goToService: GoToService,
               @Inject(DOCUMENT) document) {
   }
-
+  container: Container[];
   courseID: number;
   tasks: Task[];
   taskResults: Record<number, UserTaskResult>;
@@ -57,12 +61,16 @@ export class CourseDetailComponent implements OnInit {
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
 
+
+
   ngOnInit() {
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
         this.reloadCourse();
         this.reloadTasks();
+        this.container.getAllContainer(this.courseID).subscribe((container) => this.container = container );
+
       }
     );
     this.role = this.auth.getToken().courseRoles[this.courseID];
