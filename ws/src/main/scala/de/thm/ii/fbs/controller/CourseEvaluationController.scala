@@ -74,7 +74,7 @@ class CourseEvaluationController {
     * @param cid Course id
     * @param req http request
     * @param res http response
-    * @return is the formula valid
+    * @return an array of all container
     */
   @GetMapping(value = Array("/{cid}/evaluation/container"))
   @ResponseBody

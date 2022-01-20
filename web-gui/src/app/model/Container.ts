@@ -1,7 +1,8 @@
+import {Task} from './Task';
 export interface Container {
   id?: number;
-  name: string;
-  deadline: string;
-  mediaType?: string;
-  description?: string;
+  Task: Task[];
+  toPass: number;
+  bonusFormula: string;
+  hidePoints: string;
 }
