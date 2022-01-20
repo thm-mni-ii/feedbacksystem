@@ -54,7 +54,7 @@ export class CourseDetailComponent implements OnInit {
 
               @Inject(DOCUMENT) document) {
   }
-  container: Container[];
+  containers: Container[];
   courseID: number;
   tasks: Task[];
   taskResults: Record<number, UserTaskResult>;
@@ -70,7 +70,7 @@ export class CourseDetailComponent implements OnInit {
         this.courseID = param.id;
         this.reloadCourse();
         this.reloadTasks();
-        this.taskService.getAllContainer(this.courseID).subscribe((container) => this.container = container);
+        this.taskService.getAllContainer(this.courseID).subscribe((container) => this.containers = container);
 
       }
     );
