@@ -97,6 +97,6 @@ export class TaskService {
    * @return Observable of type Container
    */
   getAllContainer(cid: number): Observable<Container[]> {
-    return this.http.get<Container[]>(`/api/v1/${cid}/evaluation/container`);
+    return this.http.get<Container[]>(`/api/v1/courses/${cid}/evaluation/container`);
   }
 }
