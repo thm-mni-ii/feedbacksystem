@@ -121,6 +121,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   private openDialog(title: string, message: string, durationInMilliSeconds?: number): void {
+
     this.dialog.open(ConfirmationDialogComponent, {
        data: {
          title: title,
