@@ -9,6 +9,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {UserService} from '../../service/user.service';
 import {ActivatedRoute} from '@angular/router';
 import {Roles} from '../../model/Roles';
+import {ConfirmationDialogComponent} from "../confirmation-dialog/confirmation-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-participants',
@@ -28,6 +30,7 @@ export class ParticipantsComponent implements OnInit {
   searchedUser: User[];
 
   constructor(private snackBar: MatSnackBar, private userService: UserService,
+              private dialog: MatDialog,
               private registrationService: CourseRegistrationService,
               private route: ActivatedRoute) { }
 
@@ -81,7 +84,8 @@ export class ParticipantsComponent implements OnInit {
   roleChange(userID: number, role: string) {
     this.registrationService.registerCourse(userID, this.courseID, role)
       .subscribe(res => {
-        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+        // this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+        this.openDialog('Erfolgreich!!!', 'Benutzer wurde gelöscht');
         this.refreshUserList();
       }, () => {
         this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
@@ -97,7 +101,8 @@ export class ParticipantsComponent implements OnInit {
       .subscribe(() => {
         this.registrationService.deregisterCourse(user.id, this.courseID).subscribe(
         () => {
-          this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
+          // this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
+          this.openDialog('Erfolgreich !!!', 'Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.');
           this.refreshUserList();
         });
       });
@@ -109,6 +114,7 @@ export class ParticipantsComponent implements OnInit {
       this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
         .subscribe(() => {
           this.snackBar.open('Alle Studierenden wurden entfernt', 'ok', {duration: 3000});
+          this.openDialog('Erfolgreich !!!', 'Alle Studierenden wurden entfernt');
           this.refreshUserList();
         });
       });
@@ -119,7 +125,8 @@ export class ParticipantsComponent implements OnInit {
       .onAction().subscribe( () => {
       this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
         .subscribe(() => {
-          this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
+          // this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
+          this.openDialog('Erfolgreich !!!', 'Alle Tutoren wurden entfernt');
           this.refreshUserList();
         });
     });
@@ -143,11 +150,13 @@ export class ParticipantsComponent implements OnInit {
     this.snackBar.open('Soll ' + user.prename + ' ' + user.surname + ' dem Kurs hinzugefügt werden?', 'Ja', {duration: 5000})
       .onAction().subscribe( () => {
         if (this.user.find(participant => participant.id === user.id)) {
-          this.snackBar.open(user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.', 'ok', {duration: 3000});
+          // this.snackBar.open(user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.', 'ok', {duration: 3000});
+          this.openDialog('Erfolgreich !!!', user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.');
         } else {
           this.registrationService.registerCourse(user.id, this.courseID)
             .subscribe(() => {
-              this.snackBar.open('Teilnehmer hinzugefügt.', 'ok', {duration: 3000});
+              // this.snackBar.open('Teilnehmer hinzugefügt.', 'ok', {duration: 3000});
+              this.openDialog('Erfolgreich !!!', 'Teilnehmer hinzugefügt.');
               this.refreshUserList();
             });
         }
@@ -159,7 +168,8 @@ export class ParticipantsComponent implements OnInit {
       .subscribe(() => {
         this.registrationService.deregisterAll(this.courseID).subscribe(
           () => {
-            this.snackBar.open('Alle teilnehmenden Personen wurden ausgetragen.', 'OK', {duration: 5000});
+            // this.snackBar.open('Alle teilnehmenden Personen wurden ausgetragen.', 'OK', {duration: 5000});
+            this.openDialog('Erfolgreich !!!', 'Alle teilnehmenden Personen wurden ausgetragen.');
             this.refreshUserList();
           });
       });
@@ -167,5 +177,15 @@ export class ParticipantsComponent implements OnInit {
 
   displayFn(user?: User): string | undefined {
     return user ? user.surname : undefined;
+  }
+
+
+  private openDialog(title: string, message: string): void {
+    this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: title,
+        message: message,
+      }
+    });
   }
 }

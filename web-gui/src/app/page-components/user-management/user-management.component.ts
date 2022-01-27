@@ -3,7 +3,6 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatDialog} from '@angular/material/dialog';
 import {TitlebarService} from '../../service/titlebar.service';
 import {UserService} from '../../service/user.service';
 import {User} from '../../model/User';
@@ -12,7 +11,8 @@ import {
 } from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {Roles} from '../../model/Roles';
-import {ConfirmationDialogComponent} from "../../tool-components/confirmation-dialog/confirmation-dialog.component";
+
+
 
 /**
  * This component is for admins managing users
@@ -29,8 +29,9 @@ export class UserManagementComponent implements OnInit {
   columns = ['surname', 'prename', 'email', 'username', 'globalRole', 'action'];
   dataSource = new MatTableDataSource<User>();
 
-  constructor(private snackBar: MatSnackBar, private titlebar: TitlebarService,
-              private dialog: MatDialog, private userService: UserService) {
+  constructor(private snackBar: MatSnackBar,
+              private titlebar: TitlebarService,
+              private userService: UserService) {
   }
 
   ngOnInit() {
@@ -80,8 +81,7 @@ export class UserManagementComponent implements OnInit {
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.userService.deleteUser(user.id).subscribe(res => {
-          // this.snackBar.open('Benutzer wurde gelöscht.', 'OK', {duration: 5000});
-          this.openDialog('Erfolgreich!!!', 'Benutzer wurde gelöscht', 4000);
+          this.snackBar.open('Benutzer wurde gelöscht.', 'OK', {duration: 5000});
           this.refreshUserList();
         }, error => {
           console.error(error);
@@ -109,26 +109,13 @@ export class UserManagementComponent implements OnInit {
       if (user) {
         this.userService.createUser(user).subscribe(
           res => {
-            // this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
+            this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
           }, error => {
             this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
           }, () => {
-            this.openDialog('Erfolgreich!!!', 'Gast Benutzer erstellt', 4000);
             this.refreshUserList();
           });
       }
     });
-  }
-
-  private openDialog(title: string, message: string, durationInMilliSeconds?: number): void {
-
-    this.dialog.open(ConfirmationDialogComponent, {
-       data: {
-         title: title,
-         message: message,
-       }
-     }).close();
-    // dialog.close();
-    // setTimeout(() => dialog.close(), durationInMilliSeconds ? durationInMilliSeconds : 3000);
   }
 }
