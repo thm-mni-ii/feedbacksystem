@@ -32,6 +32,11 @@ export class ResultsComponent {
 
   @Input() context: {uid: number, cid: number, tid: number};
 
+  handleSubmission(event): void {
+    const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
+    this.display(submission);
+  }
+
   display(submission: Submission) {
     if (submission === undefined) {
       return;
