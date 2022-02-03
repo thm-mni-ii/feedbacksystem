@@ -21,9 +21,8 @@
     <button mat-icon-button class="green" *ngIf="externalClassroomService.isJoined()" (click)="joinClassroom()" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
     <button mat-icon-button *ngIf="!externalClassroomService.isJoined()" (click)="joinClassroom()" matTooltip="Digitalen Übungsraum beitreten"><mat-icon>meeting_room</mat-icon></button>
     <!--<button mat-icon-button class="red" *ngIf="classroomService.isJoined()" (click)="goOffline()" matTooltip="Sitzung verlassen"><mat-icon>voice_chat</mat-icon></button>-->
-
     <button mat-icon-button (click)="goToFBA()" matTooltip="Zur Feedback App wechseln"><mat-icon>question_answer</mat-icon></button>
-
+    <button mat-icon-button *ngIf="isAuthorized()" [routerLink]="['/','courses', courseID,'sql-checker']" matTooltip="SQL-Checker"><mat-icon>check</mat-icon></button>
     <button mat-icon-button *ngIf="isAuthorized() || role" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="isAuthorized()" (click)="updateCourse()"><mat-icon class="logout-icon">edit</mat-icon><span>Kurs bearbeiten</span></button>
