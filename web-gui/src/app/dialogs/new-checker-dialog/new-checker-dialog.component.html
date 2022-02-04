@@ -8,7 +8,7 @@
     </mat-select>
 
     <mat-form-field>
-      <input type="number" placeholder="Reihenfolge" matInput formControlName="ord" required>
+      <input type="number" placeholder="Reihenfolge" matInput formControlName="ord" [value]="fileCounter.toString()" required>
     </mat-form-field>
 
     <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>

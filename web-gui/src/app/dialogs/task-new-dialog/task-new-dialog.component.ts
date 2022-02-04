@@ -12,6 +12,9 @@ import {mergeMap, map} from 'rxjs/operators';
 import {CheckerService} from '../../service/checker.service';
 import {CheckerConfig} from '../../model/CheckerConfig';
 
+let currentDateAndOneMonthLater = new Date();
+currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1);
+
 /**
  * Dialog to create or update a task
  */
@@ -21,10 +24,13 @@ import {CheckerConfig} from '../../model/CheckerConfig';
   styleUrls: ['./task-new-dialog.component.scss']
 })
 export class TaskNewDialogComponent implements OnInit {
+
+
+
   taskForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
-    deadline: new FormControl(new Date()),
+    deadline: new FormControl(currentDateAndOneMonthLater),
     mediaType: new FormControl(''),
     exelFile: new FormControl(''),
     userIDField: new FormControl(''),
@@ -37,7 +43,7 @@ export class TaskNewDialogComponent implements OnInit {
   isUpdate: boolean;
   courseId: number;
   task: Task = {
-    deadline: new Date().toISOString(),
+    deadline: currentDateAndOneMonthLater.toISOString(),
     description: '',
     mediaType: '',
     name: '',

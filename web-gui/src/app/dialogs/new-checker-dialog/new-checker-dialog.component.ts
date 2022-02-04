@@ -12,6 +12,8 @@ import {CheckerService} from '../../service/checker.service';
 })
 export class NewCheckerDialogComponent implements OnInit {
 
+  fileCounter = 0;
+
   checkerForm = new FormGroup({
     checkerType: new FormControl(''),
     ord: new FormControl(''),
@@ -76,10 +78,12 @@ export class NewCheckerDialogComponent implements OnInit {
 
   updateMainFile(event) {
     this.mainFile = event['content'];
+    this.fileCounter++;
   }
 
   updateSecondaryFile(event) {
     this.secondaryFile = event['content'];
+    this.fileCounter++;
   }
 
   /**
