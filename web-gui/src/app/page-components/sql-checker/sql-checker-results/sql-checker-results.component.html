@@ -1,0 +1,7 @@
+<div class="container">
+  <app-menu-bar *ngIf="role || isAuthorized()">
+    <button mat-icon-button [routerLink]="['/', 'courses', courseID, 'sql-checker']" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+    <span class="spacer"></span>
+  </app-menu-bar>
+  <label>{{this.taskID}}</label>
+</div>

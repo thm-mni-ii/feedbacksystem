@@ -1,0 +1,14 @@
+<div class="container">
+<app-menu-bar *ngIf="role || isAuthorized()">
+  <button mat-icon-button [routerLink]="['/', 'courses', courseID]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+  <span class="spacer"></span>
+</app-menu-bar>
+
+  <div class="task-list">
+    <div *ngFor="let task of tasks">
+      <mat-card class="task-container" id="{{task.id}}" [routerLink]="['/', 'courses', courseID, 'sql-checker-results', task.id]">
+      <span>{{task.name}}</span>
+    </mat-card>
+    </div>
+  </div>
+</div>
