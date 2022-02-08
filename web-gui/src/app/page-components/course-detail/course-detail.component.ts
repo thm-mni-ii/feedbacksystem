@@ -4,7 +4,7 @@ import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DOCUMENT} from '@angular/common';
-import {mergeMap} from 'rxjs/operators';
+import {map, mergeMap} from 'rxjs/operators';
 import {of, Observable} from 'rxjs';
 import {TaskNewDialogComponent} from '../../dialogs/task-new-dialog/task-new-dialog.component';
 import {CourseUpdateDialogComponent} from '../../dialogs/course-update-dialog/course-update-dialog.component';
@@ -71,7 +71,6 @@ export class CourseDetailComponent implements OnInit {
         this.reloadCourse();
         this.reloadTasks();
         this.taskService.getAllContainer(this.courseID).subscribe((container) => this.containers = container);
-
       }
     );
     this.role = this.auth.getToken().courseRoles[this.courseID];

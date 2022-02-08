@@ -154,3 +154,34 @@
     justify-content: center;
   }
 }
+.container-container {
+  cursor: pointer;
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  .meta {
+    > * {
+      margin-left: 8px;
+    }
+    > .tiny {
+      font-size: small;
+    }
+    .state {
+      text-align: center;
+      line-height: 30px;
+    }
+  }
+  span {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.container-container:hover {
+  background: #d4dadd;
+}
+
+.container {
+  display: block;
+  padding: 16px;
+}
