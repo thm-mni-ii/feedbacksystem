@@ -1,10 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {AuthService} from '../../../service/auth.service';
 import {Task} from '../../../model/Task';
-import {SubmissionService} from '../../../service/submission.service';
-import {Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {UserTaskResult} from '../../../model/UserTaskResult';
+import {TaskService} from "../../../service/task.service";
 
 @Component({
   selector: 'app-task-preview',
@@ -16,9 +14,18 @@ export class TaskPreviewComponent implements OnInit {
   @Input() task: Task;
   @Input() taskResult: UserTaskResult = null;
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,
+              private taskService: TaskService) {
+  }
 
   ngOnInit(): void {
     const uid = this.authService.getToken().id;
+  }
+
+
+  downloadTask(event) {
+    if(event.preventDefault) event.preventDefault();
+    if(event.stopPropagation) event.stopPropagation();
+    this.taskService.downloadTask(this.courseId, this.task.id);
   }
 }

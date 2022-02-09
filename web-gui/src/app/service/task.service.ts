@@ -3,6 +3,8 @@ import {Observable, of} from 'rxjs';
 import {Task} from '../model/Task';
 import {HttpClient} from '@angular/common/http';
 import {UserTaskResult} from '../model/UserTaskResult';
+import {map} from "rxjs/operators";
+import {saveAs as importedSaveAs} from "file-saver";
 
 @Injectable({
   providedIn: 'root'
@@ -87,5 +89,13 @@ export class TaskService {
   // PUT /courses/{cid}/tasks/{tid}/secondary-file
   updateSecondaryFile(cid: number, tid: number, file: String): Observable<any> {
     return of(true); // TODO upload file
+  }
+
+  public downloadTask(cid: number, tid: number) {
+    return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}`, {responseType: 'arraybuffer'})
+      .subscribe(response => {
+        const blob = new Blob([response], {type: 'text/plain'});
+        importedSaveAs(blob);
+      });
   }
 }
