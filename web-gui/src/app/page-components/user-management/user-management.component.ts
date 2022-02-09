@@ -11,6 +11,7 @@ import {
 } from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {Roles} from '../../model/Roles';
+import {MatDialog} from "@angular/material/dialog";
 
 
 
@@ -31,6 +32,7 @@ export class UserManagementComponent implements OnInit {
 
   constructor(private snackBar: MatSnackBar,
               private titlebar: TitlebarService,
+              private dialog: MatDialog,
               private userService: UserService) {
   }
 
