@@ -43,6 +43,8 @@ services:
       - CLASSROOM_TLS_INSECURE=true
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - MONGODB_DATABASE=sql-checker
     networks:
       classroom:
       fbs:
@@ -55,6 +57,14 @@ services:
       MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
       - ./data/mysql2:/var/lib/mysql
+    networks:
+      fbs:
+
+  mongodb:
+    image: mongo:5.0.6
+    restart: unless-stopped
+    volumes:
+      - ./data/mongodb:/data/db
     networks:
       fbs:
 

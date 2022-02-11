@@ -33,6 +33,8 @@ tags:
     description: Incomming checker results
   - name: Analysis
     description: Routes to query data for analysis purposes
+  - name: SQL Checker
+    description: Routes used for SQL-Checker quering
 paths:
   /login/cas:
     post:
@@ -2144,6 +2146,38 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/sqlChecker/{tid}/queries":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Get SQL-Checker queries
+      parameters:
+        - name: tid
+          in: path
+          description: Task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SQLCheckerQuery'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -2546,3 +2580,28 @@ components:
                 type: number
               avgPoints:
                 type: number
+    SQLCheckerQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        taskNumber:
+          type: number
+        statement:
+          type: string
+        queryRight:
+          type: boolean
+        parsable:
+          type: boolean
+        tablesRight:
+          type: boolean
+        attributesRight:
+          type: boolean
+        whereAttributesRight:
+          type: boolean
+        stringsRight:
+          type: boolean
+        userId:
+          type: number
+        attempt:
+          type: number
