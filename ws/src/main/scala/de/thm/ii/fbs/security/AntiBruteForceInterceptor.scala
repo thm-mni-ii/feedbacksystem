@@ -23,9 +23,11 @@ class AntiBruteForceInterceptor extends HandlerInterceptor {
   private val protectedPathsString: String = "/api/v1/login/ldap,/api/v1/login/local"
   private val logins: mutable.Map[String, LoginAttempts] = mutable.HashMap()
   private val lock: Lock = new ReentrantLock(true)
+  private var lastClean: Date = new Date()
 
   override def preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean = {
     super.preHandle(request, response, handler)
+    cleanIfNeeded()
 
     if (protectedPaths.contains(request.getServletPath)) {
       val forwardForHeader = Option(request.getHeader("X-FORWARDED-FOR")).getOrElse("")
@@ -56,6 +58,23 @@ class AntiBruteForceInterceptor extends HandlerInterceptor {
     } else {
       true
     }
+  }
+
+  private def cleanIfNeeded(): Unit = {
+    lock.lock()
+    if (new Date().getTime - lastClean.getTime / 1000 > interval) {
+      for ((ip, lastLoginAttempt) <- logins) {
+        lastLoginAttempt.lastAttempt match {
+          case Some(lastAttempt) =>
+            if ((new Date().getTime - lastAttempt.getTime) / 1000 > interval) {
+              logins.remove(ip)
+            }
+          case None => {}
+        }
+      }
+      lastClean = new Date()
+    }
+    lock.unlock()
   }
 
   private def protectedPaths = protectedPathsString.split(",").toSeq
