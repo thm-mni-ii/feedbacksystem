@@ -49,6 +49,7 @@ export class SqlCheckerResultsComponent {
   taskID: number;
 
   ngOnInit() {
+    this.standardEvent();
       this.route.params.subscribe(
         param => {
           this.courseID = param.id;
