@@ -7,3 +7,66 @@
   margin-bottom: 30px;
   padding: 10px;
 }
+.chart-box{
+  margin-top: 100px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+.chart-left{
+  grid-area: 1 / 1 / 2 / 2;
+}
+.chart-right{
+  grid-area: 1 / 2 / 2 / 3;
+}
+.chart-center{
+  grid-area: 1 / 1 / 1 / 1;
+}
+.chart-title{
+  text-align: center;
+  font-size: 22pt;
+  font-family: sans-serif;
+  margin-top: 30px;
+}
+.solution-box{
+  text-align: center;
+  font-size: 16pt;
+  font-family: sans-serif;
+  margin-top: 15px;
+}
+.table-title{
+  text-align: center;
+  font-size: 22pt;
+  font-family: sans-serif;
+  margin-top: 30px;
+}
+.result-table{
+  margin-left: 40%;
+  font-size: 16pt;
+}
+.demo-table {
+  width: 100%;
+}
+
+.mat-column-demo-position {
+  width: 32px;
+  border-right: 1px solid currentColor;
+  padding-right: 24px;
+  text-align: center;
+}
+.mat-column-demo-name {
+  padding-left: 16px;
+  font-size: 20px;
+}
+
+.mat-column-demo-weight {
+  font-style: italic;
+}
+
+.mat-column-demo-symbol {
+  width: 32px;
+  text-align: center;
+  font-weight: bold;
+}

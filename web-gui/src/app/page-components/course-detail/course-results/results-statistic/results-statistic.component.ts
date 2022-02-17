@@ -115,7 +115,6 @@ export class ResultsStatisticComponent implements OnInit {
   lineChartPlugins = [];
   lineChartType: ChartType = 'line';
 
-
   ngOnInit(): void {
     this.tb.emitTitle('Dashboard');
     this.route.params.subscribe(param => {

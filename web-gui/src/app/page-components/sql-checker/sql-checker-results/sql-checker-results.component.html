@@ -1,8 +1,160 @@
 <div class="container">
   <app-menu-bar *ngIf="role || isAuthorized()">
-    <button mat-icon-button [routerLink]="['/', 'courses', courseID, 'sql-checker']" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
-    <span class="spacer"></span>
+    <button *ngIf="showRight" mat-icon-button [routerLink]="['/', 'courses', courseID, 'sql-checker']" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+    <span class="spacer" *ngIf="showRight">SQL-Checker</span>
+    <span class="spacer" *ngIf="!showRight"><button mat-button (click)="standardEvent()" >
+      Zurück zur Übersicht</button></span>
   </app-menu-bar>
-  <label>{{this.taskID}}</label>
-
+  <div class="table-title" *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker">{{showPath}}</div>
+  <div class="solution-box" *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker">Korrektes SQL-Statement: {{solution}}</div>
+  <div class="chart-box">
+    <div class="chart-left"*ngIf="showLeft">
+      <div class="chart-title">Table Checker</div>
+      <canvas baseChart
+            [data]="pieChartDataLeft"
+            [labels]="pieChartLabelsLeft"
+            [chartType]="pieChartTypeLeft"
+            [options]="pieChartOptionsLeft"
+            [plugins]="pieChartPluginsLeft"
+            [legend]="pieChartLegendLeft"
+            [colors]="pieChartColors"
+              (chartClick)="tableCheckerWrongTables($event)">
+      </canvas>
+    </div>
+    <div class="chart-right" *ngIf="showRight">
+      <div class="chart-title">Attribut Checker</div>
+      <canvas baseChart
+              [data]="pieChartDataRight"
+              [labels]="pieChartLabelsRight"
+              [chartType]="pieChartTypeRight"
+              [options]="pieChartOptionsRight"
+              [plugins]="pieChartPluginsRight"
+              [legend]="pieChartLegendRight"
+              [colors]="pieChartColors"
+              (chartClick)="clickAttributeChart($event)">
+      </canvas>
+    </div>
+  </div>
+  <div class="chart-center" *ngIf="showCenterTableChecker">
+    <div class="chart-title">{{showPath}}</div>
+    <canvas baseChart width="40" height="10"
+            [data]="pieChartDataCenter"
+            [labels]="pieChartLabelsCenter"
+            [chartType]="pieChartTypeCenter"
+            [options]="pieChartOptionsCenter"
+            [plugins]="pieChartPluginsCenter"
+            [legend]="pieChartLegendCenter"
+            [colors]="pieChartColors"
+            (chartClick)="clickCenterChartTableChecker($event)">
+    </canvas>
+  </div>
+  <div class="chart-center" *ngIf="showCenterAttributeChecker">
+    <div class="chart-title">{{showPath}}</div>
+    <canvas baseChart width="40" height="10"
+            [data]="pieChartDataCenter"
+            [labels]="pieChartLabelsCenter"
+            [chartType]="pieChartTypeCenter"
+            [options]="pieChartOptionsCenter"
+            [plugins]="pieChartPluginsCenter"
+            [legend]="pieChartLegendCenter"
+            [colors]="pieChartColors"
+            (chartClick)="clickCenterChartAttributeChecker($event)">
+    </canvas>
+  </div>
+  <div class="result-table" *ngIf="showTableCheckerWrongTables">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let wrongTable of wrongTable">
+        <td>{{wrongTable.userID}}</td>
+        <td>{{wrongTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-table" *ngIf="showTableCheckerRightTablesRightAttribute">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let rightTable of rightTable">
+        <td>{{rightTable.userID}}</td>
+        <td>{{rightTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-table" *ngIf="showTableCheckerRightTablesWrongAttribute">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let rightTable of rightTable">
+        <td>{{rightTable.userID}}</td>
+        <td>{{rightTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-table" *ngIf="showAttributeCheckerWrongAttribute">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let rightTable of rightTable">
+        <td>{{rightTable.userID}}</td>
+        <td>{{rightTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-table" *ngIf="showAttributeCheckerRightAttributeRightTable">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let rightTable of rightTable">
+        <td>{{rightTable.userID}}</td>
+        <td>{{rightTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="result-table" *ngIf="showAttributeCheckerRightAttributeWrongTable">
+    <table>
+      <thead>
+      <tr>
+        <th>UserID</th>
+        <th>Query</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let wrongTable of wrongTable">
+        <td>{{wrongTable.userID}}</td>
+        <td>{{wrongTable.userQuery}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
