@@ -2146,7 +2146,48 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
-  "/sqlChecker/:tid/queries/sumUpCorrect":
+  "/sqlChecker/{tid}/queries/sumUpCorrect":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Add up correct in false for give conditon
+      parameters:
+        - name: tid
+          in: query
+          description: Task id
+          required: true
+          schema:
+            type: integer
+        - name: returns
+          in: query
+          description: what summs to return
+          schema:
+            type: string
+            enum: ['tables', 'attributes']
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  trueCount:
+                    type: number
+                  falseCount:
+                    type: number
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/sqlChecker/{tid}/queries/sumUpCorrectCombined":
     get:
       security:
         - JWT: [ ]
@@ -2179,59 +2220,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  sumCorrect:
+                  trueCount:
                     type: number
-                  sumFalse:
-                    type: number
-                #type: array
-                #items:
-                #  $ref: '#/components/schemas/SQLCheckerQuery'
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-  "/sqlChecker/:tid/queries/sumUpCorrectCombined":
-    get:
-      security:
-        - JWT: [ ]
-      tags:
-        - SQL Checker
-      summary: Add up correct in false for give conditon
-      parameters:
-        - name: tid
-          in: query
-          description: Task id
-          required: true
-          schema:
-            type: integer
-        - name: return
-          in: query
-          description: what summs to return
-          schema:
-            type: string
-            enum: ['tables', 'attributes']
-      responses:
-        "200":
-          description: OK
-          headers:
-            Authorization:
-              description: Bearer
-              schema:
-                type: string
-          content:
-            "application/json":
-              schema:
-                type: object
-                properties:
-                  sumCorrect:
-                    type: number
-                  sumFalseAndCorrect:
+                  falseCount:
                     type: number
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
-  "/sqlChecker/:tid/queries/listByType":
+  "/sqlChecker/{tid}/queries/listByType":
     get:
       security:
         - JWT: [ ]
@@ -2269,7 +2266,7 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
-  "/sqlChecker/:tid/queries/listByTypes":
+  "/sqlChecker/{tid}/queries/listByTypes":
     get:
       security:
         - JWT: [ ]
