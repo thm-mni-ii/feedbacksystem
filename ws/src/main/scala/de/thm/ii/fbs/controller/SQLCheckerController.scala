@@ -5,7 +5,6 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SQLCheckerQuery}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, SQLCheckerService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
-import org.json.{JSONArray, JSONObject}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}
 

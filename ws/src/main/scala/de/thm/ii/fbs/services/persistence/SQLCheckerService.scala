@@ -2,16 +2,11 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
-import de.thm.ii.fbs.model.SQLCheckerQuery
-import org.json.{JSONArray, JSONObject}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Query.query
 import org.springframework.stereotype.Component
-
-import scala.jdk.javaapi.CollectionConverters
 
 @Component
 class SQLCheckerService {
@@ -74,5 +69,4 @@ class SQLCheckerService {
     buildCoreQuery(taskID)
       .addCriteria(where("tablesRight").is(tablesRight))
       .addCriteria(where("attributesRight").is(attributesRight))
-
 }
