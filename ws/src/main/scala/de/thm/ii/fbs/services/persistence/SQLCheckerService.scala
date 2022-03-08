@@ -1,12 +1,15 @@
 package de.thm.ii.fbs.services.persistence
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
+import de.thm.ii.fbs.model.SQLCheckerQuery
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
+
+import java.util.stream.Collectors.toList
 
 @Component
 class SQLCheckerService {
@@ -44,15 +47,24 @@ class SQLCheckerService {
       case "attributes" => "attributesRight"
     }
 
-    val result = mongodbTemplate.find(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = false), classOf[ObjectNode], CollectionName)
+    val results = mongodbTemplate.find(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = false),
+      classOf[SQLCheckerQuery], CollectionName)
 
-    mapper.createArrayNode().addAll(result)
+    val result = mapper.createArrayNode()
+
+    results.forEach(res => result.add(mapper.convertValue(res, classOf[ObjectNode])))
+
+    result
   }
 
   def listByTypes(taskID: Int, tables: Boolean, attributes: Boolean): ArrayNode = {
-    val result = mongodbTemplate.find(buildSumUpCorrectCombinedQuery(taskID, tables, attributes), classOf[ObjectNode], CollectionName)
+    val results = mongodbTemplate.find(buildSumUpCorrectCombinedQuery(taskID, tables, attributes), classOf[SQLCheckerQuery], CollectionName)
 
-    mapper.createArrayNode().addAll(result)
+    val result = mapper.createArrayNode()
+
+    results.forEach(res => result.add(mapper.convertValue(res, classOf[ObjectNode])))
+
+    result
   }
 
   private def buildCoreQuery(taskID: Int) =
