@@ -71,17 +71,19 @@
       </div>
     </div>
   </div>
-  
+
+  <h3>Kommentare</h3>
   <textarea [(ngModel)]="comment"></textarea>
   <section>
     <div class="example-button-row">
-      <button mat-button color="primary" (click)="post()">Richtig</button>
+      <button mat-button color="primary" (click)="post()">hinzufügen</button>
     </div>
   </section>
 
   <div *ngFor="let comments of postComment">
-    <p>{{comments}}</p>
-  </div>
 
+  <mat-card><p>{{comments}}</p><mat-card-actions align="end"><mat-icon class="logout-icon" (click)="delete()">delete</mat-icon></mat-card-actions></mat-card>
+
+</div>
 </div>
 

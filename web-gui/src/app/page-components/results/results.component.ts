@@ -18,6 +18,7 @@ export class ResultsComponent {
   allSubmissions: Submission[];
   displayedSubmission: Submission;
   comment = "";
+  //string Comment;
   postComment = [];
 
   resultDataSource: MatTableDataSource<any>[] = [];
@@ -29,8 +30,20 @@ export class ResultsComponent {
   tableViewAsGrid = false;
 
   post(){
+
+  if (this.comment == ""){
+
+  }else{
+
   this.postComment.push(this.comment);
+
   this.comment = "";
+  }
+  }
+
+  delete(){
+
+    this.postComment.pop();
   }
 
 
