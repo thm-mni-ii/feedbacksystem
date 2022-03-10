@@ -57,10 +57,26 @@
 
     <div *ngFor="let container of containers; let i = index">
 
-      <mat-toolbar><span>Kategorie {{i + 1}}</span></mat-toolbar>
+      <mat-accordion>
+      <!--  <mat-expansion-panel hideToggle>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span>Kategorie {{i + 1}}</span>
+            </mat-panel-title>
 
-            <div *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [container]="task" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
-
+          </mat-expansion-panel-header>
+          <div *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [container]="task" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+        </mat-expansion-panel> -->
+        <mat-expansion-panel (opened)="panelOpenState = true"
+                             (closed)="panelOpenState = false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <span>Kategorie {{i + 1}}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [container]="task" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
   </div>
 

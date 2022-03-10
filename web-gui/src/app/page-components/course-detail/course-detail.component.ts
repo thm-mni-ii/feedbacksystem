@@ -38,7 +38,7 @@ import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 })
 
 export class CourseDetailComponent implements OnInit {
-
+    panelOpenState = false;
   constructor(private taskService: TaskService,
               private authService: AuthService,
               private route: ActivatedRoute,
