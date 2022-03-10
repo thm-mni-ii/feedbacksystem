@@ -183,6 +183,7 @@ export class ResultsStatisticComponent implements OnInit {
         return extractedCResult.reduce((acc, extractedCResult) => {
           if(extractedCResult)
           extractedCResult.results.forEach((t) => {
+          console.log("Danke t", t);
             if (t.passed) {
               if (!acc[t.task.id]) acc[t.task.id] = [];
               acc[t.task.id].push(t.attempts);

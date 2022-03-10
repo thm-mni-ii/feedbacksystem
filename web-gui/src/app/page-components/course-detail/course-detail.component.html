@@ -49,13 +49,19 @@
   <div class="description">{{(course | async)?.description}}</div>
 
   <div class="create-task">
-    <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon>add</mat-icon>&nbsp;Aufgabe erstellen</button>
+    <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="createTask()" matTooltip="Aufgabe erstellen"><mat-icon>add</mat-icon>Aufgabe erstellen</button>
   </div>
 
-<!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
+<!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown> -->
   <div class="task-list">
-    <div *ngFor="let container of containers">
-      <app-task-preview> </app-task-preview>
+
+    <div *ngFor="let container of containers; let i = index">
+
+      <mat-toolbar><span>Kategorie {{i + 1}}</span></mat-toolbar>
+
+            <div *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [container]="task" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+
     </div>
   </div>
+
 </div>

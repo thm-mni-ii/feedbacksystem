@@ -30,6 +30,7 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 
 
+
 @Component({
   selector: 'app-course-detail',
   templateUrl: './course-detail.component.html',
@@ -53,6 +54,7 @@ export class CourseDetailComponent implements OnInit {
               private goToService: GoToService,
 
               @Inject(DOCUMENT) document) {
+
   }
   containers: Container[];
   courseID: number;
@@ -65,14 +67,17 @@ export class CourseDetailComponent implements OnInit {
 
 
   ngOnInit() {
+
     this.route.params.subscribe(
       param => {
         this.courseID = param.id;
         this.reloadCourse();
         this.reloadTasks();
-        this.taskService.getAllContainer(this.courseID).subscribe((container) => this.containers = container);
+        this.taskService.getAllContainer(this.courseID).subscribe((Container) => this.containers = Container);
       }
     );
+
+
     this.role = this.auth.getToken().courseRoles[this.courseID];
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
       this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
