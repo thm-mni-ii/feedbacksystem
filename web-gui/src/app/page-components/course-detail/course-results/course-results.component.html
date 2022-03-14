@@ -46,7 +46,7 @@
           <div class="name-container" *ngFor="let result of evaluationUserResults | async">
             <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
             <span class="state failed" *ngIf="!result.passed"><mat-icon>cancel</mat-icon></span>
-            <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
+            <span class="username">{{result.user.surname}},{{result.user.prename}}</span>
           </div>
         </div>
         <div class="task-column">
