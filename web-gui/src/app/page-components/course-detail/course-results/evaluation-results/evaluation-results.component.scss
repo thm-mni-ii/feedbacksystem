@@ -15,6 +15,7 @@
   flex-direction: row;
 
   .name-column {
+    margin-right: 15px;
     display: block;
   }
   .title {
@@ -91,6 +92,16 @@
 }
 
 .bonus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $green;
+}
+
+.no-bonus {
+  border-radius: 20px;
+  margin-right: -15px;
+  text-align: right;
   display: flex;
   justify-content: center;
   align-items: center;
