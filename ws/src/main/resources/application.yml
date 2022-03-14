@@ -56,6 +56,13 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
     open-in-view: false
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/}
+      database: ${MONGODB_DATABASE:default}
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 url:
   expiration:
     time: 300
