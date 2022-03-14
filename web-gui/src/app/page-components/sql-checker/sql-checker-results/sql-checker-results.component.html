@@ -62,99 +62,87 @@
     </canvas>
   </div>
   <div class="result-table" *ngIf="showTableCheckerWrongTables">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let wrongTable of wrongTable">
-        <td>{{wrongTable.userID}}</td>
-        <td>{{wrongTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="wrongTable" class="mat-elevation-z8" matSort>
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
   <div class="result-table" *ngIf="showTableCheckerRightTablesRightAttribute">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let rightTable of rightTable">
-        <td>{{rightTable.userID}}</td>
-        <td>{{rightTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
   <div class="result-table" *ngIf="showTableCheckerRightTablesWrongAttribute">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let rightTable of rightTable">
-        <td>{{rightTable.userID}}</td>
-        <td>{{rightTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
   <div class="result-table" *ngIf="showAttributeCheckerWrongAttribute">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let rightTable of rightTable">
-        <td>{{rightTable.userID}}</td>
-        <td>{{rightTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
   <div class="result-table" *ngIf="showAttributeCheckerRightAttributeRightTable">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let rightTable of rightTable">
-        <td>{{rightTable.userID}}</td>
-        <td>{{rightTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
   <div class="result-table" *ngIf="showAttributeCheckerRightAttributeWrongTable">
-    <table>
-      <thead>
-      <tr>
-        <th>UserID</th>
-        <th>Query</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let wrongTable of wrongTable">
-        <td>{{wrongTable.userID}}</td>
-        <td>{{wrongTable.userQuery}}</td>
-      </tr>
-      </tbody>
+    <table mat-table [dataSource]="wrongTable" class="mat-elevation-z8">
+      <ng-container matColumnDef="userID">
+        <th mat-header-cell *matHeaderCellDef>userID</th>
+        <td mat-cell *matCellDef="let element">{{ element.userID }}</td>
+      </ng-container>
+      <ng-container matColumnDef="userQuery">
+        <th mat-header-cell *matHeaderCellDef>userQuery</th>
+        <td mat-cell *matCellDef="let element">{{ element.userQuery }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
     </table>
   </div>
 </div>

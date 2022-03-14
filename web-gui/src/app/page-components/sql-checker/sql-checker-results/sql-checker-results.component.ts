@@ -1,4 +1,4 @@
-import {Component, Inject, Input, OnInit} from '@angular/core';
+import {Component, Inject, Input, OnInit, ViewChild} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Task} from '../../../model/Task';
 import {UserTaskResult} from '../../../model/UserTaskResult';
@@ -21,6 +21,7 @@ import {ChartType, ChartOptions, ChartColor} from 'chart.js';
 import {SingleDataSet, Label, monkeyPatchChartJsLegend, monkeyPatchChartJsTooltip, Color} from 'ng2-charts';
 import {WrongTables} from '../../../model/wrongTables';
 import {RightTables} from '../../../model/rightTables';
+import {MatSort, Sort} from '@angular/material/sort';
 
 
 @Component({
@@ -28,6 +29,7 @@ import {RightTables} from '../../../model/rightTables';
   templateUrl: './sql-checker-results.component.html',
   styleUrls: ['./sql-checker-results.component.scss']
 })
+
 export class SqlCheckerResultsComponent {
   constructor(private taskService: TaskService,
               private authService: AuthService,
@@ -106,6 +108,7 @@ export class SqlCheckerResultsComponent {
   // Testdaten
   wrongTable: WrongTables[];
   rightTable: RightTables[];
+  @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
     this.standardEvent();
@@ -157,7 +160,7 @@ export class SqlCheckerResultsComponent {
       this.showTableCheckerWrongTables = true;
       this.showLeft = false;
       this.showRight = false;
-      this.displayedColumnsWrongTable = ['userID', 'query'];
+      this.displayedColumnsWrongTable = ['userID', 'userQuery'];
       this.wrongTable = [
         {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"',
            userID: 1, userQuery: 'Select Name from Mitarbeiter'},
@@ -185,7 +188,7 @@ export class SqlCheckerResultsComponent {
         this.showPath = 'Korrekte Tabellen ➔ korrekte Attribute';
         this.showTableCheckerRightTablesRightAttribute = true;
         this.showCenterTableChecker = false;
-        this.displayedColumnsWrongTable = ['userID', 'query'];
+        this.displayedColumnsWrongTable = ['userID', 'userQuery'];
         this.rightTable = [
           {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Nachname'},
           {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Creditpoints'},
@@ -196,7 +199,7 @@ export class SqlCheckerResultsComponent {
       this.showPath = 'Korrekte Tabellen ➔ falsche Attribute';
       this.showTableCheckerRightTablesWrongAttribute = true;
       this.showCenterTableChecker = false;
-      this.displayedColumnsWrongTable = ['userID', 'query'];
+      this.displayedColumnsWrongTable = ['userID', 'userQuery'];
       this.rightTable = [
         {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Geburtstag from Studierende where vorname=Sandra'},
         {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Vorname from Studierende where vorname=Sandra'},
@@ -212,7 +215,7 @@ export class SqlCheckerResultsComponent {
       this.showRight = false;
       this.showLeft = false;
       this.showAttributeCheckerWrongAttribute = true;
-      this.displayedColumnsWrongTable = ['userID', 'query'];
+      this.displayedColumnsWrongTable = ['userID', 'userQuery'];
       this.rightTable = [
         {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Geburtstag from Studierende where vorname=Sandra'},
         {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Vorname from Studierende where vorname=Sandra'},
@@ -236,11 +239,11 @@ export class SqlCheckerResultsComponent {
         this.showPath = 'Korrekte Attribute ➔ korrekte Tabellen';
         this.showAttributeCheckerRightAttributeRightTable = true;
         this.showCenterAttributeChecker  = false;
-        this.displayedColumnsWrongTable = ['userID', 'query'];
+        this.displayedColumnsWrongTable = ['userID', 'userQuery'];
         this.rightTable = [
-          {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Nachname'},
-          {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Creditpoints'},
-          {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select Name from Studierende where vorname=Sandra Order By Geburtstag'},
+          {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Name from Studierende where vorname="Sandra" Group By Nachname'},
+          {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Studierende where vorname="Sandra" Group By Creditpoints'},
+          {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select Name from Studierende where vorname="Sandra" Order By Geburtstag'},
         ];
         this.solution = this.rightTable[0].rightQuery;
       }
@@ -248,7 +251,7 @@ export class SqlCheckerResultsComponent {
        this.showPath = 'Korrekte Attribute ➔ falsche Tabellen';
       this.showAttributeCheckerRightAttributeWrongTable = true;
       this.showCenterAttributeChecker = false;
-       this.displayedColumnsWrongTable = ['userID', 'query'];
+       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
        this.wrongTable = [
          {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1,
            userQuery: 'Select Name from Mitarbeiter'},
