@@ -22,6 +22,10 @@ import {SingleDataSet, Label, monkeyPatchChartJsLegend, monkeyPatchChartJsToolti
 import {WrongTables} from '../../../model/wrongTables';
 import {RightTables} from '../../../model/rightTables';
 import {MatSort, Sort} from '@angular/material/sort';
+import {SqlCheckerService} from '../../../service/sql-checker.service';
+import {SumUp} from '../../../model/SumUp';
+import {SqlCheckerResult} from '../../../model/SqlCheckerResult';
+import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -45,6 +49,7 @@ export class SqlCheckerResultsComponent {
               private feedbackAppService: FeedbackAppService,
               private goToService: GoToService,
               private checkerService: CheckerService,
+              private sqlcheckerService: SqlCheckerService,
               @Inject(DOCUMENT) document) {
   }
   // Chart generally
@@ -56,29 +61,38 @@ export class SqlCheckerResultsComponent {
     responsive: true,
   };
   pieChartLabelsLeft: Label[] = [['Korrekte Tabellen'], ['Falsche Tabellen']];
-  pieChartDataLeft: SingleDataSet = [5, 4];
+  pieChartDataLeft: SingleDataSet = [];
   pieChartTypeLeft: ChartType = 'pie';
   pieChartLegendLeft = true;
   pieChartPluginsLeft = [];
+  leftChartSum: Observable<SumUp[]> = of();
+  leftChartCountRight: number[];
+  leftChartCountFalse: number[];
   // Right chart
   pieChartOptionsRight: ChartOptions = {
     responsive: true,
   };
   pieChartLabelsRight: Label[] = [['Korrekte Attribute'], ['Falsche Attribute']];
-  pieChartDataRight: SingleDataSet = [6, 3];
+  pieChartDataRight: SingleDataSet[];
   pieChartTypeRight: ChartType = 'pie';
   pieChartLegendRight = true;
   pieChartPluginsRight = [];
+  rightChartSum: Observable<SumUp[]> = of();
+  rightChartCountRight: number[];
+  rightChartCountFalse: number[];
   // Center chart
   pieChartOptionsCenter: ChartOptions = {
     maintainAspectRatio: true,
     responsive: true,
   };
   pieChartLabelsCenter: Label[];
-  pieChartDataCenter: SingleDataSet = [4, 6];
+  pieChartDataCenter: SingleDataSet = [];
   pieChartTypeCenter: ChartType = 'pie';
   pieChartLegendCenter = true;
   pieChartPluginsCenter = [];
+  centerChartSum: Observable<SumUp[]> = of();
+  centerChartCountRight: number[];
+  centerChartCountFalse: number[];
   // Tables
   displayedColumnsWrongTable: string[];
   dataSource: any;
@@ -105,19 +119,21 @@ export class SqlCheckerResultsComponent {
   showAttributeCheckerRightAttributeWrongTable;
   showPath;
   solution;
-  // Testdaten
-  wrongTable: WrongTables[];
-  rightTable: RightTables[];
+  //Daten
+  wrongTable: Observable<SqlCheckerResult[]> = of();
+  rightTable: Observable<SqlCheckerResult[]> = of();
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
+    this.route.params.subscribe(
+      param => {
+        this.courseID = param.id;
+        this.taskID = param.tid;
+      }
+    );
+    console.log('hi');
+    console.log(this.taskID);
     this.standardEvent();
-      this.route.params.subscribe(
-        param => {
-          this.courseID = param.id;
-          this.taskID = param.tid;
-        }
-      );
       this.taskService.getAllTasks(this.courseID).subscribe(tasks => {
         this.taskService.getTaskResults(this.courseID).subscribe(taskResults => {
           this.tasks = tasks;
@@ -152,23 +168,24 @@ export class SqlCheckerResultsComponent {
       this.showAttributeCheckerRightAttributeWrongTable = false;
       this.showBack = false;
       this.showPath = '';
+      this.leftChartSum = this.sqlcheckerService.getSumUpCorrect(this.taskID, 'tables');
+      this.rightChartSum = this.sqlcheckerService.getSumUpCorrect(this.taskID, 'attributes');
+      this.leftChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.leftChartCountRight = sum);
+      this.leftChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.leftChartCountFalse = sum);
+      this.rightChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.rightChartCountRight = sum);
+      this.rightChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.rightChartCountFalse = sum);
+      this.pieChartDataLeft = [this.leftChartCountRight, this.leftChartCountFalse];
+      this.pieChartDataRight = [this.rightChartCountRight, this.rightChartCountFalse];
     }
   private tableCheckerWrongTables(e: any) {
     e = e.active[0]._index;
     if (e === 0) {this.tableCheckerRightTables(); } else {
+      this.wrongTable = this.sqlcheckerService.getListByType(this.taskID, 'tables');
       this.showPath = 'Falsche Tabellen';
       this.showTableCheckerWrongTables = true;
       this.showLeft = false;
       this.showRight = false;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.wrongTable = [
-        {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"',
-           userID: 1, userQuery: 'Select Name from Mitarbeiter'},
-        {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select * from Mitarbeiter where vorname="Sandra"'},
-        {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select * from Mitarbeiter'},
-        {taskID: 1, rightQuery: '', userID: 4, userQuery: 'Select Vorname from Mitarbeiter where vorname="Sandra"'},
-      ];
-      this.solution = this.wrongTable[0].rightQuery;
       this.dataSource = this.wrongTable;
       }
   }
@@ -178,8 +195,11 @@ export class SqlCheckerResultsComponent {
     this.showLeft = false;
     this.showCenterTableChecker = true;
     this.showTableCheckerRightTables = true;
-    this.pieChartDataCenter = [2, 3];
     this.pieChartLabelsCenter = [['Korrekte Tabellen korrekte Attribute'], ['Korrekte Tabellen falsche Attribute']];
+    this.centerChartSum = this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'tables');
+    this.centerChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.centerChartCountRight = sum);
+    this.centerChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.centerChartCountFalse = sum);
+    this.pieChartDataCenter = [this.centerChartCountRight, this.centerChartCountFalse];
   }
   private clickCenterChartTableChecker (e: any) {
     e = e.active[0]._index;
@@ -189,23 +209,14 @@ export class SqlCheckerResultsComponent {
         this.showTableCheckerRightTablesRightAttribute = true;
         this.showCenterTableChecker = false;
         this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-        this.rightTable = [
-          {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Nachname'},
-          {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Studierende where vorname=Sandra Group By Creditpoints'},
-        ];
-        this.solution = this.rightTable[0].rightQuery;
+        this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
       }
     } if ( e === 1) {
       this.showPath = 'Korrekte Tabellen ➔ falsche Attribute';
       this.showTableCheckerRightTablesWrongAttribute = true;
       this.showCenterTableChecker = false;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.rightTable = [
-        {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Geburtstag from Studierende where vorname=Sandra'},
-        {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Vorname from Studierende where vorname=Sandra'},
-        {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select MatrikelNummer from Studierende where vorname=Sandra'},
-      ];
-      this.solution = this.rightTable[0].rightQuery;
+      this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, false);
     }
   }
   private clickAttributeChart(e: any) {
@@ -216,12 +227,7 @@ export class SqlCheckerResultsComponent {
       this.showLeft = false;
       this.showAttributeCheckerWrongAttribute = true;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.rightTable = [
-        {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Geburtstag from Studierende where vorname=Sandra'},
-        {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Vorname from Studierende where vorname=Sandra'},
-        {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select MatrikelNummer from Studierende where vorname=Sandra'},
-      ];
-      this.solution = this.rightTable[0].rightQuery;
+      this.rightTable = this.sqlcheckerService.getListByType(this.taskID, 'attributes');
     }
   }
   private attributeCheckerRightAttribute() {
@@ -230,8 +236,11 @@ export class SqlCheckerResultsComponent {
     this.showLeft = false;
     this.showCenterAttributeChecker = true;
     this.showAttributeCheckerRightAttribute = true;
-    this.pieChartDataCenter = [3, 3];
     this.pieChartLabelsCenter = [['Korrekte Attribute korrekte Tabellen'], ['Korrekte Attribute falsche Tabellen']];
+    this.centerChartSum = this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'attributes');
+    this.centerChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.centerChartCountRight = sum);
+    this.centerChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.centerChartCountFalse = sum);
+    this.pieChartDataCenter = [this.centerChartCountRight, this.centerChartCountFalse];
   }
   private clickCenterChartAttributeChecker (e: any) {
     e = e.active[0]._index;
@@ -240,25 +249,14 @@ export class SqlCheckerResultsComponent {
         this.showAttributeCheckerRightAttributeRightTable = true;
         this.showCenterAttributeChecker  = false;
         this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-        this.rightTable = [
-          {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1, userQuery: 'Select Name from Studierende where vorname="Sandra" Group By Nachname'},
-          {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Studierende where vorname="Sandra" Group By Creditpoints'},
-          {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select Name from Studierende where vorname="Sandra" Order By Geburtstag'},
-        ];
-        this.solution = this.rightTable[0].rightQuery;
+        this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
       }
      if ( e === 1) {
        this.showPath = 'Korrekte Attribute ➔ falsche Tabellen';
       this.showAttributeCheckerRightAttributeWrongTable = true;
       this.showCenterAttributeChecker = false;
        this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-       this.wrongTable = [
-         {taskID: 1, rightQuery: 'Select Name from Studierende where vorname="Sandra"', userID: 1,
-           userQuery: 'Select Name from Mitarbeiter'},
-         {taskID: 1, rightQuery: '', userID: 2, userQuery: 'Select Name from Mitarbeiter where vorname="Sandra"'},
-         {taskID: 1, rightQuery: '', userID: 3, userQuery: 'Select Name from Mitarbeiter'},
-       ];
-       this.solution = this.wrongTable[0].rightQuery;
+       this.wrongTable = this.sqlcheckerService.getListByTypes(this.taskID, false, true);
     }
   }
 }
