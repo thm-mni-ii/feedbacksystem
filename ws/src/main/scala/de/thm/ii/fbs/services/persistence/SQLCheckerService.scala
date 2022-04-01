@@ -1,17 +1,14 @@
 package de.thm.ii.fbs.services.persistence
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.model.SQLCheckerQuery
-import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
-import org.springframework.data.mongodb.core.query.{Query, Update, UpdateDefinition}
+import org.springframework.data.mongodb.core.query.{Query, Update}
 import org.springframework.stereotype.Component
-
-import java.util.stream.Collectors.toList
 
 @Component
 class SQLCheckerService {
@@ -97,10 +94,19 @@ class SQLCheckerService {
 
   private def buildSumUpCorrectQuery(taskID: Int, additionalAttributeName: String, additionalAttributeValue: Boolean) =
     buildCoreQuery(taskID)
-      .addCriteria(where(additionalAttributeName).is(additionalAttributeValue))
+      .addCriteria(additionalAttributeName match {
+        case "attributesRight" => buildAttributesRightCondition(additionalAttributeValue)
+        case _ => where(additionalAttributeName).is(additionalAttributeValue)
+      })
 
   private def buildSumUpCorrectCombinedQuery(taskID: Int, tablesRight: Boolean, attributesRight: Boolean) =
     buildCoreQuery(taskID)
       .addCriteria(where("tablesRight").is(tablesRight))
-      .addCriteria(where("attributesRight").is(attributesRight))
+      .addCriteria(buildAttributesRightCondition(attributesRight))
+
+  private def buildAttributesRightCondition(attributesRight: Boolean) = if (attributesRight) {
+    where("proAttributesRight").is(true).andOperator(where("selAttributesRight").is(true))
+  } else {
+    where("proAttributesRight").is(false).orOperator(where("selAttributesRight").is(false))
+  }
 }
