@@ -19,13 +19,10 @@ import {DOCUMENT} from '@angular/common';
 import {Roles} from '../../../model/Roles';
 import {ChartType, ChartOptions, ChartColor} from 'chart.js';
 import {SingleDataSet, Label, monkeyPatchChartJsLegend, monkeyPatchChartJsTooltip, Color} from 'ng2-charts';
-import {WrongTables} from '../../../model/wrongTables';
-import {RightTables} from '../../../model/rightTables';
 import {MatSort, Sort} from '@angular/material/sort';
 import {SqlCheckerService} from '../../../service/sql-checker.service';
 import {SumUp} from '../../../model/SumUp';
 import {SqlCheckerResult} from '../../../model/SqlCheckerResult';
-import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -65,21 +62,21 @@ export class SqlCheckerResultsComponent {
   pieChartTypeLeft: ChartType = 'pie';
   pieChartLegendLeft = true;
   pieChartPluginsLeft = [];
-  leftChartSum: Observable<SumUp[]> = of();
-  leftChartCountRight: number[];
-  leftChartCountFalse: number[];
+  leftChartSum: Observable<SumUp> = of();
+  leftChartCountRight: number;
+  leftChartCountFalse: number;
   // Right chart
   pieChartOptionsRight: ChartOptions = {
     responsive: true,
   };
   pieChartLabelsRight: Label[] = [['Korrekte Attribute'], ['Falsche Attribute']];
-  pieChartDataRight: SingleDataSet[];
+  pieChartDataRight: SingleDataSet = [];
   pieChartTypeRight: ChartType = 'pie';
   pieChartLegendRight = true;
   pieChartPluginsRight = [];
-  rightChartSum: Observable<SumUp[]> = of();
-  rightChartCountRight: number[];
-  rightChartCountFalse: number[];
+  rightChartSum: Observable<SumUp> = of();
+  rightChartCountRight: number;
+  rightChartCountFalse: number;
   // Center chart
   pieChartOptionsCenter: ChartOptions = {
     maintainAspectRatio: true,
@@ -90,9 +87,9 @@ export class SqlCheckerResultsComponent {
   pieChartTypeCenter: ChartType = 'pie';
   pieChartLegendCenter = true;
   pieChartPluginsCenter = [];
-  centerChartSum: Observable<SumUp[]> = of();
-  centerChartCountRight: number[];
-  centerChartCountFalse: number[];
+  centerChartSum: Observable<SumUp> = of();
+  centerChartCountRight: number;
+  centerChartCountFalse: number;
   // Tables
   displayedColumnsWrongTable: string[];
   dataSource: any;
@@ -131,15 +128,7 @@ export class SqlCheckerResultsComponent {
         this.taskID = param.tid;
       }
     );
-    console.log('hi');
-    console.log(this.taskID);
     this.standardEvent();
-      this.taskService.getAllTasks(this.courseID).subscribe(tasks => {
-        this.taskService.getTaskResults(this.courseID).subscribe(taskResults => {
-          this.tasks = tasks;
-          this.taskResults = taskResults.reduce((acc, res) => {acc[res.taskID] = res; return acc; }, {});
-        });
-      });
       this.role = this.auth.getToken().courseRoles[this.courseID];
       if (this.goToService.getAndClearAutoJoin() && !this.role) {
         this.courseRegistrationService.registerCourse( this.authService.getToken().id, this.courseID)
@@ -168,14 +157,22 @@ export class SqlCheckerResultsComponent {
       this.showAttributeCheckerRightAttributeWrongTable = false;
       this.showBack = false;
       this.showPath = '';
-      this.leftChartSum = this.sqlcheckerService.getSumUpCorrect(this.taskID, 'tables');
-      this.rightChartSum = this.sqlcheckerService.getSumUpCorrect(this.taskID, 'attributes');
-      this.leftChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.leftChartCountRight = sum);
-      this.leftChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.leftChartCountFalse = sum);
-      this.rightChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.rightChartCountRight = sum);
-      this.rightChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.rightChartCountFalse = sum);
-      this.pieChartDataLeft = [this.leftChartCountRight, this.leftChartCountFalse];
-      this.pieChartDataRight = [this.rightChartCountRight, this.rightChartCountFalse];
+      this.sqlcheckerService.getSumUpCorrect(this.taskID, 'tables').subscribe(
+        x => {
+          this.leftChartCountRight = x.trueCount;
+          this.leftChartCountFalse = x.falseCount;
+          this.pieChartDataLeft = [x.trueCount, 5];
+        },
+        err => {
+        }
+      );
+      this.sqlcheckerService.getSumUpCorrect(this.taskID, 'attributes').subscribe(
+        x => {
+          this.pieChartDataRight = [x.trueCount, x.falseCount];
+        },
+        err => {
+        }
+      );
     }
   private tableCheckerWrongTables(e: any) {
     e = e.active[0]._index;
@@ -196,10 +193,13 @@ export class SqlCheckerResultsComponent {
     this.showCenterTableChecker = true;
     this.showTableCheckerRightTables = true;
     this.pieChartLabelsCenter = [['Korrekte Tabellen korrekte Attribute'], ['Korrekte Tabellen falsche Attribute']];
-    this.centerChartSum = this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'tables');
-    this.centerChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.centerChartCountRight = sum);
-    this.centerChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.centerChartCountFalse = sum);
-    this.pieChartDataCenter = [this.centerChartCountRight, this.centerChartCountFalse];
+    this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'tables').subscribe(
+      x => {
+        this.pieChartDataCenter = [x.trueCount, x.falseCount];
+      },
+      err => {
+      }
+    );
   }
   private clickCenterChartTableChecker (e: any) {
     e = e.active[0]._index;
@@ -238,9 +238,13 @@ export class SqlCheckerResultsComponent {
     this.showAttributeCheckerRightAttribute = true;
     this.pieChartLabelsCenter = [['Korrekte Attribute korrekte Tabellen'], ['Korrekte Attribute falsche Tabellen']];
     this.centerChartSum = this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'attributes');
-    this.centerChartSum.pipe(map(s => s.map(u => u.trueCount))).subscribe(sum => this.centerChartCountRight = sum);
-    this.centerChartSum.pipe(map(s => s.map(u => u.falseCount))).subscribe(sum => this.centerChartCountFalse = sum);
-    this.pieChartDataCenter = [this.centerChartCountRight, this.centerChartCountFalse];
+    this.sqlcheckerService.getSumUpCorrectCombined(this.taskID, 'attributes').subscribe(
+      x => {
+        this.pieChartDataCenter = [x.trueCount, x.falseCount];
+      },
+      err => {
+      }
+    );
   }
   private clickCenterChartAttributeChecker (e: any) {
     e = e.active[0]._index;

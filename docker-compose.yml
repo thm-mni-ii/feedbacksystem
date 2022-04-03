@@ -44,7 +44,7 @@ services:
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
       - MONGODB_URI=mongodb://mongodb:27017/
-      - MONGODB_DATABASE=sql-checker
+      - MONGODB_DATABASE=default
     networks:
       classroom:
       fbs:
@@ -67,6 +67,8 @@ services:
       - ./data/mongodb:/data/db
     networks:
       fbs:
+    ports:
+      - "27017:27017"
 
   master-runner:
     build: master-runner
