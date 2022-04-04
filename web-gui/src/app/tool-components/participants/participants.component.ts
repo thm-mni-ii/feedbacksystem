@@ -9,8 +9,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {UserService} from '../../service/user.service';
 import {ActivatedRoute} from '@angular/router';
 import {Roles} from '../../model/Roles';
-import {ConfirmationDialogComponent} from "../confirmation-dialog/confirmation-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
+import {ConfirmationDialogComponent} from '../confirmation-dialog/confirmation-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-participants',
@@ -84,8 +84,7 @@ export class ParticipantsComponent implements OnInit {
   roleChange(userID: number, role: string) {
     this.registrationService.registerCourse(userID, this.courseID, role)
       .subscribe(res => {
-        // this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
-        this.openDialog('Erfolgreich!!!', 'Benutzer wurde gelöscht');
+        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
         this.refreshUserList();
       }, () => {
         this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
@@ -97,38 +96,40 @@ export class ParticipantsComponent implements OnInit {
    * @param user The user to delete
    */
   unregister(user: User) {
-    this.snackBar.open('Soll der Benutzer ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
-      .subscribe(() => {
+    this.openDialog('Title', 'Soll der Benutzer ausgetragen werden?').subscribe( result => {
+      if (result === true) {
         this.registrationService.deregisterCourse(user.id, this.courseID).subscribe(
-        () => {
-          // this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
-          this.openDialog('Erfolgreich !!!', 'Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.');
-          this.refreshUserList();
-        });
-      });
+          () => {
+            this.snackBar.open('Der Benutzer ' + user.prename + ' ' + user.surname + ' wurde ausgetragen.', 'OK', {duration: 5000});
+            this.refreshUserList();
+          });
+      }
+    });
     }
 
   unregisterStudent() {
-    this.snackBar.open('Sollen alle Studierenden ausgetragen werden?', 'Ja', {duration: 5000})
-      .onAction().subscribe( () => {
-      this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
-        .subscribe(() => {
-          this.snackBar.open('Alle Studierenden wurden entfernt', 'ok', {duration: 3000});
-          this.openDialog('Erfolgreich !!!', 'Alle Studierenden wurden entfernt');
-          this.refreshUserList();
-        });
-      });
+    this.openDialog('Title', 'Sollen alle Studierenden ausgetragen werden?').subscribe( result => {
+      if (result === true) {
+        this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
+          .subscribe(() => {
+            this.snackBar.open('Alle Studierenden wurden entfernt', 'ok', {duration: 3000});
+            this.openDialog('Erfolgreich !!!', 'Alle Studierenden wurden entfernt');
+            this.refreshUserList();
+          });
+      }
+    });
   }
 
   unregisterTutor() {
-    this.snackBar.open('Sollen alle Tutoren ausgetragen werden?', 'Ja', {duration: 5000})
-      .onAction().subscribe( () => {
-      this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
-        .subscribe(() => {
-          // this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
-          this.openDialog('Erfolgreich !!!', 'Alle Tutoren wurden entfernt');
-          this.refreshUserList();
-        });
+    this.openDialog('Title', 'Möchten Sie alle Tutoren austragen?').subscribe( result => {
+      if (result === true) {
+        this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
+          .subscribe(() => {
+            // this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
+            this.openDialog('Title', 'Alle Tutoren wurden entfernt');
+            this.refreshUserList();
+          });
+      }
     });
   }
 
@@ -147,45 +148,50 @@ export class ParticipantsComponent implements OnInit {
   }
 
   addParticipant(user: User) {
-    this.snackBar.open('Soll ' + user.prename + ' ' + user.surname + ' dem Kurs hinzugefügt werden?', 'Ja', {duration: 5000})
-      .onAction().subscribe( () => {
+    this.openDialog('Title', 'Soll ' + user.prename + ' ' + user.surname + ' dem Kurs hinzugefügt werden?').subscribe( result => {
+      if (result === true) {
         if (this.user.find(participant => participant.id === user.id)) {
           // this.snackBar.open(user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.', 'ok', {duration: 3000});
-          this.openDialog('Erfolgreich !!!', user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.');
+          this.openDialog('Title', user.prename + ' ' + user.surname + ' nimmt bereits an dem Kurs teil.');
         } else {
           this.registrationService.registerCourse(user.id, this.courseID)
             .subscribe(() => {
               // this.snackBar.open('Teilnehmer hinzugefügt.', 'ok', {duration: 3000});
-              this.openDialog('Erfolgreich !!!', 'Teilnehmer hinzugefügt.');
+              this.snackBar.open('Teilnehmende Personen wurden hinzugefügt.', 'OK', {duration: 5000});
               this.refreshUserList();
             });
         }
+      }
     });
   }
 
   unregisterAll() {
-    this.snackBar.open('Sollen alle teilnehmenden Personen ausgetragen werden?', 'Ja', {duration: 3000}).onAction()
-      .subscribe(() => {
+    this.openDialog('Title', 'Möchten Sie alle teilnehmende Personen austragen?').subscribe( result => {
+      if (result === true) {
         this.registrationService.deregisterAll(this.courseID).subscribe(
           () => {
-            // this.snackBar.open('Alle teilnehmenden Personen wurden ausgetragen.', 'OK', {duration: 5000});
-            this.openDialog('Erfolgreich !!!', 'Alle teilnehmenden Personen wurden ausgetragen.');
+            this.snackBar.open('Alle teilnehmenden Personen wurden ausgetragen.', 'OK', {duration: 5000});
             this.refreshUserList();
           });
-      });
+      }
+    });
   }
 
   displayFn(user?: User): string | undefined {
     return user ? user.surname : undefined;
   }
-
-
-  private openDialog(title: string, message: string): void {
-    this.dialog.open(ConfirmationDialogComponent, {
+  private openDialog(title: string, message: string) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: title,
         message: message,
+        buttonText: {
+          title: title,
+          ok: 'Ok',
+          cancel: 'Abbrechen'
+        }
       }
     });
+    return dialogRef.afterClosed();
   }
 }
+
