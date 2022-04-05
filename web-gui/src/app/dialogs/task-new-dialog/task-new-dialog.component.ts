@@ -12,7 +12,8 @@ import {mergeMap, map} from 'rxjs/operators';
 import {CheckerService} from '../../service/checker.service';
 import {CheckerConfig} from '../../model/CheckerConfig';
 
-let currentDateAndOneMonthLater = new Date();
+const currentDateAndOneMonthLater = new Date();
+const defaultMediaType = 'text/plain';
 currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1);
 
 /**
@@ -31,7 +32,7 @@ export class TaskNewDialogComponent implements OnInit {
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
     deadline: new FormControl(currentDateAndOneMonthLater),
-    mediaType: new FormControl(''),
+    mediaType: new FormControl(defaultMediaType),
     exelFile: new FormControl(''),
     userIDField: new FormControl(''),
     inputFields: new FormControl(''),

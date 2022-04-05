@@ -10,13 +10,14 @@ import {CheckerService} from '../../service/checker.service';
   templateUrl: './new-checker-dialog.component.html',
   styleUrls: ['./new-checker-dialog.component.scss']
 })
+
 export class NewCheckerDialogComponent implements OnInit {
 
   fileCounter = 0;
 
   checkerForm = new FormGroup({
-    checkerType: new FormControl(''),
-    ord: new FormControl(''),
+    checkerType: new FormControl('sql'),
+    ord: new FormControl('1'),
   });
 
   mainFile: File;
