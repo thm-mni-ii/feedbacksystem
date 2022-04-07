@@ -196,6 +196,7 @@ export class TaskNewDialogComponent implements OnInit {
       this.taskForm.patchValue(values);
     });
   }
+
   getDefaultDeadline() {
     const currentDateAndOneMonthLater = new Date();
     currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1);
