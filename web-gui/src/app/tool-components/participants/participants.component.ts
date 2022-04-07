@@ -113,7 +113,6 @@ export class ParticipantsComponent implements OnInit {
         this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
           .subscribe(() => {
             this.snackBar.open('Alle Studierenden wurden entfernt', 'ok', {duration: 3000});
-            this.openDialog('Erfolgreich !!!', 'Alle Studierenden wurden entfernt');
             this.refreshUserList();
           });
       }
