@@ -124,7 +124,6 @@ export class ParticipantsComponent implements OnInit {
       if (result === true) {
         this.registrationService.deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
           .subscribe(() => {
-            // this.snackBar.open('Alle Tutoren wurden entfernt', 'ok', {duration: 3000});
             this.openDialog('Title', 'Alle Tutoren wurden entfernt');
             this.refreshUserList();
           });
