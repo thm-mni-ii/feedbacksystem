@@ -25,9 +25,6 @@ currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1)
   styleUrls: ['./task-new-dialog.component.scss']
 })
 export class TaskNewDialogComponent implements OnInit {
-
-
-
   taskForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
