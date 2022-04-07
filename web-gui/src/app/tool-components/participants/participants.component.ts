@@ -156,7 +156,6 @@ export class ParticipantsComponent implements OnInit {
         } else {
           this.registrationService.registerCourse(user.id, this.courseID)
             .subscribe(() => {
-              // this.snackBar.open('Teilnehmer hinzugefügt.', 'ok', {duration: 3000});
               this.snackBar.open('Teilnehmende Personen wurden hinzugefügt.', 'OK', {duration: 5000});
               this.refreshUserList();
             });
