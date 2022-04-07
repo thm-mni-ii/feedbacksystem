@@ -61,7 +61,6 @@ export class TaskNewDialogComponent implements OnInit {
       this.task = this.data.task;
       this.setValues();
     }
-    console.log(this.getDefaultDeadline());
   }
 
   /**
