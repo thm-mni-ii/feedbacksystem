@@ -26,7 +26,7 @@ class WebConfig extends WebMvcConfigurer {
     */
   override def addCorsMappings(registry: CorsRegistry): Unit = {
     registry.addMapping("/**")
-      .allowedOrigins(ALL)
+      .allowedOriginPatterns(ALL)
       .allowedMethods(ALL)
       .allowedHeaders(ALL)
       .allowCredentials(true)
