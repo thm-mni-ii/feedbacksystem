@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "2.2.5.RELEASE"
+    id "org.springframework.boot" version "2.6.6"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.4.1"
 }
