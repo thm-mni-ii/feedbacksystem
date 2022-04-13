@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.{Query, Update}
+import org.springframework.data.mongodb.core.query.{Criteria, Query}
 import org.springframework.stereotype.Component
 
 @Component
@@ -105,8 +106,8 @@ class SQLCheckerService {
       .addCriteria(buildAttributesRightCondition(attributesRight))
 
   private def buildAttributesRightCondition(attributesRight: Boolean) = if (attributesRight) {
-    where("proAttributesRight").is(true).andOperator(where("selAttributesRight").is(true))
+    new Criteria().andOperator(where("proAttributesRight").is(true), where("selAttributesRight").is(true))
   } else {
-    where("proAttributesRight").is(false).orOperator(where("selAttributesRight").is(false))
+    new Criteria().orOperator(where("proAttributesRight").is(false), where("selAttributesRight").is(false))
   }
 }
