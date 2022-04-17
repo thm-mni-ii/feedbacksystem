@@ -161,7 +161,7 @@ export class SqlCheckerResultsComponent {
         x => {
           this.leftChartCountRight = x.trueCount;
           this.leftChartCountFalse = x.falseCount;
-          this.pieChartDataLeft = [x.trueCount, 5];
+          this.pieChartDataLeft = [x.trueCount, x.falseCount];
         },
         err => {
         }
