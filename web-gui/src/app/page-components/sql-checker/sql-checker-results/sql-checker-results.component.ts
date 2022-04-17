@@ -116,7 +116,7 @@ export class SqlCheckerResultsComponent {
   showAttributeCheckerRightAttributeWrongTable;
   showPath;
   solution;
-  //Daten
+  // Daten
   wrongTable: Observable<SqlCheckerResult[]> = of();
   rightTable: Observable<SqlCheckerResult[]> = of();
   @ViewChild(MatSort) sort: MatSort;
