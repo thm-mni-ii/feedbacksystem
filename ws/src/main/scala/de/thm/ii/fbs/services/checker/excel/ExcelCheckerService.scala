@@ -1,13 +1,17 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, User}
+import de.thm.ii.fbs.model.{CheckResult, CheckrunnerConfiguration, ExcelMediaInformation, MediaInformation, SpreadsheetMediaInformation, User}
 import de.thm.ii.fbs.services.checker.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
+import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
+import org.apache.poi.xssf.usermodel.XSSFCell
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
+import scala.collection.mutable
+import scala.io.Source
 
 @Service
 class ExcelCheckerService extends CheckerService {
@@ -16,7 +20,7 @@ class ExcelCheckerService extends CheckerService {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val spreadsheetService: SpreadsheetService = null
+  private val excelService: ExcelService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired
@@ -34,14 +38,67 @@ class ExcelCheckerService extends CheckerService {
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     val task = this.taskService.getOne(taskID).get
+    val excelMediaInformation = this.getMediaInfo(cc.id)
     val submission = this.submissionService.getOne(submissionID, fu.id).get
     val submissionFile = this.getSubmissionFile(submission.id)
+    val mainFile = this.getMainFile(cc.id)
 
-    submissionService.storeResult(submissionID, cc.id, 0, "", null)
+    try {
+      val userRes = this.excelService.getFields(submissionFile, excelMediaInformation)
+      val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation)
+
+      val res = this.compare(userRes, expectedRes)
+      val exitCode = if (res._1) {
+        0
+      } else {
+        1
+      }
+      val resultText = if (res._1) "" else f"Die Zelle/-n '${res._2.mkString(", ")}' enthalten nicht das Korrekte ergebnis"
+      // TODO save additionalInfos
+      submissionService.storeResult(submissionID, cc.id, exitCode, resultText, null)
+    } catch {
+      case e: NotImplementedFunctionException => submissionService.storeResult(submissionID, cc.id, 1, f"Invalid Function: '${e.getMessage}", null)
+      case e: NullPointerException => submissionService.storeResult(submissionID, cc.id, 1, "Cell Not Found", null)
+      case e: Throwable => submissionService.storeResult(submissionID, cc.id, 1, f"Execption: '${e.getMessage}'", null)
+    }
   }
 
   private def getSubmissionFile(submissionID: Int): File = {
     val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
     new File(submissionPath)
+  }
+
+  private def getMainFile(ccId: Int): File = {
+    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
+    new File(mainFilePath)
+  }
+
+  private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): (Boolean, List[String]) = {
+    var invalidFields = List[String]();
+
+    val res = expectedRes.zip(userRes).forall((p) => {
+      val equal = p._1._1.contentEquals(p._2._1)
+      if (!equal) {
+        invalidFields :+= (p._1._2.getReference)
+      }
+      equal
+    })
+
+    (res, invalidFields)
+  }
+
+  private def getMediaInfo(ccId: Int): ExcelMediaInformation = {
+    val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
+    val file = new File(secondaryFilePath)
+    MediaInformation.fromJSONString(fileToString(file)).asInstanceOf[ExcelMediaInformation]
+  }
+
+  private def fileToString(file: File): String = {
+    val source = scala.io.Source.fromFile(file)
+    try {
+      source.mkString
+    } finally {
+      source.close()
+    }
   }
 }
