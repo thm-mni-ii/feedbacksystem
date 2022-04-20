@@ -1,10 +1,10 @@
-package de.thm.ii.fbs.services.checker
+package de.thm.ii.fbs.services.checker.excel
 
-import java.io.{File, FileInputStream}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
 
+import java.io.{File, FileInputStream}
 import java.text.NumberFormat
 import java.util.Locale
 import scala.util.matching.Regex
