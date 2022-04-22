@@ -6,7 +6,6 @@
       Zurück zur Übersicht</button></span>
   </app-menu-bar>
   <div class="table-title" *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker">{{showPath}}</div>
-  <div class="solution-box" *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker">Korrektes SQL-Statement: {{solution}}</div>
   <div class="chart-box">
     <div class="chart-left"*ngIf="showLeft">
       <div class="chart-title">Table Checker</div>
@@ -61,81 +60,11 @@
             (chartClick)="clickCenterChartAttributeChecker($event)">
     </canvas>
   </div>
-  <div class="result-table" *ngIf="showTableCheckerWrongTables">
-    <table mat-table [dataSource]="wrongTable" class="mat-elevation-z8" matSort>
-      <ng-container matColumnDef="userID">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
-      </ng-container>
-      <ng-container matColumnDef="userQuery">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>userQuery</th>
-        <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
-    </table>
-  </div>
-  <div class="result-table" *ngIf="showTableCheckerRightTablesRightAttribute">
-    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
+  <div class="result-table" *ngIf="showResult" >
+    <table mat-table [dataSource]="resultTable" class="mat-elevation-z8">
       <ng-container matColumnDef="userID">
         <th mat-header-cell *matHeaderCellDef>userID</th>
         <td mat-cell *matCellDef="let element">{{ element.userId}}</td>
-      </ng-container>
-      <ng-container matColumnDef="userQuery">
-        <th mat-header-cell *matHeaderCellDef>userQuery</th>
-        <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
-    </table>
-  </div>
-  <div class="result-table" *ngIf="showTableCheckerRightTablesWrongAttribute">
-    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
-      <ng-container matColumnDef="userID">
-        <th mat-header-cell *matHeaderCellDef>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
-      </ng-container>
-      <ng-container matColumnDef="userQuery">
-        <th mat-header-cell *matHeaderCellDef>userQuery</th>
-        <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
-    </table>
-  </div>
-  <div class="result-table" *ngIf="showAttributeCheckerWrongAttribute">
-    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
-      <ng-container matColumnDef="userID">
-        <th mat-header-cell *matHeaderCellDef>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
-      </ng-container>
-      <ng-container matColumnDef="userQuery">
-        <th mat-header-cell *matHeaderCellDef>userQuery</th>
-        <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
-    </table>
-  </div>
-  <div class="result-table" *ngIf="showAttributeCheckerRightAttributeRightTable">
-    <table mat-table [dataSource]="rightTable" class="mat-elevation-z8">
-      <ng-container matColumnDef="userID">
-        <th mat-header-cell *matHeaderCellDef>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
-      </ng-container>
-      <ng-container matColumnDef="userQuery">
-        <th mat-header-cell *matHeaderCellDef>userQuery</th>
-        <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
-    </table>
-  </div>
-  <div class="result-table" *ngIf="showAttributeCheckerRightAttributeWrongTable">
-    <table mat-table [dataSource]="wrongTable" class="mat-elevation-z8">
-      <ng-container matColumnDef="userID">
-        <th mat-header-cell *matHeaderCellDef>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
       </ng-container>
       <ng-container matColumnDef="userQuery">
         <th mat-header-cell *matHeaderCellDef>userQuery</th>

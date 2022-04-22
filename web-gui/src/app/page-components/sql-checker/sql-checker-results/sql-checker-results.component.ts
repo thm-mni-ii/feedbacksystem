@@ -24,7 +24,6 @@ import {SqlCheckerService} from '../../../service/sql-checker.service';
 import {SumUp} from '../../../model/SumUp';
 import {SqlCheckerResult} from '../../../model/SqlCheckerResult';
 
-
 @Component({
   selector: 'app-sql-checker-results',
   templateUrl: './sql-checker-results.component.html',
@@ -62,7 +61,6 @@ export class SqlCheckerResultsComponent {
   pieChartTypeLeft: ChartType = 'pie';
   pieChartLegendLeft = true;
   pieChartPluginsLeft = [];
-  leftChartSum: Observable<SumUp> = of();
   leftChartCountRight: number;
   leftChartCountFalse: number;
   // Right chart
@@ -74,9 +72,6 @@ export class SqlCheckerResultsComponent {
   pieChartTypeRight: ChartType = 'pie';
   pieChartLegendRight = true;
   pieChartPluginsRight = [];
-  rightChartSum: Observable<SumUp> = of();
-  rightChartCountRight: number;
-  rightChartCountFalse: number;
   // Center chart
   pieChartOptionsCenter: ChartOptions = {
     maintainAspectRatio: true,
@@ -88,11 +83,8 @@ export class SqlCheckerResultsComponent {
   pieChartLegendCenter = true;
   pieChartPluginsCenter = [];
   centerChartSum: Observable<SumUp> = of();
-  centerChartCountRight: number;
-  centerChartCountFalse: number;
   // Tables
   displayedColumnsWrongTable: string[];
-  dataSource: any;
   // End of Tables
   courseID: number;
   tasks: Task[];
@@ -116,11 +108,11 @@ export class SqlCheckerResultsComponent {
   showAttributeCheckerRightAttributeWrongTable;
   showPath;
   solution;
+  showResult = false;
+  resultTable;
+  tableColumns;
   // Daten
-  wrongTable: Observable<SqlCheckerResult[]> = of();
-  rightTable: Observable<SqlCheckerResult[]> = of();
-  @ViewChild(MatSort) sort: MatSort;
-
+  resultTableObs: Observable<SqlCheckerResult[]> = of();
   ngOnInit() {
     this.route.params.subscribe(
       param => {
@@ -136,7 +128,6 @@ export class SqlCheckerResultsComponent {
             , error => console.error(error));
       }
     }
-
   public isAuthorized(ignoreTutor: boolean = false) {
       const token = this.auth.getToken();
       const courseRole = token.courseRoles[this.courseID];
@@ -145,6 +136,8 @@ export class SqlCheckerResultsComponent {
         || Roles.CourseRole.isDocent(courseRole) || (Roles.CourseRole.isTutor(courseRole) && !ignoreTutor);
     }
     private standardEvent() {
+      this.tableColumns = ['userId', 'statement'];
+      this.showResult = false;
       this.showTableCheckerRightTablesRightAttribute = false;
       this.showCenterTableChecker = false;
       this.showCenterAttributeChecker = false;
@@ -177,13 +170,13 @@ export class SqlCheckerResultsComponent {
   private tableCheckerWrongTables(e: any) {
     e = e.active[0]._index;
     if (e === 0) {this.tableCheckerRightTables(); } else {
-      this.wrongTable = this.sqlcheckerService.getListByType(this.taskID, 'tables');
+      this.resultTableObs = this.sqlcheckerService.getListByType(this.taskID, 'tables');
+      this.resultTable = this.resultTableObs;
       this.showPath = 'Falsche Tabellen';
-      this.showTableCheckerWrongTables = true;
+      this.showResult = true;
       this.showLeft = false;
       this.showRight = false;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.dataSource = this.wrongTable;
       }
   }
   private tableCheckerRightTables() {
@@ -206,17 +199,19 @@ export class SqlCheckerResultsComponent {
     if (this.showTableCheckerRightTables) {
       if ( e === 0) {
         this.showPath = 'Korrekte Tabellen ➔ korrekte Attribute';
-        this.showTableCheckerRightTablesRightAttribute = true;
+        this.showResult = true;
         this.showCenterTableChecker = false;
         this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-        this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
+        this.resultTableObs = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
+        this.resultTable = this.resultTableObs;
       }
     } if ( e === 1) {
       this.showPath = 'Korrekte Tabellen ➔ falsche Attribute';
-      this.showTableCheckerRightTablesWrongAttribute = true;
+      this.showResult = true;
       this.showCenterTableChecker = false;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, false);
+      this.resultTableObs = this.sqlcheckerService.getListByTypes(this.taskID, true, false);
+      this.resultTable = this.resultTableObs;
     }
   }
   private clickAttributeChart(e: any) {
@@ -225,9 +220,10 @@ export class SqlCheckerResultsComponent {
       this.showPath = 'Falsche Attribute';
       this.showRight = false;
       this.showLeft = false;
-      this.showAttributeCheckerWrongAttribute = true;
+      this.showResult = true;
       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-      this.rightTable = this.sqlcheckerService.getListByType(this.taskID, 'attributes');
+      this.resultTableObs = this.sqlcheckerService.getListByType(this.taskID, 'attributes');
+      this.resultTable = this.resultTableObs;
     }
   }
   private attributeCheckerRightAttribute() {
@@ -250,19 +246,18 @@ export class SqlCheckerResultsComponent {
     e = e.active[0]._index;
       if ( e === 0) {
         this.showPath = 'Korrekte Attribute ➔ korrekte Tabellen';
-        this.showAttributeCheckerRightAttributeRightTable = true;
+        this.showResult = true;
         this.showCenterAttributeChecker  = false;
         this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-        this.rightTable = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
+        this.resultTableObs = this.sqlcheckerService.getListByTypes(this.taskID, true, true);
+        this.resultTable = this.resultTableObs;
       }
      if ( e === 1) {
        this.showPath = 'Korrekte Attribute ➔ falsche Tabellen';
-      this.showAttributeCheckerRightAttributeWrongTable = true;
+      this.showResult = true;
       this.showCenterAttributeChecker = false;
-       this.displayedColumnsWrongTable = ['userID', 'userQuery'];
-       this.wrongTable = this.sqlcheckerService.getListByTypes(this.taskID, false, true);
+      this.resultTableObs = this.sqlcheckerService.getListByTypes(this.taskID, false, true);
+      this.resultTable = this.resultTableObs;
     }
   }
 }
-
-
