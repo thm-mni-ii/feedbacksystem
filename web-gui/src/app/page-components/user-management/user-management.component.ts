@@ -11,7 +11,7 @@ import {
 } from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {Roles} from '../../model/Roles';
-import {MatDialog} from "@angular/material/dialog";
+import {MatDialog} from '@angular/material/dialog';
 
 
 
