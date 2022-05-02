@@ -20,12 +20,14 @@
   .title {
     width: 100%;
     text-align: left;
+
   }
+
   .task-column {
     margin-left: 8px;
   }
   .bonus-column {
-    margin-right: -20px;
+    margin-right: -25px;
   }
   .task-container {
     display: flex;
@@ -96,7 +98,15 @@
   align-items: center;
   color: $green;
 }
-
+.no-bonus {
+  border-radius: 20px;
+  margin-right: -5px;
+  text-align: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $black;
+}
 .passed {
   color: $green;
 }
