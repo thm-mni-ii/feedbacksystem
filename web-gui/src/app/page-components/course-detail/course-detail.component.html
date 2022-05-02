@@ -72,10 +72,14 @@
           <mat-expansion-panel-header>
             <mat-panel-title>
               <span>Kategorie {{i + 1}}</span>
+
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <div *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [container]="task" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+          <!-- [taskResult]="taskResults[task.id] -->
+          <div class=task-list-plus *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+
         </mat-expansion-panel>
+        <br>
       </mat-accordion>
     </div>
   </div>

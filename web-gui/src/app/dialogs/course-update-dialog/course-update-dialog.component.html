@@ -13,8 +13,11 @@
         <input [formControl]="description" name="newCourseDescription" type="text" matInput>
       </mat-form-field>
       <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="isVisible">Kurs anzeigen</p><p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle>
+
     </mat-card-content>
   </mat-dialog-content>
+
+  <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="!isVisible">Kategorie anzeigen</p><p *ngIf="isVisible">Kategorie verbergen</p></mat-slide-toggle>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
     <button mat-flat-button color="accent" (click)="saveCourse()" [disabled]="!isInputValid()">Speichern</button>
