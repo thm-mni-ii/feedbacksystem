@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import de.thm.ii.fbs.model.ExcelMediaInformation
+import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -20,9 +20,7 @@ class ExcelService {
   /**
     * Gets the values in the selected field range
     * @param spreadsheet the spreadsheet field
-    * @param userIDField the field id of the field in which the userID should be inserted
-    * @param userID      the userID to insert
-    * @param fields      the field for which to get the values
+    * @param excelMediaInformation the spreadsheet Configurations
     * @return the values
     */
   def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): Seq[(String, XSSFCell)] = {
@@ -36,13 +34,18 @@ class ExcelService {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
     val sheet = workbook.getSheetAt(excelMediaInformation.sheetIdx)
+    this.setCells(workbook, excelMediaInformation.changeFields)
     XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
     sheet
   }
 
   private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[(String, XSSFCell)] =
     (start to end).map(i => {
-      val cell = sheet.getRow(i).getCell(col)
+      val row = sheet.getRow(i)
+      val cell = if (row != null) {
+        row.getCell(col)
+      } else { null }
+
       val res = if (cell == null) {
         ""
       } else {
@@ -50,10 +53,10 @@ class ExcelService {
           case CellType.FORMULA => try {
             germanFormat.format(cell.getNumericCellValue)
           } catch {
-            case e: IllegalStateException => try {
+            case _: IllegalStateException => try {
               cell.getStringCellValue
             } catch {
-              case e: IllegalStateException =>
+              case _: IllegalStateException =>
                 throw new Exception(i, col, cell.getErrorCellString)
             }
           }
@@ -65,8 +68,11 @@ class ExcelService {
       (res, cell)
     })
 
-  private def setCell(sheet: XSSFSheet, cords: Cords, value: String): Unit = {
-    sheet.getRow(cords.row).getCell(cords.col).setCellValue(value)
+  private def setCells(workbook: XSSFWorkbook, changeFields: List[ExcelMediaInformationChange]): Unit = {
+    changeFields.foreach(f => {
+      val sheet = workbook.getSheetAt(f.sheetIdx)
+      this.getCell(sheet, f.cell).setCellValue(f.newValue)
+    })
   }
 
   private def parseCellRange(range: String): (Cords, Cords) = {
@@ -89,6 +95,14 @@ class ExcelService {
 
   private def colToInt(col: Char): Int =
     col.toInt - 64
+
+  private def getCell(sheet: XSSFSheet, cell: String) = {
+    val cords = this.parseCellAddress(cell)
+    val col = sheet.getRow(cords.row).getCell(cords.col)
+    if (col == null) throw new Exception(cords.row, cords.col, s"Cell '$cell' Not Found")
+
+    col
+  }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 

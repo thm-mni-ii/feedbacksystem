@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, ExtendedInfoExcel, MediaInformation, User}
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, ExtendedInfoExcel, User}
 import de.thm.ii.fbs.services.checker.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
@@ -24,7 +24,7 @@ class ExcelCheckerService extends CheckerService {
   private val storageService: StorageService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
-  private val objectMapper: ObjectMapper = new ScalaObjectMapper()
+  private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 
   /**
@@ -55,7 +55,6 @@ class ExcelCheckerService extends CheckerService {
       submissionService.storeResult(submissionID, cc.id, exitCode, resultText, objectMapper.writeValueAsString(res._3))
     } catch {
       case e: NotImplementedFunctionException => submissionService.storeResult(submissionID, cc.id, 1, f"Invalid Function: '${e.getMessage}", null)
-      case _: NullPointerException => submissionService.storeResult(submissionID, cc.id, 1, "Cell Not Found", null)
       case e: Throwable => submissionService.storeResult(submissionID, cc.id, 1, f"Fehler: '${e.getMessage}'", null)
     }
   }
@@ -79,7 +78,7 @@ class ExcelCheckerService extends CheckerService {
       if (!equal) {
         invalidFields :+= p._1._2.getReference
         extInfo.expected.rows.append(List(p._1._2.getReference, p._1._1))
-        extInfo.result.rows.append(List(p._2._2.getReference, p._2._1))
+        extInfo.result.rows.append(List(p._1._2.getReference, p._2._1))
       }
       equal
       // forall cannot be used directly, otherwise it will be aborted at the first wrong entry.
@@ -91,15 +90,6 @@ class ExcelCheckerService extends CheckerService {
   private def getMediaInfo(ccId: Int): ExcelMediaInformation = {
     val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
     val file = new File(secondaryFilePath)
-    MediaInformation.fromJSONString(fileToString(file)).asInstanceOf[ExcelMediaInformation]
-  }
-
-  private def fileToString(file: File): String = {
-    val source = scala.io.Source.fromFile(file)
-    try {
-      source.mkString
-    } finally {
-      source.close()
-    }
+    objectMapper.readValue(file, classOf[ExcelMediaInformation])
   }
 }

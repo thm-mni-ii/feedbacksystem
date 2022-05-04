@@ -23,9 +23,6 @@ object MediaInformation {
         obj.getString("outputFields"), try Some(obj.getString("pointFields")) catch {
           case _: JSONException => None
         }, obj.getInt("decimals"))
-    } else if (obj.getString("type") == "excelMediaInformation") {
-      ExcelMediaInformation(obj.getInt("sheetIdx"), obj.getString("inputFields"),
-        obj.getString("outputFields"))
     } else {
       throw new IllegalArgumentException()
     }
@@ -59,18 +56,10 @@ object MediaInformation {
     }
 }
 
-/**
-  * The Spreadsheet Media Information
-  *
-  * @param idField the idField
-  * @param inputFields the inputFields
-  * @param outputFields the outputFields
-  * @param pointFields the pointFields
-  * @param decimals the amount of decimals to round to
-  */
-case class ExcelMediaInformation(sheetIdx: Int, inputFields: String,
+case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
                                        outputFields: String) extends MediaInformation
 
+case class  ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
 
 /**
   * The Spreadsheet Media Information
