@@ -1,8 +1,10 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, MediaInformation, User}
+import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, ExtendedInfoExcel, MediaInformation, User}
 import de.thm.ii.fbs.services.checker.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +24,7 @@ class ExcelCheckerService extends CheckerService {
   private val storageService: StorageService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
+  private val objectMapper: ObjectMapper = new ScalaObjectMapper()
 
 
   /**
@@ -49,8 +52,7 @@ class ExcelCheckerService extends CheckerService {
         1
       }
       val resultText = if (res._1) "OK" else f"Die Zelle/-n '${res._2.mkString(", ")}' enthalten nicht das Korrekte ergebnis"
-      // TODO save additionalInfos
-      submissionService.storeResult(submissionID, cc.id, exitCode, resultText, null)
+      submissionService.storeResult(submissionID, cc.id, exitCode, resultText, objectMapper.writeValueAsString(res._3))
     } catch {
       case e: NotImplementedFunctionException => submissionService.storeResult(submissionID, cc.id, 1, f"Invalid Function: '${e.getMessage}", null)
       case _: NullPointerException => submissionService.storeResult(submissionID, cc.id, 1, "Cell Not Found", null)
@@ -68,19 +70,22 @@ class ExcelCheckerService extends CheckerService {
     new File(mainFilePath)
   }
 
-  private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): (Boolean, List[String]) = {
+  private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): (Boolean, List[String], ExtendedInfoExcel) = {
     var invalidFields = List[String]()
+    val extInfo = ExtendedInfoExcel()
 
     val res = expectedRes.zip(userRes).map(p => {
       val equal = p._1._1.contentEquals(p._2._1)
       if (!equal) {
         invalidFields :+= p._1._2.getReference
+        extInfo.expected.rows.append(List(p._1._2.getReference, p._1._1))
+        extInfo.result.rows.append(List(p._2._2.getReference, p._2._1))
       }
       equal
       // forall cannot be used directly, otherwise it will be aborted at the first wrong entry.
     }).forall(p => p)
 
-    (res, invalidFields)
+    (res, invalidFields, extInfo)
   }
 
   private def getMediaInfo(ccId: Int): ExcelMediaInformation = {
