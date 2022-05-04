@@ -1,17 +1,14 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import de.thm.ii.fbs.model.{CheckResult, CheckrunnerConfiguration, ExcelMediaInformation, MediaInformation, SpreadsheetMediaInformation, User}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, MediaInformation, User}
 import de.thm.ii.fbs.services.checker.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.apache.poi.xssf.usermodel.XSSFCell
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
-import scala.collection.mutable
-import scala.io.Source
 
 @Service
 class ExcelCheckerService extends CheckerService {
@@ -25,19 +22,17 @@ class ExcelCheckerService extends CheckerService {
   private val storageService: StorageService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
 
   /**
     * Notify about the new submission
     *
     * @param taskID       the taskID for the submission
-    * @param submissionID the id of the sumission
-    * @param cc           the check runner of the sumission
-    * @param fu           the user which triggered the sumission
+    * @param submissionID the id of the submission
+    * @param cc           the check runner of the submission
+    * @param fu           the user which triggered the submission
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
-    val task = this.taskService.getOne(taskID).get
     val excelMediaInformation = this.getMediaInfo(cc.id)
     val submission = this.submissionService.getOne(submissionID, fu.id).get
     val submissionFile = this.getSubmissionFile(submission.id)
@@ -53,13 +48,13 @@ class ExcelCheckerService extends CheckerService {
       } else {
         1
       }
-      val resultText = if (res._1) "" else f"Die Zelle/-n '${res._2.mkString(", ")}' enthalten nicht das Korrekte ergebnis"
+      val resultText = if (res._1) "OK" else f"Die Zelle/-n '${res._2.mkString(", ")}' enthalten nicht das Korrekte ergebnis"
       // TODO save additionalInfos
       submissionService.storeResult(submissionID, cc.id, exitCode, resultText, null)
     } catch {
       case e: NotImplementedFunctionException => submissionService.storeResult(submissionID, cc.id, 1, f"Invalid Function: '${e.getMessage}", null)
-      case e: NullPointerException => submissionService.storeResult(submissionID, cc.id, 1, "Cell Not Found", null)
-      case e: Throwable => submissionService.storeResult(submissionID, cc.id, 1, f"Execption: '${e.getMessage}'", null)
+      case _: NullPointerException => submissionService.storeResult(submissionID, cc.id, 1, "Cell Not Found", null)
+      case e: Throwable => submissionService.storeResult(submissionID, cc.id, 1, f"Fehler: '${e.getMessage}'", null)
     }
   }
 
@@ -74,15 +69,16 @@ class ExcelCheckerService extends CheckerService {
   }
 
   private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): (Boolean, List[String]) = {
-    var invalidFields = List[String]();
+    var invalidFields = List[String]()
 
-    val res = expectedRes.zip(userRes).forall((p) => {
+    val res = expectedRes.zip(userRes).map(p => {
       val equal = p._1._1.contentEquals(p._2._1)
       if (!equal) {
-        invalidFields :+= (p._1._2.getReference)
+        invalidFields :+= p._1._2.getReference
       }
       equal
-    })
+      // forall cannot be used directly, otherwise it will be aborted at the first wrong entry.
+    }).forall(p => p)
 
     (res, invalidFields)
   }
