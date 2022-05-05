@@ -26,7 +26,6 @@ class ExcelCheckerService extends CheckerService {
   private val subTaskService: CheckrunnerSubTaskService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-
   /**
     * Notify about the new submission
     *
