@@ -12,6 +12,7 @@ import {CheckerService} from '../../service/checker.service';
 })
 export class NewCheckerDialogComponent implements OnInit {
 
+  selected: string;
   checkerForm = new FormGroup({
     checkerType: new FormControl(''),
     ord: new FormControl(''),
@@ -30,6 +31,7 @@ export class NewCheckerDialogComponent implements OnInit {
   constructor(public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
               private checkerService: CheckerService,
               @Inject(MAT_DIALOG_DATA) public data: any, private snackBar: MatSnackBar) {
+              this.selected = 'bash';
   }
 
   ngOnInit() {
