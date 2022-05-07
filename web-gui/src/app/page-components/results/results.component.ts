@@ -8,7 +8,7 @@ import {CheckResult} from '../../model/CheckResult';
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.scss']
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ['checkerType', 'resultText', 'exitCode'];
 
@@ -23,6 +23,8 @@ export class ResultsComponent {
 
   tableViewAsGrid = false;
 
+  initialIndex;
+
   @Input() set submissions(subs: Submission[]) {
     this.allSubmissions = subs;
     this.display(subs[subs.length - 1]);
@@ -31,6 +33,10 @@ export class ResultsComponent {
   @Input() displayTables: boolean;
 
   @Input() context: {uid: number, cid: number, tid: number};
+
+  ngOnInit(): void {
+      this.initialIndex = this.allSubmissions.length;
+  }
 
   handleSubmission(event): void {
     const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
