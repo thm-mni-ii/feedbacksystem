@@ -22,6 +22,12 @@
   }
 }
 
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
 .mat-table {
   width: 100%;
 }
