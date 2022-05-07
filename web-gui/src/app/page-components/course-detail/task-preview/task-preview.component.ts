@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {AuthService} from '../../../service/auth.service';
 import {Task} from '../../../model/Task';
 import {UserTaskResult} from '../../../model/UserTaskResult';
-import {TaskService} from "../../../service/task.service";
+import {TaskService} from '../../../service/task.service';
 
 @Component({
   selector: 'app-task-preview',
@@ -30,8 +30,12 @@ export class TaskPreviewComponent implements OnInit {
 
 
   downloadTask(event) {
-    if(event.preventDefault) event.preventDefault();
-    if(event.stopPropagation) event.stopPropagation();
+    if (event.preventDefault) {
+      event.preventDefault();
+    }
+    if (event.stopPropagation) {
+      event.stopPropagation();
+    }
     this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
   }
 }

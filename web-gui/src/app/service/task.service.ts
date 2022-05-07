@@ -3,8 +3,8 @@ import {Observable, of} from 'rxjs';
 import {Task} from '../model/Task';
 import {HttpClient} from '@angular/common/http';
 import {UserTaskResult} from '../model/UserTaskResult';
-import {map} from "rxjs/operators";
-import {saveAs as importedSaveAs} from "file-saver";
+import {map} from 'rxjs/operators';
+import {saveAs as importedSaveAs} from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
