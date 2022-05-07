@@ -9,6 +9,6 @@
       <span class="state failed" *ngIf="!taskResult.passed && taskResult.submission"><mat-icon>not_interested</mat-icon></span>
       <span class="state not-done" *ngIf="!taskResult.passed && !taskResult.submission"><mat-icon>error_outline</mat-icon></span>
     </span>
-    <button mat-icon-button color="primary" (click)="downloadTask($event)" matTooltip="Aufgabe herunterladen"><mat-icon>save_alt</mat-icon></button>
+    <button *ngIf="role == 'DOCENT'" mat-icon-button color="primary" (click)="downloadTask($event)" matTooltip="Aufgabe herunterladen"><mat-icon>save_alt</mat-icon></button>
   </span>
 </mat-card>

@@ -14,18 +14,24 @@ export class TaskPreviewComponent implements OnInit {
   @Input() task: Task;
   @Input() taskResult: UserTaskResult = null;
 
+
+   role: string = null;
+
   constructor(private authService: AuthService,
+              private auth: AuthService,
               private taskService: TaskService) {
   }
 
   ngOnInit(): void {
     const uid = this.authService.getToken().id;
+
+     this.role = this.auth.getToken().courseRoles[this.courseId];
   }
 
 
   downloadTask(event) {
     if(event.preventDefault) event.preventDefault();
     if(event.stopPropagation) event.stopPropagation();
-    this.taskService.downloadTask(this.courseId, this.task.id);
+    this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
   }
 }
