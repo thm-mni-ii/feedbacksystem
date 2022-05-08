@@ -1,14 +1,15 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
+import {SubmissionService} from "../../service/submission.service";
 
 @Component({
   selector: 'app-results',
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.scss']
 })
-export class ResultsComponent implements OnInit {
+export class ResultsComponent implements OnInit, OnDestroy {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ['checkerType', 'resultText', 'exitCode'];
 
@@ -27,6 +28,7 @@ export class ResultsComponent implements OnInit {
 
   @Input() set submissions(subs: Submission[]) {
     this.allSubmissions = subs;
+    this.initialIndex = this.allSubmissions.length;
     this.display(subs[subs.length - 1]);
   }
 
@@ -34,8 +36,24 @@ export class ResultsComponent implements OnInit {
 
   @Input() context: {uid: number, cid: number, tid: number};
 
+  subscription: any;
+
+  constructor(private submissionService: SubmissionService) {
+    this.subscription = this.submissionService.getFileSubmissionEmitter()
+      .subscribe(isSFileSubmitted => {
+        if(isSFileSubmitted)
+          this.initialIndex = this.allSubmissions.length;
+      });
+  }
+
   ngOnInit(): void {
       this.initialIndex = this.allSubmissions.length;
+  }
+
+
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   handleSubmission(event): void {
