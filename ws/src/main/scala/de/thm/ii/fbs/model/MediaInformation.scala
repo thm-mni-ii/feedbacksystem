@@ -56,8 +56,9 @@ object MediaInformation {
     }
 }
 
+case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation])
 case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
-                                       outputFields: String) extends MediaInformation
+                                       outputFields: String, name: String, hideInvalidFields: Boolean = false) extends MediaInformation
 
 case class  ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
 
