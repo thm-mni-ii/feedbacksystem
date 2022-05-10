@@ -83,14 +83,14 @@ class ExcelService {
     (this.parseCellAddress(split(0)), this.parseCellAddress(split(1)))
   }
 
-  private val regexp = new Regex("(\\d+)([A-Z]+)")
+  private val regexp = new Regex("([A-Z]+)(\\d+)")
 
   private def parseCellAddress(address: String): Cords = {
     val m = regexp.findFirstMatchIn(address) match {
       case Some(m) => m
       case _ => throw new IllegalArgumentException(address + " is not a valid cell address")
     }
-    Cords(Integer.parseInt(m.group(1))-1, this.colToInt(m.group(2).charAt(0))-1)
+    Cords(Integer.parseInt(m.group(2))-1, this.colToInt(m.group(1).charAt(0))-1)
   }
 
   private def colToInt(col: Char): Int =
