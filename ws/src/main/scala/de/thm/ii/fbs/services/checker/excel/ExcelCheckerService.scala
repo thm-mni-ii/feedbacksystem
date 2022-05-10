@@ -65,7 +65,7 @@ class ExcelCheckerService extends CheckerService {
 
       this.compare(userRes, expectedRes)
     } catch {
-      case e: NotImplementedFunctionException => CheckResult(errorMsg = f"Ungültige Function: '${e.getMessage}'")
+      case e: NotImplementedFunctionException => CheckResult(errorMsg = f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
       case _: NullPointerException => CheckResult(errorMsg = "Ungültige Konfiguration")
       case e: Throwable => CheckResult(errorMsg = f"Bei der Überprüfung ist ein Fehler aufgetretten: '${e.getMessage}'")
     }
