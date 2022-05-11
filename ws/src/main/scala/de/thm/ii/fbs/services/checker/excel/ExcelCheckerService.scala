@@ -86,11 +86,11 @@ class ExcelCheckerService extends CheckerService {
     val extInfo = ExtendedInfoExcel()
 
     val res = expectedRes.zip(userRes).map(p => {
-      val equal = p._1._1.contentEquals(p._2._1)
+      val equal = p._2._1.contentEquals(p._1._1)
       if (!equal) {
-        invalidFields :+= p._1._2.getReference
-        extInfo.expected.rows.append(List(p._1._2.getReference, p._1._1))
-        extInfo.result.rows.append(List(p._1._2.getReference, p._2._1))
+        invalidFields :+= p._2._2.getReference
+        extInfo.result.rows.append(List(p._2._2.getReference, p._1._1))
+        extInfo.expected.rows.append(List(p._2._2.getReference, p._2._1))
       }
       equal
       // forall cannot be used directly, otherwise it will be aborted at the first wrong entry.
