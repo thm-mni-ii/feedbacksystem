@@ -109,7 +109,7 @@ class ExcelCheckerService extends CheckerService {
       val hints = results.zip(excelMediaInformation.tasks).map(t => {
         if (t._1.success) correct += 1
         t
-      }).filter(t => !t._2.hideInvalidFields).map(t => {
+      }).filter(t => !t._2.hideInvalidFields && !t._1.success).map(t => {
         if (t._1.errorMsg.nonEmpty) {
           f"${t._2.name}: ${t._1.errorMsg}"
         } else {
