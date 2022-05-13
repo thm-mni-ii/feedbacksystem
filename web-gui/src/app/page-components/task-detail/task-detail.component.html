@@ -50,11 +50,22 @@
 
       <app-results *ngIf="submissions" [submissions]="submissions" [context]="{uid: uid, cid: courseId, tid: task.id}"></app-results>
 <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
+      <mat-card-actions>
+        <button mat-button (click)="showSample()">Korrekte Werte anzeigen</button>
+      </mat-card-actions>
 
+      <mat-card-actions *ngIf="showResultTable">
+        <div>Korrekte Tabellen:</div>
+        <div *ngFor="let item of sampleTable">{{item}}</div>
+      </mat-card-actions>
+
+      <mat-card-actions *ngIf="showResultAttribute">
+        <div>Korrekte Attribute:</div>
+        <div *ngFor="let item of sampleAttribute">{{item}}</div>
+      </mat-card-actions>
 
     </mat-card-content>
   </mat-card>
-
 <!--  <div *ngFor="let submission of submissions | reverse">-->
 <!--    {{submission.id}}-->
 <!--    <mat-card *ngFor="let result of submission.results">-->

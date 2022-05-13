@@ -15,17 +15,29 @@ export class NewCheckerDialogComponent implements OnInit {
   checkerForm = new FormGroup({
     checkerType: new FormControl(''),
     ord: new FormControl(''),
+    solution: new FormControl(''),
+    showHints: new FormControl('false'),
+    showHintsAt: new FormControl(0),
+    showExtendedHints: new FormControl(false),
+    showExtendedHintsAt: new FormControl(0),
   });
-
+  choosedSQLChecker;
   mainFile: File;
   secondaryFile: File;
   isUpdate: boolean;
   courseId: number;
   taskId: number;
   checker: CheckerConfig = {
+    showExtendedHints: false,
+    showExtendedHintsAt: 0,
+    showHints: false,
+    showHintsAt: 0,
     checkerType: '',
     ord: 0,
+    solution: '',
   };
+  showHintsConfig;
+  showExtendedHintsConfig;
 
   constructor(public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
               private checkerService: CheckerService,
@@ -38,9 +50,11 @@ export class NewCheckerDialogComponent implements OnInit {
       this.checker = this.data.checker;
       this.checkerForm.controls['checkerType'].setValue(this.checker.checkerType);
       this.checkerForm.controls['ord'].setValue(this.checker.ord);
+      this.checkerForm.controls['solution'].setValue(this.checker.solution);
     }
     this.courseId = this.data.courseId;
     this.taskId = this.data.taskId;
+    this.choosedSQLChecker = false;
   }
 
   /**
@@ -58,19 +72,31 @@ export class NewCheckerDialogComponent implements OnInit {
   createChecker(value: any) {
     this.checker.checkerType = value.checkerType;
     this.checker.ord = value.ord;
-    if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType === 'bash')) {
-      this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
-        .subscribe(checker => {
-          this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)
-            .subscribe(ok => {}, error => console.error(error));
-          if (this.secondaryFile) {
-            this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
-              .subscribe(ok => {}, error => console.error(error));
-          }
-        });
-      this.dialogRef.close({success: true});
+    this.checker.checkerType = value.checkerType;
+    this.checker.solution = value.solution;
+    this.checker.showHints = value.showHints;
+    this.checker.showHintsAt = value.showHintsAt;
+    this.checker.showExtendedHints = value.showExtendedHints;
+    this.checker.showExtendedHintsAt = value.showExtendedHintsAt;
+    if (this.checker.checkerType === 'sqlchecker') {
+      console.log(this.checker);
     } else {
-      this.snackBar.open('Alle Felder müssen gefüllt werden.', 'ok');
+      if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType === 'bash')) {
+        this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
+          .subscribe(checker => {
+            this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)
+              .subscribe(ok => {
+              }, error => console.error(error));
+            if (this.secondaryFile) {
+              this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
+                .subscribe(ok => {
+                }, error => console.error(error));
+            }
+          });
+        this.dialogRef.close({success: true});
+      } else {
+        this.snackBar.open('Alle Felder müssen gefüllt werden.', 'ok');
+      }
     }
   }
 
@@ -104,6 +130,27 @@ export class NewCheckerDialogComponent implements OnInit {
       this.dialogRef.close({success: true});
     } else {
       this.snackBar.open('Alle Felder müssen gefüllt werden.', 'ok');
+    }
+  }
+  defineForm(value: any) {
+    if (value.checkerType === 'sqlchecker') {
+      this.choosedSQLChecker = true;
+    } else {
+      this.choosedSQLChecker = false;
+    }
+  }
+  showHintsEvent(value: any) {
+    if (value.showHints === false) {
+      this.showHintsConfig = false;
+    } else {
+      this.showHintsConfig = true;
+    }
+  }
+  showExtendedHintsEvent(value: any) {
+    if (value.showExtendedHints === false) {
+      this.showExtendedHintsConfig = false;
+    } else {
+      this.showExtendedHintsConfig = true;
     }
   }
 }
