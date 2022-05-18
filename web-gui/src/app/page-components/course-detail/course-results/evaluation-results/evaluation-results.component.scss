@@ -22,6 +22,9 @@
     text-align: left;
 
   }
+  .title-bonus{
+    margin-right: -15px;
+  }
 
   .task-column {
     margin-left: 8px;
@@ -55,6 +58,7 @@
     justify-content: flex-start;
     align-items: center;
   }
+
   .task-result > .title, .category-tasks > .title, .bonus-container > .title {
     transform: rotate(270deg);
     overflow: visible;
@@ -101,12 +105,26 @@
 
 .no-bonus {
   border-radius: 20px;
+  margin-right: -15px;
+  text-align: right;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: $black;
+}
+.no-bonus-kurs {
+  border-radius: 20px;
   margin-right: -5px;
   text-align: right;
   display: flex;
   justify-content: center;
   align-items: center;
   color: $black;
+}
+.no-bonus-kategorie{
+  border-radius: 20px;
+  margin-right: 9px;
+  display: flex;
 }
 .passed {
   color: $green;

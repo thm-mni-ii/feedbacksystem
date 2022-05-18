@@ -25,7 +25,7 @@
               <span class="category-result-backpane" matTooltipPosition="above"
                     matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
                        <span class="category-bonus bonus" *ngIf="result.bonusPoints!=0">{{ result.bonusPoints }}</span>
-                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints==0">-</span>
+                       <span class="category-bonus no-bonus-kurs" *ngIf="result.bonusPoints==0">-</span>
                 </span>
       </div>
     </div>
@@ -47,7 +47,7 @@
       <div class="task-container header">
         <div class="task-result">
           <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ i + 1 }} &#9660; <!--&dArr; --></span>
-          <span class="title">Bonus</span>
+          <span class="title title-bonus">Bonus</span>
           <!-- Not showing when showDetails is true -->
           <ng-container *ngIf="opened === requirement.id">
             <span class="category-tasks" *ngFor="let task of requirement.tasks">
@@ -72,7 +72,7 @@
                     <span *ngIf="showPoints">{{ taskResult.points }}</span>
                     <span *ngIf="!showPoints">{{ taskResult.attempts }}</span>
                   </span>
-                  <span *ngIf="taskResult.attempts == 0">-</span>
+                  <span class="no-bonus-kategorie" *ngIf="taskResult.attempts == 0">-</span>
                 </span>
             </ng-container>
           </ng-container>
