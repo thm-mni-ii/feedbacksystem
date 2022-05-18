@@ -17,6 +17,7 @@ export class CourseUpdateDialogComponent implements OnInit {
   name = new FormControl('', [Validators.required]);
   description = new FormControl('');
   isVisible = true;
+  iskategorie = true;
   isUpdateDialog = false;
 
   constructor(private courseService: CourseService,

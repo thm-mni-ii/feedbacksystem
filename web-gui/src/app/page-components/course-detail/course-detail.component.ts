@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, Input} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TitlebarService} from '../../service/titlebar.service';
 import {MatDialog} from '@angular/material/dialog';
@@ -23,12 +23,6 @@ import {GoToService} from '../../service/goto.service';
 import {TaskPointsDialogComponent} from '../../dialogs/task-points-dialog/task-points-dialog.component';
 import {ExternalClassroomService} from '../../service/external-classroom.service';
 import {UserTaskResult} from '../../model/UserTaskResult';
-import {MatTreeModule} from '@angular/material/tree';
-import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-
 
 
 @Component({
@@ -39,6 +33,8 @@ import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 
 export class CourseDetailComponent implements OnInit {
     panelOpenState = false;
+    //@Input()
+
   constructor(private taskService: TaskService,
               private authService: AuthService,
               private route: ActivatedRoute,
@@ -63,6 +59,7 @@ export class CourseDetailComponent implements OnInit {
   role: string = null;
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
+  //isloaded = this.taskService.getAllContainer(this.courseID).subscribe((Container) => this.containers = Container);
 
 
 
@@ -74,8 +71,10 @@ export class CourseDetailComponent implements OnInit {
         this.reloadCourse();
         this.reloadTasks();
         this.taskService.getAllContainer(this.courseID).subscribe((Container) => this.containers = Container);
+
       }
     );
+
 
 
     this.role = this.auth.getToken().courseRoles[this.courseID];

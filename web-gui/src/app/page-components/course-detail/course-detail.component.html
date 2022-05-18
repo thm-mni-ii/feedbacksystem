@@ -53,8 +53,9 @@
   </div>
 
 <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown> -->
+ <!-- <div class="task-list" [ngModel]="(this.taskService.getAllContainer(this.courseID)| async)?.containers" (ngModelChange)="loadValueChange($event)" -->
+ <!-- [ngModel]="(load | async)?.cartoons.value" (ngModelChange)="loadValueChange($event)" -->
   <div class="task-list">
-
     <div *ngFor="let container of containers; let i = index">
 
       <mat-accordion>
@@ -76,7 +77,7 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <!-- [taskResult]="taskResults[task.id] -->
-          <div class=task-list-plus *ngFor="let task of container.tasks"><app-task-preview [courseId]="courseID" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
+          <div *ngFor="let task of tasks"><app-task-preview [courseId]="courseID" [task]="task" [taskResult]="taskResults[task.id]"></app-task-preview></div>
 
         </mat-expansion-panel>
         <br>
