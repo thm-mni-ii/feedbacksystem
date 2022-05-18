@@ -13,7 +13,7 @@ import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.jdbc.JDBCClient
-import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
+import io.vertx.scala.ext.sql.{ResultSet, SQLConnection, SQLOptions}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -106,9 +106,12 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
 
   private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    val queries = s"DROP database IF EXISTS $name; create database $name; use $name; ${sqlRunArgs.dbConfig}"
+    val queries = s"DROP database IF EXISTS $name; create database $name;"
 
-    con.executeFuture(queries)
+    con.executeFuture(queries).flatMap(_ => {
+      con.setOptions(SQLOptions().setCatalog(name))
+      con.executeFuture(sqlRunArgs.dbConfig)
+    })
   }
 
   private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
@@ -116,6 +119,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
 
     con.queryFuture(s"drop database $name").onComplete({
       case Success(_) =>
+        con.setOptions(SQLOptions().setCatalog(null))
         con.close()
       case Failure(e) =>
         logger.warn(s"Submission-${sqlRunArgs.submissionId}: Count not delete Submission Database", e)
