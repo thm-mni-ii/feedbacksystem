@@ -17,9 +17,7 @@ export class ResultsComponent {
 
   allSubmissions: Submission[];
   displayedSubmission: Submission;
-  comment = "";
-  //string Comment;
-  postComment = [];
+
 
   resultDataSource: MatTableDataSource<any>[] = [];
   resultColumns = [];
@@ -28,24 +26,7 @@ export class ResultsComponent {
   expectedColumns = [];
 
   tableViewAsGrid = false;
-
-  post(){
-
-  if (this.comment == ""){
-
-  }else{
-
-  this.postComment.push(this.comment);
-
-  this.comment = "";
-  }
-  }
-
-  delete(){
-
-    this.postComment.pop();
-  }
-
+  
 
   @Input() set submissions(subs: Submission[]) {
     this.allSubmissions = subs;
