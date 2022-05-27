@@ -75,7 +75,7 @@ class SubmissionService {
     s"SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ?",
-    (res, _) => parseResult(res, fetchUserId=true), id)).headOption
+    (res, _) => parseResult(res, fetchUserId = true), id)).headOption
 
   /**
     * Create a new submission
