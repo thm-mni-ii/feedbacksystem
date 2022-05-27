@@ -1637,6 +1637,43 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/submissions/{submissionID}":
+    get:
+      tags:
+        - Submission
+      summary: Get the content of a submission
+      parameters:
+        - name: submissionID
+          in: path
+          description: the submission id
+          required: true
+          schema:
+            type: integer
+        - name: token
+          in: query
+          description: the token granting access to the submission
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "text/plain":
+              schema:
+                type: string
+                description: The submission content
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations":
     get:
       security:

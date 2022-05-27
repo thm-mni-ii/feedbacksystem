@@ -65,6 +65,19 @@ class SubmissionService {
     (res, _) => parseResult(res), id, uid)).headOption
 
   /**
+    * Lookup a submission by id
+    *
+    * @param id         The sumissions id
+    * @param addExtInfo select Extended information if present?
+    * @return The found submission
+    */
+  def getOneWithoutUser(id: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
+    s"SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
+      "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
+      "WHERE submission_id = ?",
+    (res, _) => parseResult(res, fetchUserId=true), id)).headOption
+
+  /**
     * Create a new submission
     * @param uid the user id
     * @param tid The task id
@@ -108,10 +121,11 @@ class SubmissionService {
     */
   def delete(sid: Int): Boolean = 1 == DB.update("DELETE FROM user_task_submission WHERE submission_id = ?", sid)
 
-  private def parseResult(res: ResultSet): Submission = Submission(
+  private def parseResult(res: ResultSet, fetchUserId: Boolean = false): Submission = Submission(
     id = res.getInt("submission_id"),
     submissionTime = new Date(res.getDate("submission_time").getTime),
     done = res.getObject("configuration_id") != null,
+    userID = if (fetchUserId) Some(res.getInt("user_id")) else None,
     results = if (res.getObject("configuration_id") != null) {
       // Get Extended Information or null
       val extInfo = getStringOrElse(res, "ext_info", null)

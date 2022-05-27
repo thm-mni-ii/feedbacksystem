@@ -1,10 +1,11 @@
 package de.thm.ii.fbs.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, TokenService}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
@@ -34,8 +35,6 @@ class SubmissionController {
   private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
-  @Autowired
-  private val checkrunnerService: CheckerConfigurationService = null
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
 

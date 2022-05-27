@@ -46,6 +46,7 @@ services:
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
+    selfUrl: ${SELF_URL:https://localhost}
 spring:
   main:
     allow-bean-definition-overriding: true
