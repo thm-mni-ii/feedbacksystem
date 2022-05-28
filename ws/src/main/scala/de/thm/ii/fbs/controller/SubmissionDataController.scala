@@ -2,6 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceFormatSubmission
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, StorageService, SubmissionService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,9 +21,13 @@ class SubmissionDataController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
+  private val checkerConfigurationService: CheckerConfigurationService = null
+  @Autowired
   private val storageService: StorageService = null
   @Autowired
   private val tokenService: TokenService = null
+  @Autowired
+  private val checkerServiceFactoryService: CheckerServiceFactoryService = null
 
   /**
     * Get the content of a submission
@@ -32,8 +38,8 @@ class SubmissionDataController {
     */
   @GetMapping(value = Array("/{submissionID}"))
   @ResponseBody
-  def getOne(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "raw",
-             req: HttpServletRequest, res: HttpServletResponse): String = {
+  def getOne(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "",
+             req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"submissions/$submissionID")) {
       throw new ForbiddenException()
     }
@@ -42,18 +48,24 @@ class SubmissionDataController {
       case Some(submission) => submission
       case None => throw new ResourceNotFoundException()
     }
-
     val soluion = storageService.getSolutionFile(submissionID)
-    typ match {
-      case "raw" => soluion
-      case "sql-checker" =>
-        new ObjectMapper().createObjectNode()
-          .put("passed", false)
-          .put("userid", submission.userID.get)
-          .put("attempt", 0)
-          .put("submission", soluion)
-          .toString
+    val ccs = checkerConfigurationService
+      .getAllForSubmission(submissionID)
+      .map(checker => (checker, checkerServiceFactoryService(checker.checkerType)))
+      .filter(checker => checker._2.isInstanceOf[CheckerServiceFormatSubmission])
+
+    val cco = if (ccs.length == 1) {
+      ccs.headOption
+    } else if (typ != "") {
+      ccs.find(checker => checker._1.checkerType == typ)
+    } else {
+      None
+    }
+    val (cc, checker) = cco match {
+      case Some(cc) => cc
       case _ => throw new BadRequestException()
     }
+
+    checker.asInstanceOf[CheckerServiceFormatSubmission].format(submission, cc, soluion)
   }
 }

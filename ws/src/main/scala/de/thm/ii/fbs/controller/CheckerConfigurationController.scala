@@ -2,13 +2,15 @@ package de.thm.ii.fbs.controller
 
 import java.io.FileInputStream
 import java.nio.file.{Files, Path}
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnChange
+import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -30,6 +32,10 @@ class CheckerConfigurationController {
   private val ccs: CheckerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val taskService: TaskService = null
+  @Autowired
+  private val checkerService: CheckerServiceFactoryService = null
 
   /**
     * Return a list of checker configurations for a task
@@ -75,7 +81,11 @@ class CheckerConfigurationController {
       ( body.retrive("checkerType").asText(),
         body.retrive("ord").asInt()
       ) match {
-        case (Some(checkerType), Some(ord)) => this.ccs.create(cid, tid, CheckrunnerConfiguration(checkerType, ord))
+        case (Some(checkerType), Some(ord)) => {
+          val cc = CheckrunnerConfiguration(checkerType, ord)
+          notifyChecker(tid, cc)
+          this.ccs.create(cid, tid, cc)
+        }
         case _ => throw new BadRequestException()
       }
     } else {
@@ -85,6 +95,7 @@ class CheckerConfigurationController {
 
   /**
     * Update a task configuration
+    *
     * @param cid Course id
     * @param tid Task id
     * @param ccid Checker configuration id
@@ -104,7 +115,11 @@ class CheckerConfigurationController {
       ( body.retrive("checkerType").asText(),
         body.retrive("ord").asInt()
       ) match {
-        case (Some(checkerType), Some(ord)) => this.ccs.update(cid, tid, ccid, CheckrunnerConfiguration(checkerType, ord))
+        case (Some(checkerType), Some(ord)) => {
+          val cc = CheckrunnerConfiguration(checkerType, ord)
+          notifyChecker(tid, cc)
+          this.ccs.update(cid, tid, ccid, cc)
+        }
         case _ => throw new BadRequestException()
       }
     } else {
@@ -232,6 +247,16 @@ class CheckerConfigurationController {
       }
     } else {
       throw new ForbiddenException()
+    }
+  }
+
+  private def notifyChecker(tid: Int, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnChange =>
+        change.onCheckerConfigurationChange(taskService.getOne(tid).get,
+          cc, storageService.getMainFile(cc.id), storageService.getSecondaryFile(cc.id))
+      case _ =>
     }
   }
 }

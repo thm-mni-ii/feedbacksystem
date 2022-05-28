@@ -8,19 +8,16 @@ import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import de.thm.ii.fbs.model.{User => FBSUser}
-import de.thm.ii.fbs.services.security.TokenService
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceHandle, CheckerService}
 import de.thm.ii.fbs.util.RestTemplateFactory
-import org.apache.http.client.utils.URIBuilder
 import org.json.JSONArray
-
-import java.net.{URI, URL}
 
 /**
   * Communicate with an remote checker to notify him about new submissions
   * @param insecure if true the tls certificate of the remote checker will not be validated
   */
 @Service
-class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService {
+class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService with CheckerServiceHandle {
   private val restTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   @Autowired
@@ -29,8 +26,6 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   private val submissionService: SubmissionService = null
   @Autowired
   private val subTaskServier: CheckrunnerSubTaskService = null
-  @Autowired
-  private val tokenService: TokenService = null
 
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
@@ -38,8 +33,6 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
 
   @Value("${services.masterRunner.url}")
   private val masterRunnerURL: String = null
-  @Value("${services.masterRunner.selfUrl}")
-  private val selfUrl: String = null
 
   /**
     * Notify the runner about a new submission
@@ -49,16 +42,11 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    val apiUrl = cc.checkerType match {
-      case "sql-checker" => Some(new URIBuilder(selfUrl)
-          .setPath(s"/api/v1/submissions/${submissionID}")
-          .setParameter("typ", "sql-checker")
-          .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
-          .build().toString
-      )
-      case _ => None
-    }
+    sendNotificationToRemote(taskID, submissionID, cc, fu)
+  }
 
+  protected def sendNotificationToRemote(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser,
+                                        apiUrl: Option[String] = None): Unit = {
     val submission = Submission(submissionID, User(fu.id, fu.username),
       storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
       storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get,

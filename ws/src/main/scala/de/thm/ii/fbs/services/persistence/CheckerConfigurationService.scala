@@ -30,6 +30,12 @@ class CheckerConfigurationService {
       "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ? ORDER BY ord",
       (res, _) => parseResult(res), cid, tid)
 
+  def getAllForSubmission(submissionID: Int): List[CheckrunnerConfiguration] =
+  DB.query("SELECT configuration_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord FROM user_task_submission " +
+    "JOIN task t on user_task_submission.task_id = t.task_id " +
+    "JOIN checkrunner_configuration cc on t.task_id = cc.task_id WHERE submission_id = ? ORDER BY ord",
+    (res, _) => parseResult(res), submissionID)
+
   /**
     * Get one checker configuration
     * @param cid Course id
@@ -41,6 +47,16 @@ class CheckerConfigurationService {
     DB.query("SELECT configuration_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord FROM checkrunner_configuration " +
       "JOIN task USING (task_id) JOIN course USING (course_id) WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
       (res, _) => parseResult(res), cid, tid, ccid).headOption
+
+  /**
+    * Get one checker configuration by its id
+    * @param ccid Checker configuration id
+    * @return Optional checker configuration
+    */
+  def getOne(ccid: Int): Option[CheckrunnerConfiguration] =
+    DB.query("SELECT configuration_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord FROM checkrunner_configuration " +
+      "JOIN task USING (task_id) JOIN course USING (course_id) WHERE configuration_id = ?",
+      (res, _) => parseResult(res), ccid).headOption
 
   /**
     * Create a new checker configuration

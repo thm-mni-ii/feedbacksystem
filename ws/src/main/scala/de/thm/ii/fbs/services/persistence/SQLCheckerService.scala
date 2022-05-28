@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.persistence
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.model.SQLCheckerQuery
+import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
@@ -13,7 +14,8 @@ import java.util.stream.Collectors.toList
 
 @Component
 class SQLCheckerService {
-  val CollectionName = "Queries"
+  val QueryCollectionName = "Queries"
+  val SolutionCollectionName = "Solutions"
   @Autowired
   private val mongodbTemplate: MongoTemplate = null
   @Autowired
@@ -25,8 +27,8 @@ class SQLCheckerService {
       case "attributes" => "attributesRight"
     }
 
-    val trueCount = mongodbTemplate.count(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = true), CollectionName)
-    val falseCount = mongodbTemplate.count(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = false), CollectionName)
+    val trueCount = mongodbTemplate.count(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = true), QueryCollectionName)
+    val falseCount = mongodbTemplate.count(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = false), QueryCollectionName)
 
     mapper.createObjectNode().put("trueCount", trueCount).put("falseCount", falseCount)
   }
@@ -35,8 +37,8 @@ class SQLCheckerService {
     val tablesRight = returns == "tables"
     val attributesRight = returns == "attributes"
 
-    val trueCount = mongodbTemplate.count(buildSumUpCorrectCombinedQuery(taskID, tablesRight = true, attributesRight = true), CollectionName)
-    val falseCount = mongodbTemplate.count(buildSumUpCorrectCombinedQuery(taskID, tablesRight, attributesRight), CollectionName)
+    val trueCount = mongodbTemplate.count(buildSumUpCorrectCombinedQuery(taskID, tablesRight = true, attributesRight = true), QueryCollectionName)
+    val falseCount = mongodbTemplate.count(buildSumUpCorrectCombinedQuery(taskID, tablesRight, attributesRight), QueryCollectionName)
 
     mapper.createObjectNode().put("trueCount", trueCount).put("falseCount", falseCount)
   }
@@ -48,7 +50,7 @@ class SQLCheckerService {
     }
 
     val results = mongodbTemplate.find(buildSumUpCorrectQuery(taskID, attributeName, additionalAttributeValue = false),
-      classOf[SQLCheckerQuery], CollectionName)
+      classOf[SQLCheckerQuery], QueryCollectionName)
 
     val result = mapper.createArrayNode()
 
@@ -58,13 +60,22 @@ class SQLCheckerService {
   }
 
   def listByTypes(taskID: Int, tables: Boolean, attributes: Boolean): ArrayNode = {
-    val results = mongodbTemplate.find(buildSumUpCorrectCombinedQuery(taskID, tables, attributes), classOf[SQLCheckerQuery], CollectionName)
+    val results = mongodbTemplate.find(buildSumUpCorrectCombinedQuery(taskID, tables, attributes), classOf[SQLCheckerQuery], QueryCollectionName)
 
     val result = mapper.createArrayNode()
 
     results.forEach(res => result.add(mapper.convertValue(res, classOf[ObjectNode])))
 
     result
+  }
+
+  def createSolution(id: String, taskNumber: Int, statement: String): Unit = {
+    val solution = new Document()
+    solution.put("id", id)
+    solution.put("taskNumber", taskNumber)
+    solution.put("statement", statement)
+
+    mongodbTemplate.insert(solution, SolutionCollectionName)
   }
 
   private def buildCoreQuery(taskID: Int) =
