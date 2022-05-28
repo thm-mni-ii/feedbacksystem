@@ -36,17 +36,26 @@ class SqlCheckerVerticle extends ScalaVerticle {
 
   private def startSqlChecker(msg: Message[JsonObject]): Future[Unit] = Future {
     val runArgs: RunArgs = msg.body().mapTo(classOf[RunArgs])
+    val response = new JsonObject()
+      .put("sid", runArgs.submission.id)
+      .put("ccid", runArgs.runner.id)
 
     logger.info(s"SqlChecker received submission ${runArgs.submission.id}")
 
     val sqlChecker = new SQLCheckerService(runArgs.submission)
+    val (exitCode, stdout, stderr) = sqlChecker.invoke()
 
-    if (sqlChecker.invoke()) {
+    response
+      .put("exitCode", exitCode)
+      .put("stdout", stdout)
+      .put("stderr", stderr)
+
+    if (exitCode == 0) {
       logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess")
-      vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(new JsonObject().put("success", true)))
+      vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(response.put("success", true)))
     } else {
       logger.info(s"Submission-${runArgs.submission.id} Finished\nFailed")
-      vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(new JsonObject().put("success", false)))
+      vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(response.put("success", false)))
     }
   }
 }
