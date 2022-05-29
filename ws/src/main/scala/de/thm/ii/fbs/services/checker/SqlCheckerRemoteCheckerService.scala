@@ -1,9 +1,9 @@
 package de.thm.ii.fbs.services.checker
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission, Task}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission, Task}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatSubmission, CheckerServiceOnChange}
-import de.thm.ii.fbs.services.persistence.SQLCheckerService
+import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -18,6 +18,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val tokenService: TokenService = null
   @Autowired
   private val sqlCheckerService: SQLCheckerService = null
+  @Autowired
+  private val submissionService: SubmissionService = null
+  @Autowired
+  private val taskService: TaskService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
 
@@ -43,27 +47,65 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   /**
     * Handles a result
     *
-    * @param sid        The submission id
-    * @param ccid       The check runner configuration id
-    * @param exitCode   The exit Code of the runner
-    * @param resultText The resultText of the runner
-    * @param extInfo    Extended runner information
+    * @param submission           The submission
+    * @param checkerConfiguration The check runner configuration
+    * @param task                 The task
+    * @param exitCode             The exit Code of the runner
+    * @param resultText           The resultText of the runner
+    * @param extInfo              Extended runner information
     */
-  override def handle(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit = {
-    super.handle(sid, ccid, exitCode, "", extInfo)
+  override def handle(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+                      resultText: String, extInfo: String): Unit = {
+    val userID = submission.userID.get
+    val (exitCode, resultText) = checkerConfiguration.checkerTypeInformation match {
+      case Some(sci: SqlCheckerInformation) =>
+        val hints = new StringBuilder()
+        val attempts = submissionService.getAll(userID, task.courseID, task.id).length
+        sqlCheckerService.getQuery(task.id, userID) match {
+          case Some(query) =>
+            if (!query.parsable) {
+              hints ++= "query not parsable\n"
+            } else {
+              if (sci.showHints && sci.showHintsAt <= attempts) {
+                if (!query.tablesRight.get) {
+                  hints ++= "wrong tables used\n"
+                }
+                if (!query.attributesRight.get) {
+                  hints ++= "wrong attributes used\n"
+                }
+                if (!query.whereAttributesRight.get) {
+                  hints ++= "wrong where clause used\n"
+                }
+              }
+              if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
+                //ToDo
+              }
+            }
+            (if (query.queryRight) 0 else 1, hints.toString())
+          case _ => (3, "sql-checker did not return query object")
+        }
+      case _ => (2, "invalid checker type information")
+    }
+    super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
   }
 
   def format(submission: Submission, checker: CheckrunnerConfiguration, solution: String): Any = {
+    val task = taskService.getOne(checker.taskId).get
+    val attempts = submissionService.getAll(submission.userID.get, task.courseID, checker.taskId).length
     new ObjectMapper().createObjectNode()
       .put("passed", false)
-      .put("userid", submission.userID.get)
-      .put("attempt", 0)
+      .put("userId", submission.userID.get)
+      .put("tid", checker.taskId)
+      .put("sid", submission.id)
+      .put("attempt", attempts)
       .put("submission", solution)
       .toString
   }
 
-  override def onCheckerConfigurationChange(task: Task, checkerConfiguration: CheckrunnerConfiguration,
-                                            mainFile: String, secondaryFile: String): Unit = {
-    sqlCheckerService.createSolution(UUID.randomUUID().toString, task.id, secondaryFile)
+  override def onCheckerConfigurationChange(task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    checkerConfiguration.checkerTypeInformation match {
+      case Some(sci: SqlCheckerInformation) => sqlCheckerService.setSolution(UUID.randomUUID().toString, task.id, sci.solution)
+      case _ =>
+    }
   }
 }

@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.services.checker.`trait`
 
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission, Task}
+
 trait CheckerServiceHandle {
-  def handle(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit
+  def handle(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int, resultText: String, extInfo: String): Unit
 }

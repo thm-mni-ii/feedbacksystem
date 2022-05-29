@@ -2,13 +2,12 @@ package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, NoSuchFileException, Path}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, User => FBSUser, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import de.thm.ii.fbs.model.{User => FBSUser}
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceHandle, CheckerService}
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONArray
 
@@ -62,15 +61,17 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   /**
     * Handles a result
     *
-    * @param sid        The submission id
-    * @param ccid       The check runner configuration id
+    * @param submission           The submission
+    * @param checkerConfiguration The check runner configuration
+    * @param task                 The task
     * @param exitCode   The exit Code of the runner
     * @param resultText The resultText of the runner
     * @param extInfo    Extended runner information
     */
-  def handle(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit = {
-    submissionService.storeResult(sid, ccid, exitCode, resultText, extInfo)
-    handleSubTasks(sid, ccid)
+  def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+             resultText: String, extInfo: String): Unit = {
+    submissionService.storeResult(submission.id, checkerConfiguration.id, exitCode, resultText, extInfo)
+    handleSubTasks(submission.id, checkerConfiguration.id)
   }
 
   private def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(

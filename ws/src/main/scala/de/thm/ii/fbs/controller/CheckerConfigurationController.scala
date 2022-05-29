@@ -4,7 +4,7 @@ import java.io.FileInputStream
 import java.nio.file.{Files, Path}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnChange
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
@@ -79,13 +79,24 @@ class CheckerConfigurationController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("checkerType").asText(),
-        body.retrive("ord").asInt()
+        body.retrive("ord").asInt(),
+        body.retrive("checkerTypeInformation").asObject()
       ) match {
-        case (Some(checkerType), Some(ord)) => {
+        case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
+          (checkerTypeInformation.retrive("solution").asText(), checkerTypeInformation.retrive("showHints").asBool(),
+            checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
+            checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
+            case (Some(solution), Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+              val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
+                Some(SqlCheckerInformation(solution, showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+              notifyChecker(tid, cc)
+              this.ccs.create(cid, tid, cc)
+            case _ => throw new BadRequestException("Malformed checker type information")
+          }
+        case (Some(checkerType), Some(ord), _) =>
           val cc = CheckrunnerConfiguration(checkerType, ord)
           notifyChecker(tid, cc)
           this.ccs.create(cid, tid, cc)
-        }
         case _ => throw new BadRequestException()
       }
     } else {
@@ -113,13 +124,24 @@ class CheckerConfigurationController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("checkerType").asText(),
-        body.retrive("ord").asInt()
+        body.retrive("ord").asInt(),
+        body.retrive("checkerTypeInformation").asObject()
       ) match {
-        case (Some(checkerType), Some(ord)) => {
+        case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
+          (checkerTypeInformation.retrive("solution").asText(), checkerTypeInformation.retrive("showHints").asBool(),
+            checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
+            checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
+            case (Some(solution), Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+              val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
+                Some(SqlCheckerInformation(solution, showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+              notifyChecker(tid, cc)
+              this.ccs.create(cid, tid, cc)
+            case _ => throw new BadRequestException("Malformed checker type information")
+          }
+        case (Some(checkerType), Some(ord), _) =>
           val cc = CheckrunnerConfiguration(checkerType, ord)
           notifyChecker(tid, cc)
           this.ccs.update(cid, tid, ccid, cc)
-        }
         case _ => throw new BadRequestException()
       }
     } else {
@@ -254,8 +276,7 @@ class CheckerConfigurationController {
     val checker = checkerService(cc.checkerType)
     checker match {
       case change: CheckerServiceOnChange =>
-        change.onCheckerConfigurationChange(taskService.getOne(tid).get,
-          cc, storageService.getMainFile(cc.id), storageService.getSecondaryFile(cc.id))
+        change.onCheckerConfigurationChange(taskService.getOne(tid).get, cc)
       case _ =>
     }
   }

@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.model.SQLCheckerQuery
 import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
-import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.{Query, Update, UpdateDefinition}
 import org.springframework.stereotype.Component
 
 import java.util.stream.Collectors.toList
@@ -69,13 +70,23 @@ class SQLCheckerService {
     result
   }
 
-  def createSolution(id: String, taskNumber: Int, statement: String): Unit = {
-    val solution = new Document()
-    solution.put("id", id)
-    solution.put("taskNumber", taskNumber)
-    solution.put("statement", statement)
+  def setSolution(id: String, taskNumber: Int, statement: String): Unit = {
+    val solution = new Update()
+    solution.setOnInsert("id", id)
+    solution.setOnInsert("taskNumber", taskNumber)
+    solution.set("statement", statement)
+    val query = new Query()
+    query.addCriteria(where("taskNumber").is(taskNumber))
 
-    mongodbTemplate.insert(solution, SolutionCollectionName)
+    mongodbTemplate.upsert(query, solution, SolutionCollectionName)
+  }
+
+  def getQuery(taskNumber: Int, userId: Int): Option[SQLCheckerQuery] = {
+    val query = new Query()
+    query.`with`(Sort.by(Sort.Direction.DESC, "$natural"))
+    query.addCriteria(where("taskNumber").is(taskNumber))
+
+    Option(mongodbTemplate.findOne(query, classOf[SQLCheckerQuery], QueryCollectionName))
   }
 
   private def buildCoreQuery(taskID: Int) =

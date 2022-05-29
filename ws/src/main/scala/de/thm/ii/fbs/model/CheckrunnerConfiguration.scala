@@ -14,5 +14,6 @@ case class CheckrunnerConfiguration(
   mainFileUploaded: Boolean = false,
   secondaryFileUploaded: Boolean = false,
   id: Int = 0,
-  checkerTypeInformation: CheckerTypeInformation = EmptyCheckerInformation()
+  taskId: Int = 0,
+  checkerTypeInformation: Option[CheckerTypeInformation] = None,
 )
