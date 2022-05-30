@@ -2,17 +2,15 @@ package de.thm.ii.fbs.services.runner
 
 import java.sql.SQLException
 import java.util.regex.Pattern
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
-import de.thm.ii.fbs.util.RunnerException
+import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
 import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.JsonObject
-import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.{ResultSet, SQLConnection, SQLOptions}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -90,7 +88,7 @@ object SQLRunnerService {
   * @param pool        an sql conection pool
   * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val queryTimout: Int) {
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnections, val queryTimout: Int) {
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
@@ -104,17 +102,21 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
   private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
     msgIsOk(taskQuery.description)
 
-  private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
+  protected def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    val queries = s"DROP database IF EXISTS $name; create database $name;"
+    val queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
 
     con.executeFuture(queries).flatMap(_ => {
-      con.setOptions(SQLOptions().setCatalog(name))
-      con.executeFuture(sqlRunArgs.dbConfig)
+      connections.initQuery(name, isSolution)
+      if (isSolution) {
+        connections.solutionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+      } else {
+        connections.submissionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+      }
     })
   }
 
-  private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
+  protected def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
     val name = buildName(nameExtension) // TODO secure? (prepared q)
 
     con.queryFuture(s"drop database $name").onComplete({
@@ -135,12 +137,12 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     * @return a Future that contains the Results
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
-    pool.getConnectionFuture().flatMap(c => {
+    connections.operationCon.getConnectionFuture().flatMap(c => {
       c.setQueryTimeout(queryTimout)
 
-      createDatabase(configDbExt, c).flatMap[List[ResultSet]](_ => {
+      createDatabase(configDbExt, c, isSolution = true).flatMap[List[ResultSet]](_ => {
         val queries = sqlRunArgs.section
-          .map(tq => c.queryFuture(tq.query))
+          .map(tq => connections.solutionQueryCon.get.queryFuture(tq.query))
 
         Future.sequence(queries.toList) transform {
           case s@Success(_) =>
@@ -165,11 +167,11 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     * @return a Future that contains the Results
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
-    pool.getConnectionFuture().flatMap(c => {
+    connections.operationCon.getConnectionFuture().flatMap(c => {
       c.setQueryTimeout(queryTimout)
 
       createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery(c) transform {
+        executeComplexQuery() transform {
           case s@Success(_) =>
             deleteDatabases(c, submissionDbExt)
             s
@@ -181,7 +183,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     })
   }
 
-  private def executeComplexQuery(con: SQLConnection): Future[ResultSet] = {
+  private def executeComplexQuery(): Future[ResultSet] = {
     /* Split submissions bei ; into sub Queries and execute all und just get the result of the last*/
     val queries = sqlRunArgs.submissionQuery.split(";").map(_.trim).filter(_.nonEmpty)
     val p = Pattern.compile("UPDATE.*", 2)
@@ -190,9 +192,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
       SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
       if (p.matcher(b).matches()) {
-        con.callFuture(b)
+        connections.submissionQueryCon.get.callFuture(b)
       } else {
-        con.queryFuture(b)
+        connections.submissionQueryCon.get.queryFuture(b)
       }
     }))
   }

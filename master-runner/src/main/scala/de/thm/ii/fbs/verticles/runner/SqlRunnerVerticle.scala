@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.verticles.runner
 
 import java.sql.{SQLException, SQLTimeoutException}
-
 import de.thm.ii.fbs.services.FileService
 import de.thm.ii.fbs.services.runner.SQLRunnerService
 import de.thm.ii.fbs.types.{ExtResSql, RunArgs}
 import de.thm.ii.fbs.util.RunnerException
+import de.thm.ii.fbs.util.DBConnections
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.RUN_ADDRESS
 import io.vertx.lang.scala.json.JsonObject
@@ -31,7 +31,8 @@ object SqlRunnerVerticle {
   */
 class SqlRunnerVerticle extends ScalaVerticle {
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
-  private var client: Option[JDBCClient] = None
+  private var defaultMySQLConfig: Option[JsonObject] = None
+  private var defaultPSQLConfig: Option[JsonObject] = None
 
   /**
     * start SqlRunnerVerticle
@@ -39,15 +40,21 @@ class SqlRunnerVerticle extends ScalaVerticle {
     * @return vertx Future
     */
   override def startFuture(): Future[_] = {
-    val sqlConfig = new JsonObject()
-      .put("user", config.getString("SQL_SERVER_USERNAME", "root"))
-      .put("password", config.getString("SQL_SERVER_PASSWORD", ""))
-      .put("url", config.getString("SQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
-      .put("max_pool_size", config.getInteger("SQL_MAX_POOL_SIZE", 15))
+    defaultMySQLConfig = Option(new JsonObject()
+      .put("user", config.getString("MYSQL_SERVER_USERNAME", "root"))
+      .put("password", config.getString("MYSQL_SERVER_PASSWORD", ""))
+      .put("url", config.getString("MYSQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
+      .put("max_pool_size", config.getInteger("SQL_RUNNER_INSTANCES", 5))
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
-      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10)))
 
-    client = Option(JDBCClient.createShared(vertx, sqlConfig))
+    defaultPSQLConfig = Option(new JsonObject()
+      .put("user", config.getString("PSQL_SERVER_USERNAME", "root"))
+      .put("password", config.getString("PSQL_SERVER_PASSWORD", ""))
+      .put("url", config.getString("PSQL_SERVER_URL", "jdbc:postgresql://localhost:5432"))
+      .put("max_pool_size", config.getInteger("SQL_MAX_POOL_SIZ E", 15))
+      .put("driver_class", "org.postgresql.Driver")
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10)))
 
     vertx.eventBus().consumer(RUN_ADDRESS, startSqlRunner).completionFuture()
   }
@@ -57,11 +64,29 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
     logger.info(s"SqlRunner received submission ${runArgs.submission.id}")
 
+    val connections: Option[DBConnections] = getConnections(runArgs)
+
+    if (connections.isDefined) {
+      runQueries(runArgs, connections.get)
+    }
+  }
+
+  private def getConnections(runArgs: RunArgs): Option[DBConnections] = {
+    try {
+      Option(DBConnections(vertx, defaultMySQLConfig.get))
+    } catch {
+      case _: Throwable =>
+        handleError(runArgs, "SQL Connection failed")
+        None
+    }
+  }
+
+  private def runQueries(runArgs: RunArgs, connections: DBConnections): Unit = {
     try {
       // change file paths
       FileService.addUploadDir(runArgs)
 
-      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), client.get, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
+      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), connections, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
       val results = for {
         f1Result <- sqlRunner.executeRunnerQueries()
