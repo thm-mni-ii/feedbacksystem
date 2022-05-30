@@ -99,24 +99,30 @@ class SqlRunnerVerticle extends ScalaVerticle {
           logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
           vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
+          connections.close()
 
         case Failure(ex: SQLTimeoutException) =>
-          handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
+          handleErrorAndClose(runArgs, connections, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
         case Failure(ex: SQLException) =>
-          handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}")
+          handleErrorAndClose(runArgs, connections, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}")
         case Failure(ex: RunnerException) =>
-          handleError(runArgs, ex.getMessage)
+          handleErrorAndClose(runArgs, connections, ex.getMessage)
         case Failure(ex) =>
-          handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.")
+          handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.")
       })
     } catch {
-      case e: RunnerException => handleError(runArgs, e.getMessage)
-      case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.")
+      case e: RunnerException => handleErrorAndClose(runArgs, connections, e.getMessage)
+      case e: Exception => handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.")
     }
   }
 
   private def handleError(runArgs: RunArgs, msg: String): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg")
     vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
+  }
+
+  private def handleErrorAndClose(runArgs: RunArgs, connections: DBConnections, msg: String): Unit = {
+    handleError(runArgs, msg)
+    connections.close()
   }
 }
