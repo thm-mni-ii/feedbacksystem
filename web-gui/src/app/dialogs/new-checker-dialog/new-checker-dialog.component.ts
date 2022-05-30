@@ -28,13 +28,15 @@ export class NewCheckerDialogComponent implements OnInit {
   courseId: number;
   taskId: number;
   checker: CheckerConfig = {
-    showExtendedHints: false,
-    showExtendedHintsAt: 0,
-    showHints: false,
-    showHintsAt: 0,
+    checkerTypeInformation: {
+      solution: '',
+      showExtendedHints: false,
+      showExtendedHintsAt: 0,
+      showHints: false,
+      showHintsAt: 0,
+    },
     checkerType: '',
     ord: 0,
-    solution: '',
   };
   showHintsConfig;
   showExtendedHintsConfig;
@@ -50,7 +52,7 @@ export class NewCheckerDialogComponent implements OnInit {
       this.checker = this.data.checker;
       this.checkerForm.controls['checkerType'].setValue(this.checker.checkerType);
       this.checkerForm.controls['ord'].setValue(this.checker.ord);
-      this.checkerForm.controls['solution'].setValue(this.checker.solution);
+      this.checkerForm.controls['solution'].setValue(this.checker.checkerTypeInformation.solution);
     }
     this.courseId = this.data.courseId;
     this.taskId = this.data.taskId;
@@ -73,20 +75,17 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerType = value.checkerType;
     this.checker.ord = value.ord;
     this.checker.checkerType = value.checkerType;
-    this.checker.solution = value.solution;
-    this.checker.showHints = value.showHints;
-    this.checker.showHintsAt = value.showHintsAt;
-    this.checker.showExtendedHints = value.showExtendedHints;
-    this.checker.showExtendedHintsAt = value.showExtendedHintsAt;
-    if (this.checker.checkerType === 'sqlchecker') {
-      console.log(this.checker);
-    } else {
-      if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType === 'bash')) {
-        this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
-          .subscribe(checker => {
-            this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile)
-              .subscribe(ok => {
-              }, error => console.error(error));
+    this.checker.checkerTypeInformation.solution = value.solution;
+    this.checker.checkerTypeInformation.showHints = value.showHints;
+    this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
+    this.checker.checkerTypeInformation.showExtendedHints = value.showExtendedHints;
+    this.checker.checkerTypeInformation.showExtendedHintsAt = value.showExtendedHintsAt;
+    if (this.checker.checkerType && this.checker.ord && (this.mainFile || this.checker.checkerType === 'sql-checker') &&
+      (this.secondaryFile || this.checker.checkerType === 'bash' || this.checker.checkerType === 'sql-checker')) {
+      this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
+        .subscribe(checker => {
+          this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile).subscribe(ok => {
+            }, error => console.error(error));
             if (this.secondaryFile) {
               this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
                 .subscribe(ok => {
@@ -97,7 +96,6 @@ export class NewCheckerDialogComponent implements OnInit {
       } else {
         this.snackBar.open('Alle Felder müssen gefüllt werden.', 'ok');
       }
-    }
   }
 
   updateMainFile(event) {
