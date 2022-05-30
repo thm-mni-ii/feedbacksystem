@@ -106,7 +106,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
   private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
     msgIsOk(taskQuery.description)
 
-  protected def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
+  private def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
     var queries = ""
 
@@ -127,7 +127,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     })
   }
 
-  protected def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
+  private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
     val name = buildName(nameExtension) // TODO secure? (prepared q)
     var query = ""
 
