@@ -2,8 +2,6 @@ package de.thm.ii.fbs.types
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import java.util.Optional
-
 /**
   * Class that holds the Task sections
   *
