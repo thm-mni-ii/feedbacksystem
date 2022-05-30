@@ -3,15 +3,14 @@ package de.thm.ii.fbs.verticles.runner
 import java.sql.{SQLException, SQLTimeoutException}
 import de.thm.ii.fbs.services.FileService
 import de.thm.ii.fbs.services.runner.SQLRunnerService
-import de.thm.ii.fbs.types.{ExtResSql, RunArgs}
+import de.thm.ii.fbs.types.{ExtResSql, RunArgs, SqlRunArgs}
 import de.thm.ii.fbs.util.RunnerException
 import de.thm.ii.fbs.util.DBConnections
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.RUN_ADDRESS
-import io.vertx.lang.scala.json.JsonObject
+import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY, RUN_ADDRESS}
+import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
-import io.vertx.scala.ext.jdbc.JDBCClient
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -22,6 +21,8 @@ import scala.util.{Failure, Success}
 object SqlRunnerVerticle {
   /** Event Bus Address to start an runner */
   val RUN_ADDRESS = "de.thm.ii.fbs.runner.sql"
+  val MYSQL_CONFIG_KEY = "mysql"
+  val PSQL_CONFIG_KEY = "postgresql"
 }
 
 /**
@@ -31,8 +32,7 @@ object SqlRunnerVerticle {
   */
 class SqlRunnerVerticle extends ScalaVerticle {
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
-  private var defaultMySQLConfig: Option[JsonObject] = None
-  private var defaultPSQLConfig: Option[JsonObject] = None
+  private var sqlConfig = Map[String, JsonObject]()
 
   /**
     * start SqlRunnerVerticle
@@ -40,7 +40,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
     * @return vertx Future
     */
   override def startFuture(): Future[_] = {
-    defaultMySQLConfig = Option(new JsonObject()
+    sqlConfig += (MYSQL_CONFIG_KEY -> new JsonObject()
       .put("user", config.getString("MYSQL_SERVER_USERNAME", "root"))
       .put("password", config.getString("MYSQL_SERVER_PASSWORD", ""))
       .put("url", config.getString("MYSQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
@@ -48,7 +48,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
       .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10)))
 
-    defaultPSQLConfig = Option(new JsonObject()
+    sqlConfig += (PSQL_CONFIG_KEY -> new JsonObject()
       .put("user", config.getString("PSQL_SERVER_USERNAME", "root"))
       .put("password", config.getString("PSQL_SERVER_PASSWORD", ""))
       .put("url", config.getString("PSQL_SERVER_URL", "jdbc:postgresql://localhost:5432"))
@@ -60,33 +60,46 @@ class SqlRunnerVerticle extends ScalaVerticle {
   }
 
   private def startSqlRunner(msg: Message[JsonObject]): Future[Unit] = Future {
-    val runArgs: RunArgs = msg.body().mapTo(classOf[RunArgs])
+    val runArgs = msg.body().mapTo(classOf[RunArgs])
 
-    logger.info(s"SqlRunner received submission ${runArgs.submission.id}")
+    try {
+      val sqlRunArgs: SqlRunArgs = getRunArgs(runArgs)
 
-    val connections: Option[DBConnections] = getConnections(runArgs)
 
-    if (connections.isDefined) {
-      runQueries(runArgs, connections.get)
+      logger.info(s"SqlRunner received submission ${sqlRunArgs.submissionId}")
+
+      val connections: Option[DBConnections] = getConnections(runArgs, sqlRunArgs)
+
+      if (connections.isDefined) {
+        runQueries(runArgs, sqlRunArgs, connections.get)
+      }
+    } catch {
+      case e: RunnerException => handleError(runArgs, e.getMessage)
+      case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.")
     }
   }
 
-  private def getConnections(runArgs: RunArgs): Option[DBConnections] = {
+  private def getConnections(runArgs: RunArgs, sqlRunArgs: SqlRunArgs): Option[DBConnections] = {
     try {
-      Option(DBConnections(vertx, defaultMySQLConfig.get))
+      logger.info(sqlRunArgs.dbType)
+      Option(DBConnections(vertx, sqlConfig.getOrElse(sqlRunArgs.dbType.toLowerCase, sqlConfig.default(MYSQL_CONFIG_KEY))))
     } catch {
-      case _: Throwable =>
+      case e: Throwable =>
+        logger.error(e.getStackTrace.toString)
         handleError(runArgs, "SQL Connection failed")
         None
     }
   }
 
-  private def runQueries(runArgs: RunArgs, connections: DBConnections): Unit = {
-    try {
-      // change file paths
-      FileService.addUploadDir(runArgs)
+  private def getRunArgs(runArgs: RunArgs): SqlRunArgs = {
+    // change file paths
+    FileService.addUploadDir(runArgs)
 
-      val sqlRunner = new SQLRunnerService(SQLRunnerService.prepareRunnerStart(runArgs), connections, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
+    SQLRunnerService.prepareRunnerStart(runArgs)
+  }
+
+  private def runQueries(runArgs: RunArgs, sqlRunArgs: SqlRunArgs, connections: DBConnections): Unit = {
+      val sqlRunner = new SQLRunnerService(sqlRunArgs, connections, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
       val results = for {
         f1Result <- sqlRunner.executeRunnerQueries()
@@ -96,7 +109,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       results.onComplete({
         case Success(value) =>
           val res = sqlRunner.compareResults(value)
-          logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
+          logger.info(s"Submission-${sqlRunArgs.submissionId} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
           vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
           connections.close()
@@ -110,10 +123,6 @@ class SqlRunnerVerticle extends ScalaVerticle {
         case Failure(ex) =>
           handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.")
       })
-    } catch {
-      case e: RunnerException => handleErrorAndClose(runArgs, connections, e.getMessage)
-      case e: Exception => handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.")
-    }
   }
 
   private def handleError(runArgs: RunArgs, msg: String): Unit = {

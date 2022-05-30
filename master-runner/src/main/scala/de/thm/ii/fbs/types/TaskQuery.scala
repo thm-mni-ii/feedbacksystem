@@ -2,12 +2,14 @@ package de.thm.ii.fbs.types
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+import java.util.Optional
+
 /**
   * Class that holds the Task sections
   *
   * @param sections the reference Queries
   */
-class TaskQueries(@JsonProperty("sections") val sections: Array[TaskQuery])
+class TaskQueries(@JsonProperty("sections") val sections: Array[TaskQuery], @JsonProperty("dbType") val dbType: String)
 
 /**
   *

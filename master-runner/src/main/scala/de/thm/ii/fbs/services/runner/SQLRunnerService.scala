@@ -39,7 +39,11 @@ object SQLRunnerService {
         throw new RunnerException("Config or Submission files are missing")
       }
 
-      val sections = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries]).sections
+      val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
+      val sections = taskQueries.sections
+      // Make dbType Optional
+      // TODO Solve in TaskQueries Case Class
+      val dbType = if (taskQueries.dbType == null) "mysql" else taskQueries.dbType
 
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
@@ -48,7 +52,7 @@ object SQLRunnerService {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      new SqlRunArgs(sections, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
+      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
     } catch {
       // TODO enhance messages
       case e: RunnerException => throw e
@@ -104,7 +108,14 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
   protected def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    val queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
+    var queries = ""
+
+    if (sqlRunArgs.dbType.equalsIgnoreCase("postgresql")) {
+      // postgresql needs the dbname in Quotes
+      queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
+    } else {
+      queries = f"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
+    }
 
     con.executeFuture(queries).flatMap(_ => {
       connections.initQuery(name, isSolution)
@@ -118,8 +129,16 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
   protected def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
     val name = buildName(nameExtension) // TODO secure? (prepared q)
+    var query = ""
 
-    con.queryFuture(s"drop database $name").onComplete({
+    if (sqlRunArgs.dbType.equalsIgnoreCase("postgresql")) {
+      // postgresql needs the dbname in Quotes
+      query = s"""DROP DATABASE "$name""""
+    } else {
+      query = f"DROP DATABASE $name"
+    }
+
+    con.queryFuture(query).onComplete({
       case Success(_) =>
         con.setOptions(SQLOptions().setCatalog(null))
         con.close()
@@ -153,7 +172,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
             cause match {
               // Do not display Configuration SQL errors to the user
-              case _: SQLException => Failure(new RunnerException("invalid Runner configuration"))
+              case e: SQLException => Failure(new RunnerException(f"invalid Runner configuration: ${e.getMessage}"))
               case _ => Failure(throw cause)
             }
         }
