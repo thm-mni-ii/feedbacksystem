@@ -3,13 +3,18 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission, Task}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatSubmission, CheckerServiceOnChange}
-import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService, UserService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+object SqlCheckerRemoteCheckerService {
+  private val isCheckerRun = new ConcurrentHashMap[Int, Unit]()
+}
 
 @Service
 class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends RemoteCheckerService(insecure)
@@ -22,6 +27,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val submissionService: SubmissionService = null
   @Autowired
   private val taskService: TaskService = null
+  @Autowired
+  private val userService: UserService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
 
@@ -34,14 +41,18 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param fu           the User model
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
-    val apiUrl = Some(new URIBuilder(selfUrl)
-      .setPath(s"/api/v1/submissions/${submissionID}")
-      .setParameter("typ", "sql-checker")
-      .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
-      .build().toString
-    )
+    if (SqlCheckerRemoteCheckerService.isCheckerRun.contains(submissionID)) {
+      val apiUrl = Some(new URIBuilder(selfUrl)
+        .setPath(s"/api/v1/submissions/${submissionID}")
+        .setParameter("typ", "sql-checker")
+        .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
+        .build().toString
+      )
 
-    super.sendNotificationToRemote(taskID, submissionID, cc, fu, apiUrl = apiUrl)
+      super.sendNotificationToRemote(taskID, submissionID, cc, fu, apiUrl = apiUrl)
+    } else {
+      super.notify(taskID, submissionID, cc, fu)
+    }
   }
 
   /**
@@ -56,6 +67,19 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def handle(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                       resultText: String, extInfo: String): Unit = {
+    if (SqlCheckerRemoteCheckerService.isCheckerRun.contains(submission.id)) {
+      SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
+      this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+    } else if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
+      SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, ())
+      this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
+    } else {
+      super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+    }
+  }
+
+  private def handleSelf(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+                         resultText: String, extInfo: String): Unit = {
     val userID = submission.userID.get
     val (exitCode, resultText) = checkerConfiguration.checkerTypeInformation match {
       case Some(sci: SqlCheckerInformation) =>
@@ -108,4 +132,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       case _ =>
     }
   }
+
+  private def hintsEnabled(checkerConfiguration: CheckrunnerConfiguration): Boolean =
+    checkerConfiguration.checkerTypeInformation match {
+      case Some(sci: SqlCheckerInformation) => sci.showHints
+      case _ => false
+    }
 }
