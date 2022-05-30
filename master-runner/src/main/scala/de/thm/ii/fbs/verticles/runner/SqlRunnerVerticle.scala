@@ -67,7 +67,6 @@ class SqlRunnerVerticle extends ScalaVerticle {
     try {
       val sqlRunArgs: SqlRunArgs = getRunArgs(runArgs)
 
-
       logger.info(s"SqlRunner received submission ${sqlRunArgs.submissionId}")
 
       val connections: Option[DBConnections] = getConnections(runArgs, sqlRunArgs)
