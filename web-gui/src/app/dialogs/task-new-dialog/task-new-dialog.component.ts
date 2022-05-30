@@ -123,10 +123,15 @@ export class TaskNewDialogComponent implements OnInit {
         mergeMap((task) => {
           if (this.task.mediaType === 'application/x-spreadsheet') {
             const checkerConfig: CheckerConfig = {
-              showExtendedHints: false, showExtendedHintsAt: 0, showHints: false, showHintsAt: 0,
               checkerType: 'spreadsheet',
               ord: 0,
-              solution: ''
+              checkerTypeInformation: {
+                solution: '',
+                showExtendedHints: false,
+                showExtendedHintsAt: 0,
+                showHints: false,
+                showHintsAt: 0,
+              }
             };
             const infoFile = new File([JSON.stringify(this.task.mediaInformation)], 'info.json');
             return this.checkerService.createChecker(this.courseId, task.id, checkerConfig).pipe(

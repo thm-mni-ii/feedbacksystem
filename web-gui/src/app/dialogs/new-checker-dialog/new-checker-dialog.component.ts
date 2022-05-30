@@ -80,8 +80,7 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
     this.checker.checkerTypeInformation.showExtendedHints = value.showExtendedHints;
     this.checker.checkerTypeInformation.showExtendedHintsAt = value.showExtendedHintsAt;
-    if (this.checker.checkerType && this.checker.ord && (this.mainFile || this.checker.checkerType === 'sql-checker') &&
-      (this.secondaryFile || this.checker.checkerType === 'bash' || this.checker.checkerType === 'sql-checker')) {
+    if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType === 'bash')) {
       this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
         .subscribe(checker => {
           this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile).subscribe(ok => {
@@ -131,7 +130,7 @@ export class NewCheckerDialogComponent implements OnInit {
     }
   }
   defineForm(value: any) {
-    if (value.checkerType === 'sqlchecker') {
+    if (value.checkerType === 'sql-checker') {
       this.choosedSQLChecker = true;
     } else {
       this.choosedSQLChecker = false;

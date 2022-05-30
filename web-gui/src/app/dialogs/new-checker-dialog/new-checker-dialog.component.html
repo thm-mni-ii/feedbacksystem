@@ -19,6 +19,10 @@
       <input type="string" placeholder="Musterlösung" matInput formControlName="solution" required>
     </mat-form-field>
     <div>
+    <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
+    <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>
+    </div>
+    <div>
     <mat-checkbox formControlName="showHints" value="true" (change)="showHintsEvent(checkerForm.value)">Hilfestellung anzeigen</mat-checkbox>
     </div>
     <div *ngIf="showHintsConfig">
