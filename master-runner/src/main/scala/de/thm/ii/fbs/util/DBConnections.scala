@@ -25,7 +25,6 @@ case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
   }
 
   def close(): Unit = {
-    operationCon.close()
     closeOptional(submissionQueryCon)
     closeOptional(solutionQueryCon)
   }
