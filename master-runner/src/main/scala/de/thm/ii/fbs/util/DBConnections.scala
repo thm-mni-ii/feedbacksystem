@@ -1,20 +1,16 @@
 package de.thm.ii.fbs.util
 
 import io.vertx.core.json.JsonObject
-import io.vertx.lang.scala.ScalaLogger
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.core.Vertx
 
 case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
-  private val logger = ScalaLogger.getLogger(this.getClass.getName)
-  logger.info(defaultConfig.toString)
   var operationCon: JDBCClient = JDBCClient.createShared(vertx, defaultConfig)
   var submissionQueryCon: Option[JDBCClient] = None
   var solutionQueryCon: Option[JDBCClient] = None
 
   def initQuery(dbName: String, isSolution: Boolean = false): Unit = {
     val config = defaultConfig.copy()
-    // TODO handle Params
     config.put("url", buildNewUrl(config.getString("url"), dbName))
 
     if (isSolution) {
