@@ -33,7 +33,10 @@ case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
   private def buildNewUrl(url: String, dbName: String) = {
     val parts = url.split('?')
     if (parts.length > 1) {
-      f"${parts(0)}/$dbName?${parts(1)}"
+      // Append / if url not ends with /
+      val dbUrl = f"${if (parts(0).endsWith("/")) "" else "/"}$dbName"
+
+      f"${parts(0)}$dbUrl?${parts(1)}"
     } else {
       f"$url/$dbName"
     }
