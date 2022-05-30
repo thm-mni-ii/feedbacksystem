@@ -114,7 +114,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
       // postgresql needs the dbname in Quotes
       queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
     } else {
-      queries = f"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
+      queries = s"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
     }
 
     con.executeFuture(queries).flatMap(_ => {
@@ -135,7 +135,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
       // postgresql needs the dbname in Quotes
       query = s"""DROP DATABASE "$name""""
     } else {
-      query = f"DROP DATABASE $name"
+      query = s"DROP DATABASE $name"
     }
 
     con.queryFuture(query).onComplete({
