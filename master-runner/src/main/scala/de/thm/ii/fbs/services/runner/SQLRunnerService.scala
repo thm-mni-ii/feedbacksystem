@@ -8,6 +8,7 @@ import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultSer
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
+import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle
 import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.JsonObject
@@ -43,7 +44,7 @@ object SQLRunnerService {
       val sections = taskQueries.sections
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
-      val dbType = if (taskQueries.dbType == null) "mysql" else taskQueries.dbType
+      val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
 
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
@@ -110,7 +111,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
     var queries = ""
 
-    if (sqlRunArgs.dbType.equalsIgnoreCase("postgresql")) {
+    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
       // postgresql needs the dbname in Quotes
       queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
     } else {
@@ -131,7 +132,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     val name = buildName(nameExtension) // TODO secure? (prepared q)
     var query = ""
 
-    if (sqlRunArgs.dbType.equalsIgnoreCase("postgresql")) {
+    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
       // postgresql needs the dbname in Quotes
       query = s"""DROP DATABASE "$name""""
     } else {
