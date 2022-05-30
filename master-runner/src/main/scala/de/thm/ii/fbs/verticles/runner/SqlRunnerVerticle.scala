@@ -46,7 +46,8 @@ class SqlRunnerVerticle extends ScalaVerticle {
       .put("url", config.getString("MYSQL_SERVER_URL", "jdbc:mysql://localhost:3306"))
       .put("max_pool_size", config.getInteger("SQL_RUNNER_INSTANCES", 5))
       .put("driver_class", "com.mysql.cj.jdbc.Driver")
-      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10)))
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
+      .put("dataSourceName", MYSQL_CONFIG_KEY))
 
     sqlConfig += (PSQL_CONFIG_KEY -> new JsonObject()
       .put("user", config.getString("PSQL_SERVER_USERNAME", "root"))
@@ -54,7 +55,8 @@ class SqlRunnerVerticle extends ScalaVerticle {
       .put("url", config.getString("PSQL_SERVER_URL", "jdbc:postgresql://localhost:5432"))
       .put("max_pool_size", config.getInteger("SQL_MAX_POOL_SIZ E", 15))
       .put("driver_class", "org.postgresql.Driver")
-      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10)))
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
+      .put("dataSourceName", PSQL_CONFIG_KEY))
 
     vertx.eventBus().consumer(RUN_ADDRESS, startSqlRunner).completionFuture()
   }

@@ -5,7 +5,7 @@ import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.core.Vertx
 
 case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
-  var operationCon: JDBCClient = JDBCClient.createShared(vertx, defaultConfig)
+  var operationCon: JDBCClient = JDBCClient.createShared(vertx, defaultConfig, defaultConfig.getString("dataSourceName"))
   var submissionQueryCon: Option[JDBCClient] = None
   var solutionQueryCon: Option[JDBCClient] = None
 
