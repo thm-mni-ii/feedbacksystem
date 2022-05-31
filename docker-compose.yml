@@ -47,7 +47,7 @@ services:
       classroom:
       fbs:
 
-  mysql2:
+  mysql-checker:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
     restart: unless-stopped
@@ -55,6 +55,17 @@ services:
       MYSQL_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
     volumes:
       - ./data/mysql2:/var/lib/mysql
+    networks:
+      fbs:
+      
+  psql-checker:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres2:/var/lib/postgresql/data
     networks:
       fbs:
 
@@ -70,8 +81,11 @@ services:
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
       RESULT_SERVER_HOST: http
-      SQL_SERVER_URL: jdbc:mysql://mysql2:3306?allowMultiQueries=true
-      SQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      MYSQL_SERVER_URL: jdbc:mysql://mysql-checker:3306?allowMultiQueries=true
+      MYSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
+      PSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      PSQL_SERVER_USERNAME: postgres
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
