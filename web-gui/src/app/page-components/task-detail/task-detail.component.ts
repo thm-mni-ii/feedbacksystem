@@ -37,11 +37,6 @@ export class TaskDetailComponent implements OnInit {
   lastSubmission: Submission;
   pending = false;
   ready = false;
-  showResultTable;
-  showResultAttribute;
-  sampleTable;
-  sampleAttribute;
-
   deadlinePassed = false;
 
   get latestResult() {
@@ -68,8 +63,6 @@ export class TaskDetailComponent implements OnInit {
   submissionData: string | File;
 
   ngOnInit() {
-    this.showResultTable = false;
-    this.showResultAttribute = false;
     this.route.params.pipe(
       mergeMap(params => {
         this.courseId = params.id;
@@ -251,12 +244,5 @@ export class TaskDetailComponent implements OnInit {
 
   checkersConfigurable() {
     return this.ready && this.submissionTypeOfTask() !== 'spreadsheet';
-  }
-
-  showSample() {
-    this.sampleTable = ['Kunde', 'Aufträge'];
-    this.sampleAttribute = ['Kundenname', 'Auftragstyp'];
-    this.showResultTable = true;
-    this.showResultAttribute = true;
   }
 }
