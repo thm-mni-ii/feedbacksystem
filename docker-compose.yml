@@ -73,7 +73,8 @@ services:
     build: master-runner
     restart: always
     depends_on:
-      - mysql2
+      - mysql-checker
+      - psql-checker
     ports:
       - "8081:8081"
     environment:
