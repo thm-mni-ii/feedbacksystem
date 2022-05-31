@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
-import org.springframework.data.mongodb.core.query.{Query, Update}
-import org.springframework.data.mongodb.core.query.{Criteria, Query}
+import org.springframework.data.mongodb.core.query.{Criteria, Query, Update}
 import org.springframework.stereotype.Component
 
 @Component

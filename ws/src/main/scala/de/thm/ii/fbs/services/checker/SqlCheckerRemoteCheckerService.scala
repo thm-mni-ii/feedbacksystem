@@ -94,11 +94,11 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 if (!query.tablesRight.get) {
                   hints ++= "wrong tables used\n"
                 }
-                if (!query.att.get) {
-                  hints ++= "wrong attributes used\n"
+                if (!query.selAttributesRight.get) {
+                  hints ++= "wrong select attributes used\n"
                 }
-                if (!query.whereAttributesRight.get) {
-                  hints ++= "wrong where clause used\n"
+                if (!query.proAttributesRight.get) {
+                  hints ++= "wrong projection attributes used\n"
                 }
               }
               if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
