@@ -13,7 +13,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 object SqlCheckerRemoteCheckerService {
-  private val isCheckerRun = new ConcurrentHashMap[Int, Unit]()
+  private val isCheckerRun = new ConcurrentHashMap[Int, Boolean]()
 }
 
 @Service
@@ -41,7 +41,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param fu           the User model
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
-    if (SqlCheckerRemoteCheckerService.isCheckerRun.contains(submissionID)) {
+    if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, false)) {
       val apiUrl = Some(new URIBuilder(selfUrl)
         .setPath(s"/api/v1/submissions/${submissionID}")
         .setParameter("typ", "sql-checker")
@@ -51,7 +51,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
       super.sendNotificationToRemote(taskID, submissionID, cc, fu, apiUrl = apiUrl)
     } else {
-      super.notify(taskID, submissionID, cc, fu)
+      super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
     }
   }
 
@@ -67,11 +67,11 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def handle(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                       resultText: String, extInfo: String): Unit = {
-    if (SqlCheckerRemoteCheckerService.isCheckerRun.contains(submission.id)) {
+    if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, false)) {
       SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
       this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
     } else if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
-      SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, ())
+      SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, true)
       this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
     } else {
       super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
@@ -94,7 +94,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 if (!query.tablesRight.get) {
                   hints ++= "wrong tables used\n"
                 }
-                if (!query.attributesRight.get) {
+                if (!query.att.get) {
                   hints ++= "wrong attributes used\n"
                 }
                 if (!query.whereAttributesRight.get) {
