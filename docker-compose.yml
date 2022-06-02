@@ -10,8 +10,6 @@ services:
       MYSQL_DATABASE: fbs
     volumes:
       - ./data/mysql1:/var/lib/mysql
-    ports:
-      - "3306:3306"
     networks:
       fbs:
 
