@@ -90,7 +90,9 @@ class CheckerConfigurationController {
               val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
                 Some(SqlCheckerInformation(solution, showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
               notifyChecker(tid, cc)
-              this.ccs.create(cid, tid, cc)
+              val ccc = this.ccs.create(cid, tid, cc)
+              notifyChecker(tid, ccc)
+              ccc
             case _ => throw new BadRequestException("Malformed checker type information")
           }
         case (Some(checkerType), Some(ord), _) =>

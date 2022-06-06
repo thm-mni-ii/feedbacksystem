@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.services.checker
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission, Task}
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatSubmission, CheckerServiceOnChange}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission, CheckerServiceOnChange}
 import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService, UserService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import scala.collection.mutable
 
 object SqlCheckerRemoteCheckerService {
   private val isCheckerRun = new ConcurrentHashMap[Int, Boolean]()
@@ -18,7 +19,7 @@ object SqlCheckerRemoteCheckerService {
 
 @Service
 class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends RemoteCheckerService(insecure)
-  with CheckerServiceFormatSubmission with CheckerServiceOnChange {
+  with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange {
   @Autowired
   private val tokenService: TokenService = null
   @Autowired
@@ -43,7 +44,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, false)) {
       val apiUrl = Some(new URIBuilder(selfUrl)
-        .setPath(s"/api/v1/submissions/${submissionID}")
+        .setPath(s"/api/v1/checker/submissions/${submissionID}")
         .setParameter("typ", "sql-checker")
         .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
         .build().toString
@@ -65,7 +66,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param resultText           The resultText of the runner
     * @param extInfo              Extended runner information
     */
-  override def handle(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+  override def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                       resultText: String, extInfo: String): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, false)) {
       SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
@@ -78,12 +79,12 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     }
   }
 
-  private def handleSelf(submission: Submission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+  private def handleSelf(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                          resultText: String, extInfo: String): Unit = {
     val userID = submission.userID.get
     val (exitCode, resultText) = checkerConfiguration.checkerTypeInformation match {
       case Some(sci: SqlCheckerInformation) =>
-        val hints = new StringBuilder()
+        val hints = new mutable.StringBuilder()
         val attempts = submissionService.getAll(userID, task.courseID, task.id).length
         sqlCheckerService.getQuery(task.id, userID) match {
           case Some(query) =>
@@ -94,11 +95,14 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 if (!query.tablesRight.get) {
                   hints ++= "wrong tables used\n"
                 }
-                if (!query.selAttributesRight.get) {
+                if (!query.attributesRight.get) {
                   hints ++= "wrong select attributes used\n"
                 }
-                if (!query.proAttributesRight.get) {
-                  hints ++= "wrong projection attributes used\n"
+                if (!query.whereAttributesRight.get) {
+                  hints ++= "wrong where attributes used\n"
+                }
+                if (!query.stringsRight.get) {
+                  hints ++= "wrong strings used\n"
                 }
               }
               if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
@@ -113,7 +117,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
   }
 
-  def format(submission: Submission, checker: CheckrunnerConfiguration, solution: String): Any = {
+  def formatSubmission(submission: FBSSubmission, checker: CheckrunnerConfiguration, solution: String): Any = {
     val task = taskService.getOne(checker.taskId).get
     val attempts = submissionService.getAll(submission.userID.get, task.courseID, checker.taskId).length
     new ObjectMapper().createObjectNode()
@@ -126,9 +130,35 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       .toString
   }
 
+  def formatConfiguration(checker: CheckrunnerConfiguration): Any = {
+    checker.checkerTypeInformation match {
+      case Some(sci: SqlCheckerInformation) => {
+        new ObjectMapper().createObjectNode()
+          .put("passed", true)
+          .put("resultText", "OK")
+          .put("userId", 0)
+          .put("tid", checker.taskId)
+          .put("sid", UUID.randomUUID().toString)
+          .put("attempt", 0)
+          .put("submission", sci.solution)
+          .toString
+      }
+      case _ => new ObjectMapper().createObjectNode().toString
+    }
+  }
+
   override def onCheckerConfigurationChange(task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
     checkerConfiguration.checkerTypeInformation match {
-      case Some(sci: SqlCheckerInformation) => sqlCheckerService.setSolution(UUID.randomUUID().toString, task.id, sci.solution)
+      case Some(_: SqlCheckerInformation) =>
+        val apiUrl = Some(new URIBuilder(selfUrl)
+          .setPath(s"/api/v1/checker/checkers/${checkerConfiguration.id}")
+          .setParameter("typ", "sql-checker")
+          .setParameter("token", tokenService.issue(s"checkers/${checkerConfiguration.id}", 60))
+          .build().toString
+        )
+
+        val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), Submission(0, User(0, ""), "", "", apiUrl = apiUrl))
+        restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
       case _ =>
     }
   }

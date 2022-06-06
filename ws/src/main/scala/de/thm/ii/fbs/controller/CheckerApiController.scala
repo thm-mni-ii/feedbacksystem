@@ -2,8 +2,9 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceFormatSubmission
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission}
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, StorageService, SubmissionService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,8 +17,8 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
   */
 @RestController
 @CrossOrigin
-@RequestMapping(path = Array("/api/v1/submissions"))
-class SubmissionDataController {
+@RequestMapping(path = Array("/api/v1/checker"))
+class CheckerApiController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -36,9 +37,9 @@ class SubmissionDataController {
     * @param res Http response
     * @return The submission
     */
-  @GetMapping(value = Array("/{submissionID}"))
+  @GetMapping(value = Array("/submissions/{submissionID}"))
   @ResponseBody
-  def getOne(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "",
+  def getSubmission(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "",
              req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"submissions/$submissionID")) {
       throw new ForbiddenException()
@@ -66,6 +67,25 @@ class SubmissionDataController {
       case _ => throw new BadRequestException()
     }
 
-    checker.asInstanceOf[CheckerServiceFormatSubmission].format(submission, cc, soluion)
+    checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, soluion)
+  }
+
+  @GetMapping(value = Array("/checkers/{checkerID}"))
+  @ResponseBody
+  def getChecker(@PathVariable checkerID: Int, @RequestParam token: String, @RequestParam typ: String = "",
+             req: HttpServletRequest, res: HttpServletResponse): Any = {
+    if (!tokenService.verify(token).contains(s"checkers/$checkerID")) {
+      throw new ForbiddenException()
+    }
+
+    val cc = checkerConfigurationService.getOne(checkerID) match {
+      case Some(cc) => cc
+      case None => throw new ResourceNotFoundException()
+    }
+
+    checkerServiceFactoryService(cc.checkerType) match {
+      case csfc: CheckerServiceFormatConfiguration => csfc.formatConfiguration(cc)
+      case _ => throw new BadRequestException()
+    }
   }
 }

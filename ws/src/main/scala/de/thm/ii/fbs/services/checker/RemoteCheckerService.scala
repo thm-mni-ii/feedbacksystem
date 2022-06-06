@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, NoSuchFileException, Path}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, User => FBSUser, Submission => FBSSubmission}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONArray
+import org.springframework.web.client.RestTemplate
 
 /**
   * Communicate with an remote checker to notify him about new submissions
@@ -17,7 +18,7 @@ import org.json.JSONArray
   */
 @Service
 class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService with CheckerServiceHandle {
-  private val restTemplate = RestTemplateFactory.makeRestTemplate(insecure)
+  protected val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   @Autowired
   private val storageService: StorageService = null
@@ -31,7 +32,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   private def uploadDirPath: Path = Path.of(uploadDir)
 
   @Value("${services.masterRunner.url}")
-  private val masterRunnerURL: String = null
+  protected val masterRunnerURL: String = null
 
   /**
     * Notify the runner about a new submission
@@ -74,14 +75,14 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     handleSubTasks(submission.id, checkerConfiguration.id)
   }
 
-  private def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(
+  protected def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(
     cc.id, cc.checkerType, storageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString),
     cc.secondaryFileUploaded, storageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
   )
 
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
 
-  private case class RunnerConfiguration(id: Int, typ: String,
+  protected case class RunnerConfiguration(id: Int, typ: String,
                                          mainFileLocation: Option[String], hasSecondaryFile: Boolean,
                                          secondaryFileLocation: Option[String]) {
     /**
@@ -105,7 +106,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class User(id: Int, username: String) {
+  protected case class User(id: Int, username: String) {
     /**
       * Transforms User to JsonNode
       * @return json representation
@@ -118,7 +119,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String, apiUrl: Option[String] = None) {
+  protected case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String, apiUrl: Option[String] = None) {
     /**
       * Transforms RunnerConfiguration to JsonNode
       * @return json representation
@@ -134,7 +135,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class RunnerRequest(taskID: Int,
+  protected case class RunnerRequest(taskID: Int,
                            runnerConfiguration: RunnerConfiguration,
                            submission: Submission) {
     /**
