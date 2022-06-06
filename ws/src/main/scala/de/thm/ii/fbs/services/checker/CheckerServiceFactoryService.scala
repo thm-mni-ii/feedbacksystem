@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
+import de.thm.ii.fbs.services.checker.excel.{ExcelCheckerService, SpreadsheetCheckerService}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
@@ -20,6 +21,7 @@ class CheckerServiceFactoryService {
     */
   def apply(service: String): CheckerService = service match {
     case "spreadsheet" => applicationContext.getBean(classOf[SpreadsheetCheckerService])
+    case "excel" => applicationContext.getBean(classOf[ExcelCheckerService])
     case "sql-checker" => applicationContext.getBean(classOf[SqlCheckerRemoteCheckerService])
     case _: String => applicationContext.getBean(classOf[RemoteCheckerService])
   }

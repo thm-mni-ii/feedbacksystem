@@ -9,4 +9,4 @@ package de.thm.ii.fbs.types
   * @param runnerId        the runner ID
   * @param submissionId    the submission ID
   */
-class SqlRunArgs(val section: Array[TaskQuery], val dbConfig: String, val submissionQuery: String, val runnerId: Int, val submissionId: Int)
+class SqlRunArgs(val section: Array[TaskQuery], val dbType: String, val dbConfig: String, val submissionQuery: String, val runnerId: Int, val submissionId: Int)

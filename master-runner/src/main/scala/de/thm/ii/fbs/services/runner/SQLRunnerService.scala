@@ -2,18 +2,17 @@ package de.thm.ii.fbs.services.runner
 
 import java.sql.SQLException
 import java.util.regex.Pattern
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
-import de.thm.ii.fbs.util.RunnerException
+import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
+import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle
 import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.JsonObject
-import io.vertx.scala.ext.jdbc.JDBCClient
-import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
+import io.vertx.scala.ext.sql.{ResultSet, SQLConnection, SQLOptions}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,7 +40,11 @@ object SQLRunnerService {
         throw new RunnerException("Config or Submission files are missing")
       }
 
-      val sections = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries]).sections
+      val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
+      val sections = taskQueries.sections
+      // Make dbType Optional
+      // TODO Solve in TaskQueries Case Class
+      val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
 
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
@@ -50,7 +53,7 @@ object SQLRunnerService {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      new SqlRunArgs(sections, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
+      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
     } catch {
       // TODO enhance messages
       case e: RunnerException => throw e
@@ -90,7 +93,7 @@ object SQLRunnerService {
   * @param pool        an sql conection pool
   * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val queryTimout: Int) {
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnections, val queryTimout: Int) {
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
@@ -104,18 +107,41 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
   private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
     msgIsOk(taskQuery.description)
 
-  private def createDatabase(nameExtenion: String, con: SQLConnection): Future[_] = {
+  private def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
     val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    val queries = s"DROP database IF EXISTS $name; create database $name; use $name; ${sqlRunArgs.dbConfig}"
+    var queries = ""
 
-    con.executeFuture(queries)
+    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
+      // postgresql needs the dbname in Quotes
+      queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
+    } else {
+      queries = s"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
+    }
+
+    con.executeFuture(queries).flatMap(_ => {
+      connections.initQuery(name, isSolution)
+      if (isSolution) {
+        connections.solutionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+      } else {
+        connections.submissionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+      }
+    })
   }
 
   private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
     val name = buildName(nameExtension) // TODO secure? (prepared q)
+    var query = ""
 
-    con.queryFuture(s"drop database $name").onComplete({
+    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
+      // postgresql needs the dbname in Quotes
+      query = s"""DROP DATABASE "$name""""
+    } else {
+      query = s"DROP DATABASE $name"
+    }
+
+    con.queryFuture(query).onComplete({
       case Success(_) =>
+        con.setOptions(SQLOptions().setCatalog(null))
         con.close()
       case Failure(e) =>
         logger.warn(s"Submission-${sqlRunArgs.submissionId}: Count not delete Submission Database", e)
@@ -131,12 +157,12 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     * @return a Future that contains the Results
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
-    pool.getConnectionFuture().flatMap(c => {
+    connections.operationCon.getConnectionFuture().flatMap(c => {
       c.setQueryTimeout(queryTimout)
 
-      createDatabase(configDbExt, c).flatMap[List[ResultSet]](_ => {
+      createDatabase(configDbExt, c, isSolution = true).flatMap[List[ResultSet]](_ => {
         val queries = sqlRunArgs.section
-          .map(tq => c.queryFuture(tq.query))
+          .map(tq => connections.solutionQueryCon.get.queryFuture(tq.query))
 
         Future.sequence(queries.toList) transform {
           case s@Success(_) =>
@@ -147,7 +173,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
 
             cause match {
               // Do not display Configuration SQL errors to the user
-              case _: SQLException => Failure(new RunnerException("invalid Runner configuration"))
+              case e: SQLException => Failure(new RunnerException(f"invalid Runner configuration: ${e.getMessage}"))
               case _ => Failure(throw cause)
             }
         }
@@ -161,11 +187,11 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     * @return a Future that contains the Results
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
-    pool.getConnectionFuture().flatMap(c => {
+    connections.operationCon.getConnectionFuture().flatMap(c => {
       c.setQueryTimeout(queryTimout)
 
       createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery(c) transform {
+        executeComplexQuery() transform {
           case s@Success(_) =>
             deleteDatabases(c, submissionDbExt)
             s
@@ -177,7 +203,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
     })
   }
 
-  private def executeComplexQuery(con: SQLConnection): Future[ResultSet] = {
+  private def executeComplexQuery(): Future[ResultSet] = {
     /* Split submissions bei ; into sub Queries and execute all und just get the result of the last*/
     val queries = sqlRunArgs.submissionQuery.split(";").map(_.trim).filter(_.nonEmpty)
     val p = Pattern.compile("UPDATE.*", 2)
@@ -186,9 +212,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val pool: JDBCClient, val que
       SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
       if (p.matcher(b).matches()) {
-        con.callFuture(b)
+        connections.submissionQueryCon.get.callFuture(b)
       } else {
-        con.queryFuture(b)
+        connections.submissionQueryCon.get.queryFuture(b)
       }
     }))
   }

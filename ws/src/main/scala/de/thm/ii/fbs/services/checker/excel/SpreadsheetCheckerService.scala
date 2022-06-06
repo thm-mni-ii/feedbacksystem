@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.checker
+package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
-import java.text.{DecimalFormat, DecimalFormatSymbols, NumberFormat, ParseException}
+import java.text.{NumberFormat, ParseException}
 import java.util.{Locale, Map => UtilMap}
 import scala.collection.mutable
 
