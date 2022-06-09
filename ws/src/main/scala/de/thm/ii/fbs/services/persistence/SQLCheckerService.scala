@@ -2,18 +2,24 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
-import de.thm.ii.fbs.model.SQLCheckerQuery
+import de.thm.ii.fbs.model.{SQLCheckerQuery, SQLCheckerSolution}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.{Criteria, Query, Update}
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class SQLCheckerService {
   val QueryCollectionName = "Queries"
   val SolutionCollectionName = "Solutions"
+  val ProAttributesCollectionName = "ProAttributes"
+  val SelAttributesCollectionName = "SelAttributes"
+  val StringsCollectionName = "Strings"
+  val TablesCollectionName = "Tables"
+
   @Autowired
   private val mongodbTemplate: MongoTemplate = null
   @Autowired
@@ -84,6 +90,24 @@ class SQLCheckerService {
     query.addCriteria(where("taskNumber").is(taskNumber))
 
     Option(mongodbTemplate.findOne(query, classOf[SQLCheckerQuery], QueryCollectionName))
+  }
+
+  def deleteSolutions(taskNumber: Int): Unit = {
+    val query = new Query()
+    query.addCriteria(where("taskNumber").is(taskNumber))
+
+    Option(mongodbTemplate.findAndRemove(query, classOf[SQLCheckerSolution], SolutionCollectionName)) match {
+      case Some(solution) =>
+        val idQuery = new Query()
+        idQuery.addCriteria(where("id").is(solution.id))
+
+        mongodbTemplate.remove(idQuery, ProAttributesCollectionName)
+        mongodbTemplate.remove(idQuery, QueryCollectionName)
+        mongodbTemplate.remove(idQuery, SelAttributesCollectionName)
+        mongodbTemplate.remove(idQuery, StringsCollectionName)
+        mongodbTemplate.remove(idQuery, TablesCollectionName)
+      case _ =>
+    }
   }
 
   private def buildCoreQuery(taskID: Int) =

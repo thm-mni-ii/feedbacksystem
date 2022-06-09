@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.checker
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission, CheckerServiceOnChange}
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission,
+  CheckerServiceOnChange, CheckerServiceOnDelete}
 import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService, UserService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
@@ -19,7 +20,7 @@ object SqlCheckerRemoteCheckerService {
 
 @Service
 class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends RemoteCheckerService(insecure)
-  with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange {
+  with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange with CheckerServiceOnDelete {
   @Autowired
   private val tokenService: TokenService = null
   @Autowired
@@ -150,6 +151,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   override def onCheckerConfigurationChange(task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
     checkerConfiguration.checkerTypeInformation match {
       case Some(_: SqlCheckerInformation) =>
+        sqlCheckerService.deleteSolutions(task.id)
+
         val apiUrl = Some(new URIBuilder(selfUrl)
           .setPath(s"/api/v1/checker/checkers/${checkerConfiguration.id}")
           .setParameter("typ", "sql-checker")
@@ -159,6 +162,14 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
         val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), Submission(0, User(0, ""), "", "", apiUrl = apiUrl))
         restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
+      case _ =>
+    }
+  }
+
+  override def onCheckerConfigurationDelete(task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    checkerConfiguration.checkerTypeInformation match {
+      case Some(_: SqlCheckerInformation) =>
+        sqlCheckerService.deleteSolutions(task.id)
       case _ =>
     }
   }

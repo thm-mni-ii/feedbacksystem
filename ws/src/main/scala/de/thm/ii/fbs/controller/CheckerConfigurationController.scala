@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnChange
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete}
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -166,10 +166,14 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val success = this.ccs.delete(cid, tid, ccid)
-
-      // If the configuration was deleted in the database -> delete all files
-      success && storageService.deleteConfiguration(ccid)
+      val cc = ccs.getOne(ccid) match {
+        case Some(cc) => cc
+        case None => throw new ResourceNotFoundException()
+      }
+      if (this.ccs.delete(cid, tid, ccid)) {
+        storageService.deleteConfiguration(ccid)
+        notifyCheckerDelete(tid, cc)
+      }
     } else {
       throw new ForbiddenException()
     }
@@ -279,6 +283,15 @@ class CheckerConfigurationController {
     checker match {
       case change: CheckerServiceOnChange =>
         change.onCheckerConfigurationChange(taskService.getOne(tid).get, cc)
+      case _ =>
+    }
+  }
+
+  private def notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnDelete =>
+        change.onCheckerConfigurationDelete(taskService.getOne(tid).get, cc)
       case _ =>
     }
   }
