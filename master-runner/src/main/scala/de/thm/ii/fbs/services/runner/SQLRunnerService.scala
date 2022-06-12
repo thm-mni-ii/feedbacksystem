@@ -128,7 +128,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     })
   }
 
-  private def deleteDatabases(con: SQLConnection, nameExtension: String): Unit = {
+  private def deleteDatabases(con: SQLConnection, nameExtension: String, isSolution: Boolean = false): Unit = {
     val name = buildName(nameExtension) // TODO secure? (prepared q)
     var query = ""
 
@@ -138,6 +138,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     } else {
       query = s"DROP DATABASE $name"
     }
+
+    // Close all connection to the db that should be deleted
+    connections.closeOne(isSolution)
 
     con.queryFuture(query).onComplete({
       case Success(_) =>
@@ -166,14 +169,14 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
         Future.sequence(queries.toList) transform {
           case s@Success(_) =>
-            deleteDatabases(c, configDbExt)
+            deleteDatabases(c, configDbExt, isSolution = true)
             s
           case Failure(cause) =>
-            deleteDatabases(c, configDbExt)
+            deleteDatabases(c, configDbExt, isSolution = true)
 
             cause match {
               // Do not display Configuration SQL errors to the user
-              case e: SQLException => Failure(new RunnerException(f"invalid Runner configuration: ${e.getMessage}"))
+              case e: SQLException => Failure(new RunnerException(f"invalid Runner configuration"))
               case _ => Failure(throw cause)
             }
         }
