@@ -5,6 +5,7 @@ import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.core.Vertx
 
 case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
+  val POOL_SIZE = 1
   var operationCon: JDBCClient = JDBCClient.createShared(vertx, defaultConfig, defaultConfig.getString("dataSourceName"))
   var submissionQueryCon: Option[JDBCClient] = None
   var solutionQueryCon: Option[JDBCClient] = None
@@ -12,11 +13,22 @@ case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
   def initQuery(dbName: String, isSolution: Boolean = false): Unit = {
     val config = defaultConfig.copy()
     config.put("url", buildNewUrl(config.getString("url"), dbName))
+    config.put("initial_pool_size", POOL_SIZE)
+    config.put("min_pool_size", POOL_SIZE)
+    config.put("max_pool_size", POOL_SIZE)
 
     if (isSolution) {
      solutionQueryCon = Option(JDBCClient.create(vertx, config))
     } else {
       submissionQueryCon = Option(JDBCClient.create(vertx, config))
+    }
+  }
+
+  def closeOne(isSolution: Boolean = false): Unit = {
+    if (isSolution) {
+      closeOptional(solutionQueryCon)
+    } else {
+      closeOptional(submissionQueryCon)
     }
   }
 
