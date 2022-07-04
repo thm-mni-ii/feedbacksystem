@@ -34,7 +34,10 @@ class ResultController {
     */
   @PostMapping(value = Array("/results/{sid}/{ccid}", "/api/v1/results/{sid}/{ccid}"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def postResult(@PathVariable("sid") sid: Int, @PathVariable("ccid") ccid: Int, @RequestBody request: JsonNode): Unit = {
-    val submission = submissionService.getOneWithoutUser(sid).get
+    val submission = submissionService.getOneWithoutUser(sid) match {
+      case Some(submission) => submission
+      case _ => throw new ResourceNotFoundException()
+    }
     val checkerConfiguration = checkerConfigurationService.getOne(ccid) match {
       case Some(cc) => cc
       case _ => throw new ResourceNotFoundException()

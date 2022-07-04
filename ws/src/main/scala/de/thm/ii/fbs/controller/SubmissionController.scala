@@ -173,6 +173,35 @@ class SubmissionController {
   }
 
   /**
+    * Restart the submission process for all submissions of task
+    * @param cid Course id
+    * @param tid Task id
+    * @param req Http request
+    * @param res Http response
+    * @return
+    */
+  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/resubmitAll"))
+  def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+               req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+
+    if (adminPrivileged) {
+      submissionService.getAllByTask(cid, tid).foreach(submission => {
+        submissionService.clearResults(submission.id, submission.userID.get)
+        checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+          val checkerService = checkerServiceFactoryService(cc.checkerType)
+          checkerService.notify(tid, submission.id, cc, user)
+        })
+      })
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
     * Get the status of submission
     * @param uid User id
     * @param cid Course id

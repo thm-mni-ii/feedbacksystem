@@ -45,10 +45,10 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
+    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
-      "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), cid, tid))
+      "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
 
   /**
     * Lookup a submission by id
