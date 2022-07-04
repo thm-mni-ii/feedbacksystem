@@ -136,7 +136,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       case Some(sci: SqlCheckerInformation) => {
         new ObjectMapper().createObjectNode()
           .put("passed", true)
-          .put("isSolution", true)
+          .put("isSol", true)
           .put("resultText", "OK")
           .put("userId", 0)
           .put("tid", checker.taskId)
