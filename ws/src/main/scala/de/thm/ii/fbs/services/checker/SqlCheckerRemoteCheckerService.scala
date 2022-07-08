@@ -96,10 +96,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 if (!query.tablesRight.get) {
                   hints ++= "wrong tables used\n"
                 }
-                if (!query.attributesRight.get) {
+                if (!query.selAttributesRight.get) {
                   hints ++= "wrong select attributes used\n"
                 }
-                if (!query.whereAttributesRight.get) {
+                if (!query.proAttributesRight.get) {
                   hints ++= "wrong where attributes used\n"
                 }
                 if (!query.stringsRight.get) {
@@ -123,6 +123,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     val attempts = submissionService.getAll(submission.userID.get, task.courseID, checker.taskId).length
     new ObjectMapper().createObjectNode()
       .put("passed", false)
+      .put("isSol", false)
       .put("userId", submission.userID.get)
       .put("tid", checker.taskId)
       .put("sid", submission.id)
