@@ -1,10 +1,11 @@
 package de.thm.ii.fbs.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, TokenService}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
@@ -34,8 +35,6 @@ class SubmissionController {
   private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
-  @Autowired
-  private val checkrunnerService: CheckerConfigurationService = null
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
 
@@ -168,6 +167,35 @@ class SubmissionController {
           })
         case None => throw new ResourceNotFoundException()
       }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
+    * Restart the submission process for all submissions of task
+    * @param cid Course id
+    * @param tid Task id
+    * @param req Http request
+    * @param res Http response
+    * @return
+    */
+  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/resubmitAll"))
+  def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+               req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+
+    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+
+    if (adminPrivileged) {
+      submissionService.getAllByTask(cid, tid).foreach(submission => {
+        submissionService.clearResults(submission.id, submission.userID.get)
+        checkerConfigurationService.getAll(cid, tid).foreach(cc => {
+          val checkerService = checkerServiceFactoryService(cc.checkerType)
+          checkerService.notify(tid, submission.id, cc, user)
+        })
+      })
     } else {
       throw new ForbiddenException()
     }

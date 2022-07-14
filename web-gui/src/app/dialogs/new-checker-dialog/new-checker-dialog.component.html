@@ -3,7 +3,8 @@
 <div class="newChecker">
   <form [formGroup]="checkerForm">
     <mat-select class="pad" placeholder="Checkertyp" formControlName="checkerType" required>
-      <mat-option value="sql">SQL</mat-option>
+      <mat-option value="sql">SQL Runner</mat-option>
+      <mat-option value="sql-checker">SQL Checker</mat-option>
       <mat-option value="bash">Bash</mat-option>
       <mat-option value="excel">Excel</mat-option>
     </mat-select>

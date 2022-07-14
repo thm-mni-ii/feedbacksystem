@@ -41,6 +41,9 @@ services:
       - CLASSROOM_TLS_INSECURE=true
       - MASTER_RUNNER_URL=https://master-runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - MONGODB_DATABASE=sql-checker
+      - SELF_URL=https://http
     networks:
       classroom:
       fbs:
@@ -64,6 +67,14 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./data/postgres2:/var/lib/postgresql/data
+    networks:
+      fbs:
+
+  mongodb:
+    image: mongo:5.0.6
+    restart: unless-stopped
+    volumes:
+      - ./data/mongodb:/data/db
     networks:
       fbs:
 

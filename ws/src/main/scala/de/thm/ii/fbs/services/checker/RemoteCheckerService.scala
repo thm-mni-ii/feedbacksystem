@@ -2,22 +2,23 @@ package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, NoSuchFileException, Path}
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import de.thm.ii.fbs.model.{User => FBSUser}
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONArray
+import org.springframework.web.client.RestTemplate
 
 /**
   * Communicate with an remote checker to notify him about new submissions
   * @param insecure if true the tls certificate of the remote checker will not be validated
   */
 @Service
-class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService {
-  private val restTemplate = RestTemplateFactory.makeRestTemplate(insecure)
+class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService with CheckerServiceHandle {
+  protected val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   @Autowired
   private val storageService: StorageService = null
@@ -31,7 +32,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   private def uploadDirPath: Path = Path.of(uploadDir)
 
   @Value("${services.masterRunner.url}")
-  private val masterRunnerURL: String = null
+  protected val masterRunnerURL: String = null
 
   /**
     * Notify the runner about a new submission
@@ -41,9 +42,15 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
+    sendNotificationToRemote(taskID, submissionID, cc, fu)
+  }
+
+  protected def sendNotificationToRemote(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser,
+                                        apiUrl: Option[String] = None): Unit = {
     val submission = Submission(submissionID, User(fu.id, fu.username),
       storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
-      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get
+      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
+      apiUrl = apiUrl,
     )
     val request = RunnerRequest(taskID, rcFromCC(cc), submission)
     val res = restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
@@ -55,25 +62,27 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   /**
     * Handles a result
     *
-    * @param sid        The submission id
-    * @param ccid       The check runner configuration id
+    * @param submission           The submission
+    * @param checkerConfiguration The check runner configuration
+    * @param task                 The task
     * @param exitCode   The exit Code of the runner
     * @param resultText The resultText of the runner
     * @param extInfo    Extended runner information
     */
-  def handle(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit = {
-    submissionService.storeResult(sid, ccid, exitCode, resultText, extInfo)
-    handleSubTasks(sid, ccid)
+  def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
+             resultText: String, extInfo: String): Unit = {
+    submissionService.storeResult(submission.id, checkerConfiguration.id, exitCode, resultText, extInfo)
+    handleSubTasks(submission.id, checkerConfiguration.id)
   }
 
-  private def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(
+  protected def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = RunnerConfiguration(
     cc.id, cc.checkerType, storageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString),
     cc.secondaryFileUploaded, storageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
   )
 
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
 
-  private case class RunnerConfiguration(id: Int, typ: String,
+  protected case class RunnerConfiguration(id: Int, typ: String,
                                          mainFileLocation: Option[String], hasSecondaryFile: Boolean,
                                          secondaryFileLocation: Option[String]) {
     /**
@@ -97,7 +106,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class User(id: Int, username: String) {
+  protected case class User(id: Int, username: String) {
     /**
       * Transforms User to JsonNode
       * @return json representation
@@ -110,7 +119,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     }
   }
 
-  private case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String) {
+  protected case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String, apiUrl: Option[String] = None) {
     /**
       * Transforms RunnerConfiguration to JsonNode
       * @return json representation
@@ -121,11 +130,12 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
       json.set("user", this.user.toJson)
       json.put("solutionFileLocation", this.solutionFileLocation)
       json.put("subTaskFileLocation", this.subTaskFileLocation)
+      json.put("apiUrl", this.apiUrl.orNull)
       json
     }
   }
 
-  private case class RunnerRequest(taskID: Int,
+  protected case class RunnerRequest(taskID: Int,
                            runnerConfiguration: RunnerConfiguration,
                            submission: Submission) {
     /**
