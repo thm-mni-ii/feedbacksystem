@@ -5,7 +5,6 @@ export interface CheckerConfig {
   secondaryFileUploaded?: boolean;
   ord: number;
   checkerTypeInformation: {
-    solution: string;
     showHints: boolean;
     showHintsAt: number;
     showExtendedHints: boolean;

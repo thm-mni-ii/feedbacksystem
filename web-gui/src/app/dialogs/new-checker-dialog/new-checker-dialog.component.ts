@@ -15,8 +15,7 @@ export class NewCheckerDialogComponent implements OnInit {
   checkerForm = new FormGroup({
     checkerType: new FormControl(''),
     ord: new FormControl(''),
-    solution: new FormControl(''),
-    showHints: new FormControl('false'),
+    showHints: new FormControl(false),
     showHintsAt: new FormControl(0),
     showExtendedHints: new FormControl(false),
     showExtendedHintsAt: new FormControl(0),
@@ -29,7 +28,6 @@ export class NewCheckerDialogComponent implements OnInit {
   taskId: number;
   checker: CheckerConfig = {
     checkerTypeInformation: {
-      solution: '',
       showExtendedHints: false,
       showExtendedHintsAt: 0,
       showHints: false,
@@ -52,7 +50,6 @@ export class NewCheckerDialogComponent implements OnInit {
       this.checker = this.data.checker;
       this.checkerForm.controls['checkerType'].setValue(this.checker.checkerType);
       this.checkerForm.controls['ord'].setValue(this.checker.ord);
-      this.checkerForm.controls['solution'].setValue(this.checker.checkerTypeInformation.solution);
     }
     this.courseId = this.data.courseId;
     this.taskId = this.data.taskId;
@@ -75,7 +72,6 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checker.checkerType = value.checkerType;
     this.checker.ord = value.ord;
     this.checker.checkerType = value.checkerType;
-    this.checker.checkerTypeInformation.solution = value.solution;
     this.checker.checkerTypeInformation.showHints = value.showHints;
     this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
     this.checker.checkerTypeInformation.showExtendedHints = value.showExtendedHints;

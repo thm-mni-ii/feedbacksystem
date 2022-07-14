@@ -15,9 +15,6 @@
     <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>
   </div>
   <div *ngIf="choosedSQLChecker">
-    <mat-form-field>
-      <input type="string" placeholder="Musterlösung" matInput formControlName="solution" required>
-    </mat-form-field>
     <div>
     <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
     <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>

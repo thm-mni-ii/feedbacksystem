@@ -126,7 +126,6 @@ export class TaskNewDialogComponent implements OnInit {
               checkerType: 'spreadsheet',
               ord: 0,
               checkerTypeInformation: {
-                solution: '',
                 showExtendedHints: false,
                 showExtendedHintsAt: 0,
                 showHints: false,
