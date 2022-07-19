@@ -90,20 +90,20 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
         sqlCheckerService.getQuery(task.id, userID) match {
           case Some(query) =>
             if (!query.parsable) {
-              hints ++= "query not parsable\n"
+              hints ++= "Abfrage nicht parsbar\n"
             } else {
               if (sci.showHints && sci.showHintsAt <= attempts) {
                 if (!query.tablesRight.get) {
-                  hints ++= "wrong tables used\n"
+                  hints ++= "falsche Tabellen verwendet\n"
                 }
                 if (!query.selAttributesRight.get) {
-                  hints ++= "wrong select attributes used\n"
+                  hints ++= "falsche Select-Attribute verwendet\n"
                 }
                 if (!query.proAttributesRight.get) {
-                  hints ++= "wrong where attributes used\n"
+                  hints ++= "falsche Where-Attribute verwendet\n"
                 }
                 if (!query.stringsRight.get) {
-                  hints ++= "wrong strings used\n"
+                  hints ++= "falsche Zeichenketten verwendet\n"
                 }
               }
               if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
@@ -111,9 +111,9 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
               }
             }
             (if (query.queryRight) 0 else 1, hints.toString())
-          case _ => (3, "sql-checker did not return query object")
+          case _ => (3, "sql-checker hat kein Abfrageobjekt zurückgegeben")
         }
-      case _ => (2, "invalid checker type information")
+      case _ => (2, "Ungültige Checker-Typ-Informationen")
     }
     super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
   }
