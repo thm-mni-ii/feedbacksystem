@@ -1,12 +1,12 @@
 package de.thm.ii.fbs.controller
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Path}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete}
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -193,7 +193,10 @@ class CheckerConfigurationController {
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageService.storeMainFile,
-      (cc) => this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
+      (cc) => {
+        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
+        this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
+      })(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the main file for a task configuration
@@ -283,6 +286,15 @@ class CheckerConfigurationController {
     checker match {
       case change: CheckerServiceOnChange =>
         change.onCheckerConfigurationChange(taskService.getOne(tid).get, cc)
+      case _ =>
+    }
+  }
+
+  private def notifyCheckerMainFileUpload(cid: Int, task: Task, cc: CheckrunnerConfiguration, mainFile: Path): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnMainFileUpload =>
+        change.onCheckerMainFileUpload(cid, task, cc, mainFile)
       case _ =>
     }
   }

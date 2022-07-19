@@ -1,15 +1,16 @@
 package de.thm.ii.fbs.services.checker
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
+import de.thm.ii.fbs.model.{CheckerTypeInformation, CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission,
-  CheckerServiceOnChange, CheckerServiceOnDelete}
-import de.thm.ii.fbs.services.persistence.{SQLCheckerService, SubmissionService, TaskService, UserService}
+  CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
+import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, SQLCheckerService, SubmissionService, TaskService, UserService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 
+import java.nio.file.{Files, Path}
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
@@ -20,7 +21,8 @@ object SqlCheckerRemoteCheckerService {
 
 @Service
 class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends RemoteCheckerService(insecure)
-  with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange with CheckerServiceOnDelete {
+  with CheckerServiceFormatSubmission with CheckerServiceFormatConfiguration with CheckerServiceOnChange with CheckerServiceOnDelete
+  with CheckerServiceOnMainFileUpload {
   @Autowired
   private val tokenService: TokenService = null
   @Autowired
@@ -31,6 +33,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val taskService: TaskService = null
   @Autowired
   private val userService: UserService = null
+  @Autowired
+  private val checkerService: CheckerConfigurationService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
 
@@ -164,6 +168,22 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
         val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), Submission(0, User(0, ""), "", "", apiUrl = apiUrl))
         restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
+      case _ =>
+    }
+  }
+
+  override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration, mainFile: Path): Unit = {
+    val content = Files.readString(mainFile)
+    val json = new ObjectMapper().readValue(content, classOf[JsonNode])
+    Option(json.get("sections").get(0).get("query")).map(query => query.asText()) match {
+      case Some(query: String) => checkerConfiguration.checkerTypeInformation match {
+        case Some(sqlCheckerInformation: SqlCheckerInformation) => {
+          val newCC = checkerConfiguration.copy(checkerTypeInformation = Some(sqlCheckerInformation.copy(solution = query)))
+          checkerService.update(cid, newCC.taskId, newCC.id, newCC)
+          onCheckerConfigurationChange(task, checkerConfiguration)
+        }
+        case _ =>
+      }
       case _ =>
     }
   }
