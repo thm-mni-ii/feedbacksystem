@@ -83,12 +83,12 @@ class CheckerConfigurationController {
         body.retrive("checkerTypeInformation").asObject()
       ) match {
         case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
-          (checkerTypeInformation.retrive("solution").asText(), checkerTypeInformation.retrive("showHints").asBool(),
+          (checkerTypeInformation.retrive("showHints").asBool(),
             checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
             checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
-            case (Some(solution), Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+            case (Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
               val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
-                Some(SqlCheckerInformation(solution, showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+                Some(SqlCheckerInformation("", showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
               notifyChecker(tid, cc)
               val ccc = this.ccs.create(cid, tid, cc)
               notifyChecker(tid, ccc)
@@ -130,12 +130,12 @@ class CheckerConfigurationController {
         body.retrive("checkerTypeInformation").asObject()
       ) match {
         case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
-          (checkerTypeInformation.retrive("solution").asText(), checkerTypeInformation.retrive("showHints").asBool(),
+          (checkerTypeInformation.retrive("showHints").asBool(),
             checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
             checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
-            case (Some(solution), Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+            case (Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
               val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
-                Some(SqlCheckerInformation(solution, showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+                Some(SqlCheckerInformation("", showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
               notifyChecker(tid, cc)
               this.ccs.create(cid, tid, cc)
             case _ => throw new BadRequestException("Malformed checker type information")
