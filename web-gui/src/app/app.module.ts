@@ -23,7 +23,6 @@ import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dia
 import {CookieService} from 'ngx-cookie-service';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
-import {MarkdownModule} from 'ngx-markdown';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
@@ -156,7 +155,6 @@ export const httpInterceptorProviders = [
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
-    MarkdownModule.forRoot(),
     MatDatepickerModule,
     MatNativeDateModule,
     JwtModule.forRoot({
