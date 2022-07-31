@@ -2,9 +2,9 @@
   <app-menu-bar *ngIf="role || isAuthorized()">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
-        <span *ngIf="role == 'DOCENT'">Dozent/in</span>
-        <span *ngIf="role == 'TUTOR'">Tutor/in</span>
-        <span *ngIf="role == 'STUDENT'">Student/in</span>
+        <span *ngIf="role === 'DOCENT'">Dozent/in</span>
+        <span *ngIf="role === 'TUTOR'">Tutor/in</span>
+        <span *ngIf="role === 'STUDENT'">Student/in</span>
       </span>
 
     <span class="spacer"></span>

@@ -7,7 +7,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
   styleUrls: ['./spreadsheet-dialog.component.scss']
 })
 export class SpreadsheetDialogComponent {
-  private lastSelect: string[] = null;
+  private lastSelection: string[] = null;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: {spreadsheet: File},
               public dialogRef: MatDialogRef<SpreadsheetDialogComponent>) { }
@@ -17,10 +17,10 @@ export class SpreadsheetDialogComponent {
       this.dialogRef.close(null);
       return;
     }
-    this.dialogRef.close(this.lastSelect);
+    this.dialogRef.close(this.lastSelection);
   }
 
-  select(select: string[]) {
-    this.lastSelect = select;
+  selection(selection: string[]) {
+    this.lastSelection = selection;
   }
 }

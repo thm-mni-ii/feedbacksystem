@@ -2,7 +2,7 @@
   <h3>Ergebnisse der Abgaben</h3>
   <div class="submission-list">
     <span *ngFor="let submission of allSubmissions; let i = index" (click)="display(submission)"
-          [class.active] = "submission.id == displayedSubmission.id">
+          [class.active] = "submission.id === displayedSubmission.id">
       {{i+1}}. Abgabe (ID: {{submission.id}})
     </span>
   </div>
@@ -22,8 +22,8 @@
       <ng-container matColumnDef="exitCode">
         <th mat-header-cell *matHeaderCellDef>Ergebnis</th>
         <td mat-cell *matCellDef="let checker">
-          <mat-icon class="done" *ngIf="checker.exitCode == 0">done</mat-icon>
-          <mat-icon color="not-done" *ngIf="checker.exitCode == 1">clear</mat-icon>
+          <mat-icon class="done" *ngIf="checker.exitCode === 0">done</mat-icon>
+          <mat-icon color="not-done" *ngIf="checker.exitCode === 1">clear</mat-icon>
         </td>
       </ng-container>
 

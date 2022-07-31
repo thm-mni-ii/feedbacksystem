@@ -56,8 +56,7 @@
               "vendorChunk": false,
               "buildOptimizer": true
             },
-            "development": {
-            }
+            "development": {}
           },
           "defaultConfiguration": ""
         },
@@ -93,6 +92,15 @@
               "devServerTarget": "my-dream-app:serve:production"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
@@ -103,6 +111,10 @@
     }
   },
   "cli": {
-    "analytics": false
+    "analytics": false,
+    "schematicCollections": [
+      "@angular-eslint/schematics",
+      "@angular-eslint/schematics"
+    ]
   }
 }
