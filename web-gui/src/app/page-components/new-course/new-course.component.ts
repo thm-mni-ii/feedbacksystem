@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {FormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {TitlebarService} from '../../service/titlebar.service';
 import {Course} from '../../model/Course';
 import {CourseService} from '../../service/course.service';
@@ -16,8 +16,8 @@ import {CourseService} from '../../service/course.service';
 })
 
 export class NewCourseComponent implements OnInit {
-  name = new FormControl('', [Validators.required]);
-  description = new FormControl('');
+  name = new UntypedFormControl('', [Validators.required]);
+  description = new UntypedFormControl('');
   isVisible = true;
 
   constructor(private courseService: CourseService,

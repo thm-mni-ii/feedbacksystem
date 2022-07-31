@@ -1,5 +1,5 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CheckerConfig} from '../../model/CheckerConfig';
@@ -16,9 +16,9 @@ export class NewCheckerDialogComponent implements OnInit {
 
   fileCounter = 0;
 
-  checkerForm = new FormGroup({
-    checkerType: new FormControl(''),
-    ord: new FormControl(''),
+  checkerForm = new UntypedFormGroup({
+    checkerType: new UntypedFormControl(''),
+    ord: new UntypedFormControl(''),
   });
 
   mainFile: File;

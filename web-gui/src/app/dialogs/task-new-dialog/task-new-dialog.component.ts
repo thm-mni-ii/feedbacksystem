@@ -1,7 +1,7 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 import {SpreadsheetResponseMediaInformation, Task} from 'src/app/model/Task';
 import {CourseService} from '../../service/course.service';
@@ -23,17 +23,17 @@ const defaultMediaType = 'text/plain';
   styleUrls: ['./task-new-dialog.component.scss']
 })
 export class TaskNewDialogComponent implements OnInit {
-  taskForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
-    description: new FormControl(''),
-    deadline: new FormControl(this.getDefaultDeadline()),
-    mediaType: new FormControl(defaultMediaType),
-    exelFile: new FormControl(''),
-    userIDField: new FormControl(''),
-    inputFields: new FormControl(''),
-    outputFields: new FormControl(''),
-    pointFields: new FormControl(''),
-    decimals: new FormControl(2),
+  taskForm = new UntypedFormGroup({
+    name: new UntypedFormControl('', [Validators.required]),
+    description: new UntypedFormControl(''),
+    deadline: new UntypedFormControl(this.getDefaultDeadline()),
+    mediaType: new UntypedFormControl(defaultMediaType),
+    exelFile: new UntypedFormControl(''),
+    userIDField: new UntypedFormControl(''),
+    inputFields: new UntypedFormControl(''),
+    outputFields: new UntypedFormControl(''),
+    pointFields: new UntypedFormControl(''),
+    decimals: new UntypedFormControl(2),
   });
   isUpdate: boolean;
   courseId: number;
