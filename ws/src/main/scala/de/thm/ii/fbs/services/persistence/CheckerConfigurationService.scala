@@ -110,7 +110,7 @@ class CheckerConfigurationService {
     * @param cid Course id
     * @param tid Task id
     * @param ccid Chekcrunner configuration id
-    * @param state The state of the uploaded status.g
+    * @param state The state of the uploaded status.
     * @return True if successful
     */
   def setSecondaryFileUploadedState(cid: Int, tid: Int, ccid: Int, state: Boolean): Boolean = {
