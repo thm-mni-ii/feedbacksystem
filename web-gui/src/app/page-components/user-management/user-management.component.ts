@@ -3,13 +3,17 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatDialog} from '@angular/material/dialog';
 import {TitlebarService} from '../../service/titlebar.service';
 import {UserService} from '../../service/user.service';
 import {User} from '../../model/User';
-import {CreateGuestUserDialogComponent} from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
+import {
+  CreateGuestUserDialogComponent
+} from '../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component';
 import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 import {Roles} from '../../model/Roles';
+import {MatDialog} from '@angular/material/dialog';
+
+
 
 /**
  * This component is for admins managing users
@@ -26,8 +30,10 @@ export class UserManagementComponent implements OnInit {
   columns = ['surname', 'prename', 'email', 'username', 'globalRole', 'action'];
   dataSource = new MatTableDataSource<User>();
 
-  constructor(private snackBar: MatSnackBar, private titlebar: TitlebarService,
-              private dialog: MatDialog, private userService: UserService) {
+  constructor(private snackBar: MatSnackBar,
+              private titlebar: TitlebarService,
+              private dialog: MatDialog,
+              private userService: UserService) {
   }
 
   ngOnInit() {
@@ -57,11 +63,11 @@ export class UserManagementComponent implements OnInit {
    */
   roleChange(userID: number, role: string) {
     this.userService.changeRole(userID, role).subscribe(res => {
-        this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
-        this.refreshUserList();
-      }, error => {
-        this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
-      });
+      this.snackBar.open('Benutzerrolle wurde geändert.', 'OK', {duration: 5000});
+      this.refreshUserList();
+    }, error => {
+      this.snackBar.open('Leider gab es einen Fehler mit dem Update', 'OK', {duration: 5000});
+    });
   }
 
   /**
@@ -75,15 +81,16 @@ export class UserManagementComponent implements OnInit {
         message: `Benutzer ${user.prename} ${user.surname} wirklich löschen?`
       }
     }).afterClosed().subscribe(confirmed => {
-        if (confirmed) {
-          this.userService.deleteUser(user.id).subscribe(res => {
-            this.snackBar.open('Benutzer wurde gelöscht.', 'OK', {duration: 5000});
-          }, error => {
-            console.error(error);
-            this.snackBar.open('Leider gab es einen Fehler.', 'OK', {duration: 5000});
-          });
-        }
-      });
+      if (confirmed) {
+        this.userService.deleteUser(user.id).subscribe(res => {
+          this.snackBar.open('Benutzer wurde gelöscht.', 'OK', {duration: 5000});
+          this.refreshUserList();
+        }, error => {
+          console.error(error);
+          this.snackBar.open('Leider gab es einen Fehler.', 'OK', {duration: 5000});
+        });
+      }
+    });
   }
 
   /**
@@ -101,15 +108,16 @@ export class UserManagementComponent implements OnInit {
     this.dialog.open(CreateGuestUserDialogComponent, {
       width: '700px',
     }).afterClosed().subscribe(user => {
-        if (user) {
-          this.userService.createUser(user).subscribe(
-            res => {
-              this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
-              this.refreshUserList();
-            }, error => {
-              this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
-            });
-        }
-      });
+      if (user) {
+        this.userService.createUser(user).subscribe(
+          res => {
+            this.snackBar.open('Gast Benutzer erstellt', null, {duration: 5000});
+          }, error => {
+            this.snackBar.open('Error: ' + error.message, null, {duration: 5000});
+          }, () => {
+            this.refreshUserList();
+          });
+      }
+    });
   }
 }
