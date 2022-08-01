@@ -36,7 +36,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        courseService: CourseService,
                        courseRegistrationService: CourseRegistrationService
                 ) {
-  private val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
+  private val restTemplate = new RestTemplate()
 
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
 
