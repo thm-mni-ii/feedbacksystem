@@ -15,4 +15,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class Submission(@JsonProperty("id") val id: Int,
                  @JsonProperty("solutionFileLocation") var solutionFileLocation: Path,
                  @JsonProperty("user") val user: User,
-                 @JsonProperty("subTaskFileLocation") val subTaskFileLocation: Path)
+                 @JsonProperty("subTaskFileLocation") val subTaskFileLocation: Path,
+                 @JsonProperty("apiUrl") val apiUrl: String,
+)

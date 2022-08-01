@@ -12,6 +12,8 @@ import {mergeMap, map} from 'rxjs/operators';
 import {CheckerService} from '../../service/checker.service';
 import {CheckerConfig} from '../../model/CheckerConfig';
 
+const defaultMediaType = 'text/plain';
+
 /**
  * Dialog to create or update a task
  */
@@ -24,8 +26,8 @@ export class TaskNewDialogComponent implements OnInit {
   taskForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
-    deadline: new FormControl(new Date()),
-    mediaType: new FormControl(''),
+    deadline: new FormControl(this.getDefaultDeadline()),
+    mediaType: new FormControl(defaultMediaType),
     exelFile: new FormControl(''),
     userIDField: new FormControl(''),
     inputFields: new FormControl(''),
@@ -33,11 +35,10 @@ export class TaskNewDialogComponent implements OnInit {
     pointFields: new FormControl(''),
     decimals: new FormControl(2),
   });
-
   isUpdate: boolean;
   courseId: number;
   task: Task = {
-    deadline: new Date().toISOString(),
+    deadline: this.getDefaultDeadline(),
     description: '',
     mediaType: '',
     name: '',
@@ -193,5 +194,11 @@ export class TaskNewDialogComponent implements OnInit {
       }
       this.taskForm.patchValue(values);
     });
+  }
+
+  getDefaultDeadline() {
+    const currentDateAndOneMonthLater = new Date();
+    currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1);
+    return currentDateAndOneMonthLater.toISOString();
   }
 }

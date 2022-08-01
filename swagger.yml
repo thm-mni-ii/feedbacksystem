@@ -33,6 +33,8 @@ tags:
     description: Incomming checker results
   - name: Analysis
     description: Routes to query data for analysis purposes
+  - name: SQL Checker
+    description: Routes used for SQL-Checker quering
 paths:
   /login/cas:
     post:
@@ -1635,6 +1637,43 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/submissions/{submissionID}":
+    get:
+      tags:
+        - Submission
+      summary: Get the content of a submission
+      parameters:
+        - name: submissionID
+          in: path
+          description: the submission id
+          required: true
+          schema:
+            type: integer
+        - name: token
+          in: query
+          description: the token granting access to the submission
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "text/plain":
+              schema:
+                type: string
+                description: The submission content
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations":
     get:
       security:
@@ -2144,6 +2183,168 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/sqlChecker/{tid}/queries/sumUpCorrect":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Add up correct in false for give conditon
+      parameters:
+        - name: tid
+          in: query
+          description: Task id
+          required: true
+          schema:
+            type: integer
+        - name: returns
+          in: query
+          description: what summs to return
+          schema:
+            type: string
+            enum: ['tables', 'attributes']
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  trueCount:
+                    type: number
+                  falseCount:
+                    type: number
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/sqlChecker/{tid}/queries/sumUpCorrectCombined":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Add up correct in false for give conditon
+      parameters:
+        - name: tid
+          in: query
+          description: Task id
+          required: true
+          schema:
+            type: integer
+        - name: return
+          in: query
+          description: what summs to return
+          schema:
+            type: string
+            enum: ['tables', 'attributes']
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties:
+                  trueCount:
+                    type: number
+                  falseCount:
+                    type: number
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/sqlChecker/{tid}/queries/listByType":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Add up correct in false for give conditon
+      parameters:
+        - name: tid
+          in: query
+          description: Task id
+          required: true
+          schema:
+            type: integer
+        - name: return
+          in: query
+          description: what queries to return
+          schema:
+            type: string
+            enum: ['tables', 'attributes']
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SQLCheckerQuery'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/sqlChecker/{tid}/queries/listByTypes":
+    get:
+      security:
+        - JWT: [ ]
+      tags:
+        - SQL Checker
+      summary: Add up correct in false for give conditon
+      parameters:
+        - name: tid
+          in: query
+          description: Task id
+          required: true
+          schema:
+            type: integer
+        - name: tables
+          in: query
+          description: condition for tables
+          schema:
+            type: boolean
+        - name: attributes
+          in: query
+          description: condition for attributes
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SQLCheckerQuery'
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -2546,3 +2747,28 @@ components:
                 type: number
               avgPoints:
                 type: number
+    SQLCheckerQuery:
+      type: object
+      properties:
+        id:
+          type: string
+        taskNumber:
+          type: number
+        statement:
+          type: string
+        queryRight:
+          type: boolean
+        parsable:
+          type: boolean
+        tablesRight:
+          type: boolean
+        attributesRight:
+          type: boolean
+        whereAttributesRight:
+          type: boolean
+        stringsRight:
+          type: boolean
+        userId:
+          type: number
+        attempt:
+          type: number

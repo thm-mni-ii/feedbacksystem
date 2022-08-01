@@ -17,7 +17,7 @@
 
       <ng-container matColumnDef="resultText">
         <th mat-header-cell *matHeaderCellDef>Antworttext</th>
-        <td mat-cell *matCellDef="let checker"><pre [innerHTML]="checker.resultText"></pre></td>
+        <td mat-cell *matCellDef="let checker"><pre [innerHTML]="checker.resultText" class="pre"></pre></td>
       </ng-container>
 
       <ng-container matColumnDef="exitCode">
