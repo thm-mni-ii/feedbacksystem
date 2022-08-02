@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
@@ -9,7 +9,7 @@ import {SubmissionService} from "../../service/submission.service";
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.scss']
 })
-export class ResultsComponent implements OnInit, OnDestroy {
+export class ResultsComponent implements OnDestroy {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ['checkerType', 'resultText', 'exitCode'];
 
@@ -24,12 +24,16 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   tableViewAsGrid = false;
 
-  initialIndex;
+  index: number;
 
-  @Input() set submissions(subs: Submission[]) {
-    this.allSubmissions = subs;
-    this.initialIndex = this.allSubmissions.length;
-    this.display(subs[subs.length - 1]);
+  ngForRendered() {
+    console.log('NgFor is Rendered');
+  }
+
+  @Input() set submissions(submissions: Submission[]) {
+    this.allSubmissions = submissions;
+    this.selectLast();
+    this.display(submissions[submissions.length - 1]);
   }
 
   @Input() displayTables: boolean;
@@ -40,17 +44,11 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   constructor(private submissionService: SubmissionService) {
     this.subscription = this.submissionService.getFileSubmissionEmitter()
-      .subscribe(isSFileSubmitted => {
-        if(isSFileSubmitted)
-          this.initialIndex = this.allSubmissions.length;
+      .subscribe(isFileSubmitted => {
+        if(isFileSubmitted)
+          this.selectLast();
       });
   }
-
-  ngOnInit(): void {
-      this.initialIndex = this.allSubmissions.length;
-  }
-
-
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -91,5 +89,9 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   toggleTableView() {
     this.tableViewAsGrid = !this.tableViewAsGrid;
+  }
+
+  selectLast() {
+    setTimeout(() => (this.index = this.allSubmissions.length), 1);
   }
 }
