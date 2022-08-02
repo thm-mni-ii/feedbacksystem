@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.json.JSONArray
+import org.springframework.context.annotation.Primary
 import org.springframework.web.client.RestTemplate
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate
   * @param insecure if true the tls certificate of the remote checker will not be validated
   */
 @Service
+@Primary
 class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure: Boolean) extends CheckerService with CheckerServiceHandle {
   protected val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
