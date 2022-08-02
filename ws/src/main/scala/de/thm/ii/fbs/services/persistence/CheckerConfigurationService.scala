@@ -119,6 +119,20 @@ class CheckerConfigurationService {
   }
 
   /**
+    * Set checker type information
+    * @param cid Course id
+    * @param tid Task id
+    * @param ccid Chekcrunner configuration id
+    * @param checkerTypeInformation The checkerTypeInformation to set
+    * @return True if successful
+    */
+  def setCheckerTypeInformation(cid: Int, tid: Int, ccid: Int, checkerTypeInformation: Option[CheckerTypeInformation]): Boolean = {
+    1 == DB.update("UPDATE checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
+      "SET checker_type_information = ? WHERE course_id = ? AND task_id = ? AND configuration_id = ?",
+      checkerTypeInformation.map(CheckerTypeInformation.toJSONString).orNull, cid, tid, ccid)
+  }
+
+  /**
     * Delete a checker configuration
     * @param cid course  id
     * @param tid task id

@@ -8,6 +8,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {AuthService} from '../../service/auth.service';
 import {Roles} from '../../model/Roles';
+import {ConfirmDialogComponent} from '../../dialogs/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-configuration-list',
@@ -86,11 +87,17 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   deleteConfig(checker: CheckerConfig) {
-    this.snackbar.open('Soll die Überprüfung gelöscht werden?' , 'Ja', {duration: 3000}).onAction()
-      .subscribe( () => {
-          this.checkerService.deleteChecker(this.courseId, this.taskId, checker.id)
-            .subscribe( () => this.configurations = this.checkerService.getChecker(this.courseId, this.taskId));
-        });
+    this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        message: 'Soll die Überprüfung gelöscht werden?'
+      }
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.checkerService.deleteChecker(this.courseId, this.taskId, checker.id)
+          .subscribe( () => this.configurations = this.checkerService.getChecker(this.courseId, this.taskId));
+        this.snackbar.open('Der Checker wurde entfernt.', 'OK', {duration: 3000});
+      }
+    });
   }
 
   downloadMainFile(checker: CheckerConfig) {
