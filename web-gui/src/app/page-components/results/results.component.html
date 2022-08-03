@@ -1,10 +1,11 @@
 <div class="results">
   <h3>Ergebnisse der Abgaben</h3>
   <div class="submission-list">
-    <span *ngFor="let submission of allSubmissions; let i = index" (click)="display(submission)"
-          [class.active] = "submission.id == displayedSubmission.id">
-      {{i+1}}. Abgabe (ID: {{submission.id}})
-    </span>
+    <div class="scrolling-wrapper">
+    <mat-tab-group (selectedTabChange)="handleSubmission($event)" [(selectedIndex)]="index" animationDuration="0ms">
+      <mat-tab *ngFor="let submission of allSubmissions; let i = index" label="{{i+1}}. Abgabe (ID: {{submission.id}})"></mat-tab>
+    </mat-tab-group>
+    </div>
   </div>
 
   <div class="container">
