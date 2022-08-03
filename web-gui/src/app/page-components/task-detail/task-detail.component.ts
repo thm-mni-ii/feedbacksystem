@@ -247,4 +247,8 @@ export class TaskDetailComponent implements OnInit {
   checkersConfigurable() {
     return this.ready && this.submissionTypeOfTask() !== 'spreadsheet';
   }
+
+  downloadTask() {
+    this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
+  }
 }

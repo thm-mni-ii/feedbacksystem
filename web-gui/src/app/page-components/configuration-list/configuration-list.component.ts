@@ -27,9 +27,11 @@ export class ConfigurationListComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(
       params => {
-        this.courseId = params.id;
-        this.taskId = params.tid;
-        this.configurations = this.checkerService.getChecker(this.courseId, this.taskId);
+        if(params) {
+          this.courseId = params.id;
+          this.taskId = params.tid;
+          this.configurations = this.checkerService.getChecker(this.courseId, this.taskId);
+        }
     });
   }
 
