@@ -142,6 +142,7 @@ export class TaskDetailComponent implements OnInit {
       return;
     }
     this.submit();
+    this.submissionService.emitFileSubmission();
   }
 
   private submit() {

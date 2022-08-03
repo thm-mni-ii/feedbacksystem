@@ -22,6 +22,16 @@
   }
 }
 
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .mat-tab-label-container {
+  display: block;
+}
+
 .mat-table {
   width: 100%;
 }
