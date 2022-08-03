@@ -26,10 +26,6 @@ export class ResultsComponent implements OnDestroy {
 
   index: number;
 
-  ngForRendered() {
-    console.log('NgFor is Rendered');
-  }
-
   @Input() set submissions(submissions: Submission[]) {
     this.allSubmissions = submissions;
     this.selectLast();
