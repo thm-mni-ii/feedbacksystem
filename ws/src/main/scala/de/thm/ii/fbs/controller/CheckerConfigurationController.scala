@@ -1,14 +1,16 @@
 package de.thm.ii.fbs.controller
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.nio.file.{Files, Path}
-
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
+import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -30,6 +32,10 @@ class CheckerConfigurationController {
   private val ccs: CheckerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val taskService: TaskService = null
+  @Autowired
+  private val checkerService: CheckerServiceFactoryService = null
 
   /**
     * Return a list of checker configurations for a task
@@ -73,9 +79,26 @@ class CheckerConfigurationController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("checkerType").asText(),
-        body.retrive("ord").asInt()
+        body.retrive("ord").asInt(),
+        body.retrive("checkerTypeInformation").asObject()
       ) match {
-        case (Some(checkerType), Some(ord)) => this.ccs.create(cid, tid, CheckrunnerConfiguration(checkerType, ord))
+        case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
+          (checkerTypeInformation.retrive("showHints").asBool(),
+            checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
+            checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
+            case (Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+              val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
+                Some(SqlCheckerInformation("", showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+              notifyChecker(tid, cc)
+              val ccc = this.ccs.create(cid, tid, cc)
+              notifyChecker(tid, ccc)
+              ccc
+            case _ => throw new BadRequestException("Malformed checker type information")
+          }
+        case (Some(checkerType), Some(ord), _) =>
+          val cc = CheckrunnerConfiguration(checkerType, ord)
+          notifyChecker(tid, cc)
+          this.ccs.create(cid, tid, cc)
         case _ => throw new BadRequestException()
       }
     } else {
@@ -85,6 +108,7 @@ class CheckerConfigurationController {
 
   /**
     * Update a task configuration
+    *
     * @param cid Course id
     * @param tid Task id
     * @param ccid Checker configuration id
@@ -102,9 +126,24 @@ class CheckerConfigurationController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ( body.retrive("checkerType").asText(),
-        body.retrive("ord").asInt()
+        body.retrive("ord").asInt(),
+        body.retrive("checkerTypeInformation").asObject()
       ) match {
-        case (Some(checkerType), Some(ord)) => this.ccs.update(cid, tid, ccid, CheckrunnerConfiguration(checkerType, ord))
+        case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
+          (checkerTypeInformation.retrive("showHints").asBool(),
+            checkerTypeInformation.retrive("showHintsAt").asInt(), checkerTypeInformation.retrive("showExtendedHints").asBool(),
+            checkerTypeInformation.retrive("showExtendedHintsAt").asInt()) match {
+            case (Some(showHints), Some(showHintsAt), Some(showExtendedHints), Some(showExtendedHintsAt)) =>
+              val cc = CheckrunnerConfiguration(checkerType, ord, checkerTypeInformation =
+                Some(SqlCheckerInformation("", showHints, showHintsAt, showExtendedHints, showExtendedHintsAt)))
+              notifyChecker(tid, cc)
+              this.ccs.create(cid, tid, cc)
+            case _ => throw new BadRequestException("Malformed checker type information")
+          }
+        case (Some(checkerType), Some(ord), _) =>
+          val cc = CheckrunnerConfiguration(checkerType, ord)
+          notifyChecker(tid, cc)
+          this.ccs.update(cid, tid, ccid, cc)
         case _ => throw new BadRequestException()
       }
     } else {
@@ -127,10 +166,14 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val success = this.ccs.delete(cid, tid, ccid)
-
-      // If the configuration was deleted in the database -> delete all files
-      success && storageService.deleteConfiguration(ccid)
+      val cc = ccs.getOne(ccid) match {
+        case Some(cc) => cc
+        case None => throw new ResourceNotFoundException()
+      }
+      if (this.ccs.delete(cid, tid, ccid)) {
+        storageService.deleteConfiguration(ccid)
+        notifyCheckerDelete(tid, cc)
+      }
     } else {
       throw new ForbiddenException()
     }
@@ -150,7 +193,10 @@ class CheckerConfigurationController {
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageService.storeMainFile,
-      (cc) => this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
+      (cc) => {
+        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
+        this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
+      })(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the main file for a task configuration
@@ -232,6 +278,33 @@ class CheckerConfigurationController {
       }
     } else {
       throw new ForbiddenException()
+    }
+  }
+
+  private def notifyChecker(tid: Int, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnChange =>
+        change.onCheckerConfigurationChange(taskService.getOne(tid).get, cc)
+      case _ =>
+    }
+  }
+
+  private def notifyCheckerMainFileUpload(cid: Int, task: Task, cc: CheckrunnerConfiguration, mainFile: Path): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnMainFileUpload =>
+        change.onCheckerMainFileUpload(cid, task, cc, mainFile)
+      case _ =>
+    }
+  }
+
+  private def notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnDelete =>
+        change.onCheckerConfigurationDelete(taskService.getOne(tid).get, cc)
+      case _ =>
     }
   }
 }

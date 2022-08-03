@@ -22,6 +22,8 @@ object DockerService {
     builder += DOCKER_RUN
     builder += DOCKER_REMOVE
     builder ++= config.mount.flatMap(getMountString)
+    builder ++= config.env.flatMap(getEnvString)
+    builder ++= config.networks.flatMap(getNetworkString)
     builder ++= config.dockerOptions
     builder += config.image
     builder ++= config.runOptions
@@ -31,6 +33,14 @@ object DockerService {
 
   private def getMountString(mount: (String, String)): Seq[String] = {
     Seq("-v", s"${mount._1}:${mount._2}")
+  }
+
+  private def getEnvString(mount: (String, String)): Seq[String] = {
+    Seq("-e", s"${mount._1}=${mount._2}")
+  }
+
+  private def getNetworkString(network: String): Seq[String] = {
+    Seq("--network", network)
   }
 
   /**

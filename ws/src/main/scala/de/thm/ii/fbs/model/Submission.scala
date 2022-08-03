@@ -9,4 +9,4 @@ import java.util.Date
   * @param id Submission id
   * @param results The submission results
   */
-case class Submission(submissionTime: Date, done: Boolean, id: Int, results: Array[CheckResult] = Array())
+case class Submission(submissionTime: Date, done: Boolean, id: Int, results: Array[CheckResult] = Array(), userID: Option[Int] = None)
