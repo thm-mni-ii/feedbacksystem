@@ -3,8 +3,7 @@ import {Observable, of} from 'rxjs';
 import {Task} from '../model/Task';
 import {HttpClient} from '@angular/common/http';
 import {UserTaskResult} from '../model/UserTaskResult';
-import {map} from 'rxjs/operators';
-import {saveAs as importedSaveAs} from 'file-saver';
+import {saveAs} from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
@@ -95,7 +94,7 @@ export class TaskService {
     return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}`, {responseType: 'arraybuffer'})
       .subscribe(response => {
         const blob = new Blob([response], {type: 'text/plain'});
-        importedSaveAs(blob, (filename ?  filename + '_export.txt' : '_export.txt'));
+        saveAs(blob, (filename ?  filename + '_export.txt' : '_export.txt'));
       });
   }
 }
