@@ -30,7 +30,9 @@
               "src/theme.scss",
               "src/styles.scss"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/marked/marked.min.js"
+            ],
             "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,

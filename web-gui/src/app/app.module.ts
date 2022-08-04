@@ -76,6 +76,7 @@ import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadshe
 import {SubtaskResultsComponent} from './page-components/subtask-results/subtask-results.component';
 import {ChartsModule} from 'ng2-charts';
 import {ResultsStatisticComponent} from './page-components/course-detail/course-results/results-statistic/results-statistic.component';
+import {MarkdownModule} from 'ngx-markdown';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -174,6 +175,7 @@ export const httpInterceptorProviders = [
         NgxMatTimepickerModule,
         NgxMatNativeDateModule,
         ChartsModule,
+        MarkdownModule.forRoot(),
     ],
     providers: [CookieService, httpInterceptorProviders],
     bootstrap: [AppComponent]
