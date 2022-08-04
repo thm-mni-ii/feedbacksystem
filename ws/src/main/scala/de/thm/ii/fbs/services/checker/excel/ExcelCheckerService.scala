@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, ExcelMediaInformationTasks, ExtendedInfoExcel, User}
-import de.thm.ii.fbs.services.checker.CheckerService
+import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException

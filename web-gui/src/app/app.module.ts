@@ -23,6 +23,7 @@ import {ImpressumDialogComponent} from './dialogs/impressum-dialog/impressum-dia
 import {CookieService} from 'ngx-cookie-service';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
+import {MarkdownModule} from 'ngx-markdown';
 import {NgxDropzoneModule} from 'ngx-dropzone';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
@@ -30,6 +31,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatTabsModule} from "@angular/material/tabs";
 
 import {NewCourseComponent} from './page-components/new-course/new-course.component';
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
@@ -76,7 +78,6 @@ import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadshe
 import {SubtaskResultsComponent} from './page-components/subtask-results/subtask-results.component';
 import {ChartsModule} from 'ng2-charts';
 import {ResultsStatisticComponent} from './page-components/course-detail/course-results/results-statistic/results-statistic.component';
-import {MarkdownModule} from 'ngx-markdown';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -104,81 +105,83 @@ export const httpInterceptorProviders = [
  * Root module to manage angular app
  */
 @NgModule({
-    declarations: [
-        AppComponent,
-        CreateGuestUserDialogComponent,
-        SidebarComponent,
-        NewCourseComponent,
-        DataprivacyDialogComponent,
-        ImpressumDialogComponent,
-        NotFoundComponent,
-        ChangePasswordComponent,
-        UserTeacherFilter,
-        SearchCoursesComponent,
-        CoursePreviewComponent,
-        CourseDetailComponent,
-        TaskDetailComponent,
-        UserManagementComponent,
-        AllSubmissionsComponent,
-        CourseResultsComponent,
-        TaskPreviewComponent,
-        SubmissionFileComponent,
-        SubmissionTextComponent,
-        SubmissionSpreadsheetComponent,
-        ResultsComponent,
-        MyCoursesComponent,
-        LoginComponent,
-        TaskNewDialogComponent,
-        CourseUpdateDialogComponent,
-        DropzoneComponent,
-        ParticipantsComponent,
-        ConfigurationListComponent,
-        MenuBarComponent,
-        NewCheckerDialogComponent,
-        ConfirmDialogComponent,
-        InfoComponent,
-        ReversePipe,
-        GoToComponent,
-        TaskPointsDialogComponent,
-        EvaluationResultsComponent,
-        GotoLinksDialogComponent,
-        SpreadsheetComponent,
-        SpreadsheetDialogComponent,
-        SubtaskResultsComponent,
-        ResultsStatisticComponent,
-    ],
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        LayoutModule,
-        AppRoutingModule,
-        MaterialComponentsModule,
-        FormsModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        JwtModule.forRoot({
-            config: {
-                tokenGetter: tokenGetter,
-            }
-        }),
-        NgxDropzoneModule,
-        MatSlideToggleModule,
-        MatDialogModule,
-        MatProgressBarModule,
-        MatGridListModule,
-        MatSelectModule,
-        MatFormFieldModule,
-        MatSliderModule,
-        NgxMatDatetimePickerModule,
-        NgxMatTimepickerModule,
-        NgxMatNativeDateModule,
-        ChartsModule,
-        MarkdownModule.forRoot(),
-    ],
-    providers: [CookieService, httpInterceptorProviders],
-    bootstrap: [AppComponent]
+  declarations: [
+    AppComponent,
+    CreateGuestUserDialogComponent,
+    SidebarComponent,
+    NewCourseComponent,
+    DataprivacyDialogComponent,
+    ImpressumDialogComponent,
+    NotFoundComponent,
+    ChangePasswordComponent,
+    UserTeacherFilter,
+    SearchCoursesComponent,
+    CoursePreviewComponent,
+    CourseDetailComponent,
+    TaskDetailComponent,
+    UserManagementComponent,
+    AllSubmissionsComponent,
+    CourseResultsComponent,
+    TaskPreviewComponent,
+    SubmissionFileComponent,
+    SubmissionTextComponent,
+    SubmissionSpreadsheetComponent,
+    ResultsComponent,
+    MyCoursesComponent,
+    LoginComponent,
+    TaskNewDialogComponent,
+    CourseUpdateDialogComponent,
+    DropzoneComponent,
+    ParticipantsComponent,
+    ConfigurationListComponent,
+    MenuBarComponent,
+    NewCheckerDialogComponent,
+    ConfirmDialogComponent,
+    InfoComponent,
+    ReversePipe,
+    GoToComponent,
+    TaskPointsDialogComponent,
+    EvaluationResultsComponent,
+    GotoLinksDialogComponent,
+    SpreadsheetComponent,
+    SpreadsheetDialogComponent,
+    SubtaskResultsComponent,
+    ResultsStatisticComponent,
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    LayoutModule,
+    AppRoutingModule,
+    MaterialComponentsModule,
+    FormsModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    MarkdownModule.forRoot(),
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatTabsModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter,
+      }
+    }),
+    NgxDropzoneModule,
+    MatSlideToggleModule,
+    MatDialogModule,
+    MatProgressBarModule,
+    MatGridListModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatSliderModule,
+    NgxMatDatetimePickerModule,
+    NgxMatTimepickerModule,
+    NgxMatNativeDateModule,
+    ChartsModule,
+  ],
+  entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent],
+  providers: [CookieService, httpInterceptorProviders],
+  bootstrap: [AppComponent]
 })
 export class AppModule {
 }
