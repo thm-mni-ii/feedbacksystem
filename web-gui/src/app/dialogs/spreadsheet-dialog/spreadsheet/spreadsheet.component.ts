@@ -1,5 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import canvasDatagrid from 'canvas-datagrid/dist/canvas-datagrid.debug.js';
+// @ts-ignore
+import canvasDatagrid from 'canvas-datagrid';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -28,7 +29,7 @@ export class SpreadsheetComponent implements OnInit {
   }
 
   @Output()
-  private select = new EventEmitter<string[]>();
+  private selection = new EventEmitter<string[]>();
 
   constructor(private elementRef: ElementRef) {}
 
@@ -38,7 +39,7 @@ export class SpreadsheetComponent implements OnInit {
       const {bottom, left, right, top} = e.selectionBounds;
       const first = top + 1 + this.toColName(left);
       const second = bottom + 1 + this.toColName(right);
-      this.select.emit([first, second]);
+      this.selection.emit([first, second]);
     });
     this.elementRef.nativeElement.appendChild(this.grid);
   }
