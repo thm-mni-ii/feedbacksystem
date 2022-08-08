@@ -1,23 +1,20 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
-import {MatInputModule} from '@angular/material/input';
-import {MatButtonModule} from '@angular/material/button';
-import {MatMenuModule} from '@angular/material/menu';
+import {SubmissionService} from "../../service/submission.service";
 
 @Component({
   selector: 'app-results',
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.scss']
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnDestroy {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ['checkerType', 'resultText', 'exitCode'];
 
   allSubmissions: Submission[];
   displayedSubmission: Submission;
-
 
   resultDataSource: MatTableDataSource<any>[] = [];
   resultColumns = [];
@@ -26,16 +23,37 @@ export class ResultsComponent {
   expectedColumns = [];
 
   tableViewAsGrid = false;
-  
 
-  @Input() set submissions(subs: Submission[]) {
-    this.allSubmissions = subs;
-    this.display(subs[subs.length - 1]);
+  index: number;
+
+  @Input() set submissions(submissions: Submission[]) {
+    this.allSubmissions = submissions;
+    this.selectLast();
+    this.display(submissions[submissions.length - 1]);
   }
 
   @Input() displayTables: boolean;
 
   @Input() context: {uid: number, cid: number, tid: number};
+
+  subscription: any;
+
+  constructor(private submissionService: SubmissionService) {
+    this.subscription = this.submissionService.getFileSubmissionEmitter()
+      .subscribe(isFileSubmitted => {
+        if(isFileSubmitted)
+          this.selectLast();
+      });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  handleSubmission(event): void {
+    const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
+    this.display(submission);
+  }
 
   display(submission: Submission) {
     if (submission === undefined) {
@@ -67,5 +85,9 @@ export class ResultsComponent {
 
   toggleTableView() {
     this.tableViewAsGrid = !this.tableViewAsGrid;
+  }
+
+  selectLast() {
+    setTimeout(() => (this.index = this.allSubmissions.length), 1);
   }
 }

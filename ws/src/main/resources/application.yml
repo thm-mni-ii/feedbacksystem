@@ -46,6 +46,7 @@ services:
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
+    selfUrl: ${SELF_URL:https://localhost}
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -61,6 +62,10 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
     open-in-view: false
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/}
+      database: ${MONGODB_DATABASE:default}
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

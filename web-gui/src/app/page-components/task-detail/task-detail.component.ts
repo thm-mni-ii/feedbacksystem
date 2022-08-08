@@ -142,6 +142,7 @@ export class TaskDetailComponent implements OnInit {
       return;
     }
     this.submit();
+    this.submissionService.emitFileSubmission();
   }
 
   private submit() {
@@ -245,5 +246,9 @@ export class TaskDetailComponent implements OnInit {
 
   checkersConfigurable() {
     return this.ready && this.submissionTypeOfTask() !== 'spreadsheet';
+  }
+
+  downloadTask() {
+    this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
   }
 }

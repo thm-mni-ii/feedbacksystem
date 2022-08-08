@@ -150,7 +150,7 @@ class TaskService {
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
     deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
-    id = res.getInt("task_id"))
+    id = res.getInt("task_id"), courseID = res.getInt("course_id"))
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
     res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null)

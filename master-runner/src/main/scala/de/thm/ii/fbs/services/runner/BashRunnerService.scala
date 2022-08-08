@@ -20,7 +20,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   private val SOURCE_FOLDER = s"/runner"
   private var tmpFolder: Option[Path] = None
 
-  /**
+  /**0
     * Create a DockerCmd Configuration for a BashRunner
     *
     * @return DockerCmd Config
