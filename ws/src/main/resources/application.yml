@@ -25,6 +25,11 @@ message:
 security:
   basic:
     enabled: false
+  antiBruteForce:
+    trustedProxyCount: ${TRUSTED_PROXIES:0}
+    interval: ${BRUTEFORCE_INTERVAL:600}
+    maxAttempts: ${BRUTEFORCE_ATTEMPTS:10}
+    protectedPaths: "/api/v1/login/ldap,/api/v1/login/local"
 server:
   host: ${SERVER_HOST:https://localhost}
   port: 443
@@ -41,6 +46,7 @@ services:
   masterRunner:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
+    selfUrl: ${SELF_URL:https://localhost}
 spring:
   main:
     allow-bean-definition-overriding: true

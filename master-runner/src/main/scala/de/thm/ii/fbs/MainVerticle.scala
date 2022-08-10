@@ -1,7 +1,7 @@
 package de.thm.ii.fbs
 
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlRunnerVerticle}
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlRunnerVerticle}
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.config.{ConfigRetriever, ConfigRetrieverOptions, ConfigStoreOptions}
 import io.vertx.scala.core.DeploymentOptions
@@ -58,6 +58,14 @@ class MainVerticle extends ScalaVerticle {
           .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
 
         vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlRunnerVerticle], sqlRunnerVerticleOptions)
+
+        /*Start SQL Checker*/
+        val sqlCheckerVerticleOptions = DeploymentOptions()
+          .setConfig(config)
+          .setWorker(true)
+          .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
+
+        vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlCheckerVerticle], sqlCheckerVerticleOptions)
       case Failure(exception) =>
         logger.warn("Could not load Config", exception) //TODO
         vertx.close()

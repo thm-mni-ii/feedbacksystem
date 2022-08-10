@@ -1,10 +1,11 @@
-package de.thm.ii.fbs.services.checker
+package de.thm.ii.fbs.services.checker.excel
 
-import java.io.{File, FileInputStream}
+import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange}
 import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
 
+import java.io.{File, FileInputStream}
 import java.text.NumberFormat
 import java.util.Locale
 import scala.util.matching.Regex
@@ -13,37 +14,38 @@ import scala.util.matching.Regex
   * A Spreadsheet Service
   */
 @Service
-class SpreadsheetService {
+class ExcelService {
   private case class Cords(row: Int, col: Int)
 
   /**
     * Gets the values in the selected field range
     * @param spreadsheet the spreadsheet field
-    * @param userIDField the field id of the field in which the userID should be inserted
-    * @param userID      the userID to insert
-    * @param fields      the field for which to get the values
+    * @param excelMediaInformation the spreadsheet Configurations
     * @return the values
     */
-  def getFields(spreadsheet: File, userIDField: String, userID: String, fields: String): Seq[(String, String)] = {
-    val sheet = this.initSheet(spreadsheet, userIDField, userID)
-    val (start, end) = this.parseCellRange(fields)
-    val labels = this.getInCol(sheet, start.col, start.row, end.row)
+  def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): Seq[(String, XSSFCell)] = {
+    val sheet = this.initSheet(spreadsheet, excelMediaInformation)
+    val (start, end) = this.parseCellRange(excelMediaInformation.outputFields)
     val values = this.getInCol(sheet, end.col, start.row, end.row)
-    labels.zip(values)
+    values
   }
 
-  private def initSheet(spreadsheet: File, userIDField: String, userID: String): XSSFSheet = {
+  private def initSheet(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): XSSFSheet = {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
-    val sheet = workbook.getSheetAt(0)
-    this.setCell(sheet, this.parseCellAddress(userIDField), userID)
+    val sheet = workbook.getSheetAt(excelMediaInformation.sheetIdx)
+    this.setCells(workbook, excelMediaInformation.changeFields)
     XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
     sheet
   }
 
-  private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[String] =
+  private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[(String, XSSFCell)] =
     (start to end).map(i => {
-      val cell = sheet.getRow(i).getCell(col)
+      val row = sheet.getRow(i)
+      val cell = if (row != null) {
+        row.getCell(col)
+      } else { null }
+
       val res = if (cell == null) {
         ""
       } else {
@@ -51,10 +53,10 @@ class SpreadsheetService {
           case CellType.FORMULA => try {
             germanFormat.format(cell.getNumericCellValue)
           } catch {
-            case e: IllegalStateException => try {
+            case _: IllegalStateException => try {
               cell.getStringCellValue
             } catch {
-              case e: IllegalStateException =>
+              case _: IllegalStateException =>
                 throw new Exception(i, col, cell.getErrorCellString)
             }
           }
@@ -63,11 +65,14 @@ class SpreadsheetService {
           case _ => ""
         }
       }
-      res
+      (res, cell)
     })
 
-  private def setCell(sheet: XSSFSheet, cords: Cords, value: String): Unit = {
-    sheet.getRow(cords.row).getCell(cords.col).setCellValue(value)
+  private def setCells(workbook: XSSFWorkbook, changeFields: List[ExcelMediaInformationChange]): Unit = {
+    changeFields.foreach(f => {
+      val sheet = workbook.getSheetAt(f.sheetIdx)
+      this.getCell(sheet, f.cell).setCellValue(f.newValue)
+    })
   }
 
   private def parseCellRange(range: String): (Cords, Cords) = {
@@ -78,18 +83,26 @@ class SpreadsheetService {
     (this.parseCellAddress(split(0)), this.parseCellAddress(split(1)))
   }
 
-  private val regexp = new Regex("(\\d+)([A-Z]+)")
+  private val regexp = new Regex("([A-Z]+)(\\d+)")
 
   private def parseCellAddress(address: String): Cords = {
     val m = regexp.findFirstMatchIn(address) match {
       case Some(m) => m
       case _ => throw new IllegalArgumentException(address + " is not a valid cell address")
     }
-    Cords(Integer.parseInt(m.group(1))-1, this.colToInt(m.group(2).charAt(0))-1)
+    Cords(Integer.parseInt(m.group(2))-1, this.colToInt(m.group(1).charAt(0))-1)
   }
 
   private def colToInt(col: Char): Int =
     col.toInt - 64
+
+  private def getCell(sheet: XSSFSheet, cell: String) = {
+    val cords = this.parseCellAddress(cell)
+    val col = sheet.getRow(cords.row).getCell(cords.col)
+    if (col == null) throw new Exception(cords.row, cords.col, s"Cell '$cell' Not Found")
+
+    col
+  }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 

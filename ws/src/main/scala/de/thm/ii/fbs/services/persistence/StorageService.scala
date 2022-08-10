@@ -100,6 +100,20 @@ class StorageService {
   def getSolutionFile(sid: Int): String = getFileContent(pathToSolutionFile(sid))
 
   /**
+    * Gets the Content of the main file
+    * @param ccid Checkrunner id
+    * @return The Solution file content
+    */
+  def getMainFile(ccid: Int): String = getFileContent(pathToMainFile(ccid))
+
+  /**
+    * Gets the Content of the secondary file
+    * @param ccid Checkrunner id
+    * @return The Solution file content
+    */
+  def getSecondaryFile(ccid: Int): String = getFileContent(pathToSecondaryFile(ccid))
+
+  /**
     * Delete a main file
     * @param tid Task id
     * @return True if deteled, false if not file exists
