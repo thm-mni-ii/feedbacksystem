@@ -12,8 +12,6 @@ import {mergeMap, map} from 'rxjs/operators';
 import {CheckerService} from '../../service/checker.service';
 import {CheckerConfig} from '../../model/CheckerConfig';
 
-const defaultMediaType = 'text/plain';
-
 /**
  * Dialog to create or update a task
  */
@@ -26,8 +24,8 @@ export class TaskNewDialogComponent implements OnInit {
   taskForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl(''),
-    deadline: new FormControl(this.getDefaultDeadline()),
-    mediaType: new FormControl(defaultMediaType),
+    deadline: new FormControl(new Date()),
+    mediaType: new FormControl(''),
     exelFile: new FormControl(''),
     userIDField: new FormControl(''),
     inputFields: new FormControl(''),
@@ -35,10 +33,11 @@ export class TaskNewDialogComponent implements OnInit {
     pointFields: new FormControl(''),
     decimals: new FormControl(2),
   });
+
   isUpdate: boolean;
   courseId: number;
   task: Task = {
-    deadline: this.getDefaultDeadline(),
+    deadline: new Date().toISOString(),
     description: '',
     mediaType: '',
     name: '',
@@ -125,7 +124,13 @@ export class TaskNewDialogComponent implements OnInit {
           if (this.task.mediaType === 'application/x-spreadsheet') {
             const checkerConfig: CheckerConfig = {
               checkerType: 'spreadsheet',
-              ord: 0
+              ord: 0,
+              checkerTypeInformation: {
+                showExtendedHints: false,
+                showExtendedHintsAt: 0,
+                showHints: false,
+                showHintsAt: 0,
+              }
             };
             const infoFile = new File([JSON.stringify(this.task.mediaInformation)], 'info.json');
             return this.checkerService.createChecker(this.courseId, task.id, checkerConfig).pipe(
@@ -194,11 +199,5 @@ export class TaskNewDialogComponent implements OnInit {
       }
       this.taskForm.patchValue(values);
     });
-  }
-
-  getDefaultDeadline() {
-    const currentDateAndOneMonthLater = new Date();
-    currentDateAndOneMonthLater.setMonth(currentDateAndOneMonthLater.getMonth() + 1);
-    return currentDateAndOneMonthLater.toISOString();
   }
 }

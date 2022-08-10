@@ -4,4 +4,10 @@ export interface CheckerConfig {
   mainFileUploaded?: boolean;
   secondaryFileUploaded?: boolean;
   ord: number;
+  checkerTypeInformation: {
+    showHints: boolean;
+    showHintsAt: number;
+    showExtendedHints: boolean;
+    showExtendedHintsAt: number;
+  };
 }

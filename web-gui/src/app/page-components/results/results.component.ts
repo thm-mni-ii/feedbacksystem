@@ -23,28 +23,14 @@ export class ResultsComponent {
 
   tableViewAsGrid = false;
 
-  index: number;
-
-  @Input() set submissions(submissions: Submission[]) {
-    const lengthHasChanged = this.allSubmissions != submissions;
-
-    this.allSubmissions = submissions;
-    if (lengthHasChanged) {
-      this.selectLast();
-      this.display(submissions[submissions.length - 1]);
-    }
+  @Input() set submissions(subs: Submission[]) {
+    this.allSubmissions = subs;
+    this.display(subs[subs.length - 1]);
   }
 
   @Input() displayTables: boolean;
 
   @Input() context: {uid: number, cid: number, tid: number};
-
-  subscription: any;
-
-  handleSubmission(event): void {
-    const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
-    this.display(submission);
-  }
 
   display(submission: Submission) {
     if (submission === undefined) {
@@ -76,9 +62,5 @@ export class ResultsComponent {
 
   toggleTableView() {
     this.tableViewAsGrid = !this.tableViewAsGrid;
-  }
-
-  selectLast() {
-    setTimeout(() => (this.index = this.allSubmissions.length), 1);
   }
 }

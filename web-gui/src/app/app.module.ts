@@ -31,7 +31,6 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
-import {MatTabsModule} from "@angular/material/tabs";
 
 import {NewCourseComponent} from './page-components/new-course/new-course.component';
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
@@ -78,6 +77,10 @@ import {SpreadsheetDialogComponent} from './dialogs/spreadsheet-dialog/spreadshe
 import {SubtaskResultsComponent} from './page-components/subtask-results/subtask-results.component';
 import {ChartsModule} from 'ng2-charts';
 import {ResultsStatisticComponent} from './page-components/course-detail/course-results/results-statistic/results-statistic.component';
+import {SqlCheckerComponent} from './page-components/sql-checker/sql-checker.component';
+import {SqlCheckerResultsComponent} from './page-components/sql-checker/sql-checker-results/sql-checker-results.component';
+import {MatTableModule} from '@angular/material/table';
+import {MatSortModule} from '@angular/material/sort';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -147,6 +150,8 @@ export const httpInterceptorProviders = [
     SpreadsheetDialogComponent,
     SubtaskResultsComponent,
     ResultsStatisticComponent,
+    SqlCheckerComponent,
+    SqlCheckerResultsComponent,
   ],
   imports: [
     BrowserModule,
@@ -160,7 +165,6 @@ export const httpInterceptorProviders = [
     MarkdownModule.forRoot(),
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTabsModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
@@ -178,6 +182,8 @@ export const httpInterceptorProviders = [
     NgxMatTimepickerModule,
     NgxMatNativeDateModule,
     ChartsModule,
+    MatTableModule,
+    MatSortModule,
   ],
   entryComponents: [DataprivacyDialogComponent, CreateGuestUserDialogComponent, ImpressumDialogComponent],
   providers: [CookieService, httpInterceptorProviders],
