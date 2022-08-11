@@ -5,6 +5,7 @@
     <span class="spacer"></span>
 
     <!--<button mat-icon-button (click)="reRun()" [disabled]="this.lastSubmission == null" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>-->
+    <button mat-icon-button *ngIf="canEdit()" (click)="downloadTask()" matTooltip="Aufgabe Exportieren"><mat-icon class="logout-icon">save_alt</mat-icon></button>
     <button mat-icon-button *ngIf="canEdit() && checkersConfigurable()" [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']" matTooltip="Überprüfung konfigurieren"><mat-icon class="logout-icon">engineering</mat-icon></button>
     <button mat-icon-button *ngIf="canEdit()" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
     <mat-menu #settings="matMenu">
@@ -50,8 +51,11 @@
 
       <app-results *ngIf="submissions" [submissions]="submissions" [context]="{uid: uid, cid: courseId, tid: task.id}"></app-results>
 <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
+
+
     </mat-card-content>
   </mat-card>
+
 <!--  <div *ngFor="let submission of submissions | reverse">-->
 <!--    {{submission.id}}-->
 <!--    <mat-card *ngFor="let result of submission.results">-->

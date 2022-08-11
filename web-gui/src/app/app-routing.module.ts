@@ -15,8 +15,6 @@ import {CourseResultsComponent} from './page-components/course-detail/course-res
 import {ConfigurationListComponent} from './page-components/configuration-list/configuration-list.component';
 import {ParticipantsComponent} from './tool-components/participants/participants.component';
 import {GoToComponent} from './page-components/goto/goto.component';
-import {SqlCheckerComponent} from './page-components/sql-checker/sql-checker.component';
-import {SqlCheckerResultsComponent} from './page-components/sql-checker/sql-checker-results/sql-checker-results.component';
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -29,8 +27,6 @@ const routes: Routes = [
       {path: 'courses/:id/results', component: CourseResultsComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/tasks/:tid/configurations', component: ConfigurationListComponent, canActivate: [AuthGuard]},
       {path: 'courses/:id/participants', component: ParticipantsComponent, canActivate: [AuthGuard]},
-      {path: 'courses/:id/sql-checker', component: SqlCheckerComponent, canActivate: [AuthGuard]},
-      {path: 'courses/:id/sql-checker-results/:tid', component: SqlCheckerResultsComponent, canActivate: [AuthGuard]},
 
       // Admin
       {path: 'admin/user-management', component: UserManagementComponent, canActivate: [AdminGuard]},
