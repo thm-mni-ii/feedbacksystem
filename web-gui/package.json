@@ -29,7 +29,6 @@
     "@fontsource/roboto": "^4.5.8",
     "canvas-datagrid": "^0.4.5",
     "chart.js": "^2.9.4",
-    "core-js": "^3.6.4",
     "file-saver": "^2.0.5",
     "ng2-charts": "^2.4.3",
     "ngx-cookie-service": "^14.0.1",
