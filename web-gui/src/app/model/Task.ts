@@ -4,7 +4,9 @@ export interface Task {
   description?: string;
   deadline: string;
   mediaType?: string;
-  mediaInformation?: SpreadsheetMediaInformation | SpreadsheetResponseMediaInformation;
+  mediaInformation?:
+    | SpreadsheetMediaInformation
+    | SpreadsheetResponseMediaInformation;
 }
 
 export interface SpreadsheetMediaInformation {

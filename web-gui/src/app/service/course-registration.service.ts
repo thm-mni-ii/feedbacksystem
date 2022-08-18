@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import {Course} from '../model/Course';
-import {HttpClient} from '@angular/common/http';
-import {Participant} from '../model/Participant';
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { Course } from "../model/Course";
+import { HttpClient } from "@angular/common/http";
+import { Participant } from "../model/Participant";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class CourseRegistrationService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * @param uid User id
@@ -33,8 +33,14 @@ export class CourseRegistrationService {
    * @param roleName Either, DOCENT, TUTOR, or STUDENT
    * @return Observable that succeeds on successful registration
    */
-  registerCourse(uid: number, cid: number, roleName: string = 'STUDENT'): Observable<void> {
-    return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}`, {roleName: roleName});
+  registerCourse(
+    uid: number,
+    cid: number,
+    roleName: string = "STUDENT"
+  ): Observable<void> {
+    return this.http.put<void>(`/api/v1/users/${uid}/courses/${cid}`, {
+      roleName: roleName,
+    });
   }
 
   /**
@@ -52,7 +58,9 @@ export class CourseRegistrationService {
    * @param cid Course id
    */
   deregisterRole(cid: number, roleName: string): Observable<void> {
-    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {roleName});
+    return this.http.put<void>(`/api/v1/courses/${cid}/deregisterrole`, {
+      roleName,
+    });
   }
 
   /**

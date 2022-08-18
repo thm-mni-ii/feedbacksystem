@@ -1,4 +1,4 @@
-import {EvaluationContainerResult} from './EvaluationContainerResult';
+import { EvaluationContainerResult } from "./EvaluationContainerResult";
 
 export interface EvaluationContainerResults {
   bonusPoints: number;

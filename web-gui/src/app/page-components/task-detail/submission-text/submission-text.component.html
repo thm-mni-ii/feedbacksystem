@@ -1,4 +1,14 @@
-<mat-form-field style="width: 100%;" class="user-input-text" appearance="outline">
+<mat-form-field
+  style="width: 100%"
+  class="user-input-text"
+  appearance="outline"
+>
   <mat-label>Abgabe Text:</mat-label>
-  <textarea style="height: 60px;" matInput type="text" (ngModelChange)="updateSubmission($event)" [(ngModel)]="toSubmit"></textarea>
+  <textarea
+    style="height: 60px"
+    matInput
+    type="text"
+    (ngModelChange)="updateSubmission($event)"
+    [(ngModel)]="toSubmit"
+  ></textarea>
 </mat-form-field>

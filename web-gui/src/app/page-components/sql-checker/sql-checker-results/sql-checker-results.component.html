@@ -1,77 +1,107 @@
 <div class="container">
   <app-menu-bar *ngIf="role || isAuthorized()">
-    <button *ngIf="showRight" mat-icon-button [routerLink]="['/', 'courses', courseID, 'sql-checker']" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+    <button
+      *ngIf="showRight"
+      mat-icon-button
+      [routerLink]="['/', 'courses', courseID, 'sql-checker']"
+      matTooltip="Zurück zum Kurs"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
     <span class="spacer" *ngIf="showRight">SQL-Checker</span>
-    <span class="spacer" *ngIf="!showRight"><button mat-button (click)="standardEvent()" >
-      Zurück zur Übersicht</button></span>
+    <span class="spacer" *ngIf="!showRight"
+      ><button mat-button (click)="standardEvent()">
+        Zurück zur Übersicht
+      </button></span
+    >
   </app-menu-bar>
-  <div class="table-title" *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker">{{showPath}}</div>
+  <div
+    class="table-title"
+    *ngIf="!showRight && !showCenterAttributeChecker && !showCenterTableChecker"
+  >
+    {{ showPath }}
+  </div>
   <div class="chart-box">
-    <div class="chart-left"*ngIf="showLeft">
+    <div class="chart-left" *ngIf="showLeft">
       <div class="chart-title">Table Checker</div>
-      <canvas baseChart
-            [data]="pieChartDataLeft"
-            [labels]="pieChartLabelsLeft"
-            [chartType]="pieChartTypeLeft"
-            [options]="pieChartOptionsLeft"
-            [plugins]="pieChartPluginsLeft"
-            [legend]="pieChartLegendLeft"
-            [colors]="pieChartColors"
-              (chartClick)="tableCheckerWrongTables($event)">
+      <canvas
+        baseChart
+        [data]="pieChartDataLeft"
+        [labels]="pieChartLabelsLeft"
+        [chartType]="pieChartTypeLeft"
+        [options]="pieChartOptionsLeft"
+        [plugins]="pieChartPluginsLeft"
+        [legend]="pieChartLegendLeft"
+        [colors]="pieChartColors"
+        (chartClick)="tableCheckerWrongTables($event)"
+      >
       </canvas>
     </div>
     <div class="chart-right" *ngIf="showRight">
       <div class="chart-title">Attribut Checker</div>
-      <canvas baseChart
-              [data]="pieChartDataRight"
-              [labels]="pieChartLabelsRight"
-              [chartType]="pieChartTypeRight"
-              [options]="pieChartOptionsRight"
-              [plugins]="pieChartPluginsRight"
-              [legend]="pieChartLegendRight"
-              [colors]="pieChartColors"
-              (chartClick)="clickAttributeChart($event)">
+      <canvas
+        baseChart
+        [data]="pieChartDataRight"
+        [labels]="pieChartLabelsRight"
+        [chartType]="pieChartTypeRight"
+        [options]="pieChartOptionsRight"
+        [plugins]="pieChartPluginsRight"
+        [legend]="pieChartLegendRight"
+        [colors]="pieChartColors"
+        (chartClick)="clickAttributeChart($event)"
+      >
       </canvas>
     </div>
   </div>
   <div class="chart-center" *ngIf="showCenterTableChecker">
-    <div class="chart-title">{{showPath}}</div>
-    <canvas baseChart width="40" height="10"
-            [data]="pieChartDataCenter"
-            [labels]="pieChartLabelsCenter"
-            [chartType]="pieChartTypeCenter"
-            [options]="pieChartOptionsCenter"
-            [plugins]="pieChartPluginsCenter"
-            [legend]="pieChartLegendCenter"
-            [colors]="pieChartColors"
-            (chartClick)="clickCenterChartTableChecker($event)">
+    <div class="chart-title">{{ showPath }}</div>
+    <canvas
+      baseChart
+      width="40"
+      height="10"
+      [data]="pieChartDataCenter"
+      [labels]="pieChartLabelsCenter"
+      [chartType]="pieChartTypeCenter"
+      [options]="pieChartOptionsCenter"
+      [plugins]="pieChartPluginsCenter"
+      [legend]="pieChartLegendCenter"
+      [colors]="pieChartColors"
+      (chartClick)="clickCenterChartTableChecker($event)"
+    >
     </canvas>
   </div>
   <div class="chart-center" *ngIf="showCenterAttributeChecker">
-    <div class="chart-title">{{showPath}}</div>
-    <canvas baseChart width="40" height="10"
-            [data]="pieChartDataCenter"
-            [labels]="pieChartLabelsCenter"
-            [chartType]="pieChartTypeCenter"
-            [options]="pieChartOptionsCenter"
-            [plugins]="pieChartPluginsCenter"
-            [legend]="pieChartLegendCenter"
-            [colors]="pieChartColors"
-            (chartClick)="clickCenterChartAttributeChecker($event)">
+    <div class="chart-title">{{ showPath }}</div>
+    <canvas
+      baseChart
+      width="40"
+      height="10"
+      [data]="pieChartDataCenter"
+      [labels]="pieChartLabelsCenter"
+      [chartType]="pieChartTypeCenter"
+      [options]="pieChartOptionsCenter"
+      [plugins]="pieChartPluginsCenter"
+      [legend]="pieChartLegendCenter"
+      [colors]="pieChartColors"
+      (chartClick)="clickCenterChartAttributeChecker($event)"
+    >
     </canvas>
   </div>
-  <div class="result-table" *ngIf="showResult" >
+  <div class="result-table" *ngIf="showResult">
     <table mat-table [dataSource]="resultTable" class="mat-elevation-z8">
       <ng-container matColumnDef="userID">
         <th mat-header-cell *matHeaderCellDef>userID</th>
-        <td mat-cell *matCellDef="let element">{{ element.userId}}</td>
+        <td mat-cell *matCellDef="let element">{{ element.userId }}</td>
       </ng-container>
       <ng-container matColumnDef="userQuery">
         <th mat-header-cell *matHeaderCellDef>userQuery</th>
         <td mat-cell *matCellDef="let element">{{ element.statement }}</td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumnsWrongTable"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumnsWrongTable"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumnsWrongTable"
+      ></tr>
     </table>
   </div>
 </div>

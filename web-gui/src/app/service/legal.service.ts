@@ -1,12 +1,12 @@
-import { Injectable } from '@angular/core';
-import {Observable} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class LegalService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Returns the impressum
@@ -26,8 +26,10 @@ export class LegalService {
    * Returns the information if a user accepted the terms of usage
    * @param uid the user id
    */
-  getTermsOfUse(uid: number): Observable<{accepted: boolean}> {
-    return this.http.get<{accepted: boolean}>(`/api/v1/legal/termsofuse/${uid}`);
+  getTermsOfUse(uid: number): Observable<{ accepted: boolean }> {
+    return this.http.get<{ accepted: boolean }>(
+      `/api/v1/legal/termsofuse/${uid}`
+    );
   }
 
   /**

@@ -1,4 +1,4 @@
-@import '../../../colors';
+@import "../../../colors";
 
 mat-toolbar {
   justify-content: center;
@@ -74,10 +74,12 @@ button {
   width: 100%;
   display: block;
   text-align: center;
-  h1, h2 {
+  h1,
+  h2 {
     font-weight: 300;
     color: #fff;
-    font-family: Roboto,"Helvetica Neue Light","Helvetica Neue",Helvetica,Arial,"Lucida Grande",sans-serif;
+    font-family: Roboto, "Helvetica Neue Light", "Helvetica Neue", Helvetica,
+      Arial, "Lucida Grande", sans-serif;
   }
   h1 {
     padding-top: 10px;

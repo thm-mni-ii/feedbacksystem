@@ -7,7 +7,7 @@
   margin-bottom: 30px;
   padding: 10px;
 }
-.chart-box{
+.chart-box {
   margin-top: 100px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -15,34 +15,34 @@
   grid-column-gap: 0px;
   grid-row-gap: 0px;
 }
-.chart-left{
+.chart-left {
   grid-area: 1 / 1 / 2 / 2;
 }
-.chart-right{
+.chart-right {
   grid-area: 1 / 2 / 2 / 3;
 }
-.chart-center{
+.chart-center {
   grid-area: 1 / 1 / 1 / 1;
 }
-.chart-title{
+.chart-title {
   text-align: center;
   font-size: 22pt;
   font-family: sans-serif;
   margin-top: 30px;
 }
-.solution-box{
+.solution-box {
   text-align: center;
   font-size: 16pt;
   font-family: sans-serif;
   margin-top: 15px;
 }
-.table-title{
+.table-title {
   text-align: center;
   font-size: 22pt;
   font-family: sans-serif;
   margin-top: 30px;
 }
-.result-table{
+.result-table {
   font-size: 16pt;
   width: 100%;
   table-layout: fixed;
@@ -97,9 +97,9 @@
   hyphens: auto;
 }
 
-.mat-header-cell, mat-cell {
+.mat-header-cell,
+mat-cell {
   justify-content: center;
   font-size: 14pt;
   color: black;
 }
-

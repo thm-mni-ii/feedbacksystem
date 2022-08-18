@@ -1,16 +1,16 @@
-import {Component, Input} from '@angular/core';
-import {Submission} from '../../model/Submission';
-import {MatTableDataSource} from '@angular/material/table';
-import {CheckResult} from '../../model/CheckResult';
+import { Component, Input } from "@angular/core";
+import { Submission } from "../../model/Submission";
+import { MatTableDataSource } from "@angular/material/table";
+import { CheckResult } from "../../model/CheckResult";
 
 @Component({
-  selector: 'app-results',
-  templateUrl: './results.component.html',
-  styleUrls: ['./results.component.scss']
+  selector: "app-results",
+  templateUrl: "./results.component.html",
+  styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent {
   dataSource = new MatTableDataSource<CheckResult>();
-  columns = ['checkerType', 'resultText', 'exitCode'];
+  columns = ["checkerType", "resultText", "exitCode"];
 
   allSubmissions: Submission[];
   displayedSubmission: Submission;
@@ -37,12 +37,14 @@ export class ResultsComponent {
 
   @Input() displayTables: boolean;
 
-  @Input() context: {uid: number, cid: number, tid: number};
+  @Input() context: { uid: number; cid: number; tid: number };
 
   subscription: any;
 
   handleSubmission(event): void {
-    const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
+    const submission = this.allSubmissions.find(
+      (item) => this.allSubmissions.indexOf(item) == event.index
+    );
     this.display(submission);
   }
 
@@ -58,9 +60,9 @@ export class ResultsComponent {
     this.expectedDataSource = [];
     this.expectedColumns = [];
 
-    submission.results.forEach(res => {
+    submission.results.forEach((res) => {
       const extInfo: any = res.extInfo;
-      if (extInfo && extInfo.type === 'compareTable') {
+      if (extInfo && extInfo.type === "compareTable") {
         this.resultColumns.push(extInfo.result.head);
         const resultSource = new MatTableDataSource<any>();
         resultSource.data = extInfo.result.rows;

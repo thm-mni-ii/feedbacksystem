@@ -2,9 +2,16 @@
   <h3>Ergebnisse der Abgaben</h3>
   <div class="submission-list">
     <div class="scrolling-wrapper">
-    <mat-tab-group (selectedTabChange)="handleSubmission($event)" [(selectedIndex)]="index" animationDuration="0ms">
-      <mat-tab *ngFor="let submission of allSubmissions; let i = index" label="{{i+1}}. Abgabe (ID: {{submission.id}})"></mat-tab>
-    </mat-tab-group>
+      <mat-tab-group
+        (selectedTabChange)="handleSubmission($event)"
+        [(selectedIndex)]="index"
+        animationDuration="0ms"
+      >
+        <mat-tab
+          *ngFor="let submission of allSubmissions; let i = index"
+          label="{{ i + 1 }}. Abgabe (ID: {{ submission.id }})"
+        ></mat-tab>
+      </mat-tab-group>
     </div>
   </div>
 
@@ -12,64 +19,87 @@
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="checkerType">
         <th mat-header-cell *matHeaderCellDef>Checker Typ</th>
-        <td mat-cell *matCellDef="let checker"> {{checker.checkerType}} </td>
+        <td mat-cell *matCellDef="let checker">{{ checker.checkerType }}</td>
       </ng-container>
 
       <ng-container matColumnDef="resultText">
         <th mat-header-cell *matHeaderCellDef>Antworttext</th>
-        <td mat-cell *matCellDef="let checker"><pre [innerHTML]="checker.resultText" class="pre"></pre></td>
+        <td mat-cell *matCellDef="let checker">
+          <pre [innerHTML]="checker.resultText" class="pre"></pre>
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="exitCode">
         <th mat-header-cell *matHeaderCellDef>Ergebnis</th>
         <td mat-cell *matCellDef="let checker">
           <mat-icon class="done" *ngIf="checker.exitCode === 0">done</mat-icon>
-          <mat-icon color="not-done" *ngIf="checker.exitCode === 1">clear</mat-icon>
+          <mat-icon color="not-done" *ngIf="checker.exitCode === 1"
+            >clear</mat-icon
+          >
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="columns"></tr>
-      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
     </table>
   </div>
 
-  <hr>
+  <hr />
 
-  <app-subtask-results [context]="context" [displayedSubmission]="displayedSubmission"></app-subtask-results>
+  <app-subtask-results
+    [context]="context"
+    [displayedSubmission]="displayedSubmission"
+  ></app-subtask-results>
 
   <div *ngIf="resultDataSource && displayTables" class="tables">
     <div class="toogle">
-      <button mat-icon-button aria-label="Ansicht Wechseln" (click)="toggleTableView()">
+      <button
+        mat-icon-button
+        aria-label="Ansicht Wechseln"
+        (click)="toggleTableView()"
+      >
         <mat-icon>view_stream</mat-icon>
       </button>
     </div>
-    <div [class.grid]="tableViewAsGrid" *ngFor="let source of resultDataSource; let i = index">
+    <div
+      [class.grid]="tableViewAsGrid"
+      *ngFor="let source of resultDataSource; let i = index"
+    >
       <div>
         <h3>Ergebnis des Studierenden</h3>
         <table mat-table [dataSource]="source" class="mat-elevation-z8">
-          <ng-container *ngFor="let column of resultColumns[i]; let j = index" matColumnDef="{{column}}">
-            <th mat-header-cell *matHeaderCellDef>{{column}}</th>
-            <td mat-cell *matCellDef="let row"> {{row[j]}}</td>
+          <ng-container
+            *ngFor="let column of resultColumns[i]; let j = index"
+            matColumnDef="{{ column }}"
+          >
+            <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+            <td mat-cell *matCellDef="let row">{{ row[j] }}</td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="resultColumns[i]"></tr>
-          <tr mat-row *matRowDef="let row; columns: resultColumns[i];"></tr>
+          <tr mat-row *matRowDef="let row; columns: resultColumns[i]"></tr>
         </table>
       </div>
 
       <div>
         <h3>Erwartetes Ergebnis</h3>
-        <table mat-table [dataSource]="expectedDataSource[i]" class="mat-elevation-z8">
-          <ng-container *ngFor="let column of expectedColumns[i]; let j = index" matColumnDef="{{column}}">
-            <th mat-header-cell *matHeaderCellDef>{{column}}</th>
-            <td mat-cell *matCellDef="let row"> {{row[j]}}</td>
+        <table
+          mat-table
+          [dataSource]="expectedDataSource[i]"
+          class="mat-elevation-z8"
+        >
+          <ng-container
+            *ngFor="let column of expectedColumns[i]; let j = index"
+            matColumnDef="{{ column }}"
+          >
+            <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+            <td mat-cell *matCellDef="let row">{{ row[j] }}</td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="expectedColumns[i]"></tr>
-          <tr mat-row *matRowDef="let row; columns: expectedColumns[i];"></tr>
+          <tr mat-row *matRowDef="let row; columns: expectedColumns[i]"></tr>
         </table>
       </div>
     </div>
   </div>
 </div>
-

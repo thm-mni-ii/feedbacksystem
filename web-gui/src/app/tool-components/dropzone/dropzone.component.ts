@@ -1,9 +1,9 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 
 @Component({
-  selector: 'app-dropzone',
-  templateUrl: './dropzone.component.html',
-  styleUrls: ['./dropzone.component.scss']
+  selector: "app-dropzone",
+  templateUrl: "./dropzone.component.html",
+  styleUrls: ["./dropzone.component.scss"],
 })
 export class DropzoneComponent {
   @Input() usage: String;
@@ -13,7 +13,7 @@ export class DropzoneComponent {
 
   updateSubmissionFile(event) {
     this.submissionFile = event.addedFiles;
-    this.update.emit({content: this.submissionFile[0]});
+    this.update.emit({ content: this.submissionFile[0] });
     // TODO: muss noch generisch gemacht werden
   }
 }

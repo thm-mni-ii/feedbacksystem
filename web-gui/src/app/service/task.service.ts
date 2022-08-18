@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {Task} from '../model/Task';
-import {HttpClient} from '@angular/common/http';
-import {UserTaskResult} from '../model/UserTaskResult';
-import {saveAs} from 'file-saver';
+import { Injectable } from "@angular/core";
+import { Observable, of } from "rxjs";
+import { Task } from "../model/Task";
+import { HttpClient } from "@angular/common/http";
+import { UserTaskResult } from "../model/UserTaskResult";
+import { saveAs } from "file-saver";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TaskService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Get all tasks of a course
@@ -26,7 +26,9 @@ export class TaskService {
    * @return Observable that succeeds with all task Results of the course
    */
   getTaskResults(cid: number): Observable<UserTaskResult[]> {
-    return this.http.get<UserTaskResult[]>(`/api/v1/courses/${cid}/tasks/results`);
+    return this.http.get<UserTaskResult[]>(
+      `/api/v1/courses/${cid}/tasks/results`
+    );
   }
 
   /**
@@ -56,7 +58,9 @@ export class TaskService {
    * @return Observable that succeeds with the task Result of the the
    */
   getTaskResult(cid: number, tid: number): Observable<UserTaskResult> {
-    return this.http.get<UserTaskResult>(`/api/v1/courses/${cid}/tasks/${tid}/result`);
+    return this.http.get<UserTaskResult>(
+      `/api/v1/courses/${cid}/tasks/${tid}/result`
+    );
   }
 
   /**
@@ -91,10 +95,13 @@ export class TaskService {
   }
 
   public downloadTask(cid: number, tid: number, filename?: string) {
-    return this.http.get(`/api/v1/courses/${cid}/tasks/${tid}`, {responseType: 'arraybuffer'})
-      .subscribe(response => {
-        const blob = new Blob([response], {type: 'text/plain'});
-        saveAs(blob, (filename ?  filename + '_export.txt' : '_export.txt'));
+    return this.http
+      .get(`/api/v1/courses/${cid}/tasks/${tid}`, {
+        responseType: "arraybuffer",
+      })
+      .subscribe((response) => {
+        const blob = new Blob([response], { type: "text/plain" });
+        saveAs(blob, filename ? filename + "_export.txt" : "_export.txt");
       });
   }
 }

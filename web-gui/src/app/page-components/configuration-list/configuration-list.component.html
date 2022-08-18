@@ -1,24 +1,66 @@
 <div class="container">
-
   <app-menu-bar>
-    <button mat-icon-button [routerLink]="['/courses', courseId, 'task', taskId]" matTooltip="Zurück zum Aufgabe"><mat-icon >arrow_back</mat-icon></button>
+    <button
+      mat-icon-button
+      [routerLink]="['/courses', courseId, 'task', taskId]"
+      matTooltip="Zurück zum Aufgabe"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
     <span class="spacer"></span>
-
   </app-menu-bar>
 
   <div class="create-button">
-    <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="addConfig()" matTooltip="Überprüfung hinzufügen"><mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen</button>
+    <button
+      mat-raised-button
+      color="accent"
+      *ngIf="isAuthorized()"
+      (click)="addConfig()"
+      matTooltip="Überprüfung hinzufügen"
+    >
+      <mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen
+    </button>
   </div>
 
   <mat-card class="card" *ngFor="let configuration of configurations | async">
-    <span>{{configuration.checkerType}}</span>
+    <span>{{ configuration.checkerType }}</span>
 
     <span class="spacer"></span>
 
-    <button mat-icon-button color="primary" [disabled]="!configuration.mainFileUploaded" (click)="downloadMainFile(configuration)" matTooltip="Hauptdatei herunterladen"><mat-icon>save_alt</mat-icon></button>
-    <button mat-icon-button color="primary" [disabled]="!configuration.secondaryFileUploaded" (click)="downloadSecondaryFile(configuration)" matTooltip="Nebendatei herunterladen"><mat-icon>save_alt</mat-icon></button>
+    <button
+      mat-icon-button
+      color="primary"
+      [disabled]="!configuration.mainFileUploaded"
+      (click)="downloadMainFile(configuration)"
+      matTooltip="Hauptdatei herunterladen"
+    >
+      <mat-icon>save_alt</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      color="primary"
+      [disabled]="!configuration.secondaryFileUploaded"
+      (click)="downloadSecondaryFile(configuration)"
+      matTooltip="Nebendatei herunterladen"
+    >
+      <mat-icon>save_alt</mat-icon>
+    </button>
 
-    <button mat-icon-button color="primary" (click)="editConfig(configuration)" matTooltip="Überprüfung bearbeiten"><mat-icon>edit</mat-icon></button>
-    <button mat-icon-button color="primary" (click)="deleteConfig(configuration)" matTooltip="Überprüfung entfernen"><mat-icon>delete</mat-icon></button>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="editConfig(configuration)"
+      matTooltip="Überprüfung bearbeiten"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="deleteConfig(configuration)"
+      matTooltip="Überprüfung entfernen"
+    >
+      <mat-icon>delete</mat-icon>
+    </button>
   </mat-card>
 </div>

@@ -1,13 +1,24 @@
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import {
+  UntypedFormControl,
+  UntypedFormGroup,
+  Validators,
+} from "@angular/forms";
 
 @Component({
-  selector: 'app-submission-spreadsheet',
-  templateUrl: './submission-spreadsheet.component.html',
-  styleUrls: ['./submission-spreadsheet.component.scss']
+  selector: "app-submission-spreadsheet",
+  templateUrl: "./submission-spreadsheet.component.html",
+  styleUrls: ["./submission-spreadsheet.component.scss"],
 })
 export class SubmissionSpreadsheetComponent implements OnChanges {
-  toSubmit = '';
+  toSubmit = "";
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
   @Input()
@@ -22,27 +33,32 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
 
   resultForm = new UntypedFormGroup({});
 
-  constructor() { }
+  constructor() {}
 
   updateSubmission() {
-    const enteredCount = Object.values(this.resultForm.value).reduce((acc: number, field: string) => {
-      if (field) {
-        acc++;
-      }
-      return acc;
-    }, 0);
+    const enteredCount = Object.values(this.resultForm.value).reduce(
+      (acc: number, field: string) => {
+        if (field) {
+          acc++;
+        }
+        return acc;
+      },
+      0
+    );
     const content = this.resultForm.value;
-    content['complete'] = this.outputFields.length > 0;
-    this.update.emit({content});
+    content["complete"] = this.outputFields.length > 0;
+    this.update.emit({ content });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     for (const propName in changes) {
-      if (propName === 'outputFields' || propName === 'content') {
-        this.resultForm = new UntypedFormGroup(this.outputFields.reduce((acc, val) => {
-          acc[val] = new UntypedFormControl(this.content[val] ?? '');
-          return acc;
-        }, {}));
+      if (propName === "outputFields" || propName === "content") {
+        this.resultForm = new UntypedFormGroup(
+          this.outputFields.reduce((acc, val) => {
+            acc[val] = new UntypedFormControl(this.content[val] ?? "");
+            return acc;
+          }, {})
+        );
       }
     }
   }

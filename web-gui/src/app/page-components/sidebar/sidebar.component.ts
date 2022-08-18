@@ -1,31 +1,32 @@
-import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {AuthService} from '../../service/auth.service';
-import {TitlebarService} from '../../service/titlebar.service';
-import {Observable, of} from 'rxjs';
-import {Roles} from '../../model/Roles';
-import {MatDialog} from '@angular/material/dialog';
-import {DataprivacyDialogComponent} from '../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component';
-import {ImpressumDialogComponent} from '../../dialogs/impressum-dialog/impressum-dialog.component';
-import {FeedbackAppService} from "../../service/feedback-app.service";
+import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { AuthService } from "../../service/auth.service";
+import { TitlebarService } from "../../service/titlebar.service";
+import { Observable, of } from "rxjs";
+import { Roles } from "../../model/Roles";
+import { MatDialog } from "@angular/material/dialog";
+import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
+import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
+import { FeedbackAppService } from "../../service/feedback-app.service";
 
 /**
  * Root component shows sidenav and titlebar
  */
 @Component({
-  selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss']
+  selector: "app-sidebar",
+  templateUrl: "./sidebar.component.html",
+  styleUrls: ["./sidebar.component.scss"],
 })
 export class SidebarComponent implements OnInit {
-  constructor(private router: Router,
+  constructor(
+    private router: Router,
     private auth: AuthService,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
-    private feedbackAppService: FeedbackAppService) {
-  }
+    private feedbackAppService: FeedbackAppService
+  ) {}
 
-  title: Observable<string> = of('');
+  title: Observable<string> = of("");
   opened: boolean;
   innerWidth: number;
 
@@ -50,7 +51,7 @@ export class SidebarComponent implements OnInit {
    */
   logout() {
     this.auth.logout();
-    this.router.navigate(['login']);
+    this.router.navigate(["login"]);
   }
 
   get showSidebarMenu() {
@@ -69,7 +70,9 @@ export class SidebarComponent implements OnInit {
    * Show data privay dialog
    */
   showDataprivacy() {
-    this.dialog.open(DataprivacyDialogComponent, {data: {onlyForShow: true}});
+    this.dialog.open(DataprivacyDialogComponent, {
+      data: { onlyForShow: true },
+    });
   }
   /**
    * Show impressum dialog
@@ -83,8 +86,8 @@ export class SidebarComponent implements OnInit {
    */
   goToFBA() {
     this.feedbackAppService.getToken().subscribe((token) => {
-      localStorage.setItem('flutter.authToken', JSON.stringify(token));
-      window.open('/feedbackApp/')
-    })
+      localStorage.setItem("flutter.authToken", JSON.stringify(token));
+      window.open("/feedbackApp/");
+    });
   }
 }

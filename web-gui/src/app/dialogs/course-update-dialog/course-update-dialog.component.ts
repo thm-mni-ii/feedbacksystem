@@ -1,29 +1,30 @@
-import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {UntypedFormControl, Validators} from '@angular/forms';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Course} from '../../model/Course';
-import {CourseService} from '../../service/course.service';
+import { Component, Inject, OnInit } from "@angular/core";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { UntypedFormControl, Validators } from "@angular/forms";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { Course } from "../../model/Course";
+import { CourseService } from "../../service/course.service";
 
 /**
  * Updates course information in dialog
  */
 @Component({
-  selector: 'app-course-update-dialog',
-  templateUrl: './course-update-dialog.component.html',
-  styleUrls: ['./course-update-dialog.component.scss']
+  selector: "app-course-update-dialog",
+  templateUrl: "./course-update-dialog.component.html",
+  styleUrls: ["./course-update-dialog.component.scss"],
 })
 export class CourseUpdateDialogComponent implements OnInit {
-  name = new UntypedFormControl('', [Validators.required]);
-  description = new UntypedFormControl('');
+  name = new UntypedFormControl("", [Validators.required]);
+  description = new UntypedFormControl("");
   isVisible = true;
   isUpdateDialog = false;
 
-  constructor(private courseService: CourseService,
-              private snackBar: MatSnackBar,
-              @Inject(MAT_DIALOG_DATA) public data: any,
-              public dialogRef: MatDialogRef<CourseUpdateDialogComponent>) {
-  }
+  constructor(
+    private courseService: CourseService,
+    private snackBar: MatSnackBar,
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<CourseUpdateDialogComponent>
+  ) {}
 
   ngOnInit() {
     this.isUpdateDialog = this.data.isUpdateDialog;
@@ -46,22 +47,28 @@ export class CourseUpdateDialogComponent implements OnInit {
     const course: Course = {
       name: this.name.value,
       description: this.description.value,
-      visible: this.isVisible
+      visible: this.isVisible,
     };
 
     if (this.isUpdateDialog) {
-      this.courseService
-        .updateCourse(this.data.course.id, course)
-        .subscribe(ok => this.dialogRef.close({success: true}), error => console.error(error));
+      this.courseService.updateCourse(this.data.course.id, course).subscribe(
+        (ok) => this.dialogRef.close({ success: true }),
+        (error) => console.error(error)
+      );
     } else {
-      this.courseService
-        .createCourse(course)
-        .subscribe(createdCourse => {
-          this.dialogRef.close({success: true, course: createdCourse});
-        }, error => {
+      this.courseService.createCourse(course).subscribe(
+        (createdCourse) => {
+          this.dialogRef.close({ success: true, course: createdCourse });
+        },
+        (error) => {
           console.error(error);
-          this.snackBar.open('Es ist ein fehler beim erstellen des Kurses aufgetreten', null, {duration: 3000});
-        });
+          this.snackBar.open(
+            "Es ist ein fehler beim erstellen des Kurses aufgetreten",
+            null,
+            { duration: 3000 }
+          );
+        }
+      );
     }
   }
 
@@ -73,6 +80,6 @@ export class CourseUpdateDialogComponent implements OnInit {
    * Close dialog without update
    */
   closeDialog() {
-    this.dialogRef.close({success: false});
+    this.dialogRef.close({ success: false });
   }
 }

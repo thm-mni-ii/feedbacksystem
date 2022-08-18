@@ -1,63 +1,133 @@
 <div class="container">
   <app-menu-bar>
-    <button mat-icon-button [routerLink]="['/', 'courses', courseId]" matTooltip="Zurück zum Kurs"><mat-icon >arrow_back</mat-icon></button>
+    <button
+      mat-icon-button
+      [routerLink]="['/', 'courses', courseId]"
+      matTooltip="Zurück zum Kurs"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
 
     <span class="spacer"></span>
 
     <!--<button mat-icon-button (click)="reRun()" [disabled]="this.lastSubmission == null" matTooltip="Erneut prüfen"><mat-icon>cached</mat-icon></button>-->
-    <button mat-icon-button *ngIf="canEdit()" (click)="downloadTask()" matTooltip="Aufgabe Exportieren"><mat-icon class="logout-icon">save_alt</mat-icon></button>
-    <button mat-icon-button *ngIf="canEdit() && checkersConfigurable()" [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']" matTooltip="Überprüfung konfigurieren"><mat-icon class="logout-icon">engineering</mat-icon></button>
-    <button mat-icon-button *ngIf="canEdit()" [matMenuTriggerFor]="settings" matTooltip="Einstellungen"><mat-icon>settings</mat-icon></button>
+    <button
+      mat-icon-button
+      *ngIf="canEdit()"
+      (click)="downloadTask()"
+      matTooltip="Aufgabe Exportieren"
+    >
+      <mat-icon class="logout-icon">save_alt</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      *ngIf="canEdit() && checkersConfigurable()"
+      [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']"
+      matTooltip="Überprüfung konfigurieren"
+    >
+      <mat-icon class="logout-icon">engineering</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      *ngIf="canEdit()"
+      [matMenuTriggerFor]="settings"
+      matTooltip="Einstellungen"
+    >
+      <mat-icon>settings</mat-icon>
+    </button>
     <mat-menu #settings="matMenu">
-      <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()"><mat-icon class="logout-icon">edit</mat-icon><span>Aufgabe bearbeiten</span></button>
-      <button mat-menu-item *ngIf="canEdit()" (click)="deleteTask()"><mat-icon class="logout-icon">delete</mat-icon><span>Aufgabe löschen</span></button>
+      <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()">
+        <mat-icon class="logout-icon">edit</mat-icon
+        ><span>Aufgabe bearbeiten</span>
+      </button>
+      <button mat-menu-item *ngIf="canEdit()" (click)="deleteTask()">
+        <mat-icon class="logout-icon">delete</mat-icon
+        ><span>Aufgabe löschen</span>
+      </button>
     </mat-menu>
   </app-menu-bar>
 
   <mat-card class="details" *ngIf="ready">
     <div class="task-container">
-      <span>{{task?.name}}</span>
+      <span>{{ task?.name }}</span>
       <span class="meta">
-        <span *ngIf="deadlinePassed" class="tiny failed">Abgabeende erreicht!</span>
-        <mat-icon class="material-icons" color="accent" >access_time</mat-icon>
-        <span class="tiny">{{task?.deadline | date:'dd.MM.yyyy HH:mm'}}</span>
-        <span class="state" *ngIf="taskResult.maxPoints !== 0">{{taskResult.points}}/{{taskResult.maxPoints}} Punkte</span>
+        <span *ngIf="deadlinePassed" class="tiny failed"
+          >Abgabeende erreicht!</span
+        >
+        <mat-icon class="material-icons" color="accent">access_time</mat-icon>
+        <span class="tiny">{{
+          task?.deadline | date: "dd.MM.yyyy HH:mm"
+        }}</span>
+        <span class="state" *ngIf="taskResult.maxPoints !== 0"
+          >{{ taskResult.points }}/{{ taskResult.maxPoints }} Punkte</span
+        >
         <span class="state" *ngIf="taskResult.maxPoints === 0">
-          <span class="state passed" *ngIf="taskResult.passed"><mat-icon>check_circle</mat-icon></span>
-          <span class="state failed" *ngIf="!taskResult.passed && taskResult.submission"><mat-icon>not_interested</mat-icon></span>
-          <span class="state not-done" *ngIf="!taskResult.passed && !taskResult.submission"><mat-icon>error_outline</mat-icon></span>
+          <span class="state passed" *ngIf="taskResult.passed"
+            ><mat-icon>check_circle</mat-icon></span
+          >
+          <span
+            class="state failed"
+            *ngIf="!taskResult.passed && taskResult.submission"
+            ><mat-icon>not_interested</mat-icon></span
+          >
+          <span
+            class="state not-done"
+            *ngIf="!taskResult.passed && !taskResult.submission"
+            ><mat-icon>error_outline</mat-icon></span
+          >
         </span>
-        <span class="state" *ngIf="pending"><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span>
+        <span class="state" *ngIf="pending"
+          ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span
+        >
       </span>
     </div>
     <div class="description">
-      {{task?.description}}
+      {{ task?.description }}
     </div>
     <mat-card-content>
       <div class="user-input">
-        <app-submission-file *ngIf="submissionTypeOfTask() === 'file'" (update)="updateSubmissionContent($event)"></app-submission-file>
-        <app-submission-text *ngIf="submissionTypeOfTask() === 'text'" (update)="updateSubmissionContent($event)"></app-submission-text>
-        <app-submission-spreadsheet *ngIf="submissionTypeOfTask() === 'spreadsheet'" (update)="updateSubmissionContent($event)"
-                                    [inputFields]="task?.mediaInformation.inputs || []"
-                                    [outputFields]="task?.mediaInformation.outputs || []"
-                                    [decimals]="task?.mediaInformation.decimals || 2"
-                                    [content]="latestResult?.extInfo || {}"
+        <app-submission-file
+          *ngIf="submissionTypeOfTask() === 'file'"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-file>
+        <app-submission-text
+          *ngIf="submissionTypeOfTask() === 'text'"
+          (update)="updateSubmissionContent($event)"
+        ></app-submission-text>
+        <app-submission-spreadsheet
+          *ngIf="submissionTypeOfTask() === 'spreadsheet'"
+          (update)="updateSubmissionContent($event)"
+          [inputFields]="task?.mediaInformation.inputs || []"
+          [outputFields]="task?.mediaInformation.outputs || []"
+          [decimals]="task?.mediaInformation.decimals || 2"
+          [content]="latestResult?.extInfo || {}"
         ></app-submission-spreadsheet>
       </div>
 
       <mat-card-actions>
-        <button [disabled]="deadlinePassed || isSubmissionEmpty()" mat-flat-button color="accent" (click)="submission()">Abgeben</button>
+        <button
+          [disabled]="deadlinePassed || isSubmissionEmpty()"
+          mat-flat-button
+          color="accent"
+          (click)="submission()"
+        >
+          Abgeben
+        </button>
       </mat-card-actions>
 
-      <app-results *ngIf="submissions" [submissions]="submissions" [context]="{uid: uid, cid: courseId, tid: task.id}"></app-results>
-<!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
+      <app-results
+        *ngIf="submissions"
+        [submissions]="submissions"
+        [context]="{ uid: uid, cid: courseId, tid: task.id }"
+      ></app-results>
+      <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
     </mat-card-content>
   </mat-card>
-<!--  <div *ngFor="let submission of submissions | reverse">-->
-<!--    {{submission.id}}-->
-<!--    <mat-card *ngFor="let result of submission.results">-->
-<!--      <h5>{{result?.checkerType}} (Exit Code: {{result.exitCode}})</h5>-->
-<!--      <p>{{result.resultText}}</p>-->
-<!--    </mat-card>-->
-<!--  </div>-->
+  <!--  <div *ngFor="let submission of submissions | reverse">-->
+  <!--    {{submission.id}}-->
+  <!--    <mat-card *ngFor="let result of submission.results">-->
+  <!--      <h5>{{result?.checkerType}} (Exit Code: {{result.exitCode}})</h5>-->
+  <!--      <p>{{result.resultText}}</p>-->
+  <!--    </mat-card>-->
+  <!--  </div>-->
 </div>

@@ -1,33 +1,33 @@
-import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {UntypedFormControl, Validators} from '@angular/forms';
-import {TitlebarService} from '../../service/titlebar.service';
-import {Course} from '../../model/Course';
-import {CourseService} from '../../service/course.service';
+import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { UntypedFormControl, Validators } from "@angular/forms";
+import { TitlebarService } from "../../service/titlebar.service";
+import { Course } from "../../model/Course";
+import { CourseService } from "../../service/course.service";
 
 /**
  * Create a new course
  */
 @Component({
-  selector: 'app-new-course',
-  templateUrl: './new-course.component.html',
-  styleUrls: ['./new-course.component.scss']
+  selector: "app-new-course",
+  templateUrl: "./new-course.component.html",
+  styleUrls: ["./new-course.component.scss"],
 })
-
 export class NewCourseComponent implements OnInit {
-  name = new UntypedFormControl('', [Validators.required]);
-  description = new UntypedFormControl('');
+  name = new UntypedFormControl("", [Validators.required]);
+  description = new UntypedFormControl("");
   isVisible = true;
 
-  constructor(private courseService: CourseService,
-              private snackBar: MatSnackBar,
-              private titlebar: TitlebarService,
-              private router: Router) {
-  }
+  constructor(
+    private courseService: CourseService,
+    private snackBar: MatSnackBar,
+    private titlebar: TitlebarService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.titlebar.emitTitle('Neuen Kurs erstellen');
+    this.titlebar.emitTitle("Neuen Kurs erstellen");
   }
 
   /**
@@ -41,17 +41,24 @@ export class NewCourseComponent implements OnInit {
     const course: Course = {
       name: this.name.value,
       description: this.description.value,
-      visible: this.isVisible
+      visible: this.isVisible,
     };
 
-    this.courseService
-      .createCourse(course)
-      .subscribe(createdCourse => {
-        setTimeout( () => {this.router.navigate(['courses', createdCourse.id]); }, 100);
-      }, error => {
+    this.courseService.createCourse(course).subscribe(
+      (createdCourse) => {
+        setTimeout(() => {
+          this.router.navigate(["courses", createdCourse.id]);
+        }, 100);
+      },
+      (error) => {
         console.error(error);
-        this.snackBar.open('Es ist ein fehler beim erstellen des Kurses aufgetreten', null, {duration: 3000});
-      });
+        this.snackBar.open(
+          "Es ist ein fehler beim erstellen des Kurses aufgetreten",
+          null,
+          { duration: 3000 }
+        );
+      }
+    );
   }
 
   isInputValid(): boolean {

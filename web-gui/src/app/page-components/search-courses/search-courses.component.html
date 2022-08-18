@@ -1,15 +1,33 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
     <mat-label>Kurs suchen</mat-label>
-    <input type="text" aria-label="Kurs suchen" matInput [formControl]="control">
+    <input
+      type="text"
+      aria-label="Kurs suchen"
+      matInput
+      [formControl]="control"
+    />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
 
   <div class="create-course">
-    <button mat-raised-button color="accent" *ngIf="isAuthorized()" (click)="createCourse()" matTooltip="Kurs erstellen"><mat-icon>add</mat-icon>&nbsp;Kurs erstellen</button>
+    <button
+      mat-raised-button
+      color="accent"
+      *ngIf="isAuthorized()"
+      (click)="createCourse()"
+      matTooltip="Kurs erstellen"
+    >
+      <mat-icon>add</mat-icon>&nbsp;Kurs erstellen
+    </button>
   </div>
 
-  <app-course-preview *ngFor="let course of filteredCourses | async" [data]="course"></app-course-preview>
+  <app-course-preview
+    *ngFor="let course of filteredCourses | async"
+    [data]="course"
+  ></app-course-preview>
 
-  <span class="noElements" *ngIf="(courses | async)?.length === 0">Es gibt noch keiner Kurse denen Sie beitreten können.</span>
+  <span class="noElements" *ngIf="(courses | async)?.length === 0"
+    >Es gibt noch keiner Kurse denen Sie beitreten können.</span
+  >
 </div>

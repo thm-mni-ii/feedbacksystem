@@ -1,4 +1,4 @@
-@import '../../../../../colors';
+@import "../../../../../colors";
 
 .container {
   display: block;
@@ -35,7 +35,8 @@
     justify-content: flex-start;
     overflow: hidden;
 
-    .task-result, .category-tasks {
+    .task-result,
+    .category-tasks {
       width: 30px;
       min-height: 30px;
       text-align: right;
@@ -45,19 +46,25 @@
       min-height: 30px;
     }
   }
-  .name-container, .task-container, .bonus-container {
+  .name-container,
+  .task-container,
+  .bonus-container {
     height: 30px;
   }
-  .task-result, .category-tasks, .title {
+  .task-result,
+  .category-tasks,
+  .title {
     display: flex;
     justify-content: flex-start;
     align-items: center;
   }
-  .task-result > .title, .category-tasks > .title, .bonus-container > .title {
+  .task-result > .title,
+  .category-tasks > .title,
+  .bonus-container > .title {
     transform: rotate(270deg);
     overflow: visible;
     text-overflow: ellipsis;
-    white-space: nowrap
+    white-space: nowrap;
   }
   .task-result > .title:hover.title-hoverable {
     cursor: pointer;
@@ -108,7 +115,8 @@
   //transform: rotate(45deg);
 }
 
-.name-container, .bonus-container {
+.name-container,
+.bonus-container {
   color: rgba(0, 0, 0, 0.87);
   display: flex;
   align-items: center;

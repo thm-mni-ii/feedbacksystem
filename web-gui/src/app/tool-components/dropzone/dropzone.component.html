@@ -1,5 +1,5 @@
 <ngx-dropzone [multiple]="false" (change)="updateSubmissionFile($event)">
-  <ngx-dropzone-label>{{usage}}</ngx-dropzone-label>
+  <ngx-dropzone-label>{{ usage }}</ngx-dropzone-label>
   <ngx-dropzone-preview *ngFor="let f of submissionFile">
     <ngx-dropzone-label>{{ f.name }}</ngx-dropzone-label>
   </ngx-dropzone-preview>
