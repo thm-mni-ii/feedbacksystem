@@ -23,7 +23,7 @@
         required
       />
     </mat-form-field>
-    <div *ngIf="choosedSQLChecker == false">
+    <div *ngIf="choosedSQLChecker === false">
       <app-dropzone
         class="pad"
         (update)="updateMainFile($event)"

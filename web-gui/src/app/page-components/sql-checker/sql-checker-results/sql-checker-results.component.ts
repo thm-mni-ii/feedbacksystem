@@ -35,7 +35,7 @@ import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
   templateUrl: "./sql-checker-results.component.html",
   styleUrls: ["./sql-checker-results.component.scss"],
 })
-export class SqlCheckerResultsComponent {
+export class SqlCheckerResultsComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private authService: AuthService,

@@ -24,7 +24,7 @@ import { CheckerConfig } from "../../model/CheckerConfig";
   templateUrl: "./sql-checker.component.html",
   styleUrls: ["./sql-checker.component.scss"],
 })
-export class SqlCheckerComponent {
+export class SqlCheckerComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private authService: AuthService,
