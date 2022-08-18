@@ -14,7 +14,6 @@ export class CoursePreviewComponent {
 
   /**
    * Show course in detail
-   * @param courseID The course to see in detail
    */
   goToCourse() {
     this.router.navigate(["courses", this.data.id]); // TODO: Should be ID
