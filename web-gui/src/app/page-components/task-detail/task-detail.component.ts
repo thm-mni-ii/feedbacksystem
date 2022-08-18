@@ -37,7 +37,6 @@ export class TaskDetailComponent implements OnInit {
   lastSubmission: Submission;
   pending = false;
   ready = false;
-
   deadlinePassed = false;
 
   get latestResult() {

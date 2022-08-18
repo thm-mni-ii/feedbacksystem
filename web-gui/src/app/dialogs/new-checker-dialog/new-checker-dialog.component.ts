@@ -15,20 +15,32 @@ export class NewCheckerDialogComponent implements OnInit {
   fileCounter = 0;
 
   checkerForm = new FormGroup({
-    checkerType: new FormControl(""),
-    ord: new FormControl(""),
+    checkerType: new FormControl(''),
+    ord: new FormControl(''),
+    showHints: new FormControl(false),
+    showHintsAt: new FormControl(0),
+    showExtendedHints: new FormControl(false),
+    showExtendedHintsAt: new FormControl(0),
   });
-
+  choosedSQLChecker;
   mainFile: File;
   secondaryFile: File;
   isUpdate: boolean;
   courseId: number;
   taskId: number;
   checker: CheckerConfig = {
-    checkerType: "",
-    ord: null,
+    checkerTypeInformation: {
+      showExtendedHints: false,
+      showExtendedHintsAt: 0,
+      showHints: false,
+      showHintsAt: 0,
+    },
+    checkerType: '',
+    ord: 0,
   };
   checkerCount: Observable<CheckerConfig[]> = of();
+  showHintsConfig;
+  showExtendedHintsConfig;
 
   constructor(
     public dialogRef: MatDialogRef<NewCheckerDialogComponent>,
@@ -49,6 +61,7 @@ export class NewCheckerDialogComponent implements OnInit {
     this.courseId = this.data.courseId;
     this.taskId = this.data.taskId;
     this.setDefaultValues();
+    this.choosedSQLChecker = false;
   }
 
   /**
@@ -66,48 +79,26 @@ export class NewCheckerDialogComponent implements OnInit {
   createChecker(value: any) {
     this.checker.checkerType = value.checkerType;
     this.checker.ord = value.ord;
-    if (this.checker.ord === 0) {
-      this.snackBar.open('Die Reihenfolge darf nicht "0" sein.', "ok");
-      return;
-    }
-    if (
-      this.checker.checkerType &&
-      this.checker.ord &&
-      this.mainFile &&
-      (this.secondaryFile || this.checker.checkerType === "bash")
-    ) {
-      this.checkerService
-        .createChecker(this.courseId, this.taskId, this.checker)
-        .subscribe((checker) => {
-          this.checkerService
-            .updateMainFile(
-              this.courseId,
-              this.taskId,
-              checker.id,
-              this.mainFile
-            )
-            .subscribe(
-              (ok) => {},
-              (error) => console.error(error)
-            );
-          if (this.secondaryFile) {
-            this.checkerService
-              .updateSecondaryFile(
-                this.courseId,
-                this.taskId,
-                checker.id,
-                this.secondaryFile
-              )
-              .subscribe(
-                (ok) => {},
-                (error) => console.error(error)
-              );
-          }
-        });
-      this.dialogRef.close({ success: true });
-    } else {
-      this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");
-    }
+    this.checker.checkerType = value.checkerType;
+    this.checker.checkerTypeInformation.showHints = value.showHints;
+    this.checker.checkerTypeInformation.showHintsAt = value.showHintsAt;
+    this.checker.checkerTypeInformation.showExtendedHints = value.showExtendedHints;
+    this.checker.checkerTypeInformation.showExtendedHintsAt = value.showExtendedHintsAt;
+    if (this.checker.checkerType && this.checker.ord && this.mainFile && (this.secondaryFile || this.checker.checkerType === 'bash')) {
+      this.checkerService.createChecker(this.courseId, this.taskId, this.checker)
+        .subscribe(checker => {
+          this.checkerService.updateMainFile(this.courseId, this.taskId, checker.id, this.mainFile).subscribe(ok => {
+            }, error => console.error(error));
+            if (this.secondaryFile) {
+              this.checkerService.updateSecondaryFile(this.courseId, this.taskId, checker.id, this.secondaryFile)
+                .subscribe(ok => {
+                }, error => console.error(error));
+            }
+          });
+        this.dialogRef.close({success: true});
+      } else {
+        this.snackBar.open('Alle Felder müssen gefüllt werden.', 'ok');
+      }
   }
 
   updateMainFile(event) {
@@ -178,9 +169,31 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checkerCount.subscribe((r) => {
       const newCheckerOrder = r.length + 1;
       this.checkerForm.setValue({
+        ...this.checkerForm.value,
         checkerType: "sql",
         ord: newCheckerOrder,
       });
     });
+  }
+  defineForm(value: any) {
+    if (value.checkerType === 'sql-checker') {
+      this.choosedSQLChecker = true;
+    } else {
+      this.choosedSQLChecker = false;
+    }
+  }
+  showHintsEvent(value: any) {
+    if (value.showHints === false) {
+      this.showHintsConfig = false;
+    } else {
+      this.showHintsConfig = true;
+    }
+  }
+  showExtendedHintsEvent(value: any) {
+    if (value.showExtendedHints === false) {
+      this.showExtendedHintsConfig = false;
+    } else {
+      this.showExtendedHintsConfig = true;
+    }
   }
 }

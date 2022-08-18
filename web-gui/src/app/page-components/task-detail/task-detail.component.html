@@ -51,11 +51,8 @@
 
       <app-results *ngIf="submissions" [submissions]="submissions" [context]="{uid: uid, cid: courseId, tid: task.id}"></app-results>
 <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
-
-
     </mat-card-content>
   </mat-card>
-
 <!--  <div *ngFor="let submission of submissions | reverse">-->
 <!--    {{submission.id}}-->
 <!--    <mat-card *ngFor="let result of submission.results">-->
