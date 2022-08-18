@@ -7,13 +7,13 @@
       placeholder="Checkertyp"
       formControlName="checkerType"
       required
+      (selectionChange)="defineForm(checkerForm.value)"
     >
       <mat-option value="sql">SQL Runner</mat-option>
       <mat-option value="sql-checker">SQL Checker</mat-option>
       <mat-option value="bash">Bash</mat-option>
       <mat-option value="excel">Excel</mat-option>
     </mat-select>
-
     <mat-form-field>
       <input
         type="number"
@@ -23,16 +23,36 @@
         required
       />
     </mat-form-field>
-
-    <app-dropzone
-      class="pad"
-      (update)="updateMainFile($event)"
-      [usage]="'Hauptdatei hochladen'"
-    ></app-dropzone>
-    <app-dropzone
-      (update)="updateSecondaryFile($event)"
-      [usage]="'sekundäre Datei hochladen'"
-    ></app-dropzone>
+  <div *ngIf="choosedSQLChecker==false">
+    <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
+    <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>
+  </div>
+  <div *ngIf="choosedSQLChecker">
+    <div>
+    <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
+    <app-dropzone (update)="updateSecondaryFile($event)" [usage]="'sekundäre Datei hochladen'"></app-dropzone>
+    </div>
+    <div>
+    <mat-checkbox formControlName="showHints" value="true" (change)="showHintsEvent(checkerForm.value)">Hilfestellung anzeigen</mat-checkbox>
+    </div>
+    <div *ngIf="showHintsConfig">
+      <h4>Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?</h4>
+      <mat-icon matTooltip="Studierende erfahren, wo ihre Fehler liegen.">info</mat-icon>
+      <mat-form-field>
+        <input type="number" placeholder="" matInput formControlName="showHintsAt" required>
+      </mat-form-field>
+      <div>
+        <mat-checkbox formControlName="showExtendedHints" value="true" (change)="showExtendedHintsEvent(checkerForm.value)">Hilfestellung geben</mat-checkbox>
+      </div>
+      <div *ngIf="showExtendedHintsConfig">
+        <h4>Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?</h4>
+        <mat-icon matTooltip="Studierende erhalten Informationen zu den korrekten Tabellen und Attributen">info</mat-icon>
+        <mat-form-field>
+          <input type="number" placeholder="" matInput formControlName="showExtendedHintsAt" required>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">

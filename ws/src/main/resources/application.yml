@@ -17,8 +17,6 @@ ldap:
 logging:
   level:
     root: INFO
-    sql: debug
-    de.thm: debug
 message:
   topic:
     name: java

@@ -1,15 +1,14 @@
-import {Component, Input, OnDestroy} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Submission} from '../../model/Submission';
 import {MatTableDataSource} from '@angular/material/table';
 import {CheckResult} from '../../model/CheckResult';
-import {SubmissionService} from "../../service/submission.service";
 
 @Component({
   selector: 'app-results',
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.scss']
 })
-export class ResultsComponent implements OnDestroy {
+export class ResultsComponent {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ['checkerType', 'resultText', 'exitCode'];
 
@@ -27,9 +26,13 @@ export class ResultsComponent implements OnDestroy {
   index: number;
 
   @Input() set submissions(submissions: Submission[]) {
+    const lengthHasChanged = this.allSubmissions != submissions;
+
     this.allSubmissions = submissions;
-    this.selectLast();
-    this.display(submissions[submissions.length - 1]);
+    if (lengthHasChanged) {
+      this.selectLast();
+      this.display(submissions[submissions.length - 1]);
+    }
   }
 
   @Input() displayTables: boolean;
@@ -37,18 +40,6 @@ export class ResultsComponent implements OnDestroy {
   @Input() context: {uid: number, cid: number, tid: number};
 
   subscription: any;
-
-  constructor(private submissionService: SubmissionService) {
-    this.subscription = this.submissionService.getFileSubmissionEmitter()
-      .subscribe(isFileSubmitted => {
-        if(isFileSubmitted)
-          this.selectLast();
-      });
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
 
   handleSubmission(event): void {
     const submission = this.allSubmissions.find(item => this.allSubmissions.indexOf(item) == event.index);
