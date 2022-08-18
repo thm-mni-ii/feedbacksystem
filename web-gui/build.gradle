@@ -45,7 +45,7 @@ copyWebToWS
 
 // Run eslint
 
-task lint(type: NpmTask) {
+task lint(type: NpmTask, dependsOn: [npmInstall]) {
   args = ['run', 'lint']
 }
 
