@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {TitlebarService} from '../../service/titlebar.service';
-import {FormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {AuthService} from '../../service/auth.service';
 import {UserService} from '../../service/user.service';
 
@@ -14,7 +14,7 @@ export class ChangePasswordComponent implements OnInit {
   passwd_repeat: string;
   passwd: string;
 
-  passwordMatcher = new FormControl('', [Validators.required]);
+  passwordMatcher = new UntypedFormControl('', [Validators.required]);
 
   constructor(private auth: AuthService, private userService: UserService,
               private snackbar: MatSnackBar,

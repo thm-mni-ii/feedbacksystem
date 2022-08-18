@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import {mergeMap, startWith} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
 import {Router} from '@angular/router';
@@ -29,7 +29,7 @@ export class SearchCoursesComponent implements OnInit {
 
   courses: Observable<Course[]> = of();
   filteredCourses: Observable<Course[]> = of();
-  control: FormControl = new FormControl();
+  control: UntypedFormControl = new UntypedFormControl();
 
   ngOnInit() {
     this.titlebar.emitTitle('Kurs suchen');

@@ -1,16 +1,15 @@
-@import "~@angular/material/_theming.scss";
+@use '@angular/material' as mat;
 
-@import '~@angular/material/theming';
 .mat-checkbox-layout {
   white-space: normal !important;
 }
 
-@include mat-core();
+@include mat.core();
 
-$primary: mat-palette($mat-blue-grey, 600, 500, 700);
-$accent:  mat-palette($mat-indigo, 300, 200, 400);
-$warn:    mat-palette($mat-red);
+$primary: mat.define-palette(mat.$blue-grey-palette, 600, 500, 700);
+$accent:  mat.define-palette(mat.$indigo-palette, 300, 200, 400);
+$warn:    mat.define-palette(mat.$red-palette);
 
-$light-theme: mat-light-theme($primary, $accent, $warn);
+$light-theme: mat.define-light-theme($primary, $accent, $warn);
 
-@include angular-material-theme($light-theme);
+@include mat.all-component-themes($light-theme);

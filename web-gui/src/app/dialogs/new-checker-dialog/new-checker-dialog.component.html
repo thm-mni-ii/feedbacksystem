@@ -67,7 +67,7 @@
         this.mainFile?.size <= 0 ||
         !(
           this.secondaryFile?.size > 0 ||
-          checkerForm.value.checkerType == 'bash'
+          checkerForm.value.checkerType === 'bash'
         )
       "
       (click)="createChecker(checkerForm.value)"

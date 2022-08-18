@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {FormControl, Validators} from '@angular/forms';
+import {UntypedFormControl, Validators} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Course} from '../../model/Course';
 import {CourseService} from '../../service/course.service';
@@ -14,8 +14,8 @@ import {CourseService} from '../../service/course.service';
   styleUrls: ['./course-update-dialog.component.scss']
 })
 export class CourseUpdateDialogComponent implements OnInit {
-  name = new FormControl('', [Validators.required]);
-  description = new FormControl('');
+  name = new UntypedFormControl('', [Validators.required]);
+  description = new UntypedFormControl('');
   isVisible = true;
   isUpdateDialog = false;
 

@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 
 @Component({
   selector: 'app-submission-spreadsheet',
@@ -20,7 +20,7 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   @Input()
   content: object = {};
 
-  resultForm = new FormGroup({});
+  resultForm = new UntypedFormGroup({});
 
   constructor() { }
 
@@ -39,8 +39,8 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     for (const propName in changes) {
       if (propName === 'outputFields' || propName === 'content') {
-        this.resultForm = new FormGroup(this.outputFields.reduce((acc, val) => {
-          acc[val] = new FormControl(this.content[val] ?? '');
+        this.resultForm = new UntypedFormGroup(this.outputFields.reduce((acc, val) => {
+          acc[val] = new UntypedFormControl(this.content[val] ?? '');
           return acc;
         }, {}));
       }

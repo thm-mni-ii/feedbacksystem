@@ -4,7 +4,7 @@ import {TitlebarService} from '../../service/titlebar.service';
 import {Course} from '../../model/Course';
 import {AuthService} from '../../service/auth.service';
 import {mergeMap, startWith} from 'rxjs/operators';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import {CourseRegistrationService} from '../../service/course-registration.service';
 
 /**
@@ -24,7 +24,7 @@ export class MyCoursesComponent implements OnInit {
 
   courses: Observable<Course[]> = of();
   filteredCourses: Observable<Course[]> = of();
-  control: FormControl = new FormControl();
+  control: UntypedFormControl = new UntypedFormControl();
 
   ngOnInit() {
     this.titlebar.emitTitle('Meine Kurse');

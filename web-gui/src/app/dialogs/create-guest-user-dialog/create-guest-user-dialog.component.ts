@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {AbstractControl, UntypedFormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {User} from '../../model/User';
@@ -28,7 +28,7 @@ export class CreateGuestUserDialogComponent {
     username: string;
   };
 
-  passwordMatcher = new FormControl('', [Validators.required, (control: AbstractControl): ValidationErrors | null => {
+  passwordMatcher = new UntypedFormControl('', [Validators.required, (control: AbstractControl): ValidationErrors | null => {
     return control.value === this.data.password ? null : {'notMatch': true};
   }]);
 
