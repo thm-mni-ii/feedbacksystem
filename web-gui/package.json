@@ -8,7 +8,7 @@
     "dist": "ng build --configuration production",
     "test": "ng test",
     "clean": "rimraf dist",
-    "lint": "ng lint",
+    "lint": "ng lint --max-warnings=0",
     "e2e": "ng e2e"
   },
   "private": true,
