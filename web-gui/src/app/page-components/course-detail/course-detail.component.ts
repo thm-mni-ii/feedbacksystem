@@ -1,9 +1,8 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TitlebarService } from "../../service/titlebar.service";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { DOCUMENT } from "@angular/common";
 import { mergeMap } from "rxjs/operators";
 import { of, Observable } from "rxjs";
 import { TaskNewDialogComponent } from "../../dialogs/task-new-dialog/task-new-dialog.component";
@@ -42,8 +41,7 @@ export class CourseDetailComponent implements OnInit {
     private courseService: CourseService,
     private courseRegistrationService: CourseRegistrationService,
     private feedbackAppService: FeedbackAppService,
-    private goToService: GoToService,
-    @Inject(DOCUMENT) document
+    private goToService: GoToService
   ) {}
 
   courseID: number;
@@ -159,7 +157,7 @@ export class CourseDetailComponent implements OnInit {
           this.courseRegistrationService
             .registerCourse(this.authService.getToken().id, this.courseID)
             .subscribe(
-              (_) =>
+              () =>
                 this.courseService
                   .getCourse(this.courseID)
                   .subscribe(() => this.ngOnInit()),
@@ -182,11 +180,11 @@ export class CourseDetailComponent implements OnInit {
         },
       })
       .afterClosed()
-      .subscribe((_) => {
+      .subscribe(() => {
         this.courseRegistrationService
           .deregisterCourse(this.authService.getToken().id, this.courseID)
           .subscribe(
-            (ok) => {
+            () => {
               this.router.navigate(["/courses"]).then();
             },
             (error) => console.error(error)
@@ -230,7 +228,7 @@ export class CourseDetailComponent implements OnInit {
           })
         )
         .subscribe(
-          (ok) => {
+          () => {
             this.router.navigate(["courses"]).then();
           },
           (error) => console.error(error)

@@ -145,7 +145,7 @@ export class TaskNewDialogComponent implements OnInit {
    * Create a new task
    * and close dialog
    */
-  createTask(value: any) {
+  createTask() {
     this.getValues();
     if (this.task.name) {
       this.taskService
@@ -207,7 +207,7 @@ export class TaskNewDialogComponent implements OnInit {
    * Update given task
    * and close dialog
    */
-  updateTask(value: any) {
+  updateTask() {
     this.getValues();
     if (this.task.name) {
       this.snackBar.open("Task bearbeitet.", "ok");

@@ -112,7 +112,7 @@ export class TaskPointsDialogComponent implements OnInit {
                   );
                   this.snackbar.open("Das Löschen war erfolgreich");
                 },
-                (error) => this.snackbar.open("Es ist ein Fehler aufgetreten.")
+                () => this.snackbar.open("Es ist ein Fehler aufgetreten.")
               );
           } else {
             this.allRequirements.splice(

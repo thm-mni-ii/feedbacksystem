@@ -51,7 +51,7 @@ export class CourseResultsService {
    * @param cid Course id
    * @return All category results
    */
-  getRequirementResultData(cid: number): {
+  getRequirementResultData(): {
     hidePoints: boolean;
     toPass: number;
     bonusFormula: number;

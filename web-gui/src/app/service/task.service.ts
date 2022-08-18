@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 import { Task } from "../model/Task";
 import { HttpClient } from "@angular/common/http";
 import { UserTaskResult } from "../model/UserTaskResult";
@@ -82,16 +82,6 @@ export class TaskService {
    */
   deleteTask(cid: number, tid: number): Observable<void> {
     return this.http.delete<void>(`/api/v1/courses/${cid}/tasks/${tid}`);
-  }
-
-  // PUT /courses/{cid}/tasks/{tid}/main-file
-  updateMainFile(cid: number, tid: number, file: String): Observable<any> {
-    return of(true); // TODO upload file
-  }
-
-  // PUT /courses/{cid}/tasks/{tid}/secondary-file
-  updateSecondaryFile(cid: number, tid: number, file: String): Observable<any> {
-    return of(true); // TODO upload file
   }
 
   public downloadTask(cid: number, tid: number, filename?: string) {

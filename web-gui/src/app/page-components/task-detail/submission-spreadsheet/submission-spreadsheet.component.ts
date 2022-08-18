@@ -6,11 +6,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import {
-  UntypedFormControl,
-  UntypedFormGroup,
-  Validators,
-} from "@angular/forms";
+import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 
 @Component({
   selector: "app-submission-spreadsheet",
@@ -36,15 +32,6 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   constructor() {}
 
   updateSubmission() {
-    const enteredCount = Object.values(this.resultForm.value).reduce(
-      (acc: number, field: string) => {
-        if (field) {
-          acc++;
-        }
-        return acc;
-      },
-      0
-    );
     const content = this.resultForm.value;
     content["complete"] = this.outputFields.length > 0;
     this.update.emit({ content });

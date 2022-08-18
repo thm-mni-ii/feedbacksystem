@@ -85,7 +85,7 @@ export class ParticipantsComponent implements OnInit {
     this.registrationService
       .registerCourse(userID, this.courseID, role)
       .subscribe(
-        (res) => {
+        () => {
           this.snackBar.open("Benutzerrolle wurde geändert.", "OK", {
             duration: 5000,
           });

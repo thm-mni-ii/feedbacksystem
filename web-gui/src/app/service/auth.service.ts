@@ -37,7 +37,7 @@ export class AuthService {
    */
   getToken(): JWTToken {
     const token = this.loadToken();
-    const decodedToken = this.decodeToken(token);
+    const decodedToken = this.decodeToken();
     if (!decodedToken) {
       throw new Error("Decoding the token failed");
     } else if (this.jwtHelper.isTokenExpired(token)) {
@@ -103,7 +103,7 @@ export class AuthService {
           return token;
         }),
         mergeMap((token) => {
-          const decodedToken = this.decodeToken(token);
+          const decodedToken = this.decodeToken();
           if (!decodedToken) {
             return throwError("Decoding the token failed");
           } else if (this.jwtHelper.isTokenExpired(token)) {
@@ -114,7 +114,7 @@ export class AuthService {
       );
   }
 
-  private decodeToken(token: string): JWTToken | null {
+  private decodeToken(): JWTToken | null {
     return this.jwtHelper.decodeToken(localStorage.getItem("token"));
   }
 

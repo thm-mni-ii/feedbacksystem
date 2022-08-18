@@ -22,12 +22,7 @@ export class SubmissionService {
    * @param passed Filters only passed submissions
    * @return Observable that succeeds with all submission of a user for a task
    */
-  getAllSubmissions(
-    uid: number,
-    cid: number,
-    tid: number,
-    passed?: boolean
-  ): Observable<any> {
+  getAllSubmissions(uid: number, cid: number, tid: number): Observable<any> {
     // TODO: do we need passed filter?
     return this.http.get<any>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`
@@ -98,11 +93,6 @@ export class SubmissionService {
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`,
       formData
     );
-  }
-
-  // PUT /users/{uid}/courses/{cid}/tasks/{tid}/submissions/
-  restartAllSubmissions(uid: number, cid: number, tid: number, sid: number) {
-    // TODO: this Route doesn't exist yet
   }
 
   // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults

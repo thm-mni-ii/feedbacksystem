@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { Task } from "../../../model/Task";
 import { UserTaskResult } from "../../../model/UserTaskResult";
 

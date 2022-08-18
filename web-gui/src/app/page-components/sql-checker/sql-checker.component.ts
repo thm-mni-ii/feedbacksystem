@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { TaskService } from "../../service/task.service";
 import { AuthService } from "../../service/auth.service";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -10,7 +10,6 @@ import { CourseService } from "../../service/course.service";
 import { CourseRegistrationService } from "../../service/course-registration.service";
 import { FeedbackAppService } from "../../service/feedback-app.service";
 import { GoToService } from "../../service/goto.service";
-import { DOCUMENT } from "@angular/common";
 import { Task } from "../../model/Task";
 import { UserTaskResult } from "../../model/UserTaskResult";
 import { Observable, of } from "rxjs";
@@ -39,8 +38,7 @@ export class SqlCheckerComponent implements OnInit {
     private courseRegistrationService: CourseRegistrationService,
     private feedbackAppService: FeedbackAppService,
     private goToService: GoToService,
-    private checkerService: CheckerService,
-    @Inject(DOCUMENT) document
+    private checkerService: CheckerService
   ) {}
   checkerConfig: Observable<CheckerConfig[]> = of();
   courseID: number;

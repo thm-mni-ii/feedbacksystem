@@ -1,7 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
 import { AuthService } from "./service/auth.service";
-import { GoToService } from "./service/goto.service";
 
 /**
  * Component that routes from login to app
@@ -12,7 +10,7 @@ import { GoToService } from "./service/goto.service";
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent implements OnInit {
-  constructor(private dialog: MatDialog, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
     this.authService.startTokenAutoRefresh();

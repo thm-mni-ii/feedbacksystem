@@ -51,13 +51,13 @@ export class ChangePasswordComponent implements OnInit {
           this.passwd_repeat
         )
         .subscribe(
-          (res) => {
+          () => {
             this.showOK();
             setTimeout(() => {
               location.reload();
             }, 2000);
           },
-          (error) => {
+          () => {
             this.showError("Leider gab es einen Fehler mit dem Update");
           }
         );

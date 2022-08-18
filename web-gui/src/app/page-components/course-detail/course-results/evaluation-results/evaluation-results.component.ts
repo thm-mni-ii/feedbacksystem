@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 import { EvaluationUserResults } from "../../../../model/EvaluationUserResults";
 import { ActivatedRoute } from "@angular/router";
 import { CourseResultsService } from "../../../../service/course-results.service";

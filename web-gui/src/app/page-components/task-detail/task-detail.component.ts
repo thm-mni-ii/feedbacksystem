@@ -1,8 +1,7 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { DOCUMENT } from "@angular/common";
 import { DomSanitizer } from "@angular/platform-browser";
 import { TitlebarService } from "../../service/titlebar.service";
 import { UserService } from "../../service/user.service";
@@ -57,8 +56,7 @@ export class TaskDetailComponent implements OnInit {
     private taskService: TaskService,
     private courseService: CourseService,
     private submissionService: SubmissionService,
-    private authService: AuthService,
-    @Inject(DOCUMENT) document
+    private authService: AuthService
   ) {
     // Check if task reached deadline TODO: this needs work
     // setInterval(() => {
@@ -109,7 +107,7 @@ export class TaskDetailComponent implements OnInit {
         })
       )
       .subscribe(
-        (ok) => {
+        () => {
           this.refreshByPolling();
         },
         (error) => console.error(error)
@@ -183,7 +181,7 @@ export class TaskDetailComponent implements OnInit {
         this.submissionData
       )
       .subscribe(
-        (ok) => {
+        () => {
           this.pending = true;
           this.refreshByPolling(true);
           this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
@@ -237,7 +235,7 @@ export class TaskDetailComponent implements OnInit {
           this.lastSubmission.id
         )
         .subscribe(
-          (ok) => {
+          () => {
             this.ngOnInit();
           },
           (error) => console.error(error)
@@ -302,7 +300,7 @@ export class TaskDetailComponent implements OnInit {
           return confirmed
             ? this.taskService
                 .deleteTask(this.courseId, this.task.id)
-                .pipe(map((e) => true))
+                .pipe(map(() => true))
             : of(false);
         })
       )

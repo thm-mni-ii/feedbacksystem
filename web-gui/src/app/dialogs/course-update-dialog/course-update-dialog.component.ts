@@ -52,7 +52,7 @@ export class CourseUpdateDialogComponent implements OnInit {
 
     if (this.isUpdateDialog) {
       this.courseService.updateCourse(this.data.course.id, course).subscribe(
-        (ok) => this.dialogRef.close({ success: true }),
+        () => this.dialogRef.close({ success: true }),
         (error) => console.error(error)
       );
     } else {

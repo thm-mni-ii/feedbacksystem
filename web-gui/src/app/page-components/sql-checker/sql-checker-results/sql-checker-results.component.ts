@@ -1,4 +1,4 @@
-import { Component, Inject, Input, OnInit, ViewChild } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { Task } from "../../../model/Task";
 import { UserTaskResult } from "../../../model/UserTaskResult";
@@ -15,17 +15,9 @@ import { CourseRegistrationService } from "../../../service/course-registration.
 import { FeedbackAppService } from "../../../service/feedback-app.service";
 import { GoToService } from "../../../service/goto.service";
 import { CheckerService } from "../../../service/checker.service";
-import { DOCUMENT } from "@angular/common";
 import { Roles } from "../../../model/Roles";
-import { ChartType, ChartOptions, ChartColor } from "chart.js";
-import {
-  SingleDataSet,
-  Label,
-  monkeyPatchChartJsLegend,
-  monkeyPatchChartJsTooltip,
-  Color,
-} from "ng2-charts";
-import { MatSort, Sort } from "@angular/material/sort";
+import { ChartType, ChartOptions } from "chart.js";
+import { SingleDataSet, Label } from "ng2-charts";
 import { SqlCheckerService } from "../../../service/sql-checker.service";
 import { SumUp } from "../../../model/SumUp";
 import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
@@ -51,8 +43,7 @@ export class SqlCheckerResultsComponent implements OnInit {
     private feedbackAppService: FeedbackAppService,
     private goToService: GoToService,
     private checkerService: CheckerService,
-    private sqlcheckerService: SqlCheckerService,
-    @Inject(DOCUMENT) document
+    private sqlcheckerService: SqlCheckerService
   ) {}
   // Chart generally
   public pieChartColors: Array<any> = [
@@ -175,13 +166,13 @@ export class SqlCheckerResultsComponent implements OnInit {
         this.leftChartCountFalse = x.falseCount;
         this.pieChartDataLeft = [x.trueCount, x.falseCount];
       },
-      (err) => {}
+      () => {}
     );
     this.sqlcheckerService.getSumUpCorrect(this.taskID, "attributes").subscribe(
       (x) => {
         this.pieChartDataRight = [x.trueCount, x.falseCount];
       },
-      (err) => {}
+      () => {}
     );
   }
   private tableCheckerWrongTables(e: any) {
@@ -217,7 +208,7 @@ export class SqlCheckerResultsComponent implements OnInit {
         (x) => {
           this.pieChartDataCenter = [x.trueCount, x.falseCount];
         },
-        (err) => {}
+        () => {}
       );
   }
   private clickCenterChartTableChecker(e: any) {
@@ -286,7 +277,7 @@ export class SqlCheckerResultsComponent implements OnInit {
         (x) => {
           this.pieChartDataCenter = [x.trueCount, x.falseCount];
         },
-        (err) => {}
+        () => {}
       );
   }
   private clickCenterChartAttributeChecker(e: any) {

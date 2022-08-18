@@ -93,14 +93,14 @@ export class LoginComponent implements OnInit {
           .subscribe(
             (data) => {
               if (data.success) {
-                this.legalService.acceptTermsOfUse(uid).subscribe((_) => {
+                this.legalService.acceptTermsOfUse(uid).subscribe(() => {
                   this.router.navigateByUrl("/courses");
                 });
               } else {
                 this.auth.logout();
               }
             },
-            (error) => {
+            () => {
               this.auth.logout();
             }
           );

@@ -60,13 +60,13 @@ export class UserManagementComponent implements OnInit {
    */
   roleChange(userID: number, role: string) {
     this.userService.changeRole(userID, role).subscribe(
-      (res) => {
+      () => {
         this.snackBar.open("Benutzerrolle wurde geändert.", "OK", {
           duration: 5000,
         });
         this.refreshUserList();
       },
-      (error) => {
+      () => {
         this.snackBar.open("Leider gab es einen Fehler mit dem Update", "OK", {
           duration: 5000,
         });
@@ -90,7 +90,7 @@ export class UserManagementComponent implements OnInit {
       .subscribe((confirmed) => {
         if (confirmed) {
           this.userService.deleteUser(user.id).subscribe(
-            (res) => {
+            () => {
               this.snackBar.open("Benutzer wurde gelöscht.", "OK", {
                 duration: 5000,
               });
@@ -127,7 +127,7 @@ export class UserManagementComponent implements OnInit {
       .subscribe((user) => {
         if (user) {
           this.userService.createUser(user).subscribe(
-            (res) => {
+            () => {
               this.snackBar.open("Gast Benutzer erstellt", null, {
                 duration: 5000,
               });
