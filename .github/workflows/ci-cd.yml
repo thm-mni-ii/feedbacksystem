@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev, main, v*.x]
     tags:
       - v**
   pull_request:
