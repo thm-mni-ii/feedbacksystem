@@ -22,6 +22,16 @@
   }
 }
 
+.scrolling-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .mat-tab-label-container {
+  display: block;
+}
+
 .mat-table {
   width: 100%;
 }
@@ -41,4 +51,8 @@
   > div:last-child {
     margin-left: 16px;
   }
+}
+
+.pre {
+  white-space: pre-wrap;
 }

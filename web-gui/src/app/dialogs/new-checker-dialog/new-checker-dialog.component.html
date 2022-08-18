@@ -2,13 +2,25 @@
 <div matDialogTitle *ngIf="isUpdate">Überprüfung bearbeiten</div>
 <div class="newChecker">
   <form [formGroup]="checkerForm">
-    <mat-select class="pad" placeholder="Checkertyp" formControlName="checkerType" required (selectionChange)="defineForm(checkerForm.value)">
-      <mat-option value="sql">SQL</mat-option>
+    <mat-select
+      class="pad"
+      placeholder="Checkertyp"
+      formControlName="checkerType"
+      required
+    >
+      <mat-option value="sql">SQL Runner</mat-option>
       <mat-option value="sql-checker">SQL Checker</mat-option>
       <mat-option value="bash">Bash</mat-option>
+      <mat-option value="excel">Excel</mat-option>
     </mat-select>
     <mat-form-field>
-      <input type="number" placeholder="Reihenfolge" matInput formControlName="ord" required>
+      <input
+        type="number"
+        placeholder="Reihenfolge"
+        matInput
+        formControlName="ord"
+        required
+      />
     </mat-form-field>
   <div *ngIf="choosedSQLChecker==false">
     <app-dropzone class="pad" (update)="updateMainFile($event)" [usage]="'Hauptdatei hochladen'"></app-dropzone>
@@ -41,14 +53,34 @@
     </div>
   </div>
   </form>
-  <mat-dialog-actions *ngIf="choosedSQLChecker==false" class="actions">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!checkerForm.valid || checkerForm.value.checkerType == 'sqlchecker'" (click)="createChecker(checkerForm.value)">Erstellen</button>
-    <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!checkerForm.valid" (click)="updateTask(checkerForm.value)">Update</button>
-  </mat-dialog-actions>
-  <mat-dialog-actions *ngIf="choosedSQLChecker" class="actions">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!checkerForm.valid" (click)="createChecker(checkerForm.value)">Erstellen</button>
-    <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!checkerForm.valid" (click)="updateTask(checkerForm.value)">Update</button>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      Abbrechen
+    </button>
+    <button
+      *ngIf="!isUpdate"
+      mat-flat-button
+      color="accent"
+      [disabled]="
+        !checkerForm.valid ||
+        this.mainFile?.size <= 0 ||
+        !(
+          this.secondaryFile?.size > 0 ||
+          checkerForm.value.checkerType == 'bash'
+        )
+      "
+      (click)="createChecker(checkerForm.value)"
+    >
+      Erstellen
+    </button>
+    <button
+      *ngIf="isUpdate"
+      mat-flat-button
+      color="accent"
+      [disabled]="!checkerForm.valid"
+      (click)="updateTask(checkerForm.value)"
+    >
+      Update
+    </button>
   </mat-dialog-actions>
 </div>

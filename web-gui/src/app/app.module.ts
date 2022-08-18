@@ -31,6 +31,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatTabsModule} from "@angular/material/tabs";
 
 import {NewCourseComponent} from './page-components/new-course/new-course.component';
 import { SearchCoursesComponent } from './page-components/search-courses/search-courses.component';
@@ -165,6 +166,7 @@ export const httpInterceptorProviders = [
     MarkdownModule.forRoot(),
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTabsModule,
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {EventEmitter, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Submission} from '../model/Submission';
 import {HttpClient} from '@angular/common/http';
@@ -8,7 +8,12 @@ import {SubTaskResult} from '../model/SubTaskResult';
   providedIn: 'root'
 })
 export class SubmissionService {
-  constructor(private http: HttpClient) { }
+
+  private isFileSubmitted: EventEmitter<boolean>;
+
+  constructor(private http: HttpClient) {
+    this.isFileSubmitted = new EventEmitter<boolean>();
+  }
 
   /**
    * Load all submission for a task
@@ -74,5 +79,13 @@ export class SubmissionService {
   // GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults
   getSubTaskResults(uid: number, cid: number, tid: number, sid: number): Observable<SubTaskResult[]> {
     return this.http.get<SubTaskResult[]>(`/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/subresults`);
+  }
+
+  emitFileSubmission(): void {
+    this.isFileSubmitted.emit(true);
+  }
+
+  getFileSubmissionEmitter(): EventEmitter<boolean> {
+    return this.isFileSubmitted;
   }
 }

@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [dev, master]
+    branches: [dev, main]
     tags:
       - v**
   pull_request:
@@ -48,8 +48,9 @@ jobs:
         run: ./gradlew dist
       - name: Deploy to Dockerhub
         if: |
-          contains(github.ref, 'master') ||
+          contains(github.ref, 'main') ||
           contains(github.ref, 'dev') ||
+          startsWith(github.ref, 'v1.x') ||
           startsWith(github.ref, 'refs/tags/v')
         run: bash ./ci/docker-deploy.sh ${GITHUB_REF##*/}
         env:

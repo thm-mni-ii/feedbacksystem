@@ -11,5 +11,8 @@ package de.thm.ii.fbs.types
   */
 class DockerCmdConfig(val image: String,
                       var mount: Seq[(String, String)] = Seq.empty,
+                      val env: Seq[(String, String)] = Seq.empty,
                       var dockerOptions: Seq[String] = Seq.empty,
-                      var runOptions: Seq[String] = Seq.empty)
+                      var runOptions: Seq[String] = Seq.empty,
+                      var networks: Seq[String] = Seq.empty,
+                     )
