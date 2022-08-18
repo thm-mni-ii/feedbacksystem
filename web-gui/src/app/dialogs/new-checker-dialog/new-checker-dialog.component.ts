@@ -169,6 +169,7 @@ export class NewCheckerDialogComponent implements OnInit {
     this.checkerCount.subscribe((r) => {
       const newCheckerOrder = r.length + 1;
       this.checkerForm.setValue({
+        ...this.checkerForm.value,
         checkerType: "sql",
         ord: newCheckerOrder,
       });

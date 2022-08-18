@@ -7,6 +7,7 @@
       placeholder="Checkertyp"
       formControlName="checkerType"
       required
+      (selectionChange)="defineForm(checkerForm.value)"
     >
       <mat-option value="sql">SQL Runner</mat-option>
       <mat-option value="sql-checker">SQL Checker</mat-option>
@@ -47,7 +48,7 @@
         <h4>Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?</h4>
         <mat-icon matTooltip="Studierende erhalten Informationen zu den korrekten Tabellen und Attributen">info</mat-icon>
         <mat-form-field>
-          <input type="number" placeholder="" matInput formControlName="showHintsAt" required>
+          <input type="number" placeholder="" matInput formControlName="showExtendedHintsAt" required>
         </mat-form-field>
       </div>
     </div>
