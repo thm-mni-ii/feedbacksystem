@@ -196,5 +196,3 @@ export class NewCheckerDialogComponent implements OnInit {
     }
   }
 }
-=======
->>>>>>> dev
