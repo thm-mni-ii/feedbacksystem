@@ -1,75 +1,176 @@
 <div matDialogTitle *ngIf="!isUpdate">Neue Aufgabe erstellen</div>
 <div matDialogTitle *ngIf="isUpdate">Aufgabe bearbeiten</div>
 <div class="newTask">
-    <form [formGroup]="taskForm">
-      <!-- Task name -->
-      <mat-form-field>
-        <input type="text" placeholder="Name" matInput formControlName="name" required>
+  <form [formGroup]="taskForm">
+    <!-- Task name -->
+    <mat-form-field>
+      <input
+        type="text"
+        placeholder="Name"
+        matInput
+        formControlName="name"
+        required
+      />
+    </mat-form-field>
+
+    <!-- Task Description -->
+    <mat-form-field>
+      <mat-label>Beschreibung</mat-label>
+      <textarea
+        matInput
+        type="text"
+        matAutosizeMinRows="1"
+        matAutosizeMaxRows="20"
+        formControlName="description"
+      ></textarea>
+    </mat-form-field>
+
+    <!-- Task Deadline -->
+    <!--      <mat-form-field class="col">-->
+    <!--        <mat-label>Deadline</mat-label>-->
+    <!--        <input matInput [matDatepicker]="picker" formControlName="deadline" (dateChange)="addDate($event)">-->
+    <!--        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>-->
+    <!--        <mat-datepicker #picker></mat-datepicker>-->
+    <!--      </mat-form-field>-->
+
+    <mat-form-field class="col">
+      <mat-label>Deadline</mat-label>
+      <input
+        matInput
+        [ngxMatDatetimePicker]="picker"
+        placeholder="Deadline"
+        formControlName="deadline"
+        (dateChange)="addDate($event)"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <ngx-mat-datetime-picker
+        #picker
+        [showSeconds]="true"
+      ></ngx-mat-datetime-picker>
+    </mat-form-field>
+
+    <!-- Task Mediatype -->
+    <mat-form-field class="col pad">
+      <mat-label>Medientyp</mat-label>
+      <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
+        <mat-option value="text/plain">Text</mat-option>
+        <mat-option value="application/octet-stream">Datei</mat-option>
+        <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
+      <mat-form-field class="col" (click)="fileInput.click()">
+        <input
+          matInput
+          type="text"
+          placeholder="Exel-Datei"
+          formControlName="exelFile"
+          required
+          readonly
+        />
+        <input
+          hidden
+          #fileInput
+          type="file"
+          required
+          (change)="uploadExel($event)"
+          accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        />
+        <mat-icon matSuffix class="clickable">folder</mat-icon>
       </mat-form-field>
-
-      <!-- Task Description -->
-      <mat-form-field>
-        <mat-label>Beschreibung</mat-label>
-        <textarea matInput type="text" matAutosizeMinRows="1" matAutosizeMaxRows="20"
-                  formControlName="description"></textarea>
-      </mat-form-field>
-
-      <!-- Task Deadline -->
-<!--      <mat-form-field class="col">-->
-<!--        <mat-label>Deadline</mat-label>-->
-<!--        <input matInput [matDatepicker]="picker" formControlName="deadline" (dateChange)="addDate($event)">-->
-<!--        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>-->
-<!--        <mat-datepicker #picker></mat-datepicker>-->
-<!--      </mat-form-field>-->
-
-      <mat-form-field class="col">
-        <mat-label>Deadline</mat-label>
-        <input matInput [ngxMatDatetimePicker]="picker" placeholder="Deadline" formControlName="deadline" (dateChange)="addDate($event)">
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <ngx-mat-datetime-picker #picker [showSeconds]="true"></ngx-mat-datetime-picker>
-      </mat-form-field>
-
-      <!-- Task Mediatype -->
       <mat-form-field class="col pad">
-        <mat-label>Medientyp</mat-label>
-        <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
-          <mat-option value="text/plain">Text</mat-option>
-          <mat-option value="application/octet-stream">Datei</mat-option>
-          <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
-        </mat-select>
+        <input
+          matInput
+          type="text"
+          placeholder="Nutzer-ID Feld"
+          formControlName="userIDField"
+          required
+        />
+        <mat-icon
+          matSuffix
+          (click)="getFromSpreadsheet('userIDField')"
+          class="clickable"
+          >search</mat-icon
+        >
       </mat-form-field>
-
-      <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
-        <mat-form-field class="col" (click)="fileInput.click()">
-          <input matInput type="text" placeholder="Exel-Datei" formControlName="exelFile" required readonly>
-          <input hidden #fileInput type="file" required (change)="uploadExel($event)" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-          <mat-icon matSuffix class="clickable">folder</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="col pad">
-          <input matInput type="text" placeholder="Nutzer-ID Feld" formControlName="userIDField" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('userIDField')" class="clickable">search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="col">
-          <input matInput type="text" placeholder="Eingabeparameter Felder" formControlName="inputFields" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('inputFields')" class="clickable">search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="col pad">
-          <input matInput type="text" placeholder="Ergebniss Felder" formControlName="outputFields" required>
-          <mat-icon matSuffix (click)="getFromSpreadsheet('outputFields')" class="clickable">search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="col">
-          <input matInput type="text" placeholder="Punkte Felder" formControlName="pointFields">
-          <mat-icon matSuffix (click)="getFromSpreadsheet('pointFields')" class="clickable">search</mat-icon>
-        </mat-form-field>
-        <mat-form-field class="col pad">
-          <input matInput type="number" placeholder="Nachkommastellen" formControlName="decimals" required>
-        </mat-form-field>
-      </div>
-      <br>
-    </form>
+      <mat-form-field class="col">
+        <input
+          matInput
+          type="text"
+          placeholder="Eingabeparameter Felder"
+          formControlName="inputFields"
+          required
+        />
+        <mat-icon
+          matSuffix
+          (click)="getFromSpreadsheet('inputFields')"
+          class="clickable"
+          >search</mat-icon
+        >
+      </mat-form-field>
+      <mat-form-field class="col pad">
+        <input
+          matInput
+          type="text"
+          placeholder="Ergebniss Felder"
+          formControlName="outputFields"
+          required
+        />
+        <mat-icon
+          matSuffix
+          (click)="getFromSpreadsheet('outputFields')"
+          class="clickable"
+          >search</mat-icon
+        >
+      </mat-form-field>
+      <mat-form-field class="col">
+        <input
+          matInput
+          type="text"
+          placeholder="Punkte Felder"
+          formControlName="pointFields"
+        />
+        <mat-icon
+          matSuffix
+          (click)="getFromSpreadsheet('pointFields')"
+          class="clickable"
+          >search</mat-icon
+        >
+      </mat-form-field>
+      <mat-form-field class="col pad">
+        <input
+          matInput
+          type="number"
+          placeholder="Nachkommastellen"
+          formControlName="decimals"
+          required
+        />
+      </mat-form-field>
+    </div>
+    <br />
+  </form>
   <mat-dialog-actions class="actions">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Abbrechen</button>
-    <button *ngIf="!isUpdate" mat-flat-button  color="accent" [disabled]="!taskForm.valid" (click)="createTask(taskForm.value)">Erstellen</button>
-    <button *ngIf="isUpdate" mat-flat-button color="accent" [disabled]="!taskForm.valid" (click)="updateTask(taskForm.value)">Update</button>
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      Abbrechen
+    </button>
+    <button
+      *ngIf="!isUpdate"
+      mat-flat-button
+      color="accent"
+      [disabled]="!taskForm.valid"
+      (click)="createTask(taskForm.value)"
+    >
+      Erstellen
+    </button>
+    <button
+      *ngIf="isUpdate"
+      mat-flat-button
+      color="accent"
+      [disabled]="!taskForm.valid"
+      (click)="updateTask(taskForm.value)"
+    >
+      Update
+    </button>
   </mat-dialog-actions>
 </div>

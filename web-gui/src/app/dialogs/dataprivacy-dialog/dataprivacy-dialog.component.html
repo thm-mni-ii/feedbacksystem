@@ -5,13 +5,29 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="dialog-actions">
-  <mat-checkbox *ngIf="!onlyForShow" [(ngModel)]="privacyChecked">Hiermit habe ich die Datenschutzerklärung gelesen und
-    bin mit dieser
+  <mat-checkbox *ngIf="!onlyForShow" [(ngModel)]="privacyChecked"
+    >Hiermit habe ich die Datenschutzerklärung gelesen und bin mit dieser
     einverstanden
   </mat-checkbox>
   <div class="action-buttons">
-    <button *ngIf="!onlyForShow" mat-flat-button color="warn" (click)="abort()">Abbrechen</button>
-    <button *ngIf="!onlyForShow" mat-flat-button color="accent" (click)="login()">Login</button>
-    <button *ngIf="onlyForShow" mat-flat-button color="accent" (click)="abort()">Schließen</button>
+    <button *ngIf="!onlyForShow" mat-flat-button color="warn" (click)="abort()">
+      Abbrechen
+    </button>
+    <button
+      *ngIf="!onlyForShow"
+      mat-flat-button
+      color="accent"
+      (click)="login()"
+    >
+      Login
+    </button>
+    <button
+      *ngIf="onlyForShow"
+      mat-flat-button
+      color="accent"
+      (click)="abort()"
+    >
+      Schließen
+    </button>
   </div>
 </mat-dialog-actions>

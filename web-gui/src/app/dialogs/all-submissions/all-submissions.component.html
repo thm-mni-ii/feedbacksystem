@@ -1,5 +1,9 @@
 <mat-dialog-content>
-  <app-results *ngIf="data?.submission" [displayTables]="true" [submissions]="data.submission"></app-results>
+  <app-results
+    *ngIf="data?.submission"
+    [displayTables]="true"
+    [submissions]="data.submission"
+  ></app-results>
 </mat-dialog-content>
 <mat-dialog-actions class="buttons">
   <button mat-flat-button color="warn" (click)="close()">Schließen</button>

@@ -12,7 +12,12 @@
   <!--      </mat-paginator>-->
   <!--    </div>-->
   <div class="align-right-container">
-    <mat-slide-toggle class="align-right-child" [checked]="showPoints" (change)="showPoints = $event.checked">Punkte Anzeigen</mat-slide-toggle>
+    <mat-slide-toggle
+      class="align-right-child"
+      [checked]="showPoints"
+      (change)="showPoints = $event.checked"
+      >Punkte Anzeigen</mat-slide-toggle
+    >
   </div>
   <div class="card">
     <div class="bonus-column">
@@ -21,12 +26,24 @@
           <span class="title">Kurs-Bonus</span>
         </div>
       </div>
-      <div class="bonus-container" *ngFor="let result of evaluationUserResults | async">
-              <span class="category-result-backpane" matTooltipPosition="above"
-                    matTooltip="{{result.user.surname}}, {{result.user.prename}}, {{result.bonusPoints}}">
-                       <span class="category-bonus bonus" *ngIf="result.bonusPoints !== 0">{{ result.bonusPoints }}</span>
-                       <span class="category-bonus no-bonus" *ngIf="result.bonusPoints === 0">-</span>
-                </span>
+      <div
+        class="bonus-container"
+        *ngFor="let result of evaluationUserResults | async"
+      >
+        <span
+          class="category-result-backpane"
+          matTooltipPosition="above"
+          matTooltip="{{ result.user.surname }}, {{ result.user.prename }}, {{
+            result.bonusPoints
+          }}"
+        >
+          <span class="category-bonus bonus" *ngIf="result.bonusPoints !== 0">{{
+            result.bonusPoints
+          }}</span>
+          <span class="category-bonus no-bonus" *ngIf="result.bonusPoints === 0"
+            >-</span
+          >
+        </span>
       </div>
     </div>
     <div class="name-column">
@@ -36,47 +53,98 @@
           <h2 class="title">Namen</h2>
         </div>
       </div>
-      <div class="name-container" *ngFor="let result of evaluationUserResults | async">
-        <span class="state passed" *ngIf="result.passed"><mat-icon>check_circle</mat-icon></span>
-        <span class="state failed" *ngIf="!result.passed"><mat-icon>cancel</mat-icon></span>&nbsp;
-        <span class="username">{{result.user.surname}}, {{result.user.prename}}</span>
+      <div
+        class="name-container"
+        *ngFor="let result of evaluationUserResults | async"
+      >
+        <span class="state passed" *ngIf="result.passed"
+          ><mat-icon>check_circle</mat-icon></span
+        >
+        <span class="state failed" *ngIf="!result.passed"
+          ><mat-icon>cancel</mat-icon></span
+        >&nbsp;
+        <span class="username"
+          >{{ result.user.surname }}, {{ result.user.prename }}</span
+        >
       </div>
     </div>
 
-    <div class="task-column" *ngFor="let requirement of requirements | async; index as i">
+    <div
+      class="task-column"
+      *ngFor="let requirement of requirements | async; index as i"
+    >
       <div class="task-container header">
         <div class="task-result">
-          <span class="title title-hoverable" (click)="toggleDetails(requirement.id)">Kategorie {{ i + 1 }} &#9660; <!--&dArr; --></span>
+          <span
+            class="title title-hoverable"
+            (click)="toggleDetails(requirement.id)"
+            >Kategorie {{ i + 1 }} &#9660;
+            <!--&dArr; --></span
+          >
           <span class="title">Bonus</span>
           <!-- Not showing when showDetails is true -->
           <ng-container *ngIf="opened === requirement.id">
             <span class="category-tasks" *ngFor="let task of requirement.tasks">
-              <span class="title">{{task.name}}</span>
+              <span class="title">{{ task.name }}</span>
             </span>
           </ng-container>
         </div>
       </div>
-      <div class="task-container" *ngFor="let userResult of evaluationUserResults | async">
-          <span class="state passed" *ngIf="userResult.results[i].passed"><mat-icon>check_circle</mat-icon></span>
-          <span class="state failed" *ngIf="!userResult.results[i].passed"><mat-icon class="close-icon">cancel</mat-icon></span>
-          <span class="category-result-backpane" matTooltipPosition="above"
-                matTooltip="{{userResult.user.surname}}, {{userResult.user.prename}}, {{userResult.results[i].bonusPoints}}">
-             <span class="category-bonus bonus" *ngIf="userResult.results[i].bonusPoints !== 0">{{ userResult.results[i].bonusPoints }}</span>
-             <span class="category-bonus no-bonus" *ngIf="userResult.results[i].bonusPoints === 0">-</span>
-          </span>
-          <ng-container class="task-container" *ngIf="opened === requirement.id">
-            <ng-container class="task-result" *ngFor="let taskResult of userResult.results[i].container.tasks">
-                <span class="task-result-backpane {{(showPoints || taskResult.attempts === 0) ? 'not-tried' : (taskResult.passed) ? '' : 'failed-task'}}"
-                                   matTooltipPosition="above" matTooltip="{{ userResult.user.surname }}, {{ userResult.user.prename }} {{ taskResult.attempts }}">
-                  <span *ngIf="taskResult.attempts !== 0">
-                    <span *ngIf="showPoints">{{ taskResult.points }}</span>
-                    <span *ngIf="!showPoints">{{ taskResult.attempts }}</span>
-                  </span>
-                  <span *ngIf="taskResult.attempts === 0">-</span>
-                </span>
-            </ng-container>
+      <div
+        class="task-container"
+        *ngFor="let userResult of evaluationUserResults | async"
+      >
+        <span class="state passed" *ngIf="userResult.results[i].passed"
+          ><mat-icon>check_circle</mat-icon></span
+        >
+        <span class="state failed" *ngIf="!userResult.results[i].passed"
+          ><mat-icon class="close-icon">cancel</mat-icon></span
+        >
+        <span
+          class="category-result-backpane"
+          matTooltipPosition="above"
+          matTooltip="{{ userResult.user.surname }}, {{
+            userResult.user.prename
+          }}, {{ userResult.results[i].bonusPoints }}"
+        >
+          <span
+            class="category-bonus bonus"
+            *ngIf="userResult.results[i].bonusPoints !== 0"
+            >{{ userResult.results[i].bonusPoints }}</span
+          >
+          <span
+            class="category-bonus no-bonus"
+            *ngIf="userResult.results[i].bonusPoints === 0"
+            >-</span
+          >
+        </span>
+        <ng-container class="task-container" *ngIf="opened === requirement.id">
+          <ng-container
+            class="task-result"
+            *ngFor="let taskResult of userResult.results[i].container.tasks"
+          >
+            <span
+              class="task-result-backpane {{
+                showPoints || taskResult.attempts === 0
+                  ? 'not-tried'
+                  : taskResult.passed
+                  ? ''
+                  : 'failed-task'
+              }}"
+              matTooltipPosition="above"
+              matTooltip="{{ userResult.user.surname }}, {{
+                userResult.user.prename
+              }} {{ taskResult.attempts }}"
+            >
+              <span *ngIf="taskResult.attempts !== 0">
+                <span *ngIf="showPoints">{{ taskResult.points }}</span>
+                <span *ngIf="!showPoints">{{ taskResult.attempts }}</span>
+              </span>
+              <span *ngIf="taskResult.attempts === 0">-</span>
+            </span>
           </ng-container>
-        </div>
+        </ng-container>
+      </div>
     </div>
   </div>
 </mat-card>

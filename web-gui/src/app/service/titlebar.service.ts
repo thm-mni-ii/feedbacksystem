@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
+import { Injectable } from "@angular/core";
+import { Observable, Subject } from "rxjs";
 
 /**
  * Service to change title in titlebar
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TitlebarService {
   private subject = new Subject<string>();
@@ -23,6 +23,8 @@ export class TitlebarService {
    * @param title The new title value of the title bar
    */
   emitTitle(title: string) {
-    setTimeout(() => { this.subject.next(title); }, 0);
+    setTimeout(() => {
+      this.subject.next(title);
+    }, 0);
   }
 }

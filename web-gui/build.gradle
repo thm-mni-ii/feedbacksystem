@@ -33,8 +33,6 @@ distributions {
     }
 }
 
-
-
 // After build the ng app, we copy the dist content to or spring boot webservice static resoorce path
 // It will work on evry system, because of relative paths (at leat I hope so)
 
@@ -44,3 +42,11 @@ task copyWebToWS(type: Copy, dependsOn: [build]) {
 }
 
 copyWebToWS
+
+// Run eslint
+
+task lint(type: NpmTask, dependsOn: [npmInstall]) {
+  args = ['run', 'lint']
+}
+
+check.dependsOn lint

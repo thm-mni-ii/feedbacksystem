@@ -103,7 +103,7 @@ export class NewCheckerDialogComponent implements OnInit {
               this.mainFile
             )
             .subscribe(
-              (ok) => {},
+              () => {},
               (error) => console.error(error)
             );
           if (this.secondaryFile) {
@@ -115,7 +115,7 @@ export class NewCheckerDialogComponent implements OnInit {
                 this.secondaryFile
               )
               .subscribe(
-                (ok) => {},
+                () => {},
                 (error) => console.error(error)
               );
           }
@@ -140,7 +140,7 @@ export class NewCheckerDialogComponent implements OnInit {
    * Update given task
    * and close dialog
    */
-  updateTask(value: any) {
+  updateTask() {
     if (this.checker.checkerType && this.checker.ord) {
       this.checkerService
         .updateChecker(
@@ -149,7 +149,7 @@ export class NewCheckerDialogComponent implements OnInit {
           this.checker.id,
           this.checker
         )
-        .subscribe(async (res) => {
+        .subscribe(async () => {
           // TODO: res is array of checker
           if (this.mainFile) {
             // const temp = await toBase64(this.mainFile)
@@ -162,7 +162,7 @@ export class NewCheckerDialogComponent implements OnInit {
                 this.mainFile
               )
               .subscribe(
-                (ok) => {},
+                () => {},
                 (error) => console.error(error)
               );
           }
@@ -175,7 +175,7 @@ export class NewCheckerDialogComponent implements OnInit {
                 this.secondaryFile
               )
               .subscribe(
-                (ok) => {},
+                () => {},
                 (error) => console.error(error)
               );
           }

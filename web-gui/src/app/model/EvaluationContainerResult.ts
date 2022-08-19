@@ -1,4 +1,4 @@
-import {EvaluationTask} from './EvaluationTask';
+import { EvaluationTask } from "./EvaluationTask";
 
 export interface EvaluationContainerResult {
   id: number;

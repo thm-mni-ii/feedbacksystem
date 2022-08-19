@@ -1,8 +1,16 @@
 <mat-sidenav-container class="container">
-  <mat-sidenav class="sidenav" #sidenav mode="side" [(opened)]="opened"   [style.width]="showSidebarMenu ? '100%' : null" (window:resize)="onResize($event)">
+  <mat-sidenav
+    class="sidenav"
+    #sidenav
+    mode="side"
+    [(opened)]="opened"
+    [style.width]="showSidebarMenu ? '100%' : null"
+    (window:resize)="onResize($event)"
+  >
     <div class="sidenav-group">
       <div class="logo">
-        <h1>Feedbacksystem <i class="material-icons">feedback</i>
+        <h1>
+          Feedbacksystem <i class="material-icons">feedback</i>
           <button mat-icon-button *ngIf="showSidebarMenu">
             <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
           </button>
@@ -15,17 +23,29 @@
           <p>Meine Kurse</p>
         </a>
 
-        <a mat-list-item routerLink="/courses/search" routerLinkActive="selected">
+        <a
+          mat-list-item
+          routerLink="/courses/search"
+          routerLinkActive="selected"
+        >
           <mat-icon>search</mat-icon>
           <p>Alle Kurse</p>
         </a>
 
-        <a mat-list-item *ngIf="isAdmin" routerLink="/admin/user-management" routerLinkActive="selected">
+        <a
+          mat-list-item
+          *ngIf="isAdmin"
+          routerLink="/admin/user-management"
+          routerLinkActive="selected"
+        >
           <mat-icon>supervised_user_circle</mat-icon>
           <p>Benutzer</p>
         </a>
 
-        <a mat-list-item href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung">
+        <a
+          mat-list-item
+          href="https://github.com/thm-mni-ii/feedbacksystem/wiki/Benutzeranleitung"
+        >
           <mat-icon class="">help</mat-icon>
           <p>Wiki</p>
         </a>
@@ -40,7 +60,9 @@
 
       <span class="legal">
         <a mat-list-item class="general" (click)="showImpressum()">Impressum</a>
-        <a mat-list-item class="general" (click)="showDataprivacy()">Datenschutzerklärung</a>
+        <a mat-list-item class="general" (click)="showDataprivacy()"
+          >Datenschutzerklärung</a
+        >
       </span>
     </div>
   </mat-sidenav>
@@ -50,14 +72,27 @@
       <button mat-icon-button>
         <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
       </button>
-      <span class="mat-h1">{{title | async}}</span>
+      <span class="mat-h1">{{ title | async }}</span>
       <span class="toolbar-spacer"></span>
-      <button mat-icon-button [matMenuTriggerFor]="menu" class="toolbar-icon favorite-icon" aria-label="User Menu">
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="menu"
+        class="toolbar-icon favorite-icon"
+        aria-label="User Menu"
+      >
         <mat-icon>account_circle</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="logout()"><mat-icon class="logout-icon">power_settings_new</mat-icon> Logout</button>
-        <button mat-menu-item routerLink="/users/password" *ngIf="isAdmin || isModerator"><mat-icon>settings</mat-icon>Passwort ändern</button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
+        </button>
+        <button
+          mat-menu-item
+          routerLink="/users/password"
+          *ngIf="isAdmin || isModerator"
+        >
+          <mat-icon>settings</mat-icon>Passwort ändern
+        </button>
       </mat-menu>
     </mat-toolbar>
     <div class="content-container">

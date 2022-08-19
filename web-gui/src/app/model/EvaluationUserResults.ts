@@ -1,5 +1,5 @@
-import {User} from './User';
-import {EvaluationContainerResults} from './EvaluationContainerResults';
+import { User } from "./User";
+import { EvaluationContainerResults } from "./EvaluationContainerResults";
 
 export interface EvaluationUserResults {
   user: User;

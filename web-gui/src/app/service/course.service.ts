@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import {Course} from '../model/Course';
-import {HttpClient} from '@angular/common/http';
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { Course } from "../model/Course";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class CourseService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
   /**
    * @return Observable with all courses
    */
   getCourseList(): Observable<Course[]> {
-    return this.http.get<Course[]>('/api/v1/courses');
+    return this.http.get<Course[]>("/api/v1/courses");
   }
 
   /**
@@ -29,7 +29,7 @@ export class CourseService {
    * @return The created course, adjusted by the system
    */
   createCourse(course: Course): Observable<Course> {
-    return this.http.post<Course>('/api/v1/courses', course);
+    return this.http.post<Course>("/api/v1/courses", course);
   }
 
   /**
@@ -46,7 +46,8 @@ export class CourseService {
    * @param cid The course id
    * @return Observable that succeeds if the course does not exists after the operation
    */
-  deleteCourse(cid: number): Observable<void> { // returns an Observable<Succeeded>
+  deleteCourse(cid: number): Observable<void> {
+    // returns an Observable<Succeeded>
     return this.http.delete<void>(`/api/v1/courses/${cid}`);
   }
 

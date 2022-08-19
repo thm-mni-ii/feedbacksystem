@@ -10,7 +10,7 @@
 }
 
 .user-input {
- // min-height: 350px; // fix Bug? (jumps to top of page when tab is changed)
+  // min-height: 350px; // fix Bug? (jumps to top of page when tab is changed)
   display: flex;
   flex-direction: column;
   margin-top: 24px;
@@ -47,7 +47,7 @@ mat-radio-button {
   margin: 12px;
 }
 
-.resetExternalInfo{
+.resetExternalInfo {
   display: block;
   color: gray;
   font-style: italic;
@@ -55,7 +55,7 @@ mat-radio-button {
 }
 
 #choice_form {
-  padding: 0 .75em 0 0.9em;
+  padding: 0 0.75em 0 0.9em;
   margin-top: 1.25em;
   position: relative;
   margin-bottom: 1em;

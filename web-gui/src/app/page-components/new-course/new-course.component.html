@@ -1,21 +1,46 @@
 <div class="container">
-
   <mat-card class="card">
     <mat-card-content>
       <mat-form-field>
         <mat-label>Kursname</mat-label>
-        <input [formControl]="name" name="newCourseName" type="text" matInput required minlength="3" maxlength="100">
-        <mat-error *ngIf="name.errors">Der Kursname ist erforderlich! Und muss mindestens 3 Zeichen besitzen</mat-error>
+        <input
+          [formControl]="name"
+          name="newCourseName"
+          type="text"
+          matInput
+          required
+          minlength="3"
+          maxlength="100"
+        />
+        <mat-error *ngIf="name.errors"
+          >Der Kursname ist erforderlich! Und muss mindestens 3 Zeichen
+          besitzen</mat-error
+        >
       </mat-form-field>
       <mat-form-field>
         <mat-label>Kursbeschreibung</mat-label>
-        <input [formControl]="description" name="newCourseDescription" type="text" matInput>
+        <input
+          [formControl]="description"
+          name="newCourseDescription"
+          type="text"
+          matInput
+        />
       </mat-form-field>
-      <mat-slide-toggle [(ngModel)]="isVisible"><p *ngIf="isVisible">Kurs anzeigen</p><p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle>
+      <mat-slide-toggle [(ngModel)]="isVisible"
+        ><p *ngIf="isVisible">Kurs anzeigen</p>
+        <p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle
+      >
     </mat-card-content>
 
     <mat-card-actions>
-      <button mat-flat-button color="accent" (click)="createCourse()" [disabled]="!isInputValid()">Kurs erstellen</button>
+      <button
+        mat-flat-button
+        color="accent"
+        (click)="createCourse()"
+        [disabled]="!isInputValid()"
+      >
+        Kurs erstellen
+      </button>
     </mat-card-actions>
   </mat-card>
 </div>

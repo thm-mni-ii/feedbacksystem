@@ -1,4 +1,4 @@
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
 
 .mat-checkbox-layout {
   white-space: normal !important;
@@ -7,8 +7,8 @@
 @include mat.core();
 
 $primary: mat.define-palette(mat.$blue-grey-palette, 600, 500, 700);
-$accent:  mat.define-palette(mat.$indigo-palette, 300, 200, 400);
-$warn:    mat.define-palette(mat.$red-palette);
+$accent: mat.define-palette(mat.$indigo-palette, 300, 200, 400);
+$warn: mat.define-palette(mat.$red-palette);
 
 $light-theme: mat.define-light-theme($primary, $accent, $warn);
 
