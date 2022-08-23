@@ -87,7 +87,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      BASH_DOCKER: thmmniii/bashenv:dev-latest
+      BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
       RESULT_SERVER_HOST: http
