@@ -6,13 +6,13 @@ function dockerPush(){
     tag=$1
     echo "tag is: "$tag
     
-    docker tag feedbacksystem_runner thmmniii/master-runner:$tag
-    docker tag feedbacksystem_core thmmniii/http:$tag
-    docker tag feedbacksystem_bashenv thmmniii/bashenv:$tag
+    docker tag feedbacksystem_runner thmmniii/fbs-runner:$tag
+    docker tag feedbacksystem_core thmmniii/fbs-core:$tag
+    docker tag feedbacksystem_runtime-bash thmmniii/fbs-runtime-bash:$tag
     
-    docker push thmmniii/http:$tag
-    docker push thmmniii/master-runner:$tag
-    docker push thmmniii/bashenv:$tag
+    docker push thmmniii/fbs-core:$tag
+    docker push thmmniii/fbs-runner:$tag
+    docker push thmmniii/fbs-runtime-bash:$tag
 }
 
 echo "START DOCKER DEPLOY"
