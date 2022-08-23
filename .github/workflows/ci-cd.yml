@@ -18,8 +18,8 @@ jobs:
         uses: mbowman100/swagger-validator-action@2.0
         with:
           files: |
-            swagger.yml
-            master-runner/swagger.yml
+            modules/fbs-core/api/api-docs.yml
+            modules/fbs-runner/checker/api-docs.yml
   build:
     name: Build
     runs-on: ubuntu-latest
