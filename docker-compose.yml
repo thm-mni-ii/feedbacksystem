@@ -14,14 +14,14 @@ services:
       fbs:
 
   bashenv:
-    build: bash
+    build: runtime-images/bash
 
-  http:
-    build: ws
+  core:
+    build: modules/fbs-core/api
     restart: unless-stopped
     depends_on:
       - mysql1
-      - master-runner
+      - runner
     ports:
       - "443:443"
       - "80:80"
@@ -78,8 +78,8 @@ services:
     networks:
       fbs:
 
-  master-runner:
-    build: master-runner
+  runner:
+    build: modules/fbs-runner/checker
     restart: always
     depends_on:
       - mysql-checker
