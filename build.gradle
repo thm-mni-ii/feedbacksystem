@@ -23,7 +23,7 @@ subprojects { subproject ->
     version '1.0-SNAPSHOT'
 }
 
-task dist(dependsOn: ['ws:installDist', "master-runner:installDist", "web-gui:installDist", "web-gui:copyWebToWS"]) {
+task dist(dependsOn: ['fbs-core.api:installDist', "fbs-runner.checker:installDist", "fbs-core.web:installDist", "fbs-core.web:copyWebToWS"]) {
     doLast({
         installDist
     })
@@ -35,13 +35,13 @@ distributions {
         contents {
             project.subprojects.each { sub ->
                 switch (sub.name) {
-                    case 'web-gui':
-                        into('ws/http') {
+                    case 'fbs-core.web':
+                        into('modules/fbs-core/api/http') {
                             from "${sub.buildDir}/install/${sub.name}"
                             include '*/**'
                         }
                         break
-                    case 'ws':
+                    case 'fbs-core.api':
                         into('') {
                             from "${sub.buildDir}/install/"
                             include '*/**'
@@ -58,11 +58,11 @@ distributions {
 }
 
 task jacocoRootReport(type: JacocoReport) {
-    dependsOn = ['ws:test', 'master-runner:test']
-    additionalSourceDirs.setFrom files('ws/src/main/scala', 'master-runner/src/main/scala')
-    sourceDirectories.setFrom files('ws/src/main/scala', 'master-runner/src/main/scala')
-    classDirectories.setFrom files('ws/build/classes/scala/main', 'master-runner/build/classes/scala/main')
-    executionData.setFrom files('ws/build/jacoco/test.exec', 'master-runner/build/jacoco/test.exec')
+    dependsOn = ['fbs-core.api:test', 'fbs-runner.checker:test']
+    additionalSourceDirs.setFrom files('modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala')
+    sourceDirectories.setFrom files('modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala')
+    classDirectories.setFrom files('modules/fbs-core/api/build/classes/scala/main', 'modules/fbs-runner/checker/build/classes/scala/main')
+    executionData.setFrom files('modules/fbs-core/api/build/jacoco/test.exec', 'modules/fbs-runner/checker/build/jacoco/test.exec')
 
     reports {
         xml.enabled true
@@ -71,7 +71,7 @@ task jacocoRootReport(type: JacocoReport) {
 }
 
 coveralls {
-    sourceDirs = ['ws/src/main/scala', 'master-runner/src/main/scala']
+    sourceDirs = ['modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala']
     jacocoReportPath "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
 }
 

@@ -1,5 +1,13 @@
 rootProject.name = 'feedbacksystem'
 
-include 'ws'
-include 'web-gui'
-include 'master-runner'
+include 'fbs-core.api'
+include 'fbs-core.web'
+include 'fbs-runner.checker'
+
+rootProject.children.each {project ->
+    def (root, subFolder) = "$project.name".tokenize( '.' )
+    String projectDirName = "modules/$root/$subFolder"
+    project.projectDir = new File(settingsDir, projectDirName)
+    assert project.projectDir.isDirectory()
+    assert project.buildFile.isFile()
+}

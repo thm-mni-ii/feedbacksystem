@@ -1,0 +1,52 @@
+plugins {
+  id "com.github.node-gradle.node" version "3.1.1"
+}
+
+apply plugin: 'distribution'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+node {
+    version = '16.13.1'
+    download = true
+}
+
+clean.dependsOn npm_run_clean
+assemble.dependsOn npm_run_dist
+installDist.dependsOn npm_run_dist
+
+defaultTasks "build"
+
+distributions {
+    main {
+        contents {
+            from("${projectDir}/dist/${project.name}") {
+                include '*/**'
+            }
+        }
+    }
+}
+
+// After build the ng app, we copy the dist content to or spring boot webservice static resoorce path
+// It will work on evry system, because of relative paths (at leat I hope so)
+
+task copyWebToWS(type: Copy, dependsOn: [build]) {
+    from "${projectDir}/dist/${project.name}" // path from distributed web-gui
+    into "${projectDir}/../api/src/main/resources/static"
+}
+
+copyWebToWS
+
+// Run eslint
+
+task lint(type: NpmTask, dependsOn: [npmInstall]) {
+  args = ['run', 'lint']
+}
+
+check.dependsOn lint

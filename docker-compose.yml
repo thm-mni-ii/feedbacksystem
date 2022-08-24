@@ -13,23 +13,22 @@ services:
     networks:
       fbs:
 
-  bashenv:
-    build: bash
+  runtime-bash:
+    build: runtime-images/bash
 
-  http:
-    build: ws
+  core:
+    build: modules/fbs-core/api
     restart: unless-stopped
     depends_on:
       - mysql1
-      - master-runner
+      - runner
     ports:
       - "443:443"
       - "80:80"
     volumes:
       - ./data/upload-dir:/upload-dir
-      - ./conf/ws:/usr/local/ws/conf
+      - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
     environment:
-      #- KEYSTORE_PATH=file:/usr/local/ws/conf/feedback.p12
       - SERVER_HOST=https://localhost
       - KAFKA_ADDRESS=kafka1:9092
       - MYSQL_URI=jdbc:mysql://mysql1:3306
@@ -39,11 +38,11 @@ services:
       - CLASSROOM_URL=http://digital-classroom:8085
       - CLASSROOM_SECRET=8Dsupersecurekeydf0
       - CLASSROOM_TLS_INSECURE=true
-      - MASTER_RUNNER_URL=https://master-runner:8081
+      - MASTER_RUNNER_URL=https://runner:8081
       - MASTER_RUNNER_TLS_INSECURE=true
       - MONGODB_URI=mongodb://mongodb:27017/
       - MONGODB_DATABASE=sql-checker
-      - SELF_URL=https://http
+      - SELF_URL=https://core
     networks:
       classroom:
       fbs:
@@ -78,8 +77,8 @@ services:
     networks:
       fbs:
 
-  master-runner:
-    build: master-runner
+  runner:
+    build: modules/fbs-runner/checker
     restart: always
     depends_on:
       - mysql-checker
@@ -87,10 +86,10 @@ services:
     ports:
       - "8081:8081"
     environment:
-      BASH_DOCKER: thmmniii/bashenv:dev-latest
+      BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
       INSIDE_DOCKER: "true"
-      RESULT_SERVER_HOST: http
+      RESULT_SERVER_HOST: core
       MYSQL_SERVER_URL: jdbc:mysql://mysql-checker:3306?allowMultiQueries=true
       MYSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
