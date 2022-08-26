@@ -1,0 +1,25 @@
+#Parser.py
+
+import json
+import mo_sql_parsing
+from pymongo import MongoClient
+
+
+#Parse the query
+def parse_query(data):
+    try:
+        parsedQuery = mo_sql_parsing.parse(data)
+    except Exception as e:
+        print("Not able to parse the statement " + str(data))
+        print(e)
+        client = MongoClient("mongodb://localhost:27017/?readPreference=primary&"
+                             "appname=MongoDB%20Compass&directConnection=true&ssl=false",
+                             27017)
+        mydb = client['SQLChecker']
+        mycollection = mydb['NotParsable']
+        record = data
+        mycollection.insert_one(record)
+        return False
+    jsonOutput = json.dumps(parsedQuery, indent=4)
+    pyt_obj = json.loads(jsonOutput)
+    return pyt_obj
