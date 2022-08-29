@@ -83,9 +83,9 @@ def selectWhere(json_file):
 
 
 # returns SelectionAttributes for a statement and uses herefor different arts of sql-statements
-def extractSelAttributes(json_file):
+def extractSelAttributes(json_file, client):
     whereAttributes = []
-    json_file = parse_query(json_file)
+    json_file = parse_query(json_file, client)
     try:
         if ((selectWhere(json_file) is not None) and (selectWhere(json_file) != [])):
             whereAttributes.extend([selectWhere(json_file)])
@@ -98,8 +98,8 @@ def extractSelAttributes(json_file):
         return list(whereAttributes)
 
 
-def extractOrderBy(json_file):
-    json_file = parse_query(json_file)
+def extractOrderBy(json_file, client):
+    json_file = parse_query(json_file, client)
     groupBy = []
     groupByList = list(iterate(json_file, 'orderby'))
     for s in groupByList:
@@ -115,8 +115,8 @@ def extractOrderBy(json_file):
     return groupBy
 
 
-def extractGroupBy(json_file):
-    json_file = parse_query(json_file)
+def extractGroupBy(json_file, client):
+    json_file = parse_query(json_file, client)
     groupBy = []
     groupByList = list(iterate(json_file, 'groupby'))
     for s in groupByList:
