@@ -8,7 +8,7 @@ import string
 import random
 
 #The following Code is for productive purposes
-'''
+
 client = sys.argv[2]
 if (len(sys.argv) < 3):
         print("Zu wenige Argumente übergeben.")
@@ -40,3 +40,4 @@ testdic = {
 
 parseSingleStatUploadDB(testdic, client)
 #TestParseSingleStatUploadDB(testdic)
+'''
