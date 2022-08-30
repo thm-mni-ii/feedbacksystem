@@ -26,7 +26,7 @@ defaultTasks "build"
 distributions {
     main {
         contents {
-            from("${projectDir}/dist/${project.name}") {
+            from("${projectDir}/dist/web") {
                 include '*/**'
             }
         }
