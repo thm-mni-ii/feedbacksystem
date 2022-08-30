@@ -16,5 +16,6 @@
         "parser": "angular"
       }
     }
-  ]
+  ],
+  "endOfLine": "auto"
 }
