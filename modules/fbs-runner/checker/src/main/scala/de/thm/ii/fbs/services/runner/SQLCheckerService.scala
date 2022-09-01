@@ -7,7 +7,7 @@ class SQLCheckerService(val submission: Submission) {
   def invoke(): (Int, String, String) = {
     DockerService.runContainer(new DockerCmdConfig(
       "sql-checker",
-      env = Seq(("api", submission.apiUrl)),
+      env = Seq(("api", submission.apiUrl), ("mongodb", submission.mongodbUrl)),
       networks = Seq("feedbacksystem_fbs")
     ))
   }
