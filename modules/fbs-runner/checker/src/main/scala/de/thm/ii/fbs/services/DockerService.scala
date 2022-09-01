@@ -20,7 +20,7 @@ object DockerService {
     val builder = Seq.newBuilder[String]
     builder += DOCKER_CMD
     builder += DOCKER_RUN
-    builder += DOCKER_REMOVE
+    //builder += DOCKER_REMOVE
     builder ++= config.mount.flatMap(getMountString)
     builder ++= config.env.flatMap(getEnvString)
     builder ++= config.networks.flatMap(getNetworkString)

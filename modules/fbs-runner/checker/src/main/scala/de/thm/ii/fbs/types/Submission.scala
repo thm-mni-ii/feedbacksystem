@@ -17,4 +17,5 @@ class Submission(@JsonProperty("id") val id: Int,
                  @JsonProperty("user") val user: User,
                  @JsonProperty("subTaskFileLocation") val subTaskFileLocation: Path,
                  @JsonProperty("apiUrl") val apiUrl: String,
+                 @JsonProperty("mongodbUrl") val mongodbUrl: String,
 )
