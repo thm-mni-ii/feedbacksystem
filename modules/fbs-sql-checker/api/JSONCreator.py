@@ -276,7 +276,7 @@ def insertTables(mydb, elem, my_uuid, client):
                 print("Error while reading joins.")
     if len(extractProAttributes(elem['submission'], client)) == 1:
         mycollection = mydb['ProAttributes']
-        record = jsonProAttribute(my_uuid, extractProAttributes(elem['submission'])[0])
+        record = jsonProAttribute(my_uuid, extractProAttributes(elem['submission'], client)[0])
         mycollection.insert_one(record)
     elif len(extractProAttributes(elem['submission'], client)) > 1 and \
             not isinstance(extractProAttributes(elem['submission'], client), str):
