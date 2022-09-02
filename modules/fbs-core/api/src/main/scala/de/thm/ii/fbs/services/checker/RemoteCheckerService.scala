@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, NoSuchFileException, Path}
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import de.thm.ii.fbs.model.checker.{RunnerConfiguration, RunnerRequest, User, Submission, SqlRunnerSubmission}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -44,16 +44,14 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    sendNotificationToRemote(taskID, submissionID, cc, fu)
+    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username),
+      storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
+      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get
+    )
+    sendNotificationToRemote(taskID, submission, cc)
   }
 
-  protected def sendNotificationToRemote(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser,
-                                        apiUrl: Option[String] = None): Unit = {
-    val submission = Submission(submissionID, User(fu.id, fu.username),
-      storageService.pathToSolutionFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
-      storageService.pathToSubTaskFile(submissionID).map(relativeToUploadDir).map(_.toString).get,
-      apiUrl = apiUrl,
-    )
+  protected def sendNotificationToRemote(taskID: Int, submission: Submission, cc: CheckrunnerConfiguration): Unit = {
     val request = RunnerRequest(taskID, rcFromCC(cc), submission)
     val res = restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
     if (res.getStatusCode != HttpStatus.ACCEPTED) {
@@ -83,75 +81,6 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   )
 
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
-
-  protected case class RunnerConfiguration(id: Int, typ: String,
-                                         mainFileLocation: Option[String], hasSecondaryFile: Boolean,
-                                         secondaryFileLocation: Option[String]) {
-    /**
-      * Transforms RunnerConfiguration to JsonNode
-      * @return json representation
-      */
-    def toJson: JsonNode = {
-      val json = new ObjectMapper().createObjectNode()
-      json.put("id", this.id)
-      json.put("type", this.typ)
-      this.mainFileLocation match {
-        case Some(mainFileLocation) => json.put("mainFileLocation", mainFileLocation)
-        case None => json.putNull("mainFileLocation")
-      }
-      json.put("hasSecondaryFile", this.hasSecondaryFile)
-      this.secondaryFileLocation match {
-        case Some(secondaryFileLocation) => json.put("secondaryFileLocation", secondaryFileLocation)
-        case None => json.putNull("secondaryFileLocation")
-      }
-      json
-    }
-  }
-
-  protected case class User(id: Int, username: String) {
-    /**
-      * Transforms User to JsonNode
-      * @return json representation
-      */
-    def toJson: JsonNode = {
-      val json = new ObjectMapper().createObjectNode()
-      json.put("id", this.id)
-      json.put("username", this.username)
-      json
-    }
-  }
-
-  protected case class Submission(id: Int, user: User, solutionFileLocation: String, subTaskFileLocation: String, apiUrl: Option[String] = None) {
-    /**
-      * Transforms RunnerConfiguration to JsonNode
-      * @return json representation
-      */
-    def toJson: JsonNode = {
-      val json = new ObjectMapper().createObjectNode()
-      json.put("id", this.id)
-      json.set("user", this.user.toJson)
-      json.put("solutionFileLocation", this.solutionFileLocation)
-      json.put("subTaskFileLocation", this.subTaskFileLocation)
-      json.put("apiUrl", this.apiUrl.orNull)
-      json
-    }
-  }
-
-  protected case class RunnerRequest(taskID: Int,
-                           runnerConfiguration: RunnerConfiguration,
-                           submission: Submission) {
-    /**
-      * Transforms RunnerRequest to JsonNode
-      * @return json representation
-      */
-    def toJson: JsonNode = {
-      val json = new ObjectMapper().createObjectNode()
-      json.put("taskId", this.taskID)
-      json.set("runner", this.runnerConfiguration.toJson)
-      json.set("submission", this.submission.toJson)
-      json
-    }
-  }
 
   private def handleSubTasks(sid: Int, ccid: Int): Unit = {
     val subTaskPath = storageService.pathToSubTaskFile(sid).get
