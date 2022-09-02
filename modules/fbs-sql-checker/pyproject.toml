@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["jonas <jonas.woelfer@mnd.thm.de>"]
 readme = "README.md"
-packages = [{include = "/modules/fbs-sql-checker/api"}]
+packages = [{ include = "api"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
