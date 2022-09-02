@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fbs-sql-checker"
+version = "0.1.0"
+description = ""
+authors = ["jonas <jonas.woelfer@mnd.thm.de>"]
+readme = "README.md"
+packages = [{include = "/modules/fbs-sql-checker/api"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mo-sql-parsing = "^8.201.22242"
+pymongo = "^4.2.0"
+requests = "^2.28.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
