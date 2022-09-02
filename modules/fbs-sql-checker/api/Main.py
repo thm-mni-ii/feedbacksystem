@@ -1,11 +1,9 @@
 # Main.py
 
+"""System module."""
 import sys
 import requests
 from JSONCreator import parseSingleStatUploadDB
-import json
-import string
-import random
 
 # The following Code is for productive purposes
 
@@ -13,11 +11,12 @@ client = sys.argv[2]
 if len(sys.argv) < 3:
     print("Zu wenige Argumente übergeben.")
     print(
-        "Geben Sie als Argument die API an, von der die zu analysierende JSON aufgerufen werden soll."
+        "Geben Sie als Argument die API an, von der die "
+        "zu analysierende JSON aufgerufen werden soll."
     )
 else:
     urlAnswer = sys.argv[1]
-    answer = requests.get(urlAnswer, verify=False)
+    answer = requests.get(urlAnswer, verify=False, timeout=25)
     print(answer.json())
     parseSingleStatUploadDB(answer.json(), client)
 """
