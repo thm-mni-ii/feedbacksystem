@@ -5,6 +5,7 @@ from ProAttributeChecker import *
 import SelAttributeChecker as AWC
 from Parser import *
 from pymongo import MongoClient
+from Model import *
 
 rightStatements = []
 rightTables = []
@@ -26,8 +27,9 @@ def parseSingleStatUploadDB(data, client):
                                                             [], [], [], [], [], [], []
     if 'submission' in data:
         #Extract tables, selAttributes, proAttributes and strings
-        if extractTables(data['submission'], client) != "Unknown":
-            tableList = extractTables(data["submission"], client)
+        extractedTables = extractTables(data['submission'], client)
+        if extractedTables != "Unknown":
+            tableList = extractedTables
             tables2.extend(tableList[0])
             if tableList[1] != ["Empty"]:
                 try:
@@ -39,14 +41,18 @@ def parseSingleStatUploadDB(data, client):
                     joins2.append("Unknown")
             else:
                 joins2.append("Empty")
-        if extractProAttributes(data['submission'], client) != "Unknown":
-            proAtts2.extend(extractProAttributes(data["submission"], client))
-        if AWC.extractSelAttributes(data['submission'], client) != "Unknown":
-            selAtts2.extend(AWC.extractSelAttributes(data["submission"], client))
-        if extractOrderBy(data['submission'], client) != "Unknown":
-            orderBy2.extend(extractOrderBy(data["submission"], client))
-        if extractGroupBy(data['submission'], client) != "Unknown":
-            groupBy2.extend(extractGroupBy(data['submission'], client))
+        extractedProAttributes = extractProAttributes(data['submission'], client)
+        if extractedProAttributes != "Unknown":
+            proAtts2.extend(extractedProAttributes)
+        extractedString = AWC.extractSelAttributes(data['submission'], client)
+        if extractedString != "Unknown":
+            selAtts2.extend(extractedString)
+        extractedOrderBy = extractOrderBy(data['submission'], client)
+        if extractedOrderBy != "Unknown":
+            orderBy2.extend(extractedOrderBy)
+        extractedGroupBy = extractGroupBy(data['submission'], client)
+        if extractedGroupBy != "Unknown":
+            groupBy2.extend(extractedGroupBy)
         strings2.extend(list(set(AWC.literal)))
         #If TaskID or Submission ID not in data, return
         if 'tid' not in data or 'sid' not in data:
@@ -146,15 +152,7 @@ and set(selAttributes) == set(selAtts2) and set(strings) == set(strings2) and or
     #return if characteristics are True or False
     return (tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
 
-#Check if it is a new solution; check if tables, attributes etc. are right
 
-def prodSolutionJson(elem, my_uuid, taskNr):
-    value = {
-        "id": str(my_uuid),
-        "taskNumber": taskNr,
-        "statement": elem['submission']
-    }
-    return value
 
 # Parse a solution and upload it to DB
 def parseSingleStatUploadSolution(data, taskNr, my_uuid, client):
@@ -184,55 +182,6 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
             record = prodJsonNotParsable(my_uuid,
                              elem['submission'], taskNr)
     return record
-
-# Returns a json file which extracts characteristics
-# and tells which of them are wrong
-def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
-             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
-    # save data if it is a manual solution
-    if (isSol == True):
-        userData.extend([True])
-        userData.extend([0])
-        userData.extend([0])
-    value = {
-        "id": str(id),
-        "taskNumber": taskNr,
-        "statement": testSql,
-        "queryRight": userData[0],
-        "parsable": True,
-        "isSolution": isSol,
-        "tablesRight": tablesRight,
-        "selAttributesRight": selAttributesRight,
-        "proAttributesRight": proAttributesRight,
-        "stringsRight": stringsRight,
-        "userId": userData[1],
-        "attempt": userData[2],
-        "orderByRight": orderByRight,
-        "groupByRight": groupByRight,
-        "joinsRight": joinsRight
-    }
-    userData.clear()
-    AWC.literal = []
-    return value
-
-# Returns a json file which extracts Tables and Attributes
-def prodJsonNotParsable(id, testSql, taskNr, orderByRight):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "taskNumber": taskNr,
-        "statement": testSql,
-        "queryRight": userData[0],
-        "parsable": False,
-        "tablesRight": None,
-        "selAttributesRight": None,
-        "proAttributesRight": None,
-        "stringsRight": None,
-        "userId": userData[1],
-        "attempt": userData[2],
-        "orderbyRight": orderByRight,
-    }
-    return value
 
 # Insert data of Tables, proAttributes, selAttributes and Strings to Database
 def insertTables(mydb, elem, my_uuid, client):
@@ -319,72 +268,57 @@ def insertTables(mydb, elem, my_uuid, client):
         mycollection.insert_one(record)
     elif len(AWC.extractGroupBy(elem['submission'], client)) > 1 and not isinstance(AWC.extractGroupBy(elem['submission'], client), str):
         mycollection = mydb['GroupBy']
-        for val in AWC.extractGroupBy(elem['submission']):
+        for val in AWC.extractGroupBy(elem['submission'], client):
             record = jsonGroupByAttribute(my_uuid, val)
             mycollection.insert_one(record)
     AWC.literal = []
     userData.clear()
 
-#Create a json to insert to DB "Tables"
-def jsonTable(id, table):
+# Returns a json file which extracts characteristics
+# and tells which of them are wrong
+def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
+             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
+    # save data if it is a manual solution
+    if (isSol == True):
+        userData.extend([True])
+        userData.extend([0])
+        userData.extend([0])
+    value = {
+        "id": str(id),
+        "taskNumber": taskNr,
+        "statement": testSql,
+        "queryRight": userData[0],
+        "parsable": True,
+        "isSolution": isSol,
+        "tablesRight": tablesRight,
+        "selAttributesRight": selAttributesRight,
+        "proAttributesRight": proAttributesRight,
+        "stringsRight": stringsRight,
+        "userId": userData[1],
+        "attempt": userData[2],
+        "orderByRight": orderByRight,
+        "groupByRight": groupByRight,
+        "joinsRight": joinsRight
+    }
+    userData.clear()
+    AWC.literal = []
+    return value
+
+# Returns a json file which extracts Tables and Attributes
+def prodJsonNotParsable(id, testSql, taskNr, orderByRight):
     # Create dictionary
     value = {
         "id": str(id),
-        "table": table
-    }
-    return value
-
-
-#Create a json to insert to DB "ProAttributes"
-def jsonProAttribute(id, proAttribute):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "proAttribute": proAttribute
-    }
-    return value
-
-
-#Create a json to insert to DB "SelAttributes"
-def jsonSelAttribute(id, selAttribute):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "selAttribute": selAttribute
-    }
-    return value
-
-
-#Create a json to insert to DB "Strings"
-def jsonString(id, string):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "string": string
-    }
-    return value
-
-def jsonOrderByAttribute(id, orderByAttribute):
-    value = {
-        "id": str(id),
-        "orderBy": orderByAttribute[0],
-        "sort": orderByAttribute[1]
-    }
-    return value
-
-
-def jsonGroupByAttribute(id, groupByAttribute):
-    value = {
-        "id": str(id),
-        "groupBy": groupByAttribute
-    }
-    return value
-
-def jsonJoinAttribute(id, joinAttribute):
-    value = {
-        "id": str(id),
-        "type": joinAttribute[0],
-        "attr1": joinAttribute[1],
-        "attr2": joinAttribute[2]
+        "taskNumber": taskNr,
+        "statement": testSql,
+        "queryRight": userData[0],
+        "parsable": False,
+        "tablesRight": None,
+        "selAttributesRight": None,
+        "proAttributesRight": None,
+        "stringsRight": None,
+        "userId": userData[1],
+        "attempt": userData[2],
+        "orderbyRight": orderByRight,
     }
     return value
