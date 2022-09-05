@@ -1,6 +1,8 @@
 # Main.py
 
 """System module."""
+import random
+import string
 import sys
 import requests
 from JSONCreator import parseSingleStatUploadDB
@@ -21,14 +23,21 @@ else:
     parseSingleStatUploadDB(answer.json(), client)
 """
 # The following Code is for debugging purposes
-client = "mongodb://admin:password@localhost:27017/"  # Define MongoDB for debugging purposes
+client = (
+    # Define MongoDB for debugging purposes
+    "mongodb://admin:password@localhost:27017/"
+)
 for x in range(1):
-    testId = (''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in
-                      range(8)))  # Generate random ID for the MongoDB
+    testId = "".join(
+        random.SystemRandom().choice(string.ascii_letters + string.digits)
+        for _ in range(8)
+    )  # Generate random ID for the MongoDB
 idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
-    "submission": "SELECT customerName, customercity, customermail, ordertotal,salestotal FROM onlinecustomers as s inner join mitarbeiter as m on m=s WHERE salesId IS NULL order by name desc",
+    "submission": "SELECT Name, Vorname "
+                  "from Kunde "
+                  "GROUP BY Name",
     "passed": True,  # True if submission produced the right return in SQL-Runner
     "resultText": "OK",
     "userId": 1,
@@ -39,5 +48,4 @@ testdic = {
 }
 
 parseSingleStatUploadDB(testdic, client)
-# TestParseSingleStatUploadDB(testdic)
 """
