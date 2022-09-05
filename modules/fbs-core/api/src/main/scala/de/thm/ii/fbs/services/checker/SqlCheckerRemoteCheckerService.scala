@@ -1,10 +1,10 @@
 package de.thm.ii.fbs.services.checker
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
-import de.thm.ii.fbs.model.{CheckerTypeInformation, CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission,
-  CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, SQLCheckerService, SubmissionService, TaskService, UserService}
+import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerSubmission, User}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
+import de.thm.ii.fbs.services.checker.`trait`._
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -37,6 +37,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val checkerService: CheckerConfigurationService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
+  @Value("${spring.data.mongodb.uri}")
+  private val mongodbUrl: String = null
 
   /**
     * Notify the runner about a new submission
@@ -48,14 +50,13 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, false)) {
-      val apiUrl = Some(new URIBuilder(selfUrl)
+      val apiUrl = new URIBuilder(selfUrl)
         .setPath(s"/api/v1/checker/submissions/${submissionID}")
         .setParameter("typ", "sql-checker")
         .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
         .build().toString
-      )
 
-      super.sendNotificationToRemote(taskID, submissionID, cc, fu, apiUrl = apiUrl)
+      super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
     } else {
       super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
     }
@@ -159,14 +160,13 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       case Some(_: SqlCheckerInformation) =>
         sqlCheckerService.deleteSolutions(task.id)
 
-        val apiUrl = Some(new URIBuilder(selfUrl)
+        val apiUrl = new URIBuilder(selfUrl)
           .setPath(s"/api/v1/checker/checkers/${checkerConfiguration.id}")
           .setParameter("typ", "sql-checker")
           .setParameter("token", tokenService.issue(s"checkers/${checkerConfiguration.id}", 60))
           .build().toString
-        )
 
-        val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), Submission(0, User(0, ""), "", "", apiUrl = apiUrl))
+        val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), SqlCheckerSubmission(0, User(0, ""), apiUrl, mongodbUrl))
         restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
       case _ =>
     }
