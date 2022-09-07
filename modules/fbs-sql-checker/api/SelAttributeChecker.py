@@ -118,9 +118,10 @@ def extractOrderBy(json_file, client):
 def extractGroupBy(json_file, client):
     json_file = parse_query(json_file, client)
     groupBy = []
-    groupByList = list(iterate(json_file, 'groupby'))
+    groupByList = (list(iterate(json_file, 'groupby')))
     for s in groupByList:
-        groupBy.append(s['value'])
+        for y in s:
+            groupBy.append(y['value'])
     if len(groupBy) == 0:
         groupBy = "Unknown"
     return groupBy
