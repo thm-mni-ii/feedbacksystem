@@ -5,6 +5,7 @@ on:
       - opened
 jobs:
   add_issue_to_project:
+    environment: Project board Automatisation
     name: Add Issue to Project
     runs-on: ubuntu-latest
     steps:
