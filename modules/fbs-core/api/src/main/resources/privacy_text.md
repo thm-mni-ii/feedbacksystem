@@ -2,7 +2,7 @@
 
 ## 1. Allgemeine Hinweise
 
-## 2. Erfassung und Nutzung Ihrer personenbezogenen
+## 2. Erfassung und Nutzung Ihrer personenbezogenen Daten
 
 ### Informationen zum Datenschutz
 
@@ -15,14 +15,14 @@ Sie sind jederzeit berechtigt, über Ihre Daten Auskunft zu verlangen und unrich
 1. Der Betreiber fühlt sich dem Schutz der Privatsphäre seiner Kunden bei der Verarbeitung personenbezogenen Daten in hohem Maße verpflichtet und berücksichtigt dies bei allen Geschäftsprozessen. Der Betreiber verpflichtet sich, die einschlägigen Datenschutzvorgaben zu beachten. Diese Datenschutzerklärung gilt für die gesamte Webseite, nicht aber für Seiten anderer Anbieter, auf die diese Seite verlinkt.
 2. Grundsätzlich erfährt, erfasst und nutzt das System nur die Daten, die Sie uns bei der Nutzung unserer Webseite im Rahmen Ihrer Registrierung bzw. Anmeldung mitteilen. Diese Daten werden vertraulich behandelt. 
 Ihnen ist bekannt und sie willigen darin ein, dass Ihre personenbezogenen Daten für die Funktionalität dieses System erhoben, genutzt und gespeichert werden. Personenbezogene Daten sind solche, die Angaben über persönliche und sachliche Verhältnisse des Benutzers enthalten.
-4. Zur Beantwortung Ihrer Fragen, Bearbeitung Ihrer Anforderungen oder Ihrer Betreuung ist es manchmal erforderlich, Sie nach persönlichen Daten wie Name, und / oder E-Mail-Adresse zu fragen. Der Betreiber kann diese Daten zur Beantwortung Ihrer Anfragen oder für die Kontaktaufnahme mit Ihnen per E-Mail oder Telefon verwenden.
-5. Der Betreiber darf Sie auf diesem Wege auch über neue Funktionalitäten des Feedbacksystem informieren.
-6. Der Betreiber kann auf eigene Initiative oder auf Ihren Wunsch hin unvollständige, fehlerhafte oder veraltete persönliche Daten vervollständigen, berichtigen oder löschen, die von dem Feedbacksystem im Zusammenhang mit dem Betrieb dieser Seite gespeichert werden.
-7. Der Betreiber löscht im Rahmen der gesetzlichen Bestimmungen personenbezogene Daten unverzüglich auf Veranlassung des Berechtigten, sofern dem nicht zwingende gesetzliche Aufbewahrungspflichten entgegenstehen.
+3. Zur Beantwortung Ihrer Fragen, Bearbeitung Ihrer Anforderungen oder Ihrer Betreuung ist es manchmal erforderlich, Sie nach persönlichen Daten wie Name, und / oder E-Mail-Adresse zu fragen. Der Betreiber kann diese Daten zur Beantwortung Ihrer Anfragen oder für die Kontaktaufnahme mit Ihnen per E-Mail oder Telefon verwenden.
+4. Der Betreiber darf Sie auf diesem Wege auch über neue Funktionalitäten des Feedbacksystem informieren.
+5. Der Betreiber kann auf eigene Initiative oder auf Ihren Wunsch hin unvollständige, fehlerhafte oder veraltete persönliche Daten vervollständigen, berichtigen oder löschen, die vom Feedbacksystem im Zusammenhang mit dem Betrieb dieser Seite gespeichert werden.
+6. Der Betreiber löscht, auf Veranlassung des Berechtigten und im Rahmen der gesetzlichen Bestimmungen, personenbezogene Daten unverzüglich, sofern dem nicht zwingende gesetzliche Aufbewahrungspflichten entgegenstehen.
 
 ## 3. Schutz Ihrer Daten
 
-Ihre personenbezogenen Daten werden von uns über das Internet unter Anwendung des sog. SSL (Secure-Sockets-Layer)-Verfahrens verschlüsselt übertragen. Dennoch ist die Bereitstellung persönlicher Daten, ob dies persönlich, telefonisch oder über das Internet geschieht, stets mit Risiken verbunden und kein technologisches System ist völlig unanfällig für Manipulationen oder Sabotage. Der Betreiber hat versucht, in zumutbarem Umfang Vorkehrungen zu treffen, um unbefugten Zugriff auf Ihre per­sönlichen Daten sowie die unbefugte Verwendung oder Verfälschung dieser Daten zu verhindern und die entsprechenden Risiken zu minimieren. 
+Ihre personenbezogenen Daten werden von uns über das Internet unter Anwendung des sog. SSL (Secure-Sockets-Layer)-Verfahrens verschlüsselt übertragen. Dennoch ist die Bereitstellung persönlicher Daten, ob dies persönlich, telefonisch oder über das Internet geschieht, stets mit Risiken verbunden und kein technologisches System ist völlig unanfällig für Manipulationen oder Sabotage. Der Betreiber hat versucht, in zumutbarem Umfang, Vorkehrungen zu treffen, um unbefugten Zugriff auf Ihre per­sönlichen Daten sowie die unbefugte Verwendung oder Verfälschung dieser Daten zu verhindern und die entsprechenden Risiken zu minimieren. 
 
 ## 4. Einsatz von Cookies
 
@@ -42,6 +42,6 @@ Wir behalten uns das Recht vor, diese Bestimmungen jederzeit mit Wirkung für di
 
 ## 7.Fragen zum Datenschutz und Kontakt
 
-Sie können sich jederzeit an uns wenden, wenn Sie wünschen, dass Ihr Profil und die zu Ihrer Person gespeicherten Daten berichtigt, gesperrt oder gelöscht werden. Darüber hinaus erteilen wir Ihnen jederzeit Auskunft darüber, welche Daten wir von Ihnen gespeichert haben sowie deren Herkunft und Empfänger sowie den Zweck der Speicherung. Für Fragen zum Datenschutz wenden Sie sich bitte an:
+Sie können sich jederzeit an uns wenden, wenn Sie wünschen, dass Ihr Profil und die zu Ihrer Person gespeicherten Daten berichtigt, gesperrt oder gelöscht werden. Darüber hinaus erteilen wir Ihnen jederzeit Auskunft darüber, welche Daten wir von Ihnen gespeichert haben, deren Herkunft und Empfänger sowie den Zweck der Speicherung. Für Fragen zum Datenschutz wenden Sie sich bitte an:
 
 THM Gießen, Wiesenstraße 14, D - 35390 Gießen, Telefon: +49 (641) 309 2300 / 2301
