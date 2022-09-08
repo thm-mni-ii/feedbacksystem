@@ -1,4 +1,4 @@
-FROM openjdk:14.0.1-slim
+FROM openjdk:18.0.2-slim
 
 # Install Docker
 RUN apt-get update && apt-get install -y --no-install-recommends docker.io
