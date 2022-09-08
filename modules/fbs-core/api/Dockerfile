@@ -1,7 +1,6 @@
 FROM openjdk:18.0.2-slim
 
-RUN apt-get update && apt-get -y install python3 python3-pip
-RUN pip3 install requests
+RUN apt-get update && apt-get -y install curl
 
 ADD build/install/fbs-core.api /usr/local/fbs-core.api
 

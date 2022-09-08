@@ -1,7 +1,7 @@
 FROM openjdk:18.0.2-slim
 
 # Install Docker
-RUN apt-get update && apt-get install -y --no-install-recommends docker.io
+RUN apt-get update && apt-get install -y --no-install-recommends docker.io curl
 
 ADD build/install/fbs-runner.checker /usr/local/fbs-runner.checker
 EXPOSE 8081

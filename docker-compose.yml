@@ -12,6 +12,10 @@ services:
       - ./data/mysql1:/var/lib/mysql
     networks:
       fbs:
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 10s
+      retries: 10
 
   runtime-bash:
     build: runtime-images/bash
@@ -46,6 +50,10 @@ services:
     networks:
       classroom:
       fbs:
+    healthcheck:
+      test: curl -k https://localhost:443
+      timeout: 10s
+      retries: 10
 
   mysql-checker:
     image: mysql:8.0
@@ -57,6 +65,10 @@ services:
       - ./data/mysql2:/var/lib/mysql
     networks:
       fbs:
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 10s
+      retries: 10
       
   psql-checker:
     image: postgres
@@ -68,6 +80,10 @@ services:
       - ./data/postgres2:/var/lib/postgresql/data
     networks:
       fbs:
+    healthcheck:
+      test: pg_isready
+      timeout: 10s
+      retries: 10
 
   mongodb:
     image: mongo:5.0.6
@@ -76,6 +92,8 @@ services:
       - ./data/mongodb:/data/db
     networks:
       fbs:
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb://localhost:27017/ --quiet
 
   runner:
     build: modules/fbs-runner/checker
@@ -101,6 +119,8 @@ services:
       - ./data/upload-dir:/upload-dir
     networks:
       fbs:
+    healthcheck:
+      test: curl -k https://localhost:8081
 
   digital-classroom:
     image: ghcr.io/thm-mni-ii/digital-classroom:latest
