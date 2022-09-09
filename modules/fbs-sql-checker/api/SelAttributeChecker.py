@@ -103,7 +103,6 @@ def extractOrderBy(json_file, client):
     orderBy = []
     orderByList = list(iterate(json_file, 'orderby'))
     for s in orderByList:
-        print(s)
         value = []
         try:
             value.append(s['value'])
@@ -123,7 +122,6 @@ def extractOrderBy(json_file, client):
                 orderBy.append(value)
     if len(orderBy) == 0:
         orderBy = "Unknown"
-    print(orderBy)
     return orderBy
 
 
