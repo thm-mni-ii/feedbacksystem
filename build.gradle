@@ -23,11 +23,11 @@ subprojects { subproject ->
     version '1.0-SNAPSHOT'
 }
 
-task dist(dependsOn: ['fbs-core.api:installDist', "fbs-runner.checker:installDist", "fbs-core.web:installDist", "fbs-core.web:copyWebToWS"]) {
-    doLast({
-        installDist
-    })
-}
+task dist(dependsOn: ["fbs-runner.checker:installDist", "distApi", "distWeb"]) {}
+
+task distApi(dependsOn: ['fbs-core.api:installDist']) {}
+task distWeb(dependsOn: ["fbs-core.web:installDist", "fbs-core.web:copyWebToWS"])
+distApi.shouldRunAfter distWeb
 
 distributions {
     main {
