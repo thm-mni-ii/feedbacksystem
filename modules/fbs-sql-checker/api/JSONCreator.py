@@ -29,8 +29,7 @@ def parseSingleStatUploadDB(data, client):
         #Extract tables, selAttributes, proAttributes and strings
         extractedTables = extractTables(data['submission'], client)
         if extractedTables != "Unknown":
-            tableList = extractedTables
-            tables2.extend(tableList[0])
+            tables2.extend(extractedTables)
         '''
             if tableList[1] != ["Empty"]:
                 try:
@@ -48,10 +47,10 @@ def parseSingleStatUploadDB(data, client):
         extractedString = AWC.extractSelAttributes(data['submission'], client)
         if extractedString != "Unknown":
             selAtts2.extend(extractedString)
-        extractedOrderBy = extractOrderBy(data['submission'], client)
+        extractedOrderBy = AWC.extractOrderBy(data['submission'], client)
         if extractedOrderBy != "Unknown":
             orderBy2.extend(extractedOrderBy)
-        extractedGroupBy = extractGroupBy(data['submission'], client)
+        extractedGroupBy = AWC.extractGroupBy(data['submission'], client)
         if extractedGroupBy != "Unknown":
             groupBy2.extend(extractedGroupBy)
         strings2.extend(list(set(AWC.literal)))
@@ -236,24 +235,26 @@ def insertTables(mydb, elem, my_uuid, client):
                     mycollection.insert_one(record)
             except Exception as e:
                 print("Error while reading joins.")'''
-    if len(extractProAttributes(elem['submission'], client)) == 1:
+    proAttributes = extractProAttributes(elem['submission'], client)
+    if len(proAttributes) == 1:
         mycollection = mydb['ProAttributes']
-        record = jsonProAttribute(my_uuid, extractProAttributes(elem['submission'], client)[0])
+        record = jsonProAttribute(my_uuid, proAttributes[0])
         mycollection.insert_one(record)
-    elif len(extractProAttributes(elem['submission'], client)) > 1 and \
-            not isinstance(extractProAttributes(elem['submission'], client), str):
+    elif len(proAttributes) > 1 and \
+            not isinstance(proAttributes, str):
         mycollection = mydb['ProAttributes']
-        for val in extractProAttributes(elem['submission'], client):
+        for val in proAttributes:
             record = jsonProAttribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractSelAttributes(elem['submission'], client)) == 1:
+    selAttributes = AWC.extractSelAttributes(elem['submission'], client)
+    if len(selAttributes) == 1:
         mycollection = mydb['SelAttributes']
-        record = jsonSelAttribute(my_uuid, AWC.extractSelAttributes(elem['submission'], client)[0])
+        record = jsonSelAttribute(my_uuid, selAttributes[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractSelAttributes(elem['submission'], client)) > 1 and \
-            not isinstance(AWC.extractSelAttributes(elem['submission'], client), str):
+    elif len(selAttributes) > 1 and \
+            not isinstance(selAttributes, str):
         mycollection = mydb['SelAttributes']
-        for val in AWC.extractSelAttributes(elem['submission'], client):
+        for val in selAttributes:
             record = jsonSelAttribute(my_uuid, val)
             mycollection.insert_one(record)
     if len(list(set(AWC.literal))) == 1:
@@ -266,22 +267,24 @@ def insertTables(mydb, elem, my_uuid, client):
         for val in list(set(AWC.literal)):
             record = jsonString(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractOrderBy(elem['submission'], client)) == 1:
+    orderBy = AWC.extractOrderBy(elem['submission'], client)
+    if len(orderBy) == 1:
         mycollection = mydb['OrderBy']
-        record = jsonOrderByAttribute(my_uuid, AWC.extractOrderBy(elem['submission'], client)[0])
+        record = jsonOrderByAttribute(my_uuid, orderBy[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractOrderBy(elem['submission'], client)) > 1 and not isinstance(AWC.extractOrderBy(elem['submission'], client), str):
+    elif len(orderBy) > 1 and not isinstance(orderBy, str):
         mycollection = mydb['OrderBy']
-        for val in AWC.extractOrderBy(elem['submission'], client):
+        for val in orderBy:
             record = jsonOrderByAttribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractGroupBy(elem['submission'], client)) == 1:
+    groupBy = AWC.extractGroupBy(elem['submission'], client)
+    if len(groupBy) == 1:
         mycollection = mydb['GroupBy']
-        record = jsonGroupByAttribute(my_uuid, AWC.extractGroupBy(elem['submission'], client)[0])
+        record = jsonGroupByAttribute(my_uuid, groupBy[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractGroupBy(elem['submission'], client)) > 1 and not isinstance(AWC.extractGroupBy(elem['submission'], client), str):
+    elif len(groupBy) > 1 and not isinstance(groupBy, str):
         mycollection = mydb['GroupBy']
-        for val in AWC.extractGroupBy(elem['submission'], client):
+        for val in groupBy:
             record = jsonGroupByAttribute(my_uuid, val)
             mycollection.insert_one(record)
     AWC.literal = []

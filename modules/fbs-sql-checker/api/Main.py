@@ -29,7 +29,7 @@ for x in range(1):
 idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
-        "submission": "select name from table group by surname",
+        "submission": "select name, name2 from table union select surname from table2",
         "passed": True, #True if submission produced the right return in SQL-Runner
         "resultText": "OK",
         "userId": 1,
@@ -40,4 +40,3 @@ testdic = {
 }
 
 parseSingleStatUploadDB(testdic, client)
-#TestParseSingleStatUploadDB(testdic)
