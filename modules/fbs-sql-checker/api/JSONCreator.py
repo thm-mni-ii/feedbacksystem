@@ -48,10 +48,10 @@ def parseSingleStatUploadDB(data, client):
         extractedString = AWC.extractSelAttributes(data['submission'], client)
         if extractedString != "Unknown":
             selAtts2.extend(extractedString)
-        extractedOrderBy = extractOrderBy(data['submission'], client)
+        extractedOrderBy = AWC.extractOrderBy(data['submission'], client)
         if extractedOrderBy != "Unknown":
             orderBy2.extend(extractedOrderBy)
-        extractedGroupBy = extractGroupBy(data['submission'], client)
+        extractedGroupBy = AWC.extractGroupBy(data['submission'], client)
         if extractedGroupBy != "Unknown":
             groupBy2.extend(extractedGroupBy)
         strings2.extend(list(set(AWC.literal)))
