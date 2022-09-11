@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS `fbs`.`course` ;
 CREATE TABLE IF NOT EXISTS `fbs`.`course` (
                                               `course_id` INT NOT NULL AUTO_INCREMENT,
                                               `name` VARCHAR(100) NOT NULL,
+    `semester` Int NOT NULL DEFAULT 0, -- 0 == not specified
     `description` TEXT NOT NULL DEFAULT '',
     `visible` TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY (`course_id`),
