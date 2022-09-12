@@ -49,7 +49,7 @@ class TaskService {
     DB.insert("INSERT INTO task (name, media_type, description, deadline, media_information, course_id) VALUES " +
       "(?, ?, ?, ?, ?, ?);",
       task.name, task.mediaType, task.description,
-      parseTimestamp(task.deadline), task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, cid)
+      parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, cid)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
@@ -148,7 +148,7 @@ class TaskService {
       |""".stripMargin, (res, _) => parseSubtaskStatics(res), cid)
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
-    deadline = res.getTimestamp("deadline").toInstant.toString, mediaType = res.getString("media_type"),
+    deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
     id = res.getInt("task_id"), courseID = res.getInt("course_id"))
 
@@ -157,5 +157,9 @@ class TaskService {
 
   private def parseSubtaskStatics(res: ResultSet): SubtaskStatisticsTask = SubtaskStatisticsTask(res.getInt("task_id"),
     res.getString("name"), Option(res.getString("subtasks")).map(SubtaskStatisticsSubtask.fromJSONString).getOrElse(Seq()))
-  private def parseTimestamp(timestamp: String): Timestamp = Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)))
+
+  private def parseTimestamp(timestamp: Option[String]): Option[Timestamp] = timestamp match {
+    case Some(value) => Some(Timestamp.from(Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(value))))
+    case None => None
+  }
 }

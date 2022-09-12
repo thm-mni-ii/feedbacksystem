@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @param id The id of the task, if 0,  then no id was assigned
   */
 case class Task(@JsonProperty("name") name: String,
-                @JsonProperty("deadline") deadline: String,
+                @JsonProperty("deadline") deadline: Option[String],
                 @JsonProperty("mediaType") mediaType: String,
                 @JsonProperty("description") description: String = "",
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
