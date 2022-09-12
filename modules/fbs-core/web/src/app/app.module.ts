@@ -23,7 +23,7 @@ import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/datapri
 import { ImpressumDialogComponent } from "./dialogs/impressum-dialog/impressum-dialog.component";
 import { CookieService } from "ngx-cookie-service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { MatNativeDateModule } from "@angular/material/core";
+import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from "@angular/material/core";
 import { MarkdownModule } from "ngx-markdown";
 import { NgxDropzoneModule } from "ngx-dropzone";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
@@ -86,7 +86,7 @@ import { MatSortModule } from "@angular/material/sort";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
   public intercept(
     req: HttpRequest<any>,
     next: HttpHandler
@@ -198,10 +198,11 @@ export const httpInterceptorProviders = [
     CreateGuestUserDialogComponent,
     ImpressumDialogComponent,
   ],
-  providers: [CookieService, httpInterceptorProviders],
+  providers: [CookieService, httpInterceptorProviders,
+    { provide: MAT_DATE_LOCALE, useValue: "de" }],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }
 
 export function tokenGetter() {
   return localStorage.getItem("token");
