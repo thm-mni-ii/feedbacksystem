@@ -2418,7 +2418,6 @@ components:
       type: object
       required:
         - name
-        - deadline
       properties:
         id:
           type: integer
@@ -2429,6 +2428,7 @@ components:
         deadline:
           type: string
           description: ISO-8601 time as string
+          nullable: true
         mediaType:
           type: string
           description: The media type for the submissions according to RFC 4288
