@@ -51,7 +51,7 @@ class CourseService {
     * @return The created course with id
     */
   def create(course: Course): Course = {
-    DB.insert("INSERT INTO course (semester, name, description, visible) VALUES (?,?,?);", course.name, course.description, course.visible)
+    DB.insert("INSERT INTO course (semester, name, description, visible) VALUES (?,?,?,?);", course.semester, course.name, course.description, course.visible)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
