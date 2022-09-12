@@ -23,13 +23,13 @@ else:
 
 #The following Code is for debugging purposes
 
-client = "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false" #Define MongoDB for debugging purposes
+client = "mongodb://localhost:27017/" #Define MongoDB for debugging purposes
 for x in range(1):
   testId = (''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8))) #Generate random ID for the MongoDB
 idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
-        "submission": "select name, name2 from table union select surname from table2",
+        "submission": "select name from table",
         "passed": True, #True if submission produced the right return in SQL-Runner
         "resultText": "OK",
         "userId": 1,
