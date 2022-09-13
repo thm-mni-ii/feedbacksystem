@@ -23,7 +23,7 @@ class CourseService {
     * @return List of courses
     */
   def getAll(ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, semester, name, description, visible FROM course" + (if (ignoreHidden) " WHERE visible = 1" else ""),
+    "SELECT course_id, semester_id, name, description, visible FROM course" + (if (ignoreHidden) " WHERE visible = 1" else ""),
     (res, _) => parseResult(res))
 
   /**
@@ -33,7 +33,7 @@ class CourseService {
     * @return List of courses
     */
   def findByPattern(pattern: String, ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, semester, name, description, visible FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
+    "SELECT course_id, semester_id, name, description, visible FROM course WHERE name like ?" + (if (ignoreHidden) " AND visible = 1" else ""),
     (res, _) => parseResult(res), "%" + pattern + "%")
 
   /**
@@ -42,7 +42,7 @@ class CourseService {
     * @return The found course
     */
   def find(id: Int): Option[Course] = DB.query(
-    "SELECT course_id, semester, name, description, visible FROM course WHERE course_id = ?",
+    "SELECT course_id, semester_id, name, description, visible FROM course WHERE course_id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
@@ -51,7 +51,7 @@ class CourseService {
     * @return The created course with id
     */
   def create(course: Course): Course = {
-    DB.insert("INSERT INTO course (semester, name, description, visible) VALUES (?,?,?,?);", course.semester, course.name, course.description, course.visible)
+    DB.insert("INSERT INTO course (semester_id, name, description, visible) VALUES (?,?,?,?);", course.semester_id, course.name, course.description, course.visible)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
@@ -66,8 +66,8 @@ class CourseService {
     * @return True if successful
     */
   def update(cid: Int, course: Course): Boolean = {
-    1 == DB.update("UPDATE course SET semester = ?, name = ?, description = ?, visible = ? WHERE course_id = ?",
-      course.semester, course.name, course.description, course.visible, cid)
+    1 == DB.update("UPDATE course SET semester_id = ?, name = ?, description = ?, visible = ? WHERE course_id = ?",
+      course.semester_id, course.name, course.description, course.visible, cid)
   }
 
   /**
@@ -78,7 +78,7 @@ class CourseService {
   def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM course WHERE course_id = ?", id)
 
   private def parseResult(res: ResultSet): Course = Course(
-    semester = res.getInt("semester"),
+    semester_id = res.getInt("semester_id"),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),
