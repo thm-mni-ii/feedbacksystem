@@ -71,3 +71,10 @@ def jsonJoinAttribute(id, joinAttribute):
         "attr2": joinAttribute[2]
     }
     return value
+
+def jsonNotParsable(id, submission):
+    value = {
+        "id": str(id),
+        "submission": submission,
+    }
+    return value

@@ -127,8 +127,8 @@ def extractTables(json_file, client):
     except Exception as e:
         tables = ["Unknown"]
     # Gibt Indexerror bei falschen Queries
-    #if type(tables[0]) == str:
-    #    tables[0] = [tables[0]]
-    #if len(tables[1]) == 0:
-    #    tables[1].append("Empty")
+    if type(tables[0]) == str:
+        tables[0] = [tables[0]]
+    if len(tables[1]) == 0:
+        tables[1].append("Empty")
     return tables

@@ -33,9 +33,9 @@ testdic = {
         "resultText": "OK",
         "userId": 1,
         "attempt": 1,
-        "tid": 1,
+        "tid": 4,
         "sid": testId,
-        "isSol": True, #True solution is from docent
+        "isSol": False, #True solution is from docent
 }
 
 parseSingleStatUploadDB(testdic, client) '''
