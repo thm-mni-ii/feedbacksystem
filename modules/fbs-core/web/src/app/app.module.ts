@@ -23,7 +23,7 @@ import { DataprivacyDialogComponent } from "./dialogs/dataprivacy-dialog/datapri
 import { ImpressumDialogComponent } from "./dialogs/impressum-dialog/impressum-dialog.component";
 import { CookieService } from "ngx-cookie-service";
 import { MatDatepickerModule } from "@angular/material/datepicker";
-import { MatNativeDateModule } from "@angular/material/core";
+import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from "@angular/material/core";
 import { MarkdownModule } from "ngx-markdown";
 import { NgxDropzoneModule } from "ngx-dropzone";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
@@ -83,6 +83,7 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@Angular/material-moment-adapter";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -171,7 +172,6 @@ export const httpInterceptorProviders = [
     ReactiveFormsModule,
     MarkdownModule.forRoot(),
     MatDatepickerModule,
-    MatNativeDateModule,
     MatTabsModule,
     JwtModule.forRoot({
       config: {
@@ -198,7 +198,16 @@ export const httpInterceptorProviders = [
     CreateGuestUserDialogComponent,
     ImpressumDialogComponent,
   ],
-  providers: [CookieService, httpInterceptorProviders],
+  providers: [
+    CookieService,
+    httpInterceptorProviders,
+    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useStrict: true } },
+    {
+      provide: MAT_DATE_FORMATS,
+      useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
+    },
+    { provide: MAT_DATE_LOCALE, useValue: "de" },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
