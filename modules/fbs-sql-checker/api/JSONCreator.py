@@ -26,11 +26,10 @@ def parseSingleStatUploadDB(data, client):
     tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, orderBy2, groupBy2, joins2 = [], [], \
                                                             [], [], [], [], [], [], []
     if 'submission' in data:
-        #Extract tables, selAttributes, proAttributes and strings
-        extractedTables = extractTables(data['submission'], client)
-        if extractedTables != "Unknown":
-            tables2.extend(extractedTables)
-        '''
+        # Extract tables, selAttributes, proAttributes and strings
+        if extractTables(data['submission'], client) != "Unknown":
+            tableList = extractTables(data["submission"], client)
+            tables2.extend(tableList[0])
             if tableList[1] != ["Empty"]:
                 try:
                     tableList.pop(0)
@@ -40,7 +39,7 @@ def parseSingleStatUploadDB(data, client):
                 except Exception as e:
                     joins2.append("Unknown")
             else:
-                joins2.append("Empty")'''
+                joins2.append("Empty")
         extractedProAttributes = extractProAttributes(data['submission'], client)
         if extractedProAttributes != "Unknown":
             proAtts2.extend(extractedProAttributes)
@@ -185,18 +184,6 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
 
 # Insert data of Tables, proAttributes, selAttributes and Strings to Database
 def insertTables(mydb, elem, my_uuid, client):
-    tables = extractTables(elem['submission'], client)
-    mycollection = mydb['Tables']
-    if len(tables) == 1:
-        record = jsonTable(my_uuid, tables)
-        mycollection.insert_one(record)
-    elif len(tables) > 1 and \
-            not isinstance(tables, str):
-        for val in tables:
-            if (val != []):
-                record = jsonTable(my_uuid, val)
-                mycollection.insert_one(record)
-    '''
     tableList = extractTables(elem['submission'], client)
     joins = []
     tables.extend(tableList[0])
@@ -234,7 +221,7 @@ def insertTables(mydb, elem, my_uuid, client):
                     record = jsonJoinAttribute(my_uuid, y)
                     mycollection.insert_one(record)
             except Exception as e:
-                print("Error while reading joins.")'''
+                print("Error while reading joins.")
     proAttributes = extractProAttributes(elem['submission'], client)
     if len(proAttributes) == 1:
         mycollection = mydb['ProAttributes']
