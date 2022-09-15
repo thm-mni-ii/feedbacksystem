@@ -103,13 +103,24 @@ def extractOrderBy(json_file, client):
     groupBy = []
     groupByList = list(iterate(json_file, 'orderby'))
     for s in groupByList:
-        value = []
-        value.append(s['value'])
-        try:
-            value.append(s['sort'])
-        except Exception as e:
-            value.append('asc')
-        groupBy.append(value)
+        if isinstance(s, list):
+            for dicts in s:
+                value = []
+                value.append(dicts["value"])
+                try:
+                    value.append(dicts['sort'])
+                except Exception as e:
+                    value.append('asc')
+                groupBy.append(value)
+
+        if isinstance(s,dict):
+            value = []
+            value.append(s['value'])
+            try:
+                value.append(s['sort'])
+            except Exception as e:
+                value.append('asc')
+            groupBy.append(value)
     if len(groupBy) == 0:
         groupBy = "Unknown"
     return groupBy

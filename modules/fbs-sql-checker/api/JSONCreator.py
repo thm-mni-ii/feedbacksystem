@@ -182,7 +182,7 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
         else:
             #produce a json if the sql-query is not parsable
             record = prodJsonNotParsable(my_uuid,
-                             elem['submission'], taskNr)
+                             elem['submission'], taskNr,orderByRight)
     return record
 
 # Returns a json file which extracts characteristics
