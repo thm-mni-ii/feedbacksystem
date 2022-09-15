@@ -44,5 +44,5 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction  --only dev
       - run: |
-          poetry run black --check api
+          poetry run black --check --diff api
         name: Run Black
