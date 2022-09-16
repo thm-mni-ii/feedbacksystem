@@ -115,10 +115,8 @@ def isUnion(json_file):
 
 # return tables for a statement and uses therefor different arts of sql-statements
 def extractTables(json_file, client):
-    print(json_file)
     tables = []
     json_file = parse_query(json_file, client)
-    print(json_file)
     try:
         if isSingleFromWhere(json_file) is not None and isSingleFromWhere(json_file) is not []:
             tables = isSingleFromWhere(json_file)
@@ -128,8 +126,7 @@ def extractTables(json_file, client):
             tables = isUnion(json_file)
     except Exception as e:
         tables = ["Unknown"]
-    if len(tables) == 0:
-        tables = ["Unknown"]
+    # Gibt Indexerror bei falschen Queries
     if type(tables[0]) == str:
         tables[0] = [tables[0]]
     if len(tables) < 2:

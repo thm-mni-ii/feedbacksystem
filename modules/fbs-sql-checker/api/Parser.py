@@ -10,15 +10,14 @@ def parse_query(data, client):
     try:
         parsedQuery = mo_sql_parsing.parse(data)
     except Exception as e:
-        #print("Not able to parse the statement " + str(data))
-        #print(e)
+        print("Not able to parse the statement " + str(data))
+        print(e)
         mydb = client['sql-checker']
         mycollection = mydb['NotParsable']
         record = {
             "submission": data
         }
         mycollection.insert_one(record)
-        print("JA")
         return False
     jsonOutput = json.dumps(parsedQuery, indent=4)
     pyt_obj = json.loads(jsonOutput)
