@@ -13,6 +13,6 @@ alter table course
     add `semester_id` INT NOT NULL,
     ADD FOREIGN KEY (`semester_id`) REFERENCES semester(semester_id);
 
-INSERT INTO migration (number) VALUES (4);
+INSERT INTO migration (number) VALUES (5);
 
 COMMIT;
