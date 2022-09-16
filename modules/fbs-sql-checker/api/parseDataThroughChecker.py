@@ -5,7 +5,12 @@ import os
 import sys
 
 from JSONCreator import parseSingleStatUploadDB
-#The filename has to end on the TaskID an have no other digits immediatly ahead of that
+#Usage:
+#Execute "parseDataThroughChecker.py" with a path to a json file or a directory in the console
+#IMPORTANAT: The filename has to end on the TaskID an have no other digits immediatly ahead of that
+
+
+#Checks whether the given path is a file or directory and parses all files to "start"
 def parseDataThroughChecker(path):
     if os.path.isfile(path):
         start(path)
@@ -19,6 +24,7 @@ def parseDataThroughChecker(path):
     else:
         print("No such file or directory")
 
+#Goes through all submissions in a file and gives them to "parseSingleStatUploadDB"
 def start(path):
     f = open(path, encoding='utf8')
     data = json.load(f)
