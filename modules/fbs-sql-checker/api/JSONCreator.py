@@ -302,7 +302,6 @@ def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
              proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
     # save data if it is a manual solution
     if (isSol == True):
-        print("JAAHHA")
         userData.extend([True])
         userData.extend([0])
         userData.extend([0])
