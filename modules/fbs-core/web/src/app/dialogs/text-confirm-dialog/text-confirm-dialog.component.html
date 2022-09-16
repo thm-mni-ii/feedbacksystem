@@ -1,8 +1,7 @@
 <h2 matDialogTitle>{{ data.title }}</h2>
 <mat-dialog-content>{{ data.message }}</mat-dialog-content>
 <br />
-<div class="text-confirm">
-  <mat-form>
+<div>
     <mat-dialog-content>
       Geben Sie <strong>{{ data.textToRepeat }}</strong> ein.
     </mat-dialog-content>
@@ -12,7 +11,6 @@
         Die Eingabe stimmt nicht überein</mat-error
       >
     </mat-form-field>
-  </mat-form>
   <mat-dialog-actions>
     <button mat-flat-button color="accent" (click)="onCancel()">
       {{ data.closeText || "Abbrechen" }}
