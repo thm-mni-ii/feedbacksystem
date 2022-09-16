@@ -159,7 +159,7 @@ class TaskController {
         body.retrive("description").asText(),
         body.retrive("mediaInformation").asObject()
       ) match {
-        case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -171,7 +171,7 @@ class TaskController {
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), Some(deadline), Some(mediaType), desc, _) => taskService.create(cid,
+        case (Some(name), deadline, Some(mediaType), desc, _) => taskService.create(cid,
           Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
@@ -202,7 +202,7 @@ class TaskController {
         body.retrive("description").asText(),
         body.retrive("mediaInformation").asObject()
       ) match {
-        case (Some(name), Some(deadline), Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation)) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -214,7 +214,7 @@ class TaskController {
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals))))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), Some(deadline), Some(mediaType), desc, _) => taskService.update(cid, tid,
+        case (Some(name), deadline, Some(mediaType), desc, _) => taskService.update(cid, tid,
           Task(name, deadline, mediaType, desc.getOrElse(""), None))
         case _ => throw new BadRequestException("Malformed Request Body")
       }

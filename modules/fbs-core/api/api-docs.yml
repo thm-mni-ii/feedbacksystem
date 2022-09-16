@@ -2418,7 +2418,6 @@ components:
       type: object
       required:
         - name
-        - deadline
       properties:
         id:
           type: integer
