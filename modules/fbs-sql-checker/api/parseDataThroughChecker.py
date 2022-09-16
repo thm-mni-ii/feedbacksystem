@@ -5,14 +5,17 @@ import os
 import sys
 
 from JSONCreator import parseSingleStatUploadDB
-#The file has to end on the TaskID an have no other digits immediatly ahead of that
+#The filename has to end on the TaskID an have no other digits immediatly ahead of that
 def parseDataThroughChecker(path):
     if os.path.isfile(path):
         start(path)
     elif os.path.isdir(path):
         for filename in os.listdir(path):
             if filename.endswith(".json"):
-                start(path + "\\" + filename)
+                if path.endswith("\\"):
+                    start(path + filename)
+                else:
+                    start(path + "\\" + filename)
     else:
         print("No such file or directory")
 
