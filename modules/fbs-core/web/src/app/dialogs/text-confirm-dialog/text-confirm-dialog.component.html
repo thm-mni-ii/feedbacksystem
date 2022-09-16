@@ -2,15 +2,15 @@
 <mat-dialog-content>{{ data.message }}</mat-dialog-content>
 <br />
 <div>
-    <mat-dialog-content>
-      Geben Sie <strong>{{ data.textToRepeat }}</strong> ein.
-    </mat-dialog-content>
-    <mat-form-field>
-      <input matInput required [formControl]="textMatcher" [(ngModel)]="text" />
-      <mat-error *ngIf="textMatcher.hasError('notMatch')">
-        Die Eingabe stimmt nicht überein</mat-error
-      >
-    </mat-form-field>
+  <mat-dialog-content>
+    Geben Sie <strong>{{ data.textToRepeat }}</strong> ein.
+  </mat-dialog-content>
+  <mat-form-field>
+    <input matInput required [formControl]="textMatcher" [(ngModel)]="text" />
+    <mat-error *ngIf="textMatcher.hasError('notMatch')">
+      Die Eingabe stimmt nicht überein</mat-error
+    >
+  </mat-form-field>
   <mat-dialog-actions>
     <button mat-flat-button color="accent" (click)="onCancel()">
       {{ data.closeText || "Abbrechen" }}
