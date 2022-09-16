@@ -33,23 +33,34 @@ def start(path):
         i = i - 1
         TaskID = TaskID + listOfNumbers[i]
 
-    print(TaskID)
     for i in data:
         for attribute in i:
             if attribute == "submission":
                 for x in range(1):
                     testId = (
                         ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8)))
-                datas = {
-                    "passed": i["passed"],
-                    "userId": i["userId"],
-                    "attempt": i["attempt"],
-                    "submission": i["submission"],
-                    "tid": TaskID,
-                    "sid": testId,
-                    "isSol": False,
-                    "resultText": "OK"
-                }
+                if "isSol" in i and i["isSol"]:
+                    datas = {
+                        "passed": True,
+                        "userId": 1,
+                        "attempt": 1,
+                        "submission": i["submission"],
+                        "tid": TaskID,
+                        "sid": testId,
+                        "isSol": True,
+                        "resultText": "OK"
+                    }
+                else:
+                    datas = {
+                        "passed": i["passed"],
+                        "userId": i["userId"],
+                        "attempt": i["attempt"],
+                        "submission": i["submission"],
+                        "tid": TaskID,
+                        "sid": testId,
+                        "isSol": False,
+                        "resultText": "OK"
+                    }
                 parseSingleStatUploadDB(datas, "mongodb://localhost:27017/")
 
 

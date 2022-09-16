@@ -14,9 +14,7 @@ def parse_query(data, client):
         print(e)
         mydb = client['sql-checker']
         mycollection = mydb['NotParsable']
-        record = {
-            "submission": data
-        }
+        record = data
         mycollection.insert_one(record)
         return False
     jsonOutput = json.dumps(parsedQuery, indent=4)

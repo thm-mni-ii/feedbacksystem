@@ -182,7 +182,7 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
         if parse_query(elem['submission'], client) is not False:
             #produce a json to be pasted to DB
             record = prodJson(my_uuid, elem['submission'],
-                taskNr, False, tablesRight, proAttributesRight,
+                taskNr, elem["isSol"], tablesRight, proAttributesRight,
                 selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
         else:
             #produce a json if the sql-query is not parsable
@@ -302,6 +302,7 @@ def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
              proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
     # save data if it is a manual solution
     if (isSol == True):
+        print("JAAHHA")
         userData.extend([True])
         userData.extend([0])
         userData.extend([0])
