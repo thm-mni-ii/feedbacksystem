@@ -23,16 +23,6 @@ class SemesterService {
     (res, _) => parseResult(res))
 
   /**
-    * Search for a semester whose name adhere to the pattern
-    *
-    * @param pattern      SQL like pattern, i.e., %like%
-    * @return List of Semester
-    */
-  def findByPattern(pattern: String): List[Semester] = DB.query(
-    "SELECT course_id, semester_id, name, description, visible FROM course WHERE name like ?",
-    (res, _) => parseResult(res), "%" + pattern + "%")
-
-  /**
     * Lookup semester by id
     *
     * @param id The Semester id
@@ -53,7 +43,7 @@ class SemesterService {
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(semester) => semester
-      case None => throw new SQLException("Course could not be created")
+      case None => throw new SQLException("Semester could not be created")
     }
   }
 
@@ -77,6 +67,7 @@ class SemesterService {
   def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM semester WHERE semester_id = ?", id)
 
   private def parseResult(res: ResultSet): Semester = Semester(
+    semesterId = res.getInt("semester_id"),
     name = res.getString("name"),
   )
 }

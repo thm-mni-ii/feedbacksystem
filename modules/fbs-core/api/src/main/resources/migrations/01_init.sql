@@ -24,8 +24,8 @@ USE `fbs` ;
 DROP TABLE IF EXISTS `fbs`.`course` ;
 
 CREATE TABLE IF NOT EXISTS `fbs`.`course` (
-    `course_id` INT NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(100) NOT NULL,
+                                                  `course_id` INT NOT NULL AUTO_INCREMENT,
+                                                  `name` VARCHAR(100) NOT NULL,
     `description` TEXT NOT NULL DEFAULT '',
     `visible` TINYINT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY (`course_id`),

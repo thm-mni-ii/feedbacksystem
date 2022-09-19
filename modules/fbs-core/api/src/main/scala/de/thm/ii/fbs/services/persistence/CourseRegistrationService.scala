@@ -87,7 +87,7 @@ class CourseRegistrationService {
   }
 
   private def parseCourseResult(res: ResultSet): Course = Course(
-    semester_id = res.getInt("semester_id"),
+    semesterId = Some(res.getInt("semester_id")),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),
