@@ -3,6 +3,7 @@ import random
 import string
 import os
 import sys
+from tqdm import tqdm
 
 from JSONCreator import parseSingleStatUploadDB
 #Usage:
@@ -11,6 +12,10 @@ from JSONCreator import parseSingleStatUploadDB
 
 
 #Checks whether the given path is a file or directory and parses all files to "start"
+
+client = "mongodb://admin:password@localhost:27017/"
+cid = "Course ID not Found"
+
 def parseDataThroughChecker(path):
     if os.path.isfile(path):
         start(path)
@@ -42,35 +47,43 @@ def start(path):
         i = i - 1
         TaskID = TaskID + listOfNumbers[i]
 
-    for i in data:
+    for i in tqdm(data, file=sys.stdout):
         for attribute in i:
             if attribute == "submission":
+                query = i["submission"].replace('\n', ' ')
+                query = query.replace('\t', ' ')
+                query = " ".join(query.split()) #Removed all whitespaces
                 for x in range(1):
                     testId = (
                         ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8)))
                 if "isSol" in i and i["isSol"]:
+                    if "taskId" in i and i ["taskId"]:
+                        taskId = i["taskId"]
+                        cid = i["cid"]
                     datas = {
                         "passed": True,
                         "userId": 1,
                         "attempt": 1,
-                        "submission": i["submission"],
-                        "tid": TaskID,
+                        "submission": query,
+                        "tid": taskId,
                         "sid": testId,
                         "isSol": True,
-                        "resultText": "OK"
+                        "resultText": "OK",
+                        "cid": cid
                     }
                 else:
                     datas = {
                         "passed": i["passed"],
                         "userId": i["userId"],
                         "attempt": i["attempt"],
-                        "submission": i["submission"],
-                        "tid": TaskID,
+                        "submission": query,
+                        "tid": taskId,
                         "sid": testId,
                         "isSol": False,
-                        "resultText": "OK"
+                        "resultText": "OK",
+                        "cid": cid
                     }
-                parseSingleStatUploadDB(datas, "mongodb://localhost:27017/")
+                parseSingleStatUploadDB(datas, client)
 
 
 if __name__ == '__main__':
