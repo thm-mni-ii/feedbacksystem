@@ -129,6 +129,8 @@ def extractTables(json_file, client):
     # Gibt Indexerror bei falschen Queries
     if type(tables[0]) == str:
         tables[0] = [tables[0]]
+    if len(tables) < 2:
+        tables.append("Empty")
     if len(tables[1]) == 0:
         tables[1].append("Empty")
     return tables

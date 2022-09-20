@@ -23,8 +23,8 @@ def parseSingleStatUploadDB(data, client):
     client = MongoClient(client, 27107)
     mydb = client['sql-checker']
     mycollection = mydb['Queries']
-    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, orderBy2, groupBy2, joins2 = [], [], \
-                                                                                         [], [], [], [], [], [], []
+    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, courseId, orderBy2, groupBy2, joins2 = [], [], \
+                                                                                         [], [], [], [], [], [], [], []
     try:
         if 'submission' in data:
             # Extract tables, selAttributes, proAttributes and strings
@@ -60,6 +60,7 @@ def parseSingleStatUploadDB(data, client):
                 return
             taskNr = data['tid']
             my_uuid = data['sid']
+            courseId = data['cid']
             #Save tables, selAttributes, proAttributes and strings to DB
             if parse_query(data['submission'], client) is not False:
                 insertTables(mydb, data, my_uuid, client)
@@ -67,16 +68,17 @@ def parseSingleStatUploadDB(data, client):
         tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2 = checkSolutionChars(data, taskNr,
                                 my_uuid, tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
         #produce a JSON
-        record = returnJson(data, my_uuid, taskNr, tables2,
+        record = returnJson(data, my_uuid, taskNr, courseId, tables2,
                             proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
         #save JSON to DB
         mycollection.insert_one(record)
     except Exception as e:
         taskNr = data['tid']
         my_uuid = data['sid']
+        courseId = data['cid']
         userData = returnJsonNotParsable(data)
         insertNotParsable(my_uuid, userData[3], client)
-        record = prodJsonNotParsable(my_uuid, userData, taskNr)
+        record = prodJsonNotParsable(my_uuid, courseId, userData, taskNr)
         mycollection.insert_one(record)
 
 #Check if it is a new solution; check if tables, attributes etc. are right
@@ -169,7 +171,7 @@ def parseSingleStatUploadSolution(data, taskNr, my_uuid, client):
     mycollection.insert_one(record)
 
 #return JSON to be pasted to DB
-def returnJson(elem, my_uuid, taskNr, tablesRight,
+def returnJson(elem, my_uuid, taskNr, courseId, tablesRight,
         proAttributesRight, selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, client):
     #Extract informations from a sql-query-json
     if 'passed' in elem:
@@ -181,13 +183,13 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
     if 'submission' in elem:
         if parse_query(elem['submission'], client) is not False:
             #produce a json to be pasted to DB
-            record = prodJson(my_uuid, elem['submission'],
-                taskNr, False, tablesRight, proAttributesRight,
+            record = prodJson(my_uuid, courseId, elem['submission'],
+                taskNr, elem["isSol"], tablesRight, proAttributesRight,
                 selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
         else:
             #produce a json if the sql-query is not parsable
-            record = prodJsonNotParsable(my_uuid,
-                             elem['submission'], taskNr)
+            record = prodJsonNotParsable(my_uuid, courseId,
+                             elem['submission'], taskNr,orderByRight)
     return record
 
 def returnJsonNotParsable(elem):
@@ -298,7 +300,7 @@ def insertTables(mydb, elem, my_uuid, client):
 
 # Returns a json file which extracts characteristics
 # and tells which of them are wrong
-def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
+def prodJson(id, courseId, testSql, taskNr, isSol, tablesRight, selAttributesRight,
              proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
     # save data if it is a manual solution
     if (isSol == True):
@@ -307,6 +309,7 @@ def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
         userData.extend([0])
     value = {
         "id": str(id),
+        "courseId": courseId,
         "taskNumber": taskNr,
         "statement": testSql,
         "queryRight": userData[0],
@@ -327,10 +330,11 @@ def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
     return value
 
 # Returns a json file which extracts Tables and Attributes
-def prodJsonNotParsable(id, userData, taskNr):
+def prodJsonNotParsable(id, courseId,userData, taskNr):
     # Create dictionary
     value = {
         "id": str(id),
+        "courseId": courseId,
         "taskNumber": taskNr,
         "statement": userData[2],
         "queryRight": userData[0],
