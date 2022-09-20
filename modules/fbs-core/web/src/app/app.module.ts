@@ -60,6 +60,8 @@ import { ConfigurationListComponent } from "./page-components/configuration-list
 import { MenuBarComponent } from "./tool-components/menu-bar/menu-bar.component";
 import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-checker-dialog.component";
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
+import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
+
 import {
   NgxMatDatetimePickerModule,
   NgxMatNativeDateModule,
@@ -159,6 +161,7 @@ export const httpInterceptorProviders = [
     ResultsStatisticComponent,
     SqlCheckerComponent,
     SqlCheckerResultsComponent,
+    TextConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,

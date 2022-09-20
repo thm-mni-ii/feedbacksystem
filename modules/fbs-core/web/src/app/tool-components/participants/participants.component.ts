@@ -11,6 +11,7 @@ import { ActivatedRoute } from "@angular/router";
 import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import { TextConfirmDialogComponent } from "src/app/dialogs/text-confirm-dialog/text-confirm-dialog.component";
 
 @Component({
   selector: "app-participants",
@@ -106,7 +107,7 @@ export class ParticipantsComponent implements OnInit {
    * @param user The user to delete
    */
   unregister(user: User) {
-    this.openDialog("Soll der Benutzer ausgetragen werden?").subscribe(
+    this.openConfirmDialog("Soll der Benutzer ausgetragen werden?").subscribe(
       (result) => {
         if (result === true) {
           this.registrationService
@@ -129,51 +130,41 @@ export class ParticipantsComponent implements OnInit {
   }
 
   unregisterStudent() {
-    this.openDialog("Sollen alle Studierenden ausgetragen werden?").subscribe(
-      (result) => {
-        if (result === true) {
-          this.openDialog(
-            "Sollen wirklich alle Studierenden ausgetragen werden? Diese Aktion kann nicht rückgängig gemacht werden."
-          ).subscribe((result2) => {
-            if (result2 === true) {
-              this.registrationService
-                .deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
-                .subscribe(() => {
-                  this.snackBar.open(
-                    "Alle Studierenden wurden entfernt.",
-                    "ok",
-                    { duration: 3000 }
-                  );
-                  this.refreshUserList();
-                });
-            }
+    this.openTextConfirmDialog(
+      "Sollen wirklich alle Studierenden ausgetragen werden?",
+      "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "Delete Students"
+    ).subscribe((result) => {
+      if (result === true) {
+        this.registrationService
+          .deregisterRole(this.courseID, Roles.CourseRole.STUDENT)
+          .subscribe(() => {
+            this.snackBar.open("Alle Studierenden wurden entfernt.", "ok", {
+              duration: 3000,
+            });
+            this.refreshUserList();
           });
-        }
       }
-    );
+    });
   }
 
   unregisterTutor() {
-    this.openDialog("Möchten Sie alle Tutoren austragen?").subscribe(
-      (result) => {
-        if (result === true) {
-          this.openDialog(
-            "Sollen wirklich alle Tutoren ausgetragen werden? Diese Aktion kann nicht rückgängig gemacht werden."
-          ).subscribe((result2) => {
-            if (result2 === true) {
-              this.registrationService
-                .deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
-                .subscribe(() => {
-                  this.snackBar.open("Alle Tutoren wurden entfernt.", "ok", {
-                    duration: 3000,
-                  });
-                  this.refreshUserList();
-                });
-            }
+    this.openTextConfirmDialog(
+      "Sollen wirklich alle Tutoren ausgetragen werden?",
+      "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "Delete Tutors"
+    ).subscribe((result) => {
+      if (result === true) {
+        this.registrationService
+          .deregisterRole(this.courseID, Roles.CourseRole.TUTOR)
+          .subscribe(() => {
+            this.snackBar.open("Alle Tutoren wurden entfernt.", "ok", {
+              duration: 3000,
+            });
+            this.refreshUserList();
           });
-        }
       }
-    );
+    });
   }
 
   /**
@@ -195,7 +186,7 @@ export class ParticipantsComponent implements OnInit {
   }
 
   addParticipant(user: User) {
-    this.openDialog(
+    this.openConfirmDialog(
       "Soll " +
         user.prename +
         " " +
@@ -229,25 +220,19 @@ export class ParticipantsComponent implements OnInit {
   }
 
   unregisterAll() {
-    this.openDialog(
-      "Möchten Sie alle teilnehmende Personen austragen? Es werden alle Studierenden und Tutoren ausgetragen."
+    this.openTextConfirmDialog(
+      "Möchten Sie wirklich alle teilnehmenden Personen austragen?",
+      "Diese Aktion kann nicht rückgängig gemacht werden.",
+      "Delete All"
     ).subscribe((result) => {
       if (result === true) {
-        this.openDialog(
-          "Möchten Sie wirklich alle teilnehmende Personen austragen? Diese Aktion kann nicht rückgängig gemacht werden."
-        ).subscribe((result2) => {
-          if (result2 === true) {
-            this.registrationService
-              .deregisterAll(this.courseID)
-              .subscribe(() => {
-                this.snackBar.open(
-                  "Alle teilnehmenden Personen wurden entfernt.",
-                  "ok",
-                  { duration: 3000 }
-                );
-                this.refreshUserList();
-              });
-          }
+        this.registrationService.deregisterAll(this.courseID).subscribe(() => {
+          this.snackBar.open(
+            "Alle teilnehmenden Personen wurden entfernt.",
+            "ok",
+            { duration: 3000 }
+          );
+          this.refreshUserList();
         });
       }
     });
@@ -256,7 +241,7 @@ export class ParticipantsComponent implements OnInit {
   displayFn(user?: User): string | undefined {
     return user ? user.surname : undefined;
   }
-  private openDialog(message: string) {
+  private openConfirmDialog(message: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         message: message,
@@ -264,6 +249,21 @@ export class ParticipantsComponent implements OnInit {
           ok: "Ok",
           cancel: "Abbrechen",
         },
+      },
+    });
+    return dialogRef.afterClosed();
+  }
+
+  private openTextConfirmDialog(
+    title: string,
+    message: string,
+    textToRepeat: string
+  ) {
+    const dialogRef = this.dialog.open(TextConfirmDialogComponent, {
+      data: {
+        title: title,
+        message: message,
+        textToRepeat: textToRepeat,
       },
     });
     return dialogRef.afterClosed();
