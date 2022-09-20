@@ -25,13 +25,13 @@ class ExcelCheckerService extends CheckerService {
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
   /**
-    * Notify about the new submission
-    *
-    * @param taskID       the taskID for the submission
-    * @param submissionID the id of the submission
-    * @param cc           the check runner of the submission
-    * @param fu           the user which triggered the submission
-    */
+   * Notify about the new submission
+   *
+   * @param taskID       the taskID for the submission
+   * @param submissionID the id of the submission
+   * @param cc           the check runner of the submission
+   * @param fu           the user which triggered the submission
+   */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
       val excelMediaInformation = this.getMediaInfo(cc.id)
@@ -74,7 +74,7 @@ class ExcelCheckerService extends CheckerService {
     } catch {
       case e: NotImplementedFunctionException => CheckResult(errorMsg = f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
       case _: NullPointerException => CheckResult(errorMsg = "Ungültige Konfiguration")
-      case e: Throwable => CheckResult(errorMsg = f"Bei der Überprüfung ist ein Fehler aufgetretten: '${e.getMessage}'")
+      case e: Throwable => CheckResult(errorMsg = f"Bei der Überprüfung ist ein Fehler aufgetreten: '${e.getMessage}'")
     }
   }
 
@@ -84,10 +84,10 @@ class ExcelCheckerService extends CheckerService {
                          excelMediaInformation: ExcelMediaInformation,
                          checkFields: ExcelMediaInformationCheck
                        ): CheckResult = {
-      val userRes = this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
-      val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
+    val userRes = this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
+    val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
 
-      this.compare(userRes, expectedRes)
+    this.compare(userRes, expectedRes)
   }
 
   private def getSubmissionFile(submissionID: Int): File = {
@@ -161,7 +161,11 @@ class ExcelCheckerService extends CheckerService {
   private def submitSubTasks(configurationId: Int, submissionId: Int, results: List[CheckResult],
                              excelMediaInformation: ExcelMediaInformationTasks): Unit = {
     results.zip(excelMediaInformation.tasks).foreach(r => {
-      val points = if (r._1.success) {1} else {0}
+      val points = if (r._1.success) {
+        1
+      } else {
+        0
+      }
 
       val subTask = subTaskService.getOrCrate(configurationId, r._2.name, 1)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
@@ -176,7 +180,7 @@ class ExcelCheckerService extends CheckerService {
 
   private def mergeExtendedInfo(extRes1: ExtendedInfoExcel, extRes2: ExtendedInfoExcel): ExtendedInfoExcel = {
     ExtendedInfoExcel(expected = mergeExtendedInfoExcelObject(extRes1.expected, extRes2.expected),
-                      result = mergeExtendedInfoExcelObject(extRes1.result, extRes2.result))
+      result = mergeExtendedInfoExcelObject(extRes1.result, extRes2.result))
   }
 
   private def mergeExtendedInfoExcelObject(obj1: ExtendedInfoExcelObject, obj2: ExtendedInfoExcelObject): ExtendedInfoExcelObject = {
@@ -184,7 +188,7 @@ class ExcelCheckerService extends CheckerService {
   }
 
   case class CheckResult(success: Boolean = false,
-                          invalidFields: List[String] = List(),
-                          extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
-                          errorMsg: String = "")
+                         invalidFields: List[String] = List(),
+                         extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
+                         errorMsg: String = "")
 }
