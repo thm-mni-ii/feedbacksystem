@@ -65,7 +65,11 @@ class TaskService {
     * @return True if successful
     */
   def update(cid: Int, tid: Int, task: Task): Boolean =
-    1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ? WHERE task_id = ? AND course_id = ?",
+    1 == DB.update(
+      """
+        |UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
+        |WHERE task_id = ? AND course_id = ?
+        |""".stripMargin,
       task.name, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
       task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
 
