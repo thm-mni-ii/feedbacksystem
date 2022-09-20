@@ -126,6 +126,7 @@ def extractTables(json_file, client):
             tables = isUnion(json_file)
     except Exception as e:
         tables = ["Unknown"]
+    # Gibt Indexerror bei falschen Queries
     if type(tables[0]) == str:
         tables[0] = [tables[0]]
     if len(tables[1]) == 0:

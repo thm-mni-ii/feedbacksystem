@@ -12,11 +12,6 @@ def parse_query(data, client):
     except Exception as e:
         print("Not able to parse the statement " + str(data))
         print(e)
-        client = MongoClient(client, 27017)
-        mydb = client['SQLChecker']
-        mycollection = mydb['NotParsable']
-        record = data
-        mycollection.insert_one(record)
         return False
     jsonOutput = json.dumps(parsedQuery, indent=4)
     pyt_obj = json.loads(jsonOutput)
