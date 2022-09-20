@@ -75,6 +75,7 @@ def parseSingleStatUploadDB(data, client):
     except Exception as e:
         taskNr = data['tid']
         my_uuid = data['sid']
+        courseId = data['cid']
         userData = returnJsonNotParsable(data)
         insertNotParsable(my_uuid, userData[3], client)
         record = prodJsonNotParsable(my_uuid, courseId, userData, taskNr)

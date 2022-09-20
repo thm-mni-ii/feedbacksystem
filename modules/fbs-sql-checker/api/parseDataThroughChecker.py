@@ -8,9 +8,29 @@ from tqdm import tqdm
 from JSONCreator import parseSingleStatUploadDB
 #Usage:
 #Execute "parseDataThroughChecker.py" with a path to a json file or a directory in the console
-#IMPORTANAT: The filename has to end on the TaskID an have no other digits immediatly ahead of that
-
-
+#IMPORTANT: The filename has to end on the TaskID an have no other digits immediatly ahead of that
+#The first entry in JSON-File needs to contain the Solution of the task and the course id (cid). It looks like:
+'''
+{
+        "submission": "Select * from Example",
+        "passed": true,
+		"isSol": true,
+        "resultText": "ok",
+        "userId": 1,
+        "attempt": 1,
+		"taskId": 22,
+		"cid": 2
+    }
+    
+The submissions needs the following schema
+{
+        "submission": "select * from Example",
+        "passed": true,
+        "resultText": "Ok",
+        "userId": 2,
+        "attempt": 7
+    }
+'''
 #Checks whether the given path is a file or directory and parses all files to "start"
 
 client = "mongodb://admin:password@localhost:27017/"
@@ -72,6 +92,8 @@ def start(path):
                         "cid": cid
                     }
                 else:
+                    print(taskId)
+                    print(cid)
                     datas = {
                         "passed": i["passed"],
                         "userId": i["userId"],
@@ -89,8 +111,3 @@ def start(path):
 if __name__ == '__main__':
     pathtoData = sys.argv[1:][0]
     parseDataThroughChecker(pathtoData)
-
-
-
-#DEV branch nehmen
-#Lösung vorher eingeben
