@@ -21,6 +21,7 @@ import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 
 const defaultMediaType = "text/plain";
+const defaultLiability = "mandatory"
 
 /**
  * Dialog to create or update a task
@@ -36,6 +37,7 @@ export class TaskNewDialogComponent implements OnInit {
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
+    liability: new UntypedFormControl(defaultLiability),
     exelFile: new UntypedFormControl(""),
     userIDField: new UntypedFormControl(""),
     inputFields: new UntypedFormControl(""),
