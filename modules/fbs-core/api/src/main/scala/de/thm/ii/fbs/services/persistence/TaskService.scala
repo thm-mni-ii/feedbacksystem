@@ -58,7 +58,7 @@ class TaskService {
 
   /**
     * Update a task
-    * @param cid The curse id
+    * @param cid The course id
     * @param tid The task id
     * @param task The task
     * @return True if successful
