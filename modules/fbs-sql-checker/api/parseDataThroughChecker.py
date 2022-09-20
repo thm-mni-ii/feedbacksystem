@@ -8,7 +8,6 @@ from tqdm import tqdm
 from JSONCreator import parseSingleStatUploadDB
 #Usage:
 #Execute "parseDataThroughChecker.py" with a path to a json file or a directory in the console
-#IMPORTANT: The filename has to end on the TaskID an have no other digits immediatly ahead of that
 #The first entry in JSON-File needs to contain the Solution of the task and the course id (cid). It looks like:
 '''
 {
@@ -53,19 +52,6 @@ def parseDataThroughChecker(path):
 def start(path):
     f = open(path, encoding='utf8')
     data = json.load(f)
-    index = -6
-    listOfNumbers = []
-    while True:
-        if path[index].isdigit():
-            listOfNumbers.append(path[index])
-            index = index - 1
-        else:
-            break
-    TaskID = ""
-    i = len(listOfNumbers)
-    while i >= 1:
-        i = i - 1
-        TaskID = TaskID + listOfNumbers[i]
 
     for i in tqdm(data, file=sys.stdout):
         for attribute in i:
@@ -77,7 +63,7 @@ def start(path):
                     testId = (
                         ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8)))
                 if "isSol" in i and i["isSol"]:
-                    if "taskId" in i and i ["taskId"]:
+                    if "taskId" in i and i["taskId"]:
                         taskId = i["taskId"]
                         cid = i["cid"]
                     datas = {
