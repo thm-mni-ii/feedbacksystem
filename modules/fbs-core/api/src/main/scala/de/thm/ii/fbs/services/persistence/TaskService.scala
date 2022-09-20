@@ -26,7 +26,7 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id FROM task WHERE course_id = ?",
+    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
   /**
@@ -36,7 +36,7 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
@@ -46,10 +46,11 @@ class TaskService {
     * @return The created task with id
     */
   def create(cid: Int, task: Task): Task =
-    DB.insert("INSERT INTO task (name, media_type, description, deadline, media_information, course_id) VALUES " +
-      "(?, ?, ?, ?, ?, ?);",
+    DB.insert("INSERT INTO task (name, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
+      "(?, ?, ?, ?, ?, ?, ?);",
       task.name, task.mediaType, task.description,
-      parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, cid)
+      parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull,
+      cid, task.requirementType)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
@@ -64,9 +65,9 @@ class TaskService {
     * @return True if successful
     */
   def update(cid: Int, tid: Int, task: Task): Boolean =
-    1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ? WHERE task_id = ? AND course_id = ?",
+    1 == DB.update("UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ? WHERE task_id = ? AND course_id = ?",
       task.name, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
-      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, tid, cid)
+      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
 
   /**
     * Delete a task by id
@@ -150,7 +151,7 @@ class TaskService {
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
     deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
-    id = res.getInt("task_id"), courseID = res.getInt("course_id"))
+    requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"))
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
     res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null)

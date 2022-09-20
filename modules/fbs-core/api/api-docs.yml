@@ -2436,6 +2436,9 @@ components:
           oneOf:
             - $ref: '#/components/schemas/SpreadsheetInformationRequest'
             - $ref: '#/components/schemas/SpreadsheetInformationResponse'
+        requirementType:
+          type: string
+          description: The type of requirment like "mandatory", "bonus/additional", etc.
     SpreadsheetInformationRequest:
       type: object
       properties:
