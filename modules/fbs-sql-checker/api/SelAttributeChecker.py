@@ -124,8 +124,6 @@ def extractOrderBy(json_file, client):
         orderBy = "Unknown"
     return orderBy
 
-
-
 def extractGroupBy(json_file, client):
     json_file = parse_query(json_file, client)
     groupBy = []

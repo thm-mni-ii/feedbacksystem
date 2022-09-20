@@ -172,6 +172,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private submit() {
+    this.pending = true;
     const token = this.authService.getToken();
     this.submissionService
       .submitSolution(
@@ -182,7 +183,6 @@ export class TaskDetailComponent implements OnInit {
       )
       .subscribe(
         () => {
-          this.pending = true;
           this.refreshByPolling(true);
           this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
             duration: 3000,

@@ -2,8 +2,10 @@
 <mat-dialog-content>{{ data.message }}</mat-dialog-content>
 <mat-dialog-actions>
   <button mat-flat-button color="accent" (click)="confirm(false)">
-    Abbrechen
+    {{ data.closeText || "Abbrechen" }}
   </button>
   &nbsp; &nbsp;
-  <button mat-flat-button color="warn" (click)="confirm(true)">Ja</button>
+  <button mat-flat-button color="warn" (click)="confirm(true)">
+    {{ data.confirmText || "Ja" }}
+  </button>
 </mat-dialog-actions>
