@@ -52,7 +52,7 @@ class CourseService {
     */
   def create(course: Course): Course = {
     DB.insert("INSERT INTO course (semester_id, name, description, visible) VALUES (?,?,?,?);",
-      course.semesterId, course.name, course.description, course.visible)
+      course.semesterId.orNull, course.name, course.description, course.visible)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
@@ -68,7 +68,7 @@ class CourseService {
     */
   def update(cid: Int, course: Course): Boolean = {
     1 == DB.update("UPDATE course SET semester_id = ?, name = ?, description = ?, visible = ? WHERE course_id = ?",
-      course.semesterId, course.name, course.description, course.visible, cid)
+      course.semesterId.orNull, course.name, course.description, course.visible, cid)
   }
 
   /**
@@ -79,7 +79,7 @@ class CourseService {
   def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM course WHERE course_id = ?", id)
 
   private def parseResult(res: ResultSet): Course = Course(
-    semesterId = Some(res.getInt("semester_id")),
+    semesterId = Option(res.getInt("semester_id")),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),

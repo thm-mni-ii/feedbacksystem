@@ -52,11 +52,11 @@ class SemesterController {
   @PostMapping(value = Array(""), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Semester = {
-    if (authService.authorize(req, res).globalRole == GlobalRole.USER) {
+    if (authService.authorize(req, res).globalRole != GlobalRole.ADMIN) {
       throw new ForbiddenException()
     }
     (
-      body.retrive("semesterId").asInt(),
+      body.retrive("id").asInt(),
       body.retrive("name").asText()
     )
     match {
@@ -102,8 +102,8 @@ class SemesterController {
     val user = authService.authorize(req, res)
 
     user.globalRole match {
-      case GlobalRole.ADMIN | GlobalRole.MODERATOR =>
-        (body.retrive("semesterId").asInt(),
+      case GlobalRole.ADMIN =>
+        (body.retrive("id").asInt(),
           body.retrive("name").asText())
         match {
           case (Some(semesterId), Some(name)) => semesterService.update(sid, Semester(semesterId, name))
@@ -125,7 +125,7 @@ class SemesterController {
     val user = authService.authorize(req, res)
 
     user.globalRole match {
-      case GlobalRole.ADMIN | GlobalRole.MODERATOR =>
+      case GlobalRole.ADMIN =>
         // Save submissions and configurations
         semesterService.delete(sid)
       case _ => throw new ForbiddenException()

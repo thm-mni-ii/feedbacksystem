@@ -67,7 +67,7 @@ class SemesterService {
   def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM semester WHERE semester_id = ?", id)
 
   private def parseResult(res: ResultSet): Semester = Semester(
-    semesterId = res.getInt("semester_id"),
+    id = res.getInt("semester_id"),
     name = res.getString("name"),
   )
 }

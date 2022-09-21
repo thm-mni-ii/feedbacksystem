@@ -69,13 +69,13 @@ class CourseController {
       throw new ForbiddenException()
     }
     (
-      body.retrive("semester").asInt(),
+      body.retrive("semesterId").asInt(),
       body.retrive("name").asText(),
       body.retrive("description").asText(),
       body.retrive("visible").asBool()
     ) match {
-      case (semester, Some(name), desc, visible) =>
-        courseService.create(Course(semester, name, desc.getOrElse(""), visible.getOrElse(true)))
+      case (semesterId, Some(name), desc, visible) =>
+        courseService.create(Course(semesterId, name, desc.getOrElse(""), visible.getOrElse(true)))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
