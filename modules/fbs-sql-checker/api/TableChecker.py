@@ -115,7 +115,6 @@ def isUnion(json_file):
 
 # return tables for a statement and uses therefor different arts of sql-statements
 def extractTables(json_file, client):
-    tables = []
     json_file = parse_query(json_file, client)
     try:
         if isSingleFromWhere(json_file) is not None and isSingleFromWhere(json_file) is not []:

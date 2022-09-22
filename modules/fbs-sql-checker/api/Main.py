@@ -29,7 +29,7 @@ idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
         "submission": "SELECT COUNT(*) FROM Table1 INNER JOIN Table3 ON Table1.DifferentKey = Table3.DifferentKey INNER JOIN Table2 ON Table3.Key = Table3.Key AND Table2.Key2 = Table3.Key2 group by abc order by ord1, ord2 asc, ord3 desc",
-        "courseId": 1,
+        "cid": 1,
         "passed": False, #True if submission produced the right return in SQL-Runner
         "resultText": "OK",
         "userId": 1,
