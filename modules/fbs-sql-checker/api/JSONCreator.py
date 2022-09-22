@@ -336,7 +336,7 @@ def prodJsonNotParsable(id, courseId,userData, taskNr):
         "id": str(id),
         "courseId": courseId,
         "taskNumber": taskNr,
-        "statement": userData[2],
+        "statement": userData[3],
         "queryRight": userData[0],
         "parsable": False,
         "tablesRight": None,
@@ -344,7 +344,7 @@ def prodJsonNotParsable(id, courseId,userData, taskNr):
         "proAttributesRight": None,
         "stringsRight": None,
         "userId": userData[1],
-        "attempt": userData[3],
+        "attempt": userData[2],
         "orderbyRight": None
     }
     return value
