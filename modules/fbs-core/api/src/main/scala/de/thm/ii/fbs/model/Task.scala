@@ -23,6 +23,6 @@ case class Task(@JsonProperty("name") name: String,
                )
 
 object Task {
-  val requirementTypes: Array[String] = Array("mandatory", "additional")
+  val requirementTypes: Array[String] = Array("mandatory", "optional")
   val defaultRequirement: String = requirementTypes(0)
 }
