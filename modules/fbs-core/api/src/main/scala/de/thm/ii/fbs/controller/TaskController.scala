@@ -94,6 +94,7 @@ class TaskController {
 
   /**
     * Get a single task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req http request
@@ -139,9 +140,10 @@ class TaskController {
 
   /**
     * Create a new task
-    * @param cid Course id
-    * @param req http request
-    * @param res http response
+    *
+    * @param cid  Course id
+    * @param req  http request
+    * @param res  http response
     * @param body contains JSON request
     * @return JSON
     */
@@ -153,7 +155,8 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("name").asText(),
+      (body.retrive("name").asText(),
+        body.retrive("isPublic").asBool(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
         body.retrive("description").asText(),
@@ -161,9 +164,10 @@ class TaskController {
         body.retrive("requirementType").asText() match {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
-          case _ => throw new BadRequestException("Invalid requirement type.")}
+          case _ => throw new BadRequestException("Invalid requirement type.")
+        }
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), Some(isPublic), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -171,12 +175,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
-            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, isPublic, deadline, "application/x-spreadsheet", desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+        case (Some(name), Some(isPublic), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
+          Task(name, isPublic, deadline, mediaType, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -186,10 +190,11 @@ class TaskController {
 
   /**
     * Update task
-    * @param cid Course id
-    * @param tid Task id
-    * @param req http request
-    * @param res http response
+    *
+    * @param cid  Course id
+    * @param tid  Task id
+    * @param req  http request
+    * @param res  http response
     * @param body Request Body
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}"), consumes = Array())
@@ -200,7 +205,8 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("name").asText(),
+      (body.retrive("name").asText(),
+        body.retrive("isPublic").asBool(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
         body.retrive("description").asText(),
@@ -208,9 +214,10 @@ class TaskController {
         body.retrive("requirementType").asText() match {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
-          case _ => throw new BadRequestException("Invalid requirement type.")}
+          case _ => throw new BadRequestException("Invalid requirement type.")
+        }
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), Some(isPublic), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -218,12 +225,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
-            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, isPublic, deadline, "application/x-spreadsheet", desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+        case (Some(name), Some(isPublic), deadline, Some(mediaType), desc, _, requirementType) => taskService.update(cid, tid,
+          Task(name, isPublic, deadline, mediaType, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -233,6 +240,7 @@ class TaskController {
 
   /**
     * Delete a task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req http request

@@ -26,7 +26,7 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE course_id = ?",
+    DB.query("SELECT task_id, name, is_public, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
   /**
@@ -36,19 +36,20 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT task_id, name, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, is_public, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
     * Create a new task
-    * @param cid Course id
+    *
+    * @param cid  Course id
     * @param task The task
     * @return The created task with id
     */
   def create(cid: Int, task: Task): Task =
-    DB.insert("INSERT INTO task (name, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
-      "(?, ?, ?, ?, ?, ?, ?);",
-      task.name, task.mediaType, task.description,
+    DB.insert("INSERT INTO task (name, is_public, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
+      "(?, ?, ?, ?, ?, ?, ?, ?);",
+      task.name, task.isPublic, task.mediaType, task.description,
       parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull,
       cid, task.requirementType)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
@@ -59,18 +60,19 @@ class TaskService {
 
   /**
     * Update a task
-    * @param cid The course id
-    * @param tid The task id
+    *
+    * @param cid  The course id
+    * @param tid  The task id
     * @param task The task
     * @return True if successful
     */
   def update(cid: Int, tid: Int, task: Task): Boolean =
     1 == DB.update(
       """
-        |UPDATE task SET name = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
+        |UPDATE task SET name = ?, is_public = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
         |WHERE task_id = ? AND course_id = ?
         |""".stripMargin,
-      task.name, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
+      task.name, task.isPublic, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
       task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
 
   /**
@@ -84,6 +86,7 @@ class TaskService {
 
   /**
     * Get The task results for a course
+    *
     * @param cid The id of the course to get the task results for
     * @param uid The uid of the user to get the user id for
     * @return UserTaskResult The UserTaskResult Array
@@ -106,28 +109,30 @@ class TaskService {
 
   /**
     * Get The task result for a task
+    *
     * @param tid The id of the the task results for
     * @param uid The uid of the user to get the user id for
     * @return UserTaskResult The UserTaskResult Array
     */
   def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query(
-  """
-    |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
-    |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
-    |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
-    |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
-    |        LEFT JOIN checkrunner_sub_task_result cstr on cr.configuration_id = cstr.configuration_id and cr.submission_id = cstr.submission_id
-    |    WHERE uts.user_id = ? GROUP BY uts.submission_id
-    |) AS submission ON task.task_id = submission.task_id
-    |LEFT JOIN (
-    |    SELECT cc.task_id, SUM(cst.points) AS points FROM checkrunner_configuration cc
-    |        LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
-    |        GROUP BY cc.task_id
-    |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id;
-    |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
+    """
+      |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
+      |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
+      |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
+      |        LEFT JOIN checkrunner_sub_task_result cstr on cr.configuration_id = cstr.configuration_id and cr.submission_id = cstr.submission_id
+      |    WHERE uts.user_id = ? GROUP BY uts.submission_id
+      |) AS submission ON task.task_id = submission.task_id
+      |LEFT JOIN (
+      |    SELECT cc.task_id, SUM(cst.points) AS points FROM checkrunner_configuration cc
+      |        LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
+      |        GROUP BY cc.task_id
+      |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id;
+      |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
   /**
     * Get the subtask statistics for a single course
+    *
     * @param cid the id of the course to get the statistics for
     * @return the statistics
     */
@@ -153,6 +158,7 @@ class TaskService {
       |""".stripMargin, (res, _) => parseSubtaskStatics(res), cid)
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
+    isPublic = res.getBoolean("is_public"),
     deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
     requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"))
