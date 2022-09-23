@@ -1,0 +1,15 @@
+{
+  "LABEL": {
+    "name": "Invalid title",
+    "color": "d93f0b"
+  },
+  "CHECKS": {
+    "regexp": "^(?!i?[0-9]).*",
+    "ignoreLabels": ["Pull request Verifier: ignore"]
+  },
+  "MESSAGES": {
+    "success": "OK",
+    "failure": "Invalid Pull request title",
+    "notice": "The Pull request title should not be the same as the Branch name"
+  }
+}
