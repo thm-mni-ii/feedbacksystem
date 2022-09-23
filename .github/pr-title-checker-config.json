@@ -4,7 +4,7 @@
     "color": "d93f0b"
   },
   "CHECKS": {
-    "regexp": "^(?!i?[0-9]).*",
+    "regexp": "^(?![iI]?[0-9]).*",
     "ignoreLabels": ["Pull request Verifier: ignore"]
   },
   "MESSAGES": {
