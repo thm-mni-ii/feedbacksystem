@@ -2606,6 +2606,8 @@ components:
           type: string
         visible:
           type: boolean
+        semesterId:
+          type: integer
     Semester:
       type: object
       required:

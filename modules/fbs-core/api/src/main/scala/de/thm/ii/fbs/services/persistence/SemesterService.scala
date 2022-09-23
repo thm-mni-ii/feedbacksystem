@@ -19,7 +19,7 @@ class SemesterService {
     * @return List of semester
     */
   def getAll: List[Semester] = DB.query(
-    "SELECT name FROM semester",
+    "SELECT semester_id, name FROM semester",
     (res, _) => parseResult(res))
 
   /**
@@ -29,7 +29,7 @@ class SemesterService {
     * @return The found Semester
     */
   def find(id: Int): Option[Semester] = DB.query(
-    "SELECT name FROM semester WHERE semester_id = ?",
+    "SELECT semester_id, name FROM semester WHERE semester_id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
@@ -39,7 +39,7 @@ class SemesterService {
     * @return The created semester with id
     */
   def create(semester: Semester): Semester = {
-    DB.insert("INSERT INTO semester (name) VALUES (?);", semester.name)
+    DB.insert("INSERT INTO semester (semester_id, name) VALUES (?, ?);", semester.id, semester.name)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(semester) => semester
