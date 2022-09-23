@@ -10,6 +10,6 @@
   "MESSAGES": {
     "success": "OK",
     "failure": "Invalid Pull request title",
-    "notice": "The Pull request title should not be the same as the Branch name"
+    "notice": "The title of the pull request should not start with a number or an i followed by a number"
   }
 }
