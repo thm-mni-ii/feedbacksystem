@@ -125,6 +125,77 @@ def extractGroupBy(json_file, client):
         groupBy = "Unknown"
     return groupBy
 
+
+def extractHaving(json_file, client):
+    json_file = parse_query(json_file, client)
+    allHavings = []
+    having = []
+    havingList = list(iterate(json_file, 'having'))
+    print("havingList")
+    print(havingList) #'having': {'gt': [{'count': 'Orders.OrderID'}, 5]}
+
+
+
+    attOpAndCompare = [] # attOperator and attOpCompare
+
+    att = []  # customerId
+    attOperator = []  # count
+    attOpCompare = []  # gt...
+    valCompare = []  # value example 5
+
+    havingOrder = [] # end result
+
+
+
+    for s in havingList: # take one having from [this having, , ,]
+
+        print("s")
+        print(s)
+
+        parseOneCond(s, having, att, attOperator, attOpCompare, valCompare)
+
+    print("att end")
+    print(att)
+    print("valCompare end")
+    print(valCompare)
+
+
+
+    i = 0
+    for s in having:
+        listWithCond = []
+
+        if s == 'count': # with gt equals
+            listWithCond.append(s)
+        else:
+            havingOrder.append(s)
+
+        if s == 'count':
+            listWithCond.append(att[i])
+            listWithCond.append(valCompare[i])
+            i = i + 1
+            havingOrder.append(listWithCond)
+
+
+        # ['or', 'and', 'gt', 'count', 'CustomerID1', 1, 'gt', 'count', 'CustomerID2', 2, 'and', 'gt', 'count', 'CustomerID3', 3, 'gt', 'count', 'CustomerID4', 4]
+
+        #[{'or': [{'and': [{'gt': [{'count': 'CustomerID1'}, 1]}, {'gt': [{'count': 'CustomerID2'}, 2]}]},
+        #        {'and': [{'gt': [{'count': 'CustomerID3'}, 3]}, {'gt': [{'count': 'CustomerID4'}, 4]}]}]}]
+
+
+
+    allHavings.append(havingOrder)
+
+    print("havingOrder")
+    print(havingOrder)
+
+    print("allHavings")
+    print(allHavings)
+
+    if len(allHavings) == 0:
+        allHavings = "Unknown"
+    return allHavings
+
 def iterate(data, param):
     if isinstance(data, list):
         for item in data:
@@ -136,3 +207,102 @@ def iterate(data, param):
             else:
                 yield from iterate(item, param)
 
+
+def parseOneCond(s, having, att, attOperator, attOpCompare, valCompare):
+        print("in parseOneCond funktion")
+
+
+
+        for i in s:
+
+            #if i == 'count':
+                #print("i values ")
+                #print(i.values)
+
+            #if i == "count":
+                #print("i count found  ")
+                #print(i.values)
+
+
+
+
+                print("i in first condition")
+                print(i)
+
+
+                # if (i == "gt" or i == "le" or i == "eq" or i == "ne"):  # 1 dim
+                #    attOpCompare = i
+                value = i
+                having.append(value)
+
+
+
+                for t in s[i]: # took first {'and': [{'gt': [{'count': 'CustomerID'}, 1]}, {'gt': [{'count': 'CustomerID'}, 2]}]}
+
+                    if type(t) is not str:
+                        print("type")
+                        print(type(t))
+
+                        if type(t) is int:
+                            print("value t ")
+                            print(t)
+                            valCompare.append(t)
+                            print("valCompare got")
+                            print(valCompare) # todo weiterleiten und take
+
+                            #print("size of valCompare")
+                            #print(len(valCompare))
+
+
+
+                        #if type(t) is str:
+                            #print("value str ")
+                            #print(t)
+
+                        if type(t) is dict:
+                            print("s[i]")
+                            print(s[i])
+
+                            print("t / rest of logical op")
+                            print(t)  # {'and': [{'gt': [{'count': 'CustomerID'}, 1]}, {'gt': [{'count': 'CustomerID'}, 2]}]} first
+
+                            print("got count")
+                            print(t.get('count'))
+
+
+                            if t.get('count') != None:
+                                att.append( t.get('count') )
+                                print("att got")
+                                print(att) # todo weiterleiten
+
+
+
+
+                            #if t.keys == "count":
+                                #print("i count found  ")
+                                #print(i.values)
+                            #else:
+
+
+
+                            parseOneCond(t, having, att, attOperator, attOpCompare, valCompare)
+
+
+
+        return having
+
+
+
+"""
+Having:
+
+id:
+operator: OR
+array:
+    att
+    attopr
+operator: AND
+array:
+    att
+    attopr
+"""

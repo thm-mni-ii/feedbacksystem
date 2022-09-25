@@ -6,6 +6,8 @@ import SelAttributeChecker as AWC
 from Parser import *
 from pymongo import MongoClient
 
+import json
+
 rightStatements = []
 rightTables = []
 rightAtts = []
@@ -22,8 +24,8 @@ def parseSingleStatUploadDB(data, client):
     client = MongoClient(client, 27107)
     mydb = client['sql-checker']
     mycollection = mydb['Queries']
-    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, orderBy2, groupBy2, joins2 = [], [], \
-                                                            [], [], [], [], [], [], []
+    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, orderBy2, groupBy2, joins2, having2 = [], [], \
+                                                            [], [], [], [], [], [], [], []
     if 'submission' in data:
         #Extract tables, selAttributes, proAttributes and strings
         if extractTables(data['submission'], client) != "Unknown":
@@ -47,6 +49,15 @@ def parseSingleStatUploadDB(data, client):
             orderBy2.extend(extractOrderBy(data["submission"], client))
         if extractGroupBy(data['submission'], client) != "Unknown":
             groupBy2.extend(extractGroupBy(data['submission'], client))
+
+        extractedHaving = AWC.extractHaving(data['submission'], client)
+        if extractedHaving != "Unknown":
+            having2.extend(extractedHaving)
+
+
+
+
+
         strings2.extend(list(set(AWC.literal)))
         #If TaskID or Submission ID not in data, return
         if 'tid' not in data or 'sid' not in data:
@@ -58,27 +69,31 @@ def parseSingleStatUploadDB(data, client):
         if parse_query(data['submission'], client) is not False:
             insertTables(mydb, data, my_uuid, client)
     #Check if it is a new solution and charachteristics are right
-    tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2 = checkSolutionChars(data, taskNr,
-                            my_uuid, tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
+    tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, having2 = checkSolutionChars(data, taskNr,
+                            my_uuid, tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, having2, client)
     #produce a JSON
     record = returnJson(data, my_uuid, taskNr, tables2,
-                        proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
+                        proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, having2, client)
+
+    print(record)
+    #parsed = json.loads(record)
+    #print(json.dumps(parsed, indent=4))
     #save JSON to DB
     mycollection.insert_one(record)
 
 #Check if it is a new solution; check if tables, attributes etc. are right
 def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
-                       selAtts2, strings2, orderBy2, groupBy2, joins2, client):
+                       selAtts2, strings2, orderBy2, groupBy2, joins2, having2, client):
     newSolution = True
-    tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight = \
-        False, False, False, False, False, False, False
+    tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight = \
+        False, False, False, False, False, False, False, False
     mydb = client['sql-checker']
-    mycol = mydb['Solutions']
+    mycol = mydb['Solutions'] # todo was ist
     #For every solution for given task
     for x in mycol.find({"taskNumber": taskNr}):
         #Extract Tables, Attributes etc. (cut out for better overview)
         id = (x['id'])
-        tables, proAttributes, selAttributes, strings, orderBy, groupBy, joins = [], [], [], [], [], [], []
+        tables, proAttributes, selAttributes, strings, orderBy, groupBy, joins, having = [], [], [], [], [], [], [], []
         mycol = mydb['Tables']
         for y in mycol.find({"id": id}, {"table": 1}):
             tables.append(y['table'])
@@ -100,6 +115,19 @@ def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
             else:
                 orderByValue.append('asc')
             orderBy.append(orderByValue)
+
+        #todo having #list = [[att, attOperator,attOpCompare,valCompare],[],[],[]] aus solutions collection
+        mycol = mydb['Having']
+        for y in mycol.find({"id": id}, { "att": 1, "attOperator": 1, "attOpCompare": 1, "valCompare": 1}): #todo check
+            havingValue = []
+
+            havingValue.append(y['att'])
+            havingValue.append(y['attOperator'])
+            havingValue.append(y['attOpCompare'])
+            havingValue.append(y['valCompare'])
+
+            having.append(havingValue)
+
         mycol = mydb['GroupBy']
         for y in mycol.find({"id": id}, {"groupBy": 1}):
             groupBy.append(y['groupBy'])
@@ -119,7 +147,7 @@ def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
             #Compare them to tabels, proAttributes etc of a given sql-query
             if tables == tables2 and set(proAttributes) == set(proAtts2) \
 and set(selAttributes) == set(selAtts2) and set(strings) == set(strings2) and orderBy\
-                    == orderBy2 and joins == joins2:
+                    == orderBy2 and joins == joins2 and having == having2 :
                 #If they alle are same, it is not a new solution
                 newSolution = False
         else:
@@ -138,13 +166,15 @@ and set(selAttributes) == set(selAtts2) and set(strings) == set(strings2) and or
                 groupByRight = True
             if joins == joins2:
                 joinsRight = True
+            if having == having2:
+                havingRight = True
     if data['passed']:
         if newSolution == True:
             #Upload as a new Solution to DB
             parseSingleStatUploadSolution(data, taskNr, my_uuid, client)
-        return (True, True, True, True, True, True, True)
+        return (True, True, True, True, True, True, True, True)
     #return if characteristics are True or False
-    return (tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
+    return (tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight)
 
 #Check if it is a new solution; check if tables, attributes etc. are right
 
@@ -165,7 +195,7 @@ def parseSingleStatUploadSolution(data, taskNr, my_uuid, client):
 
 #return JSON to be pasted to DB
 def returnJson(elem, my_uuid, taskNr, tablesRight,
-        proAttributesRight, selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, client):
+        proAttributesRight, selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight, client):
     #Extract informations from a sql-query-json
     if 'passed' in elem:
         userData.append(elem['passed'])
@@ -234,7 +264,7 @@ def prodJsonNotParsable(id, testSql, taskNr, orderByRight):
     }
     return value
 
-# Insert data of Tables, proAttributes, selAttributes and Strings to Database
+# Insert data of Tables, proAttributes, selAttributes and Strings to Database todo late
 def insertTables(mydb, elem, my_uuid, client):
     tableList = extractTables(elem['submission'], client)
     joins = []
@@ -322,6 +352,21 @@ def insertTables(mydb, elem, my_uuid, client):
         for val in AWC.extractGroupBy(elem['submission']):
             record = jsonGroupByAttribute(my_uuid, val)
             mycollection.insert_one(record)
+
+    if len(AWC.extractHaving(elem['submission'], client)) == 1:
+        mycollection = mydb['Having']
+        record = jsonHavingAttribute(my_uuid, AWC.extractHaving(elem['submission'], client)[0])
+
+        print("record")
+        print(record)
+        mycollection.insert_one(record)
+    elif len(AWC.extractHaving(elem['submission'], client)) > 1 and not isinstance(AWC.extractHaving(elem['submission'], client), str):
+        mycollection = mydb['Having']
+        for val in AWC.extractHaving(elem['submission']):
+            record = jsonHavingAttribute(my_uuid, val)
+            mycollection.insert_one(record)
+
+
     AWC.literal = []
     userData.clear()
 
@@ -386,5 +431,18 @@ def jsonJoinAttribute(id, joinAttribute):
         "type": joinAttribute[0],
         "attr1": joinAttribute[1],
         "attr2": joinAttribute[2]
+    }
+    return value
+
+def jsonHavingAttribute(id, havingAttribute):
+    print("havingAttribute")
+    print(havingAttribute)
+
+    value = {
+        "id": str(id),
+        "att": havingAttribute[0],
+        "attOperator": havingAttribute[1],
+        "attOpCompare": havingAttribute[2],
+        "valCompare": havingAttribute[3]
     }
     return value

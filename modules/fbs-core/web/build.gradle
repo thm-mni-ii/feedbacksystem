@@ -37,7 +37,7 @@ distributions {
 // It will work on evry system, because of relative paths (at leat I hope so)
 
 task copyWebToWS(type: Copy, dependsOn: [build]) {
-    from "${projectDir}/dist/web" // path from distributed web-gui
+    from "${projectDir}/dist/${project.name}" // path from distributed web-gui
     into "${projectDir}/../api/src/main/resources/static"
 }
 
