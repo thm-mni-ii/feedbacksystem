@@ -438,6 +438,25 @@ def jsonHavingAttribute(id, havingAttribute):
     print("havingAttribute")
     print(havingAttribute)
 
+    print("len having atts")
+    print(len(havingAttribute))
+
+    i = 0
+    log_atts = []
+    customerIdAndOp = []
+    for s in havingAttribute:
+        log_atts = s[0]
+        compareAndArray = s[1 + i]
+        log_atts = s[1+i]
+
+        customerIdAndOp = s[2 + 2*i]
+
+        #if type(s) is list:
+
+
+
+
+
     value = {
         "id": str(id),
         "att": havingAttribute[0],

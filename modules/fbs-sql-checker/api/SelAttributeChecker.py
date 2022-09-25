@@ -149,17 +149,15 @@ def extractHaving(json_file, client):
 
     for s in havingList: # take one having from [this having, , ,]
 
-        print("s")
-        print(s)
+        #print("s")
+        #print(s)
 
         parseOneCond(s, having, att, attOperator, attOpCompare, valCompare)
 
-    print("att end")
-    print(att)
-    print("valCompare end")
-    print(valCompare)
-
-
+    #print("att end")
+    #print(att)
+    #print("valCompare end")
+    #print(valCompare)
 
     i = 0
     for s in having:
@@ -175,13 +173,6 @@ def extractHaving(json_file, client):
             listWithCond.append(valCompare[i])
             i = i + 1
             havingOrder.append(listWithCond)
-
-
-        # ['or', 'and', 'gt', 'count', 'CustomerID1', 1, 'gt', 'count', 'CustomerID2', 2, 'and', 'gt', 'count', 'CustomerID3', 3, 'gt', 'count', 'CustomerID4', 4]
-
-        #[{'or': [{'and': [{'gt': [{'count': 'CustomerID1'}, 1]}, {'gt': [{'count': 'CustomerID2'}, 2]}]},
-        #        {'and': [{'gt': [{'count': 'CustomerID3'}, 3]}, {'gt': [{'count': 'CustomerID4'}, 4]}]}]}]
-
 
 
     allHavings.append(havingOrder)
@@ -209,85 +200,47 @@ def iterate(data, param):
 
 
 def parseOneCond(s, having, att, attOperator, attOpCompare, valCompare):
-        print("in parseOneCond funktion")
-
-
+        #print("in parseOneCond funktion")
 
         for i in s:
-
-            #if i == 'count':
-                #print("i values ")
-                #print(i.values)
-
-            #if i == "count":
-                #print("i count found  ")
-                #print(i.values)
-
-
-
-
-                print("i in first condition")
-                print(i)
-
+                #print("i in first condition")
+                #print(i)
 
                 # if (i == "gt" or i == "le" or i == "eq" or i == "ne"):  # 1 dim
                 #    attOpCompare = i
                 value = i
                 having.append(value)
 
-
-
                 for t in s[i]: # took first {'and': [{'gt': [{'count': 'CustomerID'}, 1]}, {'gt': [{'count': 'CustomerID'}, 2]}]}
 
                     if type(t) is not str:
-                        print("type")
-                        print(type(t))
+                        #print("type")
+                        #print(type(t))
 
                         if type(t) is int:
-                            print("value t ")
-                            print(t)
-                            valCompare.append(t)
-                            print("valCompare got")
-                            print(valCompare) # todo weiterleiten und take
-
-                            #print("size of valCompare")
-                            #print(len(valCompare))
-
-
-
-                        #if type(t) is str:
-                            #print("value str ")
+                            #print("value t ")
                             #print(t)
+                            valCompare.append(t)
+                            #print("valCompare got")
+                            #print(valCompare)
 
                         if type(t) is dict:
-                            print("s[i]")
-                            print(s[i])
+                            #print("s[i]")
+                            #print(s[i])
 
-                            print("t / rest of logical op")
-                            print(t)  # {'and': [{'gt': [{'count': 'CustomerID'}, 1]}, {'gt': [{'count': 'CustomerID'}, 2]}]} first
+                            #print("t / rest of logical op")
+                            #print(t)  # {'and': [{'gt': [{'count': 'CustomerID'}, 1]}, {'gt': [{'count': 'CustomerID'}, 2]}]} first
 
-                            print("got count")
-                            print(t.get('count'))
+                            #print("got count")
+                            #print(t.get('count'))
 
 
                             if t.get('count') != None:
                                 att.append( t.get('count') )
-                                print("att got")
-                                print(att) # todo weiterleiten
-
-
-
-
-                            #if t.keys == "count":
-                                #print("i count found  ")
-                                #print(i.values)
-                            #else:
-
-
+                                #print("att got")
+                                #print(att)
 
                             parseOneCond(t, having, att, attOperator, attOpCompare, valCompare)
-
-
 
         return having
 
