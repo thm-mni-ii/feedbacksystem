@@ -3,7 +3,7 @@
 import ProAttributeChecker as AC
 from Parser import *
 
-selectCommands = [
+select_commands = [
     "sum",
     "count",
     "round",
@@ -24,51 +24,51 @@ equals = ["eq", "neq", "gte", "gt", "lt", "lte"]
 literal = []
 
 # Returns SelectionAttributes as a list if there is a where
-def selectWhere(json_file):
-    listTables = []
+def select_where(json_file):
+    list_tables = []
     if "where" in json_file:
-        isWhere = True
+        is_where = True # todo Unused variable 'is_where'
         for val1 in json_file["where"]:
             if isinstance(json_file["where"][val1], str):
                 if "." in json_file["where"][val1]:
-                    listTables.append(json_file["where"][val1].split(".")[1].lower())
+                    list_tables.append(json_file["where"][val1].split(".")[1].lower())
                 else:
-                    listTables.append(json_file["where"][val1].lower())
+                    list_tables.append(json_file["where"][val1].lower())
             if isinstance(json_file["where"][val1], dict):
                 for val2 in json_file["where"][val1]:
                     if isinstance(val2, str):
-                        if AC.singleSelectDict(val2) != []:
-                            listTables.extend(AC.singleSelectDict(val2))
+                        if AC.single_select_dict(val2) != []:
+                            list_tables.extend(AC.single_select_dict(val2))
                         elif "." in val2:
-                            listTables.append(val2.split(".")[1].lower())
+                            list_tables.append(val2.split(".")[1].lower())
                         else:
-                            listTables.append(val2.lower())
+                            list_tables.append(val2.lower())
             for i in range(len(json_file["where"][val1])):
                 if isinstance(json_file["where"][val1][i], dict):
                     for val3 in json_file["where"][val1][i]:
-                        if val3 in selectCommands:
+                        if val3 in select_commands:
                             for val4 in json_file["where"][val1][i][val3]:
                                 if isinstance(val4, str):
                                     if "." in val4:
-                                        listTables.append(val4.split(".")[1].lower())
+                                        list_tables.append(val4.split(".")[1].lower())
                                     else:
-                                        listTables.append(val4.lower())
+                                        list_tables.append(val4.lower())
             if isinstance(json_file["where"][val1], list) and (
                 len(json_file["where"][val1]) > 1
             ):
                 if isinstance(json_file["where"][val1][1], dict):
-                    if AC.singleSelectDict(json_file["where"][val1][1]) != []:
-                        listTables.extend(
-                            AC.singleSelectDict(json_file["where"][val1][1])
+                    if AC.single_select_dict(json_file["where"][val1][1]) != []: # todo 'AC.single_select_dict(...) != []' can be simplified to 'AC.single_select_dict(...)' as an empty sequence is falsey
+                        list_tables.extend(
+                            AC.single_select_dict(json_file["where"][val1][1])
                         )
                     if "literal" in json_file["where"][val1][1]:
                         literal.append(json_file["where"][val1][1]["literal"])
                 for elem in json_file["where"][val1]:
                     if isinstance(elem, str):
                         if "." in elem:
-                            listTables.append(elem.split(".")[1].lower())
+                            list_tables.append(elem.split(".")[1].lower())
                         else:
-                            listTables.append(elem.lower())
+                            list_tables.append(elem.lower())
             for i in range(len(json_file["where"][val1])):
                 if not isinstance(json_file["where"][val1][i], int):
                     for elem in json_file["where"][val1][i]:
@@ -79,13 +79,13 @@ def selectWhere(json_file):
                                         json_file["where"][val1][i][elem][j], str
                                     ):
                                         if "." in json_file["where"][val1][i][elem][j]:
-                                            listTables.append(
+                                            list_tables.append(
                                                 json_file["where"][val1][i][elem][
                                                     j
                                                 ].split(".")[1]
                                             )
                                         else:
-                                            listTables.append(
+                                            list_tables.append(
                                                 json_file["where"][val1][i][elem][j]
                                             )
                                     if isinstance(
@@ -94,7 +94,7 @@ def selectWhere(json_file):
                                         for elem1 in json_file["where"][val1][i][elem][
                                             j
                                         ]:
-                                            if elem1 in selectCommands:
+                                            if elem1 in select_commands:
                                                 if isinstance(
                                                     json_file["where"][val1][i][elem][
                                                         j
@@ -107,13 +107,13 @@ def selectWhere(json_file):
                                                             elem
                                                         ][j][elem1]
                                                     ):
-                                                        listTables.append(
+                                                        list_tables.append(
                                                             json_file["where"][val1][i][
                                                                 elem
                                                             ][j][elem1].split(".")[1]
                                                         )
                                                     else:
-                                                        listTables.append(
+                                                        list_tables.append(
                                                             json_file["where"][val1][i][
                                                                 elem
                                                             ][j][elem1]
@@ -124,58 +124,58 @@ def selectWhere(json_file):
                                                         j
                                                     ][elem1]
                                                 )
-                                        listTables.extend(
-                                            AC.singleSelectDict(
+                                        list_tables.extend(
+                                            AC.single_select_dict(
                                                 json_file["where"][val1][i][elem][j]
                                             )
                                         )
                         if elem == "where":
-                            listTables.extend(selectWhere(json_file["where"][val1][i]))
-    return set(listTables)
+                            list_tables.extend(select_where(json_file["where"][val1][i]))
+    return set(list_tables)
 
 
 # returns SelectionAttributes for a statement and uses herefor different arts of sql-statements
-def extractSelAttributes(json_file, client):
-    whereAttributes = []
-    json_file = parse_query(json_file, client)
+def extract_sel_attributes(json_file, client):
+    where_attributes = []
+    json_file = parse_query(json_file, client) # todo Undefined variable 'parse_query'
     try:
-        if (selectWhere(json_file) is not None) and (selectWhere(json_file) != []):
-            whereAttributes.extend([selectWhere(json_file)])
+        if (select_where(json_file) is not None) and (select_where(json_file) != []): # todo 'select_where(...) != []' can be simplified to 'select_where(...)' as an empty sequence is falsey
+            where_attributes.extend([select_where(json_file)])
     except Exception as e:
         # print(e)
-        whereAttributes = [["Unknown"]]
-    if len(whereAttributes) > 0:
-        return list(whereAttributes[0])
+        where_attributes = [["Unknown"]]
+    if len(where_attributes) > 0: #todo Unnecessary "else" after "return", remove the "else" and de-indent the code inside it
+        return list(where_attributes[0])
     else:
-        return list(whereAttributes)
+        return list(where_attributes)
 
 
-def extractOrderBy(json_file, client):
-    json_file = parse_query(json_file, client)
-    groupBy = []
-    groupByList = list(iterate(json_file, "orderby"))
-    for s in groupByList:
+def extract_order_by(json_file, client):
+    json_file = parse_query(json_file, client) # todo Undefined variable 'parse_query'
+    group_by = []
+    group_by_list = list(iterate(json_file, "orderby"))
+    for s in group_by_list:
         value = []
         value.append(s["value"])
         try:
             value.append(s["sort"])
         except Exception as e:
             value.append("asc")
-        groupBy.append(value)
-    if len(groupBy) == 0:
-        groupBy = "Unknown"
-    return groupBy
+        group_by.append(value)
+    if len(group_by) == 0:
+        group_by = "Unknown"
+    return group_by
 
 
-def extractGroupBy(json_file, client):
+def extract_group_by(json_file, client):
     json_file = parse_query(json_file, client)
-    groupBy = []
-    groupByList = list(iterate(json_file, "groupby"))
-    for s in groupByList:
-        groupBy.append(s["value"])
-    if len(groupBy) == 0:
-        groupBy = "Unknown"
-    return groupBy
+    group_by = []
+    group_by_list = list(iterate(json_file, "groupby"))
+    for s in group_by_list:
+        group_by.append(s["value"])
+    if len(group_by) == 0:
+        group_by = "Unknown"
+    return group_by
 
 
 def iterate(data, param):

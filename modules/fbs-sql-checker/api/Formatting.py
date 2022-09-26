@@ -1,7 +1,7 @@
 # Formatting.py
 
 # Checks if an element is a valid  String
-def isString(data):
+def is_string(data):
     if isinstance(data, str):
         return True
     else:
@@ -9,7 +9,7 @@ def isString(data):
 
 
 # Checks if an element is a dictionary
-def isDict(data):
+def is_dict(data):
     if isinstance(data, dict):
         return True
     else:
@@ -17,7 +17,7 @@ def isDict(data):
 
 
 # Checks if 'from' is in JSON
-def isFrom(data):
+def is_from(data):
     if "from" in data:
         return True
     else:
@@ -25,14 +25,14 @@ def isFrom(data):
 
 
 # Checks if 'select' is in JSON
-def isSelect(data):
+def is_select(data):
     if "select" in data:
         return True
     else:
         return False
 
 
-def isOrderBy(data):
+def is_order_by(data):
     if "orderby" in data:
         return True
     else:

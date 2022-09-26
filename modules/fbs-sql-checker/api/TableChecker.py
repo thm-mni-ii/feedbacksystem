@@ -4,24 +4,24 @@ import Formatting as f
 from Parser import *
 
 # Return a single From and a where-clause
-def isSingleFromWhere(json_file):
-    listTables = []
-    if not (f.isString(json_file)) and (f.isFrom(json_file)):
+def is_single_from_where(json_file):
+    list_tables = []
+    if not (f.is_string(json_file)) and (f.is_from(json_file)):
         if isinstance(json_file["from"], str):
             if json_file["from"].count(json_file["from"]) == 1:
-                listTables.append(json_file["from"].lower())
+                list_tables.append(json_file["from"].lower())
         if isinstance(json_file["from"], dict):
             if "value" in json_file["from"]:
                 if isinstance(json_file["from"]["value"], str):
-                    listTables.append(json_file["from"]["value"].lower())
+                    list_tables.append(json_file["from"]["value"].lower())
     for val in json_file:
         if val == "where":
             if isinstance(json_file[val], list):
                 for val1 in json_file[val]:
                     if val1 == "in":
                         for i in range(len(json_file[val][val1])):
-                            listTables.extend(
-                                isSingleFromWhere(json_file[val][val1][i])
+                            list_tables.extend(
+                                is_single_from_where(json_file[val][val1][i])
                             )
             elif isinstance(json_file[val], dict):
                 for val1 in json_file["where"]:
@@ -29,143 +29,143 @@ def isSingleFromWhere(json_file):
                         if val2 == "exists":
                             if isinstance(json_file["where"][val1][val2], dict):
                                 if (
-                                    isSingleFromWhere(json_file["where"][val1][val2])
-                                    != []
+                                        is_single_from_where(json_file["where"][val1][val2])
+                                        != []
                                 ) and (
-                                    isSingleFromWhere(json_file["where"][val1][val2])
-                                    not in listTables
+                                        is_single_from_where(json_file["where"][val1][val2])
+                                        not in list_tables
                                 ):
-                                    listTables.extend(
-                                        isSingleFromWhere(
+                                    list_tables.extend(
+                                        is_single_from_where(
                                             json_file["where"][val1][val2]
                                         )
                                     )
                     if isinstance(json_file["where"][val1], list):
                         if len(json_file["where"][val1]) > 1:
                             if isinstance(json_file["where"][val1][1], dict):
-                                if (isSingleFromWhere(val2) != []) and (
-                                    isSingleFromWhere(val2) != None
+                                if (is_single_from_where(val2) != []) and (
+                                        is_single_from_where(val2) != None
                                 ):
-                                    for elem in isSingleFromWhere(val2):
-                                        if elem not in listTables:
-                                            listTables.append(elem)
+                                    for elem in is_single_from_where(val2):
+                                        if elem not in list_tables:
+                                            list_tables.append(elem)
                                 elif (
-                                    (isJoin(val2) != [])
-                                    and (isJoin(val2) not in listTables)
-                                    and (isJoin(val2) != None)
+                                    (is_join(val2) != [])
+                                    and (is_join(val2) not in list_tables)
+                                    and (is_join(val2) != None)
                                 ):
-                                    listTables.append(isJoin(val2))
+                                    list_tables.append(is_join(val2))
     if (
-        (isJoin(json_file) != [])
-        and (isJoin(json_file) not in listTables)
-        and (isJoin(json_file) != None)
+        (is_join(json_file) != [])
+        and (is_join(json_file) not in list_tables)
+        and (is_join(json_file) != None)
     ):
-        for elem in isJoin(json_file):
-            if elem not in listTables:
-                listTables.append(elem)
-    return listTables
+        for elem in is_join(json_file):
+            if elem not in list_tables:
+                list_tables.append(elem)
+    return list_tables
 
 
 # Return Tables as a List if there is a join --> works for a python List too
-def isJoin(json_file):
-    listTables = []
-    listJoins = []
-    returnList = []
-    isJoinVar = False
-    joinType = ""
-    if not (f.isString(json_file)) and (f.isFrom(json_file)):
+def is_join(json_file):
+    list_tables = []
+    list_joins = []
+    return_list = []
+    is_join_var = False
+    join_type = ""
+    if not (f.is_string(json_file)) and (f.is_from(json_file)):
         for val in json_file["from"]:
             if (
                 (isinstance(val, str))
                 and ((val != "value") and (val != "name"))
                 and (len(val) > 1)
             ):
-                listTables.append(val.lower())
+                list_tables.append(val.lower())
             if isinstance(val, dict):
                 for element in val:
                     if element == "value":
-                        listTables.append(val[element].lower())
+                        list_tables.append(val[element].lower())
                     if isinstance(val[element], str) and (
                         (element != "name") and (element != "using")
                     ):
-                        listTables.append(val[element].lower())
-                    if isJoinVar == True:
+                        list_tables.append(val[element].lower())
+                    if is_join_var == True: # todo is true ?
                         for val1 in val[element]:
                             insert = []
-                            insert.append(joinType)
+                            insert.append(join_type)
                             for val in val[element][val1]:
                                 insert.append(val)
-                            listJoins.append(insert)
-                        isJoinVar = False
+                            list_joins.append(insert)
+                        is_join_var = False
                     if (
                         element == "inner join"
                         or element == "left join"
                         or element == "join"
                     ):
-                        isJoinVar = True
-                        joinType = element
+                        is_join_var = True
+                        join_type = element
                         for val1 in val[element]:
                             if val1 == "value":
-                                listTables.append(val[element][val1].lower())
+                                list_tables.append(val[element][val1].lower())
             if val == "value":
                 if isinstance(json_file["from"]["value"], dict):
                     if (
                         (
-                            isSingleFromWhere(json_file["from"]["value"])
-                            not in listTables
+                                is_single_from_where(json_file["from"]["value"])
+                                not in list_tables
                         )
-                        and (isSingleFromWhere(json_file["from"]["value"]) != None)
-                        and (isSingleFromWhere(json_file["from"]["value"]) != [])
+                        and (is_single_from_where(json_file["from"]["value"]) != None) # todo is not None?
+                        and (is_single_from_where(json_file["from"]["value"]) != []) # todo is not []?
                     ):
-                        listTables.extend(isSingleFromWhere(json_file["from"]["value"]))
-                for elem in json_file["from"]["value"]:
+                        list_tables.extend(is_single_from_where(json_file["from"]["value"]))
+                for elem in json_file["from"]["value"]: # todo Unused variable 'elem'
                     if (
-                        (isUnion(json_file["from"]["value"]) != None)
-                        and (isUnion(json_file["from"]["value"]) != [])
-                        and (isUnion(json_file["from"]["value"]) not in listTables)
+                        (is_union(json_file["from"]["value"]) != None)
+                        and (is_union(json_file["from"]["value"]) != [])
+                        and (is_union(json_file["from"]["value"]) not in list_tables)
                     ):
-                        listTables.extend(isUnion(json_file["from"]["value"]))
+                        list_tables.extend(is_union(json_file["from"]["value"]))
                     if (
-                        (isJoin(json_file["from"]["value"]) != None)
-                        and (isJoin(json_file["from"]["value"]) != [])
-                        and (isJoin(json_file["from"]["value"]) not in listTables)
+                        (is_join(json_file["from"]["value"]) != None)
+                        and (is_join(json_file["from"]["value"]) != [])
+                        and (is_join(json_file["from"]["value"]) not in list_tables)
                     ):
-                        listTables.extend(isJoin(json_file["from"]["value"]))
-        returnList.append(sorted(list(set(listTables))))
-        returnList.append(listJoins)
-        return returnList
+                        list_tables.extend(is_join(json_file["from"]["value"]))
+        return_list.append(sorted(list(set(list_tables))))
+        return_list.append(list_joins)
+        return return_list
 
 
 # Returns tables as a List if it is a union
-def isUnion(json_file):
-    listTables = []
-    if not (f.isString(json_file)):
+def is_union(json_file):
+    list_tables = []
+    if not (f.is_string(json_file)):
         for val in json_file:
             if val == "union":
                 for i in range(len(json_file[val])):
-                    if (isSingleFromWhere(json_file[val][i])) is not None:
-                        listTables.extend(isSingleFromWhere(json_file[val][i]))
+                    if (is_single_from_where(json_file[val][i])) is not None:
+                        list_tables.extend(is_single_from_where(json_file[val][i]))
                     else:
-                        listTables.append(isJoin(json_file[val][i]))
-                return sorted(set(listTables))
+                        list_tables.append(is_join(json_file[val][i]))
+                return sorted(set(list_tables))
             else:
                 return None
 
 
 # return tables for a statement and uses therefor different arts of sql-statements
-def extractTables(json_file, client):
+def extract_tables(json_file, client):
     tables = []
     json_file = parse_query(json_file, client)
     try:
         if (
-            isSingleFromWhere(json_file) is not None
-            and isSingleFromWhere(json_file) is not []
+            is_single_from_where(json_file) is not None
+            and is_single_from_where(json_file) is not []
         ):
-            tables = isSingleFromWhere(json_file)
-        elif isJoin(json_file) is not None and isJoin(json_file) is not []:
-            tables = isJoin(json_file)
+            tables = is_single_from_where(json_file)
+        elif is_join(json_file) is not None and is_join(json_file) is not []:
+            tables = is_join(json_file)
         else:
-            tables = isUnion(json_file)
+            tables = is_union(json_file)
     except Exception as e:
         tables = ["Unknown"]
     if type(tables[0]) == str:

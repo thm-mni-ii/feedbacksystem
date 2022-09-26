@@ -5,7 +5,7 @@ import random
 import string
 import sys
 import requests
-from JSONCreator import parseSingleStatUploadDB
+from JSONCreator import parse_single_stat_upload_db
 
 # The following Code is for productive purposes
 
@@ -17,10 +17,10 @@ if len(sys.argv) < 3:
         "zu analysierende JSON aufgerufen werden soll."
     )
 else:
-    urlAnswer = sys.argv[1]
-    answer = requests.get(urlAnswer, verify=False, timeout=25)
+    url_answer = sys.argv[1]
+    answer = requests.get(url_answer, verify=False, timeout=25)
     print(answer.json())
-    parseSingleStatUploadDB(answer.json(), client)
+    parse_single_stat_upload_db(answer.json(), client)
 """
 # The following Code is for debugging purposes
 client = (
