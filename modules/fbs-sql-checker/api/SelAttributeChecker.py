@@ -163,7 +163,7 @@ def extractHaving(json_file, client):
     for s in having:
         listWithCond = []
 
-        if s == 'count': # with gt equals
+        if s == 'count' : # with gt equals: or s == 'gt'
             listWithCond.append(s)
         else:
             havingOrder.append(s)

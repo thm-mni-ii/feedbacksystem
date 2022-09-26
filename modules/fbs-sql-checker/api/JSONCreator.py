@@ -442,26 +442,58 @@ def jsonHavingAttribute(id, havingAttribute):
     print(len(havingAttribute))
 
     i = 0
-    log_atts = []
-    customerIdAndOp = []
+
+    logOps = [] # logical operators and, or..
+    comOp = []  # gt, lt..
+
+    value1 = {}
+
+
     for s in havingAttribute:
-        log_atts = s[0]
-        compareAndArray = s[1 + i]
-        log_atts = s[1+i]
 
-        customerIdAndOp = s[2 + 2*i]
+        att = []  # count
+        attVal = []  # CustomerID1
+        valCompare = []  # 1, 2, ...
 
-        #if type(s) is list:
+        if s == 'or' or s == 'and': # todo extend
+            logOps = s
+        if s == 'gt' or s == 'lt': # todo extend
+            comOp = s
+        if type(s) is list:
+            att = s[0]
+            attVal = s[1]
+            valCompare = s[2]
 
-
+            value1 = {
+                "comOp": comOp,
+                "att": att,
+                "attVal": attVal,
+                "valCompare": valCompare
+            }
 
 
 
     value = {
         "id": str(id),
-        "att": havingAttribute[0],
-        "attOperator": havingAttribute[1],
-        "attOpCompare": havingAttribute[2],
-        "valCompare": havingAttribute[3]
+        "logOps": logOps,
+        "compares": value1
     }
+
+    print("======")
+    print(value)
+
     return value
+
+"""
+Having:
+
+id:
+operator: OR
+array:
+    att
+    attopr
+operator: AND
+array:
+    att
+    attopr
+"""
