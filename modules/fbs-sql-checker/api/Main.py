@@ -29,7 +29,7 @@ for x in range(1):
 idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
-        "submission": "SELECT customerName, customercity, customermail, ordertotal,salestotal FROM onlinecustomers as s inner join mitarbeiter as m on m=s WHERE salesId IS NULL having COUNT(CustomerID1) > 1 and COUNT(CustomerID2) > 2 or COUNT(CustomerID3) > 3 and COUNT(CustomerID4) > 4 or COUNT(CustomerID5) > 5 or COUNT(CustomerID6) > 6 order by name desc",
+        "submission": "SELECT customerName, customercity, customermail, ordertotal,salestotal FROM onlinecustomers as s inner join mitarbeiter as m on m=s WHERE salesId IS NULL having COUNT(CustomerID1) > 1 and COUNT(CustomerID2) > 2 or COUNT(CustomerID3) > 3 and COUNT(CustomerID4) > 4 or COUNT(CustomerID5) > 5 order by name desc",
         "passed": True, #True if submission produced the right return in SQL-Runner
         "resultText": "OK",
         "userId": 1,

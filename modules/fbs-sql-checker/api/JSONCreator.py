@@ -54,10 +54,6 @@ def parseSingleStatUploadDB(data, client):
         if extractedHaving != "Unknown":
             having2.extend(extractedHaving)
 
-
-
-
-
         strings2.extend(list(set(AWC.literal)))
         #If TaskID or Submission ID not in data, return
         if 'tid' not in data or 'sid' not in data:
@@ -88,7 +84,7 @@ def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
     tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight = \
         False, False, False, False, False, False, False, False
     mydb = client['sql-checker']
-    mycol = mydb['Solutions'] # todo was ist
+    mycol = mydb['Solutions']
     #For every solution for given task
     for x in mycol.find({"taskNumber": taskNr}):
         #Extract Tables, Attributes etc. (cut out for better overview)
@@ -116,16 +112,10 @@ def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
                 orderByValue.append('asc')
             orderBy.append(orderByValue)
 
-        #todo having #list = [[att, attOperator,attOpCompare,valCompare],[],[],[]] aus solutions collection
         mycol = mydb['Having']
-        for y in mycol.find({"id": id}, { "att": 1, "attOperator": 1, "attOpCompare": 1, "valCompare": 1}): #todo check
+        for y in mycol.find({"id": id}, {"havingAttribute": 1}):
             havingValue = []
-
-            havingValue.append(y['att'])
-            havingValue.append(y['attOperator'])
-            havingValue.append(y['attOpCompare'])
-            havingValue.append(y['valCompare'])
-
+            havingValue.append(y['havingAttribute'])
             having.append(havingValue)
 
         mycol = mydb['GroupBy']
@@ -208,7 +198,7 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
             #produce a json to be pasted to DB
             record = prodJson(my_uuid, elem['submission'],
                 taskNr, False, tablesRight, proAttributesRight,
-                selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
+                selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight)
         else:
             #produce a json if the sql-query is not parsable
             record = prodJsonNotParsable(my_uuid,
@@ -218,7 +208,7 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
 # Returns a json file which extracts characteristics
 # and tells which of them are wrong
 def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
-             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
+             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, havingRight):
     # save data if it is a manual solution
     if (isSol == True):
         userData.extend([True])
@@ -239,7 +229,8 @@ def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
         "attempt": userData[2],
         "orderByRight": orderByRight,
         "groupByRight": groupByRight,
-        "joinsRight": joinsRight
+        "joinsRight": joinsRight,
+        "havingRight": havingRight
     }
     userData.clear()
     AWC.literal = []
@@ -438,45 +429,9 @@ def jsonHavingAttribute(id, havingAttribute):
     print("havingAttribute")
     print(havingAttribute)
 
-    print("len having atts")
-    print(len(havingAttribute))
-
-    i = 0
-
-    logOps = [] # logical operators and, or..
-    comOp = []  # gt, lt..
-
-    value1 = {}
-
-
-    for s in havingAttribute:
-
-        att = []  # count
-        attVal = []  # CustomerID1
-        valCompare = []  # 1, 2, ...
-
-        if s == 'or' or s == 'and': # todo extend
-            logOps = s
-        if s == 'gt' or s == 'lt': # todo extend
-            comOp = s
-        if type(s) is list:
-            att = s[0]
-            attVal = s[1]
-            valCompare = s[2]
-
-            value1 = {
-                "comOp": comOp,
-                "att": att,
-                "attVal": attVal,
-                "valCompare": valCompare
-            }
-
-
-
     value = {
         "id": str(id),
-        "logOps": logOps,
-        "compares": value1
+        "havingAttribute": havingAttribute
     }
 
     print("======")
@@ -484,16 +439,3 @@ def jsonHavingAttribute(id, havingAttribute):
 
     return value
 
-"""
-Having:
-
-id:
-operator: OR
-array:
-    att
-    attopr
-operator: AND
-array:
-    att
-    attopr
-"""
