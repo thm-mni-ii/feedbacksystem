@@ -41,19 +41,23 @@ object SQLRunnerService {
       }
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
-      val sections = taskQueries.sections
-      // Make dbType Optional
+      val sections = taskQueries.section// Make dbType and queryType Optional
       // TODO Solve in TaskQueries Case Class
       val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
+      val queryType = if (taskQueries.queryType == null) "dml" else taskQueries.queryType
 
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
-      if (submissionQuarry.isBlank) {
+      if (submissionQuarry.isBlank && queryType.equalsIgnoreCase("dml")) {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
+      if (queryType.equalsIgnoreCase("dml") || queryType.equalsIgnoreCase("ddl")) {
+        throw new RunnerException("The query type must be dml or ddl!")
+      }
+
+      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
     } catch {
       // TODO enhance messages
       case e: RunnerException => throw e
@@ -190,21 +194,38 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     * @return a Future that contains the Results
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
-    connections.operationCon.getConnectionFuture().flatMap(c => {
-      c.setQueryTimeout(queryTimout)
+    if (sqlRunArgs.queryType.equals("dml")) {
+          connections.operationCon.getConnectionFuture().flatMap(c => {
+            c.setQueryTimeout(queryTimout)
 
-      createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery() transform {
-          case s@Success(_) =>
-            deleteDatabases(c, submissionDbExt)
-            s
-          case Failure(cause) =>
-            deleteDatabases(c, submissionDbExt)
-            Failure(throw cause)
-        }
-      })
-    })
-  }
+            createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
+              executeComplexQuery() transform {
+                case s@Success(_) =>
+                  deleteDatabases(c, submissionDbExt)
+                  s
+                case Failure(cause) =>
+                  deleteDatabases(c, submissionDbExt)
+                  Failure(throw cause)
+              }
+            })
+          })
+    }
+    else {
+        connections.operationCon.getConnectionFuture().flatMap(c => {
+          c.setQueryTimeout(queryTimout)
+
+          createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
+            executeComplexQuery() transform {
+              case s@Success(_) =>
+                deleteDatabases(c, submissionDbExt)
+                s
+              case Failure(cause) =>
+                Failure(throw cause)
+            }
+          })
+        })
+    }
+}
 
   private def executeComplexQuery(): Future[ResultSet] = {
     /* Split submissions bei ; into sub Queries and execute all und just get the result of the last*/
