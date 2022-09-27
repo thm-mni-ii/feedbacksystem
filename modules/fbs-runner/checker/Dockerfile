@@ -3,7 +3,7 @@ FROM gradle:jdk18 AS BUILD
 COPY . /build
 WORKDIR /build
 
-RUN gradle dist
+RUN gradle fbs-runner.checker:installDist
 
 FROM openjdk:18.0.2-slim
 
