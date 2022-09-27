@@ -76,6 +76,23 @@ class TaskService {
       task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
 
   /**
+    * Update the visibility of a task
+    *
+    * @param cid  The course id
+    * @param tid  The task id
+    * @param task The task
+    * @return True if successful
+    */
+  def updateVisibility(cid: Int, tid: Int, task: Task): Boolean =
+    1 == DB.update(
+      """
+        |UPDATE task SET is_public = ?
+        |WHERE task_id = ? AND course_id = ?
+        |""".stripMargin,
+      task.isPublic, tid, cid)
+
+
+  /**
     * Delete a task by id
     *
     * @param cid The curse id

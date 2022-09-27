@@ -49,8 +49,13 @@ class TaskController {
   @GetMapping(value = Array("/{cid}/tasks"))
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
-    authService.authorize(req, res)
-    taskService.getAll(cid)
+    val auth = authService.authorize(req, res)
+    if (auth.globalRole == GlobalRole.USER) {
+      taskService.getAll(cid).filter(task => task.isPublic)
+    }
+    else {
+      taskService.getAll(cid)
+    }
   }
 
   /**
@@ -106,7 +111,7 @@ class TaskController {
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
-      case Some(task) => task.mediaInformation match {
+      case Some(task) if task.isPublic || user.globalRole != GlobalRole.USER => task.mediaInformation match {
         case Some(smi: SpreadsheetMediaInformation) =>
           val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
           val config = this.checkerConfigurationService.getAll(cid, tid).head
