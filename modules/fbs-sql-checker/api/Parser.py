@@ -1,11 +1,11 @@
-#Parser.py
+# Parser.py
 
 import json
 import mo_sql_parsing
 from pymongo import MongoClient
 
 
-#Parse the query
+# Parse the query
 def parse_query(data, client):
     try:
         parsedQuery = mo_sql_parsing.parse(data)
@@ -13,8 +13,8 @@ def parse_query(data, client):
         print("Not able to parse the statement " + str(data))
         print(e)
         client = MongoClient(client, 27017)
-        mydb = client['SQLChecker']
-        mycollection = mydb['NotParsable']
+        mydb = client["SQLChecker"]
+        mycollection = mydb["NotParsable"]
         record = data
         mycollection.insert_one(record)
         return False

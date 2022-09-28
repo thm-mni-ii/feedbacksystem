@@ -1,4 +1,4 @@
-#Main.py
+# Main.py
 
 import sys
 import requests
@@ -7,7 +7,7 @@ import json
 import string
 import random
 
-'''
+"""
 #The following Code is for productive purposes
 
 client = sys.argv[2]
@@ -19,26 +19,29 @@ else:
         answer = requests.get(urlAnswer, verify=False)
         print(answer.json())
         parseSingleStatUploadDB(answer.json(), client)
-'''
+"""
 
-#The following Code is for debugging purposes
+# The following Code is for debugging purposes
 
-client = "mongodb://admin:password@localhost:27017/" #Define MongoDB for debugging purposes
+client = (
+    "mongodb://admin:password@localhost:27017/"  # Define MongoDB for debugging purposes
+)
 for x in range(1):
-  testId = (''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8))) #Generate random ID for the MongoDB
+    testId = "".join(
+        random.SystemRandom().choice(string.ascii_letters + string.digits)
+        for _ in range(8)
+    )  # Generate random ID for the MongoDB
 idJson = "{id:'%s'}" % (testId)
 print(idJson)
 testdic = {
-        "submission": "SELECT customerName, customercity, customermail, ordertotal,salestotal FROM onlinecustomers as s inner join mitarbeiter as m on m=s WHERE salesId IS NULL having COUNT(CustomerID1) > 1 and COUNT(CustomerID2) > 2 or COUNT(CustomerID3) > 3 and COUNT(CustomerID4) > 4 or COUNT(CustomerID5) > 5 order by name desc",
-        "passed": True, #True if submission produced the right return in SQL-Runner
-        "resultText": "OK",
-        "userId": 1,
-        "attempt": 1,
-        "tid": 1,
-        "sid": testId,
-        "isSol": True, #True solution is from docent
+    "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name HAVING AVG( Quantity ) > 3* (SELECT AVG( Quantity ) FROM SalesOrderItems);",
+    "passed": False,  # True if submission produced the right return in SQL-Runner
+    "resultText": "OK",
+    "userId": 1,
+    "attempt": 1,
+    "tid": 23,
+    "sid": testId,
+    "isSol": False,  # True solution is from docent
 }
 
 parseSingleStatUploadDB(testdic, client)
-#TestParseSingleStatUploadDB(testdic)
-
