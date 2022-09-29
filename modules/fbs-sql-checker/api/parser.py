@@ -1,4 +1,4 @@
-# Parser.py
+# parser.py
 
 import json
 import mo_sql_parsing

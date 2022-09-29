@@ -12,4 +12,4 @@ COPY api /app/api
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction
 
-CMD ["sh", "-c", "python3 /app/api/Main.py $api $mongodb"]
+CMD ["sh", "-c", "python3 /app/api/main.py $api $mongodb"]

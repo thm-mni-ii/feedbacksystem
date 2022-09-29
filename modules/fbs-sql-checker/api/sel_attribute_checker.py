@@ -1,7 +1,7 @@
-# SelAttributeChecker.py
+# sel_attribute_checker.py
 
-import ProAttributeChecker as AC
-from Parser import *
+from parser import parse_query
+import pro_attribute_checker as AC
 
 select_commands = [
     "sum",
@@ -27,7 +27,6 @@ literal = []
 def select_where(json_file):
     list_tables = []
     if "where" in json_file:
-        is_where = True # todo Unused variable 'is_where'
         for val1 in json_file["where"]:
             if isinstance(json_file["where"][val1], str):
                 if "." in json_file["where"][val1]:
@@ -37,7 +36,7 @@ def select_where(json_file):
             if isinstance(json_file["where"][val1], dict):
                 for val2 in json_file["where"][val1]:
                     if isinstance(val2, str):
-                        if AC.single_select_dict(val2) != []:
+                        if AC.single_select_dict(val2):
                             list_tables.extend(AC.single_select_dict(val2))
                         elif "." in val2:
                             list_tables.append(val2.split(".")[1].lower())
@@ -57,7 +56,7 @@ def select_where(json_file):
                 len(json_file["where"][val1]) > 1
             ):
                 if isinstance(json_file["where"][val1][1], dict):
-                    if AC.single_select_dict(json_file["where"][val1][1]) != []: # todo 'AC.single_select_dict(...) != []' can be simplified to 'AC.single_select_dict(...)' as an empty sequence is falsey
+                    if AC.single_select_dict(json_file["where"][val1][1]):
                         list_tables.extend(
                             AC.single_select_dict(json_file["where"][val1][1])
                         )
@@ -130,28 +129,29 @@ def select_where(json_file):
                                             )
                                         )
                         if elem == "where":
-                            list_tables.extend(select_where(json_file["where"][val1][i]))
+                            list_tables.extend(
+                                select_where(json_file["where"][val1][i])
+                            )
     return set(list_tables)
 
 
 # returns SelectionAttributes for a statement and uses herefor different arts of sql-statements
 def extract_sel_attributes(json_file, client):
     where_attributes = []
-    json_file = parse_query(json_file, client) # todo Undefined variable 'parse_query'
+    json_file = parse_query(json_file, client)
     try:
-        if (select_where(json_file) is not None) and (select_where(json_file) != []): # todo 'select_where(...) != []' can be simplified to 'select_where(...)' as an empty sequence is falsey
+        if (select_where(json_file) is not None) and (select_where(json_file)):
             where_attributes.extend([select_where(json_file)])
     except Exception as e:
-        # print(e)
+        print(e)
         where_attributes = [["Unknown"]]
-    if len(where_attributes) > 0: #todo Unnecessary "else" after "return", remove the "else" and de-indent the code inside it
+    if len(where_attributes) > 0:
         return list(where_attributes[0])
-    else:
-        return list(where_attributes)
+    return list(where_attributes)
 
 
 def extract_order_by(json_file, client):
-    json_file = parse_query(json_file, client) # todo Undefined variable 'parse_query'
+    json_file = parse_query(json_file, client)
     group_by = []
     group_by_list = list(iterate(json_file, "orderby"))
     for s in group_by_list:
@@ -159,7 +159,7 @@ def extract_order_by(json_file, client):
         value.append(s["value"])
         try:
             value.append(s["sort"])
-        except Exception as e:
+        except Exception:
             value.append("asc")
         group_by.append(value)
     if len(group_by) == 0:

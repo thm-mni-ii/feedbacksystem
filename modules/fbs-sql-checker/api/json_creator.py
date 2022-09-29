@@ -1,17 +1,17 @@
-# JSONCreator.py
+# json_creator.py
 
-from TableChecker import *
-from ProAttributeChecker import *
-import SelAttributeChecker as AWC
-from Parser import *
-from pymongo import MongoClient
+from parser import parse_query
+from table_checker import extract_tables
+from pro_attribute_checker import extract_pro_attributes
+from sel_attribute_checker import extract_group_by, extract_order_by
+import sel_attribute_checker as AWC
+from pymongo import MongoClient  # pylint: disable=E0401
 
 rightStatements = []
 rightTables = []
 rightAtts = []
 rightStrings = []
 rightWhereAtts = []
-global user_data
 user_data = []
 tables, selAttributes, proAttributes, strings = [], [], [], []
 
@@ -45,7 +45,7 @@ def parse_single_stat_upload_db(data, client):
                         for y in x:
                             joins2.append(y)
                 except Exception as e:
-                    joins2.append("Unknown")
+                    joins2.append(e, "Unknown")
             else:
                 joins2.append("Empty")
         if extract_pro_attributes(data["submission"], client) != "Unknown":
@@ -135,8 +135,16 @@ def check_solution_chars(
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
         # Extract Tables, Attributes etc. (cut out for better overview)
-        id = x["id"]
-        tables, pro_attributes, sel_attributes, strings, order_by, group_by, joins = ( # todo Redefining name 'tables' , strings from outer scope (line 16)
+        id = x["id"]  # pylint: disable=W0622)
+        (
+            tables,  # pylint: disable=W0621
+            pro_attributes,
+            sel_attributes,
+            strings,  # pylint: disable=W0621
+            order_by,
+            group_by,
+            joins,
+        ) = (  # pylint: disable=W0621
             [],
             [],
             [],
@@ -176,7 +184,7 @@ def check_solution_chars(
             join_value = []
             join_value.append(y["type"])
             if (
-                "attr1" and "attr2" in y
+                "attr1" in y and "attr2" in y
             ):  # if there is no order in sort the default "asc" will be used
                 join_value.append(y["attr1"])
                 join_value.append(y["attr2"])
@@ -188,7 +196,7 @@ def check_solution_chars(
         if data["passed"]:
             # Compare them to tabels, proAttributes etc of a given sql-query
             if (
-                tables == tables2
+                tables == tables2  # pylint: disable=R0916
                 and set(pro_attributes) == set(pro_atts2)
                 and set(sel_attributes) == set(sel_atts2)
                 and set(strings) == set(strings2)
@@ -214,7 +222,7 @@ def check_solution_chars(
             if joins == joins2:
                 joins_right = True
     if data["passed"]:
-        if new_solution == True: # todo Comparison 'new_solution == True' should be 'new_solution is True' if checking for the singleton value True, or 'new_solution' if testing for truthiness
+        if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
         return (True, True, True, True, True, True, True)
@@ -285,14 +293,14 @@ def return_json(
             )
         else:
             # produce a json if the sql-query is not parsable
-            record = prod_json_not_parsable(my_uuid, elem["submission"], task_nr) # todo No value for argument 'order_by_right' in function call
+            record = prod_json_not_parsable(my_uuid, elem["submission"], task_nr)
     return record
 
 
 # Returns a json file which extracts characteristics
 # and tells which of them are wrong
 def prod_json(
-    id,
+    id,  # pylint: disable=W0622
     test_sql,
     task_nr,
     is_sol,
@@ -305,7 +313,7 @@ def prod_json(
     joins_right,
 ):
     # save data if it is a manual solution
-    if is_sol == True:
+    if is_sol is True:
         user_data.extend([True])
         user_data.extend([0])
         user_data.extend([0])
@@ -332,10 +340,10 @@ def prod_json(
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(id, test_sql, task_nr, order_by_right):
+def prod_json_not_parsable(_id, test_sql, task_nr):
     # Create dictionary
     value = {
-        "id": str(id),
+        "id": str(_id),
         "taskNumber": task_nr,
         "statement": test_sql,
         "queryRight": user_data[0],
@@ -346,7 +354,7 @@ def prod_json_not_parsable(id, test_sql, task_nr, order_by_right):
         "stringsRight": None,
         "userId": user_data[1],
         "attempt": user_data[2],
-        "orderbyRight": order_by_right,
+        "orderbyRight": None,
     }
     return value
 
@@ -363,7 +371,7 @@ def insert_tables(mydb, elem, my_uuid, client):
                 for y in x:
                     joins.append(y)
         except Exception as e:
-            joins.append("Unknown")
+            joins.append(e, "Unknown")
     else:
         joins.append("Empty")
     if len(tables) == 1:
@@ -376,7 +384,7 @@ def insert_tables(mydb, elem, my_uuid, client):
                 record = json_join_attribute(my_uuid, joins)
                 mycollection.insert_one(record)
             except Exception as e:
-                print("Error while reading joins.")
+                print(e, "Error while reading joins.")
     elif len(tables) > 1 and not isinstance(
         extract_tables(elem["submission"], client), str
     ):
@@ -392,9 +400,11 @@ def insert_tables(mydb, elem, my_uuid, client):
                     mycollection.insert_one(record)
             except Exception as e:
                 print("Error while reading joins.")
-    if len(extract_pro_attributes(elem['submission'], client)) == 1:
-        mycollection = mydb['ProAttributes']
-        record = json_pro_attribute(my_uuid, extract_pro_attributes(elem['submission'], client)[0])
+    if len(extract_pro_attributes(elem["submission"], client)) == 1:
+        mycollection = mydb["ProAttributes"]
+        record = json_pro_attribute(
+            my_uuid, extract_pro_attributes(elem["submission"], client)[0]
+        )
         mycollection.insert_one(record)
     elif len(extract_pro_attributes(elem["submission"], client)) > 1 and not isinstance(
         extract_pro_attributes(elem["submission"], client), str
@@ -411,7 +421,9 @@ def insert_tables(mydb, elem, my_uuid, client):
         mycollection.insert_one(record)
     elif len(
         AWC.extract_sel_attributes(elem["submission"], client)
-    ) > 1 and not isinstance(AWC.extract_sel_attributes(elem["submission"], client), str):
+    ) > 1 and not isinstance(
+        AWC.extract_sel_attributes(elem["submission"], client), str
+    ):
         mycollection = mydb["SelAttributes"]
         for val in AWC.extract_sel_attributes(elem["submission"], client):
             record = json_sel_attribute(my_uuid, val)
@@ -450,7 +462,7 @@ def insert_tables(mydb, elem, my_uuid, client):
         AWC.extract_group_by(elem["submission"], client), str
     ):
         mycollection = mydb["GroupBy"]
-        for val in AWC.extract_group_by(elem["submission"]):
+        for val in AWC.extract_group_by(elem["submission"], client):
             record = json_group_by_attribute(my_uuid, val)
             mycollection.insert_one(record)
     AWC.literal = []
@@ -458,46 +470,50 @@ def insert_tables(mydb, elem, my_uuid, client):
 
 
 # Create a json to insert to DB "Tables"
-def json_table(id, table):
+def json_table(_id, table):
     # Create dictionary
-    value = {"id": str(id), "table": table}
+    value = {"id": str(_id), "table": table}
     return value
 
 
 # Create a json to insert to DB "ProAttributes"
-def json_pro_attribute(id, pro_attribute):
+def json_pro_attribute(_id, pro_attribute):
     # Create dictionary
-    value = {"id": str(id), "proAttribute": pro_attribute}
+    value = {"id": str(_id), "proAttribute": pro_attribute}
     return value
 
 
 # Create a json to insert to DB "SelAttributes"
-def json_sel_attribute(id, sel_attribute):
+def json_sel_attribute(_id, sel_attribute):
     # Create dictionary
-    value = {"id": str(id), "selAttribute": sel_attribute}
+    value = {"id": str(_id), "selAttribute": sel_attribute}
     return value
 
 
 # Create a json to insert to DB "Strings"
-def json_string(id, string):
+def json_string(_id, string):
     # Create dictionary
-    value = {"id": str(id), "string": string}
+    value = {"id": str(_id), "string": string}
     return value
 
 
-def json_order_by_attribute(id, order_by_attribute):
-    value = {"id": str(id), "orderBy": order_by_attribute[0], "sort": order_by_attribute[1]}
-    return value
-
-
-def json_group_by_attribute(id, group_by_attribute):
-    value = {"id": str(id), "groupBy": group_by_attribute}
-    return value
-
-
-def json_join_attribute(id, join_attribute):
+def json_order_by_attribute(_id, order_by_attribute):
     value = {
-        "id": str(id),
+        "id": str(_id),
+        "orderBy": order_by_attribute[0],
+        "sort": order_by_attribute[1],
+    }
+    return value
+
+
+def json_group_by_attribute(_id, group_by_attribute):
+    value = {"id": str(_id), "groupBy": group_by_attribute}
+    return value
+
+
+def json_join_attribute(_id, join_attribute):
+    value = {
+        "id": str(_id),
         "type": join_attribute[0],
         "attr1": join_attribute[1],
         "attr2": join_attribute[2],

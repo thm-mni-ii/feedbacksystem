@@ -1,8 +1,8 @@
-# ProAttributeChecker.py
+# pro_attribute_checker.py
 
-import Formatting as f
-from SelAttributeChecker import *
-from Parser import *
+from parser import parse_query
+from sel_attribute_checker import select_where
+import formatting as f
 
 select_commands = [
     "sum",
@@ -213,18 +213,17 @@ def single_select(json_file):
     if not (f.is_string(json_file)) and (f.is_select(json_file)):
         if isinstance(json_file["select"], str):
             if "." in json_file["select"]:
-                selects.apend(json_file["select"].split(".")[1].lower()) # todo Instance of 'list' has no 'apend' member; maybe 'append'?
+                selects.append(json_file["select"].split(".")[1].lower())
             else:
                 selects.append(json_file["select"].lower())
         for val in json_file["from"]:
             if val == "value":
-                if select_union(json_file["from"]["value"]) != []: #todo 'select_union(...) != []' can be simplified to 'select_union(...)' as an empty sequence is falsey
+                if select_union(json_file["from"]["value"]):
                     selects.extend(select_union(json_file["from"]["value"]))
-                if list_of_select(json_file["from"]["value"]) != []:
+                if list_of_select(json_file["from"]["value"]):
                     selects.extend(list_of_select(json_file["from"]["value"]))
-                if select_where(json_file["from"]["value"]) != []: # todo Undefined variable 'select_where'
+                if select_where(json_file["from"]["value"]):
                     selects.append(select_where(json_file["from"]["value"]))
-    [x.lower() for x in selects]
     return set(selects)
 
 
@@ -333,25 +332,28 @@ def single_select_dict(json_file):
                                                         i
                                                     ]["value"].lower()
                                                 )
-    [x.lower() for x in selects]
     return set(selects)
 
 
 # Returns ProjectionAttributes as a List if it is a union
 def select_union(json_file):
     list_tables = []
-    if not (f.is_string(json_file)):
+    if not f.is_string(json_file):
         for val in json_file:
             if val == "union":
                 for val1 in range(len(json_file["union"])):
-                    if list_of_select(json_file["union"][val1]) != []:
+                    if list_of_select(json_file["union"][val1]):
                         for elem in list_of_select(json_file[val][val1]):
                             if not isinstance(elem, dict):
                                 list_tables.append(elem.lower())
-                    if select_where(json_file["union"][val1]) != []:
+                    if select_where(json_file["union"][val1]):
                         if len(select_where(json_file["union"][val1])) == 1:
                             list_tables.append(
-                                select_where(json_file["union"][val1])[0].lower() # todo Value 'select_where(json_file['union'][val1])' is unsubscriptable
+                                select_where(  # pylint: disable=E1136
+                                    json_file["union"][val1]
+                                )[  # pylint: disable=E1136
+                                    0
+                                ].lower()  # pylint: disable=E1136
                             )
                         else:
                             for elem in select_where(json_file["union"][val1]):
@@ -365,15 +367,16 @@ def extract_pro_attributes(json_file, client):
     json_file = parse_query(json_file, client)
     try:
         if (single_select_dict(json_file) is not None) and (
-                single_select_dict(json_file) != []
+            single_select_dict(json_file)
         ):
             attributes.extend(single_select_dict(json_file))
-        if (single_select(json_file) is not None) and (single_select(json_file) != []):
+        if (single_select(json_file) is not None) and (single_select(json_file)):
             attributes.extend(single_select(json_file))
-        if (select_union(json_file) is not None) and (select_union(json_file) != []):
+        if (select_union(json_file) is not None) and (select_union(json_file)):
             attributes.extend(select_union(json_file))
-        if (list_of_select(json_file) is not None) and (list_of_select(json_file) != []):
+        if (list_of_select(json_file) is not None) and (list_of_select(json_file)):
             attributes.extend(list_of_select(json_file))
     except Exception as e:
+        print(e)
         attributes = ["Unknown"]
     return list(attributes)

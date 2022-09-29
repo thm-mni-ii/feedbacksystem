@@ -1,7 +1,7 @@
-# TableChecker.py
+# table_checker.py
 
-import Formatting as f
-from Parser import *
+from parser import parse_query
+import formatting as f
 
 # Return a single From and a where-clause
 def is_single_from_where(json_file):
@@ -29,11 +29,10 @@ def is_single_from_where(json_file):
                         if val2 == "exists":
                             if isinstance(json_file["where"][val1][val2], dict):
                                 if (
-                                        is_single_from_where(json_file["where"][val1][val2])
-                                        != []
+                                    is_single_from_where(json_file["where"][val1][val2])
                                 ) and (
-                                        is_single_from_where(json_file["where"][val1][val2])
-                                        not in list_tables
+                                    is_single_from_where(json_file["where"][val1][val2])
+                                    not in list_tables
                                 ):
                                     list_tables.extend(
                                         is_single_from_where(
@@ -43,22 +42,22 @@ def is_single_from_where(json_file):
                     if isinstance(json_file["where"][val1], list):
                         if len(json_file["where"][val1]) > 1:
                             if isinstance(json_file["where"][val1][1], dict):
-                                if (is_single_from_where(val2) != []) and (
-                                        is_single_from_where(val2) != None
+                                if (is_single_from_where(val2)) and (
+                                    is_single_from_where(val2) is not None
                                 ):
                                     for elem in is_single_from_where(val2):
                                         if elem not in list_tables:
                                             list_tables.append(elem)
                                 elif (
-                                    (is_join(val2) != [])
+                                    (is_join(val2))
                                     and (is_join(val2) not in list_tables)
-                                    and (is_join(val2) != None)
+                                    and (is_join(val2) is not None)
                                 ):
                                     list_tables.append(is_join(val2))
     if (
-        (is_join(json_file) != [])
+        (is_join(json_file))
         and (is_join(json_file) not in list_tables)
-        and (is_join(json_file) != None)
+        and (is_join(json_file) is not None)
     ):
         for elem in is_join(json_file):
             if elem not in list_tables:
@@ -67,7 +66,7 @@ def is_single_from_where(json_file):
 
 
 # Return Tables as a List if there is a join --> works for a python List too
-def is_join(json_file):
+def is_join(json_file):  # pylint: disable=R1710
     list_tables = []
     list_joins = []
     return_list = []
@@ -77,7 +76,7 @@ def is_join(json_file):
         for val in json_file["from"]:
             if (
                 (isinstance(val, str))
-                and ((val != "value") and (val != "name"))
+                and ((val not in "value") and (val not in "name"))
                 and (len(val) > 1)
             ):
                 list_tables.append(val.lower())
@@ -86,21 +85,21 @@ def is_join(json_file):
                     if element == "value":
                         list_tables.append(val[element].lower())
                     if isinstance(val[element], str) and (
-                        (element != "name") and (element != "using")
+                        (element in "name") and (element in "using")
                     ):
                         list_tables.append(val[element].lower())
-                    if is_join_var == True: # todo is true ?
+                    if is_join_var is True:
                         for val1 in val[element]:
                             insert = []
                             insert.append(join_type)
-                            for val in val[element][val1]:
+                            for val in val[element][val1]:  # pylint: disable=W0621
                                 insert.append(val)
                             list_joins.append(insert)
                         is_join_var = False
                     if (
-                        element == "inner join"
-                        or element == "left join"
-                        or element == "join"
+                        element in "inner join"
+                        or element in "left join"
+                        or element in "join"
                     ):
                         is_join_var = True
                         join_type = element
@@ -111,23 +110,27 @@ def is_join(json_file):
                 if isinstance(json_file["from"]["value"], dict):
                     if (
                         (
-                                is_single_from_where(json_file["from"]["value"])
-                                not in list_tables
+                            is_single_from_where(json_file["from"]["value"])
+                            not in list_tables
                         )
-                        and (is_single_from_where(json_file["from"]["value"]) != None) # todo is not None?
-                        and (is_single_from_where(json_file["from"]["value"]) != []) # todo is not []?
+                        and (
+                            is_single_from_where(json_file["from"]["value"]) is not None
+                        )
+                        and (is_single_from_where(json_file["from"]["value"]))
                     ):
-                        list_tables.extend(is_single_from_where(json_file["from"]["value"]))
-                for elem in json_file["from"]["value"]: # todo Unused variable 'elem'
+                        list_tables.extend(
+                            is_single_from_where(json_file["from"]["value"])
+                        )
+                for elem in json_file["from"]["value"]:  # pylint: disable=W0612
                     if (
-                        (is_union(json_file["from"]["value"]) != None)
-                        and (is_union(json_file["from"]["value"]) != [])
+                        (is_union(json_file["from"]["value"]) is not None)
+                        and (is_union(json_file["from"]["value"]))
                         and (is_union(json_file["from"]["value"]) not in list_tables)
                     ):
                         list_tables.extend(is_union(json_file["from"]["value"]))
                     if (
-                        (is_join(json_file["from"]["value"]) != None)
-                        and (is_join(json_file["from"]["value"]) != [])
+                        (is_join(json_file["from"]["value"]) is not None)
+                        and (is_join(json_file["from"]["value"]))
                         and (is_join(json_file["from"]["value"]) not in list_tables)
                     ):
                         list_tables.extend(is_join(json_file["from"]["value"]))
@@ -137,9 +140,9 @@ def is_join(json_file):
 
 
 # Returns tables as a List if it is a union
-def is_union(json_file):
+def is_union(json_file):  # pylint: disable=R1710
     list_tables = []
-    if not (f.is_string(json_file)):
+    if not f.is_string(json_file):
         for val in json_file:
             if val == "union":
                 for i in range(len(json_file[val])):
@@ -148,27 +151,25 @@ def is_union(json_file):
                     else:
                         list_tables.append(is_join(json_file[val][i]))
                 return sorted(set(list_tables))
-            else:
-                return None
+            return None
 
 
 # return tables for a statement and uses therefor different arts of sql-statements
 def extract_tables(json_file, client):
-    tables = []
     json_file = parse_query(json_file, client)
     try:
-        if (
-            is_single_from_where(json_file) is not None
-            and is_single_from_where(json_file) is not []
+        if is_single_from_where(json_file) is not None and is_single_from_where(
+            json_file
         ):
             tables = is_single_from_where(json_file)
-        elif is_join(json_file) is not None and is_join(json_file) is not []:
+        elif is_join(json_file) is not None and is_join(json_file):
             tables = is_join(json_file)
         else:
             tables = is_union(json_file)
     except Exception as e:
+        print(e)
         tables = ["Unknown"]
-    if type(tables[0]) == str:
+    if type(tables[0]) == str:  # pylint: disable=C0123
         tables[0] = [tables[0]]
     if len(tables[1]) == 0:
         tables[1].append("Empty")
