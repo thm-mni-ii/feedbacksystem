@@ -3,7 +3,7 @@ FROM gradle:jdk18 AS BUILD
 COPY . /build
 WORKDIR /build
 
-RUN gradle fbs-core.api:installDist
+RUN gradle fbs-core.web:installDist fbs-core.web:copyWebToWS fbs-core.api:installDist
 
 FROM openjdk:18.0.2-slim
 
