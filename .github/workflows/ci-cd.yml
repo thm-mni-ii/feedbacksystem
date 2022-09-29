@@ -44,8 +44,6 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Run Gradle Check
         run: ./gradlew check
-      - name: Build with Gradle
-        run: ./gradlew dist
       - name: Deploy to Dockerhub
         if: |
           contains(github.ref, 'main') ||
