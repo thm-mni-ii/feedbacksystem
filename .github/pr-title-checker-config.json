@@ -1,0 +1,15 @@
+{
+  "LABEL": {
+    "name": "Invalid title",
+    "color": "d93f0b"
+  },
+  "CHECKS": {
+    "regexp": "^(?![iI]?[0-9]).*",
+    "ignoreLabels": ["Pull request Verifier: ignore"]
+  },
+  "MESSAGES": {
+    "success": "OK",
+    "failure": "Invalid Pull request title",
+    "notice": "The title of the pull request should not start with a number or an i followed by a number"
+  }
+}

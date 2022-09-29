@@ -169,8 +169,11 @@ def extract_tables(json_file, client):
     except Exception as e:
         print(e)
         tables = ["Unknown"]
+    # Gibt Indexerror bei falschen Queries
     if type(tables[0]) == str:  # pylint: disable=C0123
         tables[0] = [tables[0]]
+    if len(tables) < 2:
+        tables.append("Empty")
     if len(tables[1]) == 0:
         tables[1].append("Empty")
     return tables

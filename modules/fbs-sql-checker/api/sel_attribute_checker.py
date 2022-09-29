@@ -152,19 +152,29 @@ def extract_sel_attributes(json_file, client):
 
 def extract_order_by(json_file, client):
     json_file = parse_query(json_file, client)
-    group_by = []
-    group_by_list = list(iterate(json_file, "orderby"))
-    for s in group_by_list:
+    order_by = []
+    order_by_list = list(iterate(json_file, "orderby"))
+    for s in order_by_list:
         value = []
-        value.append(s["value"])
         try:
-            value.append(s["sort"])
+            value.append(s["value"])
+            if "sort" in s:
+                value.append(s["sort"])
+            else:
+                value.append("asc")
+            order_by.append(value)
         except Exception:
-            value.append("asc")
-        group_by.append(value)
-    if len(group_by) == 0:
-        group_by = "Unknown"
-    return group_by
+            for y in s:
+                value = []
+                value.append(y["value"])
+                try:
+                    value.append(y["sort"])
+                except Exception:
+                    value.append("asc")
+                order_by.append(value)
+    if len(order_by) == 0:
+        order_by = "Unknown"
+    return order_by
 
 
 def extract_group_by(json_file, client):
@@ -172,7 +182,11 @@ def extract_group_by(json_file, client):
     group_by = []
     group_by_list = list(iterate(json_file, "groupby"))
     for s in group_by_list:
-        group_by.append(s["value"])
+        try:
+            group_by.append(s["value"])
+        except Exception:
+            for y in s:
+                group_by.append(y["value"])
     if len(group_by) == 0:
         group_by = "Unknown"
     return group_by

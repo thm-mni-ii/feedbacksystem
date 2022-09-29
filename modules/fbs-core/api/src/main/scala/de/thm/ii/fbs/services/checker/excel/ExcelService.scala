@@ -71,7 +71,10 @@ class ExcelService {
   private def setCells(workbook: XSSFWorkbook, changeFields: List[ExcelMediaInformationChange]): Unit = {
     changeFields.foreach(f => {
       val sheet = workbook.getSheetAt(f.sheetIdx)
-      this.getCell(sheet, f.cell).setCellValue(f.newValue)
+      f.newValue.toDoubleOption match {
+        case Some(v) => this.getCell(sheet, f.cell).setCellValue(v)
+        case _ => this.getCell(sheet, f.cell).setCellValue(f.newValue)
+      }
     })
   }
 

@@ -2418,7 +2418,6 @@ components:
       type: object
       required:
         - name
-        - deadline
       properties:
         id:
           type: integer
@@ -2437,6 +2436,13 @@ components:
           oneOf:
             - $ref: '#/components/schemas/SpreadsheetInformationRequest'
             - $ref: '#/components/schemas/SpreadsheetInformationResponse'
+        requirementType:
+          type: string
+          description: The type of requirment like "mandatory", "bonus/additional", etc.
+          default: "mandatory"
+          enum:
+            - "mandatory"
+            - "additional"
     SpreadsheetInformationRequest:
       type: object
       properties:
