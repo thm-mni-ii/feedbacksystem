@@ -121,7 +121,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data) #pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
         mycollection.insert_one(record)
 
 
@@ -347,123 +347,88 @@ def insert_tables(mydb, elem, my_uuid, client):
     else:
         joins.append("Empty")
     if len(tables) == 1:
-        mycollection = mydb["Tables"]
+        my_collection = mydb["Tables"]
         record = json_table(my_uuid, tables[0])
-        mycollection.insert_one(record)
+        my_collection.insert_one(record)
         if joins[0] != "Empty":
             try:
-                mycollection = mydb["Joins"]
+                my_collection = mydb["Joins"]
                 record = json_join_attribute(my_uuid, joins)
-                mycollection.insert_one(record)
+                my_collection.insert_one(record)
             except Exception:
                 print("Error while reading joins.")
     elif len(tables) > 1 and not isinstance(
         extract_tables(elem["submission"], client), str
     ):
-        mycollection = mydb["Tables"]
+        my_collection = mydb["Tables"]
         for val in tables:
             record = json_table(my_uuid, val)
-            mycollection.insert_one(record)
+            my_collection.insert_one(record)
         if joins[0] != "Empty":
             try:
-                mycollection = mydb["Joins"]
+                my_collection = mydb["Joins"]
                 for y in joins:
                     record = json_join_attribute(my_uuid, y)
-                    mycollection.insert_one(record)
+                    my_collection.insert_one(record)
             except Exception:
                 print("Error while reading joins.")
-    if len(extract_pro_attributes(elem["submission"], client)) == 1:
-        mycollection = mydb["ProAttributes"]
-        record = json_pro_attribute(
-            my_uuid, extract_pro_attributes(elem["submission"], client)[0]
-        )
     pro_attributes = extract_pro_attributes(elem["submission"], client)
     if len(pro_attributes) == 1:
-        mycollection = mydb["ProAttributes"]
+        my_collection = mydb["ProAttributes"]
         record = json_pro_attribute(my_uuid, pro_attributes[0])
-        mycollection.insert_one(record)
-    elif len(extract_pro_attributes(elem["submission"], client)) > 1 and not isinstance(
-        extract_pro_attributes(elem["submission"], client), str
-    ):
-        mycollection = mydb["ProAttributes"]
+        my_collection.insert_one(record)
         for val in extract_pro_attributes(elem["submission"], client):
             record = json_pro_attribute(my_uuid, val)
+            my_collection.insert_one(record)
     elif len(pro_attributes) > 1 and not isinstance(pro_attributes, str):
-        mycollection = mydb["ProAttributes"]
+        my_collection = mydb["ProAttributes"]
         for val in pro_attributes:
             record = json_pro_attribute(my_uuid, val)
-            mycollection.insert_one(record)
-    if len(AWC.extract_sel_attributes(elem["submission"], client)) == 1:
-        mycollection = mydb["SelAttributes"]
-        record = json_sel_attribute(
-            my_uuid, AWC.extract_sel_attributes(elem["submission"], client)[0]
-        )
+            my_collection.insert_one(record)
     sel_attributes = AWC.extract_sel_attributes(elem["submission"], client)
     if len(sel_attributes) == 1:
-        mycollection = mydb["SelAttributes"]
+        my_collection = mydb["SelAttributes"]
         record = json_sel_attribute(my_uuid, sel_attributes[0])
-        mycollection.insert_one(record)
-    elif len(
-        AWC.extract_sel_attributes(elem["submission"], client)
-    ) > 1 and not isinstance(
-        AWC.extract_sel_attributes(elem["submission"], client), str
-    ):
-        mycollection = mydb["SelAttributes"]
+        my_collection.insert_one(record)
         for val in AWC.extract_sel_attributes(elem["submission"], client):
             record = json_sel_attribute(my_uuid, val)
+            my_collection.insert_one(record)
     elif len(sel_attributes) > 1 and not isinstance(sel_attributes, str):
-        mycollection = mydb["SelAttributes"]
+        my_collection = mydb["SelAttributes"]
         for val in sel_attributes:
             record = json_sel_attribute(my_uuid, val)
-            mycollection.insert_one(record)
+            my_collection.insert_one(record)
     if len(list(set(AWC.literal))) == 1:
-        mycollection = mydb["Strings"]
+        my_collection = mydb["Strings"]
         record = json_string(my_uuid, list(set(AWC.literal))[0])
-        mycollection.insert_one(record)
+        my_collection.insert_one(record)
     elif len(list(set(AWC.literal))) > 1 and not isinstance(
         list(set(AWC.literal)), str
     ):
-        mycollection = mydb["Strings"]
+        my_collection = mydb["Strings"]
         for val in list(set(AWC.literal)):
             record = json_string(my_uuid, val)
-            mycollection.insert_one(record)
+            my_collection.insert_one(record)
     order_by = AWC.extract_order_by(elem["submission"], client)
     if len(order_by) == 1:
-        mycollection = mydb["OrderBy"]
+        my_collection = mydb["OrderBy"]
         record = json_order_by_attribute(my_uuid, order_by[0])
-        mycollection.insert_one(record)
-    elif len(AWC.extract_order_by(elem["submission"], client)) > 1 and not isinstance(
-        AWC.extract_order_by(elem["submission"], client), str
-    ):
-        mycollection = mydb["OrderBy"]
-        for val in AWC.extract_order_by(elem["submission"], client):
-            record = json_order_by_attribute(my_uuid, val)
+        my_collection.insert_one(record)
     elif len(order_by) > 1 and not isinstance(order_by, str):
-        mycollection = mydb["OrderBy"]
+        my_collection = mydb["OrderBy"]
         for val in order_by:
             record = json_order_by_attribute(my_uuid, val)
-            mycollection.insert_one(record)
-    if len(AWC.extract_group_by(elem["submission"], client)) == 1:
-        mycollection = mydb["GroupBy"]
-        record = json_group_by_attribute(
-            my_uuid, AWC.extract_group_by(elem["submission"], client)[0]
-        )
+            my_collection.insert_one(record)
     group_by = AWC.extract_group_by(elem["submission"], client)
     if len(group_by) == 1:
-        mycollection = mydb["GroupBy"]
+        my_collection = mydb["GroupBy"]
         record = json_group_by_attribute(my_uuid, group_by[0])
-        mycollection.insert_one(record)
-    elif len(AWC.extract_group_by(elem["submission"], client)) > 1 and not isinstance(
-        AWC.extract_group_by(elem["submission"], client), str
-    ):
-        mycollection = mydb["GroupBy"]
-        for val in AWC.extract_group_by(elem["submission"], client):
-            record = json_group_by_attribute(my_uuid, val)
-            mycollection.insert_one(record)
+        my_collection.insert_one(record)
     elif len(group_by) > 1 and not isinstance(group_by, str):
-        mycollection = mydb["GroupBy"]
+        my_collection = mydb["GroupBy"]
         for val in AWC.extract_group_by(elem["submission"], client):
             record = json_group_by_attribute(my_uuid, val)
+            my_collection.insert_one(record)
     AWC.literal = []
     user_data.clear()
 
