@@ -50,11 +50,9 @@ class TaskController {
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
-    if (auth.globalRole == GlobalRole.USER) {
-      taskService.getAll(cid).filter(task => task.isPublic)
-    }
-    else {
-      taskService.getAll(cid)
+    auth.globalRole match {
+      case GlobalRole.USER => taskService.getAll(cid).filter(task => task.isPublic)
+      case _ => taskService.getAll(cid)
     }
   }
 
@@ -70,7 +68,10 @@ class TaskController {
   @ResponseBody
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    taskService.getTaskResults(cid, auth.id)
+    auth.globalRole match {
+      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => getOne(cid, userTaskRes.taskID, req, res).isPublic)
+      case _ => taskService.getTaskResults(cid, auth.id)
+    }
   }
 
   /**
@@ -111,18 +112,23 @@ class TaskController {
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
-      case Some(task) if task.isPublic || user.globalRole != GlobalRole.USER => task.mediaInformation match {
-        case Some(smi: SpreadsheetMediaInformation) =>
-          val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
-          val config = this.checkerConfigurationService.getAll(cid, tid).head
-          val path = this.storageService.pathToMainFile(config.id).get.toString
-          val spreadsheetFile = new File(path)
-          val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
-          val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
-          val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-          task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
-            decimals, smi)))
-        case _ => task
+      case Some(task) => if (task.isPublic || user.globalRole != GlobalRole.USER) {
+        task.mediaInformation match {
+          case Some(smi: SpreadsheetMediaInformation) =>
+            val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
+            val config = this.checkerConfigurationService.getAll(cid, tid).head
+            val path = this.storageService.pathToMainFile(config.id).get.toString
+            val spreadsheetFile = new File(path)
+            val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
+            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
+            val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
+            task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
+              decimals, smi)))
+          case _ => task
+        }
+      }
+      else {
+        throw new ForbiddenException()
       }
       case _ => throw new ResourceNotFoundException()
     }
