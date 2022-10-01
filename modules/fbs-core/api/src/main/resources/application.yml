@@ -26,7 +26,7 @@ security:
   antiBruteForce:
     trustedProxyCount: ${TRUSTED_PROXIES:0}
     interval: ${BRUTEFORCE_INTERVAL:600}
-    maxAttempts: ${BRUTEFORCE_ATTEMPTS:10000}
+    maxAttempts: ${BRUTEFORCE_ATTEMPTS:10}
     protectedPaths: "/api/v1/login/ldap,/api/v1/login/local"
 server:
   host: ${SERVER_HOST:https://localhost}
