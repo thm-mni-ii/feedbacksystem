@@ -19,7 +19,7 @@ class SemesterService {
     * @return List of semester
     */
   def getAll: List[Semester] = DB.query(
-    "SELECT semester_id, name FROM semester",
+    "SELECT id, name FROM semester",
     (res, _) => parseResult(res))
 
   /**
@@ -29,7 +29,7 @@ class SemesterService {
     * @return The found Semester
     */
   def find(id: Int): Option[Semester] = DB.query(
-    "SELECT semester_id, name FROM semester WHERE semester_id = ?",
+    "SELECT id, name FROM semester WHERE id = ?",
     (res, _) => parseResult(res), id).headOption
 
   /**
@@ -39,7 +39,7 @@ class SemesterService {
     * @return The created semester with id
     */
   def create(semester: Semester): Semester = {
-    DB.insert("INSERT INTO semester (semester_id, name) VALUES (?, ?);", semester.id, semester.name)
+    DB.insert("INSERT INTO semester (id, name) VALUES (?, ?);", semester.id, semester.name)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(semester) => semester
@@ -55,7 +55,7 @@ class SemesterService {
     * @return True if successful
     */
   def update(sid: Int, semester: Semester): Boolean = {
-    1 == DB.update("UPDATE semester SET name = ? WHERE semester_id = ?", semester.name, sid)
+    1 == DB.update("UPDATE semester SET name = ? WHERE id = ?", semester.name, sid)
   }
 
   /**
@@ -64,10 +64,10 @@ class SemesterService {
     * @param id The semester id
     * @return True if successful
     */
-  def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM semester WHERE semester_id = ?", id)
+  def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM semester WHERE id = ?", id)
 
   private def parseResult(res: ResultSet): Semester = Semester(
-    id = res.getInt("semester_id"),
+    id = res.getInt("id"),
     name = res.getString("name"),
   )
 }

@@ -2,7 +2,7 @@ BEGIN;
 
 
 CREATE TABLE IF NOT EXISTS `fbs`.`semester` (
-    `semester_id` INT NOT NULL AUTO_INCREMENT,
+    `id` INT NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NOT NULL DEFAULT '',
     PRIMARY KEY (`semester_id`))
     ENGINE = InnoDB

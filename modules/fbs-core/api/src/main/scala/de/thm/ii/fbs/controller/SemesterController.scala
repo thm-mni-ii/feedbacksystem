@@ -33,11 +33,13 @@ class SemesterController {
     */
   @GetMapping(value = Array(""))
   @ResponseBody
-  def getAll(@RequestParam(value = "visible", required = false) req: HttpServletRequest, res: HttpServletResponse): List[Semester] = {
+  def getAll(req: HttpServletRequest, res: HttpServletResponse): List[Semester] = {
     val user = authService.authorize(req, res)
-    val semester = semesterService.getAll
     user.globalRole match {
-      case GlobalRole.ADMIN | GlobalRole.MODERATOR => semester
+      case GlobalRole.ADMIN | GlobalRole.MODERATOR =>
+        val semesterList = semesterService.getAll
+        semesterList
+      case _ => throw new ForbiddenException()
     }
   }
 
@@ -105,8 +107,9 @@ class SemesterController {
       case GlobalRole.ADMIN =>
         (body.retrive("id").asInt(),
           body.retrive("name").asText())
+        //throw new ForbiddenException()
         match {
-          case (Some(semesterId), Some(name)) => semesterService.update(sid, Semester(semesterId, name))
+          case (Some(id), Some(name)) => semesterService.update(sid, Semester(id, name))
           case _ => throw new BadRequestException("Malformed Request Body")
         }
       case _ => throw new ForbiddenException()
@@ -125,9 +128,7 @@ class SemesterController {
     val user = authService.authorize(req, res)
 
     user.globalRole match {
-      case GlobalRole.ADMIN =>
-        // Save submissions and configurations
-        semesterService.delete(sid)
+      case GlobalRole.ADMIN => semesterService.delete(sid)
       case _ => throw new ForbiddenException()
     }
   }
