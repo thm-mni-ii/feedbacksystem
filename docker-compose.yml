@@ -23,7 +23,9 @@ services:
     build: runtime-images/bash
 
   core:
-    build: modules/fbs-core/api
+    build:
+      context: .
+      dockerfile: modules/fbs-core/api/Dockerfile
     restart: unless-stopped
     depends_on:
       - mysql1
@@ -75,7 +77,7 @@ services:
       interval: 10s
       start_period: 10s
       retries: 3
-      
+
   psql-checker:
     image: postgres
     restart: unless-stopped
@@ -108,7 +110,9 @@ services:
       retries: 3
 
   runner:
-    build: modules/fbs-runner/checker
+    build:
+      context: .
+      dockerfile: modules/fbs-runner/checker/Dockerfile
     restart: always
     depends_on:
       - mysql-checker
@@ -157,6 +161,4 @@ services:
 
 networks:
   classroom:
-    driver: bridge
   fbs:
-    driver: bridge
