@@ -23,7 +23,7 @@ class EvaluationResultServiceTest {
   private val evaluationResultService: EvaluationResultService = null
 
   private def buildTask(res: Boolean, id: Int = 1, passedSubTasks: Int = 0) = {
-    val task = Task("", Option(""), "", "", None, "", id)
+    val task = Task("", false, Option(""), "", "", None, "", id)
     val taskResult = TaskResult(task, 2, passed = true, passedSubTasks)
 
     (task, taskResult)
