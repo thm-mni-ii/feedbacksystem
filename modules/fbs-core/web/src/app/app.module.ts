@@ -83,7 +83,7 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@Angular/material-moment-adapter";
+import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@angular/material-moment-adapter";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
