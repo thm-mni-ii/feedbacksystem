@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild } from "@angular/core";
 import { TitlebarService } from "../../service/titlebar.service";
 
 /**
- * This component is for admins managing users
+ * This component is for the sql playground
  */
 @Component({
-  selector: "sql-playground-management",
+  selector: "app-sql-playground-management",
   templateUrl: "./sql-playground.component.html",
   styleUrls: ["./sql-playground.component.scss"],
 })
