@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { TitlebarService } from "../../service/titlebar.service";
 
-
 /**
  * This component is for admins managing users
  */
@@ -11,10 +10,7 @@ import { TitlebarService } from "../../service/titlebar.service";
   styleUrls: ["./sql-playground.component.scss"],
 })
 export class SqlPlaygroundComponent implements OnInit {
-
-  constructor(
-    private titlebar: TitlebarService,
-  ) {}
+  constructor(private titlebar: TitlebarService) {}
 
   ngOnInit() {
     this.titlebar.emitTitle("SQL Playground");
