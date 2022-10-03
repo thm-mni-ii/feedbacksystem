@@ -86,6 +86,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@angular/material-moment-adapter";
+import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -163,6 +164,7 @@ export const httpInterceptorProviders = [
     SqlCheckerComponent,
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
+    SqlPlaygroundComponent,
   ],
   imports: [
     BrowserModule,
