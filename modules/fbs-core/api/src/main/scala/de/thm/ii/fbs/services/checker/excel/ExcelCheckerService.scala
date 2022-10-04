@@ -136,29 +136,14 @@ class ExcelCheckerService extends CheckerService {
       "OK"
     } else {
       var correct = 0
-      val hints = results.zip(excelMediaInformation.tasks).map(t => {
-        if (t._1.success) correct += 1
-        t
-      }).filter(t => !t._1.success).map(t => {
-        if (t._2.checkFields.isEmpty) {
-          buildLegacyTaskResultText(t._1, t._2)
-        } else {
-          t._1.checkResult.zip(t._2.checkFields)
-            .filter(shouldGenerateTaskResult).map(c => {
-            if (c._1.errorMsg.nonEmpty) {
-              f"${t._2.name}: ${c._1.errorMsg}"
-            } else {
-              val errorMsg = if (c._2.errorMsg.nonEmpty) f"${c._2.errorMsg}" else ""
-
-              if (c._2.hideInvalidFields) {
-                f"${t._2.name}: $errorMsg"
-              } else {
-                f"${t._2.name}: Die Zelle/-n '${c._1.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg"
-              }
-            }
-          }).mkString("\n")
-        }
-      }).mkString("\n")
+      val hints = results.zip(excelMediaInformation.tasks)
+        .map(t => {
+          if (t._1.success) correct += 1
+          t
+        })
+        .filter(t => !t._1.success)
+        .map(t => buildTaskResultText(t._1, t._2))
+        .mkString("\n")
       val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
       if (hints.nonEmpty) {
@@ -166,6 +151,17 @@ class ExcelCheckerService extends CheckerService {
       } else {
         res
       }
+    }
+  }
+
+  private def buildTaskResultText(result: CheckResultTask, task: ExcelMediaInformation) = {
+    if (task.checkFields.isEmpty) {
+      buildLegacyTaskResultText(result, task)
+    } else {
+      result.checkResult.zip(task.checkFields)
+        .filter(shouldBuildCheckResult)
+        .map(c => buildCheckResult(c._1, c._2, task))
+        .mkString("\n")
     }
   }
 
@@ -177,7 +173,21 @@ class ExcelCheckerService extends CheckerService {
     }
   }
 
-  private def shouldGenerateTaskResult(c: (CheckResult, ExcelMediaInformationCheck)) = {
+  private def buildCheckResult(result: CheckResult, check: ExcelMediaInformationCheck, task: ExcelMediaInformation) = {
+    if (result.errorMsg.nonEmpty) {
+      f"${task.name}: ${result.errorMsg}"
+    } else {
+      val errorMsg = if (check.errorMsg.nonEmpty) f"${check.errorMsg}" else ""
+
+      if (check.hideInvalidFields) {
+        f"${task.name}: $errorMsg"
+      } else {
+        f"${task.name}: Die Zelle/-n '${result.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg"
+      }
+    }
+  }
+
+  private def shouldBuildCheckResult(c: (CheckResult, ExcelMediaInformationCheck)) = {
     !c._1.success && (!c._2.hideInvalidFields || c._2.errorMsg.nonEmpty || c._1.errorMsg.nonEmpty)
   }
 
