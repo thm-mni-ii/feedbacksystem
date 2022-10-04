@@ -5,6 +5,7 @@ from ProAttributeChecker import *
 import SelAttributeChecker as AWC
 from Parser import *
 from pymongo import MongoClient
+from Model import *
 
 rightStatements = []
 rightTables = []
@@ -22,49 +23,63 @@ def parseSingleStatUploadDB(data, client):
     client = MongoClient(client, 27107)
     mydb = client['sql-checker']
     mycollection = mydb['Queries']
-    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, orderBy2, groupBy2, joins2 = [], [], \
-                                                            [], [], [], [], [], [], []
-    if 'submission' in data:
-        #Extract tables, selAttributes, proAttributes and strings
-        if extractTables(data['submission'], client) != "Unknown":
-            tableList = extractTables(data["submission"], client)
-            tables2.extend(tableList[0])
-            if tableList[1] != ["Empty"]:
-                try:
-                    tableList.pop(0)
-                    for x in tableList:
-                        for y in x:
-                            joins2.append(y)
-                except Exception as e:
-                    joins2.append("Unknown")
-            else:
-                joins2.append("Empty")
-        if extractProAttributes(data['submission'], client) != "Unknown":
-            proAtts2.extend(extractProAttributes(data["submission"], client))
-        if AWC.extractSelAttributes(data['submission'], client) != "Unknown":
-            selAtts2.extend(AWC.extractSelAttributes(data["submission"], client))
-        if extractOrderBy(data['submission'], client) != "Unknown":
-            orderBy2.extend(extractOrderBy(data["submission"], client))
-        if extractGroupBy(data['submission'], client) != "Unknown":
-            groupBy2.extend(extractGroupBy(data['submission'], client))
-        strings2.extend(list(set(AWC.literal)))
-        #If TaskID or Submission ID not in data, return
-        if 'tid' not in data or 'sid' not in data:
-            print("Task ID or Unique ID not in data")
-            return
+    tables2, proAtts2, selAtts2, strings2, taskNr, my_uuid, courseId, orderBy2, groupBy2, joins2 = [], [], \
+                                                                                         [], [], [], [], [], [], [], []
+    try:
+        if 'submission' in data:
+            # Extract tables, selAttributes, proAttributes and strings
+            if extractTables(data['submission'], client) != "Unknown":
+                tableList = extractTables(data["submission"], client)
+                tables2.extend(tableList[0])
+                if tableList[1] != ["Empty"]:
+                    try:
+                        tableList.pop(0)
+                        for x in tableList:
+                            for y in x:
+                                joins2.append(y)
+                    except Exception as e:
+                        joins2.append("Unknown")
+                else:
+                    joins2.append("Empty")
+            extractedProAttributes = extractProAttributes(data['submission'], client)
+            if extractedProAttributes != "Unknown":
+                proAtts2.extend(extractedProAttributes)
+            extractedString = AWC.extractSelAttributes(data['submission'], client)
+            if extractedString != "Unknown":
+                selAtts2.extend(extractedString)
+            extractedOrderBy = AWC.extractOrderBy(data['submission'], client)
+            if extractedOrderBy != "Unknown":
+                orderBy2.extend(extractedOrderBy)
+            extractedGroupBy = AWC.extractGroupBy(data['submission'], client)
+            if extractedGroupBy != "Unknown":
+                groupBy2.extend(extractedGroupBy)
+            strings2.extend(list(set(AWC.literal)))
+            #If TaskID or Submission ID not in data, return
+            if 'tid' not in data or 'sid' not in data:
+                print("Task ID or Unique ID not in data")
+                return
+            taskNr = data['tid']
+            my_uuid = data['sid']
+            courseId = data['cid']
+            #Save tables, selAttributes, proAttributes and strings to DB
+            if parse_query(data['submission'], client) is not False:
+                insertTables(mydb, data, my_uuid, client)
+        #Check if it is a new solution and charachteristics are right
+        tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2 = checkSolutionChars(data, taskNr,
+                                my_uuid, tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
+        #produce a JSON
+        record = returnJson(data, my_uuid, taskNr, courseId, tables2,
+                            proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
+        #save JSON to DB
+        mycollection.insert_one(record)
+    except Exception as e:
         taskNr = data['tid']
         my_uuid = data['sid']
-        #Save tables, selAttributes, proAttributes and strings to DB
-        if parse_query(data['submission'], client) is not False:
-            insertTables(mydb, data, my_uuid, client)
-    #Check if it is a new solution and charachteristics are right
-    tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2 = checkSolutionChars(data, taskNr,
-                            my_uuid, tables2, proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
-    #produce a JSON
-    record = returnJson(data, my_uuid, taskNr, tables2,
-                        proAtts2, selAtts2, strings2, orderBy2, groupBy2, joins2, client)
-    #save JSON to DB
-    mycollection.insert_one(record)
+        courseId = data['cid']
+        userData = returnJsonNotParsable(data)
+        insertNotParsable(my_uuid, userData[3], client)
+        record = prodJsonNotParsable(my_uuid, courseId, userData, taskNr)
+        mycollection.insert_one(record)
 
 #Check if it is a new solution; check if tables, attributes etc. are right
 def checkSolutionChars(data, taskNr, my_uuid, tables2, proAtts2,
@@ -146,15 +161,7 @@ and set(selAttributes) == set(selAtts2) and set(strings) == set(strings2) and or
     #return if characteristics are True or False
     return (tablesRight, selAttributesRight, proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
 
-#Check if it is a new solution; check if tables, attributes etc. are right
 
-def prodSolutionJson(elem, my_uuid, taskNr):
-    value = {
-        "id": str(my_uuid),
-        "taskNumber": taskNr,
-        "statement": elem['submission']
-    }
-    return value
 
 # Parse a solution and upload it to DB
 def parseSingleStatUploadSolution(data, taskNr, my_uuid, client):
@@ -164,7 +171,7 @@ def parseSingleStatUploadSolution(data, taskNr, my_uuid, client):
     mycollection.insert_one(record)
 
 #return JSON to be pasted to DB
-def returnJson(elem, my_uuid, taskNr, tablesRight,
+def returnJson(elem, my_uuid, taskNr, courseId, tablesRight,
         proAttributesRight, selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight, client):
     #Extract informations from a sql-query-json
     if 'passed' in elem:
@@ -176,64 +183,26 @@ def returnJson(elem, my_uuid, taskNr, tablesRight,
     if 'submission' in elem:
         if parse_query(elem['submission'], client) is not False:
             #produce a json to be pasted to DB
-            record = prodJson(my_uuid, elem['submission'],
-                taskNr, False, tablesRight, proAttributesRight,
+            record = prodJson(my_uuid, courseId, elem['submission'],
+                taskNr, elem["isSol"], tablesRight, proAttributesRight,
                 selAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight)
         else:
             #produce a json if the sql-query is not parsable
-            record = prodJsonNotParsable(my_uuid,
-                             elem['submission'], taskNr)
+            record = prodJsonNotParsable(my_uuid, courseId,
+                             elem['submission'], taskNr,orderByRight)
     return record
 
-# Returns a json file which extracts characteristics
-# and tells which of them are wrong
-def prodJson(id, testSql, taskNr, isSol, tablesRight, selAttributesRight,
-             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
-    # save data if it is a manual solution
-    if (isSol == True):
-        userData.extend([True])
-        userData.extend([0])
-        userData.extend([0])
-    value = {
-        "id": str(id),
-        "taskNumber": taskNr,
-        "statement": testSql,
-        "queryRight": userData[0],
-        "parsable": True,
-        "isSolution": isSol,
-        "tablesRight": tablesRight,
-        "selAttributesRight": selAttributesRight,
-        "proAttributesRight": proAttributesRight,
-        "stringsRight": stringsRight,
-        "userId": userData[1],
-        "attempt": userData[2],
-        "orderByRight": orderByRight,
-        "groupByRight": groupByRight,
-        "joinsRight": joinsRight
-    }
-    userData.clear()
-    AWC.literal = []
-    return value
-
-# Returns a json file which extracts Tables and Attributes
-def prodJsonNotParsable(id, testSql, taskNr, orderByRight):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "taskNumber": taskNr,
-        "statement": testSql,
-        "queryRight": userData[0],
-        "parsable": False,
-        "tablesRight": None,
-        "selAttributesRight": None,
-        "proAttributesRight": None,
-        "stringsRight": None,
-        "userId": userData[1],
-        "attempt": userData[2],
-        "orderbyRight": orderByRight,
-    }
-    return value
-
+def returnJsonNotParsable(elem):
+    # Extract informations from a sql-query-json
+    if 'passed' in elem:
+        userData.append(elem['passed'])
+    if 'userId' in elem:
+        userData.append(elem['userId'])
+    if 'attempt' in elem:
+        userData.append(elem['attempt'])
+    if 'submission' in elem:
+        userData.append(elem['submission'])
+    return userData
 # Insert data of Tables, proAttributes, selAttributes and Strings to Database
 def insertTables(mydb, elem, my_uuid, client):
     tableList = extractTables(elem['submission'], client)
@@ -274,24 +243,26 @@ def insertTables(mydb, elem, my_uuid, client):
                     mycollection.insert_one(record)
             except Exception as e:
                 print("Error while reading joins.")
-    if len(extractProAttributes(elem['submission'], client)) == 1:
+    proAttributes = extractProAttributes(elem['submission'], client)
+    if len(proAttributes) == 1:
         mycollection = mydb['ProAttributes']
-        record = jsonProAttribute(my_uuid, extractProAttributes(elem['submission'], client)[0])
+        record = jsonProAttribute(my_uuid, proAttributes[0])
         mycollection.insert_one(record)
-    elif len(extractProAttributes(elem['submission'], client)) > 1 and \
-            not isinstance(extractProAttributes(elem['submission'], client), str):
+    elif len(proAttributes) > 1 and \
+            not isinstance(proAttributes, str):
         mycollection = mydb['ProAttributes']
-        for val in extractProAttributes(elem['submission'], client):
+        for val in proAttributes:
             record = jsonProAttribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractSelAttributes(elem['submission'], client)) == 1:
+    selAttributes = AWC.extractSelAttributes(elem['submission'], client)
+    if len(selAttributes) == 1:
         mycollection = mydb['SelAttributes']
-        record = jsonSelAttribute(my_uuid, AWC.extractSelAttributes(elem['submission'], client)[0])
+        record = jsonSelAttribute(my_uuid, selAttributes[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractSelAttributes(elem['submission'], client)) > 1 and \
-            not isinstance(AWC.extractSelAttributes(elem['submission'], client), str):
+    elif len(selAttributes) > 1 and \
+            not isinstance(selAttributes, str):
         mycollection = mydb['SelAttributes']
-        for val in AWC.extractSelAttributes(elem['submission'], client):
+        for val in selAttributes:
             record = jsonSelAttribute(my_uuid, val)
             mycollection.insert_one(record)
     if len(list(set(AWC.literal))) == 1:
@@ -304,87 +275,82 @@ def insertTables(mydb, elem, my_uuid, client):
         for val in list(set(AWC.literal)):
             record = jsonString(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractOrderBy(elem['submission'], client)) == 1:
+    orderBy = AWC.extractOrderBy(elem['submission'], client)
+    if len(orderBy) == 1:
         mycollection = mydb['OrderBy']
-        record = jsonOrderByAttribute(my_uuid, AWC.extractOrderBy(elem['submission'], client)[0])
+        record = jsonOrderByAttribute(my_uuid, orderBy[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractOrderBy(elem['submission'], client)) > 1 and not isinstance(AWC.extractOrderBy(elem['submission'], client), str):
+    elif len(orderBy) > 1 and not isinstance(orderBy, str):
         mycollection = mydb['OrderBy']
-        for val in AWC.extractOrderBy(elem['submission'], client):
+        for val in orderBy:
             record = jsonOrderByAttribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extractGroupBy(elem['submission'], client)) == 1:
+    groupBy = AWC.extractGroupBy(elem['submission'], client)
+    if len(groupBy) == 1:
         mycollection = mydb['GroupBy']
-        record = jsonGroupByAttribute(my_uuid, AWC.extractGroupBy(elem['submission'], client)[0])
+        record = jsonGroupByAttribute(my_uuid, groupBy[0])
         mycollection.insert_one(record)
-    elif len(AWC.extractGroupBy(elem['submission'], client)) > 1 and not isinstance(AWC.extractGroupBy(elem['submission'], client), str):
+    elif len(groupBy) > 1 and not isinstance(groupBy, str):
         mycollection = mydb['GroupBy']
-        for val in AWC.extractGroupBy(elem['submission']):
+        for val in AWC.extractGroupBy(elem['submission'], client):
             record = jsonGroupByAttribute(my_uuid, val)
             mycollection.insert_one(record)
     AWC.literal = []
     userData.clear()
 
-#Create a json to insert to DB "Tables"
-def jsonTable(id, table):
+# Returns a json file which extracts characteristics
+# and tells which of them are wrong
+def prodJson(id, courseId, testSql, taskNr, isSol, tablesRight, selAttributesRight,
+             proAttributesRight, stringsRight, orderByRight, groupByRight, joinsRight):
+    # save data if it is a manual solution
+    if (isSol == True):
+        userData.extend([True])
+        userData.extend([0])
+        userData.extend([0])
+    value = {
+        "id": str(id),
+        "courseId": courseId,
+        "taskNumber": taskNr,
+        "statement": testSql,
+        "queryRight": userData[0],
+        "parsable": True,
+        "isSolution": isSol,
+        "tablesRight": tablesRight,
+        "selAttributesRight": selAttributesRight,
+        "proAttributesRight": proAttributesRight,
+        "stringsRight": stringsRight,
+        "userId": userData[1],
+        "attempt": userData[2],
+        "orderByRight": orderByRight,
+        "groupByRight": groupByRight,
+        "joinsRight": joinsRight
+    }
+    userData.clear()
+    AWC.literal = []
+    return value
+
+# Returns a json file which extracts Tables and Attributes
+def prodJsonNotParsable(id, courseId,userData, taskNr):
     # Create dictionary
     value = {
         "id": str(id),
-        "table": table
+        "courseId": courseId,
+        "taskNumber": taskNr,
+        "statement": userData[3],
+        "queryRight": userData[0],
+        "parsable": False,
+        "tablesRight": None,
+        "selAttributesRight": None,
+        "proAttributesRight": None,
+        "stringsRight": None,
+        "userId": userData[1],
+        "attempt": userData[2],
+        "orderbyRight": None
     }
     return value
 
-
-#Create a json to insert to DB "ProAttributes"
-def jsonProAttribute(id, proAttribute):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "proAttribute": proAttribute
-    }
-    return value
-
-
-#Create a json to insert to DB "SelAttributes"
-def jsonSelAttribute(id, selAttribute):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "selAttribute": selAttribute
-    }
-    return value
-
-
-#Create a json to insert to DB "Strings"
-def jsonString(id, string):
-    # Create dictionary
-    value = {
-        "id": str(id),
-        "string": string
-    }
-    return value
-
-def jsonOrderByAttribute(id, orderByAttribute):
-    value = {
-        "id": str(id),
-        "orderBy": orderByAttribute[0],
-        "sort": orderByAttribute[1]
-    }
-    return value
-
-
-def jsonGroupByAttribute(id, groupByAttribute):
-    value = {
-        "id": str(id),
-        "groupBy": groupByAttribute
-    }
-    return value
-
-def jsonJoinAttribute(id, joinAttribute):
-    value = {
-        "id": str(id),
-        "type": joinAttribute[0],
-        "attr1": joinAttribute[1],
-        "attr2": joinAttribute[2]
-    }
-    return value
+def insertNotParsable(my_uuid, submission, client):
+    mydb = client['sql-checker']
+    mycollection = mydb['NotParsable']
+    record = jsonNotParsable(my_uuid, submission)
+    mycollection.insert_one(record)
