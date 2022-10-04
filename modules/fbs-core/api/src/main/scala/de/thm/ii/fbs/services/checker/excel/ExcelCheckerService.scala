@@ -143,9 +143,8 @@ class ExcelCheckerService extends CheckerService {
         if (t._2.checkFields.isEmpty) {
           buildLegacyTaskResultText(t._1, t._2)
         } else {
-          t._1.checkResult.zip(t._2.checkFields).filter(
-            c => !c._1.success && (!c._2.hideInvalidFields || c._2.errorMsg.nonEmpty || c._1.errorMsg.nonEmpty)
-          ).map(c => {
+          t._1.checkResult.zip(t._2.checkFields)
+            .filter(shouldGenerateTaskResult).map(c => {
             if (c._1.errorMsg.nonEmpty) {
               f"${t._2.name}: ${c._1.errorMsg}"
             } else {
@@ -176,6 +175,10 @@ class ExcelCheckerService extends CheckerService {
     } else {
       f"${task.name}: Die Zelle/-n '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
     }
+  }
+
+  private def shouldGenerateTaskResult(c: (CheckResult, ExcelMediaInformationCheck)) = {
+    !c._1.success && (!c._2.hideInvalidFields || c._2.errorMsg.nonEmpty || c._1.errorMsg.nonEmpty)
   }
 
   private def buildExtendedRes(results: List[CheckResult], excelMediaInformation: ExcelMediaInformationTasks) = {
