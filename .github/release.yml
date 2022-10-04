@@ -1,0 +1,39 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+      - duplicate
+      - wontfix
+  categories:
+    - title: Breaking Changes 🛠
+      labels:
+        - breaking-change
+    - title: Fixed bugs 🐞
+      labels:
+        - bug
+    - title: New core Features 🎉
+      labels:
+        - enhancement
+        - "fbs-core: api"
+        - "fbs-core: web"
+    - title: New checker Features 🎉
+      labels:
+        - "checker: bash"
+        - "checker: sql"
+        - "checker: excel"
+        - "checker: sap"
+        - "fbs-runner: checker"
+    - title: New checker-api Features 🎉
+      labels:
+        - checker-api
+    - title: Dependency updates ⬆️
+      labels: 
+        - dependencies
+    - title: Internal 🔒
+      labels:
+        - "CI/CD"
+        - Docker
+        - internal
+    - title: Other Changes
+      labels:
+        - "*"
