@@ -141,11 +141,7 @@ class ExcelCheckerService extends CheckerService {
         t
       }).filter(t => !t._1.success).map(t => {
         if (t._2.checkFields.isEmpty) {
-          if (t._1.checkResult.head.errorMsg.nonEmpty) {
-            f"${t._2.name}: ${t._1.checkResult.head.errorMsg}"
-          } else {
-            f"${t._2.name}: Die Zelle/-n '${t._1.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
-          }
+          buildLegacyTaskResultText(t._1, t._2)
         } else {
           t._1.checkResult.zip(t._2.checkFields).filter(
             c => !c._1.success && (!c._2.hideInvalidFields || c._2.errorMsg.nonEmpty || c._1.errorMsg.nonEmpty)
@@ -171,6 +167,14 @@ class ExcelCheckerService extends CheckerService {
       } else {
         res
       }
+    }
+  }
+
+  private def buildLegacyTaskResultText(result: CheckResultTask, task: ExcelMediaInformation) = {
+    if (result.checkResult.head.errorMsg.nonEmpty) {
+      f"${task.name}: ${result.checkResult.head.errorMsg}"
+    } else {
+      f"${task.name}: Die Zelle/-n '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
     }
   }
 
