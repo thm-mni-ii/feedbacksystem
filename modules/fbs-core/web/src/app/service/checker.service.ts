@@ -137,22 +137,41 @@ export class CheckerService {
   }
 
   /**
-   * Get secondary file of checker configuration
+   * Download the secondary file of the configuration
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
    * @return Observable that succeeds with the secondary File of configured Checker
    */
   public getSecondaryFile(cid: number, tid: number, ccid: number) {
+    this.fetchSecondaryFile(cid, tid, ccid).subscribe((blob) =>
+      importedSaveAs(blob)
+    );
+  }
+
+  /**
+   * Fetch the secondary file of the configuration
+   * @param cid Course id
+   * @param tid Task id
+   * @param ccid Checker Configuration id
+   * @return Observable that succeeds with the Main File of configured Checker
+   */
+  public fetchSecondaryFile(
+    cid: number,
+    tid: number,
+    ccid: number
+  ): Observable<Blob> {
     return this.http
       .get(
         `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`,
         { responseType: "arraybuffer" }
       )
-      .subscribe((response) => {
-        const blob = new Blob([response], { type: "text/plain" });
-        importedSaveAs(blob);
-      });
+      .pipe(
+        map(
+          (response) =>
+            new Blob([response], { type: "application/octet-stream" })
+        )
+      );
   }
 
   /**
