@@ -135,12 +135,8 @@ class ExcelCheckerService extends CheckerService {
     if (success) {
       "OK"
     } else {
-      var correct = 0
+      var correct = results.count(c => c.success)
       val hints = results.zip(excelMediaInformation.tasks)
-        .map(t => {
-          if (t._1.success) correct += 1
-          t
-        })
         .filter(t => !t._1.success)
         .map(t => buildTaskResultText(t._1, t._2))
         .mkString("\n")
