@@ -1,0 +1,48 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for fbs-core.web
+  - package-ecosystem: "npm"
+    directory: "/modules/fbs-core/web"
+    schedule:
+      interval: "weekly"
+      
+  # Maintain dependencies for fbs-core.api
+  - package-ecosystem: "gradle"
+    directory: "/modules/fbs-core/api"
+    schedule:
+      interval: "weekly"
+      
+  # Maintain dependencies for fbs-runner.checker
+  - package-ecosystem: "gradle"
+    directory: "/modules/fbs-runner/checker"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for fbs-runner.checker Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/modules/fbs-runner/checker"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for fbs-core Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/modules/fbs-core/api"
+    schedule:
+      interval: "weekly"
+      
+  # Maintain dependencies for runtime-images.bash Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/runtime-images/bash"
+    schedule:
+      interval: "weekly"

@@ -6,5 +6,6 @@
 /runtime-images/              @thm-mni-ii/feedbacksystem-api-mods
 /scripts/ci/                  @thm-mni-ii/feedbacksystem-api-mods
 /docker-compose*.yml          @thm-mni-ii/feedbacksystem-api-mods
+Dockerfile                    @thm-mni-ii/feedbacksystem-api-mods
 
 /.github/                     @thm-mni-ii/feedbacksystem-admins

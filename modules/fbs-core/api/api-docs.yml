@@ -15,6 +15,8 @@ tags:
     description: The user api
   - name: Course
     description: The course api
+  - name: Semester
+    description: The Semester api
   - name: Course Registration
     description: The course registration api
   - name: Task
@@ -697,6 +699,196 @@ paths:
         - name: cid
           in: path
           description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  /semester:
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Get a list of all Semester-contents
+      description: ""
+      parameters:
+        - name: visible
+          in: query
+          description: Returns all Semester that exist
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Semester"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Create a new Semester
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Semester"
+        description: Semester object to create
+        required: true
+      responses:
+        "201":
+          description: Created
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Semester"
+        "400":
+          description: Invalid Format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/semester/{sid}":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Get a semester
+      parameters:
+        - name: sid
+          in: path
+          description: semester id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Semester"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    put:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Update Semester
+      description: ""
+      parameters:
+        - name: sid
+          in: path
+          description: semester id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Semester"
+        description: Semester object to update
+        required: true
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "400":
+          description: Invalid format
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+    delete:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Delete Semester by ID
+      description: ""
+      parameters:
+        - name: sid
+          in: path
+          description: semester id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  "/semester/{sid}/export":
+    get:
+      security:
+        - JWT: []
+      tags:
+        - Semester
+      summary: Get a Zip-Archive of the semesters
+      description: ""
+      parameters:
+        - name: sid
+          in: path
+          description: semester id
           required: true
           schema:
             type: integer
@@ -2414,6 +2606,17 @@ components:
           type: string
         visible:
           type: boolean
+        semesterId:
+          type: integer
+    Semester:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
     Task:
       type: object
       required:
