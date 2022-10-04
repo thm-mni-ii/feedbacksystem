@@ -178,7 +178,7 @@ class ExcelCheckerService extends CheckerService {
       if (check.hideInvalidFields) {
         f"${task.name}: $errorMsg"
       } else {
-        f"${task.name}: Die Zelle/-n '${result.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg"
+        f"${task.name}: Die Zellen '${result.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg"
       }
     }
   }
