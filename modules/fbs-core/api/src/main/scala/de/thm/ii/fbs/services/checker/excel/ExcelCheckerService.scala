@@ -79,9 +79,9 @@ class ExcelCheckerService extends CheckerService {
         CheckResultTask(success, res)
       }
     } catch {
-      case e: NotImplementedFunctionException => genearateCheckResultError(f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
-      case _: NullPointerException => genearateCheckResultError("Ungültige Konfiguration")
-      case e: Throwable => genearateCheckResultError(f"Bei der Überprüfung ist ein Fehler aufgetreten: '${e.getMessage}'")
+      case e: NotImplementedFunctionException => generateCheckResultError(f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
+      case _: NullPointerException => generateCheckResultError("Ungültige Konfiguration")
+      case e: Throwable => generateCheckResultError(f"Bei der Überprüfung ist ein Fehler aufgetreten: '${e.getMessage}'")
     }
   }
 
@@ -115,7 +115,7 @@ class ExcelCheckerService extends CheckerService {
     CheckResult(res, invalidFields, extInfo)
   }
 
-  private def genearateCheckResultError(errorMsg: String): CheckResultTask = {
+  private def generateCheckResultError(errorMsg: String): CheckResultTask = {
     CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg)))
   }
 
@@ -135,7 +135,7 @@ class ExcelCheckerService extends CheckerService {
     if (success) {
       "OK"
     } else {
-      var correct = results.count(c => c.success)
+      val correct = results.count(c => c.success)
       val hints = results.zip(excelMediaInformation.tasks)
         .filter(t => !t._1.success)
         .map(t => buildTaskResultText(t._1, t._2))
