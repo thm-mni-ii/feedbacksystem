@@ -18,7 +18,6 @@ changelog:
         - "fbs-core: web"
     - title: New checker Features 🎉
       labels:
-        - enhancement
         - "checker: bash"
         - "checker: sql"
         - "checker: excel"
