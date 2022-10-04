@@ -73,6 +73,7 @@ jobs:
     services:
       mysql:
         image: mysql:8.0.30
+        options: --default-authentication-plugin=mysql_native_password --sql_mode=""
         ports:
           - 3306:3306
         env:
