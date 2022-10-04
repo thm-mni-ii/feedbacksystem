@@ -75,7 +75,7 @@ class CourseController {
       body.retrive("visible").asBool()
     ) match {
       case (semesterId, Some(name), desc, visible) =>
-        courseService.create(Course(semesterId, name, desc.getOrElse(""), visible.getOrElse(true)))
+        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
@@ -125,8 +125,8 @@ class CourseController {
           body.retrive("description").asText(),
           body.retrive("visible").asBool()
         ) match {
-          case (semester, Some(name), desc, visible) =>
-            courseService.update(cid, Course(semester, name, desc.getOrElse(""), visible.getOrElse(true)))
+          case (semesterId, Some(name), desc, visible) =>
+            courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
           case _ => throw new BadRequestException("Malformed Request Body")
         }
       case _ => throw new ForbiddenException()
