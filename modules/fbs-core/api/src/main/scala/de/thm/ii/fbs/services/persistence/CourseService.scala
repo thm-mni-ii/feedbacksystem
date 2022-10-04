@@ -19,6 +19,7 @@ class CourseService {
 
   /**
     * Get all courses
+    *
     * @param ignoreHidden If true only visible courses will be returned
     * @return List of courses
     */
@@ -28,7 +29,8 @@ class CourseService {
 
   /**
     * Search for a course whose name adhere to the pattern
-    * @param pattern SQL like pattern, i.e., %like%
+    *
+    * @param pattern      SQL like pattern, i.e., %like%
     * @param ignoreHidden If true only visible courses will be returned
     * @return List of courses
     */
@@ -38,6 +40,7 @@ class CourseService {
 
   /**
     * Lookup course by id
+    *
     * @param id The Course id
     * @return The found course
     */
@@ -47,6 +50,7 @@ class CourseService {
 
   /**
     * Create a new course
+    *
     * @param course The course
     * @return The created course with id
     */
@@ -62,7 +66,8 @@ class CourseService {
 
   /**
     * Update a course
-    * @param cid The course id
+    *
+    * @param cid    The course id
     * @param course The course
     * @return True if successful
     */
@@ -73,16 +78,26 @@ class CourseService {
 
   /**
     * Delete a course by id
+    *
     * @param id The course id
     * @return True if successful
     */
   def delete(id: Int): Boolean = 1 == DB.update("DELETE FROM course WHERE course_id = ?", id)
 
   private def parseResult(res: ResultSet): Course = Course(
-    semesterId = Option(res.getInt("semester_id")),
+    semesterId = maybeInt(res, "semester_id"),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),
     id = res.getInt("course_id")
   )
+
+  private def maybeInt(res: ResultSet, columnName: String): Option[Int] = {
+    val tmp = res.getInt(columnName)
+    if (res.wasNull()) {
+      null
+    } else {
+      Some(tmp)
+    }
+  }
 }
