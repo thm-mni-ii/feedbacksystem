@@ -186,12 +186,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
-            Task(name, isPublic, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPublic, desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
         case (Some(name), Some(isPublic), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, isPublic, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+          Task(name, deadline, mediaType, isPublic, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -217,9 +217,9 @@ class TaskController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("name").asText(),
-        body.retrive("isPublic").asBool(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
+        body.retrive("isPublic").asBool(),
         body.retrive("description").asText(),
         body.retrive("mediaInformation").asObject(),
         body.retrive("requirementType").asText() match {
@@ -228,7 +228,7 @@ class TaskController {
           case _ => throw new BadRequestException("Invalid requirement type.")
         }
       ) match {
-        case (Some(name), Some(isPublic), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), Some(isPublic), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -236,12 +236,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
-            Task(name, isPublic, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPublic, desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), Some(isPublic), deadline, Some(mediaType), desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, isPublic, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+        case (Some(name), deadline, Some(mediaType), Some(isPublic), desc, _, requirementType) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPublic, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {

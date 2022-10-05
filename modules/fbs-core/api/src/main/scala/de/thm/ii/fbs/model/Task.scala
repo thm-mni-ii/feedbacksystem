@@ -14,9 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @param isPublic Is the Task visible for students
   */
 case class Task(@JsonProperty("name") name: String,
-                @JsonProperty("isPublic") isPublic: Boolean = false,
                 @JsonProperty("deadline") deadline: Option[String],
                 @JsonProperty("mediaType") mediaType: String,
+                @JsonProperty("isPublic") isPublic: Boolean = false,
                 @JsonProperty("description") description: String = "",
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
