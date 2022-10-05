@@ -1,0 +1,12 @@
+.bordered-container {
+  border: 1px solid;
+  height: 100%;
+  width: 100%;
+/*   position: relative; */
+  border-radius: 10px;
+}
+
+.bordered-container > legend {
+  font-size: 16px;
+  font-weight: bold;
+}
