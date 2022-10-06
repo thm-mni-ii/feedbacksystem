@@ -19,6 +19,7 @@ import { of } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
+import { CheckerFileType } from "src/app/enums/checkerFileType";
 
 const defaultMediaType = "text/plain";
 
@@ -113,7 +114,7 @@ export class TaskNewDialogComponent implements OnInit {
         .pipe(map((checkers) => checkers[0]))
         .subscribe((checker) => {
           this.checkerService
-            .fetchMainFile(this.courseId, this.task.id, checker.id)
+            .fetchFile(this.courseId, this.task.id, checker.id, CheckerFileType.MainFile)
             .subscribe(
               (spreadsheet) =>
                 (this.spreadsheet = new File([spreadsheet], "spreadsheet.xlsx"))
@@ -172,19 +173,21 @@ export class TaskNewDialogComponent implements OnInit {
                 .pipe(
                   mergeMap((checker) =>
                     this.checkerService
-                      .updateMainFile(
+                      .updateFile(
                         this.courseId,
                         task.id,
                         checker.id,
+                        CheckerFileType.MainFile,
                         this.spreadsheet
                       )
                       .pipe(map(() => checker))
                   ),
                   mergeMap((checker) =>
-                    this.checkerService.updateSecondaryFile(
+                    this.checkerService.updateFile(
                       this.courseId,
                       task.id,
                       checker.id,
+                      CheckerFileType.SecondaryFile,
                       infoFile
                     )
                   ),

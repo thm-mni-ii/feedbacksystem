@@ -4,6 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
 import { map } from "rxjs/operators";
+import { CheckerFileType } from "../enums/checkerFileType";
 
 @Injectable({
   providedIn: "root",
@@ -83,10 +84,16 @@ export class CheckerService {
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
+   * @param fType File Type as enum
    * @return Observable that succeeds with the Main File of configured Checker
    */
-  public getMainFile(cid: number, tid: number, ccid: number) {
-    this.fetchMainFile(cid, tid, ccid).subscribe((blob) =>
+  public getFile(
+    cid: number,
+    tid: number,
+    ccid: number,
+    fType: CheckerFileType
+  ) {
+    this.fetchFile(cid, tid, ccid, fType).subscribe((blob) =>
       importedSaveAs(blob)
     );
   }
@@ -96,16 +103,18 @@ export class CheckerService {
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
+   * @param fType File Type as enum
    * @return Observable that succeeds with the Main File of configured Checker
    */
-  public fetchMainFile(
+  public fetchFile(
     cid: number,
     tid: number,
-    ccid: number
+    ccid: number,
+    fType: CheckerFileType
   ): Observable<Blob> {
     return this.http
       .get(
-        `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`,
+        `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
         { responseType: "arraybuffer" }
       )
       .pipe(
@@ -121,76 +130,20 @@ export class CheckerService {
    * @param cid Course id
    * @param tid Task id
    * @param ccid Checker Configuration id
+   * @param fType File Type as enum
    * @param file the file to upload
    * @return Observable that succeeds with the upload of the main file
    */
-  public updateMainFile(
+  public updateFile(
     cid: number,
     tid: number,
     ccid: number,
+    fType: CheckerFileType,
     file: File
   ): Observable<void> {
     return this.uploadFile(
       file,
-      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/main-file`
-    );
-  }
-
-  /**
-   * Download the secondary file of the configuration
-   * @param cid Course id
-   * @param tid Task id
-   * @param ccid Checker Configuration id
-   * @return Observable that succeeds with the secondary File of configured Checker
-   */
-  public getSecondaryFile(cid: number, tid: number, ccid: number) {
-    this.fetchSecondaryFile(cid, tid, ccid).subscribe((blob) =>
-      importedSaveAs(blob)
-    );
-  }
-
-  /**
-   * Fetch the secondary file of the configuration
-   * @param cid Course id
-   * @param tid Task id
-   * @param ccid Checker Configuration id
-   * @return Observable that succeeds with the Main File of configured Checker
-   */
-  public fetchSecondaryFile(
-    cid: number,
-    tid: number,
-    ccid: number
-  ): Observable<Blob> {
-    return this.http
-      .get(
-        `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`,
-        { responseType: "arraybuffer" }
-      )
-      .pipe(
-        map(
-          (response) =>
-            new Blob([response], { type: "application/octet-stream" })
-        )
-      );
-  }
-
-  /**
-   * Update secondary file of an existing checker configuration
-   * @param cid Course id
-   * @param tid Task id
-   * @param ccid Checker Configuration id
-   * @param file the file to upload
-   * @return Observable that succeeds with the upload of the file
-   */
-  public updateSecondaryFile(
-    cid: number,
-    tid: number,
-    ccid: number,
-    file: File
-  ): Observable<void> {
-    return this.uploadFile(
-      file,
-      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/secondary-file`
+      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`
     );
   }
 

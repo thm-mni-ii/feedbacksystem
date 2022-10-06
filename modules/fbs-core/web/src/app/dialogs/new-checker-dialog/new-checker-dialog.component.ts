@@ -6,6 +6,7 @@ import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerService } from "../../service/checker.service";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
+import { CheckerFileType } from "src/app/enums/checkerFileType";
 
 @Component({
   selector: "app-new-checker-dialog",
@@ -63,34 +64,44 @@ export class NewCheckerDialogComponent implements OnInit {
       this.checkerForm.controls["ord"].setValue(this.checker.ord);
     }
 
-    if (this.checker.mainFileUploaded == true) {
+    if (this.checker.mainFileUploaded || this.checker.secondaryFileUploaded) {
       this.checkerService
         .getChecker(this.courseId, this.taskId)
-        .pipe(map((checkers) => checkers[0]))
+        .pipe(
+          map((checkers) =>
+            checkers.find((checker) => checker.id == this.data.checker.id)
+          )
+        )
         .subscribe((checker) => {
-          this.checkerService
-            .fetchMainFile(this.courseId, this.taskId, checker.id)
-            .subscribe((mainFileBlob) => {
-              this.mainFile[0] = new File([mainFileBlob], "mainFile");
-              this.fileCounter++;
-            });
-        });
-    }
-
-    if (this.checker.secondaryFileUploaded == true) {
-      this.checkerService
-        .getChecker(this.courseId, this.taskId)
-        .pipe(map((checkers) => checkers[0]))
-        .subscribe((checker) => {
-          this.checkerService
-            .fetchSecondaryFile(this.courseId, this.taskId, checker.id)
-            .subscribe((secondaryFileBlob) => {
-              this.secondaryFile[0] = new File(
-                [secondaryFileBlob],
-                "secondaryFile"
-              );
-              this.fileCounter++;
-            });
+          if (this.checker.mainFileUploaded) {
+            this.checkerService
+              .fetchFile(
+                this.courseId,
+                this.taskId,
+                checker.id,
+                CheckerFileType.MainFile
+              )
+              .subscribe((mainFileBlob) => {
+                this.mainFile[0] = new File([mainFileBlob], "mainFile");
+                this.fileCounter++;
+              });
+          }
+          if (this.checker.secondaryFileUploaded) {
+            this.checkerService
+              .fetchFile(
+                this.courseId,
+                this.taskId,
+                checker.id,
+                CheckerFileType.SecondaryFile
+              )
+              .subscribe((secondaryFileBlob) => {
+                this.secondaryFile[0] = new File(
+                  [secondaryFileBlob],
+                  "secondaryFile"
+                );
+                this.fileCounter++;
+              });
+          }
         });
     }
 
@@ -135,10 +146,11 @@ export class NewCheckerDialogComponent implements OnInit {
         .createChecker(this.courseId, this.taskId, this.checker)
         .subscribe((checker) => {
           this.checkerService
-            .updateMainFile(
+            .updateFile(
               this.courseId,
               this.taskId,
               checker.id,
+              CheckerFileType.MainFile,
               this.mainFile[0]
             )
             .subscribe(
@@ -147,10 +159,11 @@ export class NewCheckerDialogComponent implements OnInit {
             );
           if (this.secondaryFile[0]) {
             this.checkerService
-              .updateSecondaryFile(
+              .updateFile(
                 this.courseId,
                 this.taskId,
                 checker.id,
+                CheckerFileType.SecondaryFile,
                 this.secondaryFile[0]
               )
               .subscribe(
@@ -188,6 +201,7 @@ export class NewCheckerDialogComponent implements OnInit {
       value.showExtendedHints;
     this.checker.checkerTypeInformation.showExtendedHintsAt =
       value.showExtendedHintsAt;
+
     if (
       this.checker.checkerType &&
       this.checker.ord &&
@@ -203,10 +217,11 @@ export class NewCheckerDialogComponent implements OnInit {
         )
         .subscribe(() => {
           this.checkerService
-            .updateMainFile(
+            .updateFile(
               this.courseId,
               this.taskId,
               this.checker.id,
+              CheckerFileType.MainFile,
               this.mainFile[0]
             )
             .subscribe(
@@ -215,10 +230,11 @@ export class NewCheckerDialogComponent implements OnInit {
             );
           if (this.secondaryFile[0]) {
             this.checkerService
-              .updateSecondaryFile(
+              .updateFile(
                 this.courseId,
                 this.taskId,
                 this.checker.id,
+                CheckerFileType.SecondaryFile,
                 this.secondaryFile[0]
               )
               .subscribe(
