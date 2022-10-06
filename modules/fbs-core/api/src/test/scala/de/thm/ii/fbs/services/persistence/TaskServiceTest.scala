@@ -23,14 +23,14 @@ class TaskServiceTest {
 
   @Test
   def create(): Unit = {
-    taskService.create(1, Task("Test", None, "type", "A Task", None, "optional", 1, 1))
+    taskService.create(1, Task("Test", None, "type", isPublic = false, "A Task", None, "optional", 1, 1))
     Assert.assertEquals(taskService.getAll(1).length, 1)
   }
 
   @Test
   def update(): Unit = {
     create()
-    taskService.update(1, 1, Task("Test", None, "type", "A Task", None, "mandatory", 1, 1))
+    taskService.update(1, 1, Task("Test", None, "type", isPublic = false, "A Task", None, "mandatory", 1, 1))
     Assert.assertEquals(taskService.getAll(1).length, 1)
   }
 
