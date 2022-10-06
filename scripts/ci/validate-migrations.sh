@@ -12,7 +12,7 @@ do
     
     # Validate File name
     if [[ $fileName != "$migrationNumber"* ]]; then
-        echo "::error file=$filePath::The File Name should start with $migrationNumber"
+        echo "::error file=$filePath::Invalid file name '$fileName'. The file name must start with '$migrationNumber'."
         exit 1
     fi
     
