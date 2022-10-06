@@ -19,6 +19,7 @@ jobs:
       name: api-docs
       url: ${{ steps.deployment.outputs.page_url }}api-docs/
     steps:
+      - uses: actions/checkout@v3
       - name: Build Pages
         run: |
           npx redoc-cli bundle modules/fbs-core/api/api-docs.yml modules/fbs-runner/checker/api-docs.yml
