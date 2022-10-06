@@ -6,5 +6,5 @@ import { Component, Input } from "@angular/core";
   styleUrls: ["./bordered-container.component.scss"],
 })
 export class BorderedContainerComponent {
-    @Input() title?: string;
+  @Input() title?: string;
 }
