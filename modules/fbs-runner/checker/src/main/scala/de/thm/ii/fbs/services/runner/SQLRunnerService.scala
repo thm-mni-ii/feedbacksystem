@@ -45,15 +45,9 @@ object SQLRunnerService {
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
       val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
-      val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
-      val dbConfig = null
+      var queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
+      val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
 
-      if(queryType.isEmpty){
-        val queryType = "dql"
-      }
-      if(queryType.equalsIgnoreCase("dql")){
-        val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
-      }
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
       if (submissionQuarry.isBlank && queryType.equalsIgnoreCase("dql")) {
@@ -200,10 +194,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
         c.setQueryTimeout(queryTimout)
 
         createDatabase(configDbExt, c, isSolution = true).flatMap[List[ResultSet]](_ => {
-          val queries = sqlRunArgs.section
-            .map(_ => connections.solutionQueryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
+          val query = connections.solutionQueryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY)
 
-          Future.sequence(queries.toList) transform {
+          Future.sequence(List(query)) transform {
             case s@Success(_) =>
               deleteDatabases(c, configDbExt, isSolution = true)
               s
