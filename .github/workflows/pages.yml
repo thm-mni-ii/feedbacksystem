@@ -1,0 +1,33 @@
+name: Pages
+
+on:
+  push:
+    branches: [ dev ]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+
+jobs:
+  pages:
+    name: Publish API Docs
+    runs-on: ubuntu-latest
+    environment:
+      name: api-docs
+      url: ${{ steps.deployment.outputs.page_url }}api-docs/
+    steps:
+      - name: Build Pages
+        run: |
+          npx redoc-cli bundle modules/fbs-core/api/api-docs.yml modules/fbs-runner/checker/api-docs.yml
+          mkdir pages
+          mv redoc-static.html pages/api-docs/index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v1
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./pages"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@main
