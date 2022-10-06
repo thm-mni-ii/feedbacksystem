@@ -22,9 +22,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Pages
         run: |
-          npx redoc-cli bundle modules/fbs-core/api/api-docs.yml modules/fbs-runner/checker/api-docs.yml
-          mkdir -p pages/api-docs
+          mkdir -p pages/api-docs/runner
+          npx redoc-cli bundle modules/fbs-core/api/api-docs.yml 
           mv redoc-static.html pages/api-docs/index.html
+          npx redoc-cli bundle modules/fbs-runner/checker/api-docs.yml
+          mv redoc-static.html pages/api-docs/runner/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v1
       - name: Upload artifact
