@@ -10,10 +10,6 @@
   display: flex;
 }
 
-.content {
-  width: 100%;
-}
-
 .grid {
   height: 100%;
   display: grid;
@@ -21,14 +17,14 @@
   grid-template-rows: repeat(10, 10%);
 }
 
-.one {
+.results-grid {
   grid-row-start: 1;
   grid-row-end: 6;
   grid-column-start: 2;
   grid-column-end: 8;
 }
 
-.two {
+.input-grid {
   margin-top: 30px;
   grid-row-start: 6;
   grid-row-end: 10;
@@ -36,7 +32,7 @@
   grid-column-end: 8;
 }
 
-.three {
+.db-grid {
   margin-left: 10px;
   grid-row-start: 1;
   grid-row-end: 4;
@@ -44,7 +40,7 @@
   grid-column-end: 10;
 }
 
-.four {
+.db-schema-grid {
   margin-left: 10px;
   margin-top: 30px;
   grid-row-start: 4;

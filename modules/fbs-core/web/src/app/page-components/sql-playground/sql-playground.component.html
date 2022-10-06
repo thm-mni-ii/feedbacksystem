@@ -1,49 +1,24 @@
-<!-- <div class="container">
-  <mat-grid-list cols="4" [rowHeight]="'200px'">
-    <mat-grid-tile [colspan]="3" [rowspan]="2">
-      <app-bordered-container
-        class="box"
-        [title]="'Ergebnis'"
-      ></app-bordered-container>
-    </mat-grid-tile>
-    <mat-grid-tile [colspan]="1" [rowspan]="1">
-      <app-bordered-container
-        class="box"
-        [title]="'DB'"
-      ></app-bordered-container>
-    </mat-grid-tile>
-    <mat-grid-tile [colspan]="1" [rowspan]="3">
-      <app-bordered-container
-        class="box"
-        [title]="'DB Schema'"
-      ></app-bordered-container>
-    </mat-grid-tile>
-    <mat-grid-tile [colspan]="3" [rowspan]="2">
-      <app-bordered-container class="box"></app-bordered-container>
-    </mat-grid-tile>
-  </mat-grid-list>
-</div> -->
 <div class="container">
   <div class="grid">
-    <div class="one">
+    <div class="results-grid">
       <app-bordered-container
         class="box"
         [title]="'Ergebnisse'"
       ></app-bordered-container>
     </div>
-    <div class="two">
+    <div class="input-grid">
       <app-bordered-container class="box"></app-bordered-container>
     </div>
-    <div class="three">
+    <div class="db-grid">
       <app-bordered-container
         class="box"
         [title]="'DB'"
       ></app-bordered-container>
     </div>
-    <div class="four">
+    <div class="db-schema-grid">
       <app-bordered-container
         class="box"
-        [title]="'DB - Schema'"
+        [title]="'DB Schema'"
       ></app-bordered-container>
     </div>
   </div>
