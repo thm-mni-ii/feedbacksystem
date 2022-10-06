@@ -19,6 +19,7 @@ import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submi
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
 
+
 /**
  * Shows a task in detail
  */
@@ -37,6 +38,7 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
+
 
   get latestResult() {
     if (this.submissions?.length > 0) {

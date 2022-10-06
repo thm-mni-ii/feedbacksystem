@@ -19,6 +19,7 @@ import { of } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
+import { MatSlideToggleChange } from "@angular/material/slide-toggle";
 
 const defaultMediaType = "text/plain";
 
@@ -35,6 +36,7 @@ export class TaskNewDialogComponent implements OnInit {
     name: new UntypedFormControl("", [Validators.required]),
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
+    submitLimiter: new UntypedFormControl(),
     mediaType: new UntypedFormControl(defaultMediaType),
     exelFile: new UntypedFormControl(""),
     userIDField: new UntypedFormControl(""),
@@ -42,11 +44,13 @@ export class TaskNewDialogComponent implements OnInit {
     outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
+    limiterCheckBox: new UntypedFormControl(false),
   });
   isUpdate: boolean;
   courseId: number;
   task: Task = {
     deadline: this.getDefaultDeadline(),
+    submitLimiter: 0,
     description: "",
     mediaType: "",
     name: "",
@@ -106,6 +110,7 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["description"].setValue(this.task.description);
     this.taskForm.controls["mediaType"].setValue(this.task.mediaType);
     this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
+    this.taskForm.controls["submitLimiter"].setValue(this.task.submitLimiter);
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.taskForm.controls["exelFile"].setValue("loading...");
       this.checkerService
@@ -258,11 +263,23 @@ export class TaskNewDialogComponent implements OnInit {
       });
   }
 
+
+  public datePickerDisabled = false;
+
   getDefaultDeadline() {
-    const currentDateAndOneMonthLater = new Date();
-    currentDateAndOneMonthLater.setMonth(
-      currentDateAndOneMonthLater.getMonth() + 1
-    );
-    return currentDateAndOneMonthLater.toISOString();
+    if (!this.datePickerDisabled) {
+      const currentDateAndOneMonthLater = new Date();
+      currentDateAndOneMonthLater.setMonth(
+        currentDateAndOneMonthLater.getMonth() + 1
+      );
+      return currentDateAndOneMonthLater.toISOString();
+    } else {
+      return null;
+    }
   }
+  // disables the Date
+  public setMaxExpirationDate(event: MatSlideToggleChange): void {
+    this.datePickerDisabled = event.checked;
+  }
+
 }

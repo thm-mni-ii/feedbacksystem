@@ -2,7 +2,8 @@ export interface Task {
   id?: number;
   name: string;
   description?: string;
-  deadline: string;
+  deadline?: string;
+  submitLimiter: number;
   mediaType?: string;
   mediaInformation?:
     | SpreadsheetMediaInformation
