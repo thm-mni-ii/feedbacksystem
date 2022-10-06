@@ -1,17 +1,54 @@
 .container {
-  height: 100%;
+  height: 90vh;
   width: 100%;
 }
 
-mat-grid-tile {
-  .box {
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    display: flex;
-  }
+.box {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  display: flex;
 }
 
 .content {
   width: 100%;
+}
+
+.grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(10, 10%);
+  grid-template-rows: repeat(10, 10%);
+}
+
+.one {
+  grid-row-start: 1;
+  grid-row-end: 6;
+  grid-column-start: 2;
+  grid-column-end: 8;
+}
+
+.two {
+  margin-top: 30px;
+  grid-row-start: 6;
+  grid-row-end: 10;
+  grid-column-start: 2;
+  grid-column-end: 8;
+}
+
+.three {
+  margin-left: 10px;
+  grid-row-start: 1;
+  grid-row-end: 4;
+  grid-column-start: 8;
+  grid-column-end: 10;
+}
+
+.four {
+  margin-left: 10px;
+  margin-top: 30px;
+  grid-row-start: 4;
+  grid-row-end: 10;
+  grid-column-start: 8;
+  grid-column-end: 10;
 }
