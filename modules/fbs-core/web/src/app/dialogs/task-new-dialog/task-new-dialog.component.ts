@@ -114,7 +114,12 @@ export class TaskNewDialogComponent implements OnInit {
         .pipe(map((checkers) => checkers[0]))
         .subscribe((checker) => {
           this.checkerService
-            .fetchFile(this.courseId, this.task.id, checker.id, CheckerFileType.MainFile)
+            .fetchFile(
+              this.courseId,
+              this.task.id,
+              checker.id,
+              CheckerFileType.MainFile
+            )
             .subscribe(
               (spreadsheet) =>
                 (this.spreadsheet = new File([spreadsheet], "spreadsheet.xlsx"))
