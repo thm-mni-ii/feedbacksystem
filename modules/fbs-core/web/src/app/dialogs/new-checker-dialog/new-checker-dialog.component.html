@@ -28,10 +28,12 @@
         class="pad"
         (update)="updateMainFile($event)"
         [usage]="'Hauptdatei hochladen'"
+        [submissionFile]="mainFile"
       ></app-dropzone>
       <app-dropzone
         (update)="updateSecondaryFile($event)"
         [usage]="'sekundäre Datei hochladen'"
+        [submissionFile]="secondaryFile"
       ></app-dropzone>
     </div>
     <div *ngIf="choosedSQLChecker">
@@ -40,10 +42,12 @@
           class="pad"
           (update)="updateMainFile($event)"
           [usage]="'Hauptdatei hochladen'"
+          [submissionFile]="mainFile"
         ></app-dropzone>
         <app-dropzone
           (update)="updateSecondaryFile($event)"
           [usage]="'sekundäre Datei hochladen'"
+          [submissionFile]="secondaryFile"
         ></app-dropzone>
       </div>
       <div>
@@ -107,9 +111,9 @@
       color="accent"
       [disabled]="
         !checkerForm.valid ||
-        this.mainFile?.size <= 0 ||
+        this.mainFile?.length <= 0 ||
         !(
-          this.secondaryFile?.size > 0 ||
+          this.secondaryFile?.length > 0 ||
           checkerForm.value.checkerType === 'bash'
         )
       "

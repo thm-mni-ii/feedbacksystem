@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  test-mysql:
+    image: mysql:8.0.30
+    command: --default-authentication-plugin=mysql_native_password --sql_mode=""
+    environment:
+      MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
+      MYSQL_DATABASE: fbs
+    ports:
+      - 127.0.0.1:3306:3306
