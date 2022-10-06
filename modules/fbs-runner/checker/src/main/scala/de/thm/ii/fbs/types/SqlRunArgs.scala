@@ -16,4 +16,5 @@ class SqlRunArgs(val section: Array[TaskQuery],
                  val submissionQuery: String,
                  val runnerId: Int,
                  val submissionId: Int,
-                 val queryType: String)
+                 val queryType: String
+                )

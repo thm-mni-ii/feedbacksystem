@@ -60,8 +60,8 @@ object SQLRunnerService {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      if (!queryType.equalsIgnoreCase("dql") || !queryType.equalsIgnoreCase("ddl")) {
-        throw new RunnerException("The query type must be dql or ddl!")
+      if (!queryType.equalsIgnoreCase("dql") && !queryType.equalsIgnoreCase("ddl")) {
+        throw new RunnerException(queryType + "The query type must be dql or ddl!")
       }
 
       new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
@@ -128,15 +128,16 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     } else {
       queries = s"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
     }
-
-    con.executeFuture(queries).filter(_ => sqlRunArgs.queryType != ("ddl") && !isSolution).flatMap(_ => {
-      connections.initQuery(name, isSolution)
-      if (isSolution) {
-        connections.solutionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
-      } else {
-        connections.submissionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
-      }
-    })
+      con.executeFuture(queries).flatMap(_ => {
+        connections.initQuery(name, isSolution)
+        if (isSolution) {
+          connections.solutionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+        } else if (sqlRunArgs.queryType != ("ddl")) {
+          connections.submissionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
+        } else {
+          Future.unit
+        }
+      })
   }
 
   private def deleteDatabases(con: SQLConnection, nameExtension: String, isSolution: Boolean = false): Unit = {
@@ -200,7 +201,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
         createDatabase(configDbExt, c, isSolution = true).flatMap[List[ResultSet]](_ => {
           val queries = sqlRunArgs.section
-            .map(tq => connections.solutionQueryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
+            .map(_ => connections.solutionQueryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
 
           Future.sequence(queries.toList) transform {
             case s@Success(_) =>
@@ -245,8 +246,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
           c.setQueryTimeout(queryTimout)
 
           createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-            val result = connections.submissionQueryCon.get.queryFuture(sqlRunArgs.submissionQuery)
-              .flatMap(_ => connections.solutionQueryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
+            val connection = connections.submissionQueryCon.get;
+            val result = connection.queryFuture(sqlRunArgs.submissionQuery)
+              .flatMap(_ => connection.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
 
             result transform {
               case s@Success(_) =>

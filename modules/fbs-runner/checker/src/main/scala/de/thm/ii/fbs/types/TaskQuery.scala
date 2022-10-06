@@ -7,7 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
   *
   * @param sections the reference Queries
   */
-class TaskQueries(@JsonProperty("sections") val sections: Array[TaskQuery], @JsonProperty("dbType") val dbType: String, val queryType: String)
+class TaskQueries(@JsonProperty("sections") val sections: Array[TaskQuery], @JsonProperty("dbType") val dbType: String,
+                  @JsonProperty("queryType") val queryType: String)
 
 /**
   *
