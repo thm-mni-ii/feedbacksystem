@@ -9,7 +9,7 @@ on:
 
 jobs:
   validate-migration:
-    name: Migration Validation
+    name: DB Migration Validation
     runs-on: ubuntu-latest
 
     steps:
