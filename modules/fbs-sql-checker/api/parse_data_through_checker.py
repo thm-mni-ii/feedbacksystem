@@ -58,7 +58,7 @@ def start(path):
                 query = i["submission"].replace("\n", " ")
                 query = query.replace("\t", " ")
                 query = " ".join(query.split())  # Removed all whitespaces
-                for x in range(1): # pylint: disable=W0612
+                for x in range(1):  # pylint: disable=W0612
                     test_id = "".join(
                         random.SystemRandom().choice(
                             string.ascii_letters + string.digits

@@ -35,7 +35,11 @@ def json_string(_id, string):
 
 
 def json_order_by_attribute(_id, order_by_attribute):
-    value = {"id": str(_id), "orderBy": order_by_attribute[0], "sort": order_by_attribute[1]}
+    value = {
+        "id": str(_id),
+        "orderBy": order_by_attribute[0],
+        "sort": order_by_attribute[1],
+    }
     return value
 
 

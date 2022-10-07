@@ -85,7 +85,7 @@ def is_join(json_file):  # pylint: disable=R1710
                     if element == "value":
                         list_tables.append(val[element].lower())
                     if isinstance(val[element], str) and (
-                        (element in "name") and (element in "using")
+                        (element not in "name") and (element not in "using")
                     ):
                         list_tables.append(val[element].lower())
                     if is_join_var is True:
@@ -100,6 +100,8 @@ def is_join(json_file):  # pylint: disable=R1710
                         element in "inner join"
                         or element in "left join"
                         or element in "join"
+                        or element in "right join"
+                        or element in "outer join"
                     ):
                         is_join_var = True
                         join_type = element
@@ -162,12 +164,14 @@ def extract_tables(json_file, client):
             json_file
         ):
             tables = is_single_from_where(json_file)
-        elif is_join(json_file) is not None and is_join(json_file):
+        elif (
+            is_join(json_file) is not None
+            and is_join(json_file) is not []  # pylint: disable=R0123
+        ):  # pylint: disable=R0123
             tables = is_join(json_file)
         else:
             tables = is_union(json_file)
-    except Exception as e:
-        print(e)
+    except Exception:
         tables = ["Unknown"]
     # Gibt Indexerror bei falschen Queries
     if type(tables[0]) == str:  # pylint: disable=C0123

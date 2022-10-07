@@ -5,7 +5,7 @@ from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
-from model import * # pylint: disable=W0401
+from model import *  # pylint: disable=W0401
 
 rightStatements = []
 rightTables = []
@@ -51,7 +51,9 @@ def parse_single_stat_upload_db(data, client):
                         joins2.append("Unknown")
                 else:
                     joins2.append("Empty")
-            extracted_pro_attributes = extract_pro_attributes(data["submission"], client)
+            extracted_pro_attributes = extract_pro_attributes(
+                data["submission"], client
+            )
             if extracted_pro_attributes != "Unknown":
                 pro_atts2.extend(extracted_pro_attributes)
             extracted_string = AWC.extract_sel_attributes(data["submission"], client)
@@ -119,7 +121,7 @@ def parse_single_stat_upload_db(data, client):
         task_nr = data["tid"]
         my_uuid = data["sid"]
         course_id = data["cid"]
-        user_data = return_json_not_parsable(data) #pylint: disable=W0621
+        user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
         record = prod_json_not_parsable(my_uuid, course_id, user_data, task_nr)
         mycollection.insert_one(record)
@@ -256,6 +258,7 @@ def check_solution_chars(
         joins_right,
     )
 
+
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
     mydb = client["sql-checker"]
@@ -265,7 +268,7 @@ def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
 
 
 # return JSON to be pasted to DB
-def return_json( # pylint: disable=R1710
+def return_json(  # pylint: disable=R1710
     elem,
     is_sol,
     my_uuid,
@@ -372,45 +375,21 @@ def insert_tables(mydb, elem, my_uuid, client):
                     mycollection.insert_one(record)
             except Exception:
                 print("Error while reading joins.")
-    if len(extract_pro_attributes(elem["submission"], client)) == 1:
-        mycollection = mydb["ProAttributes"]
-        record = json_pro_attribute(
-            my_uuid, extract_pro_attributes(elem["submission"], client)[0]
-        )
     pro_attributes = extract_pro_attributes(elem["submission"], client)
     if len(pro_attributes) == 1:
         mycollection = mydb["ProAttributes"]
         record = json_pro_attribute(my_uuid, pro_attributes[0])
         mycollection.insert_one(record)
-    elif len(extract_pro_attributes(elem["submission"], client)) > 1 and not isinstance(
-        extract_pro_attributes(elem["submission"], client), str
-    ):
-        mycollection = mydb["ProAttributes"]
-        for val in extract_pro_attributes(elem["submission"], client):
-            record = json_pro_attribute(my_uuid, val)
     elif len(pro_attributes) > 1 and not isinstance(pro_attributes, str):
         mycollection = mydb["ProAttributes"]
         for val in pro_attributes:
             record = json_pro_attribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extract_sel_attributes(elem["submission"], client)) == 1:
-        mycollection = mydb["SelAttributes"]
-        record = json_sel_attribute(
-            my_uuid, AWC.extract_sel_attributes(elem["submission"], client)[0]
-        )
     sel_attributes = AWC.extract_sel_attributes(elem["submission"], client)
     if len(sel_attributes) == 1:
         mycollection = mydb["SelAttributes"]
         record = json_sel_attribute(my_uuid, sel_attributes[0])
         mycollection.insert_one(record)
-    elif len(
-        AWC.extract_sel_attributes(elem["submission"], client)
-    ) > 1 and not isinstance(
-        AWC.extract_sel_attributes(elem["submission"], client), str
-    ):
-        mycollection = mydb["SelAttributes"]
-        for val in AWC.extract_sel_attributes(elem["submission"], client):
-            record = json_sel_attribute(my_uuid, val)
     elif len(sel_attributes) > 1 and not isinstance(sel_attributes, str):
         mycollection = mydb["SelAttributes"]
         for val in sel_attributes:
@@ -432,38 +411,21 @@ def insert_tables(mydb, elem, my_uuid, client):
         mycollection = mydb["OrderBy"]
         record = json_order_by_attribute(my_uuid, order_by[0])
         mycollection.insert_one(record)
-    elif len(AWC.extract_order_by(elem["submission"], client)) > 1 and not isinstance(
-        AWC.extract_order_by(elem["submission"], client), str
-    ):
-        mycollection = mydb["OrderBy"]
-        for val in AWC.extract_order_by(elem["submission"], client):
-            record = json_order_by_attribute(my_uuid, val)
     elif len(order_by) > 1 and not isinstance(order_by, str):
         mycollection = mydb["OrderBy"]
         for val in order_by:
             record = json_order_by_attribute(my_uuid, val)
             mycollection.insert_one(record)
-    if len(AWC.extract_group_by(elem["submission"], client)) == 1:
-        mycollection = mydb["GroupBy"]
-        record = json_group_by_attribute(
-            my_uuid, AWC.extract_group_by(elem["submission"], client)[0]
-        )
     group_by = AWC.extract_group_by(elem["submission"], client)
     if len(group_by) == 1:
         mycollection = mydb["GroupBy"]
         record = json_group_by_attribute(my_uuid, group_by[0])
         mycollection.insert_one(record)
-    elif len(AWC.extract_group_by(elem["submission"], client)) > 1 and not isinstance(
-        AWC.extract_group_by(elem["submission"], client), str
-    ):
-        mycollection = mydb["GroupBy"]
-        for val in AWC.extract_group_by(elem["submission"], client):
-            record = json_group_by_attribute(my_uuid, val)
-            mycollection.insert_one(record)
     elif len(group_by) > 1 and not isinstance(group_by, str):
         mycollection = mydb["GroupBy"]
         for val in AWC.extract_group_by(elem["submission"], client):
             record = json_group_by_attribute(my_uuid, val)
+            mycollection.insert_one(record)
     AWC.literal = []
     user_data.clear()
 
@@ -521,12 +483,12 @@ def insert_not_parsable(my_uuid, submission, client):
 
 def return_json_not_parsable(elem):
     # Extract informations from a sql-query-json
-    if 'passed' in elem:
-        user_data.append(elem['passed'])
-    if 'userId' in elem:
-        user_data.append(elem['userId'])
-    if 'attempt' in elem:
-        user_data.append(elem['attempt'])
-    if 'submission' in elem:
-        user_data.append(elem['submission'])
+    if "passed" in elem:
+        user_data.append(elem["passed"])
+    if "userId" in elem:
+        user_data.append(elem["userId"])
+    if "attempt" in elem:
+        user_data.append(elem["attempt"])
+    if "submission" in elem:
+        user_data.append(elem["submission"])
     return user_data

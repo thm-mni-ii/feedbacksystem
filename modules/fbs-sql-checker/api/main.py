@@ -4,7 +4,7 @@
 import random  # pylint: disable=W0611
 import string  # pylint: disable=W0611
 import sys  # pylint: disable=W0611
-import requests  # pylint: disable=E0401
+import requests  # pylint: disable=W0611
 from json_creator import parse_single_stat_upload_db
 
 # The following Code is for productive purposes
@@ -22,7 +22,7 @@ else:
     print(answer.json())
     parse_single_stat_upload_db(answer.json(), client)
 
-# The following Code is for debugging purposes
+# # The following Code is for debugging purposes
 # CLIENT = (
 #     # Define MongoDB for debugging purposes
 #     "mongodb://admin:password@localhost:27017/"
@@ -36,18 +36,19 @@ else:
 # print(ID_JSON)
 # TESTDIC = {
 #     "submission": "SELECT rezept.titel, benutzer.benutzername "
-#                   "FROM rezept INNER JOIN benutzer ON rezept.id_benutzer=benutzer.id_benutzer "
+#                   "FROM rezept OUTER JOIN benutzer ON rezept.id_benutzer=benutzer.id_benutzer "
 #                   "WHERE (SELECT SUM(schritt_zutat.menge) AS Milch "
-#                   "FROM schritt_zutat INNER JOIN zutat ON schritt_zutat.zutat = zutat.id_zutat "
+#                   "FROM schritt_zutat OUTER JOIN zutat ON schritt_zutat.zutat = zutat.id_zutat "
 #                   "WHERE zutat.bezeichnung = 'Milch' AND schritt_zutat.id_rezept = rezept.id_rezept "
 #                   "GROUP BY zutat.id_zutat, schritt_zutat.id_rezept) > 200 "
 #                   "ORDER BY rezept.id_rezept;",
-#     "passed": True,  # True if submission produced the right return in SQL-Runner
+#     "passed": False,  # True if submission produced the right return in SQL-Runner
 #     "resultText": "OK",
 #     "userId": 1,
 #     "attempt": 1,
-#     "tid": 4,
+#     "tid": 8,
 #     "sid": TEST_ID,
-#     "isSol": True,  # True solution is from docent
+#     "cid": 5,
+#     "isSol": False,  # True solution is from docent
 # }
 # parse_single_stat_upload_db(TESTDIC, CLIENT)
