@@ -51,7 +51,7 @@ class TaskController {
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
     auth.globalRole match {
-      case GlobalRole.USER => taskService.getAll(cid).filter(task => task.isPublic)
+      case GlobalRole.USER => taskService.getAll(cid).filter(task => !task.isPrivate)
       case _ => taskService.getAll(cid)
     }
   }
@@ -69,7 +69,7 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     auth.globalRole match {
-      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => getOne(cid, userTaskRes.taskID, req, res).isPublic)
+      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => !getOne(cid, userTaskRes.taskID, req, res).isPrivate)
       case _ => taskService.getTaskResults(cid, auth.id)
     }
   }
@@ -112,7 +112,7 @@ class TaskController {
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
     taskService.getOne(tid) match {
-      case Some(task) => if (task.isPublic || user.globalRole != GlobalRole.USER) {
+      case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER) {
         task.mediaInformation match {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
@@ -167,7 +167,7 @@ class TaskController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("name").asText(),
-        body.retrive("isPublic").asBool(),
+        body.retrive("isPrivate").asBool(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
         body.retrive("description").asText(),
@@ -178,7 +178,7 @@ class TaskController {
           case _ => throw new BadRequestException("Invalid requirement type.")
         }
       ) match {
-        case (Some(name), Some(isPublic), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), Some(isPrivate), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -186,12 +186,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
-            Task(name, deadline, "application/x-spreadsheet", isPublic, desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPrivate, desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), Some(isPublic), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, deadline, mediaType, isPublic, desc.getOrElse(""), None, requirementType))
+        case (Some(name), Some(isPrivate), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
+          Task(name, deadline, mediaType, isPrivate, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -219,7 +219,7 @@ class TaskController {
       (body.retrive("name").asText(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
-        body.retrive("isPublic").asBool(),
+        body.retrive("isPrivate").asBool(),
         body.retrive("description").asText(),
         body.retrive("mediaInformation").asObject(),
         body.retrive("requirementType").asText() match {
@@ -228,7 +228,7 @@ class TaskController {
           case _ => throw new BadRequestException("Invalid requirement type.")
         }
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), Some(isPublic), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), Some(isPrivate), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -236,12 +236,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
-            Task(name, deadline, "application/x-spreadsheet", isPublic, desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPrivate, desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), Some(isPublic), desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, isPublic, desc.getOrElse(""), None, requirementType))
+        case (Some(name), deadline, Some(mediaType), Some(isPrivate), desc, _, requirementType) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPrivate, desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {

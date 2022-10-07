@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("deadline") deadline: Option[String],
                 @JsonProperty("mediaType") mediaType: String,
-                @JsonProperty("isPublic") isPublic: Boolean = false,
+                @JsonProperty("isPrivate") isPrivate: Boolean = false,
                 @JsonProperty("description") description: String = "",
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,

@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{MediaInformation, SubtaskStatisticsSubtask, SubtaskStatisticsTask, Task, TaskResult, UserTaskResult}
+import de.thm.ii.fbs.model.{MediaInformation, SubtaskStatisticsSubtask, SubtaskStatisticsTask, Task, UserTaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -26,7 +26,8 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, is_public, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE course_id = ?",
+    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type " +
+      "FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
   /**
@@ -36,7 +37,7 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT task_id, name, is_public, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
@@ -47,9 +48,9 @@ class TaskService {
     * @return The created task with id
     */
   def create(cid: Int, task: Task): Task =
-    DB.insert("INSERT INTO task (name, is_public, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
+    DB.insert("INSERT INTO task (name, is_private, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
       "(?, ?, ?, ?, ?, ?, ?, ?);",
-      task.name, task.isPublic, task.mediaType, task.description,
+      task.name, task.isPrivate, task.mediaType, task.description,
       parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull,
       cid, task.requirementType)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
@@ -69,10 +70,10 @@ class TaskService {
   def update(cid: Int, tid: Int, task: Task): Boolean =
     1 == DB.update(
       """
-        |UPDATE task SET name = ?, is_public = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
+        |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
         |WHERE task_id = ? AND course_id = ?
         |""".stripMargin,
-      task.name, task.isPublic, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
+      task.name, task.isPrivate, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
       task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
 
   /**
@@ -158,7 +159,7 @@ class TaskService {
       |""".stripMargin, (res, _) => parseSubtaskStatics(res), cid)
 
   private def parseResult(res: ResultSet): Task = Task(name = res.getString("name"),
-    isPublic = res.getBoolean("is_public"),
+    isPrivate = res.getBoolean("is_private"),
     deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
     requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"))
