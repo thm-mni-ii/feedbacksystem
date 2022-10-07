@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @param description The description of that task
   * @param mediaInformation The mediaInformation of that task
   * @param id The id of the task, if 0,  then no id was assigned
-  * @param isPublic Is the Task visible for students
+  * @param isPrivate Is the Task visible for students
   */
 case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("deadline") deadline: Option[String],
