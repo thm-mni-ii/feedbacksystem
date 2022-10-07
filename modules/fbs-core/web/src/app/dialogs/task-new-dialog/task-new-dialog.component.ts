@@ -22,7 +22,7 @@ import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
 
 const defaultMediaType = "text/plain";
-const defaultLiability = "mandatory"
+const defaultrequirement = "mandatory";
 
 /**
  * Dialog to create or update a task
@@ -38,7 +38,7 @@ export class TaskNewDialogComponent implements OnInit {
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
-    liability: new UntypedFormControl(defaultLiability),
+    requirementType: new UntypedFormControl(defaultrequirement),
     exelFile: new UntypedFormControl(""),
     userIDField: new UntypedFormControl(""),
     inputFields: new UntypedFormControl(""),
@@ -54,6 +54,7 @@ export class TaskNewDialogComponent implements OnInit {
     mediaType: "",
     name: "",
     mediaInformation: null,
+    requirementType: "",
   };
 
   spreadsheet: File = null;
@@ -89,6 +90,7 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
+    this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.task.mediaInformation = {
@@ -108,6 +110,9 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["name"].setValue(this.task.name);
     this.taskForm.controls["description"].setValue(this.task.description);
     this.taskForm.controls["mediaType"].setValue(this.task.mediaType);
+    this.taskForm.controls["requirementType"].setValue(
+      this.task.requirementType
+    );
     this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.taskForm.controls["exelFile"].setValue("loading...");
