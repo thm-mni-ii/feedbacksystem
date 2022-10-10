@@ -1,7 +1,7 @@
 # Feedbacksystem
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![CI/CD](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci-cd.yml)
+[![CI](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml/badge.svg)](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/thm-mni-ii/feedbacksystem/badge.svg?branch=dev)](https://coveralls.io/github/thm-mni-ii/feedbacksystem?branch=dev)
 [![code style: Scalastyle](https://img.shields.io/badge/code_style-Scalastyle-c22d40.svg?style=flat)](https://github.com/scalastyle/scalastyle)
 

@@ -2,7 +2,7 @@ name: Deploy to Docker Hub
 
 on:
   workflow_run:
-    workflows: ["CI/CD"]
+    workflows: ["CI"]
     branches: [main, dev, "v**"]
     tags:
       - v**

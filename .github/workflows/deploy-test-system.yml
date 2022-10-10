@@ -2,7 +2,7 @@ name: Deploy to testsystem
 
 on:
   workflow_run:
-    workflows: ["CI/CD"]
+    workflows: ["CI"]
     branches: [main, dev, "v**"]
     types: [completed]
 
