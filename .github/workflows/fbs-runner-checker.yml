@@ -1,4 +1,4 @@
-name: fbs-core.api
+name: fbs-runner.checker
 
 on:
   push:

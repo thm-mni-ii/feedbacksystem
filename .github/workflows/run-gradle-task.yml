@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Start mysql service container
-        if: ${{ input.startMysqlService }}
+        if: ${{ inputs.startMysqlService }}
         run: >
           docker run -d --rm --name mysql -e MYSQL_ROOT_PASSWORD=twRuvi2ejllDdA4nnQLa08O
           -e MYSQL_DATABASE=fbs -p 127.0.0.1:3306:3306 mysql:8.0.30
@@ -32,5 +32,5 @@ jobs:
         with:
           arguments: ${{ inputs.arguments }}
       - name: Stop mysql service container
-        if: ${{ input.startMysqlService }}
+        if: ${{ inputs.startMysqlService }}
         run: docker stop mysql
