@@ -41,25 +41,26 @@ object SQLRunnerService {
       }
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
-      val sections = taskQueries.sections
-      // Make dbType Optional
-      // TODO Solve in TaskQueries Case Class
-      val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
-      var queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
-      val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
+        val sections = if (taskQueries.sections == null) new TaskQuery("", "", "") else taskQueries.sections
+        // Make dbType Optional
+        // TODO Solve in TaskQueries Case Class
+        val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
+        val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
+        val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
 
-      val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
+        val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
-      if (submissionQuarry.isBlank && queryType.equalsIgnoreCase("dql")) {
-        throw new RunnerException("The submission must not be blank!")
-      }
+        if (submissionQuarry.isBlank && queryType.equalsIgnoreCase("dql")) {
+          throw new RunnerException("The submission must not be blank!")
+        }
 
-      if (!queryType.equalsIgnoreCase("dql") && !queryType.equalsIgnoreCase("ddl")) {
-        throw new RunnerException(queryType + "The query type must be dql or ddl!")
-      }
+        if (!queryType.equalsIgnoreCase("dql") && !queryType.equalsIgnoreCase("ddl")) {
+          throw new RunnerException(queryType + "The query type must be dql or ddl!")
+        }
 
-      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
-    } catch {
+        new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
+      }}
+     catch {
       // TODO enhance messages
       case e: RunnerException => throw e
       case e: DecodeException => throw new RunnerException(s"Runner configuration is invalid: ${e.getMessage}")
