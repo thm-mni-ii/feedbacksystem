@@ -30,6 +30,28 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@859c33240bd026ce8d5f711f5adcc65c2f8eafc1
 
+  fbs-core-api:
+    name: fbs-core.api
+    uses: ./.github/workflows/check-fbs-module.yml
+    with:
+      lintArguments: :fbs-core.api:scalastyleCheck
+      testArguments: :fbs-core.api:test
+      startMysqlService: true
+
+  fbs-core-web:
+    name: fbs-core.web
+    uses: ./.github/workflows/check-fbs-module.yml
+    with:
+      lintArguments: :fbs-core.web:lint
+      testArguments: :fbs-core.api:test
+
+  fbs-runner-checker:
+    name: fbs-runner.checker
+    uses: ./.github/workflows/check-fbs-module.yml
+    with:
+      lintArguments: :fbs-runner.checker:scalastyleCheck
+      testArguments: :fbs-runner.checker:test
+
   build:
     name: Build Dockerimages
     runs-on: ubuntu-latest

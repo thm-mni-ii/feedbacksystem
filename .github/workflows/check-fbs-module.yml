@@ -1,0 +1,28 @@
+name: Check FBS Module
+
+on:
+  workflow_call:
+    inputs:
+      lintArguments:
+        required: true
+        type: string
+      testArguments:
+        required: true
+        type: string
+      startMysqlService:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  lint:
+    name: Lint
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: ${{ inputs.lintArguments }}
+  test:
+    name: Test
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: ${{ inputs.testArguments }}
+      startMysqlService: ${{ inputs.startMysqlService }}
