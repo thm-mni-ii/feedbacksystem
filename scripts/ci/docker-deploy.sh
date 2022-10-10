@@ -27,21 +27,10 @@ function generateDockerTag() {
 
 branch=$1
 tag=$(generateDockerTag)
-deployToDockerHub=$2
 
 echo "START DOCKER BUILD"
 
 docker-compose build
-
-result=$?
-if [ $result -ne 0  ]; then
-    echo "DOCKER BUILD FAILLED"
-    exit 1
-fi
-
-if [[ ! -n "${deployToDockerHub}" ]]; then
-    exit 0
-fi
 
 echo "START DOCKER DEPLOY"
 

@@ -64,14 +64,14 @@ jobs:
       testArguments: :fbs-runner.checker:test
 
   build:
-    name: Build Dockerimages
+    name: Build Docker images
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v3
-      - name: Build Dockerimages
-        run: bash ./scripts/ci/docker-deploy.sh ${GITHUB_REF##*/}
+      - name: Build Docker images
+        run: docker-compose build
 
       # TODO: Move to modules
       # - name: Coveralls
