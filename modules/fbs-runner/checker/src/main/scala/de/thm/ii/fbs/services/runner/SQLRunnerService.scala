@@ -41,7 +41,7 @@ object SQLRunnerService {
       }
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
-        val sections = if (taskQueries.sections == null) new TaskQuery("", "", "") else taskQueries.sections
+      val sections = if (taskQueries.sections == null) new Array[TaskQuery](new TaskQuery("", "", "")(1)) else taskQueries.sections
         // Make dbType Optional
         // TODO Solve in TaskQueries Case Class
         val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
@@ -59,7 +59,7 @@ object SQLRunnerService {
         }
 
         new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
-      }}
+      }
      catch {
       // TODO enhance messages
       case e: RunnerException => throw e
