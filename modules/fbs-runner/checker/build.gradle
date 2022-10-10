@@ -23,8 +23,6 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyleCheck
-
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.12.12'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'

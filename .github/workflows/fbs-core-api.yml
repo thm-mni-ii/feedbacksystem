@@ -16,3 +16,14 @@ jobs:
       - uses: actions/checkout@v3
       - name: Check Migration files
         run: bash ./scripts/ci/validate-migrations.sh modules/fbs-core/api/src/main/resources/migrations
+  lint:
+    name: Lint
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: :fbs-core.api:scalastyleCheck
+  test:
+    name: Test
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: :fbs-core.api:test
+      startMysqlService: true

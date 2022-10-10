@@ -1,0 +1,22 @@
+name: fbs-core.web
+
+on:
+  push:
+    branches: [dev, main, v*.x]
+    tags:
+      - v**
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: :fbs-core.web:lint
+
+  # TODO: Run Frotnend Tests
+  # test:
+  #   name: Test
+  #    uses: ./.github/workflows/run-gradle-task.yml
+  #    with:
+  #      arguments: :fbs-core.api:test

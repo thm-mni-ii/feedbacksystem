@@ -33,8 +33,6 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyleCheck
-
 // customize start scripts
 startScripts {
     // customize application name

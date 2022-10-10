@@ -1,0 +1,21 @@
+name: fbs-core.api
+
+on:
+  push:
+    branches: [dev, main, v*.x]
+    tags:
+      - v**
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: :fbs-runner.checker:scalastyleCheck
+
+  test:
+    name: Test
+    uses: ./.github/workflows/run-gradle-task.yml
+    with:
+      arguments: :fbs-runner.checker:test
