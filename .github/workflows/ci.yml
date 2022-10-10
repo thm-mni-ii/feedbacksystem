@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI
 
 on:
   push:
@@ -42,6 +42,7 @@ jobs:
     name: fbs-core.api
     uses: ./.github/workflows/check-fbs-module.yml
     with:
+      name: fbs-core.api
       lintArguments: :fbs-core.api:scalastyleCheck
       testArguments: :fbs-core.api:test
       startMysqlService: true
@@ -50,6 +51,7 @@ jobs:
     name: fbs-core.web
     uses: ./.github/workflows/check-fbs-module.yml
     with:
+      name: fbs-core.web
       lintArguments: :fbs-core.web:lint
       testArguments: :fbs-core.web:test
 
@@ -57,6 +59,7 @@ jobs:
     name: fbs-runner.checker
     uses: ./.github/workflows/check-fbs-module.yml
     with:
+      name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
       testArguments: :fbs-runner.checker:test
 
@@ -69,37 +72,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Dockerimages
         run: bash ./scripts/ci/docker-deploy.sh ${GITHUB_REF##*/}
-
-  deploy:
-    name: Build & Deploy Dockerimages to Dockerhub
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    needs:
-      [
-        validate-gradle-warpper,
-        validate-migration,
-        fbs-core-api,
-        fbs-core-web,
-        fbs-runner-checker,
-      ]
-
-    environment:
-      name: Docker Hub
-      url: https://hub.docker.com/u/thmmniii
-
-    concurrency:
-      group: "docker-hub-deploy"
-      cancel-in-progress: true
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Login to Docker Hub
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build & Deploy Dockerimages to Dockerhub
-        run: bash ./scripts/ci/docker-deploy.sh ${GITHUB_REF##*/} true
 
       # TODO: Move to modules
       # - name: Coveralls

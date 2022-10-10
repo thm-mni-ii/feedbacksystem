@@ -7,6 +7,9 @@ env:
 on:
   workflow_call:
     inputs:
+      name:
+        required: true
+        type: string
       lintArguments:
         required: true
         type: string
@@ -31,6 +34,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
       - uses: gradle/gradle-build-action@v2
+        name: Lint ${{ inputs.name }}
         with:
           arguments: ${{ inputs.lintArguments }}
   test:
@@ -51,6 +55,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
       - uses: gradle/gradle-build-action@v2
+        name: Run ${{ inputs.name }} Tests
         with:
           arguments: ${{ inputs.testArguments }}
       - name: Stop mysql service container
