@@ -1,55 +1,51 @@
 .container {
   height: 90vh;
   width: 100%;
-}
-
-app-bordered-container {
-  width: 100%;
-  height: 100%;
-  padding: 5px;
-  display: flex;
+  padding: 16px;
 }
 
 .grid {
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(10, 10%);
-  grid-template-rows: repeat(10, 10%);
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 10px;
+}
+
+.results-grid > app-bordered-container {
+height: 100%;
 }
 
 .results-grid {
-  margin-left: 30px;
   grid-row-start: 1;
   grid-row-end: 6;
   grid-column-start: 1;
   grid-column-end: 8;
+  border: solid 1px;
 }
 
 .input-grid {
-  margin-left: 30px;
-  margin-top: 30px;
   grid-row-start: 6;
   grid-row-end: 10;
   grid-column-start: 1;
   grid-column-end: 8;
+  border: solid 1px;
 }
 
 .db-grid {
-  margin-right: 30px;
-  margin-left: 10px;
   grid-row-start: 1;
   grid-row-end: 4;
   grid-column-start: 8;
   grid-column-end: 11;
+  padding: none;
+  border: solid 1px;
 }
 
 .db-schema-grid {
-  margin-right: 30px;
-  margin-left: 10px;
-  margin-top: 30px;
   grid-row-start: 4;
   grid-row-end: 10;
   grid-column-start: 8;
   grid-column-end: 11;
+  border: solid 1px;
 }

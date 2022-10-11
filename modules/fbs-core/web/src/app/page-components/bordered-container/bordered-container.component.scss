@@ -1,22 +1,11 @@
 .bordered-container {
   border: 1px solid;
-  height: 100%;
-  width: 100%;
   border-radius: 5px;
-  background-color: white;
-  overflow: hidden;
+  background-color: red;
+  min-height: 100%;
 }
 
 .bordered-container > legend {
   font-size: 16px;
   font-weight: bold;
-}
-
-.x-scrollable {
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-}
-
-.y-scrollable {
-  overflow: auto;
 }
