@@ -23,6 +23,7 @@ import scala.util.{Failure, Success}
   * Provides Helper functions for the SQLRunnerService
   */
 object SQLRunnerService {
+  private val logger = ScalaLogger.getLogger(this.getClass.getName)
   private val yamlMapper = new ObjectMapper(new YAMLFactory)
   /**
     * Converts a Runner Configuration into an SQL Runner Configuration.
@@ -41,21 +42,24 @@ object SQLRunnerService {
       }
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
-      val sections = if (taskQueries.sections == null) new Array[TaskQuery](new TaskQuery("", "", "")(1)) else taskQueries.sections
+
+      val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "Test")).toArray else taskQueries.sections
         // Make dbType Optional
         // TODO Solve in TaskQueries Case Class
         val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
         val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
         val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
-
         val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
-        if (submissionQuarry.isBlank && queryType.equalsIgnoreCase("dql")) {
+        if (submissionQuarry.isBlank) {
           throw new RunnerException("The submission must not be blank!")
         }
+        if (queryType != ("dql") && queryType != ("ddl")) {
+          throw new RunnerException("The queryType must be ddl or dql!")
+        }
 
-        if (!queryType.equalsIgnoreCase("dql") && !queryType.equalsIgnoreCase("ddl")) {
-          throw new RunnerException(queryType + "The query type must be dql or ddl!")
+        if (queryType.equals("ddl") && dbType.equals("mysql")) {
+          throw new RunnerException("DDL just works with PostgreSQL!")
         }
 
         new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
