@@ -5,7 +5,8 @@ import de.thm.ii.fbs.services.persistence._
 import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, SubtaskStatisticsTask, Task, UserTaskResult}
+import de.thm.ii.fbs.model.
+{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, SubtaskStatisticsTask, Task, User, UserTaskResult}
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
@@ -69,7 +70,7 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     auth.globalRole match {
-      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => !getOne(cid, userTaskRes.taskID, req, res).isPrivate)
+      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => !getTaskById(cid, userTaskRes.taskID, auth).isPrivate)
       case _ => taskService.getTaskResults(cid, auth.id)
     }
   }
@@ -111,6 +112,10 @@ class TaskController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
+    getTaskById(cid, tid, user)
+  }
+
+  def getTaskById(cid: Int, tid: Int, user: User): Task = {
     taskService.getOne(tid) match {
       case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER) {
         task.mediaInformation match {
