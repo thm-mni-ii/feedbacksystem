@@ -1,9 +1,9 @@
 package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformation, ExcelMediaInformationTasks, ExtendedInfoExcel, User}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
-import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.apache.poi.xssf.usermodel.XSSFCell
@@ -14,8 +14,6 @@ import java.io.File
 
 @Service
 class ExcelCheckerService extends CheckerService {
-  @Autowired
-  private val taskService: TaskService = null
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -42,6 +40,7 @@ class ExcelCheckerService extends CheckerService {
       val mainFile = this.getMainFile(cc.id)
 
       val results = excelMediaInformation.tasks.map(t => this.checkTask(mainFile, submissionFile, t))
+      val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
       val exitCode = if (results.forall(r => r.success)) {
         0
       } else {
@@ -50,35 +49,52 @@ class ExcelCheckerService extends CheckerService {
 
       val resultText = this.buildResultText(exitCode == 0, results, excelMediaInformation)
       submissionService.storeResult(
-        submissionID, cc.id, exitCode, resultText, objectMapper.writeValueAsString(this.buildExtendedRes(results, excelMediaInformation))
+        submissionID, cc.id, exitCode, resultText, objectMapper.writeValueAsString(this.buildExtendedRes(mergedResults, excelMediaInformation))
       )
-      this.submitSubTasks(cc.id, submission.id, results, excelMediaInformation)
+      this.submitSubTasks(cc.id, submission.id, mergedResults, excelMediaInformation)
     } catch {
       case e: Throwable => submissionService.storeResult(submissionID, cc.id, 0, f"Bei der Überprüfung ist ein Fehler aufgetretten: '${e.getMessage}'", null)
     }
   }
 
-  private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResult = {
+  private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {
     try {
-      val userRes = this.excelService.getFields(submissionFile, excelMediaInformation)
-      val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation)
+      // If Config file is old -> use old field names
+      if (excelMediaInformation.checkFields.isEmpty && excelMediaInformation.outputFields.nonEmpty) {
+        val res = this.checkFields(submissionFile, mainFile, excelMediaInformation,
+          ExcelMediaInformationCheck(range = excelMediaInformation.outputFields, hideInvalidFields = excelMediaInformation.hideInvalidFields)
+        )
 
-      this.compare(userRes, expectedRes)
+        CheckResultTask(res.success, List(res))
+      } else {
+        var success = true
+        val res = excelMediaInformation.checkFields.map(c => {
+          val res = checkFields(submissionFile, mainFile, excelMediaInformation, c)
+          if (!res.success) {
+            success = false
+          }
+
+          res
+        })
+        CheckResultTask(success, res)
+      }
     } catch {
-      case e: NotImplementedFunctionException => CheckResult(errorMsg = f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
-      case _: NullPointerException => CheckResult(errorMsg = "Ungültige Konfiguration")
-      case e: Throwable => CheckResult(errorMsg = f"Bei der Überprüfung ist ein Fehler aufgetretten: '${e.getMessage}'")
+      case e: NotImplementedFunctionException => generateCheckResultError(f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
+      case _: NullPointerException => generateCheckResultError("Ungültige Konfiguration")
+      case e: Throwable => generateCheckResultError(f"Bei der Überprüfung ist ein Fehler aufgetreten: '${e.getMessage}'")
     }
   }
 
-  private def getSubmissionFile(submissionID: Int): File = {
-    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-    new File(submissionPath)
-  }
+  private def checkFields(
+                           submissionFile: File,
+                           mainFile: File,
+                           excelMediaInformation: ExcelMediaInformation,
+                           checkFields: ExcelMediaInformationCheck
+                         ): CheckResult = {
+    val userRes = this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
+    val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
 
-  private def getMainFile(ccId: Int): File = {
-    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
-    new File(mainFilePath)
+    this.compare(userRes, expectedRes)
   }
 
   private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): CheckResult = {
@@ -99,23 +115,31 @@ class ExcelCheckerService extends CheckerService {
     CheckResult(res, invalidFields, extInfo)
   }
 
+  private def generateCheckResultError(errorMsg: String): CheckResultTask = {
+    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg)))
+  }
+
+  private def getSubmissionFile(submissionID: Int): File = {
+    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
+    new File(submissionPath)
+  }
+
+  private def getMainFile(ccId: Int): File = {
+    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
+    new File(mainFilePath)
+  }
+
   private def buildResultText(success: Boolean,
-                              results: List[CheckResult],
+                              results: List[CheckResultTask],
                               excelMediaInformation: ExcelMediaInformationTasks): String = {
     if (success) {
       "OK"
     } else {
-      var correct = 0
-      val hints = results.zip(excelMediaInformation.tasks).map(t => {
-        if (t._1.success) correct += 1
-        t
-      }).filter(t => !t._2.hideInvalidFields && !t._1.success).map(t => {
-        if (t._1.errorMsg.nonEmpty) {
-          f"${t._2.name}: ${t._1.errorMsg}"
-        } else {
-          f"${t._2.name}: Die Zelle/-n '${t._1.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
-        }
-      }).mkString("\n")
+      val correct = results.count(c => c.success)
+      val hints = results.zip(excelMediaInformation.tasks)
+        .filter(t => !t._1.success)
+        .map(t => buildTaskResultText(t._1, t._2))
+        .mkString("\n")
       val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
       if (hints.nonEmpty) {
@@ -124,6 +148,43 @@ class ExcelCheckerService extends CheckerService {
         res
       }
     }
+  }
+
+  private def buildTaskResultText(result: CheckResultTask, task: ExcelMediaInformation) = {
+    if (task.checkFields.isEmpty) {
+      buildLegacyTaskResultText(result, task)
+    } else {
+      result.checkResult.zip(task.checkFields)
+        .filter(shouldBuildCheckResult)
+        .map(c => buildCheckResult(c._1, c._2, task))
+        .mkString("\n")
+    }
+  }
+
+  private def buildLegacyTaskResultText(result: CheckResultTask, task: ExcelMediaInformation) = {
+    if (result.checkResult.head.errorMsg.nonEmpty) {
+      f"${task.name}: ${result.checkResult.head.errorMsg}"
+    } else {
+      f"${task.name}: Die Zellen '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
+    }
+  }
+
+  private def buildCheckResult(result: CheckResult, check: ExcelMediaInformationCheck, task: ExcelMediaInformation) = {
+    if (result.errorMsg.nonEmpty) {
+      f"${task.name}: ${result.errorMsg}"
+    } else {
+      val errorMsg = if (check.errorMsg.nonEmpty) f"${check.errorMsg}" else ""
+
+      if (check.hideInvalidFields) {
+        f"${task.name}: $errorMsg"
+      } else {
+        f"${task.name}: Die Zellen '${result.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg"
+      }
+    }
+  }
+
+  private def shouldBuildCheckResult(c: (CheckResult, ExcelMediaInformationCheck)) = {
+    !c._1.success && (!c._2.hideInvalidFields || c._2.errorMsg.nonEmpty || c._1.errorMsg.nonEmpty)
   }
 
   private def buildExtendedRes(results: List[CheckResult], excelMediaInformation: ExcelMediaInformationTasks) = {
@@ -142,7 +203,11 @@ class ExcelCheckerService extends CheckerService {
   private def submitSubTasks(configurationId: Int, submissionId: Int, results: List[CheckResult],
                              excelMediaInformation: ExcelMediaInformationTasks): Unit = {
     results.zip(excelMediaInformation.tasks).foreach(r => {
-      val points = if (r._1.success) {1} else {0}
+      val points = if (r._1.success) {
+        1
+      } else {
+        0
+      }
 
       val subTask = subTaskService.getOrCrate(configurationId, r._2.name, 1)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
@@ -155,8 +220,26 @@ class ExcelCheckerService extends CheckerService {
     objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
   }
 
+  private def mergeCheckResult(c1: CheckResult, c2: CheckResult): CheckResult = {
+    CheckResult(c1.success && c2.success,
+      c1.invalidFields.appendedAll(c2.invalidFields),
+      mergeExtendedInfo(c1.extendedInfoExcel, c2.extendedInfoExcel),
+      c1.errorMsg.appendedAll(c2.errorMsg))
+  }
+
+  private def mergeExtendedInfo(extRes1: ExtendedInfoExcel, extRes2: ExtendedInfoExcel): ExtendedInfoExcel = {
+    ExtendedInfoExcel(expected = mergeExtendedInfoExcelObject(extRes1.expected, extRes2.expected),
+      result = mergeExtendedInfoExcelObject(extRes1.result, extRes2.result))
+  }
+
+  private def mergeExtendedInfoExcelObject(obj1: ExtendedInfoExcelObject, obj2: ExtendedInfoExcelObject): ExtendedInfoExcelObject = {
+    ExtendedInfoExcelObject(rows = obj1.rows ++ obj2.rows, head = obj1.head ++ obj2.head)
+  }
+
+  case class CheckResultTask(success: Boolean = false, checkResult: List[CheckResult])
+
   case class CheckResult(success: Boolean = false,
-                          invalidFields: List[String] = List(),
-                          extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
-                          errorMsg: String = "")
+                         invalidFields: List[String] = List(),
+                         extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
+                         errorMsg: String = "")
 }
