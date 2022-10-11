@@ -2,7 +2,10 @@
   <legend>Hallo</legend>
 </fieldset> -->
 
-<fieldset class="bordered-container" [ngClass]="{'y-scrollable': yScrollable, 'x-scrollable': xScrollable}">
+<fieldset
+  class="bordered-container"
+  [ngClass]="{ 'y-scrollable': yScrollable, 'x-scrollable': xScrollable }"
+>
   <legend *ngIf="title">{{ title }}</legend>
   <ng-content></ng-content>
 </fieldset>

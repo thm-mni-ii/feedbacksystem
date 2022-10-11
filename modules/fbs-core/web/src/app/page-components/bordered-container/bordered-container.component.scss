@@ -3,9 +3,22 @@
   border-radius: 5px;
   background-color: white;
   min-height: 100%;
+  max-height: 100%;
+  min-width: 80%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .bordered-container > legend {
   font-size: 16px;
   font-weight: bold;
+}
+
+.y-scrollable {
+  overflow: auto;
+}
+
+.x-scrollable {
+  overflow-x: auto;
+  overflow-y: hidden;
 }
