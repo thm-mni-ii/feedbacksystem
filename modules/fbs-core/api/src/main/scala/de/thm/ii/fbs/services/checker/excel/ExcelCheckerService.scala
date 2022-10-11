@@ -165,7 +165,7 @@ class ExcelCheckerService extends CheckerService {
     if (result.checkResult.head.errorMsg.nonEmpty) {
       f"${task.name}: ${result.checkResult.head.errorMsg}"
     } else {
-      f"${task.name}: Die Zelle/-n '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
+      f"${task.name}: Die Zellen '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
     }
   }
 
