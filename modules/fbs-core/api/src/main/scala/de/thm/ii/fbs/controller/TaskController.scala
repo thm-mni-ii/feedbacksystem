@@ -115,7 +115,7 @@ class TaskController {
     getTaskById(cid, tid, user)
   }
 
-  def getTaskById(cid: Int, tid: Int, user: User): Task = {
+  private def getTaskById(cid: Int, tid: Int, user: User): Task = {
     taskService.getOne(tid) match {
       case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER) {
         task.mediaInformation match {
