@@ -3,7 +3,7 @@
   width: 100%;
 }
 
-.box {
+app-bordered-container {
   width: 100%;
   height: 100%;
   padding: 5px;
@@ -12,39 +12,44 @@
 
 .grid {
   height: 100%;
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(10, 10%);
   grid-template-rows: repeat(10, 10%);
 }
 
 .results-grid {
+  margin-left: 30px;
   grid-row-start: 1;
   grid-row-end: 6;
-  grid-column-start: 2;
+  grid-column-start: 1;
   grid-column-end: 8;
 }
 
 .input-grid {
+  margin-left: 30px;
   margin-top: 30px;
   grid-row-start: 6;
   grid-row-end: 10;
-  grid-column-start: 2;
+  grid-column-start: 1;
   grid-column-end: 8;
 }
 
 .db-grid {
+  margin-right: 30px;
   margin-left: 10px;
   grid-row-start: 1;
   grid-row-end: 4;
   grid-column-start: 8;
-  grid-column-end: 10;
+  grid-column-end: 11;
 }
 
 .db-schema-grid {
+  margin-right: 30px;
   margin-left: 10px;
   margin-top: 30px;
   grid-row-start: 4;
   grid-row-end: 10;
   grid-column-start: 8;
-  grid-column-end: 10;
+  grid-column-end: 11;
 }
