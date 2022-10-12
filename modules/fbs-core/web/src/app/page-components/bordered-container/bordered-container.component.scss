@@ -1,4 +1,5 @@
 .bordered-container {
+  display: block;
   border: 1px solid;
   border-radius: 5px;
   background-color: white;
@@ -15,7 +16,9 @@
 }
 
 .y-scrollable {
-  overflow: auto;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .x-scrollable {
