@@ -1,4 +1,4 @@
-# formatting.py
+# Formatting.py
 
 # Checks if an element is a valid  String
 def isString(data):

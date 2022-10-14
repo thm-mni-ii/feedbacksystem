@@ -1,52 +1,54 @@
 # main.py
 
-import sys
-import requests
+"""System module."""
+import random  # pylint: disable=W0611
+import string  # pylint: disable=W0611
+import sys  # pylint: disable=W0611
+import requests  # pylint: disable=W0611
 from json_creator import parseSingleStatUploadDB
-import json
-import string
-import random
 
-"""
-#The following Code is for productive purposes
+# The following Code is for productive purposes
 
 client = sys.argv[2]
-if (len(sys.argv) < 3):
-        print("Zu wenige Argumente übergeben.")
-        print("Geben Sie als Argument die API an, von der die zu analysierende JSON aufgerufen werden soll.")
+if len(sys.argv) < 3:
+    print("Zu wenige Argumente übergeben.")
+    print(
+        "Geben Sie als Argument die API an, von der die "
+        "zu analysierende JSON aufgerufen werden soll."
+    )
 else:
-        urlAnswer = sys.argv[1]
-        answer = requests.get(urlAnswer, verify=False)
-        print(answer.json())
-        parseSingleStatUploadDB(answer.json(), client)
-"""
+    URL_ANSWER = sys.argv[1]
+    answer = requests.get(URL_ANSWER, verify=False, timeout=25)
+    print(answer.json())
+    parseSingleStatUploadDB(answer.json(), client)
 
-# The following Code is for debugging purposes
-
-client = (
-    "mongodb://admin:password@localhost:27017/"  # Define MongoDB for debugging purposes
-)
-for x in range(1):
-    testId = "".join(
-        random.SystemRandom().choice(string.ascii_letters + string.digits)
-        for _ in range(8)
-    )  # Generate random ID for the MongoDB
-idJson = "{id:'%s'}" % (testId)
-print(idJson)
-testdic = {
-    "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name HAVING AVG( Quantity ) > 3 * (SELECT AVG( QuantityX ) FROM SalesOrderItems) and AVG( Quantity1 ) > 4 or AVG( Quantity2 ) > 5 and MAX( Quantity3 ) > 6",
-    "passed": True,  # True if submission produced the right return in SQL-Runner
-    "resultText": "OK",
-    "userId": 1,
-    "attempt": 1,
-    "tid": 1,
-    "sid": testId,
-    "isSol": True,  # True solution is from docent
-}
-
-parseSingleStatUploadDB(testdic, client)
-# TestParseSingleStatUploadDB(testdic)
-
-# SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name HAVING AVG( Quantity ) > 3* (SELECT AVG( Quantity ) FROM SalesOrderItems)
-
-# SELECT customerName, customercity, customermail, ordertotal,salestotal FROM onlinecustomers as s inner join mitarbeiter as m on m=s WHERE salesId IS NULL having COUNT(CustomerID1) > 1 and COUNT(CustomerID2) > 2 or COUNT(CustomerID3) > 3 and COUNT(CustomerID4) > 4 or COUNT(CustomerID5) > 5 order by name desc
+# # The following Code is for debugging purposes
+# CLIENT = (
+#     # Define MongoDB for debugging purposes
+#     "mongodb://admin:password@localhost:27017/"
+# )
+# for x in range(1):
+#     TEST_ID = "".join(
+#         random.SystemRandom().choice(string.asciiletters + string.digits)
+#         for  in range(8)
+#     )  # Generate random ID for the MongoDB
+# ID_JSON = "{id:'%s'}" % (TEST_ID)
+# print(ID_JSON)
+# TESTDIC = {
+#     "submission": "SELECT rezept.titel, benutzer.benutzername "
+#                   "FROM rezept OUTER JOIN benutzer ON rezept.id_benutzer=benutzer.id_benutzer "
+#                   "WHERE (SELECT SUM(schritt_zutat.menge) AS Milch "
+#                   "FROM schritt_zutat OUTER JOIN zutat ON schritt_zutat.zutat = zutat.id_zutat "
+#                   "WHERE zutat.bezeichnung = 'Milch' AND schritt_zutat.id_rezept = rezept.id_rezept "
+#                   "GROUP BY zutat.id_zutat, schritt_zutat.id_rezept) > 200 "
+#                   "ORDER BY rezept.id_rezept;",
+#     "passed": False,  # True if submission produced the right return in SQL-Runner
+#     "resultText": "OK",
+#     "userId": 1,
+#     "attempt": 1,
+#     "tid": 8,
+#     "sid": TEST_ID,
+#     "cid": 5,
+#     "isSol": False,  # True solution is from docent
+# }
+# parse_single_stat_upload_db(TESTDIC, CLIENT)
