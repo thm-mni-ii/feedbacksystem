@@ -494,9 +494,6 @@ def insertTables(mydb, elem, my_uuid, client):
         record = jsonHavingAttribute(
             my_uuid, AWC.extract_having(elem["submission"], client)[0]
         )
-
-        print("record")
-        print(record)
         mycollection.insert_one(record)
     elif len(AWC.extract_having(elem["submission"], client)) > 1 and not isinstance(
         AWC.extract_having(elem["submission"], client), str
@@ -559,12 +556,5 @@ def jsonJoinAttribute(id, joinAttribute):
 
 
 def jsonHavingAttribute(id, havingAttribute):
-    print("havingAttribute")
-    print(havingAttribute)
-
     value = {"id": str(id), "havingAttribute": havingAttribute}
-
-    print("======")
-    print(value)
-
     return value
