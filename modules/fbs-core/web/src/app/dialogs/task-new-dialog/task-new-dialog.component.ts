@@ -264,13 +264,13 @@ export class TaskNewDialogComponent implements OnInit {
   // the deadline does not accept the nullable Value (*as it should according to Api) therefore is set to max DateTime!
   getDefaultDeadline() {
     if (this.datePickerDisabled) {
+      return new Date("9999-12-31 11:59:59").toISOString();
+    } else {
       const currentDateAndOneMonthLater = new Date();
       currentDateAndOneMonthLater.setMonth(
         currentDateAndOneMonthLater.getMonth() + 1
       );
       return currentDateAndOneMonthLater.toISOString();
-    } else {
-      return new Date("9999-12-31 11:59:59").toISOString();
     }
   }
 
