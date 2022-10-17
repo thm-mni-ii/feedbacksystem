@@ -19,6 +19,7 @@ import { of } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
+import { MatCheckbox } from "@angular/material/checkbox";
 
 const defaultMediaType = "text/plain";
 
@@ -258,11 +259,17 @@ export class TaskNewDialogComponent implements OnInit {
       });
   }
 
+  public datePickerDisabled: boolean = false;
+
   getDefaultDeadline() {
     const currentDateAndOneMonthLater = new Date();
     currentDateAndOneMonthLater.setMonth(
       currentDateAndOneMonthLater.getMonth() + 1
     );
     return currentDateAndOneMonthLater.toISOString();
+  }
+
+  public setMaxExpirationDate(event: MatCheckbox): void {
+    this.datePickerDisabled = event.checked;
   }
 }

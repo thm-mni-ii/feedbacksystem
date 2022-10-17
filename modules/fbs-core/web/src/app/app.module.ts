@@ -85,7 +85,6 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
-import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@angular/material-moment-adapter";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 
 @Injectable()
@@ -206,7 +205,6 @@ export const httpInterceptorProviders = [
   providers: [
     CookieService,
     httpInterceptorProviders,
-    { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useStrict: true } },
     {
       provide: MAT_DATE_FORMATS,
       useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
