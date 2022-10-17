@@ -216,7 +216,14 @@ export class TaskDetailComponent implements OnInit {
   }
 
   updateSubmissionContent(data: any) {
-    this.submissionData = data["content"];
+    let submissionData = data["content"];
+
+    // Only upload single file
+    if (Array.isArray(submissionData)) {
+      submissionData = submissionData[0];
+    }
+
+    this.submissionData = submissionData;
   }
 
   // TODO: there is no route for this
