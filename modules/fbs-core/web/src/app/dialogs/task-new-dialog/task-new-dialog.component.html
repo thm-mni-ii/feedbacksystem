@@ -60,7 +60,9 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-checkbox (change)="setMaxExpirationDate($event)">Ohne Deadline</mat-checkbox>
+    <mat-checkbox (change)="setMaxExpirationDate($event)"
+      >Ohne Deadline</mat-checkbox
+    >
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">

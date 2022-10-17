@@ -262,11 +262,15 @@ export class TaskNewDialogComponent implements OnInit {
   public datePickerDisabled: boolean = false;
 
   getDefaultDeadline() {
-    const currentDateAndOneMonthLater = new Date();
-    currentDateAndOneMonthLater.setMonth(
-      currentDateAndOneMonthLater.getMonth() + 1
-    );
-    return currentDateAndOneMonthLater.toISOString();
+    if (this.datePickerDisabled) {
+      const currentDateAndOneMonthLater = new Date();
+      currentDateAndOneMonthLater.setMonth(
+        currentDateAndOneMonthLater.getMonth() + 1
+      );
+      return currentDateAndOneMonthLater.toISOString();
+    } else {
+      return new Date("9999-12-31 11:59:59").toISOString();
+    }
   }
 
   public setMaxExpirationDate(event: MatCheckbox): void {
