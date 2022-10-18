@@ -70,8 +70,24 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     auth.globalRole match {
-      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => !getTaskById(cid, userTaskRes.taskID, auth).isPrivate)
+      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => isTaskPublic(cid, userTaskRes.taskID, auth))
       case _ => taskService.getTaskResults(cid, auth.id)
+    }
+  }
+
+  /**
+    * helper function that returns false if the task is not pubic and true if it is
+    * @param cid course id
+    * @param taskId task id
+    * @param auth User
+    * @return
+    */
+  def isTaskPublic(cid: Int, taskId: Int, auth: User): Boolean = {
+    try {
+      getTaskById(cid, taskId, auth)
+      true
+    } catch {
+      case _ => false
     }
   }
 
