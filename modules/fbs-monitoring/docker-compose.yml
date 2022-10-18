@@ -1,0 +1,39 @@
+version: '3'
+
+
+services:
+  grafana:
+    image: grafana/grafana:7.5.7
+    ports:
+      - 3001:3000
+    restart: unless-stopped
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    networks:
+      - grafana
+
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    ports:
+      - 9000:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+    networks:
+      - fbs-monitoring
+      - grafana
+
+
+volumes:
+  grafana-data:
+
+  prometheus-data:
+
+networks:
+  grafana:
+
+  fbs-monitoring:
+    external: true
+

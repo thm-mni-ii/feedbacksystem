@@ -72,3 +72,8 @@ url:
     time: 300
 storage:
   uploadDir: /upload-dir
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [health,info,prometheus]

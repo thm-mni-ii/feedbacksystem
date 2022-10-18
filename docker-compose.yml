@@ -54,6 +54,7 @@ services:
     networks:
       classroom:
       fbs:
+      fbs-monitoring:
     healthcheck:
       test: curl -k https://localhost:443
       timeout: 10s
@@ -162,3 +163,5 @@ services:
 networks:
   classroom:
   fbs:
+  fbs-monitoring:
+    external: true

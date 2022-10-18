@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 30s
+  scrape_timeout: 10s
+
+rule_files:
+  - alert.yml
+
+scrape_configs:
+  - job_name: 'spring-actuator'
+    scheme: https
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['feedbacksystem-core-1']
+    # only for development:
+    tls_config:
+      insecure_skip_verify: true
