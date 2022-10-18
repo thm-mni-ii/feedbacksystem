@@ -1,9 +1,9 @@
 # sel_attribute_checker.py
 
+from parser import parse_query
 import pro_attribute_checker as AC
-from parser import *
 
-selectCommands = [
+select_commands = [
     "sum",
     "count",
     "round",
@@ -24,51 +24,50 @@ equals = ["eq", "neq", "gte", "gt", "lt", "lte"]
 literal = []
 
 # Returns SelectionAttributes as a list if there is a where
-def selectWhere(json_file):
-    listTables = []
+def select_where(json_file):
+    list_tables = []
     if "where" in json_file:
-        isWhere = True
         for val1 in json_file["where"]:
             if isinstance(json_file["where"][val1], str):
                 if "." in json_file["where"][val1]:
-                    listTables.append(json_file["where"][val1].split(".")[1].lower())
+                    list_tables.append(json_file["where"][val1].split(".")[1].lower())
                 else:
-                    listTables.append(json_file["where"][val1].lower())
+                    list_tables.append(json_file["where"][val1].lower())
             if isinstance(json_file["where"][val1], dict):
                 for val2 in json_file["where"][val1]:
                     if isinstance(val2, str):
-                        if AC.singleSelectDict(val2) != []:
-                            listTables.extend(AC.singleSelectDict(val2))
+                        if AC.single_select_dict(val2):
+                            list_tables.extend(AC.single_select_dict(val2))
                         elif "." in val2:
-                            listTables.append(val2.split(".")[1].lower())
+                            list_tables.append(val2.split(".")[1].lower())
                         else:
-                            listTables.append(val2.lower())
+                            list_tables.append(val2.lower())
             for i in range(len(json_file["where"][val1])):
                 if isinstance(json_file["where"][val1][i], dict):
                     for val3 in json_file["where"][val1][i]:
-                        if val3 in selectCommands:
+                        if val3 in select_commands:
                             for val4 in json_file["where"][val1][i][val3]:
                                 if isinstance(val4, str):
                                     if "." in val4:
-                                        listTables.append(val4.split(".")[1].lower())
+                                        list_tables.append(val4.split(".")[1].lower())
                                     else:
-                                        listTables.append(val4.lower())
+                                        list_tables.append(val4.lower())
             if isinstance(json_file["where"][val1], list) and (
                 len(json_file["where"][val1]) > 1
             ):
                 if isinstance(json_file["where"][val1][1], dict):
-                    if AC.singleSelectDict(json_file["where"][val1][1]) != []:
-                        listTables.extend(
-                            AC.singleSelectDict(json_file["where"][val1][1])
+                    if AC.single_select_dict(json_file["where"][val1][1]):
+                        list_tables.extend(
+                            AC.single_select_dict(json_file["where"][val1][1])
                         )
                     if "literal" in json_file["where"][val1][1]:
                         literal.append(json_file["where"][val1][1]["literal"])
                 for elem in json_file["where"][val1]:
                     if isinstance(elem, str):
                         if "." in elem:
-                            listTables.append(elem.split(".")[1].lower())
+                            list_tables.append(elem.split(".")[1].lower())
                         else:
-                            listTables.append(elem.lower())
+                            list_tables.append(elem.lower())
             for i in range(len(json_file["where"][val1])):
                 if not isinstance(json_file["where"][val1][i], int):
                     for elem in json_file["where"][val1][i]:
@@ -79,13 +78,13 @@ def selectWhere(json_file):
                                         json_file["where"][val1][i][elem][j], str
                                     ):
                                         if "." in json_file["where"][val1][i][elem][j]:
-                                            listTables.append(
+                                            list_tables.append(
                                                 json_file["where"][val1][i][elem][
                                                     j
                                                 ].split(".")[1]
                                             )
                                         else:
-                                            listTables.append(
+                                            list_tables.append(
                                                 json_file["where"][val1][i][elem][j]
                                             )
                                     if isinstance(
@@ -94,7 +93,7 @@ def selectWhere(json_file):
                                         for elem1 in json_file["where"][val1][i][elem][
                                             j
                                         ]:
-                                            if elem1 in selectCommands:
+                                            if elem1 in select_commands:
                                                 if isinstance(
                                                     json_file["where"][val1][i][elem][
                                                         j
@@ -107,13 +106,13 @@ def selectWhere(json_file):
                                                             elem
                                                         ][j][elem1]
                                                     ):
-                                                        listTables.append(
+                                                        list_tables.append(
                                                             json_file["where"][val1][i][
                                                                 elem
                                                             ][j][elem1].split(".")[1]
                                                         )
                                                     else:
-                                                        listTables.append(
+                                                        list_tables.append(
                                                             json_file["where"][val1][i][
                                                                 elem
                                                             ][j][elem1]
@@ -124,100 +123,90 @@ def selectWhere(json_file):
                                                         j
                                                     ][elem1]
                                                 )
-                                        listTables.extend(
-                                            AC.singleSelectDict(
+                                        list_tables.extend(
+                                            AC.single_select_dict(
                                                 json_file["where"][val1][i][elem][j]
                                             )
                                         )
                         if elem == "where":
-                            listTables.extend(selectWhere(json_file["where"][val1][i]))
-    return set(listTables)
+                            list_tables.extend(
+                                select_where(json_file["where"][val1][i])
+                            )
+    return set(list_tables)
 
 
 # returns SelectionAttributes for a statement and uses herefor different arts of sql-statements
-def extractSelAttributes(json_file, client):
-    whereAttributes = []
+def extract_sel_attributes(json_file, client):
+    where_attributes = []
     json_file = parse_query(json_file, client)
     try:
-        if (selectWhere(json_file) is not None) and (selectWhere(json_file) != []):
-            whereAttributes.extend([selectWhere(json_file)])
+        if (select_where(json_file) is not None) and (select_where(json_file)):
+            where_attributes.extend([select_where(json_file)])
     except Exception as e:
-        # print(e)
-        whereAttributes = [["Unknown"]]
-    if len(whereAttributes) > 0:
-        return list(whereAttributes[0])
-    else:
-        return list(whereAttributes)
+        print(e)
+        where_attributes = [["Unknown"]]
+    if len(where_attributes) > 0:
+        return list(where_attributes[0])
+    return list(where_attributes)
 
 
-def extractOrderBy(json_file, client):
+def extract_order_by(json_file, client):
     json_file = parse_query(json_file, client)
-    groupBy = []
-    groupByList = list(iterate(json_file, "orderby"))
-    for s in groupByList:
+    order_by = []
+    order_by_list = list(iterate(json_file, "orderby"))
+    for s in order_by_list:
         value = []
-        value.append(s["value"])
         try:
-            value.append(s["sort"])
-        except Exception as e:
-            value.append("asc")
-        groupBy.append(value)
-    if len(groupBy) == 0:
-        groupBy = "Unknown"
-    return groupBy
+            value.append(s["value"])
+            if "sort" in s:
+                value.append(s["sort"])
+            else:
+                value.append("asc")
+            order_by.append(value)
+        except Exception:
+            for y in s:
+                value = []
+                value.append(y["value"])
+                try:
+                    value.append(y["sort"])
+                except Exception:
+                    value.append("asc")
+                order_by.append(value)
+    if len(order_by) == 0:
+        order_by = "Unknown"
+    return order_by
 
 
-def extractGroupBy(json_file, client):
+def extract_group_by(json_file, client):
     json_file = parse_query(json_file, client)
-    groupBy = []
-    groupByList = list(iterate(json_file, "groupby"))
-    for s in groupByList:
-        groupBy.append(s["value"])
-    if len(groupBy) == 0:
-        groupBy = "Unknown"
-    return groupBy
+    group_by = []
+    group_by_list = list(iterate(json_file, "groupby"))
+    for s in group_by_list:
+        try:
+            group_by.append(s["value"])
+        except Exception:
+            for y in s:
+                group_by.append(y["value"])
+    if len(group_by) == 0:
+        group_by = "Unknown"
+    return group_by
 
 
 def extract_having(json_file, client):
     json_file = parse_query(json_file, client)
-    all_havings = []
+    all_having = []
     having = []
     having_list = list(iterate(json_file, "having"))
-    print(having_list)
-
-    # aufteilen bei Bedarf aber complex
-
     att = []  # customerId
     att_operator = []  # count
     att_op_compare = []  # gt...
     val_compare = []  # value example 5
-    having_order = []  # end result
-
     for s in having_list:
         parse_one_cond(s, having, att, att_operator, att_op_compare, val_compare)
-
-    # aufteilen bei Bedarf aber complex
-    """
-    i = 0
-    for s in having:
-        listWithCond = []
-
-        if s == 'count' : # with gt equals: or s == 'gt'
-            listWithCond.append(s)
-        else:
-            havingOrder.append(s)
-        if s == 'count':
-            listWithCond.append(att[i])
-            listWithCond.append(valCompare[i])
-            i = i + 1
-            havingOrder.append(listWithCond)
-
-    """
-
-    all_havings.append(having) # or having_order
-    if len(all_havings) == 0:
-        all_havings = "Unknown"
-    return all_havings
+    all_having.append(having)  # or having_order
+    if len(all_having) == 0:
+        all_having = "Unknown"
+    return all_having
 
 
 def iterate(data, param):
@@ -232,75 +221,62 @@ def iterate(data, param):
                 yield from iterate(item, param)
 
 
-def parse_one_cond(s, having, att, att_operator, att_op_compare, val_compare):
-
-    if type(s) is dict:
+def parse_one_cond(  # pylint: disable = R1710
+    s, having, att, att_operator, att_op_compare, val_compare
+):  # pylint: disable=R1710
+    if isinstance(s, dict):
         for i in s.values():
-            if type(i) is str:
+            if isinstance(i, str):
                 having.append(i)
-
-            if type(i) is dict:
+            if isinstance(i, dict):
                 key, values = get_vals_and_keys(i)
-
-                if type(key) is not dict and type(key) is not list:
+                if not isinstance(key, dict) and not isinstance(key, list):
                     having.append(key)
-                if type(values) is not dict and type(values) is not list:
+                if not isinstance(key, dict) and not isinstance(key, list):
                     having.append(values)
-
-                if type(values) is dict:
+                if isinstance(values, dict):
                     key1, values1 = get_vals_and_keys(values)
-
-                    if type(key1) is not dict and type(key1) is not list:
+                    if not isinstance(key1, dict) and not isinstance(key1, list):
                         having.append(key1)
-                    if type(values1) is str:
+                    if isinstance(values1, str):
                         having.append(values1)
-
-                    if type(values1) is dict:
+                    if isinstance(values1, dict):
                         key2, values2 = get_vals_and_keys(values1)
-
-                        if type(key2) is not dict and type(key2) is not list:
+                        if not isinstance(key2, dict) and not isinstance(key2, list):
                             having.append(key2)
-                        if type(values2) is not dict and type(values2) is not list:
+                        if isinstance(values2, dict) and not isinstance(values2, list):
                             having.append(values2)
-
         for i in s:  # keys
-
-            if type(i) is not dict and type(i) is not list:
+            if not isinstance(values2, dict) and not isinstance(values2, list):
                 having.append(i)
-
-            if type(s[i]) is not str:
+            if not isinstance(s[i], str):
                 for t in s[i]:
-
-                    if type(t) is not str:
-
-                        if type(t) is int:
-                            if type(t) is not dict and type(t) is not list:
+                    if not isinstance(t, str):
+                        if isinstance(t, int):
+                            if not isinstance(t, dict) and not isinstance(t, list):
                                 having.append(t)
-
-                        if type(t) is dict:
+                        if isinstance(t, dict):
                             values = list(t.values())
                             keys = list(t.keys())
-
-                            if type(keys[0]) is not dict and type(keys[0]) is not list:
+                            if not isinstance(keys[0], dict) and not isinstance(
+                                keys[0], list
+                            ):
                                 having.append(keys[0])
-                            if (
-                                type(values[0]) is not dict
-                                and type(values[0]) is not list
+                            if not isinstance(values[0], dict) and not isinstance(
+                                values[0], list
                             ):
                                 having.append(values[0])
-
                             if len(values) > 0:
-                                for s in values:
-                                    if type(s) is not str:
-                                        for t in s:
-                                            if (
-                                                type(t) is not dict
-                                                and type(t) is not list
-                                            ):
-                                                having.append(t)
-                                            if type(t) is dict:
+                                for f in values:
+                                    if not isinstance(f, str):
+                                        for r in f:
+                                            if not isinstance(
+                                                r, dict
+                                            ) and not isinstance(r, list):
+                                                having.append(r)
+                                            if isinstance(r, dict):
                                                 parse_one_cond(
-                                                    t,
+                                                    r,
                                                     having,
                                                     att,
                                                     att_operator,
@@ -310,8 +286,8 @@ def parse_one_cond(s, having, att, att_operator, att_op_compare, val_compare):
         return having
 
 
-def get_vals_and_keys(s):
-    if type(s) is dict:
+def get_vals_and_keys(s):  # pylint: disable=R1710
+    if isinstance(s, dict):
         keys_list = list(s.keys())
         values = list(s.values())
         return keys_list[0], values[0]

@@ -60,7 +60,7 @@ class CourseRegistrationService {
     * @return List of courses
     */
   def getRegisteredCourses(uid: Int, ignoreHidden: Boolean = true): List[Course] = DB.query(
-    "SELECT course_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = ?"
+    "SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = ?"
       + (if (ignoreHidden) " AND visible = 1" else ""),
     (res, _) => parseCourseResult(res), uid)
 
@@ -87,6 +87,7 @@ class CourseRegistrationService {
   }
 
   private def parseCourseResult(res: ResultSet): Course = Course(
+    semesterId = Some(res.getInt("semester_id")),
     name = res.getString("name"),
     description = res.getString("description"),
     visible = res.getBoolean("visible"),

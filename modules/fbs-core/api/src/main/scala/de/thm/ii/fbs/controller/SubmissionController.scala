@@ -118,7 +118,7 @@ class SubmissionController {
         case Some(task) =>
           val expectedMediaType = task.mediaType
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
-          if (Instant.now().isAfter(Instant.parse(task.deadline))) {
+          if (task.deadline.isDefined && Instant.now().isAfter(Instant.parse(task.deadline.get))) {
             throw new BadRequestException("Deadline Before Now")
           }
           if (true) { // TODO: Check media type compatibility

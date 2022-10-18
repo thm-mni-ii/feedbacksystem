@@ -1,39 +1,34 @@
-# Formatting.py
+# formatting.py
 
 # Checks if an element is a valid  String
-def isString(data):
+def is_string(data):
     if isinstance(data, str):
         return True
-    else:
-        return False
+    return False
 
 
 # Checks if an element is a dictionary
-def isDict(data):
+def is_dict(data):
     if isinstance(data, dict):
         return True
-    else:
-        return False
+    return False
 
 
 # Checks if 'from' is in JSON
-def isFrom(data):
+def is_from(data):
     if "from" in data:
         return True
-    else:
-        return False
+    return False
 
 
 # Checks if 'select' is in JSON
-def isSelect(data):
+def is_select(data):
     if "select" in data:
         return True
-    else:
-        return False
+    return False
 
 
-def isOrderBy(data):
+def is_order_by(data):
     if "orderby" in data:
         return True
-    else:
-        return False
+    return False

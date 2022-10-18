@@ -172,6 +172,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   private submit() {
+    this.pending = true;
     const token = this.authService.getToken();
     this.submissionService
       .submitSolution(
@@ -182,7 +183,6 @@ export class TaskDetailComponent implements OnInit {
       )
       .subscribe(
         () => {
-          this.pending = true;
           this.refreshByPolling(true);
           this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
             duration: 3000,
@@ -216,7 +216,14 @@ export class TaskDetailComponent implements OnInit {
   }
 
   updateSubmissionContent(data: any) {
-    this.submissionData = data["content"];
+    let submissionData = data["content"];
+
+    // Only upload single file
+    if (Array.isArray(submissionData)) {
+      submissionData = submissionData[0];
+    }
+
+    this.submissionData = submissionData;
   }
 
   // TODO: there is no route for this

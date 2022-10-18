@@ -61,6 +61,22 @@ class DatabaseMigrationService {
       .foreach(migration => DB.batchUpdate(migration: _*))
   }
 
+  def resetDatabase(): Unit = {
+    this.deleteAllTables();
+    this.migrate();
+  }
+
+  private def deleteAllTables(): Unit = {
+    val dropQueries = DB.query(
+      """
+        |SELECT concat('DROP TABLE `', table_name, '`;')
+        |FROM information_schema.tables
+        |WHERE table_schema = DATABASE();
+        |""".stripMargin, (res, _) => res.getString(1))
+    val dropQueriesWithSet = Seq("SET FOREIGN_KEY_CHECKS = 0;") ++ dropQueries ++ Seq("SET FOREIGN_KEY_CHECKS = 0;")
+    DB.batchUpdate(dropQueriesWithSet: _*)
+  }
+
   private def listMigrations(): Array[Resource] = this.resourceResolver.getResources("migrations/*.sql")
     .sortBy(resource => resource.getFilename)
 

@@ -1,0 +1,48 @@
+name: SQL Checker
+
+on:
+  push:
+    branches: [dev, main, v*.x]
+    tags:
+      - v**
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./modules/fbs-sql-checker
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+      - name: Install library
+        run: poetry install --no-interaction  --only dev
+      - run: |
+          poetry run pylint api
+        name: Run Pylint
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./modules/fbs-sql-checker
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+      - name: Install library
+        run: poetry install --no-interaction  --only dev
+      - run: |
+          poetry run black --check --diff api
+        name: Run Black

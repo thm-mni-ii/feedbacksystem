@@ -17,6 +17,7 @@ import { ParticipantsComponent } from "./tool-components/participants/participan
 import { GoToComponent } from "./page-components/goto/goto.component";
 import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.component";
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
+import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -68,6 +69,13 @@ const routes: Routes = [
       {
         path: "courses/:id/sql-checker-results/:tid",
         component: SqlCheckerResultsComponent,
+        canActivate: [AuthGuard],
+      },
+
+      //sql playground
+      {
+        path: "sqlplayground",
+        component: SqlPlaygroundComponent,
         canActivate: [AuthGuard],
       },
 

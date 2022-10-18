@@ -58,9 +58,12 @@ object MediaInformation {
 
 case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation])
 case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
-                                       outputFields: String, name: String, hideInvalidFields: Boolean = false) extends MediaInformation
+                                 @deprecated("Use checkFields instead") outputFields: String, checkFields: List[ExcelMediaInformationCheck] = List(),
+                                 name: String, hideInvalidFields: Boolean = false) extends MediaInformation
 
 case class  ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
+
+case class ExcelMediaInformationCheck(range: String, hideInvalidFields: Boolean = false, errorMsg: String = "")
 
 /**
   * The Spreadsheet Media Information

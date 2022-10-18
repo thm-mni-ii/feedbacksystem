@@ -1,10 +1,10 @@
 # pro_attribute_checker.py
 
+from parser import parse_query
+from sel_attribute_checker import select_where
 import formatting as f
-from sel_attribute_checker import *
-from parser import *
 
-selectCommands = [
+select_commands = [
     "sum",
     "count",
     "round",
@@ -23,14 +23,14 @@ selectCommands = [
 
 
 # Return ProjectionAttributes as a List
-def listOfSelect(json_file):
+def list_of_select(json_file):
     selects = []
-    if not (f.isString(json_file)) and (f.isSelect(json_file)):
+    if not (f.is_string(json_file)) and (f.is_select(json_file)):
         if isinstance(json_file["select"], list):
             for val in range(len(json_file["select"])):
                 if "value" in json_file["select"][val]:
                     for val1 in json_file["select"][val]["value"]:
-                        if val1 in selectCommands:
+                        if val1 in select_commands:
                             if isinstance(json_file["select"][val]["value"][val1], str):
                                 if "." in json_file["select"][val]["value"][val1]:
                                     selects.append(
@@ -54,7 +54,7 @@ def listOfSelect(json_file):
                                         for elem1 in json_file["select"][val]["value"][
                                             val1
                                         ][i]:
-                                            if elem1 in selectCommands:
+                                            if elem1 in select_commands:
                                                 if isinstance(
                                                     json_file["select"][val]["value"][
                                                         val1
@@ -120,7 +120,7 @@ def listOfSelect(json_file):
                                                             ]:
                                                                 if (
                                                                     elem3
-                                                                    in selectCommands
+                                                                    in select_commands
                                                                 ):
                                                                     if (
                                                                         "."
@@ -208,30 +208,29 @@ def listOfSelect(json_file):
 
 
 # Returns a single ProjectionAttribute
-def singleSelect(json_file):
+def single_select(json_file):
     selects = []
-    if not (f.isString(json_file)) and (f.isSelect(json_file)):
+    if not (f.is_string(json_file)) and (f.is_select(json_file)):
         if isinstance(json_file["select"], str):
             if "." in json_file["select"]:
-                selects.apend(json_file["select"].split(".")[1].lower())
+                selects.append(json_file["select"].split(".")[1].lower())
             else:
                 selects.append(json_file["select"].lower())
         for val in json_file["from"]:
             if val == "value":
-                if selectUnion(json_file["from"]["value"]) != []:
-                    selects.extend(selectUnion(json_file["from"]["value"]))
-                if listOfSelect(json_file["from"]["value"]) != []:
-                    selects.extend(listOfSelect(json_file["from"]["value"]))
-                if selectWhere(json_file["from"]["value"]) != []:
-                    selects.append(selectWhere(json_file["from"]["value"]))
-    [x.lower() for x in selects]
+                if select_union(json_file["from"]["value"]):
+                    selects.extend(select_union(json_file["from"]["value"]))
+                if list_of_select(json_file["from"]["value"]):
+                    selects.extend(list_of_select(json_file["from"]["value"]))
+                if select_where(json_file["from"]["value"]):
+                    selects.append(select_where(json_file["from"]["value"]))
     return set(selects)
 
 
 # Returns a single ProjectionAttribute if it's a dictionary
-def singleSelectDict(json_file):
+def single_select_dict(json_file):
     selects = []
-    if not (f.isString(json_file)) and (f.isSelect(json_file)):
+    if not (f.is_string(json_file)) and (f.is_select(json_file)):
         if isinstance(json_file["select"], dict):
             if "value" in json_file["select"]:
                 if isinstance(json_file["select"]["value"], str):
@@ -243,7 +242,7 @@ def singleSelectDict(json_file):
                         selects.append(json_file["select"]["value"].lower())
                 elif isinstance(json_file["select"]["value"], dict):
                     for val in json_file["select"]["value"]:
-                        if val in selectCommands:
+                        if val in select_commands:
                             if isinstance(json_file["select"]["value"][val], dict):
                                 if "value" in json_file["select"]["value"][val]:
                                     if (
@@ -260,7 +259,7 @@ def singleSelectDict(json_file):
                                             json_file["select"]["value"][val]["value"]
                                         )
                                 for elem in json_file["select"]["value"][val]:
-                                    if (elem in selectCommands) and (
+                                    if (elem in select_commands) and (
                                         isinstance(
                                             json_file["select"]["value"][val][elem],
                                             dict,
@@ -269,7 +268,7 @@ def singleSelectDict(json_file):
                                         for elem1 in json_file["select"]["value"][val][
                                             elem
                                         ]:
-                                            if elem1 in selectCommands and isinstance(
+                                            if elem1 in select_commands and isinstance(
                                                 json_file["select"]["value"][val][elem][
                                                     elem1
                                                 ],
@@ -333,47 +332,51 @@ def singleSelectDict(json_file):
                                                         i
                                                     ]["value"].lower()
                                                 )
-    [x.lower() for x in selects]
     return set(selects)
 
 
 # Returns ProjectionAttributes as a List if it is a union
-def selectUnion(json_file):
-    listTables = []
-    if not (f.isString(json_file)):
+def select_union(json_file):
+    list_tables = []
+    if not f.is_string(json_file):
         for val in json_file:
             if val == "union":
                 for val1 in range(len(json_file["union"])):
-                    if listOfSelect(json_file["union"][val1]) != []:
-                        for elem in listOfSelect(json_file[val][val1]):
+                    if list_of_select(json_file["union"][val1]):
+                        for elem in list_of_select(json_file[val][val1]):
                             if not isinstance(elem, dict):
-                                listTables.append(elem.lower())
-                    if selectWhere(json_file["union"][val1]) != []:
-                        if len(selectWhere(json_file["union"][val1])) == 1:
-                            listTables.append(
-                                selectWhere(json_file["union"][val1])[0].lower()
+                                list_tables.append(elem.lower())
+                    if select_where(json_file["union"][val1]):
+                        if len(select_where(json_file["union"][val1])) == 1:
+                            list_tables.append(
+                                select_where(  # pylint: disable=E1136
+                                    json_file["union"][val1]
+                                )[  # pylint: disable=E1136
+                                    0
+                                ].lower()  # pylint: disable=E1136
                             )
                         else:
-                            for elem in selectWhere(json_file["union"][val1]):
-                                listTables.append(elem.lower())
-    return set(listTables)
+                            for elem in select_where(json_file["union"][val1]):
+                                list_tables.append(elem.lower())
+    return set(list_tables)
 
 
 # returns ProjectionAttributes for a statement and uses herefor different arts of sql-statements
-def extractProAttributes(json_file, client):
+def extract_pro_attributes(json_file, client):
     attributes = []
     json_file = parse_query(json_file, client)
     try:
-        if (singleSelectDict(json_file) is not None) and (
-            singleSelectDict(json_file) != []
+        if (single_select_dict(json_file) is not None) and (
+            single_select_dict(json_file)
         ):
-            attributes.extend(singleSelectDict(json_file))
-        if (singleSelect(json_file) is not None) and (singleSelect(json_file) != []):
-            attributes.extend(singleSelect(json_file))
-        if (selectUnion(json_file) is not None) and (selectUnion(json_file) != []):
-            attributes.extend(selectUnion(json_file))
-        if (listOfSelect(json_file) is not None) and (listOfSelect(json_file) != []):
-            attributes.extend(listOfSelect(json_file))
+            attributes.extend(single_select_dict(json_file))
+        if (single_select(json_file) is not None) and (single_select(json_file)):
+            attributes.extend(single_select(json_file))
+        if (select_union(json_file) is not None) and (select_union(json_file)):
+            attributes.extend(select_union(json_file))
+        if (list_of_select(json_file) is not None) and (list_of_select(json_file)):
+            attributes.extend(list_of_select(json_file))
     except Exception as e:
+        print(e)
         attributes = ["Unknown"]
     return list(attributes)

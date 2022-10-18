@@ -9,6 +9,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
+import { CheckerFileType } from "../../enums/checkerFileType";
 
 @Component({
   selector: "app-configuration-list",
@@ -152,7 +153,12 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadMainFile(checker: CheckerConfig) {
     if (checker.mainFileUploaded) {
-      this.checkerService.getMainFile(this.courseId, this.taskId, checker.id);
+      this.checkerService.getFile(
+        this.courseId,
+        this.taskId,
+        checker.id,
+        CheckerFileType.MainFile
+      );
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
     }
@@ -160,10 +166,11 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadSecondaryFile(checker: CheckerConfig) {
     if (checker.secondaryFileUploaded) {
-      this.checkerService.getSecondaryFile(
+      this.checkerService.getFile(
         this.courseId,
         this.taskId,
-        checker.id
+        checker.id,
+        CheckerFileType.SecondaryFile
       );
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });

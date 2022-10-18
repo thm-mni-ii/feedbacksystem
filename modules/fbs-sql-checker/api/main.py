@@ -5,7 +5,7 @@ import random  # pylint: disable=W0611
 import string  # pylint: disable=W0611
 import sys  # pylint: disable=W0611
 import requests  # pylint: disable=W0611
-from json_creator import parseSingleStatUploadDB
+from json_creator import parse_single_stat_upload_db
 
 # The following Code is for productive purposes
 
@@ -20,7 +20,7 @@ else:
     URL_ANSWER = sys.argv[1]
     answer = requests.get(URL_ANSWER, verify=False, timeout=25)
     print(answer.json())
-    parseSingleStatUploadDB(answer.json(), client)
+    parse_single_stat_upload_db(answer.json(), client)
 
 # # The following Code is for debugging purposes
 # CLIENT = (
@@ -29,8 +29,8 @@ else:
 # )
 # for x in range(1):
 #     TEST_ID = "".join(
-#         random.SystemRandom().choice(string.asciiletters + string.digits)
-#         for  in range(8)
+#         random.SystemRandom().choice(string.ascii_letters + string.digits)
+#         for _ in range(8)
 #     )  # Generate random ID for the MongoDB
 # ID_JSON = "{id:'%s'}" % (TEST_ID)
 # print(ID_JSON)
