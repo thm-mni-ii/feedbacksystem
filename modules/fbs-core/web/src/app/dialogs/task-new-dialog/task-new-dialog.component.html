@@ -37,7 +37,6 @@
       <mat-label>Deadline</mat-label>
       <input
         matInput
-        [disabled]="datePickerDisabled"
         [ngxMatDatetimePicker]="picker"
         placeholder="Deadline"
         formControlName="deadline"
@@ -60,25 +59,19 @@
       </mat-select>
     </mat-form-field>
 
-
-    <!-- checkBox for unspecified deadline -->
-   
-    <mat-checkbox (change)="setMaxExpirationDate($event)">Ohne Deadline</mat-checkbox>
-    
     <!-- limit the number of submission -->
     <div class="submitLimiter">
       <mat-checkbox formControlName="limiterCheckbox">
         Anzahl der Versuche</mat-checkbox
       >
-      <form class="example-form">
-        <mat-form-field class="example-full-width" appearance="fill">
-          <input
-            matInput
-            type="number"
-            formControlName="submitLimiter"
-          />
-        </mat-form-field>
-      </form>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <input
+          matInput
+          type="number"
+          formControlName="submitLimiter"
+          (change)="addLimitTask($event)"
+        />
+      </mat-form-field>
     </div>
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">

@@ -3,7 +3,7 @@ export interface Task {
   name: string;
   description?: string;
   deadline?: string;
-  submitLimiter: number;
+  submitLimiter?: number;
   mediaType?: string;
   mediaInformation?:
     | SpreadsheetMediaInformation

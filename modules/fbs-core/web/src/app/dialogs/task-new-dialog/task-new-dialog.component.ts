@@ -20,6 +20,8 @@ import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { MatSlideToggleChange } from "@angular/material/slide-toggle";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { MatInput } from "@angular/material/input";
 
 const defaultMediaType = "text/plain";
 
@@ -44,13 +46,12 @@ export class TaskNewDialogComponent implements OnInit {
     outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
-    limiterCheckBox: new UntypedFormControl(false),
   });
   isUpdate: boolean;
   courseId: number;
   task: Task = {
     deadline: this.getDefaultDeadline(),
-    submitLimiter: 0,
+    submitLimiter: null,
     description: "",
     mediaType: "",
     name: "",
@@ -230,6 +231,10 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.deadline = event.value.toISOString();
   }
 
+  addLimitTask(event: any) {
+    this.task.submitLimiter = event.value;
+  }
+
   uploadExel(event: Event) {
     const file = (event.currentTarget as any).files[0];
     this.spreadsheet = file;
@@ -263,23 +268,11 @@ export class TaskNewDialogComponent implements OnInit {
       });
   }
 
-
-  public datePickerDisabled = false;
-
   getDefaultDeadline() {
-    if (!this.datePickerDisabled) {
-      const currentDateAndOneMonthLater = new Date();
-      currentDateAndOneMonthLater.setMonth(
-        currentDateAndOneMonthLater.getMonth() + 1
-      );
-      return currentDateAndOneMonthLater.toISOString();
-    } else {
-      return null;
-    }
+    const currentDateAndOneMonthLater = new Date();
+    currentDateAndOneMonthLater.setMonth(
+      currentDateAndOneMonthLater.getMonth() + 1
+    );
+    return currentDateAndOneMonthLater.toISOString();
   }
-  // disables the Date
-  public setMaxExpirationDate(event: MatSlideToggleChange): void {
-    this.datePickerDisabled = event.checked;
-  }
-
 }
