@@ -2,7 +2,7 @@
 name = "fbs-sql-checker"
 version = "0.1.0"
 description = ""
-authors = ["jonas <jonas.woelfer@mnd.thm.de>"]
+authors = ["Technische Hochschule Mittelhessen"]
 readme = "README.md"
 packages = [{ include = "api"}]
 

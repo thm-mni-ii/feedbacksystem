@@ -1,15 +1,27 @@
-FROM python:3.10
+# inspired by https://github.com/python-poetry/poetry/issues/1178#issuecomment-1238475183
+FROM python:3.10 AS builder
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
-RUN pip install poetry
+RUN pip install poetry && poetry config virtualenvs.in-project true
 
-WORKDIR /app
-COPY poetry.lock pyproject.toml README.md /app/
+WORKDIR "/app"
+COPY . .
 
-COPY api /app/api
+RUN poetry install --only main --no-dev
 
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction
+FROM python:3.10-alpine
 
-CMD ["sh", "-c", "python3 /app/api/main.py $api $mongodb"]
+WORKDIR "/app"
+
+RUN adduser \
+  --disabled-password \
+  --home "$(pwd)" \
+  --no-create-home \
+  "app"
+USER app
+
+COPY --from=builder "/app" .
+
+CMD ["sh", "-c", "./.venv/bin/python api/main.py $api $mongodb"]
