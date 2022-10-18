@@ -17,6 +17,12 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("mediaType") mediaType: String,
                 @JsonProperty("description") description: String = "",
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
+                @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
                 @JsonProperty("id") id: Int = 0,
                 @JsonProperty("courseID") courseID: Int = 0
-)
+               )
+
+object Task {
+  val requirementTypes: Array[String] = Array("mandatory", "optional")
+  val defaultRequirement: String = requirementTypes(0)
+}

@@ -68,12 +68,14 @@ class CourseController {
     if (authService.authorize(req, res).globalRole == GlobalRole.USER) {
       throw new ForbiddenException()
     }
-    ( body.retrive("name").asText(),
+    (
+      body.retrive("semesterId").asInt(),
+      body.retrive("name").asText(),
       body.retrive("description").asText(),
       body.retrive("visible").asBool()
     ) match {
-      case (Some(name), desc, visible) =>
-        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true)))
+      case (semesterId, Some(name), desc, visible) =>
+        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
@@ -117,12 +119,14 @@ class CourseController {
 
     (user.globalRole, someCourseRole) match {
       case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
-        ( body.retrive("name").asText(),
+        (
+          body.retrive("semester").asInt(),
+          body.retrive("name").asText(),
           body.retrive("description").asText(),
           body.retrive("visible").asBool()
         ) match {
-          case (Some(name), desc, visible) =>
-            courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true)))
+          case (semesterId, Some(name), desc, visible) =>
+            courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
           case _ => throw new BadRequestException("Malformed Request Body")
         }
       case _ => throw new ForbiddenException()

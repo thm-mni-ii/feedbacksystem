@@ -1,0 +1,49 @@
+.container {
+  display: block;
+  padding: 16px;
+}
+
+.grid {
+  height: 85vh;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.results-grid > app-bordered-container {
+height: 100%;
+}
+
+.results-grid {
+  grid-row-start: 1;
+  grid-row-end: 6;
+  grid-column-start: 1;
+  grid-column-end: 8;
+}
+
+.input-grid {
+  margin-top: 20px;
+  grid-row-start: 6;
+  grid-row-end: 10;
+  grid-column-start: 1;
+  grid-column-end: 8;
+}
+
+.db-grid {
+  grid-row-start: 1;
+  grid-row-end: 4;
+  grid-column-start: 8;
+  grid-column-end: 11;
+  padding: none;
+}
+
+.db-schema-grid {
+  margin-top: 20px;
+  grid-row-start: 4;
+  grid-row-end: 10;
+  grid-column-start: 8;
+  grid-column-end: 11;
+}
