@@ -14,7 +14,7 @@ function dockerPush(){
     docker push thmmniii/fbs-core:$tag
     docker push thmmniii/fbs-runner:$tag
     docker push thmmniii/fbs-runtime-bash:$tag
-    docker push thmmniii/fbs-sql-checker$tag
+    docker push thmmniii/fbs-sql-checker:$tag
 }
 
 echo "START DOCKER DEPLOY"
