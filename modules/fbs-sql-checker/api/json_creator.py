@@ -124,13 +124,14 @@ def parse_single_stat_upload_db(data, client):
         )
         # save JSON to DB
         mycollection.insert_one(record)
-    except Exception:
+    except Exception as e:
+        print(e)
         task_nr = data["tid"]
         my_uuid = data["sid"]
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         mycollection.insert_one(record)
 
 
@@ -258,6 +259,8 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
+            print("h1", having)
+            print("h2", having2)
     if data["passed"]:
         if new_solution is True:
             # Upload as a new Solution to DB
@@ -328,18 +331,18 @@ def return_json(  # pylint: disable=R1710
             )
             return record
         # produce a json if the sql-query is not parsable
-        record = prod_json_not_parsable(my_uuid, course_id, elem["submission"], task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         return record
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(_id, cid, test_sql, task_nr):
+def prod_json_not_parsable(_id, cid, task_nr):
     # Create dictionary
     value = {
         "id": str(_id),
         "cid": cid,
         "taskNumber": task_nr,
-        "statement": test_sql,
+        "statement": user_data[3],
         "queryRight": user_data[0],
         "parsable": False,
         "tablesRight": None,

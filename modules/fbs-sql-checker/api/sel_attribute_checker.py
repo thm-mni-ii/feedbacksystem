@@ -206,6 +206,8 @@ def extract_having(json_file, client):
     all_having.append(having)  # or having_order
     if len(all_having) == 0:
         all_having = "Unknown"
+    if all_having == [[]]:
+        return []
     return all_having
 
 
