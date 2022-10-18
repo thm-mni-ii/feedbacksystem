@@ -32,7 +32,9 @@ for x in range(1):
         random.SystemRandom().choice(string.ascii_letters + string.digits)
         for _ in range(8)
     )  # Generate random ID for the MongoDB
-ID_JSON = "{id:'%s'}" % (TEST_ID)
+ID_JSON = "{id:'%s'}" % (
+    TEST_ID
+)  # pylint: disable=c0209 # pylint: disable=bad-option-value
 print(ID_JSON)
 TESTDIC = {
     "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name "
