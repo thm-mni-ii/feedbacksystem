@@ -249,7 +249,7 @@ def parse_one_cond(  # pylint: disable = R1710
                         if isinstance(values2, dict) and not isinstance(values2, list):
                             having.append(values2)
         for i in s:  # keys
-            if not isinstance(values2, dict) and not isinstance(values2, list):
+            if not isinstance(i, dict) and not isinstance(i, list):
                 having.append(i)
             if not isinstance(s[i], str):
                 for t in s[i]:

@@ -38,13 +38,13 @@ TESTDIC = {
     "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name "
     "HAVING AVG( Quantity ) > 3 * (SELECT AVG( Quantity ) "
     "FROM SalesOrderItems);",
-    "passed": True,  # True if submission produced the right return in SQL-Runner
+    "passed": False,  # True if submission produced the right return in SQL-Runner
     "resultText": "OK",
     "userId": 1,
     "attempt": 2,
     "tid": 10,
     "sid": TEST_ID,
     "cid": 5,
-    "isSol": True,  # True solution is from docent
+    "isSol": False,  # True solution is from docent
 }
 parse_single_stat_upload_db(TESTDIC, CLIENT)

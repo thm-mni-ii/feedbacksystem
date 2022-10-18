@@ -259,8 +259,8 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
-            print("h1", having)
-            print("h2", having2)
+            print("having", having)
+            print("having2", having2)
     if data["passed"]:
         if new_solution is True:
             # Upload as a new Solution to DB
