@@ -51,8 +51,10 @@ class TaskController {
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
-    auth.globalRole match {
-      case GlobalRole.USER => taskService.getAll(cid).filter(task => !task.isPrivate)
+    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == auth.id).map(_.role)
+
+    (auth.globalRole, someCourseRole) match {
+      case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getAll(cid).filter(task => !task.isPrivate)
       case _ => taskService.getAll(cid)
     }
   }
@@ -69,8 +71,11 @@ class TaskController {
   @ResponseBody
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    auth.globalRole match {
-      case GlobalRole.USER => taskService.getTaskResults(cid, auth.id).filter(userTaskRes => isTaskPublic(cid, userTaskRes.taskID, auth))
+    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == auth.id).map(_.role)
+
+    (auth.globalRole, someCourseRole) match {
+      case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getTaskResults(cid, auth.id)
+        .filter(userTaskRes => isTaskPublic(cid, userTaskRes.taskID, auth))
       case _ => taskService.getTaskResults(cid, auth.id)
     }
   }
@@ -132,8 +137,10 @@ class TaskController {
   }
 
   private def getTaskById(cid: Int, tid: Int, user: User): Task = {
+    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == user.id).map(_.role)
+
     taskService.getOne(tid) match {
-      case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER) {
+      case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER || !someCourseRole.contains(CourseRole.STUDENT)) {
         task.mediaInformation match {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
