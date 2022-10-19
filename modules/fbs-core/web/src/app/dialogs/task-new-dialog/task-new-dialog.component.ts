@@ -263,18 +263,19 @@ export class TaskNewDialogComponent implements OnInit {
 
   // the deadline does not accept the nullable Value (*as it should according to Api) therefore is set to max DateTime!
   getDefaultDeadline() {
-    if (this.datePickerDisabled) {
-      return new Date("9999-12-31 11:59:59").toISOString();
-    } else {
       const currentDateAndOneMonthLater = new Date();
       currentDateAndOneMonthLater.setMonth(
         currentDateAndOneMonthLater.getMonth() + 1
       );
       return currentDateAndOneMonthLater.toISOString();
-    }
   }
 
-  public setMaxExpirationDate(event: MatCheckbox): void {
+  public setMaxExpirationDate(event: MatCheckbox){
     this.datePickerDisabled = event.checked;
+    if (this.datePickerDisabled) {
+        this.task.deadline = null;
+    } else {
+       this.task.deadline = this.getDefaultDeadline();
+    }
   }
 }
