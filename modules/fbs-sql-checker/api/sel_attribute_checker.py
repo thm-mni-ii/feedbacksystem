@@ -194,16 +194,17 @@ def extract_group_by(json_file, client):
 
 def extract_having(json_file, client):
     json_file = parse_query(json_file, client)
-    all_having = []
+    all_having = [[]]  # reason> having in check_solution_chars() in json_creator is [[[...]]]
     having = []
     having_list = list(iterate(json_file, "having"))
+    # if necessary , not in use now
     att = []  # customerId
     att_operator = []  # count
     att_op_compare = []  # gt...
     val_compare = []  # value example 5
     for s in having_list:
         parse_one_cond(s, having, att, att_operator, att_op_compare, val_compare)
-    all_having.append(having)  # or having_order
+    all_having[0].append(having)  # or having_order
     if len(all_having) == 0:
         all_having = "Unknown"
     if all_having == [[]]:
