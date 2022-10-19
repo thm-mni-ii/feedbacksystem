@@ -85,6 +85,10 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
+import { DataAnalyticsComponent } from "./page-components/data-analytics/data-analytics.component";
+import { PlotlyViaCDNModule } from "angular-plotly.js";
+PlotlyViaCDNModule.setPlotlyVersion("latest");
+import { CommonModule } from "@angular/common";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -162,6 +166,7 @@ export const httpInterceptorProviders = [
     SqlCheckerComponent,
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
+    DataAnalyticsComponent,
   ],
   imports: [
     BrowserModule,
@@ -195,6 +200,8 @@ export const httpInterceptorProviders = [
     ChartsModule,
     MatTableModule,
     MatSortModule,
+    CommonModule,
+    PlotlyViaCDNModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,

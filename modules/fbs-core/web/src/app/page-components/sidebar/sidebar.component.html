@@ -36,6 +36,15 @@
 
         <a
           mat-list-item
+          routerLink="/data-analytics"
+          routerLinkActive="selected"
+        >
+          <mat-icon>table_chart</mat-icon>
+          <p>Analysen</p>
+        </a>
+
+        <a
+          mat-list-item
           *ngIf="isAdmin"
           routerLink="/admin/user-management"
           routerLinkActive="selected"
