@@ -68,6 +68,19 @@ class JsonWrapperTest {
     Assertions.assertThat(res).isEqualTo(expected)
   }
 
+  /**
+    * Tests JsonWrapper As Long
+    *
+    */
+  @Test
+  def jsonWrapperTestAsObject(): Unit = {
+    val json = getJsonObj
+    val expected = Option(mapper.createObjectNode())
+    val res = json.retrive("object").asObject()
+
+    Assertions.assertThat(res).isEqualTo(expected)
+  }
+
   private def getJsonObj = {
     val json = mapper.createObjectNode()
     json.put("string", "test")
@@ -81,6 +94,9 @@ class JsonWrapperTest {
 
     json.put("long", 1.toLong)
     json.putNull("emptyLong")
+
+    json.putObject("object")
+    json.putNull("emptyObject")
 
     json.putNull("null")
   }
@@ -97,11 +113,13 @@ class JsonWrapperTest {
     val resInt = json.retrive("emptyInt").asInt()
     val resBool = json.retrive("emptyBool").asBool()
     val resLong = json.retrive("emptyLong").asLong()
+    val resObj = json.retrive("emptyObject").asObject()
 
     Assertions.assertThat(resString).isEqualTo(expected)
     Assertions.assertThat(resInt).isEqualTo(expected)
     Assertions.assertThat(resBool).isEqualTo(expected)
     Assertions.assertThat(resLong).isEqualTo(expected)
+    Assertions.assertThat(resObj).isEqualTo(expected)
   }
 
   /**
