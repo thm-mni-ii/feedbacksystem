@@ -273,7 +273,7 @@ export class TaskNewDialogComponent implements OnInit {
   public setMaxExpirationDate(event: MatCheckbox){
     this.datePickerDisabled = event.checked;
     if (this.datePickerDisabled) {
-        this.task.deadline = null;
+        this.task.deadline = undefined;
     } else {
        this.task.deadline = this.getDefaultDeadline();
     }
