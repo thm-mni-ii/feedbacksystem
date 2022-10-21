@@ -56,7 +56,7 @@ class SubmissionController {
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = user.id == uid || adminPrivileged
+    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
       submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
@@ -84,7 +84,7 @@ class SubmissionController {
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = user.id == uid || adminPrivileged
+    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
       checkerConfigurationService.getAll(cid, tid).headOption match {
@@ -116,6 +116,9 @@ class SubmissionController {
     if (user.id == uid) {
       this.taskService.getOne(tid) match {
         case Some(task) =>
+          if (task.isPrivate) {
+            throw new ForbiddenException()
+          }
           val expectedMediaType = task.mediaType
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
           if (task.deadline.isDefined && Instant.now().isAfter(Instant.parse(task.deadline.get))) {
@@ -156,7 +159,9 @@ class SubmissionController {
   def resubmit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, @PathVariable("sid") sid: Int,
              req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val allowed = user.id == uid
+    val task = taskService.getOne(tid).get
+
+    val allowed = user.id == uid && !task.isPrivate
     if (allowed) {
       submissionService.getOne(sid, uid) match {
         case Some(_) =>
@@ -184,11 +189,13 @@ class SubmissionController {
   def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
                req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
-    if (adminPrivileged) {
+    if (adminPrivileged || (user.id == uid && !task.isPrivate)) {
       submissionService.getAllByTask(cid, tid).foreach(submission => {
         submissionService.clearResults(submission.id, submission.userID.get)
         checkerConfigurationService.getAll(cid, tid).foreach(cc => {
@@ -216,10 +223,11 @@ class SubmissionController {
   def getOne(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = user.id == uid || adminPrivileged
+    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
       submissionService.getOne(sid, uid, adminPrivileged) match {
