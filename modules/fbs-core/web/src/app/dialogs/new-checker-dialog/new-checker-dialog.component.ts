@@ -282,13 +282,13 @@ export class NewCheckerDialogComponent implements OnInit {
         break;
       }
       case "bash": {
-        this.mainFileName = "bash1";
-        this.secondaryFileName = "bash2";
+        this.mainFileName = "Bash Script (.sh)";
+        this.secondaryFileName = "Optionale Hilfsdatei (*)";
         break;
       }
       case "excel": {
-        this.mainFileName = "excel1";
-        this.secondaryFileName = "excel2";
+        this.mainFileName = "Musterlösung (.xlsx)";
+        this.secondaryFileName = "Aufgaben Konfiguration (.json)";
         break;
       }
       default: {
