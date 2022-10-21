@@ -90,7 +90,6 @@ class CourseRegistrationService {
       (res, _) => Option(CourseRole.parse(res.getInt("course_role"))), uid, cid).head
   }
 
-
     private def parseCourseResult(res: ResultSet): Course = Course(
     semesterId = Some(res.getInt("semester_id")),
     name = res.getString("name"),
