@@ -51,7 +51,7 @@ class TaskController {
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == auth.id).map(_.role)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
 
     (auth.globalRole, someCourseRole) match {
       case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getAll(cid).filter(task => !task.isPrivate)
@@ -71,28 +71,12 @@ class TaskController {
   @ResponseBody
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == auth.id).map(_.role)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
 
     (auth.globalRole, someCourseRole) match {
       case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getTaskResults(cid, auth.id)
-        .filter(userTaskRes => isTaskPublic(cid, userTaskRes.taskID, auth))
+        .filter(userTaskRes => getTaskById(cid, userTaskRes.taskID, auth).fold(task => true, e => false))
       case _ => taskService.getTaskResults(cid, auth.id)
-    }
-  }
-
-  /**
-    * helper function that returns false if the task is not pubic and true if it is
-    * @param cid course id
-    * @param taskId task id
-    * @param auth User
-    * @return
-    */
-  def isTaskPublic(cid: Int, taskId: Int, auth: User): Boolean = {
-    try {
-      getTaskById(cid, taskId, auth)
-      true
-    } catch {
-      case _ => false
     }
   }
 
@@ -133,11 +117,11 @@ class TaskController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
-    getTaskById(cid, tid, user)
+    getTaskById(cid, tid, user).fold(task => task, e => throw e)
   }
 
-  private def getTaskById(cid: Int, tid: Int, user: User): Task = {
-    val someCourseRole = courseRegistration.getParticipants(cid).find(_.user.id == user.id).map(_.role)
+  private def getTaskById(cid: Int, tid: Int, user: User): Either[Task, Exception] = {
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
 
     taskService.getOne(tid) match {
       case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER || !someCourseRole.contains(CourseRole.STUDENT)) {
@@ -150,15 +134,15 @@ class TaskController {
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-            task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
-              decimals, smi)))
-          case _ => task
+            Left(task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
+              decimals, smi))))
+          case _ => Left(task)
         }
       }
       else {
-        throw new ForbiddenException()
+        Right(new ForbiddenException())
       }
-      case _ => throw new ResourceNotFoundException()
+      case _ => Right(new ResourceNotFoundException())
     }
   }
 
@@ -172,9 +156,10 @@ class TaskController {
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/result"))
   @ResponseBody
-  def getTaskResult(@PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Option[UserTaskResult] = {
+  def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Option[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    taskService.getTaskResult(tid, auth.id)
+
+    getTaskById(cid, tid, auth).fold(task => taskService.getTaskResult(tid, auth.id), e => None)
   }
 
   /**

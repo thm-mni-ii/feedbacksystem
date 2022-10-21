@@ -1,8 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import java.sql.ResultSet
-
-import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.{CourseRole, _}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -86,7 +85,13 @@ class CourseRegistrationService {
       .foldLeft(Map[Int, CourseRole.Value]())((akku, value) => akku + value)
   }
 
-  private def parseCourseResult(res: ResultSet): Course = Course(
+  def getCourseRoleOfUser(cid: Int, uid: Int): Option[CourseRole.Value] = {
+    DB.query("SELECT course_role FROM user_course WHERE user_id = ? AND course_id = ?",
+      (res, _) => Option(CourseRole.parse(res.getInt("course_role"))), uid, cid).head
+  }
+
+
+    private def parseCourseResult(res: ResultSet): Course = Course(
     semesterId = Some(res.getInt("semester_id")),
     name = res.getString("name"),
     description = res.getString("description"),
