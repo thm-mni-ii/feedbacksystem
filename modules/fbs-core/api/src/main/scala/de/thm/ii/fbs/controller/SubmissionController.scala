@@ -40,6 +40,7 @@ class SubmissionController {
 
   /**
     * Get a list of all submissions for a task
+    *
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
@@ -67,6 +68,7 @@ class SubmissionController {
 
   /**
     * Get a list of all submissions for a task
+    *
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
@@ -78,7 +80,7 @@ class SubmissionController {
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults"))
   @ResponseBody
   def getSubresults(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             @PathVariable("sid") sid: Int, req: HttpServletRequest, res: HttpServletResponse): List[SubTaskResult] = {
+                    @PathVariable("sid") sid: Int, req: HttpServletRequest, res: HttpServletResponse): List[SubTaskResult] = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
@@ -98,12 +100,13 @@ class SubmissionController {
 
   /**
     * Submit a file for a task
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param uid  User id
+    * @param cid  Course id
+    * @param tid  Task id
     * @param file Mutipart file
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     * @return Submission information
     */
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
@@ -147,6 +150,7 @@ class SubmissionController {
 
   /**
     * Restart the submission process
+    *
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
@@ -157,7 +161,7 @@ class SubmissionController {
     */
   @PutMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
   def resubmit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, @PathVariable("sid") sid: Int,
-             req: HttpServletRequest, res: HttpServletResponse): Unit = {
+               req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
@@ -179,6 +183,7 @@ class SubmissionController {
 
   /**
     * Restart the submission process for all submissions of task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req Http request
@@ -187,10 +192,10 @@ class SubmissionController {
     */
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/resubmitAll"))
   def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-               req: HttpServletRequest, res: HttpServletResponse): Unit = {
+                  req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
-    
+
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
@@ -209,6 +214,7 @@ class SubmissionController {
 
   /**
     * Get the status of submission
+    *
     * @param uid User id
     * @param cid Course id
     * @param tid Task id
