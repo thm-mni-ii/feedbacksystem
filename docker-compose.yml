@@ -31,8 +31,8 @@ services:
       - mysql1
       - runner
     ports:
-      - "443:443"
-      - "80:80"
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:80:80"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
@@ -112,8 +112,8 @@ services:
   minio:
     image: minio/minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - ./data/minio_storage:/data
     environment:
@@ -139,7 +139,7 @@ services:
       - mysql-checker
       - psql-checker
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     environment:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
@@ -167,7 +167,7 @@ services:
     image: ghcr.io/thm-mni-ii/digital-classroom:latest
     restart: unless-stopped
     ports:
-      - "8085:8085"
+      - "127.0.0.1:8085:8085"
     environment:
       - CLASSROOM_SSL_ENABLED=false
       - CLASSROOM_BBB_UPSTREAM_URL=https://localhost/bbb
