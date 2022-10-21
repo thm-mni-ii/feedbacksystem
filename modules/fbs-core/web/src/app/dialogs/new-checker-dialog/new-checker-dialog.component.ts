@@ -27,6 +27,8 @@ export class NewCheckerDialogComponent implements OnInit {
   choosedSQLChecker;
   mainFile: File[] = [];
   secondaryFile: File[] = [];
+  mainFileName: string;
+  secondaryFileName: string;
   isUpdate: boolean;
   courseId: number;
   taskId: number;
@@ -82,7 +84,7 @@ export class NewCheckerDialogComponent implements OnInit {
                 CheckerFileType.MainFile
               )
               .subscribe((mainFileBlob) => {
-                this.mainFile[0] = new File([mainFileBlob], "mainFile");
+                this.mainFile[0] = new File([mainFileBlob], this.mainFileName);
                 this.fileCounter++;
               });
           }
@@ -97,7 +99,7 @@ export class NewCheckerDialogComponent implements OnInit {
               .subscribe((secondaryFileBlob) => {
                 this.secondaryFile[0] = new File(
                   [secondaryFileBlob],
-                  "secondaryFile"
+                  this.secondaryFileName
                 );
                 this.fileCounter++;
               });
@@ -111,7 +113,6 @@ export class NewCheckerDialogComponent implements OnInit {
 
     if (this.isUpdate != true) {
       this.setDefaultValues();
-      this.choosedSQLChecker = false;
     }
   }
 
@@ -261,13 +262,40 @@ export class NewCheckerDialogComponent implements OnInit {
         checkerType: "sql",
         ord: newCheckerOrder,
       });
+      this.defineForm(this.checkerForm.value);
     });
   }
   defineForm(value: any) {
-    if (value.checkerType === "sql-checker") {
-      this.choosedSQLChecker = true;
-    } else {
-      this.choosedSQLChecker = false;
+    //set default value to false
+    this.choosedSQLChecker = false;
+
+    switch (value.checkerType) {
+      case "sql": {
+        this.mainFileName = "Aufgaben Konfiguration (.json)";
+        this.secondaryFileName = "Datenbank Export (.sql)";
+        break;
+      }
+      case "sql-checker": {
+        this.mainFileName = "Aufgaben Konfiguration (.json)";
+        this.secondaryFileName = "Datenbank Export (.sql)";
+        this.choosedSQLChecker = true;
+        break;
+      }
+      case "bash": {
+        this.mainFileName = "bash1";
+        this.secondaryFileName = "bash2";
+        break;
+      }
+      case "excel": {
+        this.mainFileName = "excel1";
+        this.secondaryFileName = "excel2";
+        break;
+      }
+      default: {
+        this.mainFileName = "Not Implemented Checker Type";
+        this.secondaryFileName = "Not Implemented Checker Type";
+        break;
+      }
     }
   }
   showHintsEvent(value: any) {
