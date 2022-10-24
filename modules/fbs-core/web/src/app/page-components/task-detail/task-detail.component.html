@@ -54,7 +54,9 @@
         <span *ngIf="deadlinePassed" class="tiny failed"
           >Abgabeende erreicht!</span
         >
-        <mat-icon class="material-icons" color="accent" *ngIf="task.deadline">access_time</mat-icon>
+        <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
+          >access_time</mat-icon
+        >
         <span class="tiny">{{
           task?.deadline | date: "dd.MM.yyyy HH:mm"
         }}</span>
@@ -115,10 +117,7 @@
         </button>
       </mat-card-actions>
 
-      
-      <p>Anzahl der Versuche:  </p>
-
-      
+      <p>Anzahl der Versuche:</p>
 
       <app-results
         *ngIf="submissions"
