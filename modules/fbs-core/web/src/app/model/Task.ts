@@ -3,6 +3,7 @@ export interface Task {
   name: string;
   description?: string;
   deadline?: string;
+  requirementType: string;
   mediaType?: string;
   mediaInformation?:
     | SpreadsheetMediaInformation

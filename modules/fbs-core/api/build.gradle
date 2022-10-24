@@ -2,6 +2,7 @@ plugins {
     id "org.springframework.boot" version "2.6.6"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.4.1"
+    id "org.jetbrains.kotlin.jvm" version "1.7.20"
 }
 
 apply plugin: 'scala'

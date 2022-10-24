@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
-import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange}
+import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -23,9 +23,9 @@ class ExcelService {
     * @param excelMediaInformation the spreadsheet Configurations
     * @return the values
     */
-  def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): Seq[(String, XSSFCell)] = {
+  def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation, checkFields: ExcelMediaInformationCheck): Seq[(String, XSSFCell)] = {
     val sheet = this.initSheet(spreadsheet, excelMediaInformation)
-    val (start, end) = this.parseCellRange(excelMediaInformation.outputFields)
+    val (start, end) = this.parseCellRange(checkFields.range)
     val values = this.getInCol(sheet, end.col, start.row, end.row)
     values
   }

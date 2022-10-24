@@ -1,0 +1,24 @@
+{
+    "head": [
+        "PNr",
+        "Name"
+    ],
+    "rows": [
+        [
+            4,
+            "Wagner"
+        ],
+        [
+            6,
+            "Vogt"
+        ],
+        [
+            7,
+            "Schultheiss"
+        ],
+        [
+            8,
+            "Müller"
+        ]
+    ]
+}

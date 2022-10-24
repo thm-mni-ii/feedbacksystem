@@ -60,6 +60,15 @@
       </mat-select>
     </mat-form-field>
 
+    <!-- Task Mediatype -->
+    <mat-form-field class="col">
+      <mat-label>Verbindlichkeit</mat-label>
+      <mat-select formControlName="requirementType">
+        <mat-option value="mandatory">Pflicht</mat-option>
+        <mat-option value="optional">Bonus</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <mat-checkbox (change)="setMaxExpirationDate($event)"
       >Ohne Deadline</mat-checkbox
     >

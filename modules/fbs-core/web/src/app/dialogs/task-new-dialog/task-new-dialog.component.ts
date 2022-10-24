@@ -19,9 +19,11 @@ import { of } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
+import { CheckerFileType } from "src/app/enums/checkerFileType";
 import { MatCheckbox } from "@angular/material/checkbox";
 
 const defaultMediaType = "text/plain";
+const defaultrequirement = "mandatory";
 
 /**
  * Dialog to create or update a task
@@ -37,6 +39,7 @@ export class TaskNewDialogComponent implements OnInit {
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
+    requirementType: new UntypedFormControl(defaultrequirement),
     exelFile: new UntypedFormControl(""),
     userIDField: new UntypedFormControl(""),
     inputFields: new UntypedFormControl(""),
@@ -52,6 +55,7 @@ export class TaskNewDialogComponent implements OnInit {
     mediaType: "",
     name: "",
     mediaInformation: null,
+    requirementType: "",
   };
 
   spreadsheet: File = null;
@@ -87,6 +91,7 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
+    this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.task.mediaInformation = {
@@ -106,6 +111,9 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["name"].setValue(this.task.name);
     this.taskForm.controls["description"].setValue(this.task.description);
     this.taskForm.controls["mediaType"].setValue(this.task.mediaType);
+    this.taskForm.controls["requirementType"].setValue(
+      this.task.requirementType
+    );
     this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.taskForm.controls["exelFile"].setValue("loading...");
@@ -114,7 +122,12 @@ export class TaskNewDialogComponent implements OnInit {
         .pipe(map((checkers) => checkers[0]))
         .subscribe((checker) => {
           this.checkerService
-            .fetchMainFile(this.courseId, this.task.id, checker.id)
+            .fetchFile(
+              this.courseId,
+              this.task.id,
+              checker.id,
+              CheckerFileType.MainFile
+            )
             .subscribe(
               (spreadsheet) =>
                 (this.spreadsheet = new File([spreadsheet], "spreadsheet.xlsx"))
@@ -173,19 +186,21 @@ export class TaskNewDialogComponent implements OnInit {
                 .pipe(
                   mergeMap((checker) =>
                     this.checkerService
-                      .updateMainFile(
+                      .updateFile(
                         this.courseId,
                         task.id,
                         checker.id,
+                        CheckerFileType.MainFile,
                         this.spreadsheet
                       )
                       .pipe(map(() => checker))
                   ),
                   mergeMap((checker) =>
-                    this.checkerService.updateSecondaryFile(
+                    this.checkerService.updateFile(
                       this.courseId,
                       task.id,
                       checker.id,
+                      CheckerFileType.SecondaryFile,
                       infoFile
                     )
                   ),

@@ -1,9 +1,22 @@
 FROM gradle:jdk18 AS BUILD
 
-COPY . /build
+RUN mkdir /build
 WORKDIR /build
 
-RUN gradle fbs-core.web:installDist fbs-core.web:copyWebToWS fbs-core.api:installDist
+# Copy gradle files
+COPY *.gradle scalastyle_config.xml /build/
+RUN mkdir -p /build/modules/fbs-core/api
+COPY modules/fbs-core/api/*.gradle modules/fbs-core/api/
+RUN mkdir -p /build/modules/fbs-runner/checker
+COPY modules/fbs-runner/checker/*.gradle /build/modules/fbs-runner/checker/
+
+# Build web
+COPY modules/fbs-core/web /build/modules/fbs-core/web/
+RUN gradle fbs-core.web:installDist
+
+# Build api
+COPY modules/fbs-core/api /build/modules/fbs-core/api/
+RUN gradle fbs-core.web:copyWebToWS fbs-core.api:installDist
 
 FROM openjdk:18.0.2-slim
 

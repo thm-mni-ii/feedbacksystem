@@ -1,0 +1,22 @@
+<div class="grid">
+  <div class="results-grid">
+    <app-bordered-container
+      [xScrollable]="true"
+      [yScrollable]="false"
+      [title]="'Ergebnisse'"
+      ><app-dynamic-result-table></app-dynamic-result-table>
+    </app-bordered-container>
+  </div>
+  <div class="input-grid">
+    <app-bordered-container></app-bordered-container>
+  </div>
+  <div class="db-grid">
+    <app-bordered-container [title]="'DB'"></app-bordered-container>
+  </div>
+  <div class="db-schema-grid">
+    <app-bordered-container
+      [yScrollable]="true"
+      [title]="'DB Schema'"
+    ></app-bordered-container>
+  </div>
+</div>

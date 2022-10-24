@@ -3,7 +3,13 @@
   class="task-container"
   id="{{ task.id }}"
 >
-  <span>{{ task.name }}</span>
+  <span
+    >{{ task.name }}
+    <span *ngIf="task.requirementType === 'mandatory'">&nbsp; (Pflicht)</span
+    ><span *ngIf="task.requirementType === 'optional'"
+      >&nbsp; (Bonus)</span
+    ></span
+  >
   <span class="meta">
     <mat-icon class="material-icons" color="accent" *ngIf="task.deadline">access_time</mat-icon>
     <span class="tiny" >{{ task.deadline | date: "dd.MM.yyyy HH:mm" }}</span>
