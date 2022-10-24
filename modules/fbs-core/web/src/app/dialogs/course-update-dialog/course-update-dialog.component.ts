@@ -3,7 +3,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Course } from "../../model/Course";
+import { Semester } from "../../model/Semester";
+import { Observable, of } from "rxjs";
 import { CourseService } from "../../service/course.service";
+import { SemesterService } from "../../service/semester.service";
 
 /**
  * Updates course information in dialog
@@ -17,10 +20,13 @@ export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);
   description = new UntypedFormControl("");
   isVisible = true;
+  selectedSemester = new UntypedFormControl("");
+  semesterList: Semester[] = [];
   isUpdateDialog = false;
 
   constructor(
     private courseService: CourseService,
+    private semesterService: SemesterService,
     private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<CourseUpdateDialogComponent>
@@ -34,6 +40,10 @@ export class CourseUpdateDialogComponent implements OnInit {
       this.description.setValue(course.description);
       this.isVisible = course.visible;
     }
+
+    this.semesterService.getSemesterList().subscribe((result) => {
+      this.semesterList = result;
+    });
   }
 
   /**

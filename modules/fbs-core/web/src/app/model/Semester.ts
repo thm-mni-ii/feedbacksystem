@@ -1,7 +1,6 @@
-export interface Course {
+export interface Semester {
   id?: number;
   name: string;
   description?: string;
   visible?: boolean;
-  semesterId?: number;
 }
