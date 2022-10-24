@@ -38,7 +38,6 @@
       <input
         matInput
         [ngxMatDatetimePicker]="picker"
-        [disabled]="datePickerDisabled"
         placeholder="Deadline"
         formControlName="deadline"
         (dateChange)="addDate($event)"
@@ -68,10 +67,6 @@
         <mat-option value="optional">Bonus</mat-option>
       </mat-select>
     </mat-form-field>
-
-    <mat-checkbox (change)="setMaxExpirationDate($event)"
-      >Ohne Deadline</mat-checkbox
-    >
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">
