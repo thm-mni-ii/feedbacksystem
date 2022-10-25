@@ -1,11 +1,10 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.services.security.{AuthService, TokenService}
+import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
@@ -37,6 +36,8 @@ class SubmissionController {
   private val courseRegistrationService: CourseRegistrationService = null
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
+  @Autowired
+  private val courseRegistration: CourseRegistrationService = null
 
   /**
     * Get a list of all submissions for a task
@@ -115,13 +116,17 @@ class SubmissionController {
              @RequestParam file: MultipartFile,
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
 
     if (user.id == uid) {
       this.taskService.getOne(tid) match {
         case Some(task) =>
-          if (task.isPrivate) {
+          // Not allow Students to Submit to Private Tasks
+          if (noPrivateAccess && task.isPrivate) {
             throw new ForbiddenException()
           }
+
           val expectedMediaType = task.mediaType
           val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
           if (task.deadline.isDefined && Instant.now().isAfter(Instant.parse(task.deadline.get))) {
@@ -164,8 +169,10 @@ class SubmissionController {
                req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
 
-    val allowed = user.id == uid && !task.isPrivate
+    val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
     if (allowed) {
       submissionService.getOne(sid, uid) match {
         case Some(_) =>
@@ -194,12 +201,11 @@ class SubmissionController {
   def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
                   req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
-    if (adminPrivileged || (user.id == uid && !task.isPrivate)) {
+    if (adminPrivileged) {
       submissionService.getAllByTask(cid, tid).foreach(submission => {
         submissionService.clearResults(submission.id, submission.userID.get)
         checkerConfigurationService.getAll(cid, tid).foreach(cc => {
