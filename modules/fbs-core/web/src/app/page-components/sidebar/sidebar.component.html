@@ -53,6 +53,7 @@
           mat-list-item
           routerLink="/sqlplayground"
           routerLinkActive="selected"
+          *ngIf="isAdmin"
         >
           <mat-icon>extension</mat-icon>
           <p>SQL Playground</p>

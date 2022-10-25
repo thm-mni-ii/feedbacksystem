@@ -2647,7 +2647,7 @@ components:
           default: "mandatory"
           enum:
             - "mandatory"
-            - "additional"
+            - "optional"
     SpreadsheetInformationRequest:
       type: object
       properties:
