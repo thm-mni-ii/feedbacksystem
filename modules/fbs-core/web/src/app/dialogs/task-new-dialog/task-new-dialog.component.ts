@@ -20,7 +20,6 @@ import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
-import { MatCheckbox } from "@angular/material/checkbox";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
@@ -274,23 +273,11 @@ export class TaskNewDialogComponent implements OnInit {
       });
   }
 
-  public datePickerDisabled: boolean = false;
-
-  // the deadline does not accept the nullable Value (*as it should according to Api)
   getDefaultDeadline() {
     const currentDateAndOneMonthLater = new Date();
     currentDateAndOneMonthLater.setMonth(
       currentDateAndOneMonthLater.getMonth() + 1
     );
     return currentDateAndOneMonthLater.toISOString();
-  }
-
-  public setMaxExpirationDate(event: MatCheckbox) {
-    this.datePickerDisabled = event.checked;
-    if (this.datePickerDisabled) {
-      this.task.deadline = undefined;
-    } else {
-      this.task.deadline = this.getDefaultDeadline();
-    }
   }
 }
