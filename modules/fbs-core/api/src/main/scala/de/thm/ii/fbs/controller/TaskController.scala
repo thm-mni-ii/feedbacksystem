@@ -1,21 +1,19 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.services.persistence._
-
-import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.
-{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, SubtaskStatisticsTask, Task, User, UserTaskResult}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetService
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
+
+import java.io.File
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * TaskController implement routes for submitting task and receive results
@@ -52,10 +50,12 @@ class TaskController {
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
 
-    (auth.globalRole, someCourseRole) match {
-      case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getAll(cid).filter(task => !task.isPrivate)
-      case _ => taskService.getAll(cid)
+    if (noPrivateAccess) {
+      taskService.getAll(cid).filter(task => !task.isPrivate)
+    } else {
+      taskService.getAll(cid)
     }
   }
 
@@ -72,11 +72,12 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
 
-    (auth.globalRole, someCourseRole) match {
-      case (GlobalRole.USER, Some(CourseRole.STUDENT)) => taskService.getTaskResults(cid, auth.id)
-        .filter(userTaskRes => getTaskById(cid, userTaskRes.taskID, auth).fold(task => true, e => false))
-      case _ => taskService.getTaskResults(cid, auth.id)
+    if (noPrivateAccess) {
+      taskService.getTaskResults(cid, auth.id).filter(res => !res.isPrivate)
+    } else {
+      taskService.getTaskResults(cid, auth.id)
     }
   }
 
@@ -117,14 +118,11 @@ class TaskController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
-    getTaskById(cid, tid, user).fold(task => task, e => throw e)
-  }
-
-  private def getTaskById(cid: Int, tid: Int, user: User): Either[Task, Exception] = {
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
 
-    taskService.getOne(tid) match {
-      case Some(task) => if (!task.isPrivate || user.globalRole != GlobalRole.USER || !someCourseRole.contains(CourseRole.STUDENT)) {
+    val task = taskService.getOne(tid) match {
+      case Some(task) =>
         task.mediaInformation match {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
@@ -134,15 +132,17 @@ class TaskController {
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-            Left(task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
-              decimals, smi))))
-          case _ => Left(task)
+            task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
+              decimals, smi)))
+          case _ => task
         }
-      }
-      else {
-        Right(new ForbiddenException())
-      }
-      case _ => Right(new ResourceNotFoundException())
+      case _ => throw new ResourceNotFoundException()
+    }
+
+    if (noPrivateAccess && task.isPrivate) {
+      throw new ForbiddenException()
+    } else {
+      task
     }
   }
 
@@ -156,10 +156,18 @@ class TaskController {
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/result"))
   @ResponseBody
-  def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Option[UserTaskResult] = {
+  def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): UserTaskResult = {
     val auth = authService.authorize(req, res)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
 
-    getTaskById(cid, tid, auth).fold(task => taskService.getTaskResult(tid, auth.id), e => None)
+    val taskResult = taskService.getTaskResult(tid, auth.id).getOrElse(throw new ResourceNotFoundException())
+
+    if (noPrivateAccess && taskResult.isPrivate) {
+      throw new ForbiddenException()
+    } else {
+      taskResult
+    }
   }
 
   /**
