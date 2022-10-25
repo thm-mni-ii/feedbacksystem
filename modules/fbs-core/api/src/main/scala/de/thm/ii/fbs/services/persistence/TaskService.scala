@@ -94,7 +94,8 @@ class TaskService {
     */
   def getTaskResults(cid: Int, uid: Int): Seq[UserTaskResult] = DB.query(
     """
-      |SELECT task.task_id, task.is_private, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |SELECT task.task_id, task.is_private, submission.submission_id,
+      |COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
       |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
       |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
       |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
@@ -117,7 +118,8 @@ class TaskService {
     */
   def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query(
     """
-      |SELECT task.task_id, task.is_private, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |SELECT task.task_id, task.is_private, submission.submission_id,
+      |COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
       |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
       |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
       |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
