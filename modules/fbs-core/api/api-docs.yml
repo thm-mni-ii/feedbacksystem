@@ -2626,6 +2626,8 @@ components:
           type: integer
         name:
           type: string
+        isPrivate:
+          type: boolean
         description:
           type: string
         deadline:
