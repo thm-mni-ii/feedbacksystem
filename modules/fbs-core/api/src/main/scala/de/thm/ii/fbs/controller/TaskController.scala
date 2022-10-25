@@ -50,7 +50,7 @@ class TaskController {
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
 
     if (noPrivateAccess) {
       taskService.getAll(cid).filter(task => !task.isPrivate)
@@ -72,7 +72,7 @@ class TaskController {
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
 
     if (noPrivateAccess) {
       taskService.getTaskResults(cid, auth.id).filter(res => !res.isPrivate)
@@ -119,7 +119,7 @@ class TaskController {
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
 
     val task = taskService.getOne(tid) match {
       case Some(task) =>
@@ -159,7 +159,7 @@ class TaskController {
   def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): UserTaskResult = {
     val auth = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || auth.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
 
     val taskResult = taskService.getTaskResult(tid, auth.id).getOrElse(throw new ResourceNotFoundException())
 

@@ -117,7 +117,7 @@ class SubmissionController {
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
 
     if (user.id == uid) {
       this.taskService.getOne(tid) match {
@@ -170,7 +170,7 @@ class SubmissionController {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) || user.globalRole != GlobalRole.ADMIN
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
 
     val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
     if (allowed) {
