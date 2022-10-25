@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{MediaInformation, SubtaskStatisticsSubtask, SubtaskStatisticsTask, Task, UserTaskResult}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -94,7 +94,7 @@ class TaskService {
     */
   def getTaskResults(cid: Int, uid: Int): Seq[UserTaskResult] = DB.query(
     """
-      |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |SELECT task.task_id, task.is_private, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
       |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
       |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
       |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
@@ -117,7 +117,7 @@ class TaskService {
     */
   def getTaskResult(tid: Int, uid: Int): Option[UserTaskResult] = DB.query(
     """
-      |SELECT task.task_id, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
+      |SELECT task.task_id, task.is_private, submission.submission_id, COALESCE(MIN(submission.status), 1) AS status, COALESCE(MAX(submission.points), 0) AS points,
       |       COALESCE(subtask.points, 0) AS max_points FROM task LEFT JOIN (
       |    SELECT uts.task_id, uts.submission_id, COALESCE(LEAST(MAX(cr.exit_code), 1), 1) AS status, SUM(cstr.points) AS points FROM user_task_submission uts
       |        LEFT JOIN checker_result cr on uts.submission_id = cr.submission_id
@@ -128,7 +128,7 @@ class TaskService {
       |    SELECT cc.task_id, SUM(cst.points) AS points FROM checkrunner_configuration cc
       |        LEFT JOIN checkrunner_sub_task cst on cc.configuration_id = cst.configuration_id
       |        GROUP BY cc.task_id
-      |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id;
+      |) AS subtask ON task.task_id = subtask.task_id WHERE task.task_id = ? GROUP BY task.task_id LIMIT 1;
       |""".stripMargin, (res, _) => parseUserTaskResult(res), uid, tid).headOption
 
   /**
@@ -165,7 +165,7 @@ class TaskService {
     requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"))
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
-    res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null)
+    res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null, res.getBoolean("is_private"))
 
   private def parseSubtaskStatics(res: ResultSet): SubtaskStatisticsTask = SubtaskStatisticsTask(res.getInt("task_id"),
     res.getString("name"), Option(res.getString("subtasks")).map(SubtaskStatisticsSubtask.fromJSONString).getOrElse(Seq()))
