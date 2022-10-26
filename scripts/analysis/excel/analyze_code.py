@@ -3,6 +3,15 @@ from pathlib import Path
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 
+class CheckerWorksheet:
+    def __init__(self, start_row, end_row, start_col, end_col, j):
+        self.start_row = start_row
+        self.end_row = end_row
+        self.start_col = start_col
+        self.end_col = end_col
+        self.j = j
+
+
 class Subtask:
     def __init__(self, sum=0, formula=0, number=0, format=0):
         self.sum = sum
@@ -28,12 +37,9 @@ class Subtask:
                     if ws[char + str(row)].font != ws_sol[char + str(row)].font:
                         self.sum += 1
                         self.format += 1
-                    j += 1
             
             return self.sum, self.formula, self.number, self.format
         
-
-
 
 def analyze(path, path_sol):
     res = []
@@ -50,97 +56,50 @@ def analyze(path, path_sol):
 
     wb_sol = load_workbook(path_sol)
     wb_sol2 = load_workbook(path_sol, data_only=True)
+
+    sheet_def = []
+    sheet = CheckerWorksheet(1, 34, 2, 16, 1)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 37, 2, 16, 2)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 57, 2, 5, 3)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 89, 1, 3, 4)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 202, 1, 6, 5)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 37, 1, 6, 6)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 48, 1, 8, 7)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 10, 1, 5, 8)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 2323, 11, 13, 9)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 27, 1, 8, 10)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 37, 2, 16, 11) # Placeholder, sheet will be skipped: only graph to compare
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 41, 5, 12, 12)
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 10, 1, 5, 13) # Placeholder, sheet will be skipped: only graph to compare
+    sheet_def.append(sheet)
+    sheet = CheckerWorksheet(1, 10, 1, 5, 14) # Placeholder, sheet will be skipped: only graph to compare
+    sheet_def.append(sheet)
+
+
     for i, input in enumerate(path.glob("*.xlsx*")): # rglob if directory includes subfolders and you want to access those aswell
         wb = load_workbook(filename=input)
         wb2 = load_workbook(filename=input, data_only=True)
        
         print(i)
         if len(wb.worksheets) <= len(wb_sol.worksheets):
-            j = 1
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask2_1 = Subtask() # GuV 01
-                subtask2_1.classify_error(1, 34, 2, 16, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask2_1)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask2_2 = Subtask() #GuV 02
-                subtask2_2.classify_error(1, 37, 2, 16, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask2_2)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask3 = Subtask() # Bilanzaufstellung
-                subtask3.classify_error(1, 57, 2, 5, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask3)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):    
-                subtask3_anlage = Subtask() # Bilanzaufstellung (Anlage)
-                subtask3_anlage.classify_error(1, 89, 1, 3, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask3_anlage)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask4 = Subtask() # Notenliste
-                subtask4.classify_error(1, 202, 1, 6, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask4)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask4_skala = Subtask() # Notenliste (Skala)
-                subtask4_skala.classify_error(1, 37, 1, 6, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask4_skala)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):    
-                subtask5 = Subtask() # Rechnung
-                subtask5.classify_error(1, 48, 1, 8, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask5)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask5_rabatt = Subtask() # Rabattstaffel
-                subtask5_rabatt.classify_error(1, 10, 1, 5, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask5_rabatt)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask6 = Subtask() # Artikelliste
-                subtask6.classify_error(1, 2323, 11, 13, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask6)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask7 = Subtask() # Studentenbudget
-                subtask7.classify_error(1, 27, 1, 8, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask7)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask8 = Subtask() # Absatzliste
-                # subtask8.classify_error(1, 37, 2, 16, ws, ws2, ws_sol, ws_sol2, j)
-                # res.append(subtask8)
-                # Only graph to compare, table was given
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask9_1u = Subtask() # Umsatzliste (graphcomparison not added)
-                subtask9_1u.classify_error(1, 41, 5, 12, wb, wb2, wb_sol, wb_sol2, j)
-                res.append(subtask9_1u)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask9_1a = Subtask() # Absatzdiagramm (only graph to compare)
-                # subtask9_1a.classify_error(1, 57, 2, 5, ws, ws2, ws_sol, ws_sol2, j)
-                # res.append(subtask9_1a)
-                j += 1
-
-            if (j < len(wb.worksheets) and j < len(wb_sol.worksheets)):
-                subtask9_2 = Subtask() # Quartalsumsätze (only graph to compare)
-                # subtask9_2.classify_error(1, 57, 2, 5, ws, ws2, ws_sol, ws_sol2, j)
-                # res.append(subtask9_2)
-                j += 1
+            for sheet in sheet_def:
+                if (sheet.j < len(wb.worksheets) and sheet.j < len(wb_sol.worksheets)):
+                    if sheet.j != 11 and sheet.j != 13 and sheet.j != 14:
+                        subtask = Subtask()
+                        subtask.classify_error(sheet.start_row, sheet.end_row, sheet.start_col, sheet.end_col, wb, wb2, wb_sol, wb_sol2, sheet.j)
+                        res.append(subtask)
         
         else:
             print("Studentenabgabe hat zu viele Sheets!")
