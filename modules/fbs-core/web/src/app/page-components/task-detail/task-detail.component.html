@@ -113,10 +113,11 @@
         >
           Abgeben
         </button>
+        <!-- <p>Anzahl der Versuche: {{ task.submitLimiter }}</p> -->
       </mat-card-actions>
 
-      <div>
-        <p>Anzahl der Versuche: {{ task.submitLimiter }}</p>
+      <div class="numberOfSumbits">
+        <p>Anzahl der Versuche: {{ submitLimit }} <span> | </span> Versuch: {{ submission.id }}</p>
       </div>
 
       <app-results

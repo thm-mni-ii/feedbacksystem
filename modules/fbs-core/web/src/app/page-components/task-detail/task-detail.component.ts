@@ -38,6 +38,8 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
+  // dummy variable for test
+  submitLimit = 10;
 
 
   get latestResult() {
