@@ -23,7 +23,7 @@ bootRun {
             [
                     "-Dconfdir=" + confidir
             ]
-    
+
 }
 
 repositories {
@@ -46,6 +46,8 @@ dependencies {
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
+    implementation group: 'io.minio', name: 'minio', version: '8.4.5'
+    compile 'io.minio:minio:8.4.5'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.1'
     implementation 'mysql:mysql-connector-java:8.0.19'

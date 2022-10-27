@@ -67,6 +67,15 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+minio:
+  user:
+    admin
+  password:
+    SqfyBWhiFGr7FK60cVR2rel
+  url:
+    ${http://localhost:9090}
+
 url:
   expiration:
     time: 300
