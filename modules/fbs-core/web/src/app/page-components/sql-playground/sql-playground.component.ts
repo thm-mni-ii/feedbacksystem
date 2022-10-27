@@ -15,17 +15,7 @@ import { MatLabel } from "@angular/material/form-field";
 })
 export class SqlPlaygroundComponent implements OnInit {
   constructor(private titlebar: TitlebarService) {}
-  @ViewChildren(MatTab, { read: MatTab })
-  public tabNodes: QueryList<MatTab>;
-  public tabs = [{name:undefined}];
-
-  closeTab(index: number) {
-    this.tabs.splice(index, 1);
-  }
-
-  addTab(index: number) {
-    this.tabs.push({ name: "Query_" + index });
-  }
+ 
 
   ngOnInit() {
     this.titlebar.emitTitle("SQL Playground");

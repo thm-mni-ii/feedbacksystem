@@ -8,34 +8,7 @@
     </app-bordered-container>
   </div>
   <div class="input-grid">
-    <app-bordered-container>
-      <mat-card-actions>
-        <mat-tab-group>
-          <ng-container *ngFor="let tab of tabs; let index = index">
-            <mat-tab>
-              <ng-template mat-tab-label>
-                <div class="col" style="margin-left: 20px">
-                  Query_ {{ index + 1 }}
-                </div>
-                <button
-                  *ngIf="index !== 0"
-                  mat-icon-button
-                  (click)="closeTab(index)"
-                >
-                  <mat-icon>remove_circle_outline</mat-icon>
-                </button>
-                <button mat-icon-button (click)="addTab(index)">
-                  <mat-icon>add_circle_outline</mat-icon>
-                </button>
-              </ng-template>
-              <app-submission-text></app-submission-text>
-            </mat-tab>
-          </ng-container>
-        </mat-tab-group>
-        <button mat-button class="downloadBtn"><mat-icon>download</mat-icon>Download</button>
-        <button mat-flat-button color="accent" class="excuteBtn">Abgeben</button>
-      </mat-card-actions>
-    </app-bordered-container>
+    <app-sql-input-tabs></app-sql-input-tabs>
   </div>
   <div class="db-grid">
     <app-bordered-container [title]="'DB'"></app-bordered-container>
