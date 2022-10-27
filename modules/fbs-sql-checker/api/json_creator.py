@@ -224,7 +224,7 @@ def check_solution_chars(
             joins.append(join_value)
         mycol = mydb["Having"]
         for y in mycol.find({"id": id}, {"havingAttribute": 1}):
-            having_value = [y["havingAttribute"]]
+            having_value = y["havingAttribute"]
             having.append(having_value)
         if len(joins) == 0:
             joins.append("Empty")
@@ -259,8 +259,6 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
-            print("having", having)
-            print("having2", having2)
     if data["passed"]:
         if new_solution is True:
             # Upload as a new Solution to DB
