@@ -1,5 +1,5 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { MatTab } from '@angular/material/tabs';
+import { Component, OnInit, QueryList, ViewChildren } from "@angular/core";
+import { MatTab } from "@angular/material/tabs";
 
 @Component({
   selector: "app-sql-input-tabs",

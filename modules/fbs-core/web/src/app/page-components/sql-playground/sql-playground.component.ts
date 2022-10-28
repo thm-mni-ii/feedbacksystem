@@ -15,7 +15,6 @@ import { MatLabel } from "@angular/material/form-field";
 })
 export class SqlPlaygroundComponent implements OnInit {
   constructor(private titlebar: TitlebarService) {}
- 
 
   ngOnInit() {
     this.titlebar.emitTitle("SQL Playground");
