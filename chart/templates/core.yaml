@@ -1,0 +1,95 @@
+{{ if and .Values.core.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-core
+  labels:
+    app: {{ .Release.Name }}-core
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-core
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-core
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-core
+        image: {{ .Values.core.image.registry }}/{{ .Values.core.image.name }}:{{ .Values.core.image.tag }}
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        env:
+        # ToDo: Add env
+        resources:
+          requests:
+            cpu: {{ .Values.core.resources.cpu.request }}
+            memory: {{ .Values.core.resources.memory.request }}
+          limits:
+            cpu: {{ .Values.core.resources.cpu.limit }}
+            memory: {{ .Values.core.resources.memory.limit }}
+        volumeMounts:
+        - name: config
+          mountPath: /usr/local/fbs-core.api/conf
+        - name: upload-dir
+          mountPath: /upload-dir
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-core-config
+      - name: upload-dir
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-core-upload-dir
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-core
+data:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-core
+  labels:
+    app: {{ .Release.Name }}-core
+spec:
+  selector:
+    app: {{ .Release.Name }}-core
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-core-config
+spec:
+  accessModes:
+    - {{ .Values.core.volumes.config.mode }}
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.core.volumes.config.size }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-core-upload-dir
+spec:
+  accessModes:
+    - {{ .Values.core.volumes.uploadDir.mode }}
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.core.volumes.uploadDir.size }}
+{{ end }}

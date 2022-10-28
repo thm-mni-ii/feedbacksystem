@@ -1,0 +1,3 @@
+{{ if .Values.digitalClassroom.enabled }}
+# ToDo: Add digital classroom
+{{ end }}

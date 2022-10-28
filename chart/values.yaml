@@ -1,0 +1,15 @@
+global:
+  hostname: https://feedback.example.org
+
+core:
+  enabled: true
+  image:
+    registry: docker.io
+    name: fbs/core # ToDo find real name
+    tag: "1.1.1"
+runner:
+  enabled: true
+sqlChecker:
+  enabled: true
+digitalClassroom:
+  enabled: true

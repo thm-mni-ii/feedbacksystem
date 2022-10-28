@@ -1,0 +1,3 @@
+{{ if .Values.sqlChecker.enabled }}
+# ToDo: Add SQL-Checker
+{{ end }}
