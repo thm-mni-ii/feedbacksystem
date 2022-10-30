@@ -1,17 +1,16 @@
 package de.thm.ii.fbs.verticles.runner
 
-import java.sql.{SQLException, SQLTimeoutException}
 import de.thm.ii.fbs.services.FileService
 import de.thm.ii.fbs.services.runner.SQLRunnerService
 import de.thm.ii.fbs.types.{ExtResSql, RunArgs, SqlRunArgs}
-import de.thm.ii.fbs.util.RunnerException
-import de.thm.ii.fbs.util.DBConnections
+import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY, RUN_ADDRESS}
 import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
 
+import java.sql.{SQLException, SQLTimeoutException}
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -75,8 +74,8 @@ class SqlRunnerVerticle extends ScalaVerticle {
         runQueries(runArgs, sqlRunArgs, connections.get)
       }
     } catch {
-      case e: RunnerException => handleError(runArgs, e.getMessage)
-      case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.")
+      case e: RunnerException => handleError(runArgs, e.getMessage, e)
+      case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.", e)
     }
   }
 
@@ -87,7 +86,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
     } catch {
       case e: Throwable =>
         logger.error(e.getStackTrace.toString)
-        handleError(runArgs, "SQL Connection failed")
+        handleError(runArgs, "SQL Connection failed", e)
         None
     }
   }
@@ -100,39 +99,39 @@ class SqlRunnerVerticle extends ScalaVerticle {
   }
 
   private def runQueries(runArgs: RunArgs, sqlRunArgs: SqlRunArgs, connections: DBConnections): Unit = {
-      val sqlRunner = new SQLRunnerService(sqlRunArgs, connections, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
+    val sqlRunner = new SQLRunnerService(sqlRunArgs, connections, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
-      val results = for {
-        f1Result <- sqlRunner.executeRunnerQueries()
-        f2Result <- sqlRunner.executeSubmissionQuery()
-      } yield (f1Result, f2Result)
+    val results = for {
+      f1Result <- sqlRunner.executeRunnerQueries()
+      f2Result <- sqlRunner.executeSubmissionQuery()
+    } yield (f1Result, f2Result)
 
-      results.onComplete({
-        case Success(value) =>
-          val res = sqlRunner.compareResults(value)
-          logger.info(s"Submission-${sqlRunArgs.submissionId} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
+    results.onComplete({
+      case Success(value) =>
+        val res = sqlRunner.compareResults(value)
+        logger.info(s"Submission-${sqlRunArgs.submissionId} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
-          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
-          connections.close()
+        vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
+        connections.close()
 
-        case Failure(ex: SQLTimeoutException) =>
-          handleErrorAndClose(runArgs, connections, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
-        case Failure(ex: SQLException) =>
-          handleErrorAndClose(runArgs, connections, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}")
-        case Failure(ex: RunnerException) =>
-          handleErrorAndClose(runArgs, connections, ex.getMessage)
-        case Failure(ex) =>
-          handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.")
-      })
+      case Failure(ex: SQLTimeoutException) =>
+        handleErrorAndClose(runArgs, connections, s"Das Query hat zu lange gedauert: ${ex.getMessage}", ex)
+      case Failure(ex: SQLException) =>
+        handleErrorAndClose(runArgs, connections, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}", ex)
+      case Failure(ex: RunnerException) =>
+        handleErrorAndClose(runArgs, connections, ex.getMessage, ex)
+      case Failure(ex) =>
+        handleErrorAndClose(runArgs, connections, s"Der SQL Runner hat einen Fehler geworfen: ${ex.getMessage}.", ex)
+    })
   }
 
-  private def handleError(runArgs: RunArgs, msg: String): Unit = {
-    logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg")
+  private def handleError(runArgs: RunArgs, msg: String, e: Throwable): Unit = {
+    logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg", e)
     vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
   }
 
-  private def handleErrorAndClose(runArgs: RunArgs, connections: DBConnections, msg: String): Unit = {
-    handleError(runArgs, msg)
+  private def handleErrorAndClose(runArgs: RunArgs, connections: DBConnections, msg: String, e: Throwable): Unit = {
+    handleError(runArgs, msg, e)
     connections.close()
   }
 }
