@@ -7,7 +7,8 @@ import io.vertx.scala.ext.sql.ResultSet
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MySqlOperationsService(override val dbName: String, override val username: String) extends DBOperationsService(dbName, username) {
+class MySqlOperationsService(override val dbName: String, override val username: String, override val queryTimeout: Int)
+  extends DBOperationsService(dbName, username, queryTimeout) {
   private val WRITE_USER_PRIVILEGES: MysqlPrivileges =
     MysqlPrivileges("CREATE, SELECT, INSERT, UPDATE, DELETE, DROP, REFERENCES, CREATE VIEW, ALTER, INDEX")
   private val READ_USER_PRIVILEGES: MysqlPrivileges =
@@ -19,10 +20,6 @@ class MySqlOperationsService(override val dbName: String, override val username:
 
   override def deleteDB(client: JDBCClient): Future[ResultSet] = {
     client.queryFuture(s"DROP DATABASE $dbName")
-  }
-
-  override def initDB(client: JDBCClient, query: String): Future[ResultSet] = {
-    client.queryFuture(query)
   }
 
   override def createUserWithWriteAccess(client: JDBCClient): Future[String] = {

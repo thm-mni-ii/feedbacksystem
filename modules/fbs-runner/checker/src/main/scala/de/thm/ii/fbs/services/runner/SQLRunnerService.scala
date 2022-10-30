@@ -13,7 +13,6 @@ import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
 
 import java.sql.SQLException
-import java.util.regex.Pattern
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.Breaks.{break, breakable}
@@ -120,9 +119,9 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     // TODO: May find better way to generate the username
     val username = if (isPsql) dbName else shortDBName(dbName) // Mysql only allow usernames with a length of max 32 chars
     val dbOperation = if (isPsql) {
-      new PsqlOperationsService(dbName, username)
+      new PsqlOperationsService(dbName, username, queryTimout)
     } else {
-      new MySqlOperationsService(dbName, username)
+      new MySqlOperationsService(dbName, username, queryTimout)
     }
 
     dbOperation
@@ -140,7 +139,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
 
     connections.initDB(dbOperations, sqlRunArgs.dbConfig, isSolution = true).flatMap(_ => {
       val queries = sqlRunArgs.section
-        .map(tq => connections.solutionQueryCon.get.queryFuture(tq.query))
+        .map(tq => dbOperations.queryFutureWithTimeout(connections.solutionQueryCon.get, tq.query))
 
       Future.sequence(queries.toList) transform {
         case s@Success(_) =>
@@ -167,9 +166,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     val dbOperations = initDBOperations(submissionDbExt)
 
     connections.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(c => {
-      // TODO: Set Query Timeout: c.setQueryTimeout(queryTimout)
-
-      executeComplexQuery() transform {
+      executeComplexQuery(dbOperations) transform {
         case s@Success(_) =>
           connections.closeOne(dbOperations)
           s
@@ -180,19 +177,14 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     })
   }
 
-  private def executeComplexQuery(): Future[ResultSet] = {
-    /* Split submissions bei ; into sub Queries and execute all und just get the result of the last*/
+  private def executeComplexQuery(dbOperations: DBOperationsService): Future[ResultSet] = {
+    /* Split submissions at ; into sub Queries and execute all und just get the result of the last*/
     val queries = sqlRunArgs.submissionQuery.split(";").map(_.trim).filter(_.nonEmpty)
-    val p = Pattern.compile("UPDATE.*", 2)
 
     queries.foldLeft[Future[ResultSet]](Future {
       SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
-      if (p.matcher(b).matches()) {
-        connections.submissionQueryCon.get.callFuture(b)
-      } else {
-        connections.submissionQueryCon.get.queryFuture(b)
-      }
+      dbOperations.queryFutureWithTimeout(connections.submissionQueryCon.get, b)
     }))
   }
 

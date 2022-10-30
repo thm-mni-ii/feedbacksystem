@@ -4,20 +4,39 @@ import de.thm.ii.fbs.util.Secrets
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.ResultSet
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
-abstract case class DBOperationsService(dbName: String, username: String) {
+abstract case class DBOperationsService(dbName: String, username: String, queryTimeout: Int) {
   def createDB(client: JDBCClient): Future[ResultSet]
 
   def deleteDB(client: JDBCClient): Future[ResultSet]
 
-  def initDB(client: JDBCClient, query: String): Future[ResultSet]
+  def initDB(client: JDBCClient, query: String): Future[ResultSet] = {
+    queryFutureWithTimeout(client, query)
+  }
 
   def createUserWithWriteAccess(client: JDBCClient): Future[String]
 
   def changeUserToReadOnly(client: JDBCClient): Future[ResultSet]
 
   def deleteUser(client: JDBCClient): Future[ResultSet]
+
+  def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
+    client.getConnectionFuture().flatMap(con => {
+      con.setQueryTimeout(queryTimeout)
+
+      con.queryFuture(sql) transform {
+        case Success(result) =>
+          con.close()
+          Try(result)
+        case Failure(exception) =>
+          con.close()
+          Failure(throw exception)
+      }
+    })
+  }
 
   protected def generateUserPassword(): String =
     Secrets.getSHAStringFromRandom()
