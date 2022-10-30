@@ -53,7 +53,8 @@ case class DBConnections(vertx: Vertx, defaultConfig: JsonObject) {
         dbOperations.initDB(pool2.get, dbConfig).flatMap(_ => {
           dbOperations.changeUserToReadOnly(pool.get).map(_ => {
             closeOptional(pool)
-            pool2
+            closeOptional(pool2)
+            createPool(dbOperations.dbName, Option(username), Option(password))
           })
         })
       })
