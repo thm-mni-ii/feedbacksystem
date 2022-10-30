@@ -121,7 +121,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
       case Failure(ex: SQLTimeoutException) =>
         handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}", ex)
       case Failure(ex: SQLException) =>
-        handleError(runArgs, s"Es gab eine SQLException: ${ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")}", ex)
+        handleError(runArgs, getSQLErrorMsg(ex), ex)
       case Failure(ex: RunnerException) =>
         handleError(runArgs, ex.getMessage, ex)
       case Failure(ex) =>
@@ -132,5 +132,14 @@ class SqlRunnerVerticle extends ScalaVerticle {
   private def handleError(runArgs: RunArgs, msg: String, e: Throwable): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg", e)
     vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
+  }
+
+  private def getSQLErrorMsg(ex: SQLException): String = {
+    // Remove DB Name from Error message
+    var errorMsg = ex.getMessage.replaceAll("[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*\\.", "")
+    // Remove Username Name from Error message
+    errorMsg = errorMsg.replaceAll("'[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*'@'[0-9.]*'", "'submission'")
+
+    s"Es gab eine SQLException: $errorMsg"
   }
 }
