@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.db
 
 import de.thm.ii.fbs.types.MysqlPrivileges
 import io.vertx.scala.ext.jdbc.JDBCClient
-import io.vertx.scala.ext.sql.ResultSet
+import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -14,11 +14,11 @@ class MySqlOperationsService(override val dbName: String, override val username:
   private val READ_USER_PRIVILEGES: MysqlPrivileges =
     MysqlPrivileges("SELECT")
 
-  override def createDB(client: JDBCClient): Future[ResultSet] = {
+  override def createDB(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"DROP DATABASE IF EXISTS $dbName; CREATE DATABASE $dbName;")
   }
 
-  override def deleteDB(client: JDBCClient): Future[ResultSet] = {
+  override def deleteDB(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"DROP DATABASE $dbName")
   }
 
@@ -44,7 +44,7 @@ class MySqlOperationsService(override val dbName: String, override val username:
     client.queryFuture(readQuery)
   }
 
-  override def deleteUser(client: JDBCClient): Future[ResultSet] = {
+  override def deleteUser(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"DROP USER '$username'@'%';")
   }
 }

@@ -89,11 +89,12 @@ object SQLRunnerService {
 /**
   * Provides all functions to start a SQL Runner
   *
-  * @param sqlRunArgs  the Runner arguments
-  * @param connections DB connections used to execute all queries
-  * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
+  * @param sqlRunArgs    the Runner arguments
+  * @param solutionCon   DB connections used to execute all Solution queries
+  * @param submissionCon DB connections used to execute all Submission queries
+  * @param queryTimout   timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnections, val queryTimout: Int) {
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnections, val submissionCon: DBConnections, val queryTimout: Int) {
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
 
@@ -137,16 +138,16 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
   def executeRunnerQueries(): Future[List[ResultSet]] = {
     val dbOperations = initDBOperations(configDbExt)
 
-    connections.initDB(dbOperations, sqlRunArgs.dbConfig, isSolution = true).flatMap(_ => {
+    solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(_ => {
       val queries = sqlRunArgs.section
-        .map(tq => dbOperations.queryFutureWithTimeout(connections.solutionQueryCon.get, tq.query))
+        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query))
 
       Future.sequence(queries.toList) transform {
         case s@Success(_) =>
-          connections.closeOne(dbOperations, isSolution = true)
+          solutionCon.close(dbOperations)
           s
         case Failure(cause) =>
-          connections.closeOne(dbOperations, isSolution = true)
+          solutionCon.close(dbOperations)
 
           cause match {
             // Do not display Configuration SQL errors to the user
@@ -165,13 +166,13 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
   def executeSubmissionQuery(): Future[ResultSet] = {
     val dbOperations = initDBOperations(submissionDbExt)
 
-    connections.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(c => {
+    submissionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(c => {
       executeComplexQuery(dbOperations) transform {
         case s@Success(_) =>
-          connections.closeOne(dbOperations)
+          submissionCon.close(dbOperations)
           s
         case Failure(cause) =>
-          connections.closeOne(dbOperations)
+          submissionCon.close(dbOperations)
           Failure(throw cause)
       }
     })
@@ -184,7 +185,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     queries.foldLeft[Future[ResultSet]](Future {
       SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
-      dbOperations.queryFutureWithTimeout(connections.submissionQueryCon.get, b)
+      dbOperations.queryFutureWithTimeout(submissionCon.queryCon.get, b)
     }))
   }
 

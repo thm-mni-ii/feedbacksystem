@@ -2,16 +2,16 @@ package de.thm.ii.fbs.services.db
 
 import de.thm.ii.fbs.util.Secrets
 import io.vertx.scala.ext.jdbc.JDBCClient
-import io.vertx.scala.ext.sql.ResultSet
+import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 abstract case class DBOperationsService(dbName: String, username: String, queryTimeout: Int) {
-  def createDB(client: JDBCClient): Future[ResultSet]
+  def createDB(client: SQLConnection): Future[ResultSet]
 
-  def deleteDB(client: JDBCClient): Future[ResultSet]
+  def deleteDB(client: SQLConnection): Future[ResultSet]
 
   def initDB(client: JDBCClient, query: String): Future[ResultSet] = {
     queryFutureWithTimeout(client, query)
@@ -21,7 +21,7 @@ abstract case class DBOperationsService(dbName: String, username: String, queryT
 
   def changeUserToReadOnly(client: JDBCClient): Future[ResultSet]
 
-  def deleteUser(client: JDBCClient): Future[ResultSet]
+  def deleteUser(client: SQLConnection): Future[ResultSet]
 
   def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
     client.getConnectionFuture().flatMap(con => {
