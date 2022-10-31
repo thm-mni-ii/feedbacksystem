@@ -91,11 +91,29 @@ export class CheckerService {
     cid: number,
     tid: number,
     ccid: number,
-    fType: CheckerFileType
+    fType: CheckerFileType,
+    filename: string
   ) {
-    this.fetchFile(cid, tid, ccid, fType).subscribe((blob) =>
-      importedSaveAs(blob)
-    );
+    //replace all illegal file characters with underscore
+    filename = filename.replace(/[~"#%&*:<>?/\\{|}. ]+/g, "_");
+    let fExtension: string;
+    switch (fType) {
+      case "main-file":
+        fExtension = "_config.txt";
+        break;
+      case "secondary-file":
+        fExtension = "_secondary.txt";
+        break;
+      default:
+        fExtension = ".txt";
+        break;
+    }
+
+    this.fetchFile(cid, tid, ccid, fType).subscribe((response) => {
+      const blob = new Blob([response], { type: "text/plain" });
+
+      importedSaveAs(blob, filename + fExtension);
+    });
   }
 
   /**
