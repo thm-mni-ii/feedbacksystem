@@ -24,6 +24,18 @@ const values = {
       rootPassword: randomHex(),
     },
   },
+  runnerMysql: {
+    auth: {
+      password: randomHex(),
+      rootPassword: randomHex(),
+    },
+  },
+  runnerPostgres: {
+    auth: {
+      password: randomHex(),
+      postgresPassword: randomHex(),
+    },
+  },
 };
 
 console.log(stringify(values));

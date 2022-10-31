@@ -8,10 +8,39 @@ core:
     registry: docker.io
     name: fbs/core # ToDo find real name
     tag: "1.1.1"
+  resources:
+    cpu:
+      request: 0.1
+      limit: 2
+    memory:
+      request: "250Mi"
+      limit: "4Gi"
   config:
     jwtSecret: "2edb8793d987389e1626918e0ec1dbee" # CHANGE ME
 runner:
   enabled: true
+  image:
+    registry: docker.io
+    name: fbs/core # ToDo find real name
+    tag: "1.1.1"
+  resources:
+    cpu:
+      request: 0.1
+      limit: 2
+    memory:
+      request: "250Mi"
+      limit: "4Gi"
+  dink:
+    image:
+      registry: docker.io
+      name: library/docker
+      tag: "20.10.21-dind-rootless"
+    cpu:
+      request: 0.1
+      limit: 2
+    memory:
+      request: "100Mi"
+      limit: "4Gi"
 sqlChecker:
   enabled: true
 digitalClassroom:
@@ -24,4 +53,19 @@ mysql:
     passwords: fbs # CHANGE ME
     rootPassword: root # CHANGE ME
     createDatabase: true
+
+runnerMysql:
+  auth:
+    database: fbs
+    username: fbs
+    passwords: fbs # CHANGE ME
+    rootPassword: root # CHANGE ME
+
+runnerPostgres:
+  auth:
+    database: fbs
+    username: fbs
+    passwords: fbs # CHANGE ME
+    postgresPassword: root # CHANGE ME
+
 checkerMongodb:

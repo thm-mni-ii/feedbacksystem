@@ -28,9 +28,9 @@ spec:
               name: {{ .Release.Name }}-common
               key: host
           - name: MYSQL_URI
-            secretKeyRef:
+            configMapKeyRef:
               name: {{ .Release.Name }}-core
-              key: mysqJdbclUri
+              key: mysqlJdbclUri
           - name: MYSQL_USER
             configMapKeyRef:
               name: {{ .Release.Name }}-core
@@ -86,13 +86,20 @@ spec:
           claimName: {{ .Release.Name }}-core-upload-dir
 ---
 apiVersion: v1
+kind: ConfigMap
+type: Opaque
+metadata:
+  name: {{ .Release.Name }}-core
+data:
+  mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" | b64enc }}
+---
+apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
   name: {{ .Release.Name }}-core
 data:
   jwtSecret: {{ .Values.core.config.jwtSecret | b64enc }}
-  mysqJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" | b64enc }}
   mysqlUser:  {{ .Values.mysql.auth.username | b64enc }}
   mysqlPassword: {{ .Values.mysql.auth.passwords | b64enc }}
 ---

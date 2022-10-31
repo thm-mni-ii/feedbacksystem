@@ -1,3 +1,148 @@
 {{ if .Values.runner.enabled }}
-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-runner
+  labels:
+    app: {{ .Release.Name }}-runner
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-runner
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-runner
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-runner
+        image: {{ .Values.runner.image.registry }}/{{ .Values.runner.image.name }}:{{ .Values.runner.image.tag }}
+        ports:
+        - containerPort: 8081
+          name: https
+        env:
+          - name: BASH_DOCKER
+            value: thmmniii/fbs-runtime-bash:dev-latest
+          - name: HOST_TMP_DIR
+            value: /tmp/feebi
+          - name: INSIDE_DOCKER
+            value: true
+          - name: RESULT_SERVER_HOST
+            value: {{ .Release.Name }}-core
+          - name: MYSQL_SERVER_URL
+            configMapKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: mysqlJdbclUri
+          - name: MYSQL_SERVER_PASSWORD
+            secretKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: mysqlPassword
+          - name: PSQL_SERVER_URL
+            configMapKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: psqlJdbclUri
+          - name: PSQL_SERVER_USERNAME
+            configMapKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: psqlUsername
+          - name: PSQL_SERVER_PASSWORD
+            secretKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: psqlPassword
+          - name: JWT_SECRET
+           secretKeyRef:
+              name: {{ .Release.Name }}-runner
+              key: jwtSecret
+          - name: CLASSROOM_URL
+            value: http://{{ .Release.Name }}-digital-classroom:8055
+          - name: CLASSROOM_SECRET
+            secretKeyRef:
+              name: {{ .Release.Name }}-classroom
+              key: secret
+          - name: CLASSROOM_TLS_INSECURE
+            value: true
+          - name: MASTER_RUNNER_URL
+            value: https://{{ .Release.Name }}-runner:8001
+          - name: MASTER_RUNNER_TLS_INSECURE
+            value: true
+          - name: MONGODB_URI
+            secretKeyRef:
+              name: {{ .Release.Name }}-sql-checker
+              key: mongodbUri
+          - name: MONGODB_DATABASE
+            configMapKeyRef:
+              name: {{ .Release.Name }}-sql-checker
+              key: mongoDatabase
+          - name: SELF_URL
+            value: https://{{ .Release.Name }}-runner
+        resources:
+          requests:
+            cpu: {{ .Values.runner.resources.cpu.request }}
+            memory: {{ .Values.runner.resources.memory.request }}
+          limits:
+            cpu: {{ .Values.runner.resources.cpu.limit }}
+            memory: {{ .Values.runner.resources.memory.limit }}
+        volumeMounts:
+        - name: tmp
+          mountPath: /dockertemp
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+          subPath: docker.sock
+        - name: upload-dir
+          mountPath: /upload-dir
+      - name: {{ .Release.Name }}-runner-docker
+        image: {{ .Values.runner.dink.image.registry }}/{{ .Values.runner.dink.image.name }}:{{ .Values.runner.dink.image.tag }}
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: {{ .Values.runner.dink.resources.cpu.request }}
+            memory: {{ .Values.runner.dink.resources.memory.request }}
+          limits:
+            cpu: {{ .Values.runner.dink.resources.cpu.limit }}
+            memory: {{ .Values.runner.dink.resources.memory.limit }}
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: docker-socket
+        emptyDir: {}
+      - name: upload-dir
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-runner-upload-dir
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-runner
+data:
+  mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-runnerMysql:3306?allowMultiQueries=true" }}
+  psqlJdbclUri: {{ print "jdbc:postgresql://" .Release.Name "-runnerPostgres:5432?allowMultiQueries=true" }}
+  psqlUsername: {{ .Values.runnerPostgres.auth.username }}
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .Release.Name }}-runner
+data:
+  mysqlPassword: {{ .Values.runnerMysql.auth.passwords | b64enc }}
+  psqlPassword: {{ .Values.runnerMysql.auth.passwords | b64enc }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-runner
+  labels:
+    app: {{ .Release.Name }}-runner
+spec:
+  selector:
+    app: {{ .Release.Name }}-runner
+  ports:
+    - name: https
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
 {{ end }}
