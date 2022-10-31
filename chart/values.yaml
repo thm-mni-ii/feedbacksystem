@@ -17,6 +17,7 @@ core:
       limit: "4Gi"
   config:
     jwtSecret: "2edb8793d987389e1626918e0ec1dbee" # CHANGE ME
+
 runner:
   enabled: true
   image:
@@ -41,8 +42,10 @@ runner:
     memory:
       request: "100Mi"
       limit: "4Gi"
+
 sqlChecker:
   enabled: true
+
 digitalClassroom:
   enabled: true
   image:
@@ -86,3 +89,8 @@ runnerPostgres:
     postgresPassword: root # CHANGE ME
 
 checkerMongodb:
+  auth:
+    database: fbs
+    username: fbs
+    passwords: fbs # CHANGE ME
+    rootPassword: root # CHANGE ME

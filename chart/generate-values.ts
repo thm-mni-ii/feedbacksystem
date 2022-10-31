@@ -8,50 +8,67 @@ function randomHex(lenght = 16): string {
   return new TextDecoder().decode(encode(bs));
 }
 
-const values: any = {
-  common: {
-    config: {
-      hostname: prompt("Enter Hostname:"),
+function buildValues(): any {
+  const values: any = {
+    common: {
+      config: {
+        hostname: prompt("Enter Hostname:"),
+      },
     },
-  },
-  core: {
-    config: {
-      jwtSecret: randomHex(),
+    core: {
+      config: {
+        jwtSecret: randomHex(),
+      },
     },
-  },
-  mysql: {
-    auth: {
-      password: randomHex(),
-      rootPassword: randomHex(),
+    mysql: {
+      auth: {
+        password: randomHex(),
+        rootPassword: randomHex(),
+      },
     },
-  },
-  runnerMysql: {
-    auth: {
-      password: randomHex(),
-      rootPassword: randomHex(),
+    runnerMysql: {
+      auth: {
+        password: randomHex(),
+        rootPassword: randomHex(),
+      },
     },
-  },
-  runnerPostgres: {
-    auth: {
-      password: randomHex(),
-      postgresPassword: randomHex(),
+    runnerPostgres: {
+      auth: {
+        password: randomHex(),
+        postgresPassword: randomHex(),
+      },
     },
-  },
-  digitalClassroom: {
-    enabled: false,
-  },
-};
-
-if (confirm("Enable digital classroom:")) {
-  values.digitalClassroom.enabled = true;
-  values.digitalClassroom.config = {
-    jwtSecret: randomHex(),
-    secret: randomHex(),
-    bbb: {
-      url: prompt("Enter BBB Url:"),
-      bbb: prompt("Enter BBB secret:"),
+    checkerMongodb: {
+      auth: {
+        password: randomHex(),
+        postgresPassword: randomHex(),
+      },
+    },
+    digitalClassroom: {
+      enabled: false,
     },
   };
+
+  if (confirm("Enable digital classroom:")) {
+    values.digitalClassroom.enabled = true;
+    values.digitalClassroom.config = {
+      jwtSecret: randomHex(),
+      secret: randomHex(),
+      bbb: {
+        url: prompt("Enter BBB Url:"),
+        bbb: prompt("Enter BBB secret:"),
+      },
+    };
+  }
+
+  return values;
 }
 
-console.log(stringify(values));
+if (Deno.args.length < 1) {
+  throw new Error("argument for output is required");
+}
+
+Deno.writeFileSync(
+  Deno.args[0],
+  new TextEncoder().encode(stringify(buildValues())),
+);

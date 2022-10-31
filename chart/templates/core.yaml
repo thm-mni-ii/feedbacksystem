@@ -43,18 +43,23 @@ spec:
            secretKeyRef:
               name: {{ .Release.Name }}-core
               key: jwtSecret
+          {{ if .Values.digitalClassroom.enabled }}
           - name: CLASSROOM_URL
             value: http://{{ .Release.Name }}-digital-classroom:8055
           - name: CLASSROOM_SECRET
             secretKeyRef:
               name: {{ .Release.Name }}-digital-classroom
               key: secret
+          {{ end }}
           - name: CLASSROOM_TLS_INSECURE
             value: true
+          {{ if .Values.runner.enabled }}
           - name: MASTER_RUNNER_URL
             value: https://{{ .Release.Name }}-master-runner:8001
           - name: MASTER_RUNNER_TLS_INSECURE
             value: true
+          {{ end }}
+          {{ if .Values.sqlChecker.enabled }}
           - name: MONGODB_URI
             secretKeyRef:
               name: {{ .Release.Name }}-sql-checker
@@ -63,6 +68,7 @@ spec:
             configMapKeyRef:
               name: {{ .Release.Name }}-sql-checker
               key: mongoDatabase
+          {{ end }}
           - name: SELF_URL
             value: https://{{ .Release.Name }}-core
         resources:
@@ -91,7 +97,7 @@ type: Opaque
 metadata:
   name: {{ .Release.Name }}-core
 data:
-  mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" | b64enc }}
+  mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" }}
 ---
 apiVersion: v1
 kind: Secret
