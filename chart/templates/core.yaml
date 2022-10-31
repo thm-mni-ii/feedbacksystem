@@ -110,25 +110,6 @@ data:
   mysqlPassword: {{ .Values.mysql.auth.passwords | b64enc }}
 ---
 apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-core
-  labels:
-    app: {{ .Release.Name }}-core
-spec:
-  selector:
-    app: {{ .Release.Name }}-core
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 80
-    - name: https
-      protocol: TCP
-      port: 443
-      targetPort: 443
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-core-config
@@ -151,4 +132,42 @@ spec:
   resources:
     requests:
       storage: {{ .Values.core.volumes.uploadDir.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-core
+  labels:
+    app: {{ .Release.Name }}-core
+spec:
+  selector:
+    app: {{ .Release.Name }}-core
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443
+{{ if .Values.core.ingress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-core
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-core
+            port:
+              number: 443
+
+{{ end }}
 {{ end }}

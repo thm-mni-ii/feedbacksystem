@@ -17,6 +17,8 @@ core:
       limit: "4Gi"
   config:
     jwtSecret: "2edb8793d987389e1626918e0ec1dbee" # CHANGE ME
+  ingress:
+    enabled: true
 
 runner:
   enabled: true
