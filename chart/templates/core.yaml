@@ -23,7 +23,48 @@ spec:
         - containerPort: 443
           name: https
         env:
-        # ToDo: Add env
+          - name: SERVER_HOST
+            configMapKeyRef:
+              name: {{ .Release.Name }}-common
+              key: host
+          - name: MYSQL_URI
+            secretKeyRef:
+              name: {{ .Release.Name }}-core
+              key: mysqJdbclUri
+          - name: MYSQL_USER
+            configMapKeyRef:
+              name: {{ .Release.Name }}-core
+              key: mysqlUser
+          - name: MYSQL_PASSWORD
+            secretKeyRef:
+              name: {{ .Release.Name }}-core
+              key: mysqlPassword
+          - name: JWT_SECRET
+           secretKeyRef:
+              name: {{ .Release.Name }}-core
+              key: jwtSecret
+          - name: CLASSROOM_URL
+            value: http://{{ .Release.Name }}-digital-classroom:8055
+          - name: CLASSROOM_SECRET
+            secretKeyRef:
+              name: {{ .Release.Name }}-classroom
+              key: secret
+          - name: CLASSROOM_TLS_INSECURE
+            value: true
+          - name: MASTER_RUNNER_URL
+            value: https://{{ .Release.Name }}-master-runner:8001
+          - name: MASTER_RUNNER_TLS_INSECURE
+            value: true
+          - name: MONGODB_URI
+            secretKeyRef:
+              name: {{ .Release.Name }}-sql-checker
+              key: mongodbUri
+          - name: MONGODB_DATABASE
+            configMapKeyRef:
+              name: {{ .Release.Name }}-sql-checker
+              key: mongoDatabase
+          - name: SELF_URL
+            value: https://{{ .Release.Name }}-core
         resources:
           requests:
             cpu: {{ .Values.core.resources.cpu.request }}
@@ -45,10 +86,15 @@ spec:
           claimName: {{ .Release.Name }}-core-upload-dir
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
+type: Opaque
 metadata:
   name: {{ .Release.Name }}-core
 data:
+  jwtSecret: {{ .Values.core.config.jwtSecret | b64enc }}
+  mysqJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" | b64enc }}
+  mysqlUser:  {{ .Values.mysql.auth.username | b64enc }}
+  mysqlPassword: {{ .Values.mysql.auth.passwords | b64enc }}
 ---
 apiVersion: v1
 kind: Service

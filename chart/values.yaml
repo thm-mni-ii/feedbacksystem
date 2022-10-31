@@ -1,5 +1,6 @@
-global:
-  hostname: https://feedback.example.org
+common:
+  config:
+    hostname: https://feedback.example.org
 
 core:
   enabled: true
@@ -7,9 +8,20 @@ core:
     registry: docker.io
     name: fbs/core # ToDo find real name
     tag: "1.1.1"
+  config:
+    jwtSecret: "2edb8793d987389e1626918e0ec1dbee" # CHANGE ME
 runner:
   enabled: true
 sqlChecker:
   enabled: true
 digitalClassroom:
   enabled: true
+
+mysql:
+  auth:
+    database: fbs
+    username: fbs
+    passwords: fbs # CHANGE ME
+    rootPassword: root # CHANGE ME
+    createDatabase: true
+checkerMongodb:
