@@ -172,8 +172,8 @@ export class NewCheckerDialogComponent implements OnInit {
                 (error) => console.error(error)
               );
           }
+          this.dialogRef.close({ success: true });
         });
-      this.dialogRef.close({ success: true });
     } else {
       this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");
     }
@@ -243,8 +243,8 @@ export class NewCheckerDialogComponent implements OnInit {
                 (error) => console.error(error)
               );
           }
+          this.dialogRef.close({ success: true });
         });
-      this.dialogRef.close({ success: true });
     } else {
       this.snackBar.open("Alle Felder müssen gefüllt werden.", "ok");
     }
