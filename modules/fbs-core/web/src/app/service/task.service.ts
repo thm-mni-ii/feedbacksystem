@@ -91,8 +91,6 @@ export class TaskService {
       })
       .subscribe((response) => {
         const blob = new Blob([response], { type: "text/plain" });
-        console.log(filename);
-        
         saveAs(blob, filename ? filename + "_export.txt" : "_export.txt");
       });
   }
