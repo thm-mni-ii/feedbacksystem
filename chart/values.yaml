@@ -45,6 +45,23 @@ sqlChecker:
   enabled: true
 digitalClassroom:
   enabled: true
+  image:
+    registry: ghcr.io
+    name: thm-mni-ii/digital-classroom # ToDo find real name
+    tag: "v1.0.1"
+  resources:
+    cpu:
+      request: 0.1
+      limit: 2
+    memory:
+      request: "250Mi"
+      limit: "4Gi"
+  config:
+    jwtSecret: "2edb8793d987389e1626918e0ec1dbee" # CHANGE ME
+    secret: "1f2a08f5dbd81580a6fb0f645dce3737"
+    bbb:
+      url: "https://bbb.example.org"
+      secret: 1234
 
 mysql:
   auth:

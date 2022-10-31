@@ -47,7 +47,7 @@ spec:
             value: http://{{ .Release.Name }}-digital-classroom:8055
           - name: CLASSROOM_SECRET
             secretKeyRef:
-              name: {{ .Release.Name }}-classroom
+              name: {{ .Release.Name }}-digital-classroom
               key: secret
           - name: CLASSROOM_TLS_INSECURE
             value: true
