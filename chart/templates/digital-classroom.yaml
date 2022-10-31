@@ -24,25 +24,29 @@ spec:
         - name: CLASSROOM_SSL_ENABLED
           value: "false"
         - name: CLASSROOM_BBB_UPSTREAM_URL
-          configMapKeyRef:
-            name: {{ .Release.Name }}-digital-classroom
-            key: upstreamUrl
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Release.Name }}-digital-classroom
+              key: upstreamUrl
         - name: CLASSROOM_BBB_UPSTREAM_SECRET
-          secretKeyRef:
-            name: {{ .Release.Name }}-digital-classroom
-            key: upstreamSecret
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-digital-classroom
+              key: upstreamSecret
         - name: CLASSROOM_SECRET
-          secretKeyRef:
-            name: {{ .Release.Name }}-digital-classroom
-            key: secret
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-digital-classroom
+              key: secret
         - name: CLASSROOM_HOST
           value: "http://localhost:8085"
         - name: CLASSROOM_PORT
           value: "8085"
         - name: CLASSROOM_JWT_SECRET
-          secretKeyRef:
-            name: {{ .Release.Name }}-digital-classroom
-            key: jwtSecret
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-digital-classroom
+              key: jwtSecret
         - name: CLASSROOM_JWT_EXPIRATION
           value: "900"
         resources:
@@ -59,17 +63,16 @@ type: Opaque
 metadata:
   name: {{ .Release.Name }}-digital-classroom
 data:
-  upstreamUrl: {{ .Values.digitalClassroom.bbb.url }}
+  upstreamUrl: {{ .Values.digitalClassroom.config.bbb.url }}
 ---
 apiVersion: v1
 kind: Secret
-type: Opaque
 metadata:
   name: {{ .Release.Name }}-digital-classroom
 data:
   jwtSecret: {{ .Values.digitalClassroom.config.jwtSecret | b64enc }}
   secret:  {{ .Values.digitalClassroom.config.secret | b64enc }}
-  upstreamSecret: {{ .Values.digitalClassroom.bbb.secret | b64enc }}
+  upstreamSecret: {{ .Values.digitalClassroom.config.bbb.secret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

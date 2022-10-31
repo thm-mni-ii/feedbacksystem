@@ -24,50 +24,58 @@ spec:
           name: https
         env:
           - name: SERVER_HOST
-            configMapKeyRef:
-              name: {{ .Release.Name }}-common
-              key: host
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-common
+                key: host
           - name: MYSQL_URI
-            configMapKeyRef:
-              name: {{ .Release.Name }}-core
-              key: mysqlJdbclUri
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-core
+                key: mysqlJdbclUri
           - name: MYSQL_USER
-            configMapKeyRef:
-              name: {{ .Release.Name }}-core
-              key: mysqlUser
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-core
+                key: mysqlUser
           - name: MYSQL_PASSWORD
-            secretKeyRef:
-              name: {{ .Release.Name }}-core
-              key: mysqlPassword
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-core
+                key: mysqlPassword
           - name: JWT_SECRET
-           secretKeyRef:
-              name: {{ .Release.Name }}-core
-              key: jwtSecret
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-core
+                key: jwtSecret
           {{ if .Values.digitalClassroom.enabled }}
           - name: CLASSROOM_URL
             value: http://{{ .Release.Name }}-digital-classroom:8055
           - name: CLASSROOM_SECRET
-            secretKeyRef:
-              name: {{ .Release.Name }}-digital-classroom
-              key: secret
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-digital-classroom
+                key: secret
           {{ end }}
           - name: CLASSROOM_TLS_INSECURE
-            value: true
+            value: "true"
           {{ if .Values.runner.enabled }}
           - name: MASTER_RUNNER_URL
             value: https://{{ .Release.Name }}-master-runner:8001
           - name: MASTER_RUNNER_TLS_INSECURE
-            value: true
+            value: "true"
           {{ end }}
           {{ if .Values.sqlChecker.enabled }}
           - name: MONGODB_URI
-            secretKeyRef:
-              name: {{ .Release.Name }}-sql-checker
-              key: mongodbUri
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-sql-checker
+                key: mongodbUri
           - name: MONGODB_DATABASE
-            configMapKeyRef:
-              name: {{ .Release.Name }}-sql-checker
-              key: mongoDatabase
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-sql-checker
+                key: mongoDatabase
           {{ end }}
           - name: SELF_URL
             value: https://{{ .Release.Name }}-core
@@ -93,11 +101,11 @@ spec:
 ---
 apiVersion: v1
 kind: ConfigMap
-type: Opaque
 metadata:
   name: {{ .Release.Name }}-core
 data:
   mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" }}
+  mysqlUser:  {{ .Values.mysql.auth.username }}
 ---
 apiVersion: v1
 kind: Secret
@@ -106,8 +114,7 @@ metadata:
   name: {{ .Release.Name }}-core
 data:
   jwtSecret: {{ .Values.core.config.jwtSecret | b64enc }}
-  mysqlUser:  {{ .Values.mysql.auth.username | b64enc }}
-  mysqlPassword: {{ .Values.mysql.auth.passwords | b64enc }}
+  mysqlPassword: {{ .Values.mysql.auth.password | b64enc }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -159,7 +166,8 @@ metadata:
   name: {{ .Release.Name }}-core
 spec:
   rules:
-  - http:
+  - host: {{ .Values.common.config.hostname }}
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -168,6 +176,5 @@ spec:
             name: {{ .Release.Name }}-core
             port:
               number: 443
-
 {{ end }}
 {{ end }}

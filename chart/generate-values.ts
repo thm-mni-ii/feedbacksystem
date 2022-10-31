@@ -9,10 +9,14 @@ function randomHex(lenght = 16): string {
 }
 
 function buildValues(): any {
+  const host = new URL(prompt("Enter host:")!);
+
   const values: any = {
     common: {
       config: {
-        hostname: prompt("Enter Hostname:"),
+        protocol: host.protocol,
+        hostname: host.hostname,
+        port: host.port || 443,
       },
     },
     core: {

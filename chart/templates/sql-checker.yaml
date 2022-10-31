@@ -1,7 +1,6 @@
 {{ if .Values.sqlChecker.enabled }}
 apiVersion: v1
 kind: ConfigMap
-type: Opaque
 metadata:
   name: {{ .Release.Name }}-sql-checker
 data:
@@ -13,5 +12,5 @@ type: Opaque
 metadata:
   name: {{ .Release.Name }}-sql-checker
 data:
-  mongodbUri: {{ print "mongodb://" .Values.checkerMongodb.auth.username ":" .Values.checkerMongodb.auth.passwords "@" .Release.Name "-checkerMongodb" ":27017" | b64enc }}
+  mongodbUri: {{ print "mongodb://" .Values.checkerMongodb.auth.username ":" .Values.checkerMongodb.auth.password "@" .Release.Name "-checker-mongodb" ":27017" | b64enc }}
 {{ end }}
