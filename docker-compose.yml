@@ -79,7 +79,7 @@ services:
       retries: 3
 
   psql-checker:
-    image: postgres
+    image: postgres:14
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
@@ -110,7 +110,7 @@ services:
       retries: 3
 
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2022-10-29T06-21-33Z
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
