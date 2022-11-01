@@ -22,6 +22,6 @@
 }
 
 .x-scrollable {
-  overflow-x: auto;
-  overflow-y: hidden;
+  min-height: 150px;
+  max-height: 400px;
 }

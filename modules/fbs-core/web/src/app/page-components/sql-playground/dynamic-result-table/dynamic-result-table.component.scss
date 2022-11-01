@@ -1,0 +1,59 @@
+.container {
+  display: block;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-container {
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 40px;
+  margin-top: 5px;
+  height: 40px;
+
+  mat-paginator {
+    background: transparent;
+  }
+
+  button {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    height: fit-content;
+    width: fit-content;
+    background: inherit;
+    border: none;
+    color: rgba(0, 0, 0, 0.54);
+    cursor: pointer;
+  }
+
+  button:hover {
+    color: black;
+  }
+}
+
+.table-container {
+  display: block;
+  min-height: 100px;
+  max-height: 350px;
+  overflow-x: auto;
+
+  table {
+    margin: 10px;
+  }
+}
+
+.cells {
+  width: fit-content;
+  padding: 5px 15px 5px 15px;
+  white-space: nowrap;
+}
+
+.table-row {
+  height: 10px;
+}

@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.util
 
+import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
 import javax.xml.bind.DatatypeConverter
 
 /**
@@ -53,5 +53,18 @@ object Secrets {
   def getSHAStringFromNow(): String = {
     val md = java.security.MessageDigest.getInstance("SHA-1")
     md.digest(getRandomStringByDateNow().getBytes("UTF-8")).map("%02x".format(_)).mkString
+  }
+
+  /**
+    * creates a random sha1 string based on SecureRandom
+    *
+    * @author Max Stephan
+    * @return a random SHA
+    */
+  def getSHAStringFromRandom(): String = {
+    val md = java.security.MessageDigest.getInstance("SHA-1")
+    val buffer = Array[Byte](32)
+    new SecureRandom().nextBytes(buffer)
+    md.digest(buffer).map("%02x".format(_)).mkString
   }
 }
