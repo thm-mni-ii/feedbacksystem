@@ -1,19 +1,18 @@
 package de.thm.ii.fbs.services.runner
 
-import java.sql.SQLException
-import java.util.regex.Pattern
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import de.thm.ii.fbs.services.db.{DBOperationsService, MySqlOperationsService, PsqlOperationsService}
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
-import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
+import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle
 import io.vertx.core.json.DecodeException
-import io.vertx.lang.scala.ScalaLogger
 import io.vertx.lang.scala.json.JsonObject
-import io.vertx.scala.ext.sql.{ResultSet, SQLConnection, SQLOptions}
+import io.vertx.scala.ext.sql.ResultSet
 
+import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.Breaks.{break, breakable}
@@ -24,6 +23,7 @@ import scala.util.{Failure, Success}
   */
 object SQLRunnerService {
   private val yamlMapper = new ObjectMapper(new YAMLFactory)
+
   /**
     * Converts a Runner Configuration into an SQL Runner Configuration.
     *
@@ -89,14 +89,14 @@ object SQLRunnerService {
 /**
   * Provides all functions to start a SQL Runner
   *
-  * @param sqlRunArgs  the Runner arguments
-  * @param pool        an sql conection pool
-  * @param queryTimout timeoutInSeconds the max amount of seconds the query can take to execute
+  * @param sqlRunArgs    the Runner arguments
+  * @param solutionCon   DB connections used to execute all Solution queries
+  * @param submissionCon DB connections used to execute all Submission queries
+  * @param queryTimout   timeoutInSeconds the max amount of seconds the query can take to execute
   */
-class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnections, val queryTimout: Int) {
+class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnections, val submissionCon: DBConnections, val queryTimout: Int) {
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
-  private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
   private def isVariable(taskQuery: TaskQuery): Boolean =
     taskQuery.order != null && taskQuery.order.equalsIgnoreCase("variable")
@@ -107,52 +107,28 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
   private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
     msgIsOk(taskQuery.description)
 
-  private def createDatabase(nameExtenion: String, con: SQLConnection, isSolution: Boolean = false): Future[_] = {
-    val name = buildName(nameExtenion) // TODO secure? (prepared q)
-    var queries = ""
+  private def isPsql: Boolean = sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)
 
-    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
-      // postgresql needs the dbname in Quotes
-      queries = s"""DROP DATABASE IF EXISTS "$name"; CREATE DATABASE "$name";"""
-    } else {
-      queries = s"DROP DATABASE IF EXISTS $name; CREATE DATABASE $name;"
-    }
-
-    con.executeFuture(queries).flatMap(_ => {
-      connections.initQuery(name, isSolution)
-      if (isSolution) {
-        connections.solutionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
-      } else {
-        connections.submissionQueryCon.get.queryFuture(sqlRunArgs.dbConfig)
-      }
-    })
+  private def shortDBName(dbName: String) = {
+    val lastChar = dbName.last
+    // Keep _c or _s to avoid collisions
+    s"${dbName.slice(0, 30)}_$lastChar"
   }
 
-  private def deleteDatabases(con: SQLConnection, nameExtension: String, isSolution: Boolean = false): Unit = {
-    val name = buildName(nameExtension) // TODO secure? (prepared q)
-    var query = ""
-
-    if (sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)) {
-      // postgresql needs the dbname in Quotes
-      query = s"""DROP DATABASE "$name""""
+  private def initDBOperations(nameExtension: String): DBOperationsService = {
+    val dbName = buildName(nameExtension)
+    // TODO: May find better way to generate the username
+    val username = if (isPsql) dbName else shortDBName(dbName) // Mysql only allow usernames with a length of max 32 chars
+    val dbOperation = if (isPsql) {
+      new PsqlOperationsService(dbName, username, queryTimout)
     } else {
-      query = s"DROP DATABASE $name"
+      new MySqlOperationsService(dbName, username, queryTimout)
     }
 
-    // Close all connection to the db that should be deleted
-    connections.closeOne(isSolution)
-
-    con.queryFuture(query).onComplete({
-      case Success(_) =>
-        con.setOptions(SQLOptions().setCatalog(null))
-        con.close()
-      case Failure(e) =>
-        logger.warn(s"Submission-${sqlRunArgs.submissionId}: Count not delete Submission Database", e)
-        con.close()
-    })
+    dbOperation
   }
 
-  private def buildName(nameExtention: String): String = s"${sqlRunArgs.submissionId}_${sqlRunArgs.runnerId}_$nameExtention"
+  private def buildName(nameExtension: String): String = s"${sqlRunArgs.submissionId}_${sqlRunArgs.runnerId}_$nameExtension"
 
   /**
     * Execute the Runner Queries
@@ -160,27 +136,25 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     * @return a Future that contains the Results
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
-    connections.operationCon.getConnectionFuture().flatMap(c => {
-      c.setQueryTimeout(queryTimout)
+    val dbOperations = initDBOperations(configDbExt)
 
-      createDatabase(configDbExt, c, isSolution = true).flatMap[List[ResultSet]](_ => {
-        val queries = sqlRunArgs.section
-          .map(tq => connections.solutionQueryCon.get.queryFuture(tq.query))
+    solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(_ => {
+      val queries = sqlRunArgs.section
+        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query))
 
-        Future.sequence(queries.toList) transform {
-          case s@Success(_) =>
-            deleteDatabases(c, configDbExt, isSolution = true)
-            s
-          case Failure(cause) =>
-            deleteDatabases(c, configDbExt, isSolution = true)
+      Future.sequence(queries.toList) transform {
+        case s@Success(_) =>
+          solutionCon.close(dbOperations)
+          s
+        case Failure(cause) =>
+          solutionCon.close(dbOperations)
 
-            cause match {
-              // Do not display Configuration SQL errors to the user
-              case e: SQLException => Failure(new RunnerException(f"invalid Runner configuration"))
-              case _ => Failure(throw cause)
-            }
-        }
-      })
+          cause match {
+            // Do not display Configuration SQL errors to the user
+            case _: SQLException => Failure(new RunnerException(f"invalid Runner configuration"))
+            case _ => Failure(throw cause)
+          }
+      }
     })
   }
 
@@ -190,35 +164,28 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     * @return a Future that contains the Results
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
-    connections.operationCon.getConnectionFuture().flatMap(c => {
-      c.setQueryTimeout(queryTimout)
+    val dbOperations = initDBOperations(submissionDbExt)
 
-      createDatabase(submissionDbExt, c).flatMap[ResultSet](_ => {
-        executeComplexQuery() transform {
-          case s@Success(_) =>
-            deleteDatabases(c, submissionDbExt)
-            s
-          case Failure(cause) =>
-            deleteDatabases(c, submissionDbExt)
-            Failure(throw cause)
-        }
-      })
+    submissionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(c => {
+      executeComplexQuery(dbOperations) transform {
+        case s@Success(_) =>
+          submissionCon.close(dbOperations)
+          s
+        case Failure(cause) =>
+          submissionCon.close(dbOperations)
+          Failure(throw cause)
+      }
     })
   }
 
-  private def executeComplexQuery(): Future[ResultSet] = {
-    /* Split submissions bei ; into sub Queries and execute all und just get the result of the last*/
+  private def executeComplexQuery(dbOperations: DBOperationsService): Future[ResultSet] = {
+    /* Split submissions at ; into sub Queries and execute all und just get the result of the last*/
     val queries = sqlRunArgs.submissionQuery.split(";").map(_.trim).filter(_.nonEmpty)
-    val p = Pattern.compile("UPDATE.*", 2)
 
     queries.foldLeft[Future[ResultSet]](Future {
       SQLResultService.emptyResult()
     })((a, b) => a.flatMap[ResultSet]({ _ =>
-      if (p.matcher(b).matches()) {
-        connections.submissionQueryCon.get.callFuture(b)
-      } else {
-        connections.submissionQueryCon.get.queryFuture(b)
-      }
+      dbOperations.queryFutureWithTimeout(submissionCon.queryCon.get, b)
     }))
   }
 
@@ -230,7 +197,10 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val connections: DBConnection
     */
   def compareResults(res: (List[ResultSet], ResultSet)): (String, Boolean, ExtResSql) = {
     var msg = "Your Query didn't produce the correct result"
-    var success = false; var identified = false; var foundIndex = -1; var variable = false
+    var success = false
+    var identified = false
+    var foundIndex = -1
+    var variable = false
     val userRes = res._2
     val userResSorted = SQLResultService.sortResult(SQLResultService.copyResult(res._2))
     val correctResults: ExtResSql = new ExtResSql(None, Option(res._2))
