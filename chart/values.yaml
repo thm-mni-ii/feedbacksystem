@@ -62,7 +62,7 @@ digitalClassroom:
   enabled: true
   image:
     registry: ghcr.io
-    name: thm-mni-ii/digital-classroom 
+    name: thm-mni-ii/digital-classroom
     tag: "v1.0.1"
   resources:
     cpu:
@@ -85,6 +85,8 @@ mysql:
     password: fbs # CHANGE ME
     rootPassword: root # CHANGE ME
     createDatabase: true
+  primray:
+    existingConfigmap: 'CHANGE-ME'
 
 runnerMysql:
   nameOverride: runner-mysql
@@ -109,3 +111,7 @@ checkerMongodb:
     username: fbs
     password: fbs # CHANGE ME
     rootPassword: root # CHANGE ME
+
+minio:
+  auth:
+    rootPassword: fbs

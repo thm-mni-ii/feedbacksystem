@@ -34,6 +34,11 @@ spec:
               configMapKeyRef:
                 name: {{ .Release.Name }}-runner
                 key: mysqlJdbclUri
+          - name: MYSQL_SERVER_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-runner
+                key: mysqlUsername
           - name: MYSQL_SERVER_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -97,8 +102,9 @@ metadata:
   name: {{ .Release.Name }}-runner
 data:
   mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-runner-mysql:3306?allowMultiQueries=true" }}
-  psqlJdbclUri: {{ print "jdbc:postgresql://" .Release.Name "-runner-postgres:5432?allowMultiQueries=true" }}
-  psqlUsername: {{ .Values.runnerPostgres.auth.username }}
+  psqlJdbclUri: {{ print "jdbc:postgresql://" .Release.Name "-runner-postgres:5432/?allowMultiQueries=true" }}
+  mysqlUsername: 'root'
+  psqlUsername: 'postgres'
 ---
 apiVersion: v1
 kind: Secret
@@ -106,8 +112,8 @@ type: Opaque
 metadata:
   name: {{ .Release.Name }}-runner
 data:
-  mysqlPassword: {{ .Values.runnerMysql.auth.password | b64enc }}
-  psqlPassword: {{ .Values.runnerMysql.auth.password | b64enc }}
+  mysqlPassword: {{ .Values.runnerMysql.auth.rootPassword | b64enc }}
+  psqlPassword: {{ .Values.runnerPostgres.auth.postgresPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

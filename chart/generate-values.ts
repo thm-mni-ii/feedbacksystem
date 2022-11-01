@@ -9,6 +9,8 @@ function randomHex(lenght = 16): string {
 }
 
 function buildValues(): any {
+  const namespace = prompt("Namespace:");
+  const name = prompt("Name: ");
   const host = new URL(prompt("Enter host:")!);
 
   const values: any = {
@@ -29,6 +31,9 @@ function buildValues(): any {
         password: randomHex(),
         rootPassword: randomHex(),
       },
+      primary: {
+        existingConfigmap: `${name}-mysql-config`,
+      },
     },
     runnerMysql: {
       auth: {
@@ -48,6 +53,11 @@ function buildValues(): any {
         postgresPassword: randomHex(),
       },
     },
+    minio: {
+      auth: {
+        rootPassword: randomHex(),
+      },
+    },
     digitalClassroom: {
       enabled: false,
     },
@@ -65,14 +75,22 @@ function buildValues(): any {
     };
   }
 
-  return values;
+  return { namespace, name, values };
 }
 
 if (Deno.args.length < 1) {
   throw new Error("argument for output is required");
 }
 
+const { name, namespace, values } = buildValues();
+
 Deno.writeFileSync(
   Deno.args[0],
-  new TextEncoder().encode(stringify(buildValues())),
+  new TextEncoder().encode(stringify(values)),
+);
+
+console.log(
+  `Install with helm install -f ${
+    Deno.args[0]
+  } -n ${namespace} --create-namespace ${name} <chart name>`,
 );

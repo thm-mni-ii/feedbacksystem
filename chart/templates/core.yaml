@@ -61,7 +61,7 @@ spec:
             value: "true"
           {{ if .Values.runner.enabled }}
           - name: MASTER_RUNNER_URL
-            value: https://{{ .Release.Name }}-master-runner:8001
+            value: https://{{ .Release.Name }}-runner:8081
           - name: MASTER_RUNNER_TLS_INSECURE
             value: "true"
           {{ end }}
