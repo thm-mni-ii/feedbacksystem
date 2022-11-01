@@ -152,7 +152,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(_ => {
       val queries = executeRunnerQueryByType(dbOperations)
 
-      Future.sequence(queries.toList) transform {
+      Future.sequence(queries) transform {
         case s@Success(_) =>
           solutionCon.close(dbOperations)
           s
@@ -190,8 +190,8 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
 
   private def executeRunnerQueryByType(dbOperations: DBOperationsService): List[Future[ResultSet]] = {
     if (sqlRunArgs.queryType.equals("dql")) {
-      val queries = sqlRunArgs.section
-        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query))
+      sqlRunArgs.section
+        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query)).toList
     } else {
       List(solutionCon.queryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
     }
