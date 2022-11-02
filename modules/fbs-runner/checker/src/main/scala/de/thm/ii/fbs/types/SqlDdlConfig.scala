@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.types
 
 object SqlDdlConfig {
-  val TABLE_STRUCTURE_QUERY = """SELECT
+  val TABLE_STRUCTURE_QUERY =
+    """SELECT
 tc.table_schema,
 tc.constraint_name,
 tc.table_name,
@@ -11,7 +12,6 @@ ccu.table_name AS foreign_table_name,
 ccu.column_name AS foreign_column_name,
 isc.table_schema,
 isc.column_name,
-isc.ordinal_position,
 isc.column_default,
 isc.is_nullable,
 isc.data_type,
@@ -21,7 +21,6 @@ isc.numeric_precision,
 isc.numeric_precision_radix,
 isc.numeric_scale,
 isc.udt_name,
-isc.dtd_identifier,
 isc.is_updatable
 FROM
 information_schema.table_constraints AS tc
@@ -44,7 +43,6 @@ tc.table_schema,
   ccu.column_name,
   isc.table_schema,
   isc.column_name,
-  isc.ordinal_position,
   isc.column_default,
   isc.is_nullable,
   isc.data_type,
@@ -54,7 +52,6 @@ tc.table_schema,
   isc.numeric_precision_radix,
   isc.numeric_scale,
   isc.udt_name,
-  isc.dtd_identifier,
   isc.is_updatable;"""
 }
 
