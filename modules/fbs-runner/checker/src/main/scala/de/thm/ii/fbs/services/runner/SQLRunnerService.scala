@@ -42,7 +42,7 @@ object SQLRunnerService {
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
 
-      val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "Test")).toArray else taskQueries.sections
+      val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "variable")).toArray else taskQueries.sections
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
       val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
