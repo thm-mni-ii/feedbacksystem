@@ -64,15 +64,16 @@ class ExcelCheckerService extends CheckerService {
     try {
       // If Config file is old -> use old field names
       if (excelMediaInformation.checkFields.isEmpty && excelMediaInformation.outputFields.nonEmpty) {
-        val res = this.checkFields(submissionFile, mainFile, excelMediaInformation,
+        val res = this.compare(this.getFields(submissionFile, mainFile, excelMediaInformation,
           ExcelMediaInformationCheck(range = excelMediaInformation.outputFields, hideInvalidFields = excelMediaInformation.hideInvalidFields)
-        )
+        ))
 
         CheckResultTask(res.success, List(res))
       } else {
-        val res = excelMediaInformation.checkFields.map(c => checkFields(submissionFile, mainFile, excelMediaInformation, c))
-        val success = res.forall(r => r.success)
-        CheckResultTask(success, res)
+        val res = excelMediaInformation.checkFields
+          .map(c => getFields(submissionFile, mainFile, excelMediaInformation, c))
+          .map(compare)
+        CheckResultTask(res.forall(r => r.success), res)
       }
     } catch {
       case e: NotImplementedFunctionException => generateCheckResultError("Die Excel-Funktion '%s' wird nicht unterstützt", e.getMessage)
@@ -81,23 +82,24 @@ class ExcelCheckerService extends CheckerService {
     }
   }
 
-  private def checkFields(
-                           submissionFile: File,
-                           mainFile: File,
-                           excelMediaInformation: ExcelMediaInformation,
-                           checkFields: ExcelMediaInformationCheck
-                         ): CheckResult = {
+  private def getFields(
+                         submissionFile: File,
+                         mainFile: File,
+                         excelMediaInformation: ExcelMediaInformation,
+                         checkFields: ExcelMediaInformationCheck
+                       ): CellsComparator = {
     val userRes = this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
     val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
 
-    this.compare(userRes, expectedRes)
+    CellsComparator(userRes, expectedRes)
   }
 
-  private def compare(userRes: Seq[SpreadsheetCell], expectedRes: Seq[SpreadsheetCell]): CheckResult = {
+  private def compare(cells: CellsComparator): CheckResult = {
     var invalidFields = List[String]()
     val extInfo = ExtendedInfoExcel()
 
-    val res = expectedRes.zip(userRes).foldLeft(true)({ case (accumulator, (expected, actual)) =>
+
+    val res = cells.expectedCells.zip(cells.actualCell).foldLeft(true)({ case (accumulator, (expected, actual)) =>
       val equal = actual.value.contentEquals(expected.value)
       if (!equal) {
         invalidFields :+= actual.reference
@@ -243,4 +245,6 @@ class ExcelCheckerService extends CheckerService {
                          errorMsg: String = "")
 
   case class SubmissionResult(exitCode: Int, results: List[CheckResultTask], mergedResults: List[CheckResult])
+
+  case class CellsComparator(expectedCells: Seq[SpreadsheetCell], actualCell: Seq[SpreadsheetCell])
 }
