@@ -38,24 +38,27 @@ class ExcelCheckerService extends CheckerService {
       val excelMediaInformation = this.getMediaInfo(cc.id)
       val submission = this.submissionService.getOne(submissionID, fu.id).get
       val submissionFile = this.getSubmissionFile(submission.id)
-      val mainFile = this.getMainFile(cc.id)
+      val solutionFile = this.getSolutionFile(cc.id)
 
-      val results = excelMediaInformation.tasks.map(t => this.checkTask(mainFile, submissionFile, t))
-      val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
-      val exitCode = if (results.forall(r => r.success)) {
-        0
-      } else {
-        1
-      }
-
-      val resultText = this.buildResultText(exitCode == 0, results, excelMediaInformation)
-      submissionService.storeResult(
-        submissionID, cc.id, exitCode, resultText, objectMapper.writeValueAsString(this.buildExtendedRes(mergedResults, excelMediaInformation))
+      val submissionResult = checkSubmission(excelMediaInformation, submissionFile, solutionFile)
+      val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
+      submissionService.storeResult(submissionID, cc.id, submissionResult.exitCode, resultText,
+        objectMapper.writeValueAsString(this.buildExtendedRes(submissionResult.mergedResults, excelMediaInformation))
       )
-      this.submitSubTasks(cc.id, submission.id, mergedResults, excelMediaInformation)
+      this.submitSubTasks(cc.id, submission.id, submissionResult.mergedResults, excelMediaInformation)
     } catch {
       case e: Throwable => storeError(submissionID, cc, e.getMessage)
     }
+  }
+
+  private def checkSubmission(excelMediaInformation: ExcelMediaInformationTasks, submissionFile: File, solutionFile: File): SubmissionResult = {
+    val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
+    val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
+    SubmissionResult(if (results.forall(r => r.success)) {
+      0
+    } else {
+      1
+    }, results, mergedResults)
   }
 
   private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {
@@ -129,7 +132,7 @@ class ExcelCheckerService extends CheckerService {
     new File(submissionPath)
   }
 
-  private def getMainFile(ccId: Int): File = {
+  private def getSolutionFile(ccId: Int): File = {
     val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
     new File(mainFilePath)
   }
