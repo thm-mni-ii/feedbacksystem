@@ -242,4 +242,6 @@ class ExcelCheckerService extends CheckerService {
                          invalidFields: List[String] = List(),
                          extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
                          errorMsg: String = "")
+
+  case class SubmissionResult(exitCode: Int, results: List[CheckResultTask], mergedResults: List[CheckResult])
 }
