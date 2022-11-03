@@ -53,11 +53,7 @@ class ExcelCheckerService extends CheckerService {
   private def checkSubmission(excelMediaInformation: ExcelMediaInformationTasks, submissionFile: File, solutionFile: File): SubmissionResult = {
     val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
     val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
-    SubmissionResult(if (results.forall(r => r.success)) {
-      0
-    } else {
-      1
-    }, results, mergedResults)
+    SubmissionResult(if (results.forall(r => r.success)) 0 else 1, results, mergedResults)
   }
 
   private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {
@@ -203,14 +199,10 @@ class ExcelCheckerService extends CheckerService {
 
   private def submitSubTasks(configurationId: Int, submissionId: Int, results: List[CheckResult],
                              excelMediaInformation: ExcelMediaInformationTasks): Unit = {
-    results.zip(excelMediaInformation.tasks).foreach(r => {
-      val points = if (r._1.success) {
-        1
-      } else {
-        0
-      }
+    results.zip(excelMediaInformation.tasks).foreach({ case (r, ex) =>
+      val points = if (r.success) 1 else 0
 
-      val subTask = subTaskService.getOrCrate(configurationId, r._2.name, 1)
+      val subTask = subTaskService.getOrCrate(configurationId, ex.name, 1)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
     })
   }
