@@ -7,7 +7,6 @@ import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
-import org.apache.poi.xssf.usermodel.XSSFCell
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
