@@ -2,6 +2,7 @@ package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
@@ -97,7 +98,7 @@ class ExcelCheckerService extends CheckerService {
     this.compare(userRes, expectedRes)
   }
 
-  private def compare(userRes: Seq[(String, XSSFCell)], expectedRes: Seq[(String, XSSFCell)]): CheckResult = {
+  private def compare(userRes: Seq[SpreadsheetCell], expectedRes: Seq[SpreadsheetCell]): CheckResult = {
     var invalidFields = List[String]()
     val extInfo = ExtendedInfoExcel()
 
