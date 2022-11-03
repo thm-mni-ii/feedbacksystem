@@ -25,13 +25,13 @@ class ExcelCheckerService extends CheckerService {
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
   /**
-    * Notify about the new submission
-    *
-    * @param taskID       the taskID for the submission
-    * @param submissionID the id of the submission
-    * @param cc           the check runner of the submission
-    * @param fu           the user which triggered the submission
-    */
+   * Notify about the new submission
+   *
+   * @param taskID       the taskID for the submission
+   * @param submissionID the id of the submission
+   * @param cc           the check runner of the submission
+   * @param fu           the user which triggered the submission
+   */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
       val excelMediaInformation = this.getMediaInfo(cc.id)
