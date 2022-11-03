@@ -10,6 +10,8 @@ import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerSe
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+import io.minio.{BucketExistsArgs, MakeBucketArgs, MinioClient, UploadObjectArgs}
+import org.springframework.beans.factory.annotation.Value
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,8 +39,15 @@ class CheckerConfigurationController {
   @Autowired
   private val checkerService: CheckerServiceFactoryService = null
 
+  @Value("${minio.url}") private val minioUrl: String = null
+  @Value("${minio.user}") private val minioUser: String = null
+  @Value("${minio.password}") private val minioPassword: String = null
+
+  val minioClient: MinioClient = MinioClient.builder().endpoint("http://localhost:9090").credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
+
   /**
     * Return a list of checker configurations for a task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req Http request
@@ -61,10 +70,11 @@ class CheckerConfigurationController {
 
   /**
     * Create a new task configuration
-    * @param cid Course id
-    * @param tid Task id
-    * @param req Http request
-    * @param res Http response
+    *
+    * @param cid  Course id
+    * @param tid  Task id
+    * @param req  Http request
+    * @param res  Http response
     * @param body Content
     * @return List of configurations
     */
@@ -78,7 +88,7 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("checkerType").asText(),
+      (body.retrive("checkerType").asText(),
         body.retrive("ord").asInt(),
         body.retrive("checkerTypeInformation").asObject()
       ) match {
@@ -109,11 +119,11 @@ class CheckerConfigurationController {
   /**
     * Update a task configuration
     *
-    * @param cid Course id
-    * @param tid Task id
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     * @param body Content
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"),
@@ -125,7 +135,7 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("checkerType").asText(),
+      (body.retrive("checkerType").asText(),
         body.retrive("ord").asInt(),
         body.retrive("checkerTypeInformation").asObject()
       ) match {
@@ -153,11 +163,12 @@ class CheckerConfigurationController {
 
   /**
     * Delete a task configuration
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     */
   @DeleteMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"))
   def delete(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
@@ -171,7 +182,7 @@ class CheckerConfigurationController {
         case None => throw new ResourceNotFoundException()
       }
       if (this.ccs.delete(cid, tid, ccid)) {
-        storageService.deleteConfiguration(ccid)
+        storageService.deleteConfigurationFromBucket(ccid)
         notifyCheckerDelete(tid, cc)
       }
     } else {
@@ -181,65 +192,70 @@ class CheckerConfigurationController {
 
   /**
     * Upload a the main file for a task configuration
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
     * @param file Multipart file
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile(storageService.storeMainFile,
+    uploadFile("main-file",
       (cc) => {
-        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
+        // ?? //notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
         this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
       })(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the main file for a task configuration
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def getMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
-                     req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(storageService.pathToMainFile)(cid, tid, ccid, req, res)
+                  req: HttpServletRequest, res: HttpServletResponse): Unit =
+    getFile(storageService.pathToMainFile)("main-file", cid, tid, ccid, req, res)
 
-    /**
+  /**
     * Upload a the secondary file for a task configuration
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
     * @param file Multipart file
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def uploadSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
-                         @RequestParam file: MultipartFile,
+                          @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile(storageService.storeSecondaryFile,
+    uploadFile("secondary-file",
       (cc) => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the secondary file for a task configuration
-    * @param cid Course id
-    * @param tid Task id
+    *
+    * @param cid  Course id
+    * @param tid  Task id
     * @param ccid Checker configuration id
-    * @param req Http request
-    * @param res Http response
+    * @param req  Http request
+    * @param res  Http response
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def getSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
-                  req: HttpServletRequest, res: HttpServletResponse): Unit = getFile(storageService.pathToSecondaryFile)(cid, tid, ccid, req, res)
+                       req: HttpServletRequest, res: HttpServletResponse): Unit =
+    getFile(storageService.pathToSecondaryFile)("secondary-file", cid, tid, ccid, req, res)
 
-  private def uploadFile(storageFn: (Int, Path) => Unit, postHook: (CheckrunnerConfiguration) => Unit)
+  private def uploadFile(fileName: String, postHook: (CheckrunnerConfiguration) => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
@@ -248,9 +264,12 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
-          val tempDesc = Files.createTempFile("fbs", ".tmp")
-          file.transferTo(tempDesc)
-          storageFn(ccid, tempDesc)
+          val bucketName = "tasks"
+          val pathName = ccid.toString + "/" + fileName
+          if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+          }
+          minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName).`object`(pathName).build())
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }
@@ -259,7 +278,7 @@ class CheckerConfigurationController {
     }
   }
 
-  private def getFile(pathFn: (Int) => Option[Path])(cid: Int, tid: Int, ccid: Int,
+  private def getFile(pathFn: (Int) => Option[Path])(fileName: String, cid: Int, tid: Int, ccid: Int,
                                                      req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
@@ -267,12 +286,21 @@ class CheckerConfigurationController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
-        case Some(_) =>
-          pathFn(ccid) match {
-            case Some(mainFilePath) =>
-              val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
-              mainFileInputStream.transferTo(res.getOutputStream)
-            case _ => throw new ResourceNotFoundException()
+        case Some(checkrunnerConfiguration) =>
+          // check ob bucket oder fs
+          if (checkrunnerConfiguration.isBucket) {
+            // bucket
+            storageService.getFileContentBucket("tasks", ccid, fileName)
+
+          } else {
+            // fs
+            pathFn(ccid) match {
+              case Some(mainFilePath) =>
+                val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
+                mainFileInputStream.transferTo(res.getOutputStream)
+              case _ => throw new ResourceNotFoundException()
+            }
+
           }
         case _ => throw new ResourceNotFoundException()
       }

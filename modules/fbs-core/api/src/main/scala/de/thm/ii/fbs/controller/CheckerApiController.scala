@@ -49,7 +49,7 @@ class CheckerApiController {
       case Some(submission) => submission
       case None => throw new ResourceNotFoundException()
     }
-    val soluion = storageService.getSolutionFile(submissionID)
+    val soluion = storageService.getSolutionFileFromBucket(submissionID)
     val ccs = checkerConfigurationService
       .getAllForSubmission(submissionID)
       .map(checker => (checker, checkerServiceFactoryService(checker.checkerType)))

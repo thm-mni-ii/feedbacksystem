@@ -98,7 +98,7 @@ class CourseResultService {
   )
 
   private def parseByTaskResult(res: ResultSet): AnalysisCourseResult = AnalysisCourseResult(
-    submission = storageService.getSolutionFile(res.getInt("submission_id")),
+    submission = storageService.getSolutionFileFromBucket(res.getInt("submission_id")),
     passed = res.getBoolean("passed"),
     resultText = res.getString("result_text"),
     userId = res.getInt("user_id"),
