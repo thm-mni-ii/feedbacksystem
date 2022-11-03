@@ -54,7 +54,7 @@ class ExcelCheckerService extends CheckerService {
       )
       this.submitSubTasks(cc.id, submission.id, mergedResults, excelMediaInformation)
     } catch {
-      case e: Throwable => submissionService.storeResult(submissionID, cc.id, 0, f"Bei der Überprüfung ist ein Fehler aufgetretten: '${e.getMessage}'", null)
+      case e: Throwable => storeError(submissionID, cc, e.getMessage)
     }
   }
 
@@ -80,9 +80,9 @@ class ExcelCheckerService extends CheckerService {
         CheckResultTask(success, res)
       }
     } catch {
-      case e: NotImplementedFunctionException => generateCheckResultError(f"Die Excel-Funktion '${e.getMessage}' wird nicht unterstützt")
+      case e: NotImplementedFunctionException => generateCheckResultError("Die Excel-Funktion '%s' wird nicht unterstützt", e.getMessage)
       case _: NullPointerException => generateCheckResultError("Ungültige Konfiguration")
-      case e: Throwable => generateCheckResultError(f"Bei der Überprüfung ist ein Fehler aufgetreten: '${e.getMessage}'")
+      case e: Throwable => generateCheckResultError("Bei der Überprüfung ist ein Fehler aufgetreten: '%s'", e.getMessage)
     }
   }
 
@@ -116,8 +116,12 @@ class ExcelCheckerService extends CheckerService {
     CheckResult(res, invalidFields, extInfo)
   }
 
-  private def generateCheckResultError(errorMsg: String): CheckResultTask = {
-    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg)))
+  private def generateCheckResultError(errorMsg: String, args: Any*): CheckResultTask = {
+    CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg.format(args))))
+  }
+
+  private def storeError(submissionID: Int, cc: CheckrunnerConfiguration, errorMsg: String): Unit = {
+    submissionService.storeResult(submissionID, cc.id, 0, f"Bei der Überprüfung ist ein Fehler aufgetretten: '$errorMsg'", null)
   }
 
   private def getSubmissionFile(submissionID: Int): File = {
