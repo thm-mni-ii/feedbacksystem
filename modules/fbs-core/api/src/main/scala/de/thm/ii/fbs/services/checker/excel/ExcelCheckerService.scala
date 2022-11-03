@@ -71,15 +71,8 @@ class ExcelCheckerService extends CheckerService {
 
         CheckResultTask(res.success, List(res))
       } else {
-        var success = true
-        val res = excelMediaInformation.checkFields.map(c => {
-          val res = checkFields(submissionFile, mainFile, excelMediaInformation, c)
-          if (!res.success) {
-            success = false
-          }
-
-          res
-        })
+        val res = excelMediaInformation.checkFields.map(c => checkFields(submissionFile, mainFile, excelMediaInformation, c))
+        val success = res.forall(r => r.success)
         CheckResultTask(success, res)
       }
     } catch {
