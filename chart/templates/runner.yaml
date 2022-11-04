@@ -25,7 +25,7 @@ spec:
           - name: BASH_DOCKER
             value: thmmniii/fbs-runtime-bash:dev-latest
           - name: HOST_TMP_DIR
-            value: /tmp/feebi
+            value: /fbs-tmp
           - name: INSIDE_DOCKER
             value: "true"
           - name: RESULT_SERVER_HOST
@@ -68,7 +68,7 @@ spec:
             cpu: {{ .Values.runner.resources.cpu.limit }}
             memory: {{ .Values.runner.resources.memory.limit }}
         volumeMounts:
-        - name: tmp
+        - name: shared-tmp
           mountPath: /dockertemp
         - name: docker-socket
           mountPath: /var/run
@@ -88,12 +88,12 @@ spec:
             cpu: {{ .Values.runner.dink.resources.cpu.limit }}
             memory: {{ .Values.runner.dink.resources.memory.limit }}
         volumeMounts:
-        - name: tmp
-          mountPath: /dockertemp
+        - name: shared-tmp
+          mountPath: /fbs-tmp
         - name: docker-socket
           mountPath: /var/run/
       volumes:
-      - name: tmp
+      - name: shared-tmp
         emptyDir: {}
       - name: docker-socket
         emptyDir: {}
