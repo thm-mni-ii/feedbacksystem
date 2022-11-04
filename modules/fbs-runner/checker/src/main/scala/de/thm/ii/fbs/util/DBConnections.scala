@@ -17,10 +17,10 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
   var queryCon: Option[JDBCClient] = None
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
-  def initDB(dbOperations: DBOperationsService, dbConfig: String): Future[Unit] = {
+  def initDB(dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean = false, skipDBInt: Boolean = false): Future[Unit] = {
     sqlPoolWithConfig.pool.getConnectionFuture().flatMap(con => {
       operationCon = Option(con)
-      initPool(dbOperations.username, dbOperations, dbConfig).map(pool => {
+      initPool(dbOperations.username, dbOperations, dbConfig, allowUserWrite, skipDBInt).map(pool => {
         queryCon = pool
       })
     })
@@ -38,14 +38,14 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
       })
   }
 
-  private def initPool(username: String, dbOperations: DBOperationsService, dbConfig: String): Future[Option[JDBCClient]] = {
+  private def initPool
+  (username: String, dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean, skipDBInt: Boolean): Future[Option[JDBCClient]] = {
     dbOperations.createDB(operationCon.get).flatMap(_ => {
       val pool = createPool(dbOperations.dbName)
 
       dbOperations.createUserWithWriteAccess(pool.get).flatMap[Option[JDBCClient]](password => {
-        val pool2 = createPool(dbOperations.dbName, Option(username), Option(password))
-        dbOperations.initDB(pool2.get, dbConfig).flatMap(_ => {
-          dbOperations.changeUserToReadOnly(pool.get).map(_ => {
+        initDB(dbOperations, dbConfig, username, password, skipDBInt).flatMap(pool2 => {
+          changeUserToReadOnly(dbOperations, pool.get, allowUserWrite).map(_ => {
             closeOptional(pool)
             closeOptional(pool2)
             createPool(dbOperations.dbName, Option(username), Option(password))
@@ -53,6 +53,25 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
         })
       })
     })
+  }
+
+  private def initDB(dbOperations: DBOperationsService, dbConfig: String, username: String, password: String, skipInit: Boolean): Future[Option[JDBCClient]] = {
+    if (!skipInit) {
+      val pool2 = createPool(dbOperations.dbName, Option(username), Option(password))
+      dbOperations.initDB(pool2.get, dbConfig).map[Option[JDBCClient]](_ => pool2)
+    } else {
+      Future {
+        None
+      }
+    }
+  }
+
+  private def changeUserToReadOnly(dbOperations: DBOperationsService, pool: JDBCClient, skip: Boolean): Future[Unit] = {
+    if (!skip) {
+      dbOperations.changeUserToReadOnly(pool).map(_ => Unit)
+    } else {
+      Future.unit
+    }
   }
 
   private def createPool(dbName: String, username: Option[String] = None, password: Option[String] = None): Option[JDBCClient] = {

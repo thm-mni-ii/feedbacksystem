@@ -41,11 +41,12 @@ object SQLRunnerService {
       }
 
       val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
-      val sections = taskQueries.sections
+
+      val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "variable")).toArray else taskQueries.sections
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
       val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
-
+      val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
@@ -53,8 +54,17 @@ object SQLRunnerService {
         throw new RunnerException("The submission must not be blank!")
       }
 
-      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id)
-    } catch {
+      if (queryType != "dql" && queryType != "ddl") {
+        throw new RunnerException("The queryType must be ddl or dql!")
+      }
+
+      if (queryType.equals("ddl") && dbType.equals("mysql")) {
+        throw new RunnerException("DDL just works with PostgreSQL!")
+      }
+
+      new SqlRunArgs(sections, dbType, dbConfig, submissionQuarry, runArgs.runner.id, runArgs.submission.id, queryType)
+    }
+    catch {
       // TODO enhance messages
       case e: RunnerException => throw e
       case e: DecodeException => throw new RunnerException(s"Runner configuration is invalid: ${e.getMessage}")
@@ -137,12 +147,12 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     */
   def executeRunnerQueries(): Future[List[ResultSet]] = {
     val dbOperations = initDBOperations(configDbExt)
+    val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(_ => {
-      val queries = sqlRunArgs.section
-        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query))
+    solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite).flatMap(_ => {
+      val queries = executeRunnerQueryByType(dbOperations)
 
-      Future.sequence(queries.toList) transform {
+      Future.sequence(queries) transform {
         case s@Success(_) =>
           solutionCon.close(dbOperations)
           s
@@ -165,9 +175,11 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     */
   def executeSubmissionQuery(): Future[ResultSet] = {
     val dbOperations = initDBOperations(submissionDbExt)
+    val skipInitDB = sqlRunArgs.queryType.equals("ddl")
+    val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    submissionCon.initDB(dbOperations, sqlRunArgs.dbConfig).flatMap(c => {
-      executeComplexQuery(dbOperations) transform {
+    submissionCon.initDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite, skipInitDB).flatMap(_ => {
+      executeSubmissionQueryByType(dbOperations) transform {
         case s@Success(_) =>
           submissionCon.close(dbOperations)
           s
@@ -176,6 +188,25 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
           Failure(throw cause)
       }
     })
+  }
+
+  private def executeRunnerQueryByType(dbOperations: DBOperationsService): List[Future[ResultSet]] = {
+    if (sqlRunArgs.queryType.equals("dql")) {
+      sqlRunArgs.section
+        .map(tq => dbOperations.queryFutureWithTimeout(solutionCon.queryCon.get, tq.query)).toList
+    } else {
+      List(solutionCon.queryCon.get.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
+    }
+  }
+
+  private def executeSubmissionQueryByType(dbOperations: DBOperationsService): Future[ResultSet] = {
+    if (sqlRunArgs.queryType.equals("dql")) {
+      executeComplexQuery(dbOperations)
+    } else {
+      val connection = submissionCon.queryCon.get
+      dbOperations.queryFutureWithTimeout(connection, sqlRunArgs.submissionQuery)
+        .flatMap(_ => connection.queryFuture(SqlDdlConfig.TABLE_STRUCTURE_QUERY))
+    }
   }
 
   private def executeComplexQuery(dbOperations: DBOperationsService): Future[ResultSet] = {
