@@ -119,6 +119,6 @@ class CourseRegistrationService {
 
   def getCourseRoleOfUser(cid: Int, uid: Int): Option[CourseRole.Value] = {
     DB.query("SELECT course_role FROM user_course WHERE user_id = ? AND course_id = ?",
-      (res, _) => Option(CourseRole.parse(res.getInt("course_role"))), uid, cid).head
+      (res, _) => CourseRole.parse(res.getInt("course_role")), uid, cid).headOption
   }
 }
