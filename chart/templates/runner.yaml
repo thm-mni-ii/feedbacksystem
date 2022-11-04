@@ -20,6 +20,7 @@ spec:
         ports:
         - containerPort: 8081
           name: https
+        command: ["/custom/prepare-runner-images.sh"]
         env:
           - name: BASH_DOCKER
             value: thmmniii/fbs-runtime-bash:dev-latest
@@ -73,6 +74,8 @@ spec:
           mountPath: /var/run
         - name: upload-dir
           mountPath: /upload-dir
+        - name: custom-runner-scripts
+          mountPath: /custom
       - name: {{ .Release.Name }}-runner-docker
         image: {{ .Values.runner.dink.image.registry }}/{{ .Values.runner.dink.image.name }}:{{ .Values.runner.dink.image.tag }}
         securityContext:
@@ -85,6 +88,8 @@ spec:
             cpu: {{ .Values.runner.dink.resources.cpu.limit }}
             memory: {{ .Values.runner.dink.resources.memory.limit }}
         volumeMounts:
+        - name: tmp
+          mountPath: /dockertemp
         - name: docker-socket
           mountPath: /var/run/
       volumes:
@@ -95,6 +100,10 @@ spec:
       - name: upload-dir
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-core-upload-dir
+      - name: custom-runner-scripts
+        configMap:
+          name: {{ .Release.Name }}-custom-runner-scripts
+          defaultMode: 0555
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -129,4 +138,16 @@ spec:
       protocol: TCP
       port: 8081
       targetPort: 8081
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-custom-runner-scripts
+data:
+  prepare-runner-images.sh: |
+    #!/bin/sh
+    set -e
+    sleep 10 # ToDo: Wait for docker to be ready instead of fixed time
+    docker pull "$BASH_DOCKER"
+    ./fbs-runner.checker run scala:de.thm.ii.fbs.MainVerticle
 {{ end }}
