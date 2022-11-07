@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { UntypedFormControl, Validators } from "@angular/forms";
+import { UntypedFormControl, Validators, FormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Course } from "../../model/Course";
 import { Semester } from "../../model/Semester";
@@ -20,7 +20,8 @@ export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);
   description = new UntypedFormControl("");
   isVisible = true;
-  selectedSemester = new UntypedFormControl("");
+  enableSemester = new UntypedFormControl(false);
+  selectedSemester = new UntypedFormControl(null);
   semesterList: Semester[] = [];
   isUpdateDialog = false;
 
@@ -34,16 +35,22 @@ export class CourseUpdateDialogComponent implements OnInit {
 
   ngOnInit() {
     this.isUpdateDialog = this.data.isUpdateDialog;
+
+    this.semesterService.getSemesterList().subscribe((result) => {
+      this.semesterList = result;
+    });
+
     if (this.isUpdateDialog) {
       const course: Course = this.data.course;
       this.name.setValue(course.name);
       this.description.setValue(course.description);
       this.isVisible = course.visible;
-    }
+      this.selectedSemester.setValue(course.semesterId);
 
-    this.semesterService.getSemesterList().subscribe((result) => {
-      this.semesterList = result;
-    });
+      if (course.semesterId != null) {
+        this.enableSemester.setValue(true);
+      }
+    }
   }
 
   /**
@@ -54,10 +61,15 @@ export class CourseUpdateDialogComponent implements OnInit {
       return;
     }
 
+    if (!this.enableSemester.value) {
+      this.selectedSemester.setValue(null);
+    }
+
     const course: Course = {
       name: this.name.value,
       description: this.description.value,
       visible: this.isVisible,
+      semesterId: this.selectedSemester.value,
     };
 
     if (this.isUpdateDialog) {

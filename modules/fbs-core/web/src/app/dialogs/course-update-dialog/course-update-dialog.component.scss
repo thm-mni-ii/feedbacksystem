@@ -2,11 +2,13 @@
   height: 100%;
 }
 
-.col {
-  width: 47%;
+#semesterCheckbox {
+  width: 25%;
 }
-.pad {
-  padding-left: 6%;
+
+#semesterFormField {
+  width: 72%;
+  padding-left: 3%;
 }
 
 mat-form-field {

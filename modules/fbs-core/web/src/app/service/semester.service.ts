@@ -15,4 +15,13 @@ export class SemesterService {
   getSemesterList(): Observable<Semester[]> {
     return this.http.get<Semester[]>("/api/v1/semester");
   }
+
+  /**
+   * Create a new semester
+   * @param semester The semester state
+   * @return The created semester, adjusted by the system
+   */
+  createSemester(semester: Semester): Observable<Semester> {
+    return this.http.post<Semester>("/api/v1/semester", semester);
+  }
 }
