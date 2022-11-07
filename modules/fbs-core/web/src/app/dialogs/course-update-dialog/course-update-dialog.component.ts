@@ -1,10 +1,9 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { UntypedFormControl, Validators, FormControl } from "@angular/forms";
+import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Course } from "../../model/Course";
 import { Semester } from "../../model/Semester";
-import { Observable, of } from "rxjs";
 import { CourseService } from "../../service/course.service";
 import { SemesterService } from "../../service/semester.service";
 
