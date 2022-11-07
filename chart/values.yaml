@@ -9,7 +9,7 @@ core:
   image:
     registry: docker.io
     name: thmmniii/fbs-core
-    tag: "v1.1.1"
+    tag: "v1.2.1"
   volumes:
     config:
       size: "8G"
@@ -34,7 +34,7 @@ runner:
   image:
     registry: docker.io
     name: thmmniii/fbs-runner
-    tag: "v1.1.1"
+    tag: "v1.2.1"
   resources:
     cpu:
       request: 0.1
