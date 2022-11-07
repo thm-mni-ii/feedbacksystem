@@ -4,7 +4,7 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <div class="col" style="margin-left: 20px">
-            Query_ {{ index + 1 }}
+            <input matInput type="text" placeholder="Query" />
           </div>
           <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
@@ -13,7 +13,7 @@
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>
-        <app-submission-text class="input-field"></app-submission-text>
+        <app-submission-text class="inputField"></app-submission-text>
       </mat-tab>
     </ng-container>
   </mat-tab-group>
