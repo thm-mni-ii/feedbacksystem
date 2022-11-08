@@ -17,13 +17,16 @@ spec:
       containers:
       - name: {{ .Release.Name }}-runner
         image: {{ .Values.runner.image.registry }}/{{ .Values.runner.image.name }}:{{ .Values.runner.image.tag }}
+        imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
         ports:
         - containerPort: 8081
           name: https
         command: ["/custom/prepare-runner-images.sh"]
         env:
           - name: BASH_DOCKER
-            value: thmmniii/fbs-runtime-bash:dev-latest
+            value: thmmniii/fbs-runtime-bash:latest
+          - name: RUNNER_SQL_CHECKER_IMAGE
+            value: thmmniii/fbs-sql-checker:latest
           - name: HOST_TMP_DIR
             value: /fbs-tmp
           - name: INSIDE_DOCKER
@@ -60,6 +63,12 @@ spec:
               secretKeyRef:
                 name: {{ .Release.Name }}-runner
                 key: psqlPassword
+          - name: RUNNER_SQL_CHECKER_DISABLE_NETWORK
+            value: "true"
+          {{ if .Values.runner.config.debug.disableContainerRemoval }}
+          - name: RUNNER_DOCKER_DISABLE_REMOVE
+            value: "true"
+          {{ end }}
         resources:
           requests:
             cpu: {{ .Values.runner.resources.cpu.request }}
@@ -78,6 +87,7 @@ spec:
           mountPath: /custom
       - name: {{ .Release.Name }}-runner-docker
         image: {{ .Values.runner.dink.image.registry }}/{{ .Values.runner.dink.image.name }}:{{ .Values.runner.dink.image.tag }}
+        imagePullPolicy: {{ .Values.runner.dink.image.pullPolicy }}
         securityContext:
           privileged: true
         resources:
@@ -92,6 +102,8 @@ spec:
           mountPath: /fbs-tmp
         - name: docker-socket
           mountPath: /var/run/
+        - name: docker-images
+          mountPath: /var/lib/docker
       volumes:
       - name: shared-tmp
         emptyDir: {}
@@ -100,6 +112,9 @@ spec:
       - name: upload-dir
         persistentVolumeClaim:
           claimName: {{ .Release.Name }}-core-upload-dir
+      - name: docker-images
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-runner-docker-images
       - name: custom-runner-scripts
         configMap:
           name: {{ .Release.Name }}-custom-runner-scripts
@@ -149,5 +164,18 @@ data:
     set -e
     sleep 10 # ToDo: Wait for docker to be ready instead of fixed time
     docker pull "$BASH_DOCKER"
+    docker pull "$RUNNER_SQL_CHECKER_IMAGE"
     ./fbs-runner.checker run scala:de.thm.ii.fbs.MainVerticle
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-runner-docker-images
+spec:
+  accessModes:
+    - {{ .Values.runner.dink.volumes.images.mode }}
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.runner.dink.volumes.images.size }}
 {{ end }}

@@ -17,6 +17,7 @@ spec:
       containers:
       - name: {{ .Release.Name }}-digital-classroom
         image: {{ .Values.digitalClassroom.image.registry }}/{{ .Values.digitalClassroom.image.name }}:{{ .Values.digitalClassroom.image.tag }}
+        imagePullPolicy: {{ .Values.runner.image.pullPolicy }}
         ports:
         - containerPort: 8085
           name: http

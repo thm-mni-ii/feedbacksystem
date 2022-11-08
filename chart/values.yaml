@@ -10,6 +10,7 @@ core:
     registry: docker.io
     name: thmmniii/fbs-core
     tag: "v1.2.1"
+    pullPolicy: "IfNotPresent"
   volumes:
     config:
       size: "8G"
@@ -35,6 +36,7 @@ runner:
     registry: docker.io
     name: thmmniii/fbs-runner
     tag: "v1.2.1"
+    pullPolicy: "IfNotPresent"
   resources:
     cpu:
       request: 0.1
@@ -42,11 +44,19 @@ runner:
     memory:
       request: "250Mi"
       limit: "4Gi"
+  config:
+    debug:
+      disableContainerRemoval: false
   dink:
     image:
       registry: docker.io
       name: library/docker
       tag: "20.10.21-dind"
+      pullPolicy: "IfNotPresent"
+    volumes:
+      images:
+        size: "16G"
+        mode: "ReadWriteOnce"
     resources:
       cpu:
         request: 0.1
@@ -64,6 +74,7 @@ digitalClassroom:
     registry: ghcr.io
     name: thm-mni-ii/digital-classroom
     tag: "v1.0.1"
+    pullPolicy: "IfNotPresent"
   resources:
     cpu:
       request: 0.1

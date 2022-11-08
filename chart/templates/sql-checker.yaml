@@ -12,5 +12,5 @@ type: Opaque
 metadata:
   name: {{ .Release.Name }}-sql-checker
 data:
-  mongodbUri: {{ print "mongodb://" .Values.checkerMongodb.auth.username ":" .Values.checkerMongodb.auth.password "@" .Release.Name "-checker-mongodb" ":27017" | b64enc }}
+  mongodbUri: {{ print "mongodb://" .Values.checkerMongodb.auth.username ":" .Values.checkerMongodb.auth.password "@" .Release.Name "-checker-mongodb" ":27017/" .Values.checkerMongodb.auth.database | b64enc }}
 {{ end }}

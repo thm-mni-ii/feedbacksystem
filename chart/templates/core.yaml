@@ -17,6 +17,7 @@ spec:
       containers:
       - name: {{ .Release.Name }}-core
         image: {{ .Values.core.image.registry }}/{{ .Values.core.image.name }}:{{ .Values.core.image.tag }}
+        imagePullPolicy: {{ .Values.core.image.pullPolicy }}
         ports:
         - containerPort: 80
           name: http
