@@ -25,7 +25,7 @@ class PlaygroundController {
 
     @GetMapping("/{dbId}/activate")
     @ResponseBody
-    fun activate(): Int = 1
+    fun activate(): Unit = Unit
 
     @PostMapping("/{dbId}/reset")
     @ResponseBody
@@ -33,8 +33,9 @@ class PlaygroundController {
 
     @PostMapping("/{dbId}/execute")
     @ResponseBody
-    fun execute(@RequestBody sqlQuery: SQLQuery): Int = 1
+    fun execute(@RequestBody sqlQuery: SQLQuery): SQLExecuteResponse = SQLExecuteResponse(1)
 
+    // TODO: add pagination
     @PostMapping("/{dbId}/results")
     @ResponseBody
     fun results(): List<SQLResponse> = listOf(SQLResponse(false, null, ""))
