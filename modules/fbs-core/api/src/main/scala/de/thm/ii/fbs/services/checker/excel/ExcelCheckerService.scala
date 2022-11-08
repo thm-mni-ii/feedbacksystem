@@ -19,9 +19,9 @@ class ExcelCheckerService extends CheckerService {
   @Autowired
   private val excelService: ExcelService = null
   @Autowired
-  private val storageService: StorageService = null
-  @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
+  @Autowired
+  private val spreadsheetFileService: SpreadsheetFileService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
   /**
@@ -34,10 +34,10 @@ class ExcelCheckerService extends CheckerService {
    */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
-      val excelMediaInformation = this.getMediaInfo(cc.id)
+      val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc.id)
       val submission = this.submissionService.getOne(submissionID, fu.id).get
-      val submissionFile = this.getSubmissionFile(submission.id)
-      val solutionFile = this.getSolutionFile(cc.id)
+      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission.id)
+      val solutionFile = this.spreadsheetFileService.getSolutionFile(cc.id)
 
       val submissionResult = checkSubmission(excelMediaInformation, submissionFile, solutionFile)
       val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
@@ -114,16 +114,6 @@ class ExcelCheckerService extends CheckerService {
 
   private def storeError(submissionID: Int, cc: CheckrunnerConfiguration, errorMsg: String): Unit = {
     submissionService.storeResult(submissionID, cc.id, 0, f"Bei der Überprüfung ist ein Fehler aufgetretten: '$errorMsg'", null)
-  }
-
-  private def getSubmissionFile(submissionID: Int): File = {
-    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-    new File(submissionPath)
-  }
-
-  private def getSolutionFile(ccId: Int): File = {
-    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
-    new File(mainFilePath)
   }
 
   private def buildResultText(success: Boolean,
@@ -205,12 +195,6 @@ class ExcelCheckerService extends CheckerService {
       val subTask = subTaskService.getOrCrate(configurationId, ex.name, 1)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)
     })
-  }
-
-  private def getMediaInfo(ccId: Int): ExcelMediaInformationTasks = {
-    val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
-    val file = new File(secondaryFilePath)
-    objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
   }
 
   private def mergeCheckResult(c1: CheckResult, c2: CheckResult): CheckResult = {
