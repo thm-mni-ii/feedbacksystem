@@ -112,7 +112,7 @@ paths:
   /users:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Get user list
@@ -137,7 +137,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Create a new user
@@ -168,7 +168,7 @@ paths:
   "/users/{uid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Find user by ID
@@ -200,7 +200,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Delete user by ID
@@ -227,7 +227,7 @@ paths:
   "/users/{uid}/passwd":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Change password of a local user
@@ -273,7 +273,7 @@ paths:
   "/users/{uid}/global-role":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Change global role of a user
@@ -316,7 +316,7 @@ paths:
   "/users/{uid}/courses":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Get all registered courses
@@ -351,7 +351,7 @@ paths:
   "/courses/{cid}/participants":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Get all participants of a course
@@ -386,7 +386,7 @@ paths:
   "/users/{uid}/courses/{cid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Register a user into a course
@@ -430,7 +430,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: De-register a user from a course
@@ -529,7 +529,7 @@ paths:
   /courses:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a list of all courses
@@ -560,7 +560,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Create a new course
@@ -595,7 +595,7 @@ paths:
   "/courses/{cid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a course
@@ -626,7 +626,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Update course
@@ -663,7 +663,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Delete course by ID
@@ -690,7 +690,7 @@ paths:
   "/courses/{cid}/export":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a Zip-Archive of the course
@@ -719,7 +719,7 @@ paths:
   /semester:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a list of all Semester-contents
@@ -750,7 +750,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Create a new Semester
@@ -759,7 +759,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Semester"
+              $ref: "#/components/schemas/SemesterCreate"
         description: Semester object to create
         required: true
       responses:
@@ -785,7 +785,7 @@ paths:
   "/semester/{sid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a semester
@@ -816,7 +816,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Update Semester
@@ -853,7 +853,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Delete Semester by ID
@@ -880,7 +880,7 @@ paths:
   "/semester/{sid}/export":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a Zip-Archive of the semesters
@@ -909,7 +909,7 @@ paths:
   "/courses/{cid}/tasks":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get all tasks of a course
@@ -942,7 +942,7 @@ paths:
           description: Not found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Create a new task for this course
@@ -976,7 +976,7 @@ paths:
   "/courses/{cid}/tasks/results":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get all the result for the tasks
@@ -1010,7 +1010,7 @@ paths:
   "/courses/{cid}/tasks/{tid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get a task by id
@@ -1047,7 +1047,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Update an existing task for this course
@@ -1086,7 +1086,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Delete a task by id
@@ -1118,7 +1118,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/result":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Gets the task result by id
@@ -1156,7 +1156,7 @@ paths:
   "/courses/evaluation/formula/validate":
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Validate a evaluation formula
@@ -1209,7 +1209,7 @@ paths:
   "/courses/{cid}/evaluation/container":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Get all Course evaluation Containers
@@ -1242,7 +1242,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Create a Course evaluation Container
@@ -1280,7 +1280,7 @@ paths:
   "/courses/{cid}/evaluation/container/{ctid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Get a Course evaluation Container
@@ -1317,7 +1317,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Update a Course evaluation Container
@@ -1360,7 +1360,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Delete a Course evaluation Container
@@ -1398,7 +1398,7 @@ paths:
   "/courses/{cid}/evaluation/container/{ctid}/task/{tid}":
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Add a Task to an Course evaluation Container
@@ -1441,7 +1441,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Delate a Task from an Course evaluation Container
@@ -1584,7 +1584,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get all submissions for a task
@@ -1634,7 +1634,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Submit a solution for a task
@@ -1685,7 +1685,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get all subresults for a submission
@@ -1737,7 +1737,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Restart the submission process
@@ -1782,7 +1782,7 @@ paths:
           description: Not Found
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get the current submission state
@@ -1869,7 +1869,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -1908,7 +1908,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Create a new checker configuration
@@ -1954,7 +1954,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update an existing checker configuration
@@ -2000,7 +2000,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Delete an existing checker configuration
@@ -2042,7 +2042,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a the main file of the configuration
@@ -2090,7 +2090,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2138,7 +2138,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -2186,7 +2186,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2394,7 +2394,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2435,7 +2435,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2476,7 +2476,7 @@ paths:
           description: what queries to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2608,6 +2608,13 @@ components:
           type: boolean
         semesterId:
           type: integer
+    SemesterCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
     Semester:
       type: object
       required:
@@ -2732,7 +2739,7 @@ components:
           type: string
         mainFileUploaded:
           type: boolean
-          description:  True if main file was provided
+          description: True if main file was provided
         secondaryFileUploaded:
           type: boolean
           description: True if secondary file was provided

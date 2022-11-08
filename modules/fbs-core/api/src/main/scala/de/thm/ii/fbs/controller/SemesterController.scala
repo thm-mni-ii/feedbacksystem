@@ -6,11 +6,11 @@ import de.thm.ii.fbs.model.{GlobalRole, Semester}
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
+
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * Controller to manage rest api calls for a semester resource.
@@ -57,12 +57,9 @@ class SemesterController {
     if (authService.authorize(req, res).globalRole != GlobalRole.ADMIN) {
       throw new ForbiddenException()
     }
-    (
-      body.retrive("id").asInt(),
-      body.retrive("name").asText()
-    )
-    match {
-      case (Some(semesterId), Some(name)) => semesterService.create(Semester(semesterId, name))
+
+    body.retrive("name").asText() match {
+      case Some(name) => semesterService.create(Semester(0, name))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
@@ -107,7 +104,7 @@ class SemesterController {
       case GlobalRole.ADMIN =>
         (body.retrive("id").asInt(),
           body.retrive("name").asText())
-        //throw new ForbiddenException()
+          //throw new ForbiddenException()
         match {
           case (Some(id), Some(name)) => semesterService.update(sid, Semester(id, name))
           case _ => throw new BadRequestException("Malformed Request Body")
