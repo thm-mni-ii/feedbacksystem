@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 class PlaygroundController {
     @GetMapping
     @ResponseBody
-    fun index(): List<Database> = listOf(Database("1", "Test", "8", "PSQL"))
+    fun index(): List<Database> = listOf(Database("1", "Test", "8", "PSQL", true))
 
     @PutMapping
     @ResponseBody
@@ -23,14 +23,25 @@ class PlaygroundController {
     @ResponseBody
     fun get(): Database = Database("1", "Test", "8", "PSQL")
 
+    @GetMapping("/{dbId}/activate")
+    @ResponseBody
+    fun activate(): Int = 1
+
     @PostMapping("/{dbId}/reset")
     @ResponseBody
     fun reset(): Unit = Unit
 
-    // TODO: Make async
     @PostMapping("/{dbId}/execute")
     @ResponseBody
-    fun execute(@RequestBody sqlQuery: SQLQuery): SQLResponse = SQLResponse(false, null, "")
+    fun execute(@RequestBody sqlQuery: SQLQuery): Int = 1
+
+    @PostMapping("/{dbId}/results")
+    @ResponseBody
+    fun results(): List<SQLResponse> = listOf(SQLResponse(false, null, ""))
+
+    @PostMapping("/{dbId}/results/{rId}")
+    @ResponseBody
+    fun result(): SQLResponse = SQLResponse(false, null, "")
 
     // TODO: add pagination
     @GetMapping("/{dbId}/tables")
