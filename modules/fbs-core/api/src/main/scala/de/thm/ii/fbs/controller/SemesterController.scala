@@ -104,7 +104,6 @@ class SemesterController {
       case GlobalRole.ADMIN =>
         (body.retrive("id").asInt(),
           body.retrive("name").asText())
-          //throw new ForbiddenException()
         match {
           case (Some(id), Some(name)) => semesterService.update(sid, Semester(id, name))
           case _ => throw new BadRequestException("Malformed Request Body")
