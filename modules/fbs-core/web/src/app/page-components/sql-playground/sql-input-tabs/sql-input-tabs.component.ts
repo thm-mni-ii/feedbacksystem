@@ -12,11 +12,14 @@ export class SqlInputTabsComponent {
   constructor(private dialog: MatDialog) {}
   @ViewChildren(MatTab, { read: MatTab })
   public tabNodes: QueryList<MatTab>;
-  public tabs = [{ name: undefined }];
+  fileName = "Query_";
+  public tabs = [{ name: this.fileName }];
+  toSubmit: any;
+  ind: number = 0;
 
   closeTab(index: number) {
     this.openConfirmDialog(
-      "Möchtest du wirklich diesen Query schließen?",
+      "Möchtest du wirklich diesen " + this.tabs[index].name + "  schließen?",
       "Achtung der Inhalt wird nicht gespeichert!"
     ).subscribe((result) => {
       if (result == true) {
@@ -25,8 +28,19 @@ export class SqlInputTabsComponent {
     });
   }
 
+  inputValue(data: any) {
+    let submissionData = data["content"];
+    if (Array.isArray(submissionData)) {
+      submissionData = submissionData[0];
+    }
+    this.toSubmit = submissionData;
+  }
+
   addTab(index: number) {
-    this.tabs.push({ name: "Query_" + index });
+    //this.ind = index + 1;
+    this.fileName = "Query_" + (index + 1);
+    this.tabs.push({ name: this.fileName });
+    // this.ind = index;
   }
 
   private openConfirmDialog(title: string, message: string) {
@@ -37,5 +51,20 @@ export class SqlInputTabsComponent {
       },
     });
     return dialogRef.afterClosed();
+  }
+
+  downloadFile() {
+    console.log(this.ind);
+    var file = new Blob([this.toSubmit], { type: ".txt" });
+    var a = document.createElement("a"),
+      url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = this.tabs[this.ind].name + ".sql";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
   }
 }

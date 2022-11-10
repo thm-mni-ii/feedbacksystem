@@ -4,7 +4,12 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <div class="col" style="margin-left: 20px">
-            <input matInput type="text" placeholder="Query" />
+            <input
+              matInput
+              type="text"
+              placeholder="Query_0"
+              [(ngModel)]="tabs[index].name"
+            />
           </div>
           <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
@@ -14,12 +19,14 @@
           </button>
         </ng-template>
         <div class="inputField">
-          <app-submission-text></app-submission-text>
+          <app-submission-text
+            (update)="inputValue($event)"
+          ></app-submission-text>
         </div>
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <button mat-button class="downloadBtn">
+  <button mat-button class="downloadBtn" (click)="downloadFile()">
     <mat-icon>download</mat-icon>Download
   </button>
   <button mat-flat-button color="accent" class="excuteBtn">Abgeben</button>
