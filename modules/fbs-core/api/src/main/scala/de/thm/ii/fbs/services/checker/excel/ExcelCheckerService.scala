@@ -94,7 +94,6 @@ class ExcelCheckerService extends CheckerService {
     var invalidFields = List[String]()
     val extInfo = ExtendedInfoExcel()
 
-
     val res = cells.expectedCells.zip(cells.actualCell).foldLeft(true)({ case (accumulator, (expected, actual)) =>
       val equal = actual.value.contentEquals(expected.value)
       if (!equal) {

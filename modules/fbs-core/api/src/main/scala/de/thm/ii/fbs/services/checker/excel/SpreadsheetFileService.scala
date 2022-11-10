@@ -15,7 +15,6 @@ class SpreadsheetFileService {
   private val storageService: StorageService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-
   def getMediaInfo(ccId: Int): ExcelMediaInformationTasks = {
     val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
     val file = new File(secondaryFilePath)
@@ -31,5 +30,4 @@ class SpreadsheetFileService {
     val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
     new File(mainFilePath)
   }
-
 }
