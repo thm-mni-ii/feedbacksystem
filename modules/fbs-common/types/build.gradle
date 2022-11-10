@@ -1,0 +1,13 @@
+plugins {
+    id "java-library"
+    id "org.jetbrains.kotlin.jvm" version "1.7.20"
+}
+
+repositories {
+    mavenCentral()
+
+    dependencies {
+        implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
+    }
+}

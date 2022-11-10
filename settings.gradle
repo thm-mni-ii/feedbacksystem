@@ -3,6 +3,7 @@ rootProject.name = 'feedbacksystem'
 include 'fbs-core.api'
 include 'fbs-core.web'
 include 'fbs-runner.checker'
+include 'fbs-common.types'
 
 rootProject.children.each {project ->
     def (root, subFolder) = "$project.name".tokenize( '.' )
