@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.types
 
-import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.annotation.JsonProperty
 
-case class SqlPlaygroundRunArgs(@JsonValue("executionId") executionId: Int,
-                                @JsonValue("user") user: User,
-                                @JsonValue("statement") statement: String,
-                                @JsonValue("database") database: Database)
+case class SqlPlaygroundRunArgs(@JsonProperty("executionId") executionId: Int,
+                                @JsonProperty("user") user: User,
+                                @JsonProperty("statement") statement: String,
+                                @JsonProperty("database") database: Database)
