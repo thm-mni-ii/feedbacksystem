@@ -1,10 +1,11 @@
 package de.thm.ii.fbs
 
-import de.thm.ii.fbs.services.persistence.DatabaseMigrationService
+import de.thm.ii.fbs.controller.MinioC
+import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService, MinioService}
+
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +31,8 @@ class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
   private implicit val migrationService: DatabaseMigrationService = null
+  @Autowired
+  private implicit val minioService: MinioService = null
 
   /**
     * Initialize the database schema if none exists.
@@ -38,6 +41,15 @@ class Application {
   private def ensureDBSchema(): Unit = {
     migrationService.migrate()
     logger.info("Feedbacksystem started.")
+  }
+
+  /**
+    * Initialize Minio Client
+    */
+  @EventListener(value = Array(classOf[ApplicationReadyEvent]))
+  private def initializeMinio(): Unit = {
+    minioService.initialMinio()
+    logger.info("Minio started")
   }
 }
 /**

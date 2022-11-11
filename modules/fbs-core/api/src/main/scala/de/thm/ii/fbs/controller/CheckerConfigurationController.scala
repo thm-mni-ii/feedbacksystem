@@ -7,7 +7,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, StorageService, TaskService}
+import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import io.minio.{BucketExistsArgs, MakeBucketArgs, MinioClient, UploadObjectArgs}
@@ -43,7 +43,9 @@ class CheckerConfigurationController {
   @Value("${minio.user}") private val minioUser: String = null
   @Value("${minio.password}") private val minioPassword: String = null
 
-  val minioClient: MinioClient = MinioClient.builder().endpoint("http://localhost:9090").credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
+  val minioClient: MinioClient = MinioClient.builder()
+    .endpoint("http://127.0.0.1", 9000, false)
+    .credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
 
   /**
     * Return a list of checker configurations for a task
@@ -265,11 +267,13 @@ class CheckerConfigurationController {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
           val bucketName = "tasks"
-          val pathName = ccid.toString + "/" + fileName
           if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
           }
-          minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName).`object`(pathName).build())
+          val tempDesc = Files.createTempFile("fbs", ".tmp")
+          file.transferTo(tempDesc)
+          minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName)
+            .`object`("/" + ccid.toString + "/" + fileName).filename(tempDesc.toString).build())
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }
@@ -288,11 +292,10 @@ class CheckerConfigurationController {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
           // check ob bucket oder fs
-          if (checkrunnerConfiguration.isBucket) {
+          //if (checkrunnerConfiguration.isInBlockStorage) {
             // bucket
             storageService.getFileContentBucket("tasks", ccid, fileName)
-
-          } else {
+          /*} else {
             // fs
             pathFn(ccid) match {
               case Some(mainFilePath) =>
@@ -301,7 +304,7 @@ class CheckerConfigurationController {
               case _ => throw new ResourceNotFoundException()
             }
 
-          }
+          }*/
         case _ => throw new ResourceNotFoundException()
       }
     } else {

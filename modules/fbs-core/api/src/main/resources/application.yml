@@ -30,7 +30,7 @@ security:
     protectedPaths: "/api/v1/login/ldap,/api/v1/login/local"
 server:
   host: ${SERVER_HOST:https://localhost}
-  port: 443
+  port: 8443
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
@@ -71,7 +71,7 @@ spring:
 minio:
   user: admin
   password: SqfyBWhiFGr7FK60cVR2rel
-  url: ${http://localhost:9090}
+  url: ${http://127.0.0.1:9001}
 
 url:
   expiration:

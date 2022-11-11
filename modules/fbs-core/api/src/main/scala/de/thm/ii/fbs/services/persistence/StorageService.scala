@@ -21,8 +21,9 @@ class StorageService extends App {
   @Value("${minio.user}") private val minioUser: String = null
   @Value("${minio.password}") private val minioPassword: String = null
 
-  val minioClient = MinioClient.builder().endpoint("http://localhost:9090").credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
-
+  val minioClient: MinioClient = MinioClient.builder()
+    .endpoint("http://127.0.0.1", 9000, false)
+    .credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
   private def uploadDirPath: Path = Path.of(uploadDir)
 
   private def tasksDir(tid: Int) = uploadDirPath.resolve("tasks").resolve(String.valueOf(tid))
@@ -184,13 +185,12 @@ class StorageService extends App {
   }
 
   def getFileContentBucket(bucketName: String, id: Int, fileName: String): String = {
-    // gibt es bucket schon?
     // muss ein bucket angelegt werden oder geschieht dies automatisch beim hinzufügen zu einem bucketName
-    if (minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+    if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+      ""
+    } else {
       val concat = id.toString + "/" + fileName
       get(bucketName, concat)
-    } else {
-      ""
     }
   }
 

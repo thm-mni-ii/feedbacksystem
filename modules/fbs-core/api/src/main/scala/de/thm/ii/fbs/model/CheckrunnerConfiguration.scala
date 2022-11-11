@@ -16,5 +16,5 @@ case class CheckrunnerConfiguration(
   id: Int = 0,
   taskId: Int = 0,
   checkerTypeInformation: Option[CheckerTypeInformation] = None,
-  isBucket: Boolean = false
+  isInBlockStorage: Boolean = false
 )
