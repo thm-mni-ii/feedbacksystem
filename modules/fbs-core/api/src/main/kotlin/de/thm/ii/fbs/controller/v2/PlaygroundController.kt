@@ -1,27 +1,46 @@
 package de.thm.ii.fbs.controller.v2
 
-import de.thm.ii.fbs.model.playground.*
+import de.thm.ii.fbs.model.v2.ac.User
+import de.thm.ii.fbs.model.v2.playground.*
+import de.thm.ii.fbs.services.v2.persistence.DatabaseRepository
+import de.thm.ii.fbs.utils.v2.annotations.CurrentUser
 import org.springframework.web.bind.annotation.*
+import kotlin.jvm.optionals.getOrNull
 
 // TODO: Autorisation
 @RestController
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
-class PlaygroundController {
+class PlaygroundController(
+        private val databaseRepository: DatabaseRepository,
+) {
     @GetMapping
     @ResponseBody
-    fun index(): List<Database> = listOf(Database("1", "Test", "8", "PSQL", true))
+    fun index(@CurrentUser currentUser: User): List<Database> = databaseRepository.findByOwner(currentUser)
 
     @PutMapping
     @ResponseBody
-    fun create(@RequestBody database: DatabaseCreation): Database = Database("1", "Test", "8", "PSQL")
+    fun create(@CurrentUser currentUser: User, @RequestBody database: DatabaseCreation): Database {
+        val db = databaseRepository.save(Database(database.name, "1", "PSQL", currentUser, true, 1))
+        val currentActiveDb = databaseRepository.findByActive(true)
+        if (currentActiveDb !== null) {
+            currentActiveDb.active = false
+            databaseRepository.save(currentActiveDb)
+        }
+        return databaseRepository.save(db)
+    }
 
     @DeleteMapping("/{dbId}")
     @ResponseBody
-    fun delete(): Database = Database("1", "Test", "8", "PSQL")
+    fun delete(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): Database {
+        val db = databaseRepository.findById(dbId).orElse(null)!!
+        databaseRepository.delete(db)
+        return db
+    }
 
     @GetMapping("/{dbId}")
     @ResponseBody
-    fun get(): Database = Database("1", "Test", "8", "PSQL")
+    fun get(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): Database? =
+        databaseRepository.findById(dbId).orElse(null)
 
     @GetMapping("/{dbId}/activate")
     @ResponseBody

@@ -1,9 +1,9 @@
-package de.thm.ii.fbs.model.playground
+package de.thm.ii.fbs.model.v2.playground
 
 data class SQLTrigger(
-    val name: String,
-    val event: SQLTriggerEvent,
-    val action: SQLTriggerAction
+        val name: String,
+        val event: SQLTriggerEvent,
+        val action: SQLTriggerAction
 )
 
 data class SQLTriggerEvent(val manipulation: String, val objectTable: String)

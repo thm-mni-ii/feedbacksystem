@@ -63,7 +63,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/}
-      database: ${MONGODB_DATABASE:default}
+      database: ${MONGODB_DATABASE:sql-checker}
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
