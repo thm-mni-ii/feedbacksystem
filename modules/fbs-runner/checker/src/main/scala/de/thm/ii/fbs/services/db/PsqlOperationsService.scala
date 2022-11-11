@@ -14,8 +14,9 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   private val READ_USER_PRIVILEGES: PsqlPrivileges =
     PsqlPrivileges("USAGE", "SELECT", "SELECT")
 
-  override def createDB(client: SQLConnection): Future[ResultSet] = {
-    client.queryFuture(s"""DROP DATABASE IF EXISTS "$dbName"; CREATE DATABASE "$dbName";""")
+  override def createDB(client: SQLConnection, noDrop: Boolean = false): Future[ResultSet] = {
+    val dropStatement = if (noDrop) "" else s"""DROP DATABASE IF EXISTS "$dbName";"""
+    client.queryFuture(s"""$dropStatement CREATE DATABASE "$dbName";""")
   }
 
   override def deleteDB(client: SQLConnection): Future[ResultSet] = {

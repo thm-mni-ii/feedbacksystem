@@ -9,7 +9,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 abstract case class DBOperationsService(dbName: String, username: String, queryTimeout: Int) {
-  def createDB(client: SQLConnection): Future[ResultSet]
+  def createDB(client: SQLConnection, noDrop: Boolean = false): Future[ResultSet]
 
   def deleteDB(client: SQLConnection): Future[ResultSet]
 
