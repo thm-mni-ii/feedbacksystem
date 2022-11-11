@@ -13,7 +13,13 @@ import io.vertx.scala.ext.sql.ResultSet
 object ExtendedResultsService {
   private val COMPARE_TABLE_TYPE = "compareTable"
 
-  private def buildTableJson(resultSet: Option[ResultSet]) = {
+  /**
+    * Create a table from a result set
+    *
+    * @param resultSet Result Set to Transform
+    * @return the Result Set as an Table
+    */
+  def buildTableJson(resultSet: Option[ResultSet]): JsonObject = {
     val table = new JsonObject
 
     if (resultSet.isDefined) {
