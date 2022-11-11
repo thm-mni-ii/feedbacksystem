@@ -35,14 +35,14 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     })
   }
 
-  def close(dbOperations: DBOperationsService, skipDeletion: Boolean = false): Unit = {
+  def close(dbOperations: DBOperationsService, skipDeletion: Boolean = false, skipUserDeletion: Boolean = false): Unit = {
     closeOptional(queryCon)
 
     if (skipDeletion) {
       closeOptionalCon(operationCon)
     } else {
       dbOperations.deleteDB(operationCon.get)
-        .flatMap(_ => dbOperations.deleteUser(operationCon.get))
+        .flatMap(_ => if (skipUserDeletion) Future.unit else dbOperations.deleteUser(operationCon.get))
         .onComplete({
           case Failure(e) =>
             closeOptionalCon(operationCon)
