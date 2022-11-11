@@ -63,10 +63,10 @@ object Secrets {
     * @return
     */
   def generateHMAC(value: String): String = {
-    val secret = new SecretKeySpec(HMAC_SECRET.getBytes, "SHA256")
-    val mac = Mac.getInstance("SHA256")
+    val secret = new SecretKeySpec(HMAC_SECRET.getBytes, "HmacSHA256")
+    val mac = Mac.getInstance("HmacSHA256")
     mac.init(secret)
     val hashString: Array[Byte] = mac.doFinal(value.getBytes)
-    new String(hashString.map(_.toChar))
+    hashString.map("%02x".format(_)).mkString
   }
 }
