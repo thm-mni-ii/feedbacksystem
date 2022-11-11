@@ -70,7 +70,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
 
   private def getConnection(runArgs: SqlPlaygroundRunArgs): Option[DBConnections] = {
     try {
-      val poolWithConfig = sqlPools.getOrElse(runArgs.database.dbType.toLowerCase, sqlPools.default(MYSQL_CONFIG_KEY))
+      val poolWithConfig = sqlPools.getOrElse(runArgs.database.dbType.toLowerCase, sqlPools.default(PSQL_CONFIG_KEY))
       Option(DBConnections(vertx, poolWithConfig))
     } catch {
       case e: Throwable =>
