@@ -310,7 +310,7 @@ class StorageService extends App {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteSolutionFileFromBucket(sid: Int): Boolean = {
+  def deleteSolutionFileFromBucket(sid: Int): Boolean = {// nicht bucket sondern file des kurses löschen TODO1
     if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("submissions").build())) {
       minioService.minioClient.removeBucket(RemoveBucketArgs.builder().bucket("submissions").build())
       true

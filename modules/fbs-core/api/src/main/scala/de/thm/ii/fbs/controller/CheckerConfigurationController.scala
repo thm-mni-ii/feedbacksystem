@@ -172,22 +172,21 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val cc = ccs.getOne(ccid) match {
-        case Some(cc) => cc
-        case None => throw new ResourceNotFoundException()
-      }
-      if (this.ccs.delete(cid, tid, ccid)) {
-        if (checkrunnerConfiguration.isInBlockStorage){
-          storageService.deleteSecondaryFileFromBucket(tid)
-          storageService.deleteMainFileFromBucket(tid)
-          storageService.deleteConfigurationFromBucket(ccid)
-        } else {
-          // FS
-          storageService.deleteSecondaryFile(tid)
-          storageService.deleteMainFile(tid)
-          storageService.deleteConfiguration(tid)
+      ccs.getOne(ccid) match {
+        case Some(cc) => if (this.ccs.delete(cid, tid, ccid)) {
+          if (cc.isInBlockStorage) {
+            storageService.deleteSecondaryFileFromBucket(tid)
+            storageService.deleteMainFileFromBucket(tid)
+            storageService.deleteConfigurationFromBucket(ccid)
+          } else {
+            // FS
+            storageService.deleteSecondaryFile(tid)
+            storageService.deleteMainFile(tid)
+            storageService.deleteConfiguration(tid)
+          }
+          notifyCheckerDelete(tid, cc)
         }
-        notifyCheckerDelete(tid, cc)
+        case None => throw new ResourceNotFoundException()
       }
     } else {
       throw new ForbiddenException()
@@ -295,18 +294,18 @@ class CheckerConfigurationController {
         case Some(checkrunnerConfiguration) =>
           // check ob bucket oder fs
           //if (checkrunnerConfiguration.isInBlockStorage) {
-            // bucket
-            storageService.getFileContentBucket("tasks", ccid, fileName)
-          /*} else {
-            // fs
-            pathFn(ccid) match {
-              case Some(mainFilePath) =>
-                val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
-                mainFileInputStream.transferTo(res.getOutputStream)
-              case _ => throw new ResourceNotFoundException()
-            }
+          // bucket
+          storageService.getFileContentBucket("tasks", ccid, fileName)
+        /*} else {
+          // fs
+          pathFn(ccid) match {
+            case Some(mainFilePath) =>
+              val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
+              mainFileInputStream.transferTo(res.getOutputStream)
+            case _ => throw new ResourceNotFoundException()
+          }
 
-          }*/
+        }*/
         case _ => throw new ResourceNotFoundException()
       }
     } else {
