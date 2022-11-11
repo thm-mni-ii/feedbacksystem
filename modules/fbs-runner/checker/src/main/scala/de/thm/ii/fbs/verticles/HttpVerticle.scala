@@ -109,6 +109,9 @@ class HttpVerticle extends ScalaVerticle {
     }
     val request = client.get.post(s"/results/$resource")
 
+    // Remove resultType as is not needed by fbs-core
+    resultJson.remove("resultType")
+
     // Add handler
     request.exceptionHandler({ e =>
       logger.warn("Count not send result", e) // TODO handle
