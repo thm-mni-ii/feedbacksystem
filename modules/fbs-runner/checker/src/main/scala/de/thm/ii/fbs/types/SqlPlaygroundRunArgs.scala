@@ -6,4 +6,5 @@ import com.fasterxml.jackson.annotation.{JsonIgnoreProperties, JsonProperty}
 case class SqlPlaygroundRunArgs(@JsonProperty("executionId") executionId: Int,
                                 @JsonProperty("user") user: User,
                                 @JsonProperty("statement") statement: String,
-                                @JsonProperty("database") database: Database)
+                                @JsonProperty("database") database: Database,
+                                @JsonProperty("mode") mode: String)

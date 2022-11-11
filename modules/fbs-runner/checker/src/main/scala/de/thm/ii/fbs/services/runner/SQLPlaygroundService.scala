@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.runner
 import de.thm.ii.fbs.services.ExtendedResultsService
 import de.thm.ii.fbs.services.db.{DBOperationsService, PsqlOperationsService}
 import de.thm.ii.fbs.types.SqlPlaygroundRunArgs
-import de.thm.ii.fbs.util.{DBConnections, DBTypes}
+import de.thm.ii.fbs.util.{DBConnections, DBTypes, SqlPlaygroundMode}
 import io.vertx.core.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
 
@@ -30,6 +30,7 @@ object SQLPlaygroundService {
       .put("result", ExtendedResultsService.buildTableJson(result))
       .put("error", error)
       .put("errorMsg", errorMsg.getOrElse(""))
+      .put("mode", sqlRunArgs.mode)
       .put("resultType", PLAYGROUND_RESULT_TYPE)
   }
 }
@@ -48,15 +49,16 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: DBConn
 
   def executeStatement(): Future[ResultSet] = {
     val dbOperations = initDBOperations()
+    val skipDeletion = SqlPlaygroundMode.skipDeletion(sqlRunArgs.mode)
 
     con.initCon(dbOperations).flatMap(_ => {
       dbOperations.queryFutureWithTimeout(con.queryCon.get, sqlRunArgs.statement)
     }) transform {
       case s@Success(_) =>
-        con.close(dbOperations, skipDeletion = true)
+        con.close(dbOperations, skipDeletion, skipUserDeletion = true)
         s
       case Failure(cause) =>
-        con.close(dbOperations, skipDeletion = true)
+        con.close(dbOperations, skipDeletion, skipUserDeletion = true)
         Failure(throw cause)
     }
   }
