@@ -5,7 +5,7 @@ import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.DBConnections
 import de.thm.ii.fbs.util.DBTypes.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY}
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.RUN_ADDRESS
+import de.thm.ii.fbs.verticles.runner.SqlPlaygroundVerticle.RUN_ADDRESS
 import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 /**
-  * Object that stores all static vars for the SqlRunnerVerticle
+  * Object that stores all static vars for the SqlPlaygroundVerticle
   */
 object SqlPlaygroundVerticle {
   /** Event Bus Address to start an runner */
