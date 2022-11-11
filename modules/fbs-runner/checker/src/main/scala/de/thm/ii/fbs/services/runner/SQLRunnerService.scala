@@ -6,8 +6,7 @@ import de.thm.ii.fbs.services.db.{DBOperationsService, MySqlOperationsService, P
 import de.thm.ii.fbs.services.{ExtendedResultsService, FileService, SQLResultService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
-import de.thm.ii.fbs.util.{DBConnections, RunnerException}
-import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle
+import de.thm.ii.fbs.util.{DBConnections, DBTypes, RunnerException}
 import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
@@ -45,7 +44,7 @@ object SQLRunnerService {
       val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "variable")).toArray else taskQueries.sections
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
-      val dbType = if (taskQueries.dbType == null) SqlRunnerVerticle.MYSQL_CONFIG_KEY else taskQueries.dbType
+      val dbType = if (taskQueries.dbType == null) DBTypes.MYSQL_CONFIG_KEY else taskQueries.dbType
       val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
       val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
@@ -117,7 +116,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
   private def taskQueryIsOk(taskQuery: TaskQuery): Boolean =
     msgIsOk(taskQuery.description)
 
-  private def isPsql: Boolean = sqlRunArgs.dbType.equalsIgnoreCase(SqlRunnerVerticle.PSQL_CONFIG_KEY)
+  private def isPsql: Boolean = DBTypes.isPsql(sqlRunArgs.dbType)
 
   private def shortDBName(dbName: String) = {
     val lastChar = dbName.last
