@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.runner
 
+import de.thm.ii.fbs.services.ExtendedResultsService
 import de.thm.ii.fbs.services.db.{DBOperationsService, PsqlOperationsService}
 import de.thm.ii.fbs.types.SqlPlaygroundRunArgs
 import de.thm.ii.fbs.util.{DBConnections, DBTypes}
@@ -26,9 +27,9 @@ object SQLPlaygroundService {
     val res = new JsonObject()
 
     res.put("executionId", sqlRunArgs.executionId)
-      .put("result", result)
+      .put("result", ExtendedResultsService.buildTableJson(result))
       .put("error", error)
-      .put("errorMsg", errorMsg)
+      .put("errorMsg", errorMsg.getOrElse(""))
       .put("resultType", PLAYGROUND_RESULT_TYPE)
   }
 }
@@ -49,14 +50,14 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: DBConn
     val dbOperations = initDBOperations()
 
     con.initCon(dbOperations).flatMap(_ => {
-      dbOperations.queryFutureWithTimeout(con.queryCon.get, sqlRunArgs.statement) transform {
-        case s@Success(_) =>
-          con.close(dbOperations, skipDeletion = true)
-          s
-        case Failure(cause) =>
-          con.close(dbOperations, skipDeletion = true)
-          Failure(throw cause)
-      }
-    })
+      dbOperations.queryFutureWithTimeout(con.queryCon.get, sqlRunArgs.statement)
+    }) transform {
+      case s@Success(_) =>
+        con.close(dbOperations, skipDeletion = true)
+        s
+      case Failure(cause) =>
+        con.close(dbOperations, skipDeletion = true)
+        Failure(throw cause)
+    }
   }
 }
