@@ -17,7 +17,16 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
   var queryCon: Option[JDBCClient] = None
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
-  def initDB(dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean = false, skipDBInt: Boolean = false): Future[Unit] = {
+  def initCon(dbOperations: DBOperationsService): Future[Unit] = {
+    sqlPoolWithConfig.pool.getConnectionFuture().map(con => {
+      operationCon = Option(con)
+      createPool(dbOperations.dbName, Option(dbOperations.username), Option(Secrets.generateHMAC(dbOperations.username))).map(pool => {
+        queryCon = Option(pool)
+      })
+    })
+  }
+
+  def initConAndCreateDB(dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean = false, skipDBInt: Boolean = false): Future[Unit] = {
     sqlPoolWithConfig.pool.getConnectionFuture().flatMap(con => {
       operationCon = Option(con)
       initPool(dbOperations.username, dbOperations, dbConfig, allowUserWrite, skipDBInt).map(pool => {
@@ -26,16 +35,21 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     })
   }
 
-  def close(dbOperations: DBOperationsService): Unit = {
+  def close(dbOperations: DBOperationsService, skipDeletion: Boolean = false): Unit = {
     closeOptional(queryCon)
-    dbOperations.deleteDB(operationCon.get)
-      .flatMap(_ => dbOperations.deleteUser(operationCon.get))
-      .onComplete({
-        case Failure(e) =>
-          closeOptionalCon(operationCon)
-          logger.error(s"Could not delete Database and/or User '${dbOperations.dbName}'", e)
-        case _ => closeOptionalCon(operationCon)
-      })
+
+    if (skipDeletion) {
+      closeOptionalCon(operationCon)
+    } else {
+      dbOperations.deleteDB(operationCon.get)
+        .flatMap(_ => dbOperations.deleteUser(operationCon.get))
+        .onComplete({
+          case Failure(e) =>
+            closeOptionalCon(operationCon)
+            logger.error(s"Could not delete Database and/or User '${dbOperations.dbName}'", e)
+          case _ => closeOptionalCon(operationCon)
+        })
+    }
   }
 
   private def initPool

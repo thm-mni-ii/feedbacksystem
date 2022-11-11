@@ -148,7 +148,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     val dbOperations = initDBOperations(configDbExt)
     val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    solutionCon.initDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite).flatMap(_ => {
+    solutionCon.initConAndCreateDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite).flatMap(_ => {
       val queries = executeRunnerQueryByType(dbOperations)
 
       Future.sequence(queries) transform {
@@ -177,7 +177,7 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     val skipInitDB = sqlRunArgs.queryType.equals("ddl")
     val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    submissionCon.initDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite, skipInitDB).flatMap(_ => {
+    submissionCon.initConAndCreateDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite, skipInitDB).flatMap(_ => {
       executeSubmissionQueryByType(dbOperations) transform {
         case s@Success(_) =>
           submissionCon.close(dbOperations)
