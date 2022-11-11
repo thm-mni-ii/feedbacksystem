@@ -3,11 +3,13 @@ package de.thm.ii.fbs.services.persistence
 import java.io.{ByteArrayInputStream, File, IOException}
 import java.nio.file._
 import org.apache.commons.io.FileUtils
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
-import io.minio.{BucketExistsArgs, GetObjectArgs, MinioClient, RemoveBucketArgs, RemoveObjectArgs}
+import io.minio.{BucketExistsArgs, GetObjectArgs, RemoveBucketArgs, RemoveObjectArgs}
 import org.apache.commons.io.IOUtils
+import org.slf4j.LoggerFactory
 
+import java.util.logging.Logger
 import scala.io.Source
 
 /**
@@ -15,15 +17,17 @@ import scala.io.Source
   */
 @Component
 class StorageService extends App {
+  @Autowired
+  private val minioService: MinioService = null
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
   @Value("${minio.url}") private val minioUrl: String = null
   @Value("${minio.user}") private val minioUser: String = null
   @Value("${minio.password}") private val minioPassword: String = null
 
-  val minioClient: MinioClient = MinioClient.builder()
-    .endpoint("http://127.0.0.1", 9000, false)
-    .credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
   private def uploadDirPath: Path = Path.of(uploadDir)
 
   private def tasksDir(tid: Int) = uploadDirPath.resolve("tasks").resolve(String.valueOf(tid))
@@ -186,7 +190,7 @@ class StorageService extends App {
 
   def getFileContentBucket(bucketName: String, id: Int, fileName: String): String = {
     // muss ein bucket angelegt werden oder geschieht dies automatisch beim hinzufügen zu einem bucketName
-    if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
       ""
     } else {
       val concat = id.toString + "/" + fileName
@@ -202,9 +206,12 @@ class StorageService extends App {
     */
   private def get(bucket: String, id: String): String = {
     // get object as byte array
-    val stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucket).`object`(id).build())
-    val content = IOUtils.toByteArray(stream)
-    content.map(_.toChar).mkString
+    val stream = minioService.minioClient.getObject(GetObjectArgs.builder().bucket(bucket).`object`(id).build())
+    val content = stream.readAllBytes()
+    print(content.mkString("Array(", ", ", ")"))
+    val t = content.map(_.toChar)
+    print(t.mkString)
+    t.mkString
   }
 
   /**
@@ -272,8 +279,8 @@ class StorageService extends App {
   @throws[IOException]
   def deleteFileFromBucket(filePath: String): Unit = {
       // remove obj from bucket
-    if (minioClient.bucketExists(BucketExistsArgs.builder().bucket("tasks").build())) {
-      minioClient.removeObject(RemoveObjectArgs.builder().bucket("tasks").`object`(filePath).build())
+    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("tasks").build())) {
+      minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket("tasks").`object`(filePath).build())
     }
   }
 
@@ -286,13 +293,12 @@ class StorageService extends App {
     * @throws IOException If the i/o operation fails
     */
   def deleteConfigurationFromBucket(tid: Int): Boolean = {
-    if (minioClient.bucketExists(BucketExistsArgs.builder().bucket("tasks").build())) {
-      minioClient.removeBucket(RemoveBucketArgs.builder().bucket("tasks").build())
+    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("tasks").build())) {
+      minioService.minioClient.removeBucket(RemoveBucketArgs.builder().bucket("tasks").build())
       true
     }
     else {
       false
-
     }
   }
 
@@ -305,8 +311,8 @@ class StorageService extends App {
     */
   @throws[IOException]
   def deleteSolutionFileFromBucket(sid: Int): Boolean = {
-    if (minioClient.bucketExists(BucketExistsArgs.builder().bucket("submissions").build())) {
-      minioClient.removeBucket(RemoveBucketArgs.builder().bucket("submissions").build())
+    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("submissions").build())) {
+      minioService.minioClient.removeBucket(RemoveBucketArgs.builder().bucket("submissions").build())
       true
     }
     else {

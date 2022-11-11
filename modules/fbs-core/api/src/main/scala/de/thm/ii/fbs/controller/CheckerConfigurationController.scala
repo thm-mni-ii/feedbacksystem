@@ -10,8 +10,7 @@ import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerSe
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import io.minio.{BucketExistsArgs, MakeBucketArgs, MinioClient, UploadObjectArgs}
-import org.springframework.beans.factory.annotation.Value
+import io.minio.{BucketExistsArgs, MakeBucketArgs, UploadObjectArgs}
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,14 +37,8 @@ class CheckerConfigurationController {
   private val taskService: TaskService = null
   @Autowired
   private val checkerService: CheckerServiceFactoryService = null
-
-  @Value("${minio.url}") private val minioUrl: String = null
-  @Value("${minio.user}") private val minioUser: String = null
-  @Value("${minio.password}") private val minioPassword: String = null
-
-  val minioClient: MinioClient = MinioClient.builder()
-    .endpoint("http://127.0.0.1", 9000, false)
-    .credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
+  @Autowired
+  private val minioService: MinioService = null
 
   /**
     * Return a list of checker configurations for a task
@@ -184,7 +177,16 @@ class CheckerConfigurationController {
         case None => throw new ResourceNotFoundException()
       }
       if (this.ccs.delete(cid, tid, ccid)) {
-        storageService.deleteConfigurationFromBucket(ccid)
+        if (checkrunnerConfiguration.isInBlockStorage){
+          storageService.deleteSecondaryFileFromBucket(tid)
+          storageService.deleteMainFileFromBucket(tid)
+          storageService.deleteConfigurationFromBucket(ccid)
+        } else {
+          // FS
+          storageService.deleteSecondaryFile(tid)
+          storageService.deleteMainFile(tid)
+          storageService.deleteConfiguration(tid)
+        }
         notifyCheckerDelete(tid, cc)
       }
     } else {
@@ -267,12 +269,12 @@ class CheckerConfigurationController {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
           val bucketName = "tasks"
-          if (!minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+          if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+            minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
           }
           val tempDesc = Files.createTempFile("fbs", ".tmp")
           file.transferTo(tempDesc)
-          minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName)
+          minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName)
             .`object`("/" + ccid.toString + "/" + fileName).filename(tempDesc.toString).build())
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()

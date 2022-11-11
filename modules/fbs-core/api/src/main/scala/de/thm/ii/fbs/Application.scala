@@ -1,6 +1,5 @@
 package de.thm.ii.fbs
 
-import de.thm.ii.fbs.controller.MinioC
 import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService, MinioService}
 
 import java.nio.file.{Files, Paths}

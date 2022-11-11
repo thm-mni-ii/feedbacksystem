@@ -151,7 +151,7 @@ class CourseController {
 
         val success = courseService.delete(cid)
 
-        // If the Course was deleted in the database -> delete all files
+        // If the Course was deleted in the database -> delete all files TODO
         success && tasks.forall(t => t._1.forall(s => storageService.deleteSolutionFileFromBucket(s.id)) && t._2.forall(cc => storageService.deleteConfigurationFromBucket(cc.id)))
       case _ => throw new ForbiddenException()
     }
