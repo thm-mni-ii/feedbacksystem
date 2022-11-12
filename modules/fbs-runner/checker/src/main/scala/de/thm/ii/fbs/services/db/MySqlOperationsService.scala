@@ -48,4 +48,6 @@ class MySqlOperationsService(override val dbName: String, override val username:
   override def deleteUser(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"DROP USER '$username'@'%';")
   }
+
+  override def getDatabaseInformation(client: JDBCClient): Future[ResultSet] = ???
 }

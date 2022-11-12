@@ -38,6 +38,8 @@ abstract case class DBOperationsService(dbName: String, username: String, queryT
     })
   }
 
+  def getDatabaseInformation(client: JDBCClient): Future[ResultSet]
+
   protected def generateUserPassword(): String =
     Secrets.getSHAStringFromRandom()
 }

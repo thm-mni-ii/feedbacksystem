@@ -60,4 +60,50 @@ class PsqlOperationsService(override val dbName: String, override val username: 
     client.queryFuture(
       s"""DROP USER "$username";""")
   }
+
+  override def getDatabaseInformation(client: JDBCClient): Future[ResultSet] = {
+    val tables =
+      """
+        |SELECT c.table_name, json_agg(json_build_object('columnName', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
+        |FROM information_schema.columns as c
+        |join information_schema.tables as t on c.table_name = t.table_name and c.table_schema = t.table_schema
+        |WHERE c.table_schema = 'public' and t.table_type != 'VIEW'
+        |group by c.table_name, t.table_type;
+        |""".stripMargin
+    val constrains =
+      """
+        |select constrains.table_name, json_agg(json_build_object('columnName', constrains.column_name, 'constraintName', constrains.constraint_name, 'constraintType', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
+        |from information_schema.KEY_COLUMN_USAGE as kcu
+        |JOIN information_schema.table_constraints as tc ON tc.constraint_name = kcu.constraint_name
+        |where tc.table_schema = 'public'
+        |UNION
+        |SELECT tc.table_name, SUBSTRING(cc.check_clause from '(?:^|(?:\.\s))(\w+)'), tc.constraint_name, tc.constraint_type, cc.check_clause
+        |FROM information_schema.table_constraints as tc
+        |JOIN information_schema.check_constraints as cc ON cc.constraint_name = tc.constraint_name
+        |AND constraint_type = 'CHECK'
+        |where tc.table_schema = 'public') as constrains group by constrains.table_name;
+        |""".stripMargin
+    val views =
+      """
+        |SELECT table_name, view_definition
+        |FROM information_schema.views
+        |WHERE table_schema = 'public';
+        |""".stripMargin
+
+    val routines =
+      """
+        |SELECT routine_name, routine_type, routine_definition
+        |FROM information_schema.routines
+        |WHERE routine_schema = 'public';
+        |""".stripMargin
+
+    val triggers =
+      """
+        |SELECT trigger_name, event_manipulation, event_object_table, action_statement, action_orientation, action_timing
+        |FROM information_schema.triggers
+        |WHERE trigger_schema = 'public';
+        |""".stripMargin
+
+    client.queryFuture(s"$tables $constrains $views $routines $triggers")
+  }
 }
