@@ -3,7 +3,7 @@ package de.thm.ii.fbs.verticles.runner
 import de.thm.ii.fbs.services.runner.SQLPlaygroundService
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.DBConnections
-import de.thm.ii.fbs.util.DBTypes.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY}
+import de.thm.ii.fbs.util.DBTypes.PSQL_CONFIG_KEY
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlPlaygroundVerticle.RUN_ADDRESS
 import io.vertx.core.json.JsonObject
@@ -38,6 +38,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     * @return vertx Future
     */
   override def startFuture(): Future[_] = {
+    val psqlDataSource = s"${PSQL_CONFIG_KEY}_playground"
     val psqlConfig = new JsonObject()
       .put("user", config.getString("SQL_PLAYGROUND_PSQL_SERVER_USERNAME", "root"))
       .put("password", config.getString("SQL_PLAYGROUND_PSQL_SERVER_PASSWORD", ""))
@@ -45,8 +46,8 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
       .put("max_pool_size", config.getInteger("SQL_PLAYGROUND_INSTANCES", 15))
       .put("driver_class", "org.postgresql.Driver")
       .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
-      .put("dataSourceName", PSQL_CONFIG_KEY)
-    val psqlPool = JDBCClient.createShared(vertx, psqlConfig, PSQL_CONFIG_KEY)
+      .put("dataSourceName", psqlDataSource)
+    val psqlPool = JDBCClient.createShared(vertx, psqlConfig, psqlDataSource)
     sqlPools += (PSQL_CONFIG_KEY -> SqlPoolWithConfig(psqlPool, psqlConfig))
 
     vertx.eventBus().consumer(RUN_ADDRESS, startSqlPlayground).completionFuture()
