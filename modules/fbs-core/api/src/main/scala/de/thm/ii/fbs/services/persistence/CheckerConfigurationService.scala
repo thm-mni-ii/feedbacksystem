@@ -25,13 +25,15 @@ class CheckerConfigurationService {
     * @return List of configurations
     */
   def getAll(cid: Int, tid: Int): List[CheckrunnerConfiguration] =
-    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord, checker_type_information " +
+    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
+      " checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) " +
       "WHERE course_id = ? AND task_id = ? ORDER BY ord",
       (res, _) => parseResult(res), cid, tid)
 
   def getAllForSubmission(submissionID: Int): List[CheckrunnerConfiguration] =
-  DB.query("SELECT configuration_id, t.task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord, checker_type_information " +
+  DB.query("SELECT configuration_id, t.task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
+    " checker_type_information, is_in_block_storage " +
     "FROM user_task_submission JOIN task t on user_task_submission.task_id = t.task_id " +
     "JOIN checkrunner_configuration cc on t.task_id = cc.task_id WHERE submission_id = ? ORDER BY ord",
     (res, _) => parseResult(res), submissionID)
@@ -44,7 +46,8 @@ class CheckerConfigurationService {
     * @return Optional checker configuration
     */
   def find(cid: Int, tid: Int, ccid: Int): Option[CheckrunnerConfiguration] =
-    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord, checker_type_information " +
+    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
+      " checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) WHERE " +
       "course_id = ? AND task_id = ? AND configuration_id = ?",
       (res, _) => parseResult(res), cid, tid, ccid).headOption
@@ -55,7 +58,8 @@ class CheckerConfigurationService {
     * @return Optional checker configuration
     */
   def getOne(ccid: Int): Option[CheckrunnerConfiguration] =
-    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord, checker_type_information " +
+    DB.query("SELECT configuration_id, task_id, checker_type, main_file_uploaded, secondary_file_uploaded, ord," +
+      " checker_type_information, is_in_block_storage " +
       "FROM checkrunner_configuration JOIN task USING (task_id) JOIN course USING (course_id) WHERE configuration_id = ?",
       (res, _) => parseResult(res), ccid).headOption
 
@@ -68,8 +72,8 @@ class CheckerConfigurationService {
     */
   def create(cid: Int, tid: Int, cc: CheckrunnerConfiguration): CheckrunnerConfiguration =
     DB.insert("INSERT INTO checkrunner_configuration (task_id, checker_type, main_file_uploaded, " +
-        "secondary_file_uploaded, ord, checker_type_information) VALUES (?,?,?,?,?,?);", tid, cc.checkerType,
-      cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord, cc.checkerTypeInformation.map(CheckerTypeInformation.toJSONString).orNull)
+        "secondary_file_uploaded, ord, checker_type_information, is_in_block_storage) VALUES (?,?,?,?,?,?,?);", tid, cc.checkerType,
+      cc.mainFileUploaded, cc.secondaryFileUploaded, cc.ord, cc.checkerTypeInformation.map(CheckerTypeInformation.toJSONString).orNull, true)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(ccid => find(cid, tid, ccid)) match {
       case Some(configuration) => configuration
@@ -150,6 +154,7 @@ class CheckerConfigurationService {
     secondaryFileUploaded = res.getBoolean("secondary_file_uploaded"),
     ord = res.getInt("ord"),
     checkerTypeInformation = Option(res.getString("checker_type_information")).map(CheckerTypeInformation.fromJSONString),
-    id = res.getInt("configuration_id")
+    id = res.getInt("configuration_id"),
+    isInBlockStorage = res.getBoolean("is_in_block_storage"),
   )
 }

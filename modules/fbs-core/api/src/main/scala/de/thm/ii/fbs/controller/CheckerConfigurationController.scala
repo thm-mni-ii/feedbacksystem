@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
-import java.io.{File, FileInputStream}
-import java.nio.file.{Files, Path}
+import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream}
+import java.nio.file.{Files, Path, Paths}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task}
@@ -85,7 +85,7 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("checkerType").asText(),
         body.retrive("ord").asInt(),
-        body.retrive("checkerTypeInformation").asObject()
+        body.retrive("checkerTypeInformation").asObject(),
       ) match {
         case (Some(checkerType), Some(ord), Some(checkerTypeInformation)) =>
           (checkerTypeInformation.retrive("showHints").asBool(),
@@ -170,19 +170,18 @@ class CheckerConfigurationController {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ccs.getOne(ccid) match {
         case Some(cc) => if (this.ccs.delete(cid, tid, ccid)) {
           if (cc.isInBlockStorage) {
             storageService.deleteSecondaryFileFromBucket(tid)
             storageService.deleteMainFileFromBucket(tid)
-            storageService.deleteConfigurationFromBucket(ccid)
+            //storageService.deleteConfigurationFromBucket(ccid)
           } else {
             // FS
             storageService.deleteSecondaryFile(tid)
             storageService.deleteMainFile(tid)
-            storageService.deleteConfiguration(tid)
+            //storageService.deleteConfiguration(ccid)
           }
           notifyCheckerDelete(tid, cc)
         }
@@ -274,7 +273,7 @@ class CheckerConfigurationController {
           val tempDesc = Files.createTempFile("fbs", ".tmp")
           file.transferTo(tempDesc)
           minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName)
-            .`object`("/" + ccid.toString + "/" + fileName).filename(tempDesc.toString).build())
+            .`object`("/" + tid.toString + "/" + fileName).filename(tempDesc.toString).build())
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }
@@ -293,19 +292,20 @@ class CheckerConfigurationController {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
           // check ob bucket oder fs
-          //if (checkrunnerConfiguration.isInBlockStorage) {
-          // bucket
-          storageService.getFileContentBucket("tasks", ccid, fileName)
-        /*} else {
-          // fs
-          pathFn(ccid) match {
-            case Some(mainFilePath) =>
-              val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
-              mainFileInputStream.transferTo(res.getOutputStream)
-            case _ => throw new ResourceNotFoundException()
+          if (checkrunnerConfiguration.isInBlockStorage) {
+            // bucket
+            val fileContent = storageService.getFileContentBucket("tasks", tid, fileName)
+            val mainFileInputStream = new ByteArrayInputStream(fileContent.getBytes())
+            mainFileInputStream.transferTo(res.getOutputStream)
+          } else {
+            // fs
+            pathFn(ccid) match {
+              case Some(mainFilePath) =>
+                val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
+                mainFileInputStream.transferTo(res.getOutputStream)
+              case _ => throw new ResourceNotFoundException()
+            }
           }
-
-        }*/
         case _ => throw new ResourceNotFoundException()
       }
     } else {

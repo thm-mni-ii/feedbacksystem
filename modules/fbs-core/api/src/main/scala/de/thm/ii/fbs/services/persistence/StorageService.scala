@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.services.persistence
 
-import java.io.{ByteArrayInputStream, File, IOException}
+import java.io.{ByteArrayInputStream, File, FileOutputStream, IOException}
 import java.nio.file._
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
-import io.minio.{BucketExistsArgs, GetObjectArgs, RemoveBucketArgs, RemoveObjectArgs}
+import io.minio.{BucketExistsArgs, GetObjectArgs, RemoveBucketArgs, RemoveObjectArgs, StatObjectArgs}
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
 
@@ -206,12 +206,14 @@ class StorageService extends App {
     */
   private def get(bucket: String, id: String): String = {
     // get object as byte array
-    val stream = minioService.minioClient.getObject(GetObjectArgs.builder().bucket(bucket).`object`(id).build())
-    val content = stream.readAllBytes()
-    print(content.mkString("Array(", ", ", ")"))
-    val t = content.map(_.toChar)
-    print(t.mkString)
-    t.mkString
+    try {
+      val stream = minioService.minioClient.getObject(GetObjectArgs.builder().bucket(bucket).`object`(id).build())
+      val content = stream.readAllBytes()
+      val t = content.map(_.toChar)
+      t.mkString
+    } catch {
+      case e: Exception => ""
+    }
   }
 
   /**
@@ -244,7 +246,7 @@ class StorageService extends App {
   @throws[IOException]
   def deleteMainFileFromBucket(tid: Int): Boolean = {
     val str = getMainFileFromBucket(tid)
-    if (!str.equals("")) {
+    if (!str.equals("")) {// check ob existiert
       // remove obj from bucket
       val path = tid.toString + "/main-file"
       deleteFileFromBucket(path)
@@ -261,7 +263,7 @@ class StorageService extends App {
   @throws[IOException]
   def deleteSecondaryFileFromBucket(tid: Int): Boolean = {
     val str = getSecondaryFileFromBucket(tid)
-    if (!str.equals("")) {
+    if (!str.equals("")) {// check ob existiert
       // remove obj from bucket
       val path = tid.toString + "/secondary-file"
       deleteFileFromBucket(path)
