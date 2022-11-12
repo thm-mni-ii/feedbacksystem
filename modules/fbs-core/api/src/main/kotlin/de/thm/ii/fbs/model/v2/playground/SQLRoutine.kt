@@ -1,3 +1,18 @@
 package de.thm.ii.fbs.model.v2.playground
 
-data class SQLRoutine(val name: String, val type: String, val definition: String)
+import jakarta.persistence.*
+
+@Entity
+data class SQLRoutine(
+        @Column(nullable = false)
+        var name: String,
+        @Column(nullable = false)
+        var type: String,
+        @Column(nullable = false)
+        var definition: String,
+        @ManyToOne(optional = false)
+        var database: Database,
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Int? = null,
+)
