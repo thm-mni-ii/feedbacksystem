@@ -68,7 +68,6 @@ spring:
       database: ${MONGODB_DATABASE:sql-checker}
       repositories:
         type: none
-    jpa: {}
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

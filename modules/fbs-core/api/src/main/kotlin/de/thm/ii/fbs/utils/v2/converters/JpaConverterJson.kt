@@ -2,7 +2,6 @@ package de.thm.ii.fbs.utils.v2.converters
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import javax.persistence.AttributeConverter
-import javax.persistence.Converter
 import kotlin.reflect.KClass
 
 abstract class JpaJsonConverter<T: Any>(kClass: KClass<T>) : AttributeConverter<T, String> {

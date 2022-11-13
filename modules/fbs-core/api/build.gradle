@@ -4,8 +4,6 @@ plugins {
     id "com.github.alisiikh.scalastyle" version "3.4.1"
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
     id "org.jetbrains.kotlin.plugin.jpa" version "1.7.20"
-    id "org.jetbrains.kotlin.plugin.noarg" version "1.7.20"
-    id "org.jetbrains.kotlin.plugin.allopen" version "1.7.20"
 }
 
 apply plugin: 'scala'
@@ -85,16 +83,4 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8'
     testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
-}
-
-noArg {
-    annotation("javax.persistence.Entity")
-    annotation("javax.persistence.Embeddable")
-    annotation("javax.persistence.MappedSuperclass")
-}
-
-allOpen {
-    annotation("jakarta.persistence.Entity")
-    annotation("jakarta.persistence.Embeddable")
-    annotation("jakarta.persistence.MappedSuperclass")
 }
