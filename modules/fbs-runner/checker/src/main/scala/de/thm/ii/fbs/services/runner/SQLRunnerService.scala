@@ -148,15 +148,15 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     val dbOperations = initDBOperations(configDbExt)
     val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    solutionCon.initConAndCreateDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite).flatMap(_ => {
+    solutionCon.initCon(dbOperations, sqlRunArgs.dbConfig, allowUserWrite).flatMap(_ => {
       val queries = executeRunnerQueryByType(dbOperations)
 
       Future.sequence(queries) transform {
         case s@Success(_) =>
-          solutionCon.close(dbOperations)
+          solutionCon.closeAndDelete(dbOperations)
           s
         case Failure(cause) =>
-          solutionCon.close(dbOperations)
+          solutionCon.closeAndDelete(dbOperations)
 
           cause match {
             // Do not display Configuration SQL errors to the user
@@ -177,13 +177,13 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     val skipInitDB = sqlRunArgs.queryType.equals("ddl")
     val allowUserWrite = sqlRunArgs.queryType.equals("ddl")
 
-    submissionCon.initConAndCreateDB(dbOperations, sqlRunArgs.dbConfig, allowUserWrite, skipInitDB).flatMap(_ => {
+    submissionCon.initCon(dbOperations, sqlRunArgs.dbConfig, allowUserWrite, skipInitDB).flatMap(_ => {
       executeSubmissionQueryByType(dbOperations) transform {
         case s@Success(_) =>
-          submissionCon.close(dbOperations)
+          submissionCon.closeAndDelete(dbOperations)
           s
         case Failure(cause) =>
-          submissionCon.close(dbOperations)
+          submissionCon.closeAndDelete(dbOperations)
           Failure(throw cause)
       }
     })

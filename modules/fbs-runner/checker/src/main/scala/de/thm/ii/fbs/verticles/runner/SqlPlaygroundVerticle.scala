@@ -2,8 +2,8 @@ package de.thm.ii.fbs.verticles.runner
 
 import de.thm.ii.fbs.services.runner.SQLPlaygroundService
 import de.thm.ii.fbs.types._
-import de.thm.ii.fbs.util.DBConnections
 import de.thm.ii.fbs.util.DBTypes.PSQL_CONFIG_KEY
+import de.thm.ii.fbs.util.PlaygroundDBConnections
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlPlaygroundVerticle.RUN_ADDRESS
 import io.vertx.core.json.JsonObject
@@ -69,10 +69,10 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     }
   }
 
-  private def getConnection(runArgs: SqlPlaygroundRunArgs): Option[DBConnections] = {
+  private def getConnection(runArgs: SqlPlaygroundRunArgs): Option[PlaygroundDBConnections] = {
     try {
       val poolWithConfig = sqlPools.getOrElse(runArgs.database.dbType.toLowerCase, sqlPools.default(PSQL_CONFIG_KEY))
-      Option(DBConnections(vertx, poolWithConfig))
+      Option(new PlaygroundDBConnections(vertx, poolWithConfig))
     } catch {
       case e: Throwable =>
         handleError(runArgs, e)
@@ -80,7 +80,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     }
   }
 
-  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: DBConnections): Unit = {
+  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: PlaygroundDBConnections): Unit = {
     val sqlPlayground = new SQLPlaygroundService(runArgs, con, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
 
     sqlPlayground.executeStatement().onComplete({

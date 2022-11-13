@@ -5,5 +5,5 @@ object SqlPlaygroundMode {
   val EXECUTE_CONFIG_KEY = "execute"
   val DELETE_DB_CONFIG_KEY = "deleteDb"
 
-  def skipDeletion(key: String): Boolean = !key.equals(DELETE_DB_CONFIG_KEY)
+  def shouldDeleteDatabase(key: String): Boolean = key.equals(DELETE_DB_CONFIG_KEY)
 }

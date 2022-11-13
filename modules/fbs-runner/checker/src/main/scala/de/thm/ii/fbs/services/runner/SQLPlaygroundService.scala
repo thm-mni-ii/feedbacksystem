@@ -3,7 +3,7 @@ package de.thm.ii.fbs.services.runner
 import de.thm.ii.fbs.services.ExtendedResultsService
 import de.thm.ii.fbs.services.db.{DBOperationsService, PsqlOperationsService}
 import de.thm.ii.fbs.types.{OutputJsonStructure, SqlPlaygroundRunArgs}
-import de.thm.ii.fbs.util.{DBConnections, DBTypes, DatabaseInformationService, SqlPlaygroundMode}
+import de.thm.ii.fbs.util.{DBTypes, DatabaseInformationService, PlaygroundDBConnections, SqlPlaygroundMode}
 import io.vertx.core.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
 
@@ -60,7 +60,7 @@ object SQLPlaygroundService {
   }
 }
 
-class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: DBConnections, val queryTimeout: Int) {
+class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: PlaygroundDBConnections, val queryTimeout: Int) {
   private def isPsql: Boolean = DBTypes.isPsql(sqlRunArgs.database.dbType)
 
   private def initDBOperations(): DBOperationsService = {
@@ -74,16 +74,16 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: DBConn
 
   def executeStatement(): Future[(ResultSet, ResultSet)] = {
     val dbOperations = initDBOperations()
-    val skipDeletion = SqlPlaygroundMode.skipDeletion(sqlRunArgs.mode)
+    val deleteDatabase = SqlPlaygroundMode.shouldDeleteDatabase(sqlRunArgs.mode)
 
     con.initCon(dbOperations).flatMap(_ => {
       executeAndCollectInformation(dbOperations)
     }) transform {
       case s@Success(_) =>
-        con.close(dbOperations, skipDeletion, skipUserDeletion = true)
+        con.close(dbOperations, deleteDatabase)
         s
       case Failure(cause) =>
-        con.close(dbOperations, skipDeletion, skipUserDeletion = true)
+        con.close(dbOperations, deleteDatabase)
         Failure(throw cause)
     }
   }

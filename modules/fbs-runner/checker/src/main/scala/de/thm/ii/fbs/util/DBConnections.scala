@@ -15,18 +15,9 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
   val POOL_SIZE = 1
   var operationCon: Option[SQLConnection] = None
   var queryCon: Option[JDBCClient] = None
-  private val logger = ScalaLogger.getLogger(this.getClass.getName)
+  protected val logger: ScalaLogger = ScalaLogger.getLogger(this.getClass.getName)
 
-  def initCon(dbOperations: DBOperationsService): Future[Unit] = {
-    sqlPoolWithConfig.pool.getConnectionFuture().map(con => {
-      operationCon = Option(con)
-      createPool(dbOperations.dbName, Option(dbOperations.username), Option(Secrets.generateHMAC(dbOperations.username))).map(pool => {
-        queryCon = Option(pool)
-      })
-    })
-  }
-
-  def initConAndCreateDB(dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean = false, skipDBInt: Boolean = false): Future[Unit] = {
+  def initCon(dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean = false, skipDBInt: Boolean = false): Future[Unit] = {
     sqlPoolWithConfig.pool.getConnectionFuture().flatMap(con => {
       operationCon = Option(con)
       initPool(dbOperations.username, dbOperations, dbConfig, allowUserWrite, skipDBInt).map(pool => {
@@ -35,24 +26,20 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     })
   }
 
-  def close(dbOperations: DBOperationsService, skipDeletion: Boolean = false, skipUserDeletion: Boolean = false): Unit = {
+  def closeAndDelete(dbOperations: DBOperationsService): Unit = {
     closeOptional(queryCon)
 
-    if (skipDeletion) {
-      closeOptionalCon(operationCon)
-    } else {
-      dbOperations.deleteDB(operationCon.get)
-        .flatMap(_ => if (skipUserDeletion) Future.unit else dbOperations.deleteUser(operationCon.get))
-        .onComplete({
-          case Failure(e) =>
-            closeOptionalCon(operationCon)
-            logger.error(s"Could not delete Database and/or User '${dbOperations.dbName}'", e)
-          case _ => closeOptionalCon(operationCon)
-        })
-    }
+    dbOperations.deleteDB(operationCon.get)
+      .flatMap(_ => dbOperations.deleteUser(operationCon.get))
+      .onComplete({
+        case Failure(e) =>
+          closeOptionalCon(operationCon)
+          logger.error(s"Could not delete Database and/or User '${dbOperations.dbName}'", e)
+        case _ => closeOptionalCon(operationCon)
+      })
   }
 
-  private def initPool
+  protected def initPool
   (username: String, dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean, skipDBInt: Boolean): Future[Option[JDBCClient]] = {
     dbOperations.createDB(operationCon.get).flatMap(_ => {
       val pool = createPool(dbOperations.dbName)
@@ -69,7 +56,8 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     })
   }
 
-  private def initDB(dbOperations: DBOperationsService, dbConfig: String, username: String, password: String, skipInit: Boolean): Future[Option[JDBCClient]] = {
+  protected def initDB
+  (dbOperations: DBOperationsService, dbConfig: String, username: String, password: String, skipInit: Boolean): Future[Option[JDBCClient]] = {
     if (!skipInit) {
       val pool2 = createPool(dbOperations.dbName, Option(username), Option(password))
       dbOperations.initDB(pool2.get, dbConfig).map[Option[JDBCClient]](_ => pool2)
@@ -80,7 +68,7 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     }
   }
 
-  private def changeUserToReadOnly(dbOperations: DBOperationsService, pool: JDBCClient, skip: Boolean): Future[Unit] = {
+  protected def changeUserToReadOnly(dbOperations: DBOperationsService, pool: JDBCClient, skip: Boolean): Future[Unit] = {
     if (!skip) {
       dbOperations.changeUserToReadOnly(pool).map(_ => Unit)
     } else {
@@ -88,7 +76,7 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     }
   }
 
-  private def createPool(dbName: String, username: Option[String] = None, password: Option[String] = None): Option[JDBCClient] = {
+  protected def createPool(dbName: String, username: Option[String] = None, password: Option[String] = None): Option[JDBCClient] = {
     val config = sqlPoolWithConfig.config.copy()
     config.put("url", buildNewUrl(config.getString("url"), dbName))
     config.put("initial_pool_size", POOL_SIZE)
@@ -100,7 +88,7 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     Option(JDBCClient.create(vertx, config))
   }
 
-  private def buildNewUrl(url: String, dbName: String) = {
+  protected def buildNewUrl(url: String, dbName: String): String = {
     val parts = url.split('?')
     if (parts.length > 1) {
       // Append / if url not ends with /
@@ -112,14 +100,14 @@ case class DBConnections(vertx: Vertx, sqlPoolWithConfig: SqlPoolWithConfig) {
     }
   }
 
-  private def closeOptional(con: Option[JDBCClient]): Unit = {
+  protected def closeOptional(con: Option[JDBCClient]): Unit = {
     con match {
       case Some(c) => c.close()
       case _ =>
     }
   }
 
-  private def closeOptionalCon(con: Option[SQLConnection]): Unit = {
+  protected def closeOptionalCon(con: Option[SQLConnection]): Unit = {
     con match {
       case Some(c) => c.close()
       case _ =>
