@@ -40,7 +40,7 @@ object SQLPlaygroundService {
     val res = new JsonObject()
 
     res.put("executionId", sqlRunArgs.executionId)
-      .put("result", ExtendedResultsService.buildTableJson(statementResult))
+      .put("result", ExtendedResultsService.buildMultiResultTable(statementResult))
       .put("databaseInformation", DatabaseInformationService.buildOutputJson(getInformationResultValue(informationResult), outputJsonStructure))
       .put("error", error)
       .put("errorMsg", errorMsg.getOrElse(""))
