@@ -1,9 +1,13 @@
 package de.thm.ii.fbs.model.v2.playground
 
-import de.thm.ii.fbs.model.v2.ac.User
+import com.fasterxml.jackson.annotation.JsonProperty
+import de.thm.ii.fbs.model.v2.security.User
 import javax.persistence.*
 
-data class DatabaseCreation(val name: String)
+class DatabaseCreation(
+    @JsonProperty("name")
+    var name: String
+)
 
 @Entity
 @Table(name = "sql_playground_database")

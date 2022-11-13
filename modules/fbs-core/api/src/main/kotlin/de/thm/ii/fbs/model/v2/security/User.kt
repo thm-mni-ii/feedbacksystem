@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.v2.ac
+package de.thm.ii.fbs.model.v2.security
 
 import javax.persistence.*
 

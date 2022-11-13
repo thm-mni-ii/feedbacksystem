@@ -21,9 +21,9 @@ class SQLTrigger(
         var id: Int? = null,
 )
 
-data class SQLTriggerEvent(val manipulation: String, val objectTable: String)
+class SQLTriggerEvent(val manipulation: String, val objectTable: String)
 
-data class SQLTriggerAction(val statement: String, val orientation: String, val timing: String)
+class SQLTriggerAction(val statement: String, val orientation: String, val timing: String)
 
 class SQLTriggerEventConvert : JpaJsonConverter<SQLTriggerEvent>(SQLTriggerEvent::class)
 class SQLTriggerActionConvert : JpaJsonConverter<SQLTriggerAction>(SQLTriggerAction::class)

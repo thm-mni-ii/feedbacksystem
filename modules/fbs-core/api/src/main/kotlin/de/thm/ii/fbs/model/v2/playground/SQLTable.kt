@@ -18,6 +18,6 @@ class SQLTable(
         var id: Int? = null,
 )
 
-data class SQLTableColumn(val name: String, val isNullable: Boolean, val udtName: String)
+class SQLTableColumn(val name: String, val isNullable: Boolean, val udtName: String)
 
 class ColumnsConvert : JpaJsonConverter<SQLTableColumn>(SQLTableColumn::class)
