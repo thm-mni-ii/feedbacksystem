@@ -11,7 +11,7 @@ object DatabaseInformationService {
     * Builds the Output Json based an the given structure
     *
     * @param result    the Results to transform
-    * @param structure the Output Structure definitioon
+    * @param structure the Output Structure definition
     * @return the Results transformed to the Output Structure
     */
   def buildOutputJson(result: JsonObject, structure: List[OutputJsonStructure]): JsonObject = {
