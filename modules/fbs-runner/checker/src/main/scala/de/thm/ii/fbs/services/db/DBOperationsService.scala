@@ -11,13 +11,17 @@ import scala.util.{Failure, Success, Try}
 abstract case class DBOperationsService(dbName: String, username: String, queryTimeout: Int) {
   def createDB(client: SQLConnection, noDrop: Boolean = false): Future[ResultSet]
 
+  def createDBIfNotExist(client: SQLConnection, noDrop: Boolean = false): Future[Boolean]
+
   def deleteDB(client: SQLConnection): Future[ResultSet]
 
   def initDB(client: JDBCClient, query: String): Future[ResultSet] = {
     queryFutureWithTimeout(client, query)
   }
 
-  def createUserWithWriteAccess(client: JDBCClient): Future[String]
+  def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String]
+
+  def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet]
 
   def changeUserToReadOnly(client: JDBCClient): Future[ResultSet]
 
@@ -40,6 +44,7 @@ abstract case class DBOperationsService(dbName: String, username: String, queryT
 
   def getDatabaseInformation(client: JDBCClient): Future[ResultSet]
 
-  protected def generateUserPassword(): String =
+  protected def generateUserPassword(): String = {
     Secrets.getSHAStringFromRandom()
+  }
 }

@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.db
 
 import de.thm.ii.fbs.types.PsqlPrivileges
+import io.vertx.lang.scala.json.JsonArray
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
@@ -19,15 +20,34 @@ class PsqlOperationsService(override val dbName: String, override val username: 
     client.queryFuture(s"""$dropStatement CREATE DATABASE "$dbName";""")
   }
 
+
+  override def createDBIfNotExist(client: SQLConnection, noDrop: Boolean): Future[Boolean] = {
+    val query = "SELECT FROM pg_database WHERE datname=?"
+    val arg = new JsonArray()
+    arg.add(dbName)
+
+    client.queryWithParamsFuture(query, arg).flatMap(r => {
+      if (r.asJava.getNumRows == 0) {
+        createDB(client, noDrop = true).map(_ => true)
+      } else {
+        Future {
+          false
+        }
+      }
+    })
+  }
+
   override def deleteDB(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"""DROP DATABASE "$dbName";""")
   }
 
-  override def createUserWithWriteAccess(client: JDBCClient): Future[String] = {
-    val password = generateUserPassword()
+  override def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String] = {
+    val password = if (skipUserCreation) "" else generateUserPassword()
 
+    val userCreateQuery = if (skipUserCreation) "" else s"""CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';"""
     val writeQuery =
-      s"""CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';
+      s"""
+         |$userCreateQuery
          |REVOKE CREATE ON SCHEMA public FROM PUBLIC;
          |GRANT CONNECT on DATABASE "$dbName" TO "$username";
          |GRANT ${WRITE_USER_PRIVILEGES.schema}  ON SCHEMA public TO "$username";
@@ -37,6 +57,26 @@ class PsqlOperationsService(override val dbName: String, override val username: 
          |""".stripMargin
 
     client.queryFuture(writeQuery).map(_ => password)
+  }
+
+  override def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet] = {
+    val query =
+      s"""
+         |DO
+         |$$create_user$$
+         |BEGIN
+         |    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$username') THEN
+         |      BEGIN
+         |        CREATE USER $username WITH ENCRYPTED PASSWORD '$password';
+         |      EXCEPTION WHEN duplicate_object THEN
+         |        -- User Already Exist -> Do Nothing
+         |      END;
+         |    END IF;
+         |END
+         |$$create_user$$;
+         |""".stripMargin
+
+    client.queryFuture(query)
   }
 
   override def changeUserToReadOnly(client: JDBCClient): Future[ResultSet] = {

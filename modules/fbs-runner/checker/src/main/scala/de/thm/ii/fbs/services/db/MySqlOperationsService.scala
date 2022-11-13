@@ -19,20 +19,31 @@ class MySqlOperationsService(override val dbName: String, override val username:
     client.queryFuture(s"$dropStatement CREATE DATABASE $dbName;")
   }
 
+  override def createDBIfNotExist(client: SQLConnection, noDrop: Boolean = false): Future[Boolean] = ???
+
   override def deleteDB(client: SQLConnection): Future[ResultSet] = {
     client.queryFuture(s"DROP DATABASE $dbName")
   }
 
-  override def createUserWithWriteAccess(client: JDBCClient): Future[String] = {
-    val password = generateUserPassword()
+  override def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String] = {
+    val password = if (skipUserCreation) "" else generateUserPassword()
 
+    val userCreateQuery = if (skipUserCreation) "" else s"""CREATE USER '$username'@'%' IDENTIFIED BY '$password';"""
     val writeQuery =
-      s"""CREATE USER '$username'@'%' IDENTIFIED BY '$password';
+      s"""$userCreateQuery
          |GRANT ${WRITE_USER_PRIVILEGES.db} ON $dbName.* TO '$username'@'%';
          |FLUSH PRIVILEGES;
          |""".stripMargin
 
     client.queryFuture(writeQuery).map(_ => password)
+  }
+
+  override def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet] = {
+    val writeQuery =
+      s"""CREATE USER IF NOT EXISTS '$username'@'%' IDENTIFIED BY '$password';
+         |""".stripMargin
+
+    client.queryFuture(writeQuery)
   }
 
   override def changeUserToReadOnly(client: JDBCClient): Future[ResultSet] = {
