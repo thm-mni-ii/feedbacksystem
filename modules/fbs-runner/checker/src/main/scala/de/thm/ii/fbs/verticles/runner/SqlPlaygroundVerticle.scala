@@ -85,9 +85,13 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
 
     sqlPlayground.executeStatement().onComplete({
       case Success(value) =>
-        logger.info(s"Execution-${runArgs.executionId} Finished")
+        try {
+          logger.info(s"Execution-${runArgs.executionId} Finished")
 
-        vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLPlaygroundService.transformResult(runArgs, Option(value._1), Option(value._2))))
+          vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLPlaygroundService.transformResult(runArgs, Option(value._1), Option(value._2))))
+        } catch {
+          case e: Throwable => handleError(runArgs, e)
+        }
 
       case Failure(ex: SQLTimeoutException) =>
         handleError(runArgs, ex, s"Das Query hat zu lange gedauert: ${ex.getMessage}")
