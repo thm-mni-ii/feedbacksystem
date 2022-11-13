@@ -20,7 +20,6 @@ class PsqlOperationsService(override val dbName: String, override val username: 
     client.queryFuture(s"""$dropStatement CREATE DATABASE "$dbName";""")
   }
 
-
   override def createDBIfNotExist(client: SQLConnection, noDrop: Boolean): Future[Boolean] = {
     val query = "SELECT FROM pg_database WHERE datname=?"
     val arg = new JsonArray()
@@ -104,7 +103,8 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   override def getDatabaseInformation(client: JDBCClient): Future[ResultSet] = {
     val tables =
       """
-        |SELECT c.table_name, json_agg(json_build_object('columnName', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
+        |SELECT c.table_name,
+        |json_agg(json_build_object('columnName', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
         |FROM information_schema.columns as c
         |join information_schema.tables as t on c.table_name = t.table_name and c.table_schema = t.table_schema
         |WHERE c.table_schema = 'public' and t.table_type != 'VIEW'
@@ -112,7 +112,10 @@ class PsqlOperationsService(override val dbName: String, override val username: 
         |""".stripMargin
     val constrains =
       """
-        |select constrains.table_name, json_agg(json_build_object('columnName', constrains.column_name, 'constraintName', constrains.constraint_name, 'constraintType', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
+        |select constrains.table_name,
+        |json_agg(json_build_object('columnName', constrains.column_name, 'constraintName',
+        |constrains.constraint_name, 'constraintType', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json
+        |from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
         |from information_schema.KEY_COLUMN_USAGE as kcu
         |JOIN information_schema.table_constraints as tc ON tc.constraint_name = kcu.constraint_name
         |where tc.table_schema = 'public'

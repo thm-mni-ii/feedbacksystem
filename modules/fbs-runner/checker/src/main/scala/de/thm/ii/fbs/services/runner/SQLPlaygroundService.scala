@@ -21,7 +21,6 @@ object SQLPlaygroundService {
     OutputJsonStructure("triggers")
   )
 
-
   def isPlaygroundResult(res: JsonObject): Boolean = res.getString("resultType", "").equals(PLAYGROUND_RESULT_TYPE)
 
   /**
