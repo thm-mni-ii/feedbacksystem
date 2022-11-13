@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.model.v2.playground
 
-import jakarta.persistence.*
+import javax.persistence.*
 
 @Entity
-data class SQLRoutine(
+@Table(name ="sql_playground_routine")
+class SQLRoutine(
         @Column(nullable = false)
         var name: String,
         @Column(nullable = false)

@@ -11,7 +11,7 @@ import java.util.Date
 import javax.xml.bind.DatatypeConverter
 
 @Component
-class TokenService(
+class TokenV2Service(
         @Value("\${jwt.secret}")
         private val jwtSecret: String,
 ) {

@@ -18,13 +18,13 @@ class PlaygroundController(
         ) {
     @GetMapping
     @ResponseBody
-    fun index(@CurrentUser currentUser: User): List<Database> = databaseRepository.findByOwner(currentUser)
+    fun index(@CurrentUser currentUser: User): List<Database> = databaseRepository.findByOwner_Id(currentUser.id!!)
 
     @PutMapping
     @ResponseBody
     fun create(@CurrentUser currentUser: User, @RequestBody database: DatabaseCreation): Database {
         val db = Database(database.name, "1", "PSQL", currentUser, true, 1)
-        val currentActiveDb = databaseRepository.findByOwnerAndActive(currentUser, true)
+        val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentUser.id!!, true)
         if (currentActiveDb !== null) {
             currentActiveDb.active = false
             databaseRepository.save(currentActiveDb)
@@ -35,7 +35,7 @@ class PlaygroundController(
     @DeleteMapping("/{dbId}")
     @ResponseBody
     fun delete(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): Database {
-        val db = databaseRepository.findByOwnerAndId(currentUser, dbId)!!
+        val db = databaseRepository.findByOwner_IdAndId(currentUser.id!!, dbId)!!
         databaseRepository.delete(db)
         return db
     }
@@ -43,14 +43,14 @@ class PlaygroundController(
     @GetMapping("/{dbId}")
     @ResponseBody
     fun get(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): Database? =
-        databaseRepository.findByOwnerAndId(currentUser, dbId)
+        databaseRepository.findByOwner_IdAndId(currentUser.id!!, dbId)
 
     @GetMapping("/{dbId}/activate")
     @ResponseBody
     fun activate(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): Unit {
         val db = databaseRepository.findById(dbId).orElse(null)
         db.active = true
-        val currentActiveDb = databaseRepository.findByOwnerAndActive(currentUser, true)
+        val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentUser.id!!, true)
         if (currentActiveDb !== null) {
             currentActiveDb.active = false
             databaseRepository.save(currentActiveDb)
@@ -79,32 +79,32 @@ class PlaygroundController(
     @GetMapping("/{dbId}/tables")
     @ResponseBody
     fun tables(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): List<SQLTable> =
-            tableRepository.findByDatabase_OwnerAndDatabase_Id(currentUser, dbId)
+            tableRepository.findByDatabase_Owner_IdAndDatabase_Id(currentUser.id!!, dbId)
 
     @GetMapping("/{dbId}/tables/{taskId}")
     @ResponseBody
     fun tableDetails(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int, @RequestParam("taskId") taskId: Int): SQLTable? =
-            tableRepository.findByDatabase_OwnerAndDatabase_IdAndId(currentUser, dbId, taskId)
+            tableRepository.findByDatabase_Owner_IdAndDatabase_IdAndId(currentUser.id!!, dbId, taskId)
 
     // TODO: add pagination
     @GetMapping("/{dbId}/tables/{tId}/constraints")
     @ResponseBody
     fun tableConstrains(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int, @RequestParam("taskId") taskId: Int): List<SQLConstraint> =
-            constraintRepository.findByTable_Database_OwnerAndTable_Database_IdAndTable_Id(currentUser, dbId, taskId)
+            constraintRepository.findByTable_Database_Owner_IdAndTable_Database_IdAndTable_Id(currentUser.id!!, dbId, taskId)
 
     @GetMapping("/{dbId}/views")
     @ResponseBody
     fun views(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): List<SQLView> =
-            viewRepository.findByDatabase_OwnerAndDatabase_Id(currentUser, dbId)
+            viewRepository.findByDatabase_Owner_IdAndDatabase_Id(currentUser.id!!, dbId)
 
     @GetMapping("/{dbId}/routines")
     @ResponseBody
     fun routines(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): List<SQLRoutine> =
-            routineRepository.findByDatabase_OwnerAndDatabase_Id(currentUser, dbId)
+            routineRepository.findByDatabase_Owner_IdAndDatabase_Id(currentUser.id!!, dbId)
 
     // TODO: add pagination
     @GetMapping("/{dbId}/triggers")
     @ResponseBody
     fun triggers(@CurrentUser currentUser: User, @RequestParam("dbId") dbId: Int): List<SQLTrigger> =
-        triggerRepository.findByDatabase_OwnerAndDatabase_Id(currentUser, dbId)
+        triggerRepository.findByDatabase_Owner_IdAndDatabase_Id(currentUser.id!!, dbId)
 }
