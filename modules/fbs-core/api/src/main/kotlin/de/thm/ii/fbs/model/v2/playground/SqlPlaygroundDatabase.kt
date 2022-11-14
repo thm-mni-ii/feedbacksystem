@@ -1,17 +1,11 @@
 package de.thm.ii.fbs.model.v2.playground
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import de.thm.ii.fbs.model.v2.security.User
 import javax.persistence.*
 
-class DatabaseCreation(
-    @JsonProperty("name")
-    var name: String
-)
-
 @Entity
 @Table(name = "sql_playground_database")
-class Database(
+class SqlPlaygroundDatabase(
     @Column(nullable = false)
     var name: String,
     @Column(nullable = false)

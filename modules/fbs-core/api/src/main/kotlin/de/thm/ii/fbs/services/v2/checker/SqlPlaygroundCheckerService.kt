@@ -1,10 +1,9 @@
 package de.thm.ii.fbs.services.v2.checker
 
 import de.thm.ii.fbs.model.v2.checker.RunnerDatabase
-import de.thm.ii.fbs.model.v2.checker.RunnerMode
 import de.thm.ii.fbs.model.v2.checker.RunnerUser
 import de.thm.ii.fbs.model.v2.checker.SqlPlaygroundRunnerArguments
-import de.thm.ii.fbs.model.v2.playground.SQLQuery
+import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundQuery
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
@@ -16,7 +15,7 @@ class SqlPlaygroundCheckerService(
     private val masterRunnerURL: String,
 ) : RemoteCheckerV2Service(insecure, masterRunnerURL) {
 
-    fun submit(query: SQLQuery) {
+    fun submit(query: SqlPlaygroundQuery) {
         this.sendToRunner(SqlPlaygroundRunnerArguments(
             query.id!!,
             RunnerUser(query.runIn.owner.id!!, query.runIn.owner.username),

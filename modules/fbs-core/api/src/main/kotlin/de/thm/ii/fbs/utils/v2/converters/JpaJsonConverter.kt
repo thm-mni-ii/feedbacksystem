@@ -11,6 +11,6 @@ abstract class JpaJsonConverter<T: Any>(kClass: KClass<T>) : AttributeConverter<
     override fun convertToDatabaseColumn(attribute: T?): String =
             mapper.writeValueAsString(attribute);
 
-    override fun convertToEntityAttribute(dbData: String?): T =
+    override fun convertToEntityAttribute(dbData: String): T? =
             mapper.readValue(dbData, jClass)
 }
