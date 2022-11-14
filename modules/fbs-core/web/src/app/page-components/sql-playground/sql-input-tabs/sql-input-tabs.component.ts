@@ -1,7 +1,7 @@
-import { Component, QueryList, ViewChildren } from "@angular/core";
-import { MatTab } from "@angular/material/tabs";
+import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
+import { UntypedFormControl } from "@angular/forms";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -10,12 +10,10 @@ import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-d
 })
 export class SqlInputTabsComponent {
   constructor(private dialog: MatDialog) {}
-  @ViewChildren(MatTab, { read: MatTab })
-  public tabNodes: QueryList<MatTab>;
-  fileName = "Query_";
-  public tabs = [{ name: this.fileName }];
+  fileName = "New_Query";
+  tabs = [{ name: this.fileName }];
   toSubmit: any;
-  ind: number = 0;
+  activeTab = new UntypedFormControl(0);
 
   closeTab(index: number) {
     this.openConfirmDialog(
@@ -36,11 +34,9 @@ export class SqlInputTabsComponent {
     this.toSubmit = submissionData;
   }
 
-  addTab(index: number) {
-    //this.ind = index + 1;
-    this.fileName = "Query_" + (index + 1);
+  addTab() {
     this.tabs.push({ name: this.fileName });
-    // this.ind = index;
+    this.activeTab.setValue(this.tabs.length - 1);
   }
 
   private openConfirmDialog(title: string, message: string) {
@@ -54,12 +50,11 @@ export class SqlInputTabsComponent {
   }
 
   downloadFile() {
-    console.log(this.ind);
     var file = new Blob([this.toSubmit], { type: ".txt" });
     var a = document.createElement("a"),
       url = URL.createObjectURL(file);
     a.href = url;
-    a.download = this.tabs[this.ind].name + ".sql";
+    a.download = this.tabs[this.activeTab.value].name + ".sql";
     document.body.appendChild(a);
     a.click();
     setTimeout(function () {

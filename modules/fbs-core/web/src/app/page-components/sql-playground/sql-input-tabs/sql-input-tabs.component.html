@@ -1,8 +1,12 @@
 <mat-card-actions>
-  <mat-tab-group>
-    <ng-container *ngFor="let tab of tabs; let index = index">
-      <mat-tab>
-        <ng-template mat-tab-label>
+  <mat-tab-group
+    [selectedIndex]="activeTab.value"
+    (selectedIndexChange)="activeTab.setValue($event)"
+    [backgroundColor]=""
+  >
+    <ng-container>
+      <mat-tab *ngFor="let tab of tabs; let index = index">
+        <ng-template [mat-tab-label]>
           <div class="col" style="margin-left: 20px">
             <input
               matInput
@@ -11,10 +15,10 @@
               [(ngModel)]="tabs[index].name"
             />
           </div>
-          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
+          <button *ngIf="index !== 0"  mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
           </button>
-          <button mat-icon-button (click)="addTab(index)">
+          <button mat-icon-button (click)="addTab()">
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>
