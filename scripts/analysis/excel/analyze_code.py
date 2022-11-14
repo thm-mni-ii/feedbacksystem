@@ -39,7 +39,26 @@ class Subtask:
                     if ws_sol[char + str(row)].value == ws_sol2[char + str(row)].value and ws2[char + str(row)].value != ws_sol2[char + str(row)].value:
                         self.sum += 1
                         self.number += 1
-                if ws[char + str(row)].font != ws_sol[char + str(row)].font:
+                if (ws[char + str(row)].font.name != ws_sol[char + str(row)].font.name or
+                    ws[char + str(row)].font.sz != ws_sol[char + str(row)].font.sz or 
+                    ws[char + str(row)].font.b != ws_sol[char + str(row)].font.b or
+                    ws[char + str(row)].font.i != ws_sol[char + str(row)].font.i or
+                    ws[char + str(row)].font.charset != ws_sol[char + str(row)].font.charset or
+                    ws[char + str(row)].font.u != ws_sol[char + str(row)].font.u or
+                    ws[char + str(row)].font.strike != ws_sol[char + str(row)].font.strike or
+                    ws[char + str(row)].font.color != ws_sol[char + str(row)].font.color or
+                    ws[char + str(row)].font.scheme != ws_sol[char + str(row)].font.scheme or
+                    ws[char + str(row)].font.family != ws_sol[char + str(row)].font.family or
+                    ws[char + str(row)].font.size != ws_sol[char + str(row)].font.size or
+                    ws[char + str(row)].font.bold != ws_sol[char + str(row)].font.bold or
+                    ws[char + str(row)].font.italic != ws_sol[char + str(row)].font.italic or
+                    ws[char + str(row)].font.strikethrough != ws_sol[char + str(row)].font.strikethrough or
+                    ws[char + str(row)].font.underline != ws_sol[char + str(row)].font.underline or
+                    ws[char + str(row)].font.vertAlign != ws_sol[char + str(row)].font.vertAlign or
+                    ws[char + str(row)].font.outline != ws_sol[char + str(row)].font.outline or
+                    ws[char + str(row)].font.shadow != ws_sol[char + str(row)].font.shadow or
+                    ws[char + str(row)].font.condense != ws_sol[char + str(row)].font.condense or
+                    ws[char + str(row)].font.extend != ws_sol[char + str(row)].font.extend):
                     self.sum += 1
                     self.format += 1
         self.sheet_index = j
@@ -127,7 +146,7 @@ def analyze(path, path_sol):
         print(f"Davon waren {total_formula} Formel-, {total_number} Nummern- & {total_format} Formatfehler!")
 
         # visualisation of errortypes per subtask as pie chart
-        if n != 11 and n != 13 and n != 14:
+        if n != 11 and n != 13 and n != 14 and total_sum > 0:
             data = [total_formula, total_number, total_format]
             labels = ["formula errors", "number errors" , "format errors"]
 
@@ -149,10 +168,12 @@ def analyze(path, path_sol):
 
     print(f"In allen Abgaben wurden somit insgesamt {overall} Fehler gemacht!") 
     print(f"Davon waren {overall_formula} Formel-, {overall_number} Nummern- & {overall_format} Formatfehler!")
-    data = [overall_formula, overall_number, overall_format]
-    labels = ["formula errors", "number errors" , "format errors"]
+    
+    if overall > 0:
+        data = [overall_formula, overall_number, overall_format]
+        labels = ["formula errors", "number errors" , "format errors"]
 
-    # visualisation of errortypes for total errorcount of all submissions as pie chart
-    colors = sns.color_palette('pastel')[0:5]
-    plt.pie(data, labels = labels, colors = colors, autopct='%.0f%%')
-    plt.show()
+        # visualisation of errortypes for total errorcount of all submissions as pie chart
+        colors = sns.color_palette('pastel')[0:5]
+        plt.pie(data, labels = labels, colors = colors, autopct='%.0f%%')
+        plt.show()
