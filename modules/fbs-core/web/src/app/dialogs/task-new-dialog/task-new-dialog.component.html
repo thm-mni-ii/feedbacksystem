@@ -68,8 +68,11 @@
         <mat-option value="optional">Bonus</mat-option>
       </mat-select>
     </mat-form-field>
-    <br />
-    <mat-checkbox (change)="setMaxExpirationDate($event)"
+
+    <mat-checkbox
+     
+      class="noDeadline"
+      (change)="setMaxExpirationDate($event)"
       >Ohne Deadline</mat-checkbox
     >
 
