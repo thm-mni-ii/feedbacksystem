@@ -15,7 +15,7 @@
               [(ngModel)]="tabs[index].name"
             />
           </div>
-          <button *ngIf="index !== 0"  mat-icon-button (click)="closeTab(index)">
+          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
           </button>
           <button mat-icon-button (click)="addTab()">
