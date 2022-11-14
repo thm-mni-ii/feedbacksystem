@@ -2,7 +2,7 @@ package de.thm.ii.fbs.model.v2.checker
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class SqlPlaygroundRunnerArguments(
+data class SqlPlaygroundRunnerArguments(
     @JsonProperty("executionId")
     val executionId: Int,
     @JsonProperty("user")
@@ -11,6 +11,8 @@ class SqlPlaygroundRunnerArguments(
     val statement: String,
     @JsonProperty("database")
     val database: RunnerDatabase,
+    @JsonProperty("runner")
+    val runner: Runner = Runner(RunnerType.SQL_PLAYGROUND),
     @JsonProperty("mode")
-    val mode: RunnerMode
+    val mode: RunnerMode = RunnerMode.EXECUTE,
 ) : RunnerArguments()

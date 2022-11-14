@@ -25,7 +25,6 @@ class SqlPlaygroundCheckerService(
                 query.runIn.id!!,
                 query.runIn.name,
             ),
-            RunnerMode.EXECUTE,
         ))
     }
 }
