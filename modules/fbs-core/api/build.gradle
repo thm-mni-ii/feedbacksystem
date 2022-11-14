@@ -56,6 +56,7 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     implementation('org.json:json:20210307')
