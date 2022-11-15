@@ -1,7 +1,8 @@
 package de.thm.ii.fbs
 
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlRunnerVerticle}
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
+import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.config.{ConfigRetriever, ConfigRetrieverOptions, ConfigStoreOptions}
 import io.vertx.scala.core.DeploymentOptions
@@ -38,37 +39,49 @@ class MainVerticle extends ScalaVerticle {
 
     /* Start all Other Vertices */
     retriever.getConfigFuture().onComplete({
-      case Success(config) =>
-        /*Start Http server*/
-        val HttpVerticleOptions = DeploymentOptions().setConfig(config)
-        vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[HttpVerticle], HttpVerticleOptions)
+      case Success(config) => startVertices(config)
 
-        /*Start Bash Runner*/
-        val bashRunnerVerticleOptions = DeploymentOptions()
-          .setConfig(config)
-          .setWorker(true)
-          .setInstances(config.getInteger("BASH_RUNNER_INSTANCES", 1))
-
-        vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[BashRunnerVerticle], bashRunnerVerticleOptions)
-
-        /*Start SQL Runner*/
-        val sqlRunnerVerticleOptions = DeploymentOptions()
-          .setConfig(config)
-          .setWorker(true)
-          .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
-
-        vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlRunnerVerticle], sqlRunnerVerticleOptions)
-
-        /*Start SQL Checker*/
-        val sqlCheckerVerticleOptions = DeploymentOptions()
-          .setConfig(config)
-          .setWorker(true)
-          .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
-
-        vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlCheckerVerticle], sqlCheckerVerticleOptions)
       case Failure(exception) =>
         logger.warn("Could not load Config", exception) //TODO
         vertx.close()
     })
+  }
+
+  private def startVertices(config: JsonObject) = {
+    /*Start Http server*/
+    val HttpVerticleOptions = DeploymentOptions().setConfig(config)
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[HttpVerticle], HttpVerticleOptions)
+
+    /*Start Bash Runner*/
+    val bashRunnerVerticleOptions = DeploymentOptions()
+      .setConfig(config)
+      .setWorker(true)
+      .setInstances(config.getInteger("BASH_RUNNER_INSTANCES", 1))
+
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[BashRunnerVerticle], bashRunnerVerticleOptions)
+
+    /*Start SQL Runner*/
+    val sqlRunnerVerticleOptions = DeploymentOptions()
+      .setConfig(config)
+      .setWorker(true)
+      .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
+
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlRunnerVerticle], sqlRunnerVerticleOptions)
+
+    /*Start SQL Checker*/
+    val sqlCheckerVerticleOptions = DeploymentOptions()
+      .setConfig(config)
+      .setWorker(true)
+      .setInstances(config.getInteger("SQL_RUNNER_INSTANCES", 1))
+
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlCheckerVerticle], sqlCheckerVerticleOptions)
+
+    /*Start SQL Playground */
+    val sqlPlaygroundVerticleOptions = DeploymentOptions()
+      .setConfig(config)
+      .setWorker(true)
+      .setInstances(config.getInteger("SQL_PLAYGROUND_INSTANCES", 1))
+
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlPlaygroundVerticle], sqlPlaygroundVerticleOptions)
   }
 }

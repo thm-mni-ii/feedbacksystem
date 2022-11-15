@@ -3,9 +3,10 @@ package de.thm.ii.fbs.verticles.runner
 import de.thm.ii.fbs.services.FileService
 import de.thm.ii.fbs.services.runner.SQLRunnerService
 import de.thm.ii.fbs.types.{ExtResSql, RunArgs, SqlPoolWithConfig, SqlRunArgs}
+import de.thm.ii.fbs.util.DBTypes.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY}
 import de.thm.ii.fbs.util.{DBConnections, RunnerException}
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.{MYSQL_CONFIG_KEY, PSQL_CONFIG_KEY, RUN_ADDRESS}
+import de.thm.ii.fbs.verticles.runner.SqlRunnerVerticle.RUN_ADDRESS
 import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -21,8 +22,6 @@ import scala.util.{Failure, Success}
 object SqlRunnerVerticle {
   /** Event Bus Address to start an runner */
   val RUN_ADDRESS = "de.thm.ii.fbs.runner.sql"
-  val MYSQL_CONFIG_KEY = "mysql"
-  val PSQL_CONFIG_KEY = "postgresql"
 }
 
 /**

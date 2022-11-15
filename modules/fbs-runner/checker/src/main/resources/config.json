@@ -16,6 +16,10 @@
   "PSQL_SERVER_USERNAME": "root",
   "PSQL_SERVER_PASSWORD": "SqfyBWhiFGr7FK60cVR2rel",
   "PSQL_SERVER_URL": "jdbc:postgresql://localhost:5432?allowMultiQueries=true",
+  "SQL_PLAYGROUND_INSTANCES": 15,
+  "SQL_PLAYGROUND_PSQL_SERVER_USERNAME": "root",
+  "SQL_PLAYGROUND_PSQL_SERVER_PASSWORD": "SqfyBWhiFGr7FK60cVR2rel",
+  "SQL_PLAYGROUND_PSQL_SERVER_URL": "jdbc:postgresql://localhost:5432?allowMultiQueries=true",
   "SQL_QUERY_TIMEOUT_S": 10,
   "SQL_MAX_IDLE_TIME": 10
 }
