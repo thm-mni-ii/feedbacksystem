@@ -14,7 +14,7 @@ import scala.collection.immutable.Nil
   * Handles checker configurations
   */
 @Component
-class CheckerConfigurationService {
+class CheckrunnerConfigurationService {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
 

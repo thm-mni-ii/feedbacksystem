@@ -31,7 +31,7 @@ class TaskController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
+  private val checkerConfigurationService: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired
