@@ -37,6 +37,8 @@ tags:
     description: Routes to query data for analysis purposes
   - name: SQL Checker
     description: Routes used for SQL-Checker quering
+  - name: SQL Playground API
+    description: API used to interact with the SQL Playground
 paths:
   /login/cas:
     post:
@@ -112,7 +114,7 @@ paths:
   /users:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Get user list
@@ -137,7 +139,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Create a new user
@@ -168,7 +170,7 @@ paths:
   "/users/{uid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Find user by ID
@@ -200,7 +202,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Delete user by ID
@@ -227,7 +229,7 @@ paths:
   "/users/{uid}/passwd":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Change password of a local user
@@ -273,7 +275,7 @@ paths:
   "/users/{uid}/global-role":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - User
       summary: Change global role of a user
@@ -316,7 +318,7 @@ paths:
   "/users/{uid}/courses":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Get all registered courses
@@ -351,7 +353,7 @@ paths:
   "/courses/{cid}/participants":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Get all participants of a course
@@ -386,7 +388,7 @@ paths:
   "/users/{uid}/courses/{cid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: Register a user into a course
@@ -430,7 +432,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course Registration
       summary: De-register a user from a course
@@ -529,7 +531,7 @@ paths:
   /courses:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a list of all courses
@@ -560,7 +562,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Create a new course
@@ -595,7 +597,7 @@ paths:
   "/courses/{cid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a course
@@ -626,7 +628,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Update course
@@ -663,7 +665,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Delete course by ID
@@ -690,7 +692,7 @@ paths:
   "/courses/{cid}/export":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course
       summary: Get a Zip-Archive of the course
@@ -719,7 +721,7 @@ paths:
   /semester:
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a list of all Semester-contents
@@ -750,7 +752,7 @@ paths:
           description: Forbidden
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Create a new Semester
@@ -759,7 +761,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Semester"
+              $ref: "#/components/schemas/SemesterCreate"
         description: Semester object to create
         required: true
       responses:
@@ -785,7 +787,7 @@ paths:
   "/semester/{sid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a semester
@@ -816,7 +818,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Update Semester
@@ -853,7 +855,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Delete Semester by ID
@@ -880,7 +882,7 @@ paths:
   "/semester/{sid}/export":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Semester
       summary: Get a Zip-Archive of the semesters
@@ -909,7 +911,7 @@ paths:
   "/courses/{cid}/tasks":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get all tasks of a course
@@ -942,7 +944,7 @@ paths:
           description: Not found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Create a new task for this course
@@ -976,7 +978,7 @@ paths:
   "/courses/{cid}/tasks/results":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get all the result for the tasks
@@ -1010,7 +1012,7 @@ paths:
   "/courses/{cid}/tasks/{tid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Get a task by id
@@ -1047,7 +1049,7 @@ paths:
           description: Not found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Update an existing task for this course
@@ -1086,7 +1088,7 @@ paths:
           description: Not found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Delete a task by id
@@ -1118,7 +1120,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/result":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Task
       summary: Gets the task result by id
@@ -1156,7 +1158,7 @@ paths:
   "/courses/evaluation/formula/validate":
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Validate a evaluation formula
@@ -1209,7 +1211,7 @@ paths:
   "/courses/{cid}/evaluation/container":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Get all Course evaluation Containers
@@ -1242,7 +1244,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Create a Course evaluation Container
@@ -1280,7 +1282,7 @@ paths:
   "/courses/{cid}/evaluation/container/{ctid}":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Get a Course evaluation Container
@@ -1317,7 +1319,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Update a Course evaluation Container
@@ -1360,7 +1362,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Delete a Course evaluation Container
@@ -1398,7 +1400,7 @@ paths:
   "/courses/{cid}/evaluation/container/{ctid}/task/{tid}":
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Add a Task to an Course evaluation Container
@@ -1441,7 +1443,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Course evaluation
       summary: Delate a Task from an Course evaluation Container
@@ -1584,7 +1586,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get all submissions for a task
@@ -1634,7 +1636,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Submit a solution for a task
@@ -1685,7 +1687,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get all subresults for a submission
@@ -1737,7 +1739,7 @@ paths:
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Restart the submission process
@@ -1782,7 +1784,7 @@ paths:
           description: Not Found
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Submission
       summary: Get the current submission state
@@ -1869,7 +1871,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -1908,7 +1910,7 @@ paths:
           description: Not Found
     post:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Create a new checker configuration
@@ -1954,7 +1956,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}":
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update an existing checker configuration
@@ -2000,7 +2002,7 @@ paths:
           description: Not Found
     delete:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Delete an existing checker configuration
@@ -2042,7 +2044,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a the main file of the configuration
@@ -2090,7 +2092,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2138,7 +2140,7 @@ paths:
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file":
     get:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -2186,7 +2188,7 @@ paths:
           description: Not Found
     put:
       security:
-        - JWT: []
+        - JWT: [ ]
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2394,7 +2396,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2435,7 +2437,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2476,7 +2478,7 @@ paths:
           description: what queries to return
           schema:
             type: string
-            enum: ['tables', 'attributes']
+            enum: [ 'tables', 'attributes' ]
       responses:
         "200":
           description: OK
@@ -2537,6 +2539,327 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/api/v2/playground/{uid}/databases":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: index
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Database"
+    put:
+      tags:
+        - SQL Playground API
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DatabaseCreation"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+  "/api/v2/playground/{uid}/databases/{dbId}/results":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: results
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}/results/{rId}":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: result
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/SQLResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}/reset":
+    post:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: reset
+      responses:
+        "200":
+          description: OK
+  "/api/v2/playground/{uid}/databases/{dbId}/execute":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: execute
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SQLQuery"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/SQLExecuteResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: get
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+    delete:
+      tags:
+        - SQL Playground API
+      operationId: delete
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+  "/api/v2/playground/{uid}/databases/{dbId}/tables":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tables
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLTable"
+  "/api/v2/playground/{uid}/databases/{dbId}/views":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableViews
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLView"
+  "/api/v2/playground/{uid}/databases/{dbId}/triggers":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableTriggers
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLTrigger"
+  "/api/v2/playground/{uid}/databases/{dbId}/routines":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableRoutines
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLRoutine"
+  "/api/v2/playground/{uid}/databases/{dbId}/constraints":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableConstrains
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLConstraint"
+  "/api/v2/playground/{uid}/databases/{dbId}/activate":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: activate
+      responses:
+        "200":
+          description: OK
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -2608,6 +2931,13 @@ components:
           type: boolean
         semesterId:
           type: integer
+    SemesterCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
     Semester:
       type: object
       required:
@@ -2732,7 +3062,7 @@ components:
           type: string
         mainFileUploaded:
           type: boolean
-          description:  True if main file was provided
+          description: True if main file was provided
         secondaryFileUploaded:
           type: boolean
           description: True if secondary file was provided
@@ -2983,3 +3313,128 @@ components:
           type: number
         attempt:
           type: number
+    DatabaseCreation:
+      type: object
+      properties:
+        name:
+          type: string
+    Database:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        dbType:
+          type: string
+        active:
+          type: boolean
+    SQLResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+        errorMsg:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SQLResponseTable"
+    SQLResponseTable:
+      type: object
+      properties:
+        head:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: string
+    SQLQuery:
+      type: object
+      properties:
+        statement:
+          type: string
+    SQLTable:
+      type: object
+      properties:
+        name:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/SQLTableColumn"
+    SQLTableColumn:
+      type: object
+      properties:
+        name:
+          type: string
+        udtName:
+          type: string
+        nullable:
+          type: boolean
+    SQLView:
+      type: object
+      properties:
+        tableName:
+          type: string
+        definition:
+          type: string
+    SQLTrigger:
+      type: object
+      properties:
+        name:
+          type: string
+        event:
+          $ref: "#/components/schemas/SQLTriggerEvent"
+        action:
+          $ref: "#/components/schemas/SQLTriggerAction"
+    SQLTriggerAction:
+      type: object
+      properties:
+        statement:
+          type: string
+        orientation:
+          type: string
+        timing:
+          type: string
+    SQLTriggerEvent:
+      type: object
+      properties:
+        manipulation:
+          type: string
+        objectTable:
+          type: string
+    SQLRoutine:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        definition:
+          type: string
+    SQLConstraint:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        columnName:
+          type: string
+        checkClause:
+          type: string
+    SQLExecuteResponse:
+      type: object
+      properties:
+        statement:
+          type: string
+        runIn:
+          $ref: "#/components/schemas/Database"
+        id:
+          type: integer
+          format: int32
