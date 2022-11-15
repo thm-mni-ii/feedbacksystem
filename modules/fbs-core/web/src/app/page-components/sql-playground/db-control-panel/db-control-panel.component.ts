@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { UntypedFormControl } from "@angular/forms";
 import { Database } from "../../../model/sql_playground/Database";
 import databases from "./test-data/databases.json";
 
@@ -15,7 +14,10 @@ export class DbControlPanelComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // TODO: show active db in dropdown
+    console.log("");
+  }
 
   getActiveDb(): Database {
     return this.dbs.find((db) => db.active);
