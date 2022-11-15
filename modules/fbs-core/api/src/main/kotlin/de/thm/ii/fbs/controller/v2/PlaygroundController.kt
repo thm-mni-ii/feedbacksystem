@@ -43,6 +43,7 @@ class PlaygroundController(
     @ResponseBody
     fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
         val db = databaseRepository.findByOwner_IdAndId(currentToken.id, dbId) ?: throw NotFoundException()
+        sqlPlaygroundCheckerService.deleteDatabase(db, currentToken.id, currentToken.username)
         databaseRepository.delete(db)
         return db
     }

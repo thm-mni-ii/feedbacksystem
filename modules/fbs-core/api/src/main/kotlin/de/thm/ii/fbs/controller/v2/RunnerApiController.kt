@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
+import de.thm.ii.fbs.model.v2.checker.RunnerMode
 import de.thm.ii.fbs.model.v2.checker.SqlPlaygroundRunnerResult
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundEntity
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundQuery
@@ -23,6 +24,7 @@ class RunnerApiController(
     @PostMapping("/results/playground", "/api/v1/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
+        if (result.mode != RunnerMode.EXECUTE) return
         val query = queryRepository.findByIdOrNull(result.executionId) ?: throw NotFoundException()
         updateEntity(query, result, "tables")
         updateEntity(query, result, "constraints")
