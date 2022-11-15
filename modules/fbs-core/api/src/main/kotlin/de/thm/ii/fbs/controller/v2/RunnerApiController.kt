@@ -20,7 +20,7 @@ class RunnerApiController(
         private val queryRepository: SqlPlaygroundQueryRepository,
         private val entityRepository: SqlPlaygroundEntityRepository,
 ) {
-    @PostMapping("/results/playground", "/api/v2/results")
+    @PostMapping("/results/playground", "/api/v1/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
         val query = queryRepository.findByIdOrNull(result.executionId) ?: throw NotFoundException()
