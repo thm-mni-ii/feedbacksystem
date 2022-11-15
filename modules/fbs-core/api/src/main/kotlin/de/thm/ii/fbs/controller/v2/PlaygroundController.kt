@@ -30,7 +30,7 @@ class PlaygroundController(
     @PostMapping
     @ResponseBody
     fun create(@CurrentToken currentToken: LegacyToken, @RequestBody database: SqlPlaygroundDatabaseCreation): SqlPlaygroundDatabase {
-        val db = SqlPlaygroundDatabase(database.name, "1", "PSQL", userRepository.findById(currentToken.id).get(), true)
+        val db = SqlPlaygroundDatabase(database.name, "PostgreSQL 14", "PSQL", userRepository.findById(currentToken.id).get(), true)
         val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentToken.id, true)
         if (currentActiveDb !== null) {
             currentActiveDb.active = false
