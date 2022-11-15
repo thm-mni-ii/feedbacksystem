@@ -2879,9 +2879,10 @@ paths:
                 items:
                   $ref: "#/components/schemas/SQLConstraint"
   "/api/v2/playground/{uid}/databases/{dbId}/activate":
-    get:
+    post:
       tags:
         - SQL Playground API
+      operationId: activate
       parameters:
         - name: uid
           in: path
@@ -2895,7 +2896,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: activate
       responses:
         "200":
           description: OK
