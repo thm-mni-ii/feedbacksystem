@@ -54,7 +54,7 @@ class PlaygroundController(
 
     @PostMapping("/{dbId}/activate")
     @ResponseBody
-    fun activate(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int) {
+    fun activate(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
         val db = databaseRepository.findByIdOrNull(dbId) ?: throw NotFoundException()
         db.active = true
         val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentToken.id, true)
@@ -62,7 +62,7 @@ class PlaygroundController(
             currentActiveDb.active = false
             databaseRepository.save(currentActiveDb)
         }
-        databaseRepository.save(db)
+        return databaseRepository.save(db)
     }
 
     @PostMapping("/{dbId}/reset")
