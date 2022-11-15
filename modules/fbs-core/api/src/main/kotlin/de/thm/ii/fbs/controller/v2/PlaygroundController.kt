@@ -10,6 +10,7 @@ import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -29,7 +30,7 @@ class PlaygroundController(
     @PostMapping
     @ResponseBody
     fun create(@CurrentToken currentToken: LegacyToken, @RequestBody database: SqlPlaygroundDatabaseCreation): SqlPlaygroundDatabase {
-        val db = SqlPlaygroundDatabase(database.name, "1", "PSQL", userRepository.findById(currentToken.id).get(), true, 1)
+        val db = SqlPlaygroundDatabase(database.name, "1", "PSQL", userRepository.findById(currentToken.id).get(), true)
         val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentToken.id, true)
         if (currentActiveDb !== null) {
             currentActiveDb.active = false
@@ -41,20 +42,20 @@ class PlaygroundController(
     @DeleteMapping("/{dbId}")
     @ResponseBody
     fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
-        val db = databaseRepository.findByOwner_IdAndId(currentToken.id, dbId)!!
+        val db = databaseRepository.findByOwner_IdAndId(currentToken.id, dbId) ?: throw NotFoundException()
         databaseRepository.delete(db)
         return db
     }
 
     @GetMapping("/{dbId}")
     @ResponseBody
-    fun get(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase? =
-        databaseRepository.findByOwner_IdAndId(currentToken.id, dbId)
+    fun get(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase =
+        databaseRepository.findByOwner_IdAndId(currentToken.id, dbId) ?: throw NotFoundException()
 
     @PostMapping("/{dbId}/activate")
     @ResponseBody
     fun activate(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int) {
-        val db = databaseRepository.findById(dbId).orElse(null)
+        val db = databaseRepository.findByIdOrNull(dbId) ?: throw NotFoundException()
         db.active = true
         val currentActiveDb = databaseRepository.findByOwner_IdAndActive(currentToken.id, true)
         if (currentActiveDb !== null) {
@@ -85,8 +86,8 @@ class PlaygroundController(
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
-    fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult? =
-            queryRepository.findByRunIn_Owner_IdAndRunIn_idAndId(currentToken.id, dbId, qId)?.result
+    fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
+            queryRepository.findByRunIn_Owner_IdAndRunIn_idAndId(currentToken.id, dbId, qId)?.result  ?: throw NotFoundException()
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody
