@@ -95,6 +95,24 @@ services:
       start_period: 10s
       retries: 3
 
+  psql-playground:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres-playground:/var/lib/postgresql/data
+    networks:
+      fbs:
+    healthcheck:
+      test: pg_isready
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+
+
   mongodb:
     image: mongo:5.0.6
     restart: unless-stopped
@@ -150,6 +168,10 @@ services:
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
       PSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_USERNAME: postgres
+      SQL_PLAYGROUND_PSQL_SERVER_URL: jdbc:postgresql://psql-playground:5432/?allowMultiQueries=true
+      SQL_PLAYGROUND_PSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      SQL_PLAYGROUND_PSQL_SERVER_USERNAME: postgres
+      HMAC_SECRET: uigbduhegafudegufqu8o3q4tgru4ieubfiel
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock

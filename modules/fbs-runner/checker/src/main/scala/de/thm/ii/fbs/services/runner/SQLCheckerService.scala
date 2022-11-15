@@ -6,9 +6,9 @@ import de.thm.ii.fbs.types.{DockerCmdConfig, Submission}
 class SQLCheckerService(val submission: Submission) {
   def invoke(): (Int, String, String) = {
     DockerService.runContainer(new DockerCmdConfig(
-      "sql-checker",
+      Option(System.getenv("RUNNER_SQL_CHECKER_IMAGE")).getOrElse("sql-checker"),
       env = Seq(("api", submission.apiUrl), ("mongodb", submission.mongodbUrl)),
-      networks = Seq("feedbacksystem_fbs")
+      networks = if (System.getenv("RUNNER_SQL_CHECKER_DISABLE_NETWORK") != "true") {Seq("feedbacksystem_fbs")} else {Seq()}
     ))
   }
 }
