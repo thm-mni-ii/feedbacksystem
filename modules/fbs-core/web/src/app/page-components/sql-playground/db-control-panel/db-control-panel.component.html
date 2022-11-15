@@ -1,0 +1,23 @@
+<div class="container">
+  <div>
+    <p>
+      Version:
+      <span class="highlight">
+        {{ this.activeDb.version }}
+      </span>
+    </p>
+  </div>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Select Database</mat-label>
+    <mat-select [(value)]="selectedDb">
+      <mat-option *ngFor="let db of dbs" [value]="db.id">
+        {{ db.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div>
+    <button mat-flat-button color="warn">Delete DB</button>
+    <button mat-flat-button color="accent">Load DB</button>
+  </div>
+</div>
