@@ -26,6 +26,11 @@ function buildValues(): any {
         jwtSecret: randomHex(),
       },
     },
+    runner: {
+      config: {
+        hmacSecret: randomHex(),
+      },
+    },
     mysql: {
       auth: {
         password: randomHex(),
@@ -42,6 +47,12 @@ function buildValues(): any {
       },
     },
     runnerPostgres: {
+      auth: {
+        password: randomHex(),
+        postgresPassword: randomHex(),
+      },
+    },
+    runnerPlaygroundPostgres: {
       auth: {
         password: randomHex(),
         postgresPassword: randomHex(),

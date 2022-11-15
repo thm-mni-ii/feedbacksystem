@@ -63,6 +63,26 @@ spec:
               secretKeyRef:
                 name: {{ .Release.Name }}-runner
                 key: psqlPassword
+          - name: SQL_PLAYGROUND_PSQL_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-runner
+                key: playgroundPsqlJdbclUri
+          - name: SQL_PLAYGROUND_PSQL_SERVER_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-runner
+                key: playgroundPsqlUsername
+          - name: SQL_PLAYGROUND_PSQL_SERVER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-runner
+                key: playgroundPsqlPassword
+          - name: HMAC_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-runner
+                key: hmacSecret
           - name: RUNNER_SQL_CHECKER_DISABLE_NETWORK
             value: "true"
           {{ if .Values.runner.config.debug.disableContainerRemoval }}
@@ -127,8 +147,10 @@ metadata:
 data:
   mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-runner-mysql:3306?allowMultiQueries=true" }}
   psqlJdbclUri: {{ print "jdbc:postgresql://" .Release.Name "-runner-postgres:5432/?allowMultiQueries=true" }}
+  playgroundPsqlJdbclUri: {{ print "jdbc:postgresql://" .Release.Name "-runner-playground-postgres:5432/?allowMultiQueries=true" }}
   mysqlUsername: 'root'
   psqlUsername: 'postgres'
+  playgroundPsqlUsername: 'postgres'
 ---
 apiVersion: v1
 kind: Secret
@@ -138,6 +160,8 @@ metadata:
 data:
   mysqlPassword: {{ .Values.runnerMysql.auth.rootPassword | b64enc }}
   psqlPassword: {{ .Values.runnerPostgres.auth.postgresPassword | b64enc }}
+  playgroundPsqlPassword: {{ .Values.runnerPlaygroundPostgres.auth.postgresPassword | b64enc }}
+  hmacSecret: {{ .Values.runner.config.hmacSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

@@ -28,3 +28,8 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: sqlChecker.enabled
     alias: checkerMongodb
+  - name: postgresql
+    version: 12.0.0
+    repository: https://charts.bitnami.com/bitnami
+    condition: runner.enabled
+    alias: runnerPlaygroundPostgres

@@ -45,6 +45,7 @@ runner:
       request: "250Mi"
       limit: "4Gi"
   config:
+    hmacSecret: fbs # CHANGE ME
     debug:
       disableContainerRemoval: false
   dink:
@@ -109,6 +110,14 @@ runnerMysql:
 
 runnerPostgres:
   nameOverride: runner-postgres
+  auth:
+    database: fbs
+    username: fbs
+    password: fbs # CHANGE ME
+    postgresPassword: root # CHANGE ME
+
+runnerPlaygroundPostgres:
+  nameOverride: runner-playground-postgres
   auth:
     database: fbs
     username: fbs
