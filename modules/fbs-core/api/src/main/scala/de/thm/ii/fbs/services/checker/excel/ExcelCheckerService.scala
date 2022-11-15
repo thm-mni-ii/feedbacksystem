@@ -112,7 +112,7 @@ class ExcelCheckerService extends CheckerService {
   }
 
   private def storeError(submissionID: Int, cc: CheckrunnerConfiguration, errorMsg: String): Unit = {
-    submissionService.storeResult(submissionID, cc.id, 0, f"Bei der Überprüfung ist ein Fehler aufgetretten: '$errorMsg'", null)
+    submissionService.storeResult(submissionID, cc.id, 1, f"Bei der Überprüfung ist ein Fehler aufgetretten: '$errorMsg'", null)
   }
 
   private def buildResultText(success: Boolean,
