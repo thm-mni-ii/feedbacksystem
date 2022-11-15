@@ -18,7 +18,6 @@ abstract class RemoteCheckerV2Service(
 
     protected fun sendToRunner(request: RunnerArguments) {
         val body = objectMapper.writeValueAsString(request);
-        println(body)
         val res = restTemplate.postForEntity("$masterRunnerURL/runner/start", body, Unit::class.java)
         if (res.statusCode != HttpStatus.ACCEPTED) {
             throw Exception("invalid status code from runner: ${res.statusCode}")

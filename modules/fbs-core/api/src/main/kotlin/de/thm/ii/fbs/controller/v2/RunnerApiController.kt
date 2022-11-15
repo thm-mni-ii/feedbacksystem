@@ -25,7 +25,7 @@ class RunnerApiController(
     fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
         val query = queryRepository.findByIdOrNull(result.executionId) ?: throw NotFoundException()
         updateEntity(query, result, "tables")
-        updateEntity(query, result, "constrains")
+        updateEntity(query, result, "constraints")
         updateEntity(query, result, "views")
         updateEntity(query, result, "routines")
         updateEntity(query, result, "triggers")

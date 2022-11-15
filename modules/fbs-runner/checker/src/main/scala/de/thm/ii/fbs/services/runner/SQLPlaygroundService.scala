@@ -15,7 +15,7 @@ object SQLPlaygroundService {
   final val PLAYGROUND_RESULT_TYPE = "playground"
   private final val outputJsonStructure = List(
     OutputJsonStructure("tables", Option("columns")),
-    OutputJsonStructure("constrains", Option("constrains")),
+    OutputJsonStructure("constraints", Option("constrains")),
     OutputJsonStructure("views"),
     OutputJsonStructure("routines"),
     OutputJsonStructure("triggers")
