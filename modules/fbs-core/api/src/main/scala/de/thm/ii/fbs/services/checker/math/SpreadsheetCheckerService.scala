@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.checker.excel
+package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
