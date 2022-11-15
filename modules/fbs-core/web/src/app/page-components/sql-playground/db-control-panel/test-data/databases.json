@@ -1,0 +1,25 @@
+{
+  "databases": [
+    {
+      "id": 1,
+      "name": "DB1",
+      "version": "PostgreSQL 12.1.1",
+      "dbType": "dbType",
+      "active": false
+    },
+    {
+      "id": 2,
+      "name": "DB2",
+      "version": "PostgreSQL 12.1.1",
+      "dbType": "dbType",
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "DB3",
+      "version": "PostgreSQL 12.1.1",
+      "dbType": "dbType",
+      "active": false
+    }
+  ]
+}

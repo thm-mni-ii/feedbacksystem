@@ -89,6 +89,7 @@ import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@angular/material-moment-adapte
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
+import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
 import { SqlInputTabsComponent } from "./page-components/sql-playground/sql-input-tabs/sql-input-tabs.component";
 
 @Injectable()
@@ -170,6 +171,7 @@ export const httpInterceptorProviders = [
     SqlPlaygroundComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
+    DbControlPanelComponent,
     SqlInputTabsComponent,
   ],
   imports: [
