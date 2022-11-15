@@ -2564,6 +2564,13 @@ paths:
       tags:
         - SQL Playground API
       operationId: create
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -2609,6 +2616,25 @@ paths:
       tags:
         - SQL Playground API
       operationId: result
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: database id
+          required: true
+          schema:
+            type: integer
+        - name: rId
+          in: path
+          description: database id
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
           description: OK
@@ -2697,6 +2723,19 @@ paths:
       tags:
         - SQL Playground API
       operationId: delete
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
           description: OK
