@@ -1,19 +1,21 @@
 package de.thm.ii.fbs
 
 import de.thm.ii.fbs.services.persistence.DatabaseMigrationService
+
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-
 import javax.net.ssl.{HttpsURLConnection, SSLContext, TrustManager, X509TrustManager}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.boot.web.servlet.MultipartConfigFactory
-import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.{Bean, ComponentScan}
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 import javax.servlet.MultipartConfigElement
 import org.springframework.util.unit.DataSize

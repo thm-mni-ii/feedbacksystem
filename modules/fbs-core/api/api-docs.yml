@@ -37,6 +37,8 @@ tags:
     description: Routes to query data for analysis purposes
   - name: SQL Checker
     description: Routes used for SQL-Checker quering
+  - name: SQL Playground API
+    description: API used to interact with the SQL Playground
 paths:
   /login/cas:
     post:
@@ -2537,6 +2539,366 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden
+  "/api/v2/playground/{uid}/databases":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: index
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Database"
+    put:
+      tags:
+        - SQL Playground API
+      operationId: create
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DatabaseCreation"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+  "/api/v2/playground/{uid}/databases/{dbId}/results":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: results
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}/results/{rId}":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: result
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: database id
+          required: true
+          schema:
+            type: integer
+        - name: rId
+          in: path
+          description: database id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/SQLResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}/reset":
+    post:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: reset
+      responses:
+        "200":
+          description: OK
+  "/api/v2/playground/{uid}/databases/{dbId}/execute":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: execute
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SQLQuery"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/SQLExecuteResponse"
+  "/api/v2/playground/{uid}/databases/{dbId}":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: get
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+    delete:
+      tags:
+        - SQL Playground API
+      operationId: delete
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: "#/components/schemas/Database"
+  "/api/v2/playground/{uid}/databases/{dbId}/tables":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tables
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLTable"
+  "/api/v2/playground/{uid}/databases/{dbId}/views":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableViews
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLView"
+  "/api/v2/playground/{uid}/databases/{dbId}/triggers":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableTriggers
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLTrigger"
+  "/api/v2/playground/{uid}/databases/{dbId}/routines":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableRoutines
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLRoutine"
+  "/api/v2/playground/{uid}/databases/{dbId}/constraints":
+    get:
+      tags:
+        - SQL Playground API
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      operationId: tableConstrains
+      responses:
+        "200":
+          description: OK
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SQLConstraint"
+  "/api/v2/playground/{uid}/databases/{dbId}/activate":
+    post:
+      tags:
+        - SQL Playground API
+      operationId: activate
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: dbId
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
@@ -2990,3 +3352,128 @@ components:
           type: number
         attempt:
           type: number
+    DatabaseCreation:
+      type: object
+      properties:
+        name:
+          type: string
+    Database:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        dbType:
+          type: string
+        active:
+          type: boolean
+    SQLResponse:
+      type: object
+      properties:
+        error:
+          type: boolean
+        errorMsg:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/SQLResponseTable"
+    SQLResponseTable:
+      type: object
+      properties:
+        head:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: string
+    SQLQuery:
+      type: object
+      properties:
+        statement:
+          type: string
+    SQLTable:
+      type: object
+      properties:
+        name:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/SQLTableColumn"
+    SQLTableColumn:
+      type: object
+      properties:
+        name:
+          type: string
+        udtName:
+          type: string
+        nullable:
+          type: boolean
+    SQLView:
+      type: object
+      properties:
+        tableName:
+          type: string
+        definition:
+          type: string
+    SQLTrigger:
+      type: object
+      properties:
+        name:
+          type: string
+        event:
+          $ref: "#/components/schemas/SQLTriggerEvent"
+        action:
+          $ref: "#/components/schemas/SQLTriggerAction"
+    SQLTriggerAction:
+      type: object
+      properties:
+        statement:
+          type: string
+        orientation:
+          type: string
+        timing:
+          type: string
+    SQLTriggerEvent:
+      type: object
+      properties:
+        manipulation:
+          type: string
+        objectTable:
+          type: string
+    SQLRoutine:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        definition:
+          type: string
+    SQLConstraint:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        columnName:
+          type: string
+        checkClause:
+          type: string
+    SQLExecuteResponse:
+      type: object
+      properties:
+        statement:
+          type: string
+        runIn:
+          $ref: "#/components/schemas/Database"
+        id:
+          type: integer
+          format: int32
