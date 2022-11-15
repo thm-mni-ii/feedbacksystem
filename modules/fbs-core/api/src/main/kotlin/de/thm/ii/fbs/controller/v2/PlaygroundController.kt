@@ -67,6 +67,7 @@ class PlaygroundController(
 
     @PostMapping("/{dbId}/reset")
     @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)
     fun reset(): Unit = Unit
 
     @PostMapping("/{dbId}/execute")
