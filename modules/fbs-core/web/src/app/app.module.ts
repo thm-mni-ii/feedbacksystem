@@ -91,6 +91,7 @@ import { BorderedContainerComponent } from "./page-components/bordered-container
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
 import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
 import { SqlInputTabsComponent } from "./page-components/sql-playground/sql-input-tabs/sql-input-tabs.component";
+import { DbSchemeComponent } from "./page-components/sql-playground/db-scheme/db-scheme.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -173,6 +174,7 @@ export const httpInterceptorProviders = [
     DynamicResultTableComponent,
     DbControlPanelComponent,
     SqlInputTabsComponent,
+    DbSchemeComponent
   ],
   imports: [
     BrowserModule,
