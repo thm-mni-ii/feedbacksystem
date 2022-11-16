@@ -154,7 +154,7 @@ class CourseController {
         // If the Course was deleted in the database -> delete all files TODO1
         success && tasks.forall(t => t._1
           .forall(s => storageService.deleteSolutionFileFromBucket(s.id)) && t._2
-          .forall(cc => storageService.deletConfig(cc.taskId, cid, cc.id, cc)))
+          .forall(cc => storageService.deleteAllConfigurations(cc.taskId, cid, cc.id, cc)))
       case _ => throw new ForbiddenException()
     }
   }
