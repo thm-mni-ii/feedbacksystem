@@ -1,7 +1,7 @@
 <mat-card-actions>
   <mat-tab-group
-    [selectedIndex]="activeTab.value"
-    (selectedIndexChange)="activeTab.setValue($event)"
+    [selectedIndex]="activeTabId.value"
+    (selectedIndexChange)="activeTabId.setValue($event)"
     [backgroundColor]=""
   >
     <ng-container>
@@ -11,7 +11,7 @@
             <input
               matInput
               type="text"
-              placeholder="Query_0"
+              placeholder="New_Query"
               [(ngModel)]="tabs[index].name"
             />
           </div>
@@ -24,7 +24,7 @@
         </ng-template>
         <div class="inputField">
           <app-submission-text
-            (update)="inputValue($event)"
+            (update)="updateSubmissionContent($event)"
           ></app-submission-text>
         </div>
       </mat-tab>
@@ -33,5 +33,13 @@
   <button mat-button class="downloadBtn" (click)="downloadFile()">
     <mat-icon>download</mat-icon>Download
   </button>
-  <button mat-flat-button color="accent" class="excuteBtn">Abgeben</button>
+  <button
+    [disabled]="isSubmissionEmpty()"
+    mat-flat-button
+    color="accent"
+    class="excuteBtn"
+    (click)="submission()"
+  >
+    Abgeben
+  </button>
 </mat-card-actions>

@@ -1,6 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { Database } from "../../../model/sql_playground/Database";
-import databases from "./test-data/databases.json";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { AuthService } from "src/app/service/auth.service";
+import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { JWTToken } from "src/app/model/JWTToken";
 
 @Component({
   selector: "app-db-control-panel",
@@ -8,15 +11,29 @@ import databases from "./test-data/databases.json";
   styleUrls: ["./db-control-panel.component.scss"],
 })
 export class DbControlPanelComponent implements OnInit {
-  dbs: Database[] = databases.databases;
+  constructor(
+    private snackbar: MatSnackBar,
+    private authService: AuthService,
+    private sqlPlaygroundService: SqlPlaygroundService
+  ) {}
+
+  dbs: Database[];
   activeDb: Database = this.getActiveDb();
   selectedDb: Number = this.activeDb.id;
-
-  constructor() {}
+  token: JWTToken = this.authService.getToken();
 
   ngOnInit(): void {
-    // TODO: show active db in dropdown
-    console.log("");
+    this.sqlPlaygroundService.getDatabases(this.token.id).subscribe(
+      (data) => {
+        this.dbs = data;
+      },
+      (error) => {
+        console.log(error);
+        this.snackbar.open("Fehler beim Laden der Datenbanken", "Ok", {
+          duration: 3000,
+        });
+      }
+    );
   }
 
   getActiveDb(): Database {
