@@ -1,0 +1,37 @@
+<div class="container">
+  <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
+  <div *ngIf="!isUpdateDialog" matDialogTitle>Datenbank erstellen</div>
+  <mat-dialog-content style="max-height: 100%; overflow: hidden">
+    <mat-card-content>
+      <mat-form-field>
+        <mat-label>Datenbankname</mat-label>
+        <input
+          [formControl]="name"
+          name="newCourseName"
+          type="text"
+          matInput
+          required
+          minlength="3"
+          maxlength="100"
+        />
+        <mat-error *ngIf="name.errors"
+          >Der Datenbankname ist erforderlich! Und muss mindestens 3 Zeichen
+          besitzen</mat-error
+        >
+      </mat-form-field>
+    </mat-card-content>
+  </mat-dialog-content>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      Abbrechen
+    </button>
+    <button
+      mat-flat-button
+      color="accent"
+      (click)="createDb()"
+      [disabled]="!isInputValid()"
+    >
+      Erstellen
+    </button>
+  </mat-dialog-actions>
+</div>

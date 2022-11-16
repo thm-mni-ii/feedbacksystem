@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
 import { Database } from "../model/sql_playground/Database";
 
 @Injectable({
@@ -12,7 +13,7 @@ export class SqlPlaygroundService {
    * Load all databases for a user
    * @param uid User id
    */
-  getDatabases(uid: number) {
+  getDatabases(uid: number): Observable<Database[]> {
     return this.http.get<Database[]>(`/api/v2/playground/${uid}/databases`);
   }
 
@@ -22,14 +23,24 @@ export class SqlPlaygroundService {
    * @param name Name of the database
    * @return The created database, adjusted by the system
    */
-  createDatabases(uid: number, name: string) {
-    return this.http.put<any>(`/api/v2/playground/${uid}/databases`, {
+  createDatabase(uid: number, name: string): Observable<Database> {
+    return this.http.post<any>(`/api/v2/playground/${uid}/databases`, {
       name: name,
     });
   }
 
+  /**
+   * Delete Database
+   * @param uid User id
+   * @param name Name of the database
+   * @return The deletet database
+   */
+  deleteDatabase(uid: number, dbId: number) {
+    return this.http.delete(`/api/v2/playground/${uid}/databases/${dbId}`);
+  }
+
   // /api/v2/playground/{uid}/databases/{dbId}/activate
-  activateDatabase(uid: number, dbId: number) {
+  activateDatabase(uid: number, dbId: number): Observable<Database> {
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/activate`,
       {}

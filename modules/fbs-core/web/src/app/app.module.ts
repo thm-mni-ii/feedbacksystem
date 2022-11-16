@@ -61,6 +61,7 @@ import { MenuBarComponent } from "./tool-components/menu-bar/menu-bar.component"
 import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-checker-dialog.component";
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
+import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
 
 import {
   NgxMatDatetimePickerModule,
@@ -173,6 +174,7 @@ export const httpInterceptorProviders = [
     DynamicResultTableComponent,
     DbControlPanelComponent,
     SqlInputTabsComponent,
+    NewDbDialogComponent,
   ],
   imports: [
     BrowserModule,
