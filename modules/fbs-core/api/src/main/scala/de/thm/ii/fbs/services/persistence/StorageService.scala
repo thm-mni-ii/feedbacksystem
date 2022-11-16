@@ -1,15 +1,16 @@
 package de.thm.ii.fbs.services.persistence
 
+import de.thm.ii.fbs.model.CheckrunnerConfiguration
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
+
 import java.io.{ByteArrayInputStream, File, FileOutputStream, IOException}
 import java.nio.file._
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
 import io.minio.{BucketExistsArgs, GetObjectArgs, RemoveBucketArgs, RemoveObjectArgs, StatObjectArgs}
-import org.apache.commons.io.IOUtils
-import org.slf4j.LoggerFactory
 
-import java.util.logging.Logger
 import scala.io.Source
 
 /**
@@ -19,7 +20,12 @@ import scala.io.Source
 class StorageService extends App {
   @Autowired
   private val minioService: MinioService = null
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  @Autowired
+  private val checkerService: CheckerServiceFactoryService = null
+  @Autowired
+  private val taskService: TaskService = null
+  @Autowired
+  private val ccs: CheckerConfigurationService = null
 
 
   @Value("${storage.uploadDir}")
@@ -319,6 +325,51 @@ class StorageService extends App {
     }
     else {
       false
+    }
+  }
+
+  def deleteAllSolutions(): Boolean = {
+    false
+  }
+
+  /**
+    * Deletes the configuration files from minio or FS and the DB entry
+    * @param tid task id
+    * @param cid course id
+    * @param ccid checker config id
+    * @param cc checker config cc.id == ccid ??
+    * @throws
+    * @return
+    */
+  @throws[IOException]
+  def deleteAllConfigurations(tid: Int, cid: Int, ccid: Int, cc: CheckrunnerConfiguration): Boolean = {
+    try {
+      if (ccs.delete(cid, tid, ccid)) {
+        if (cc.isInBlockStorage) {
+          deleteSecondaryFileFromBucket(tid)
+          deleteMainFileFromBucket(tid)
+          //storageService.deleteConfigurationFromBucket(ccid)
+        } else {
+          // FS
+          deleteSecondaryFile(tid)
+          deleteMainFile(tid)
+          //storageService.deleteConfiguration(ccid)
+        }
+        notifyCheckerDelete(tid, cc)
+      }
+      true
+    }
+    catch {
+      case e: _ => false
+    }
+  }
+
+  private def notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnDelete =>
+        change.onCheckerConfigurationDelete(taskService.getOne(tid).get, cc)
+      case _ =>
     }
   }
 }

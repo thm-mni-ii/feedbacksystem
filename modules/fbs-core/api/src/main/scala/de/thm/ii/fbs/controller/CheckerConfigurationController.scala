@@ -172,19 +172,8 @@ class CheckerConfigurationController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ccs.getOne(ccid) match {
-        case Some(cc) => if (this.ccs.delete(cid, tid, ccid)) {
-          if (cc.isInBlockStorage) {
-            storageService.deleteSecondaryFileFromBucket(tid)
-            storageService.deleteMainFileFromBucket(tid)
-            //storageService.deleteConfigurationFromBucket(ccid)
-          } else {
-            // FS
-            storageService.deleteSecondaryFile(tid)
-            storageService.deleteMainFile(tid)
-            //storageService.deleteConfiguration(ccid)
-          }
-          notifyCheckerDelete(tid, cc)
-        }
+        case Some(cc) =>
+          storageService.deleteAllConfigurations(tid, cid, ccid, cc)
         case None => throw new ResourceNotFoundException()
       }
     } else {
