@@ -1,0 +1,7 @@
+<p>{{ title }}</p>
+<mat-expansion-panel *ngFor="let element of tables; index as i;">
+  <mat-expansion-panel-header>
+    <mat-panel-title> {{element.table_name}} </mat-panel-title>
+  </mat-expansion-panel-header>
+  <p *ngFor="let column of element.columns; index as j">{{ element.columns[j].column_name }}</p>
+</mat-expansion-panel>

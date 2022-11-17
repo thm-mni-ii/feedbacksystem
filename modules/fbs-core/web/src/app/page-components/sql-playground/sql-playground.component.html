@@ -18,9 +18,8 @@
     ></app-bordered-container>
   </div>
   <div class="db-schema-grid">
-    <app-bordered-container
-      [yScrollable]="true"
-      [title]="'DB Schema'"
-    ><app-db-scheme></app-db-scheme></app-bordered-container>
+    <app-bordered-container [yScrollable]="true" [title]="'DB Schema'"
+      ><app-db-scheme-table [title]="'Tabellen'"></app-db-scheme-table
+    ></app-bordered-container>
   </div>
 </div>

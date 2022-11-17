@@ -1,0 +1,26 @@
+{
+    "tables": [
+        {
+            "table_name": "Gast",
+            "columns": [
+                {"column_name": "Vorname",
+                "is_nullable": false,
+                "datatype": "varchar(50)"},
+                {"column_name": "Nachname",
+                "is_nullable": false,
+                "datatype": "varchar(50)"}
+            ]
+        },
+        {
+            "table_name": "Hotel",
+            "columns": [
+                {"column_name": "Hotelname",
+                "is_nullable": false,
+                "datatype": "varchar(50)"},
+                {"column_name": "Personal",
+                "is_nullable": true,
+                "datatype": "int"}
+            ]
+        }
+    ]
+}
