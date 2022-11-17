@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
-import data from "./test-data/test.json";
+import tables from "./test-data/tables.json";
+import views from "./test-data/views.json";
 
 @Component({
   selector: "app-db-scheme",
@@ -26,7 +27,25 @@ export class DbSchemeComponentTable extends DbSchemeComponent {
   @Input() tables: Array<any> = this.getTables();
 
   getTables(): Array<any> {
-    return data.tables;
+    return tables.tables;
+  }
+
+  ngOnInit(): void {
+    console.log("");
+  }
+}
+
+@Component({
+  selector: "app-db-scheme-views",
+  templateUrl: "./db-scheme-view.component.html",
+  styleUrls: ["./db-scheme.component.scss"],
+})
+export class DbSchemeComponentViews extends DbSchemeComponent {
+
+  @Input() views: Array<any> = this.getViews();
+
+  getViews(): Array<any> {
+    return views.views;
   }
 
   ngOnInit(): void {

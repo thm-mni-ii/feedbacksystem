@@ -2,3 +2,11 @@ mat-expansion-panel {
     margin-bottom: 5px;
     margin-top: 5px;
 }
+
+.mat-expansion-panel.mat-expanded .mat-expansion-panel-header {
+     background: #7986cb;
+
+     .mat-expansion-panel-header-title{
+        color: white;
+     }
+}
