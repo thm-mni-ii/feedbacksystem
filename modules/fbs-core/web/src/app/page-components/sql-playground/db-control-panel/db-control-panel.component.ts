@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { Observable } from "rxjs";
 import { Database } from "../../../model/sql_playground/Database";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -15,6 +15,8 @@ import { MatDialog } from "@angular/material/dialog";
   styleUrls: ["./db-control-panel.component.scss"],
 })
 export class DbControlPanelComponent implements OnInit {
+  @Output() changeActiveDb = new EventEmitter<number>();
+
   constructor(
     private snackbar: MatSnackBar,
     private authService: AuthService,
@@ -48,6 +50,7 @@ export class DbControlPanelComponent implements OnInit {
           this.activeDb = this.getActiveDb(this.dbs);
           this.selectedDb = this.activeDb.id;
         }
+        this.changeActiveDb.emit(this.activeDb.id);
       },
       (error) => {
         console.log(error);
@@ -56,11 +59,6 @@ export class DbControlPanelComponent implements OnInit {
         });
       }
     );
-  }
-
-  changeSelect($event) {
-    console.log($event);
-    console.log(this.selectedDb);
   }
 
   getActiveDb(dbs: Database[]): Database {

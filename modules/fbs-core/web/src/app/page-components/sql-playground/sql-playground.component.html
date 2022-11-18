@@ -4,17 +4,24 @@
       [xScrollable]="true"
       [yScrollable]="false"
       [title]="'Ergebnisse'"
-      ><app-dynamic-result-table></app-dynamic-result-table>
+      ><app-dynamic-result-table
+        [resultset]="resultset"
+      ></app-dynamic-result-table>
     </app-bordered-container>
   </div>
   <div class="input-grid">
     <app-bordered-container [input]="true">
-      <app-sql-input-tabs></app-sql-input-tabs>
+      <app-sql-input-tabs
+        [activeDb]="activeDb"
+        (resultset)="changeResultset($event)"
+      ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
   <div class="db-grid">
-    <app-bordered-container [title]="'DB'" >
-      <app-db-control-panel></app-db-control-panel
+    <app-bordered-container [title]="'DB'">
+      <app-db-control-panel
+        (changeActiveDb)="changeActiveDb($event)"
+      ></app-db-control-panel
     ></app-bordered-container>
   </div>
   <div class="db-schema-grid">

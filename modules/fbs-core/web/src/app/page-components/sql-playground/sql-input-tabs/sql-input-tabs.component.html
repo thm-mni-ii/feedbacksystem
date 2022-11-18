@@ -1,4 +1,5 @@
 <mat-card-actions>
+  {{ response$ | json }}
   <mat-tab-group
     [selectedIndex]="activeTabId.value"
     (selectedIndexChange)="activeTabId.setValue($event)"
@@ -41,5 +42,8 @@
     (click)="submission()"
   >
     Abgeben
+  </button>
+  <button mat-flat-button color="accent" (click)="getResultsList()">
+    ResultList
   </button>
 </mat-card-actions>

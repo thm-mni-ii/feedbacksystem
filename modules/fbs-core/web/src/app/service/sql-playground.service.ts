@@ -46,4 +46,28 @@ export class SqlPlaygroundService {
       {}
     );
   }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/execute
+  submitStatement(uid: number, dbId: number, statement: string) {
+    return this.http.post<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/execute`,
+      {
+        statement: statement,
+      }
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/results/{rId}
+  getResults(uid: number, dbId: number, rId: number) {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/results
+  getResultsList(uid: number, dbId: number): Observable<Database[]> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/results`
+    );
+  }
 }

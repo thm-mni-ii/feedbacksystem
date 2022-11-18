@@ -12,6 +12,17 @@ import { TitlebarService } from "../../service/titlebar.service";
 export class SqlPlaygroundComponent implements OnInit {
   constructor(private titlebar: TitlebarService) {}
 
+  activeDb: number;
+  resultset: any;
+
+  changeActiveDb($event) {
+    this.activeDb = $event;
+  }
+
+  changeResultset($event) {
+    this.resultset = $event;
+  }
+
   ngOnInit() {
     this.titlebar.emitTitle("SQL Playground");
   }

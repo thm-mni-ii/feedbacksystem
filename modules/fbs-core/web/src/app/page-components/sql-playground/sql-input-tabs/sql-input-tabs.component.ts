@@ -1,10 +1,13 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { interval } from "rxjs";
+import { switchMap, takeWhile, retry, delay } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { outputAst } from "@angular/compiler";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -12,6 +15,9 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
 export class SqlInputTabsComponent implements OnInit {
+  @Input() activeDb: number;
+  @Output() resultset = new EventEmitter<any>();
+
   constructor(
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
@@ -96,38 +102,71 @@ export class SqlInputTabsComponent implements OnInit {
     this.pending = true;
     const token = this.authService.getToken();
 
-    this.sqlPlaygroundService.getDatabases(token.id).subscribe(
-      (data) => {
-        console.log(data);
+    this.sqlPlaygroundService
+      .submitStatement(token.id, this.activeDb, this.activeTab.content)
+      .subscribe(
+        (result) => {
+          this.getResultsbyPolling(result.id);
+          console.log(result);
+          this.snackbar.open("Deine Eingabe wird ausgewertet.", "OK", {
+            duration: 3000,
+          });
+        },
+        (error) => {
+          console.error(error);
+          this.snackbar.open(
+            "Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",
+            "OK",
+            { duration: 3000 }
+          );
+        }
+      );
+  }
+
+  getResultsbyPolling(rId: number) {
+    const token = this.authService.getToken();
+    let result: any;
+
+    this.sqlPlaygroundService
+      .getResults(token.id, this.activeDb, rId)
+      .pipe(delay(5000), retry())
+      .subscribe((res) => {
+        result = res;
+
+        if (res !== undefined) {
+          this.resultset.emit(res);
+        }
+      });
+
+    // interval(5000)
+    //   .pipe(
+    //     switchMap(() =>
+    //       this.sqlPlaygroundService.getResults(token.id, this.activeDb, rId)
+    //     ),
+    //     takeWhile(({}) => {
+    //       return result === undefined;
+    //     })
+    //   )
+    //   .subscribe((res) => {
+    //     result = res;
+    //     console.log(result);
+
+    //     if (res !== undefined) {
+    //       this.resultset.emit(res);
+    //     }
+    //   });
+  }
+
+  getResultsList() {
+    const token = this.authService.getToken();
+
+    this.sqlPlaygroundService.getResultsList(token.id, this.activeDb).subscribe(
+      (result) => {
+        console.log(result);
       },
       (error) => {
-        console.log(error);
-        this.snackbar.open("Fehler beim Laden der Datenbanken", "Ups!");
+        console.error(error);
       }
     );
-
-    //   this.submissionService
-    //     .submitPlayground(
-    //       token.id,
-    //       this.courseId,
-    //       this.task.id,
-    //       this.submissionData
-    //     )
-    //     .subscribe(
-    //       () => {
-    //         this.refreshByPolling(true);
-    //         this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
-    //           duration: 3000,
-    //         });
-    //       },
-    //       (error) => {
-    //         console.error(error);
-    //         this.snackbar.open(
-    //           "Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",
-    //           "OK",
-    //           { duration: 3000 }
-    //         );
-    //       }
-    //     );
   }
 }

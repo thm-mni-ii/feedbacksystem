@@ -11,7 +11,7 @@
 
   <mat-form-field appearance="fill">
     <mat-label>Select Database</mat-label>
-    <mat-select [(value)]="selectedDb" (valueChange)="changeSelect($event)">
+    <mat-select [(value)]="selectedDb">
       <mat-option *ngFor="let db of dbs" [value]="db.id">
         {{ db.name }}
       </mat-option>

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from "@angular/core";
+import { AfterViewInit, Component, ViewChild, Input } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 /* import smallTable from "./test-tables/smallTable.json";
@@ -16,6 +16,7 @@ export interface Content {
   styleUrls: ["./dynamic-result-table.component.scss"],
 })
 export class DynamicResultTableComponent implements AfterViewInit {
+  @Input() resultset: any;
   /*   dataSource = new MatTableDataSource<any[]>(bigTable.rows);
   displayedColumns = bigTable.head; */
   dataSource = new MatTableDataSource<any[]>();
