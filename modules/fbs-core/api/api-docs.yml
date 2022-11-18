@@ -2560,7 +2560,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Database"
-    put:
+    post:
       tags:
         - SQL Playground API
       operationId: create

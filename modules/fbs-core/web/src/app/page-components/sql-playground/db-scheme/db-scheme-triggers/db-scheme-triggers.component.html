@@ -1,0 +1,11 @@
+<p class="title">{{ title }}</p>
+<mat-expansion-panel *ngFor="let trigger of triggers; index as i">
+  <mat-expansion-panel-header>
+    <mat-panel-title> {{ trigger.name }} </mat-panel-title>
+  </mat-expansion-panel-header>
+  <p>{{ trigger.event.manipulation }} {{ trigger.event.objectTable }}</p>
+  <p>
+    {{ trigger.action.statement }} {{ trigger.action.orientation }}
+    {{ trigger.action.timing }}
+  </p>
+</mat-expansion-panel>
