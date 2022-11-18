@@ -1,5 +1,4 @@
 <mat-card-actions>
-  {{ response$ | json }}
   <mat-tab-group
     [selectedIndex]="activeTabId.value"
     (selectedIndexChange)="activeTabId.setValue($event)"
@@ -31,19 +30,22 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <button mat-button class="downloadBtn" (click)="downloadFile()">
-    <mat-icon>download</mat-icon>Download
-  </button>
-  <button
-    [disabled]="isSubmissionEmpty()"
-    mat-flat-button
-    color="accent"
-    class="excuteBtn"
-    (click)="submission()"
-  >
-    Abgeben
-  </button>
-  <button mat-flat-button color="accent" (click)="getResultsList()">
-    ResultList
-  </button>
+  <div class="bottom-container">
+    <button mat-button class="downloadBtn" (click)="downloadFile()">
+      <mat-icon>download</mat-icon> Download
+    </button>
+
+    <button
+      [disabled]="isSubmissionEmpty()"
+      mat-flat-button
+      color="accent"
+      class="excuteBtn"
+      (click)="submission()"
+    >
+      <span class="spinner" *ngIf="pending">
+        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+      </span>
+      <span *ngIf="!pending">Abgeben</span>
+    </button>
+  </div>
 </mat-card-actions>

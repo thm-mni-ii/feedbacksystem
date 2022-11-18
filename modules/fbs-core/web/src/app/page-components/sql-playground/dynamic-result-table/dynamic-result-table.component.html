@@ -1,11 +1,23 @@
-<div class="container" *ngIf="this.resultset">
+<div class="container" *ngIf="this.resultset !== undefined">
   <div *ngIf="this.resultset.error === true">
-    <mat-card>{{ this.resultset.errorMsg }}</mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="error-icon">close</mat-icon>
+          <span>SQL Error</span>
+          <mat-icon class="error-icon">close</mat-icon>
+        </mat-card-title>
+        <mat-card-subtitle>Bitte überprüfe deine Eingabe</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ this.resultset.errorMsg }}</p>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div *ngIf="this.resultset.error === false">
     <div class="table-container">
-      <table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
+      <table mat-table [dataSource]="this.dataSource">
         <ng-container
           matColumnDef="{{ col }}"
           *ngFor="let col of displayedColumns; let index = index"

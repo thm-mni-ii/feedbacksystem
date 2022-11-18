@@ -1,6 +1,14 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { interval } from "rxjs";
-import { switchMap, takeWhile, retry, delay } from "rxjs/operators";
+import {
+  switchMap,
+  takeWhile,
+  retry,
+  delay,
+  timeout,
+  retryWhen,
+  take,
+} from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
@@ -35,6 +43,35 @@ export class SqlInputTabsComponent implements OnInit {
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
+  }
+
+  getTables() {
+    const token = this.authService.getToken();
+    this.sqlPlaygroundService
+      .getTables(token.id, this.activeDb)
+      .subscribe((result) => {
+        console.log(result);
+      });
+    this.sqlPlaygroundService
+      .getConstraints(token.id, this.activeDb)
+      .subscribe((result) => {
+        console.log(result);
+      });
+    this.sqlPlaygroundService
+      .getViews(token.id, this.activeDb)
+      .subscribe((result) => {
+        console.log(result);
+      });
+    this.sqlPlaygroundService
+      .getRoutines(token.id, this.activeDb)
+      .subscribe((result) => {
+        console.log(result);
+      });
+    this.sqlPlaygroundService
+      .getTriggers(token.id, this.activeDb)
+      .subscribe((result) => {
+        console.log(result);
+      });
   }
 
   closeTab(index: number) {
@@ -83,7 +120,7 @@ export class SqlInputTabsComponent implements OnInit {
   }
 
   isSubmissionEmpty(): boolean {
-    if (this.activeTab.content != "") {
+    if (this.activeTab.content != "" && this.pending == false) {
       return false;
     }
     return true;
@@ -107,10 +144,6 @@ export class SqlInputTabsComponent implements OnInit {
       .subscribe(
         (result) => {
           this.getResultsbyPolling(result.id);
-          console.log(result);
-          this.snackbar.open("Deine Eingabe wird ausgewertet.", "OK", {
-            duration: 3000,
-          });
         },
         (error) => {
           console.error(error);
@@ -119,42 +152,39 @@ export class SqlInputTabsComponent implements OnInit {
             "OK",
             { duration: 3000 }
           );
+          this.pending = false;
         }
       );
   }
 
   getResultsbyPolling(rId: number) {
     const token = this.authService.getToken();
-    let result: any;
 
-    this.sqlPlaygroundService
-      .getResults(token.id, this.activeDb, rId)
-      .pipe(delay(5000), retry())
-      .subscribe((res) => {
-        result = res;
-
-        if (res !== undefined) {
-          this.resultset.emit(res);
-        }
-      });
-
-    // interval(5000)
-    //   .pipe(
-    //     switchMap(() =>
-    //       this.sqlPlaygroundService.getResults(token.id, this.activeDb, rId)
-    //     ),
-    //     takeWhile(({}) => {
-    //       return result === undefined;
-    //     })
-    //   )
+    // this.sqlPlaygroundService
+    //   .getResults(token.id, this.activeDb, rId)
+    //   .pipe(delay(2500), retry())
     //   .subscribe((res) => {
-    //     result = res;
-    //     console.log(result);
-
     //     if (res !== undefined) {
     //       this.resultset.emit(res);
     //     }
     //   });
+
+    this.sqlPlaygroundService
+      .getResults(token.id, this.activeDb, rId)
+      .pipe(
+        retryWhen((err) => {
+          return err.pipe(delay(1000));
+        })
+      )
+      .subscribe(
+        (res) => {
+          // emit if success
+          this.pending = false;
+          this.resultset.emit(res);
+        },
+        (err) => {},
+        () => console.log("completed") // dispatched when API notify errors twice
+      );
   }
 
   getResultsList() {

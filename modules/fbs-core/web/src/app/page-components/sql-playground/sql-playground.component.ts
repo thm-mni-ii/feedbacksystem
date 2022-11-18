@@ -21,6 +21,7 @@ export class SqlPlaygroundComponent implements OnInit {
 
   changeResultset($event) {
     this.resultset = $event;
+    console.log(this.resultset);
   }
 
   ngOnInit() {

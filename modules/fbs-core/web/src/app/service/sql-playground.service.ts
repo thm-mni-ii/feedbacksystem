@@ -58,7 +58,7 @@ export class SqlPlaygroundService {
   }
 
   // /api/v2/playground/{uid}/databases/{dbId}/results/{rId}
-  getResults(uid: number, dbId: number, rId: number) {
+  getResults(uid: number, dbId: number, rId: number): Observable<any> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`
     );
@@ -68,6 +68,41 @@ export class SqlPlaygroundService {
   getResultsList(uid: number, dbId: number): Observable<Database[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/tables
+  getTables(uid: number, dbId: number): Observable<any> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/tables`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/constraints
+  getConstraints(uid: number, dbId: number): Observable<any> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/constraints`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/views
+  getViews(uid: number, dbId: number): Observable<any> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/views`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/triggers
+  getTriggers(uid: number, dbId: number): Observable<any> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/triggers`
+    );
+  }
+
+  // /api/v2/playground/{uid}/databases/{dbId}/routines
+  getRoutines(uid: number, dbId: number): Observable<any> {
+    return this.http.get<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/routines`
     );
   }
 }

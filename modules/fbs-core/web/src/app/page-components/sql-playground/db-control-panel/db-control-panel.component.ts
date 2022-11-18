@@ -26,8 +26,9 @@ export class DbControlPanelComponent implements OnInit {
 
   dbs: Database[] = [];
   activeDb: Database;
-  selectedDb: number = 1;
+  selectedDb: number = 0;
   token: JWTToken = this.authService.getToken();
+  pending: boolean = false;
 
   ngOnInit(): void {
     this.sqlPlaygroundService.getDatabases(this.token.id).subscribe(
@@ -70,10 +71,17 @@ export class DbControlPanelComponent implements OnInit {
     }
   }
 
+  isSelectDbActive(): boolean {
+    if(this.activeDb !== undefined){
+      return this.selectedDb == this.activeDb.id;
+    } else {
+      return false;
+    }
+  }
+
   createDatabase(name: string): Observable<Database> {
     this.sqlPlaygroundService.createDatabase(this.token.id, name).subscribe(
       (data) => {
-        console.log(data);
         this.snackbar.open("Datenbank erfolgreich erstellt", "Ok", {
           duration: 3000,
         });
@@ -124,6 +132,7 @@ export class DbControlPanelComponent implements OnInit {
   }
 
   activateDb() {
+    this.pending = true;
     const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
 
     this.sqlPlaygroundService
@@ -138,12 +147,14 @@ export class DbControlPanelComponent implements OnInit {
             }
           );
           this.ngOnInit();
+          this.pending = false;
         },
         (error) => {
           console.log(error);
           this.snackbar.open("Fehler beim Aktivieren der Datenbank", "Ok", {
             duration: 3000,
           });
+          this.pending = false;
         }
       );
   }

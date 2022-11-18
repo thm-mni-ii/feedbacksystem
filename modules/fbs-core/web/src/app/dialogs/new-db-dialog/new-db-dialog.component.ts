@@ -56,4 +56,8 @@ export class NewDbDialogComponent implements OnInit {
   isInputValid(): boolean {
     return this.name.valid;
   }
+
+  closeDialog() {
+    this.dialogRef.close({ success: false });
+  }
 }

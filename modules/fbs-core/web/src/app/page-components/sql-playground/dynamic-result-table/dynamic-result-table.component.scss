@@ -7,6 +7,8 @@
 }
 
 .action-container {
+  position: absolute;
+  bottom: 70px;
   overflow: hidden;
   display: grid;
   align-items: center;
@@ -37,6 +39,10 @@
   }
 }
 
+table {
+  width: 90%;
+}
+
 .table-container {
   display: block;
   min-height: 100px;
@@ -56,4 +62,14 @@
 
 .table-row {
   height: 10px;
+}
+
+.error-icon {
+  color: #f44336;
+}
+
+mat-card-title{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
