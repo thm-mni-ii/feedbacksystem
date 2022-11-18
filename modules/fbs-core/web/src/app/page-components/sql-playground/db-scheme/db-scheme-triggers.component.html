@@ -1,7 +1,7 @@
 <p>{{ title }}</p>
-<mat-expansion-panel *ngFor="let view of views; index as i;">
+<mat-expansion-panel *ngFor="let trigger of triggers; index as i;">
   <mat-expansion-panel-header>
-    <mat-panel-title> {{view.table_name}} </mat-panel-title>
+    <mat-panel-title> {{trigger.name}} </mat-panel-title>
   </mat-expansion-panel-header>
-  <p>{{ view.definition }}</p>
+  <p>{{ trigger.event.manipulation }}</p>
 </mat-expansion-panel>

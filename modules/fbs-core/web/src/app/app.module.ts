@@ -96,6 +96,7 @@ import {
   DbSchemeComponentTable,
   DbSchemeComponentViews,
   DbSchemeTrigger,
+  DbSchemeRoutines,
 } from "./page-components/sql-playground/db-scheme/db-scheme.component";
 
 @Injectable()
@@ -183,6 +184,7 @@ export const httpInterceptorProviders = [
     DbSchemeComponentTable,
     DbSchemeComponentViews,
     DbSchemeTrigger,
+    DbSchemeRoutines,
   ],
   imports: [
     BrowserModule,

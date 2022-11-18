@@ -1,4 +1,5 @@
 export interface Trigger {
+    name: string;
     action: TriggerAction;
     event: TriggerEvent;
 }
