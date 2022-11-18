@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
 
-
 @Component({
   selector: "app-db-scheme",
   templateUrl: "./db-scheme.component.html",
@@ -15,5 +14,3 @@ export class DbSchemeComponent implements OnInit {
     console.log("");
   }
 }
-
-

@@ -1,12 +1,12 @@
 {
-    "SQLViews": [
-        {
-            "tableName": "View_1",
-            "definition": "definition_1"
-        },
-        {
-            "tableName": "View_2",
-            "definition": "definition_2"
-        }
-    ]
+  "SQLViews": [
+    {
+      "tableName": "View_1",
+      "definition": "definition_1"
+    },
+    {
+      "tableName": "View_2",
+      "definition": "definition_2"
+    }
+  ]
 }
