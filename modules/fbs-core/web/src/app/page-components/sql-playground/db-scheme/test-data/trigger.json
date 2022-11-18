@@ -1,5 +1,5 @@
 {
-    "triggers": [
+    "SQLTriggers": [
         {
             "name": "Trigger_1",
             "event": {

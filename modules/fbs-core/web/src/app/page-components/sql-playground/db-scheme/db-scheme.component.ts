@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { Trigger } from "src/app/model/sql_playground/Trigger";
+import { Routine } from "src/app/model/sql_playground/Routine";
+import { View } from "src/app/model/sql_playground/View";
 import tablesJson from "./test-data/tables.json";
 import viewsJson from "./test-data/views.json";
 import triggersJson from "./test-data/trigger.json";
@@ -26,7 +28,6 @@ export class DbSchemeComponent implements OnInit {
   styleUrls: ["./db-scheme.component.scss"],
 })
 export class DbSchemeComponentTable extends DbSchemeComponent {
-
   @Input() tables: Array<any> = this.getTables();
 
   getTables(): Array<any> {
@@ -44,12 +45,7 @@ export class DbSchemeComponentTable extends DbSchemeComponent {
   styleUrls: ["./db-scheme.component.scss"],
 })
 export class DbSchemeComponentViews extends DbSchemeComponent {
-
-  @Input() views: Array<any> = this.getViews();
-
-  getViews(): Array<any> {
-    return viewsJson.views;
-  }
+  @Input() views: View[] = viewsJson.SQLViews;
 
   ngOnInit(): void {
     console.log("");
@@ -62,12 +58,7 @@ export class DbSchemeComponentViews extends DbSchemeComponent {
   styleUrls: ["./db-scheme.component.scss"],
 })
 export class DbSchemeTrigger extends DbSchemeComponent {
-
-  @Input() triggers: Array<Trigger> = this.getViews();
-
-  getViews(): Array<Trigger> {
-    return [];
-  }
+  @Input() triggers: Trigger[] = triggersJson.SQLTriggers;
 
   ngOnInit(): void {
     console.log("");
@@ -80,12 +71,7 @@ export class DbSchemeTrigger extends DbSchemeComponent {
   styleUrls: ["./db-scheme.component.scss"],
 })
 export class DbSchemeRoutines extends DbSchemeComponent {
-
-  @Input() routines: Array<any> = this.getViews();
-
-  getViews(): Array<any> {
-    return routinesJson.SQLRoutines;
-  }
+  @Input() routines: Routine[] = routinesJson.SQLRoutines;
 
   ngOnInit(): void {
     console.log("");

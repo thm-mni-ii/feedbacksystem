@@ -1,11 +1,11 @@
 {
-    "views": [
+    "SQLViews": [
         {
-            "table_name": "View_1",
+            "tableName": "View_1",
             "definition": "definition_1"
         },
         {
-            "table_name": "View_2",
+            "tableName": "View_2",
             "definition": "definition_2"
         }
     ]
