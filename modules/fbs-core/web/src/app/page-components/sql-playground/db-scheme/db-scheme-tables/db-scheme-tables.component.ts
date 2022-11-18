@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { DbSchemeComponent } from "../db-scheme.component";
 import tablesJson from "../test-data/tables.json";
 
@@ -7,7 +7,10 @@ import tablesJson from "../test-data/tables.json";
   templateUrl: "./db-scheme-tables.component.html",
   styleUrls: ["../db-scheme.component.scss"],
 })
-export class DbSchemeTablesComponent extends DbSchemeComponent {
+export class DbSchemeTablesComponent
+  extends DbSchemeComponent
+  implements OnInit
+{
   @Input() tables: Array<any> = this.getTables();
 
   getTables(): Array<any> {

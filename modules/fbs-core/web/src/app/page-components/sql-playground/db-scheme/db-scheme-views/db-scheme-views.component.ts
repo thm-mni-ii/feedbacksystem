@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { View } from "src/app/model/sql_playground/View";
 import { DbSchemeComponent } from "../db-scheme.component";
 import viewsJson from "../test-data/views.json";
@@ -8,7 +8,10 @@ import viewsJson from "../test-data/views.json";
   templateUrl: "./db-scheme-views.component.html",
   styleUrls: ["../db-scheme.component.scss"],
 })
-export class DbSchemeViewsComponent extends DbSchemeComponent {
+export class DbSchemeViewsComponent
+  extends DbSchemeComponent
+  implements OnInit
+{
   @Input() views: View[] = viewsJson.SQLViews;
 
   ngOnInit(): void {
