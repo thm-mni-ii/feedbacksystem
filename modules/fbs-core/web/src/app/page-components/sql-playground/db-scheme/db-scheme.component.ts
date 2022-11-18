@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
+import { Trigger } from "src/app/model/sql_playground/Trigger";
 import tables from "./test-data/tables.json";
 import views from "./test-data/views.json";
 
@@ -43,6 +44,24 @@ export class DbSchemeComponentTable extends DbSchemeComponent {
 export class DbSchemeComponentViews extends DbSchemeComponent {
 
   @Input() views: Array<any> = this.getViews();
+
+  getViews(): Array<any> {
+    return views.views;
+  }
+
+  ngOnInit(): void {
+    console.log("");
+  }
+}
+
+@Component({
+  selector: "app-db-scheme-triggers",
+  templateUrl: "./db-scheme-view.component.html",
+  styleUrls: ["./db-scheme.component.scss"],
+})
+export class DbSchemeTrigger extends DbSchemeComponent {
+
+  @Input() views: Array<Trigger> = this.getViews();
 
   getViews(): Array<any> {
     return views.views;
