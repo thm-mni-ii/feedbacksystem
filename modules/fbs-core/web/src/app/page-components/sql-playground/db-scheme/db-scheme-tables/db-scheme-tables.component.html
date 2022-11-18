@@ -1,0 +1,11 @@
+<p class="title">{{ title }}</p>
+<mat-expansion-panel *ngFor="let element of tables; index as i">
+  <mat-expansion-panel-header>
+    <mat-panel-title> {{ element.name }} </mat-panel-title>
+  </mat-expansion-panel-header>
+  <div *ngFor="let column of element.columns; index as j">
+    <p>{{ element.columns[j].name }} {{ element.columns[j].udtName }}</p>
+    <p>isNullable: {{ element.columns[j].nullable }}</p>
+    <hr />
+  </div>
+</mat-expansion-panel>

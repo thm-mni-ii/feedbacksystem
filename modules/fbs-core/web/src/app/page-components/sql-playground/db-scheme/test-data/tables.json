@@ -1,0 +1,30 @@
+{
+  "tables": [
+    {
+      "name": "Gast",
+      "columns": [
+        {
+          "name": "Vorname",
+          "udtName": "varchar(50)",
+          "nullable": false
+        },
+        {
+          "name": "Nachname",
+          "udtName": "varchar(50)",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "Hotel",
+      "columns": [
+        {
+          "name": "Hotelname",
+          "udtName": "varchar(50)",
+          "nullable": false
+        },
+        { "name": "Personal", "udtName": "int", "nullable": true }
+      ]
+    }
+  ]
+}

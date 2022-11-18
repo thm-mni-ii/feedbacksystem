@@ -18,9 +18,13 @@
     ></app-bordered-container>
   </div>
   <div class="db-schema-grid">
-    <app-bordered-container
-      [yScrollable]="true"
-      [title]="'DB Schema'"
-    ></app-bordered-container>
+    <app-bordered-container [yScrollable]="true" [title]="'DB Schema'">
+      <app-db-scheme-table [title]="'Tabellen'"></app-db-scheme-table>
+      <app-db-scheme-views [title]="'Views'"></app-db-scheme-views>
+      <app-db-scheme-routines
+        [title]="'Stored Procedures'"
+      ></app-db-scheme-routines>
+      <app-db-scheme-triggers [title]="'Triggers'"></app-db-scheme-triggers>
+    </app-bordered-container>
   </div>
 </div>
