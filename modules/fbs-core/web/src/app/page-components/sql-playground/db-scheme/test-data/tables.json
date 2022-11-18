@@ -1,26 +1,30 @@
 {
-    "tables": [
+  "tables": [
+    {
+      "name": "Gast",
+      "columns": [
         {
-            "table_name": "Gast",
-            "columns": [
-                {"column_name": "Vorname",
-                "is_nullable": false,
-                "datatype": "varchar(50)"},
-                {"column_name": "Nachname",
-                "is_nullable": false,
-                "datatype": "varchar(50)"}
-            ]
+          "name": "Vorname",
+          "udtName": "varchar(50)",
+          "nullable": false
         },
         {
-            "table_name": "Hotel",
-            "columns": [
-                {"column_name": "Hotelname",
-                "is_nullable": false,
-                "datatype": "varchar(50)"},
-                {"column_name": "Personal",
-                "is_nullable": true,
-                "datatype": "int"}
-            ]
+          "name": "Nachname",
+          "udtName": "varchar(50)",
+          "nullable": false
         }
-    ]
+      ]
+    },
+    {
+      "name": "Hotel",
+      "columns": [
+        {
+          "name": "Hotelname",
+          "udtName": "varchar(50)",
+          "nullable": false
+        },
+        { "name": "Personal", "udtName": "int", "nullable": true }
+      ]
+    }
+  ]
 }
