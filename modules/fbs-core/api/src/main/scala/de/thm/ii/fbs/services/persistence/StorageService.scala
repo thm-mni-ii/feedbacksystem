@@ -9,7 +9,8 @@ import java.nio.file._
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Component
-import io.minio.{BucketExistsArgs, GetObjectArgs, RemoveBucketArgs, RemoveObjectArgs, StatObjectArgs}
+import io.minio.{BucketExistsArgs, DownloadObjectArgs, GetObjectArgs, MakeBucketArgs, RemoveBucketArgs, RemoveObjectArgs, StatObjectArgs, UploadObjectArgs}
+import org.springframework.web.multipart.MultipartFile
 
 import scala.io.Source
 
@@ -37,6 +38,7 @@ class StorageService extends App {
   private def uploadDirPath: Path = Path.of(uploadDir)
 
   private def tasksDir(tid: Int) = uploadDirPath.resolve("tasks").resolve(String.valueOf(tid))
+
   private def submissionDir(sid: Int) = uploadDirPath.resolve("submissions").resolve(String.valueOf(sid))
 
   private def getFileContent(path: Option[Path]): String = {
@@ -85,6 +87,25 @@ class StorageService extends App {
   @throws[IOException]
   def storeSolutionFile(sid: Int, src: Path): Unit =
     Files.move(src, Files.createDirectories(submissionDir(sid)).resolve("solution-file"), StandardCopyOption.REPLACE_EXISTING)
+
+  /**
+    * Store (replace if exists) the solution file a submission
+    *
+    * @param sid Submission id
+    * @param src Current path to the file
+    * @throws IOException If the i/o operation fails
+    */
+  @throws[IOException]
+  def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit = {
+    val bucketName = "submissions"
+    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
+      minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+    }
+    val tempDesc = Files.createTempFile("solution-file", ".tmp")
+    file.transferTo(tempDesc)
+    minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName).`object`(s"$sid/solution-file").filename(tempDesc.toString).build())
+  }
+
 
   /**
     * Get the path to the main file of a task
@@ -222,8 +243,13 @@ class StorageService extends App {
     }
   }
 
+  def getFileFromBucket(bucketName: String, objName: String, tmpFile: String): Unit = {
+    minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename(tmpFile).build)
+  }
+
   /**
     * Gets the Content of the solution file
+    *
     * @param sid Submission id
     * @return The Solution file content
     */
@@ -231,6 +257,7 @@ class StorageService extends App {
 
   /**
     * Gets the Content of the main file
+    *
     * @param ccid Checkrunner id
     * @return The Solution file content
     */
@@ -238,6 +265,7 @@ class StorageService extends App {
 
   /**
     * Gets the Content of the secondary file
+    *
     * @param ccid Checkrunner id
     * @return The Solution file content
     */
@@ -245,6 +273,7 @@ class StorageService extends App {
 
   /**
     * Delete a main file
+    *
     * @param tid Task id
     * @return True if deteled, false if not file exists
     * @throws IOException If the i/o operation fails
@@ -252,13 +281,14 @@ class StorageService extends App {
   @throws[IOException]
   def deleteMainFileFromBucket(tid: Int): Boolean = {
     val str = getMainFileFromBucket(tid)
-    if (!str.equals("")) {// check ob existiert
+    if (!str.equals("")) {
       // remove obj from bucket
       val path = tid.toString + "/main-file"
       deleteFileFromBucket(path)
     }
     true
   }
+
   /**
     * Delete a secondary file
     *
@@ -269,7 +299,7 @@ class StorageService extends App {
   @throws[IOException]
   def deleteSecondaryFileFromBucket(tid: Int): Boolean = {
     val str = getSecondaryFileFromBucket(tid)
-    if (!str.equals("")) {// check ob existiert
+    if (!str.equals("")) { // check ob existiert
       // remove obj from bucket
       val path = tid.toString + "/secondary-file"
       deleteFileFromBucket(path)
@@ -286,7 +316,7 @@ class StorageService extends App {
     */
   @throws[IOException]
   def deleteFileFromBucket(filePath: String): Unit = {
-      // remove obj from bucket
+    // remove obj from bucket
     if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("tasks").build())) {
       minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket("tasks").`object`(filePath).build())
     }
@@ -318,9 +348,12 @@ class StorageService extends App {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteSolutionFileFromBucket(sid: Int): Boolean = {// nicht bucket sondern file des kurses löschen TODO1
+  def deleteSolutionFileFromBucket(sid: Int): Boolean = { // nicht bucket sondern file des kurses löschen TODO1
     if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("submissions").build())) {
-      minioService.minioClient.removeBucket(RemoveBucketArgs.builder().bucket("submissions").build())
+      val str = getSolutionFileFromBucket(sid)
+      if (!str.equals("")) {
+        minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket("submissions").`object`(sid + "solution-file").build())
+      }
       true
     }
     else {
@@ -328,16 +361,13 @@ class StorageService extends App {
     }
   }
 
-  def deleteAllSolutions(): Boolean = {
-    false
-  }
-
   /**
     * Deletes the configuration files from minio or FS and the DB entry
-    * @param tid task id
-    * @param cid course id
+    *
+    * @param tid  task id
+    * @param cid  course id
     * @param ccid checker config id
-    * @param cc checker config cc.id == ccid ??
+    * @param cc   checker config cc.id == ccid ??
     * @throws
     * @return
     */
@@ -360,7 +390,7 @@ class StorageService extends App {
       true
     }
     catch {
-      case e: _ => false
+      case e: Exception => false
     }
   }
 

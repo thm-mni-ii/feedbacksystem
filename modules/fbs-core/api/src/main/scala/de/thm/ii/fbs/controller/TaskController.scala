@@ -127,8 +127,14 @@ class TaskController {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
             val config = this.checkerConfigurationService.getAll(cid, tid).head
-            val path = this.storageService.pathToMainFile(config.id).get.toString
-            val spreadsheetFile = new File(path)
+            val tempFile: String = "tmp"
+            var spreadsheetFile: File = new File(tempFile)
+            if (config.isInBlockStorage) {
+              storageService.getFileFromBucket("tasks", s"${task.id}/main-file", tempFile)
+            } else {
+              val path = this.storageService.pathToMainFile(config.id).get.toString
+              spreadsheetFile = new File(path)
+            }
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)

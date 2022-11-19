@@ -133,10 +133,9 @@ class SubmissionController {
             throw new BadRequestException("Deadline Before Now")
           }
           if (true) { // TODO: Check media type compatibility
-            val tempDesc = Files.createTempFile("fbs", ".tmp")
-            file.transferTo(tempDesc)
             val submission = submissionService.create(uid, tid)
-            storageService.storeSolutionFile(submission.id, tempDesc)
+            //storageService.storeSolutionFile(submission.id, tempDesc)
+            storageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)
               checkerService.notify(tid, submission.id, cc, user)

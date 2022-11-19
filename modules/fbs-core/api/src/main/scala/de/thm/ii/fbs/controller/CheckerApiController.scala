@@ -32,15 +32,16 @@ class CheckerApiController {
 
   /**
     * Get the content of a submission
+    *
     * @param submissionID Submission id
-    * @param req Http request
-    * @param res Http response
+    * @param req          Http request
+    * @param res          Http response
     * @return The submission
     */
   @GetMapping(value = Array("/submissions/{submissionID}"))
   @ResponseBody
   def getSubmission(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "",
-             req: HttpServletRequest, res: HttpServletResponse): Any = {
+                    req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"submissions/$submissionID")) {
       throw new ForbiddenException()
     }
@@ -49,11 +50,13 @@ class CheckerApiController {
       case Some(submission) => submission
       case None => throw new ResourceNotFoundException()
     }
-    val soluion = storageService.getSolutionFileFromBucket(submissionID)
+
     val ccs = checkerConfigurationService
       .getAllForSubmission(submissionID)
       .map(checker => (checker, checkerServiceFactoryService(checker.checkerType)))
       .filter(checker => checker._2.isInstanceOf[CheckerServiceFormatSubmission])
+
+
 
     val cco = if (ccs.length == 1) {
       ccs.headOption
@@ -67,13 +70,21 @@ class CheckerApiController {
       case _ => throw new BadRequestException()
     }
 
-    checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, soluion)
+    var solution: String = ""
+    if (cc.isInBlockStorage){
+      solution = storageService.getSolutionFileFromBucket(submissionID)
+    }
+    else {
+      solution = storageService.getSolutionFile(submissionID)
+    }
+
+    checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, solution)
   }
 
   @GetMapping(value = Array("/checkers/{checkerID}"))
   @ResponseBody
   def getChecker(@PathVariable checkerID: Int, @RequestParam token: String, @RequestParam typ: String = "",
-             req: HttpServletRequest, res: HttpServletResponse): Any = {
+                 req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"checkers/$checkerID")) {
       throw new ForbiddenException()
     }
