@@ -15,8 +15,8 @@ class MinioService {
 
   def initialMinio(): Unit = {
     minioClient = MinioClient.builder()
-      .endpoint("http://127.0.0.1", 9000, false)
-      .credentials("admin", "SqfyBWhiFGr7FK60cVR2rel").build()
+      .endpoint(minioUrl, port, false)
+      .credentials(minioUser, minioPassword).build()
   }
 
 }

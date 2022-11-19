@@ -132,14 +132,6 @@ class StorageService extends App {
   def pathToSolutionFile(sid: Int): Option[Path] = Option(submissionDir(sid).resolve("solution-file")).filter(Files.exists(_))
 
   /**
-    * Get the path to the subtask file of a submission
-    *
-    * @param sid Submission id
-    * @return The path to the file
-    */
-  def pathToSubTaskFile(sid: Int): Option[Path] = Option(submissionDir(sid).resolve("subtask-file"))
-
-  /**
     * Gets the Content of the solution file
     *
     * @param sid Submission id
@@ -276,6 +268,14 @@ class StorageService extends App {
     * @return The Solution file content
     */
   def getSecondaryFileFromBucket(ccid: Int): String = getFileContentBucket("tasks", ccid, "secondary-file")
+
+  /**
+    * Gets the Content of the subtask file
+    *
+    * @param ccid Checkrunner id
+    * @return
+    */
+  def getSubTaskFromBucket(ccid: Int): String = getFileContentBucket("submissions", ccid, "subtask-file")
 
   /**
     * Delete a main file

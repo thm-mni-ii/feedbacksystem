@@ -18,7 +18,7 @@ services:
       test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   runtime-bash:
@@ -60,7 +60,7 @@ services:
       test: curl -k https://localhost:443
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   mysql-checker:
@@ -77,7 +77,7 @@ services:
       test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   psql-checker:
@@ -94,7 +94,7 @@ services:
       test: pg_isready
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   mongodb:
@@ -110,7 +110,7 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb://localhost:27017/ --quiet
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   minio:
@@ -132,7 +132,7 @@ services:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   runner:
@@ -165,7 +165,7 @@ services:
       test: curl -k https://localhost:8081
       timeout: 10s
       interval: 10s
-      #start_period: 10s
+      start_period: 10s
       retries: 3
 
   digital-classroom:

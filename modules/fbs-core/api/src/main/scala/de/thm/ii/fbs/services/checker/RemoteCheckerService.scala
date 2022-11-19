@@ -110,6 +110,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
 
   private def handleSubTasks(sid: Int, cc: CheckrunnerConfiguration): Unit = {
+    //val subTaskPath = storageService.getFileFromBucket("submissions", s"$sid/subtask-file")
     val subTaskPath = new File("subtask-file")
     storageService.getFileFromBucket("submissions", s"$sid/subtask-file", "subtask-file")
     try {

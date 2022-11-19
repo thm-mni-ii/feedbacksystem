@@ -71,7 +71,7 @@ spring:
 minio:
   user: admin
   password: SqfyBWhiFGr7FK60cVR2rel
-  url: ${http://127.0.0.1}
+  url: "http://127.0.0.1"
   port: 9000
 
 url:
