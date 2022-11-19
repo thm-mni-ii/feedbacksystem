@@ -1,5 +1,11 @@
 import { Component, OnInit } from "@angular/core";
+import { Observable } from "rxjs";
+import { Routine } from "src/app/model/sql_playground/Routine";
+import { Trigger } from "src/app/model/sql_playground/Trigger";
+import { View } from "src/app/model/sql_playground/View";
 import { TitlebarService } from "../../service/titlebar.service";
+import { AuthService } from "src/app/service/auth.service";
+import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 
 /**
  * This component is for the sql playground
@@ -10,21 +16,65 @@ import { TitlebarService } from "../../service/titlebar.service";
   styleUrls: ["./sql-playground.component.scss"],
 })
 export class SqlPlaygroundComponent implements OnInit {
-  constructor(private titlebar: TitlebarService) {}
+  constructor(
+    private titlebar: TitlebarService,
+    private authService: AuthService,
+    private sqlPlaygroundService: SqlPlaygroundService
+  ) {}
 
   activeDb: number;
   resultset: any;
 
+  triggers: Trigger[];
+  routines: Routine[];
+  views: View[];
+  tables: any[];
+
+  ngOnInit() {
+    this.titlebar.emitTitle("SQL Playground");
+  }
+
   changeActiveDb($event) {
     this.activeDb = $event;
+    this.updateScheme();
   }
 
   changeResultset($event) {
     this.resultset = $event;
-    console.log(this.resultset);
+    this.updateScheme();
   }
 
-  ngOnInit() {
-    this.titlebar.emitTitle("SQL Playground");
+  updateScheme() {
+    const token = this.authService.getToken();
+
+    this.sqlPlaygroundService
+      .getTables(token.id, this.activeDb)
+      .subscribe((result) => {
+        this.tables = result;
+      });
+
+    this.sqlPlaygroundService
+      .getConstraints(token.id, this.activeDb)
+      .subscribe((result) => {
+        // console.log(result);
+      });
+
+    this.sqlPlaygroundService
+      .getViews(token.id, this.activeDb)
+      .subscribe((result) => {
+        this.views = result;
+      });
+
+    this.sqlPlaygroundService
+      .getRoutines(token.id, this.activeDb)
+      .subscribe((result) => {
+        this.routines = result;
+      });
+
+    this.sqlPlaygroundService
+      .getTriggers(token.id, this.activeDb)
+      .subscribe((result) => {
+        this.triggers = result;
+      });
   }
 }

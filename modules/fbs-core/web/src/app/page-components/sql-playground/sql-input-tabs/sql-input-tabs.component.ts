@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { interval } from "rxjs";
 import {
   switchMap,
-  takeWhile,
   retry,
   delay,
   timeout,
@@ -15,7 +14,6 @@ import { UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
-import { outputAst } from "@angular/compiler";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -43,35 +41,6 @@ export class SqlInputTabsComponent implements OnInit {
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
-  }
-
-  getTables() {
-    const token = this.authService.getToken();
-    this.sqlPlaygroundService
-      .getTables(token.id, this.activeDb)
-      .subscribe((result) => {
-        console.log(result);
-      });
-    this.sqlPlaygroundService
-      .getConstraints(token.id, this.activeDb)
-      .subscribe((result) => {
-        console.log(result);
-      });
-    this.sqlPlaygroundService
-      .getViews(token.id, this.activeDb)
-      .subscribe((result) => {
-        console.log(result);
-      });
-    this.sqlPlaygroundService
-      .getRoutines(token.id, this.activeDb)
-      .subscribe((result) => {
-        console.log(result);
-      });
-    this.sqlPlaygroundService
-      .getTriggers(token.id, this.activeDb)
-      .subscribe((result) => {
-        console.log(result);
-      });
   }
 
   closeTab(index: number) {

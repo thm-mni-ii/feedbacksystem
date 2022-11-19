@@ -10,7 +10,5 @@ export class DbSchemeComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {
-    console.log("");
-  }
+  ngOnInit(): void {}
 }

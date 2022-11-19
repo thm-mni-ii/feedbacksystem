@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { DbSchemeComponent } from "../db-scheme.component";
-import tablesJson from "../test-data/tables.json";
 
 @Component({
   selector: "app-db-scheme-table",
@@ -11,13 +10,11 @@ export class DbSchemeTablesComponent
   extends DbSchemeComponent
   implements OnInit
 {
-  @Input() tables: Array<any> = this.getTables();
+  @Input() tables: Array<any>;
 
-  getTables(): Array<any> {
-    return tablesJson.tables;
-  }
+  ngOnInit(): void {}
 
-  ngOnInit(): void {
-    console.log("");
+  ngOnChanges(): void {
+    console.log(this.tables);
   }
 }
