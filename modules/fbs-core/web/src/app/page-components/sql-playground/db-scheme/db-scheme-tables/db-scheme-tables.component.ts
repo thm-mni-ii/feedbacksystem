@@ -15,6 +15,6 @@ export class DbSchemeTablesComponent
   ngOnInit(): void {}
 
   ngOnChanges(): void {
-    console.log(this.tables);
+    // console.log(this.tables);
   }
 }

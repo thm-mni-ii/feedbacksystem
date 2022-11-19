@@ -4,8 +4,10 @@
     <mat-panel-title> {{ table.table_name }} </mat-panel-title>
   </mat-expansion-panel-header>
   <div *ngFor="let column of table.columns; index as j">
-    <p>{{ table.columns[j].columnName }} {{ table.columns[j].udtName }}</p>
-    <p>isNullable: {{ table.columns[j].isNullable }}</p>
+    <p>{{ table.columns[j].columnName }} --> {{ table.columns[j].udtName }}</p>
+    <p *ngIf="this.table.columns[j].isNullable === false">
+      isNullable: {{ table.columns[j].isNullable }}
+    </p>
     <hr />
   </div>
 </mat-expansion-panel>
