@@ -41,9 +41,9 @@ class SpreadsheetCheckerService extends CheckerService {
     val spreadsheetMediaInformation = task.mediaInformation.get.asInstanceOf[SpreadsheetMediaInformation]
     val submission = this.submissionService.getOne(submissionID, fu.id).get
 
-    val fields = this.getFields(cc.id, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
-    val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc.id, spreadsheetMediaInformation, fu.username, pointsFields))
-    val submittedFields = this.getSubmittedFields(submission.id)
+    val fields = this.getFields(cc, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
+    val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc, spreadsheetMediaInformation, fu.username, pointsFields))
+    val submittedFields = this.getSubmittedFields(submission.id, cc)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
@@ -55,18 +55,33 @@ class SpreadsheetCheckerService extends CheckerService {
     this.submittSubTasks(cc.id, submissionID, results, pointFields)
   }
 
-  private def getFields(ccID: Int, spreadsheetMediaInformation: SpreadsheetMediaInformation, username: String, fields: String): Seq[(String, String)] = {
-    val path = this.storageService.pathToMainFile(ccID).get.toString
-    val spreadsheetFile = new File(path)
+  private def getFields(cc: CheckrunnerConfiguration, spreadsheetMediaInformation: SpreadsheetMediaInformation
+                        , username: String, fields: String): Seq[(String, String)] = {
+    var spreadsheetFile: File = null
+    if (cc.isInBlockStorage) {
+      //spreadsheetFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
+      spreadsheetFile = new File("main-file")
+      storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file", "main-file")
+    } else {
+      val path = this.storageService.pathToMainFile(cc.id).get.toString
+      spreadsheetFile = new File(path)
+    }
 
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
     this.spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
   }
 
-  private def getSubmittedFields(submissionID: Int): UtilMap[String, String] = {
-    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-    val submissionFile = new File(submissionPath)
+  private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
+    var submissionFile: File = null
+    if (cc.isInBlockStorage) {
+      //submissionFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
+      submissionFile = new File("solution-file")
+      storageService.getFileFromBucket("submission", s"$submissionID/solution-file", "solution-file")
+    } else {
+      val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
+      submissionFile = new File(submissionPath)
+    }
 
     val mapper = new JsonMapper()
     val resultFields = mapper.readValue(submissionFile, classOf[UtilMap[String, String]])

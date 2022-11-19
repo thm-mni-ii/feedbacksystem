@@ -34,10 +34,10 @@ class ExcelCheckerService extends CheckerService {
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
-      val excelMediaInformation = this.getMediaInfo(cc.id)
+      val excelMediaInformation = this.getMediaInfo(cc)
       val submission = this.submissionService.getOne(submissionID, fu.id).get
-      val submissionFile = this.getSubmissionFile(submission.id)
-      val mainFile = this.getMainFile(cc.id)
+      val submissionFile = this.getSubmissionFile(submission.id, cc)
+      val mainFile = this.getMainFile(cc)
 
       val results = excelMediaInformation.tasks.map(t => this.checkTask(mainFile, submissionFile, t))
       val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
@@ -119,14 +119,28 @@ class ExcelCheckerService extends CheckerService {
     CheckResultTask(success = false, List(CheckResult(errorMsg = errorMsg)))
   }
 
-  private def getSubmissionFile(submissionID: Int): File = {
-    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-    new File(submissionPath)
+  private def getSubmissionFile(submissionID: Int, cc: CheckrunnerConfiguration): File = {
+    if (cc.isInBlockStorage) {
+      //storageService.getFileFromBucket("submissions", s"${cc.taskId}/solution-file")
+      val tmpFile = new File("solution-file")
+      storageService.getFileFromBucket("submissions", s"${cc.taskId}/solution-file", "solution-file")
+      tmpFile
+    } else {
+      val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
+      new File(submissionPath)
+    }
   }
 
-  private def getMainFile(ccId: Int): File = {
-    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
-    new File(mainFilePath)
+  private def getMainFile(cc: CheckrunnerConfiguration): File = {
+    if (cc.isInBlockStorage) {
+      //storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
+      val tmpFile = new File("main-file")
+      storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file", "main-file")
+      tmpFile
+    } else {
+      val mainFilePath = this.storageService.pathToMainFile(cc.id).get.toString
+      new File(mainFilePath)
+    }
   }
 
   private def buildResultText(success: Boolean,
@@ -214,10 +228,17 @@ class ExcelCheckerService extends CheckerService {
     })
   }
 
-  private def getMediaInfo(ccId: Int): ExcelMediaInformationTasks = {
-    val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
-    val file = new File(secondaryFilePath)
-    objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
+  private def getMediaInfo(cc: CheckrunnerConfiguration): ExcelMediaInformationTasks = {
+    if (cc.isInBlockStorage) {
+      //val tmpFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/secondary-file")
+      val tmpFile = new File("secondary-file")
+      storageService.getFileFromBucket("tasks", s"${cc.taskId}/secondary-file", "secondary-file")
+      objectMapper.readValue(tmpFile, classOf[ExcelMediaInformationTasks])
+    } else {
+      val secondaryFilePath = this.storageService.pathToSecondaryFile(cc.id).get.toString
+      val file = new File(secondaryFilePath)
+      objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
+    }
   }
 
   private def mergeCheckResult(c1: CheckResult, c2: CheckResult): CheckResult = {

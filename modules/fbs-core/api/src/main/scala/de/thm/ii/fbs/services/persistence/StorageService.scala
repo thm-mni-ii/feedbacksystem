@@ -244,6 +244,12 @@ class StorageService extends App {
   }
 
   def getFileFromBucket(bucketName: String, objName: String, tmpFile: String): Unit = {
+/*
+    val tmpFile = new File("temp-file")
+    minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename("temp-file").build)
+    tmpFile
+*/
+
     minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename(tmpFile).build)
   }
 
@@ -348,11 +354,11 @@ class StorageService extends App {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteSolutionFileFromBucket(sid: Int): Boolean = { // nicht bucket sondern file des kurses löschen TODO1
+  def deleteSolutionFileFromBucket(sid: Int): Boolean = {
     if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket("submissions").build())) {
       val str = getSolutionFileFromBucket(sid)
       if (!str.equals("")) {
-        minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket("submissions").`object`(sid + "solution-file").build())
+        minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket("submissions").`object`(s"$sid/solution-file").build())
       }
       true
     }
