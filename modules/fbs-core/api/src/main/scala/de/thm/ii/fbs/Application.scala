@@ -48,7 +48,7 @@ class Application {
   @EventListener(value = Array(classOf[ApplicationReadyEvent]))
   private def initializeMinio(): Unit = {
     minioService.initialMinio()
-    logger.info("Minio started")
+    logger.info("Minioclient connected")
   }
 }
 /**
