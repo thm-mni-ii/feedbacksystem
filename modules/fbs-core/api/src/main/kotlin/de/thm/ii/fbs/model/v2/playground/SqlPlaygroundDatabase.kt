@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model.v2.playground
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import de.thm.ii.fbs.model.v2.security.User
 import javax.persistence.*
 
@@ -16,6 +17,9 @@ class SqlPlaygroundDatabase(
     var owner: User,
     @Column(nullable = false)
     var active: Boolean = false,
+    @Column(nullable = false)
+    @JsonIgnore
+    var deleted: Boolean = false,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
