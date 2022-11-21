@@ -4,7 +4,7 @@ import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundDatabase
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface SqlPlaygroundDatabaseRepository : JpaRepository<SqlPlaygroundDatabase, Int> {
-    fun findByOwner_Id(ownerId: Int): List<SqlPlaygroundDatabase>
-    fun findByOwner_IdAndId(ownerId: Int, id: Int): SqlPlaygroundDatabase?
-    fun findByOwner_IdAndActive(ownerId: Int, active: Boolean): SqlPlaygroundDatabase?
+    fun findByOwner_IdAndDeleted(ownerId: Int, deleted: Boolean): List<SqlPlaygroundDatabase>
+    fun findByOwner_IdAndIdAndDeleted(ownerId: Int, id: Int, deleted: Boolean): SqlPlaygroundDatabase?
+    fun findByOwner_IdAndActiveAndDeleted(ownerId: Int, active: Boolean, deleted: Boolean): SqlPlaygroundDatabase?
 }
