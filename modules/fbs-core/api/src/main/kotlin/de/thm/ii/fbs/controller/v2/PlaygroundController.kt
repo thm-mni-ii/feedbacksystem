@@ -36,7 +36,9 @@ class PlaygroundController(
             currentActiveDb.active = false
             databaseRepository.save(currentActiveDb)
         }
-        return databaseRepository.save(db)
+        val newDb = databaseRepository.save(db)
+        createAllEntities(newDb)
+        return newDb
     }
 
     @DeleteMapping("/{dbId}")
@@ -120,4 +122,8 @@ class PlaygroundController(
 
     private fun getEntity(userId: Int, databaseId: Int, type: String) =
         entityRepository.findByDatabase_Owner_IdAndDatabase_idAndType(userId, databaseId, type)?.data ?: throw NotFoundException()
+
+    private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach {type ->
+        entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
+    }
 }
