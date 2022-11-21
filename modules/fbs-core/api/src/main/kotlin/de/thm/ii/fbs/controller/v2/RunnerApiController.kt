@@ -49,6 +49,6 @@ class RunnerApiController(
         }
 
     private fun getEntity(query: SqlPlaygroundQuery, type: String) =
-        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndType(query.runIn.owner.id!!, query.runIn.id!!, type) ?:
+        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(query.runIn.owner.id!!, query.runIn.id!!, false, type) ?:
             SqlPlaygroundEntity(query.runIn, type)
 }
