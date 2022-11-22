@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.controller
 
+import de.thm.ii.fbs.controller.exception.ForbiddenException
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -23,31 +25,27 @@ class ExportController {
   @Autowired
   private val storageService: StorageService = null
 
-  @GetMapping(value = Array("/{taskId}"))
+  @GetMapping(value = Array("/{cid}/{taskId}"))
   @ResponseBody
   def getTask(@PathVariable(value = "taskId", required = true) taskId: Int,
+              @PathVariable(value = "cid", required = true) cid: Int,
               req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
+    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
-    //res.setHeader("Content-Disposition", s"attachment;filename=task_${taskId}.fbs-export")
-    //res.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+      val file = new File(taskExportService.exportTask(taskId))
+      val resource = new InputStreamResource(new FileInputStream(file))
 
-    val file = new File(taskExportService.exportTask(taskId))
-    val resource = new InputStreamResource(new FileInputStream(file))
-
-    ResponseEntity.ok()
-      .contentType(MediaType.APPLICATION_OCTET_STREAM)
-      .contentLength(file.length())
-      .header("Content-Disposition", s"attachment;filename=task_$taskId.fbs-export")
-      .body(resource)
-
-
-    /*val courseRights = courseRegistrationService.getCoursePrivileges(user.id)
-    user.globalRole match {
-      case GlobalRole.ADMIN | GlobalRole.MODERATOR => courses
-      case _ => courses
-        .filter(c => c.visible || courseRights.getOrElse(c.id, CourseRole.STUDENT) != CourseRole.STUDENT)
-    }*/
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(file.length())
+        .header("Content-Disposition", s"attachment;filename=task_$taskId.fbs-export")
+        .body(resource)
+    } else {
+      throw new ForbiddenException()
+    }
   }
 
 }
