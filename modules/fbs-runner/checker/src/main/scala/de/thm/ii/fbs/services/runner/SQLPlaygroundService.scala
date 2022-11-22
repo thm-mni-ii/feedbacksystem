@@ -18,7 +18,7 @@ object SQLPlaygroundService {
     OutputJsonStructure("constraints", Option("constrains")),
     OutputJsonStructure("views"),
     OutputJsonStructure("routines"),
-    OutputJsonStructure("triggers")
+    OutputJsonStructure("triggers", Option("manipulation"))
   )
 
   def isPlaygroundResult(res: JsonObject): Boolean = res.getString("resultType", "").equals(PLAYGROUND_RESULT_TYPE)
