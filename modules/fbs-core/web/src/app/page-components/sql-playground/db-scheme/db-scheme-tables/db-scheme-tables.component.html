@@ -24,10 +24,8 @@
       </li>
       <li *ngFor="let constraint of table.constraints.constrains; index as k">
         <span class="constraints">
-          <span> Name: {{ constraint.constraintName }} </span>
-          <span>
-            {{ constraint.constraintType }} on {{ constraint.name }}
-          </span>
+          <span> Name: {{ constraint.name }} </span>
+          <span> {{ constraint.type }} on {{ constraint.name }} </span>
           <span *ngIf="constraint.checkClause !== null">
             Clause: {{ constraint.checkClause }}
           </span>

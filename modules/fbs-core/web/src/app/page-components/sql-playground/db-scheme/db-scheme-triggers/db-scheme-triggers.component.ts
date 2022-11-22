@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { Trigger } from "src/app/model/sql_playground/Trigger";
 import { DbSchemeComponent } from "../db-scheme.component";
 

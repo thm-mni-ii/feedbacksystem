@@ -31,7 +31,10 @@
       (click)="createDb()"
       [disabled]="!isInputValid()"
     >
-      Erstellen
+      <span class="spinner" *ngIf="pending">
+        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+      </span>
+      <span *ngIf="!pending">Erstellen</span>
     </button>
   </mat-dialog-actions>
 </div>

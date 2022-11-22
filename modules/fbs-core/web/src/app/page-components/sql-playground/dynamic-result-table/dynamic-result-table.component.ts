@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, Input } from "@angular/core";
+import { Component, ViewChild, Input, OnChanges } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 
@@ -12,7 +12,7 @@ export interface Content {
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],
 })
-export class DynamicResultTableComponent {
+export class DynamicResultTableComponent implements OnChanges {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @Input() resultset: any;
   @Input() isQueryPending: boolean = false;
@@ -37,6 +37,4 @@ export class DynamicResultTableComponent {
       }, 100);
     }
   }
-
-  downloadResults() {}
 }

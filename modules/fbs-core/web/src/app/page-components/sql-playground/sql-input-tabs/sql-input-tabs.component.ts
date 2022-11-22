@@ -1,13 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { interval } from "rxjs";
-import {
-  switchMap,
-  retry,
-  delay,
-  timeout,
-  retryWhen,
-  take,
-} from "rxjs/operators";
+import { delay, retryWhen } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
@@ -155,7 +147,7 @@ export class SqlInputTabsComponent implements OnInit {
           this.isPending.emit(false);
           this.resultset.emit(res);
         },
-        (err) => {},
+        () => {}, //handle error
         () => console.log("Request Complete")
       );
   }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { Observable } from "rxjs";
 import { Database } from "../../../model/sql_playground/Database";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -72,7 +72,7 @@ export class DbControlPanelComponent implements OnInit {
   }
 
   isSelectDbActive(): boolean {
-    if(this.activeDb !== undefined){
+    if (this.activeDb !== undefined) {
       return this.selectedDb == this.activeDb.id;
     } else {
       return false;
@@ -110,7 +110,7 @@ export class DbControlPanelComponent implements OnInit {
         this.sqlPlaygroundService
           .deleteDatabase(this.token.id, selectedDb.id)
           .subscribe(
-            (data) => {
+            () => {
               this.snackbar.open(
                 `Datenbank ${selectedDb.name} erfolgreich gelöscht`,
                 "Ok",
@@ -138,7 +138,7 @@ export class DbControlPanelComponent implements OnInit {
     this.sqlPlaygroundService
       .activateDatabase(this.token.id, selectedDb.id)
       .subscribe(
-        (data) => {
+        () => {
           this.snackbar.open(
             `Datenbank ${selectedDb.name} erfolgreich aktiviert`,
             "Ok",

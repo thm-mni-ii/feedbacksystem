@@ -1,5 +1,4 @@
 import { Component, OnInit } from "@angular/core";
-import { Observable } from "rxjs";
 import { Routine } from "src/app/model/sql_playground/Routine";
 import { Trigger } from "src/app/model/sql_playground/Trigger";
 import { View } from "src/app/model/sql_playground/View";
@@ -71,24 +70,18 @@ export class SqlPlaygroundComponent implements OnInit {
       .getViews(token.id, this.activeDb)
       .subscribe((result) => {
         this.views = result;
-        console.log(this.views);
-        
       });
 
     this.sqlPlaygroundService
       .getRoutines(token.id, this.activeDb)
       .subscribe((result) => {
         this.routines = result;
-        console.log(this.routines);
-        
       });
 
     this.sqlPlaygroundService
       .getTriggers(token.id, this.activeDb)
       .subscribe((result) => {
         this.triggers = result;
-        console.log(this.triggers);
-        
       });
   }
 }

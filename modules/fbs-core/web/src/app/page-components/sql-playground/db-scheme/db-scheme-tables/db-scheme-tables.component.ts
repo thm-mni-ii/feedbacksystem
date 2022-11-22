@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnChanges } from "@angular/core";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
 import { Table } from "src/app/model/sql_playground/Table";
 import { DbSchemeComponent } from "../db-scheme.component";
@@ -8,7 +8,10 @@ import { DbSchemeComponent } from "../db-scheme.component";
   templateUrl: "./db-scheme-tables.component.html",
   styleUrls: ["../db-scheme.component.scss"],
 })
-export class DbSchemeTablesComponent extends DbSchemeComponent {
+export class DbSchemeTablesComponent
+  extends DbSchemeComponent
+  implements OnChanges
+{
   @Input() tables: Table[];
   @Input() constraints: Constraint[];
 
