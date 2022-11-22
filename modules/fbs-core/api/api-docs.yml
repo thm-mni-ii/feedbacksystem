@@ -2877,7 +2877,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/SQLConstraint"
+                  $ref: "#/components/schemas/SQLTableConstraints"
   "/api/v2/playground/{uid}/databases/{dbId}/activate":
     post:
       tags:
@@ -3413,12 +3413,12 @@ components:
           type: string
         udtName:
           type: string
-        nullable:
+        isNullable:
           type: boolean
     SQLView:
       type: object
       properties:
-        tableName:
+        table:
           type: string
         definition:
           type: string
@@ -3427,24 +3427,17 @@ components:
       properties:
         name:
           type: string
-        event:
-          $ref: "#/components/schemas/SQLTriggerEvent"
-        action:
-          $ref: "#/components/schemas/SQLTriggerAction"
-    SQLTriggerAction:
-      type: object
-      properties:
         statement:
           type: string
         orientation:
           type: string
         timing:
           type: string
-    SQLTriggerEvent:
-      type: object
-      properties:
         manipulation:
-          type: string
+          type: array
+          items:
+            type: string
+            enum: [ INSERT, UPDATE, DELETE ]
         objectTable:
           type: string
     SQLRoutine:
@@ -3456,6 +3449,15 @@ components:
           type: string
         definition:
           type: string
+    SQLTableConstraints:
+      type: object
+      properties:
+        table:
+          type: string
+        constraints:
+          type: array
+          items:
+            $ref: "#/components/schemas/SQLConstraint"
     SQLConstraint:
       type: object
       properties:

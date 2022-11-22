@@ -179,12 +179,6 @@ export const httpInterceptorProviders = [
     DynamicResultTableComponent,
     DbControlPanelComponent,
     SqlInputTabsComponent,
-    DbSchemeComponent,
-    DbSchemeViewsComponent,
-    DbSchemeTriggersComponent,
-    DbSchemeRoutinesComponent,
-    DbSchemeTablesComponent,
-    NewDbDialogComponent,
   ],
   imports: [
     BrowserModule,

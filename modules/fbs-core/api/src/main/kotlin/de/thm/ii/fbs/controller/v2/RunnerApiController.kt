@@ -26,13 +26,20 @@ class RunnerApiController(
     fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
         if (result.mode != RunnerMode.EXECUTE) return
         val query = queryRepository.findByIdOrNull(result.executionId) ?: throw NotFoundException()
+        updateAllEntity(query, result)
+        query.result = SqlPlaygroundResult(result.error, result.errorMsg, result.result)
+        queryRepository.save(query)
+    }
+
+    private fun updateAllEntity(query: SqlPlaygroundQuery, result: SqlPlaygroundRunnerResult) {
+        // Do not update the entity if the query had an error, as the checker will not return db information if there was an error
+        if (result.error) return
+
         updateEntity(query, result, "tables")
         updateEntity(query, result, "constraints")
         updateEntity(query, result, "views")
         updateEntity(query, result, "routines")
         updateEntity(query, result, "triggers")
-        query.result = SqlPlaygroundResult(result.error, result.errorMsg, result.result)
-        queryRepository.save(query)
     }
 
     private fun updateEntity(query: SqlPlaygroundQuery, result: SqlPlaygroundRunnerResult, type: String) =
@@ -42,6 +49,6 @@ class RunnerApiController(
         }
 
     private fun getEntity(query: SqlPlaygroundQuery, type: String) =
-        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndType(query.runIn.owner.id!!, query.runIn.id!!, type) ?:
+        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(query.runIn.owner.id!!, query.runIn.id!!, false, type) ?:
             SqlPlaygroundEntity(query.runIn, type)
 }

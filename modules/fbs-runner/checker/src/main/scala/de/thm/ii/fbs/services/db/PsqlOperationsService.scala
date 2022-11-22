@@ -103,8 +103,8 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   override def getDatabaseInformation(client: JDBCClient): Future[ResultSet] = {
     val tables =
       """
-        |SELECT c.table_name,
-        |json_agg(json_build_object('columnName', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
+        |SELECT c.table_name as name,
+        |json_agg(json_build_object('name', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
         |FROM information_schema.columns as c
         |join information_schema.tables as t on c.table_name = t.table_name and c.table_schema = t.table_schema
         |WHERE c.table_schema = 'public' and t.table_type != 'VIEW'
@@ -112,9 +112,9 @@ class PsqlOperationsService(override val dbName: String, override val username: 
         |""".stripMargin
     val constrains =
       """
-        |select constrains.table_name,
-        |json_agg(json_build_object('columnName', constrains.column_name, 'constraintName',
-        |constrains.constraint_name, 'constraintType', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json
+        |select constrains.table_name as table,
+        |json_agg(json_build_object('columnName', constrains.column_name, 'name',
+        |constrains.constraint_name, 'type', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json
         |from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
         |from information_schema.KEY_COLUMN_USAGE as kcu
         |JOIN information_schema.table_constraints as tc ON tc.constraint_name = kcu.constraint_name
@@ -128,23 +128,26 @@ class PsqlOperationsService(override val dbName: String, override val username: 
         |""".stripMargin
     val views =
       """
-        |SELECT table_name, view_definition
+        |SELECT table_name as table, view_definition as definition
         |FROM information_schema.views
         |WHERE table_schema = 'public';
         |""".stripMargin
 
     val routines =
       """
-        |SELECT routine_name, routine_type, routine_definition
+        |SELECT routine_name as name, routine_type as type, routine_definition as definition
         |FROM information_schema.routines
         |WHERE routine_schema = 'public';
         |""".stripMargin
 
     val triggers =
       """
-        |SELECT trigger_name, event_manipulation, event_object_table, action_statement, action_orientation, action_timing
+        |SELECT trigger_name as name,
+        |event_object_table as objectTable,
+        |json_agg(event_manipulation) as json,
+        |action_statement as statement, action_orientation as orientation, action_timing as timing
         |FROM information_schema.triggers
-        |WHERE trigger_schema = 'public';
+        |WHERE trigger_schema = 'public' group by trigger_name, action_statement, action_orientation, action_timing, event_object_table;
         |""".stripMargin
 
     client.queryFuture(s"$tables $constrains $views $routines $triggers")
