@@ -22,7 +22,6 @@ class TaskExportService {
   private val storageService: StorageService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper()
 
-
   def exportTask(taskId: Int): String = {
     val optionalTask = taskService.getOne(taskId)
     optionalTask match {
@@ -58,6 +57,4 @@ class TaskExportService {
   case class TaskExport(task: Task, configs: List[ConfigExport])
 
   case class ConfigExport(config: CheckrunnerConfiguration, subTasks: List[CheckrunnerSubTask], mainFile: Option[String], secondaryFile: Option[String])
-
 }
-

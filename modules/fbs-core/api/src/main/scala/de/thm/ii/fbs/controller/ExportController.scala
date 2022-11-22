@@ -47,5 +47,4 @@ class ExportController {
       throw new ForbiddenException()
     }
   }
-
 }
