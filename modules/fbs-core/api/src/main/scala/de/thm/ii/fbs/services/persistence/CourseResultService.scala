@@ -74,7 +74,7 @@ class CourseResultService {
     |         ) as subtasks on submissions.submission_id = subtasks.submission_id
     |where course_id = ? and uc.course_role between ? and ?
     |group by u.user_id
-    |order by u.user_id;
+    |order by u.surname, u.user_id;
     |""".stripMargin, (res, _) => parseResult(res), cid, minRole, maxRole)
 
   /**

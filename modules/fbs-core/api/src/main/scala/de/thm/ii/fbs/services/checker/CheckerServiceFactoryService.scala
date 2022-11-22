@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
-import de.thm.ii.fbs.services.checker.excel.{ExcelCheckerService, SpreadsheetCheckerService}
+import de.thm.ii.fbs.services.checker.excel.ExcelCheckerService
+import de.thm.ii.fbs.services.checker.math.SpreadsheetCheckerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service

@@ -1,0 +1,28 @@
+{
+  "SQLTriggers": [
+    {
+      "name": "Trigger_1",
+      "event": {
+        "manipulation": "lorem",
+        "objectTable": "ipsulum"
+      },
+      "action": {
+        "statement": "lorem",
+        "orientation": "ipsulum",
+        "timing": "now"
+      }
+    },
+    {
+      "name": "Trigger_2",
+      "event": {
+        "manipulation": "lorem_2",
+        "objectTable": "ipsulum_2"
+      },
+      "action": {
+        "statement": "lorem_2",
+        "orientation": "ipsulum_2",
+        "timing": "now_2"
+      }
+    }
+  ]
+}
