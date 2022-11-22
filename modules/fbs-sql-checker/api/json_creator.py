@@ -20,7 +20,7 @@ tables, selAttributes, proAttributes, strings = [], [], [], []
 def parse_single_stat_upload_db(data, client):
     # create DB-connection
     client = MongoClient(client, 27107)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Queries"]
     (
         tables2,
@@ -151,7 +151,7 @@ def check_solution_chars(
         group_by_right,
         joins_right,
     ) = (False, False, False, False, False, False, False)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -261,7 +261,7 @@ def check_solution_chars(
 
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Solutions"]
     record = prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
@@ -475,7 +475,7 @@ def prod_json(
 
 
 def insert_not_parsable(my_uuid, submission, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["NotParsable"]
     record = json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
