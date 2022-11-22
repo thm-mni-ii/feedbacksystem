@@ -48,8 +48,9 @@ class TaskExportService {
         writer.write(objectMapper.writeValueAsString(export))
         writer.close()
         files += filename
-        Archiver.compress(f"/tmp/export.tar.gz", files.map(f => new File(f)).toArray: _*)
-        f"/tmp/export.tar.gz"
+        val archive = f"task_$taskId.fbs-export"
+        Archiver.pack(archive, files.map(f => new File(f)).toArray: _*)
+        archive
       case None => null // TODO ERROR
     }
   }
