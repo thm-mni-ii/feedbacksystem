@@ -24,9 +24,9 @@ spec:
         command: ["/custom/prepare-runner-images.sh"]
         env:
           - name: BASH_DOCKER
-            value: thmmniii/fbs-runtime-bash:latest
+            value: {{ .Values.runner.bashChecker.image }}
           - name: RUNNER_SQL_CHECKER_IMAGE
-            value: thmmniii/fbs-sql-checker:latest
+            value: {{ .Values.runner.sqlChecker.image }}
           - name: HOST_TMP_DIR
             value: /fbs-tmp
           - name: INSIDE_DOCKER

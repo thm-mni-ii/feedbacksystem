@@ -48,6 +48,11 @@ runner:
     hmacSecret: fbs # CHANGE ME
     debug:
       disableContainerRemoval: false
+  sqlChecker:
+    enabled: true
+    image: "thmmniii/fbs-sql-checker:latest"
+  bashChecker:
+    image: "thmmniii/fbs-runtime-bash:latest"
   dink:
     image:
       registry: docker.io
@@ -65,9 +70,6 @@ runner:
       memory:
         request: "100Mi"
         limit: "4Gi"
-
-sqlChecker:
-  enabled: true
 
 digitalClassroom:
   enabled: true

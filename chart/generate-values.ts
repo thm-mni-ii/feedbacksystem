@@ -64,7 +64,7 @@ function buildValues(): any {
     checkerMongodb: {
       auth: {
         password: randomHex(),
-        postgresPassword: randomHex(),
+        rootPassword: randomHex(),
       },
     },
     minio: {

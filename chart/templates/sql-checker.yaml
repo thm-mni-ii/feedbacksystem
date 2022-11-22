@@ -1,4 +1,4 @@
-{{ if .Values.sqlChecker.enabled }}
+{{ if .Values.runner.sqlChecker.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
