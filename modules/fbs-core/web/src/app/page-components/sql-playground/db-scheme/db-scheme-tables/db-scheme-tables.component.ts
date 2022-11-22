@@ -22,7 +22,9 @@ export class DbSchemeTablesComponent
           (constraint) => constraint.table === table.name
         );
         table.constraints = tableConstraints[0];
-        table.constraints.constraints.sort((a, b) => (a.type > b.type ? -1 : 1));
+        table.constraints.constraints.sort((a, b) =>
+          a.type > b.type ? -1 : 1
+        );
 
         table.columns.forEach((column) => {
           let isPk = table.constraints.constraints.filter(

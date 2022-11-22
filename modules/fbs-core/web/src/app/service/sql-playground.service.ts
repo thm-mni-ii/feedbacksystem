@@ -1,7 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { Constraint } from "../model/sql_playground/Constraint";
 import { Database } from "../model/sql_playground/Database";
+import { Routine } from "../model/sql_playground/Routine";
+import { SQLExecuteResponse } from "../model/sql_playground/SQLExecuteResponse";
+import { SQLResponse } from "../model/sql_playground/SQLResponse";
+import { Table } from "../model/sql_playground/Table";
+import { Trigger } from "../model/sql_playground/Trigger";
+import { View } from "../model/sql_playground/View";
 
 @Injectable({
   providedIn: "root",
@@ -39,7 +46,12 @@ export class SqlPlaygroundService {
     return this.http.delete(`/api/v2/playground/${uid}/databases/${dbId}`);
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/activate
+  /**
+   * Activate a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns Activated database
+   */
   activateDatabase(uid: number, dbId: number): Observable<Database> {
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/activate`,
@@ -47,8 +59,18 @@ export class SqlPlaygroundService {
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/execute
-  submitStatement(uid: number, dbId: number, statement: string) {
+  /**
+   * Submit a SQL query
+   * @param uid User id
+   * @param dbId Database id
+   * @param statement SQL statement
+   * @returns Execute Response
+   */
+  submitStatement(
+    uid: number,
+    dbId: number,
+    statement: string
+  ): Observable<SQLExecuteResponse> {
     return this.http.post<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/execute`,
       {
@@ -57,50 +79,86 @@ export class SqlPlaygroundService {
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/results/{rId}
-  getResults(uid: number, dbId: number, rId: number): Observable<any> {
+  /**
+   * get the result of a query
+   * @param uid User id
+   * @param dbId Database id
+   * @param rId Result id
+   * @returns SQL Response
+   */
+  getResults(uid: number, dbId: number, rId: number): Observable<SQLResponse> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results/${rId}`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/results
+  /**
+   * get results of all queries
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Results
+   */
   getResultsList(uid: number, dbId: number): Observable<Database[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/results`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/tables
-  getTables(uid: number, dbId: number): Observable<any> {
+  /**
+   * get all tables of a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Tables
+   */
+  getTables(uid: number, dbId: number): Observable<Table[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/tables`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/constraints
-  getConstraints(uid: number, dbId: number): Observable<any> {
+  /**
+   * get all constraints of a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Constraints
+   */
+  getConstraints(uid: number, dbId: number): Observable<Constraint[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/constraints`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/views
-  getViews(uid: number, dbId: number): Observable<any> {
+  /**
+   * get all views of a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Views
+   */
+  getViews(uid: number, dbId: number): Observable<View[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/views`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/triggers
-  getTriggers(uid: number, dbId: number): Observable<any> {
+  /**
+   * get all triggers of a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Triggers
+   */
+  getTriggers(uid: number, dbId: number): Observable<Trigger[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/triggers`
     );
   }
 
-  // /api/v2/playground/{uid}/databases/{dbId}/routines
-  getRoutines(uid: number, dbId: number): Observable<any> {
+  /**
+   * get all routines of a database
+   * @param uid User id
+   * @param dbId Database id
+   * @returns all Routines
+   */
+  getRoutines(uid: number, dbId: number): Observable<Routine[]> {
     return this.http.get<any>(
       `/api/v2/playground/${uid}/databases/${dbId}/routines`
     );
