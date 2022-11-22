@@ -1,7 +1,6 @@
 package de.thm.ii.fbs.util
 
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream
 import org.apache.commons.compress.utils.IOUtils
 
 import java.io._
@@ -10,7 +9,7 @@ import java.nio.file.{Files, Paths}
 object Archiver {
   @throws[IOException]
   def pack(name: String, files: File*): Unit = {
-    val out = new TarArchiveOutputStream(new GzipCompressorOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(name)))))
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(Paths.get(name))))
     for (file <- files) {
       addToArchive(out, file, ".")
     }
@@ -19,7 +18,7 @@ object Archiver {
 
   @throws[IOException]
   def compress(outputStream: OutputStream, files: File*): TarArchiveOutputStream = {
-    val out = new TarArchiveOutputStream(new GzipCompressorOutputStream(new BufferedOutputStream(outputStream)))
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(outputStream))
     for (file <- files) {
       addToArchive(out, file, ".")
     }
