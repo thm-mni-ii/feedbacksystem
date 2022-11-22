@@ -107,6 +107,8 @@ runnerMysql:
     username: fbs
     password: fbs # CHANGE ME
     rootPassword: root # CHANGE ME
+  primray:
+    existingConfigmap: 'CHANGE-ME'
 
 runnerPostgres:
   nameOverride: runner-postgres
