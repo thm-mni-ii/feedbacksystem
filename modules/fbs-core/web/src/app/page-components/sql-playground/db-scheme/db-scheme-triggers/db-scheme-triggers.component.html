@@ -3,9 +3,11 @@
   <mat-expansion-panel-header>
     <mat-panel-title> {{ trigger.name }} </mat-panel-title>
   </mat-expansion-panel-header>
-  <p>{{ trigger.event.manipulation }} {{ trigger.event.objectTable }}</p>
-  <p>
-    {{ trigger.action.statement }} {{ trigger.action.orientation }}
-    {{ trigger.action.timing }}
-  </p>
+  <div class="trigger">
+    <span>
+      {{ trigger.timing }} {{ trigger.manipulation }} {{ trigger.objecttable }}
+    </span>
+    <span>FOR EACH {{ trigger.orientation }}</span>
+    <pre class="trigger-definition">{{ trigger.statement }}</pre>
+  </div>
 </mat-expansion-panel>

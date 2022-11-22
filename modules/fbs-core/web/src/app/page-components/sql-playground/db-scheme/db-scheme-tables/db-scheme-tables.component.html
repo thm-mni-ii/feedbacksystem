@@ -1,11 +1,38 @@
-<p class="title">{{ title }}</p>
-<mat-expansion-panel *ngFor="let element of tables; index as i">
-  <mat-expansion-panel-header>
-    <mat-panel-title> {{ element.name }} </mat-panel-title>
-  </mat-expansion-panel-header>
-  <div *ngFor="let column of element.columns; index as j">
-    <p>{{ element.columns[j].name }} {{ element.columns[j].udtName }}</p>
-    <p>isNullable: {{ element.columns[j].nullable }}</p>
-    <hr />
-  </div>
-</mat-expansion-panel>
+<div *ngIf="this.tables !== undefined && this.constraints !== undefined">
+  <p class="title">{{ title }}</p>
+  <mat-expansion-panel *ngFor="let table of tables; index as i">
+    <mat-expansion-panel-header>
+      <mat-panel-title> {{ table.name }} </mat-panel-title>
+    </mat-expansion-panel-header>
+    <ul class="attribute-list">
+      <li *ngFor="let column of table.columns; index as j">
+        <span class="attribute">
+          <span [ngClass]="{ 'primary-key': column.isPrimaryKey }">
+            {{ column.name }}
+          </span>
+          <span>
+            <i>{{ column.udtName }}</i>
+          </span>
+        </span>
+        <span class="attribute info" *ngIf="column.isNullable === false">
+          not_null
+        </span>
+      </li>
+
+      <li>
+        <span class="constraints"><b>Constraints:</b></span>
+      </li>
+      <li *ngFor="let constraint of table.constraints.constrains; index as k">
+        <span class="constraints">
+          <span> Name: {{ constraint.constraintName }} </span>
+          <span>
+            {{ constraint.constraintType }} on {{ constraint.name }}
+          </span>
+          <span *ngIf="constraint.checkClause !== null">
+            Clause: {{ constraint.checkClause }}
+          </span>
+        </span>
+      </li>
+    </ul>
+  </mat-expansion-panel>
+</div>
