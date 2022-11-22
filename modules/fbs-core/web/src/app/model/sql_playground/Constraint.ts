@@ -1,6 +1,6 @@
 export interface Constraint {
   table: string;
-  constrains: [
+  constraints: [
     {
       name: string;
       type: string;
