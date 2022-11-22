@@ -6,6 +6,7 @@
       [title]="'Ergebnisse'"
       ><app-dynamic-result-table
         [resultset]="resultset"
+        [isQueryPending]="isQueryPending"
       ></app-dynamic-result-table>
     </app-bordered-container>
   </div>
@@ -14,6 +15,7 @@
       <app-sql-input-tabs
         [activeDb]="activeDb"
         (resultset)="changeResultset($event)"
+        (isPending)="changeQueryPending($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
@@ -29,6 +31,7 @@
       <app-db-scheme-table
         [title]="'Tabellen'"
         [tables]="tables"
+        [constraints]="constraints"
       ></app-db-scheme-table>
       <app-db-scheme-views
         [title]="'Views'"

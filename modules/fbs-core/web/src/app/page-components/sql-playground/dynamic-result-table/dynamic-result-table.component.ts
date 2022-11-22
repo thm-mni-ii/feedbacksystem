@@ -18,12 +18,18 @@ export interface Content {
 export class DynamicResultTableComponent {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @Input() resultset: any;
+  @Input() isQueryPending: boolean = false;
   /*   dataSource = new MatTableDataSource<any[]>(bigTable.rows);
   displayedColumns = bigTable.head; */
   dataSource: MatTableDataSource<string[]>;
   displayedColumns: any[] = [];
 
   ngOnChanges() {
+    if(this.isQueryPending){
+      this.resultset = undefined;
+      this.displayedColumns = [];
+    }
+    
     if (this.resultset !== undefined && this.resultset.error === false) {
       this.displayedColumns = this.resultset.result[0].head;
       this.dataSource = new MatTableDataSource<string[]>(
@@ -31,7 +37,7 @@ export class DynamicResultTableComponent {
       );
       setTimeout(() => {
         this.dataSource.paginator = this.paginator;
-      }, 10);
+      }, 100);
     }
   }
 

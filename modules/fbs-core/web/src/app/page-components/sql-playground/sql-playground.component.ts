@@ -6,6 +6,8 @@ import { View } from "src/app/model/sql_playground/View";
 import { TitlebarService } from "../../service/titlebar.service";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { Table } from "src/app/model/sql_playground/Table";
+import { Constraint } from "src/app/model/sql_playground/Constraint";
 
 /**
  * This component is for the sql playground
@@ -28,7 +30,9 @@ export class SqlPlaygroundComponent implements OnInit {
   triggers: Trigger[];
   routines: Routine[];
   views: View[];
-  tables: any[];
+  tables: Table[];
+  constraints: Constraint[];
+  isQueryPending: boolean = false;
 
   ngOnInit() {
     this.titlebar.emitTitle("SQL Playground");
@@ -44,6 +48,10 @@ export class SqlPlaygroundComponent implements OnInit {
     this.updateScheme();
   }
 
+  changeQueryPending($event) {
+    this.isQueryPending = $event;
+  }
+
   updateScheme() {
     const token = this.authService.getToken();
 
@@ -56,7 +64,7 @@ export class SqlPlaygroundComponent implements OnInit {
     this.sqlPlaygroundService
       .getConstraints(token.id, this.activeDb)
       .subscribe((result) => {
-        // console.log(result);
+        this.constraints = result;
       });
 
     this.sqlPlaygroundService

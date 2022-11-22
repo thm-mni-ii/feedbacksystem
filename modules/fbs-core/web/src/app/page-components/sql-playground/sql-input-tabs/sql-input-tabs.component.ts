@@ -23,6 +23,7 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 export class SqlInputTabsComponent implements OnInit {
   @Input() activeDb: number;
   @Output() resultset = new EventEmitter<any>();
+  @Output() isPending = new EventEmitter<any>();
 
   constructor(
     private dialog: MatDialog,
@@ -106,6 +107,7 @@ export class SqlInputTabsComponent implements OnInit {
 
   private submit() {
     this.pending = true;
+    this.isPending.emit(true);
     const token = this.authService.getToken();
 
     this.sqlPlaygroundService
@@ -122,6 +124,7 @@ export class SqlInputTabsComponent implements OnInit {
             { duration: 3000 }
           );
           this.pending = false;
+          this.isPending.emit(false);
         }
       );
   }
@@ -149,6 +152,7 @@ export class SqlInputTabsComponent implements OnInit {
         (res) => {
           // emit if success
           this.pending = false;
+          this.isPending.emit(false);
           this.resultset.emit(res);
         },
         (err) => {},

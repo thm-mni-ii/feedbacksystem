@@ -5,7 +5,7 @@ import { Component, Input, OnInit } from "@angular/core";
   templateUrl: "./db-scheme.component.html",
   styleUrls: ["./db-scheme.component.scss"],
 })
-export class DbSchemeComponent implements OnInit {
+export class DbSchemeComponent {
   @Input() title: string;
 
   constructor() {}

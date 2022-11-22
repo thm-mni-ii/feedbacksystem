@@ -1,16 +1,16 @@
 export interface Trigger {
   name: string;
-  action: TriggerAction;
   event: TriggerEvent;
+  action: TriggerAction;
 }
 
-export interface TriggerAction {
+interface TriggerEvent {
+  manipulation: string;
+  objectTable: string;
+}
+
+interface TriggerAction {
   statement: string;
   orientation: string;
   timing: string;
-}
-
-export interface TriggerEvent {
-  manipulation: string;
-  objectTable: string;
 }

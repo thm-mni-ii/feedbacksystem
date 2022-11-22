@@ -65,8 +65,15 @@
   color: #f44336;
 }
 
-mat-card-title{
+mat-card-title {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+}
+
+.spinner {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
   align-items: center;
 }

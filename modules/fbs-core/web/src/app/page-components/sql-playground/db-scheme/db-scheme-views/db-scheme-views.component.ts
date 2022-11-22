@@ -7,9 +7,6 @@ import { DbSchemeComponent } from "../db-scheme.component";
   templateUrl: "./db-scheme-views.component.html",
   styleUrls: ["../db-scheme.component.scss"],
 })
-export class DbSchemeViewsComponent
-  extends DbSchemeComponent
-  implements OnInit
-{
+export class DbSchemeViewsComponent extends DbSchemeComponent {
   @Input() views: View[];
 }
