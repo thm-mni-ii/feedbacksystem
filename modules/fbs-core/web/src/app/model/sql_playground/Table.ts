@@ -1,12 +1,12 @@
 import { Constraint } from "./Constraint";
 
 export interface Table {
-  table_name: string;
+  name: string;
   columns: [
     {
-      columnName: string;
+      name: string;
       udtName: string;
-      nullable: boolean;
+      isNullable: boolean;
       isPrimaryKey: boolean;
     }
   ];

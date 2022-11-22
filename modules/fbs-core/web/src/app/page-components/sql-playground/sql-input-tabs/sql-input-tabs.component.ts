@@ -156,7 +156,7 @@ export class SqlInputTabsComponent implements OnInit {
           this.resultset.emit(res);
         },
         (err) => {},
-        () => console.log("completed") // dispatched when API notify errors twice
+        () => console.log("Request Complete")
       );
   }
 

@@ -66,3 +66,42 @@ mat-expansion-panel {
 .foreign-key {
   color: #00ff00;
 }
+
+.view-definition {
+  margin: 10px 15px;
+  font-size: smaller;
+  overflow-x: auto;
+}
+
+.routine {
+  font-size: smaller;
+
+  span {
+    margin: 10px 15px 0;
+    font-size: smaller;
+    font-weight: bold;
+  }
+  .routine-definition {
+    margin: 0px 15px 10px;
+    font-size: smaller;
+    overflow-x: auto;
+  }
+}
+
+.trigger {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-gap: 0px;
+
+  font-size: smaller;
+
+  span {
+    margin: 0px 15px;
+  }
+
+  .trigger-definition {
+    margin: -10px 15px 0px;
+    font-size: smaller;
+    overflow-x: auto;
+  }
+}

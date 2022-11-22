@@ -15,25 +15,21 @@ export class DbSchemeTablesComponent extends DbSchemeComponent {
   ngOnChanges() {
     if (this.tables !== undefined && this.constraints !== undefined) {
       this.tables.forEach((table) => {
-        let constraints = this.constraints.filter(
-          (constraint) => constraint.table_name === table.table_name
+        let tableConstraints = this.constraints.filter(
+          (constraint) => constraint.table === table.name
         );
-        table.constraints = constraints[0];
-        table.constraints.constrains.sort((a, b) =>
-          a.constraintType > b.constraintType ? -1 : 1
-        );
+        table.constraints = tableConstraints[0];
+        table.constraints.constrains.sort((a, b) => (a.type > b.type ? -1 : 1));
 
         table.columns.forEach((column) => {
           let isPk = table.constraints.constrains.filter(
             (constraint) =>
-              constraint.columnName == column.columnName &&
-              constraint.constraintType == "PRIMARY KEY"
+              constraint.columnName == column.name &&
+              constraint.type == "PRIMARY KEY"
           );
           column.isPrimaryKey = isPk.length > 0;
         });
       });
     }
-
-    console.log(this.tables);
   }
 }

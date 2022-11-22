@@ -1,9 +1,6 @@
 import { AfterViewInit, Component, ViewChild, Input } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-/* import smallTable from "./test-tables/smallTable.json";
-import middleTable from "./test-tables/mediumTable.json";
-import bigTable from "./test-tables/largeTable.json" */
 
 export interface Content {
   head: any[];
@@ -25,11 +22,11 @@ export class DynamicResultTableComponent {
   displayedColumns: any[] = [];
 
   ngOnChanges() {
-    if(this.isQueryPending){
+    if (this.isQueryPending) {
       this.resultset = undefined;
       this.displayedColumns = [];
     }
-    
+
     if (this.resultset !== undefined && this.resultset.error === false) {
       this.displayedColumns = this.resultset.result[0].head;
       this.dataSource = new MatTableDataSource<string[]>(

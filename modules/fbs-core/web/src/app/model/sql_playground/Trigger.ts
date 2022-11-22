@@ -6,7 +6,7 @@ export interface Trigger {
 
 interface TriggerEvent {
   manipulation: string;
-  objectTable: string;
+  objecttable: string;
 }
 
 interface TriggerAction {

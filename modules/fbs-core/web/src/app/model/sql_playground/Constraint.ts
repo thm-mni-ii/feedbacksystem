@@ -1,9 +1,9 @@
 export interface Constraint {
-  table_name: string;
+  table: string;
   constrains: [
     {
-      constraintName: string;
-      constraintType: string;
+      name: string;
+      type: string;
       columnName: string;
       checkClause: string;
     }

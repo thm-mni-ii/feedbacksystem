@@ -2,13 +2,13 @@
   <p class="title">{{ title }}</p>
   <mat-expansion-panel *ngFor="let table of tables; index as i">
     <mat-expansion-panel-header>
-      <mat-panel-title> {{ table.table_name }} </mat-panel-title>
+      <mat-panel-title> {{ table.name }} </mat-panel-title>
     </mat-expansion-panel-header>
     <ul class="attribute-list">
       <li *ngFor="let column of table.columns; index as j">
         <span class="attribute">
           <span [ngClass]="{ 'primary-key': column.isPrimaryKey }">
-            {{ column.columnName }}
+            {{ column.name }}
           </span>
           <span>
             <i>{{ column.udtName }}</i>
@@ -26,7 +26,7 @@
         <span class="constraints">
           <span> Name: {{ constraint.constraintName }} </span>
           <span>
-            {{ constraint.constraintType }} on {{ constraint.columnName }}
+            {{ constraint.constraintType }} on {{ constraint.name }}
           </span>
           <span *ngIf="constraint.checkClause !== null">
             Clause: {{ constraint.checkClause }}
