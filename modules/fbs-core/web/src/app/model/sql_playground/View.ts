@@ -1,4 +1,4 @@
 export interface View {
-  tableName: string;
+  table: string;
   definition: string;
 }

@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnChanges } from "@angular/core";
+import { Constraint } from "src/app/model/sql_playground/Constraint";
+import { Table } from "src/app/model/sql_playground/Table";
 import { DbSchemeComponent } from "../db-scheme.component";
-import tablesJson from "../test-data/tables.json";
 
 @Component({
   selector: "app-db-scheme-table",
@@ -9,15 +10,36 @@ import tablesJson from "../test-data/tables.json";
 })
 export class DbSchemeTablesComponent
   extends DbSchemeComponent
-  implements OnInit
+  implements OnChanges
 {
-  @Input() tables: Array<any> = this.getTables();
+  @Input() tables: Table[];
+  @Input() constraints: Constraint[];
 
-  getTables(): Array<any> {
-    return tablesJson.tables;
-  }
+  ngOnChanges() {
+    if (this.tables !== undefined && this.constraints !== undefined) {
+      this.tables.forEach((table) => {
+        if (this.constraints !== undefined) {
+          let tableConstraints = this.constraints.filter(
+            (constraint) => constraint.table === table.name
+          );
 
-  ngOnInit(): void {
-    console.log("");
+          if (tableConstraints[0] !== undefined) {
+            table.constraints = tableConstraints[0];
+            table.constraints.constraints.sort((a, b) =>
+              a.type > b.type ? -1 : 1
+            );
+
+            table.columns.forEach((column) => {
+              let isPk = table.constraints.constraints.filter(
+                (constraint) =>
+                  constraint.columnName == column.name &&
+                  constraint.type == "PRIMARY KEY"
+              );
+              column.isPrimaryKey = isPk.length > 0;
+            });
+          }
+        }
+      });
+    }
   }
 }

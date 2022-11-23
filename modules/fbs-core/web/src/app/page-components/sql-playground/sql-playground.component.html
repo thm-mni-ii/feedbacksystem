@@ -4,27 +4,47 @@
       [xScrollable]="true"
       [yScrollable]="false"
       [title]="'Ergebnisse'"
-      ><app-dynamic-result-table></app-dynamic-result-table>
+      ><app-dynamic-result-table
+        [resultset]="resultset"
+        [isQueryPending]="isQueryPending"
+      ></app-dynamic-result-table>
     </app-bordered-container>
   </div>
   <div class="input-grid">
     <app-bordered-container [input]="true">
-      <app-sql-input-tabs></app-sql-input-tabs>
+      <app-sql-input-tabs
+        [activeDb]="activeDb"
+        (resultset)="changeResultset($event)"
+        (isPending)="changeQueryPending($event)"
+      ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
   <div class="db-grid">
     <app-bordered-container [title]="'DB'">
-      <app-db-control-panel></app-db-control-panel
+      <app-db-control-panel
+        (changeActiveDb)="changeActiveDb($event)"
+      ></app-db-control-panel
     ></app-bordered-container>
   </div>
   <div class="db-schema-grid">
     <app-bordered-container [yScrollable]="true" [title]="'DB Schema'">
-      <app-db-scheme-table [title]="'Tabellen'"></app-db-scheme-table>
-      <app-db-scheme-views [title]="'Views'"></app-db-scheme-views>
+      <app-db-scheme-table
+        [title]="'Tabellen'"
+        [tables]="tables"
+        [constraints]="constraints"
+      ></app-db-scheme-table>
+      <app-db-scheme-views
+        [title]="'Views'"
+        [views]="views"
+      ></app-db-scheme-views>
       <app-db-scheme-routines
         [title]="'Stored Procedures'"
+        [routines]="routines"
       ></app-db-scheme-routines>
-      <app-db-scheme-triggers [title]="'Triggers'"></app-db-scheme-triggers>
+      <app-db-scheme-triggers
+        [title]="'Triggers'"
+        [triggers]="triggers"
+      ></app-db-scheme-triggers>
     </app-bordered-container>
   </div>
 </div>
