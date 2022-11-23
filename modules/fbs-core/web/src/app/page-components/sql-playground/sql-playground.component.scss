@@ -13,6 +13,7 @@
 }
 
 .results-grid {
+  width: 100%;
   grid-row-start: 1;
   grid-row-end: 5;
   grid-column-start: 1;
@@ -20,6 +21,7 @@
 }
 
 .input-grid {
+  width: 100%;
   grid-row-start: 6;
   grid-row-end: 7;
   grid-column-start: 1;
@@ -27,6 +29,7 @@
 }
 
 .db-grid {
+  width: 100%;
   grid-row-start: 1;
   grid-row-end: 4;
   grid-column-start: 8;
@@ -35,6 +38,7 @@
 }
 
 .db-schema-grid {
+  width: 100%;
   margin-top: 20px;
   grid-row-start: 4;
   grid-row-end: 9;
