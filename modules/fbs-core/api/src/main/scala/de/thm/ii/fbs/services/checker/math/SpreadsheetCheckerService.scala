@@ -131,7 +131,7 @@ class SpreadsheetCheckerService extends CheckerService {
     val parsed = try Option(format.parse(input, position)) catch {
       case _: ParseException => None
     }
-    // Check if full string if parsed and return None for invalid input
+    // Check if full string is parsed and return None for invalid input
     if (position.getIndex == input.length) {
       parsed.map(x => x.doubleValue())
     } else {
