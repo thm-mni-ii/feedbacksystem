@@ -128,7 +128,7 @@ class SpreadsheetCheckerService extends CheckerService {
 
   private def parseDouble(input: String, format: NumberFormat): Option[Double] = {
     val position = new ParsePosition(0)
-    val parsed = try Some(format.parse(input, position)) catch {
+    val parsed = try Option(format.parse(input, position)) catch {
       case _: ParseException => None
     }
     if (position.getIndex == input.length) {
