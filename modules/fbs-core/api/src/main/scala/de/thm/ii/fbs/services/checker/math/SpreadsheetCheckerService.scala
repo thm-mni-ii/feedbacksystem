@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
-import java.text.{NumberFormat, ParseException}
+import java.text.{NumberFormat, ParseException, ParsePosition}
 import java.util.{Locale, Map => UtilMap}
 import scala.collection.mutable
 
@@ -119,17 +119,25 @@ class SpreadsheetCheckerService extends CheckerService {
     (parseDouble(enteredValue, germanFormat), parseDouble(value, germanFormat)) match {
       case (Some(enteredValue), Some(value)) =>
         round(enteredValue, decimals) == round(value, decimals)
-      case _ => false
+      case _ => enteredValue == value
     }
   }
 
   private def round(input: Double, toDecimals: Int): String =
     BigDecimal(input).setScale(toDecimals, BigDecimal.RoundingMode.HALF_UP).toString()
 
-  private def parseDouble(input: String, format: NumberFormat): Option[Double] =
-    try Some(format.parse(input).doubleValue()) catch {
+  private def parseDouble(input: String, format: NumberFormat): Option[Double] = {
+    val position = new ParsePosition(0)
+    val parsed = try Option(format.parse(input, position)) catch {
       case _: ParseException => None
     }
+    // Check if full string is parsed and return None for invalid input
+    if (position.getIndex == input.length) {
+      parsed.map(x => x.doubleValue())
+    } else {
+      None
+    }
+  }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
