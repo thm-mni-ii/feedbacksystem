@@ -10,7 +10,7 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, ResponseBody, RestController}
 
-import java.io.{File, FileInputStream}
+import java.nio.file.{Files, StandardOpenOption}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RestController
@@ -35,12 +35,13 @@ class ExportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val file = new File(taskExportService.exportTask(taskId))
-      val resource = new InputStreamResource(new FileInputStream(file))
+      val file = taskExportService.exportTask(taskId)
+      val contentLength = file.length()
+      val resource = new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE))
 
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .contentLength(file.length())
+        .contentLength(contentLength)
         .header("Content-Disposition", s"attachment;filename=task_$taskId.fbs-export")
         .body(resource)
     } else {

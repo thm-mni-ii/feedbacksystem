@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.controller.exception.InternalServerException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, Task}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import java.io.{BufferedWriter, File, FileWriter}
+import java.nio.file.Path
 import scala.collection.mutable.ListBuffer
 
 @Component
@@ -22,36 +24,46 @@ class TaskExportService {
   private val storageService: StorageService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper()
 
-  def exportTask(taskId: Int): String = {
+  private val tmpDir: File = new File("/tmp")
+
+  def exportTask(taskId: Int): File = {
     val optionalTask = taskService.getOne(taskId)
     optionalTask match {
       case Some(task) =>
-        val files: ListBuffer[String] = ListBuffer()
+        val files: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
         val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
         val export = TaskExport(task, ccs.map(cc => {
-          val main = Option.when(cc.mainFileUploaded)({
-            val filename = storageService.pathToMainFile(cc.id).get.toAbsolutePath.toString
-            files += filename
-            filename
-          })
-          val secondary = Option.when(cc.secondaryFileUploaded)({
-            val filename = storageService.pathToSecondaryFile(cc.id).get.toAbsolutePath.toString
-            files += filename
-            filename
-          })
+          val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
+          val secondary = addCCFileAndGetName(cc.id, cc.secondaryFileUploaded, storageService.pathToSecondaryFile, files)
           ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
-        }
-        ))
-        val filename = f"/tmp/$taskId.json"
-        val writer = new BufferedWriter(new FileWriter(filename))
-        writer.write(objectMapper.writeValueAsString(export))
-        writer.close()
-        files += filename
-        val archive = f"task_$taskId.fbs-export"
-        Archiver.pack(archive, files.map(f => new File(f)).toArray: _*)
+        }))
+        val descrFile = writeToTmpFile(taskId, export)
+        files += Archiver.ArchiveFile(descrFile, Option(f"task_$taskId.json"))
+        val archive = File.createTempFile(s"task_$taskId-", ".fbs-export", tmpDir)
+        Archiver.pack(archive, files.toArray: _*)
+        descrFile.delete()
         archive
       case None => null // TODO ERROR
     }
+  }
+
+  private def writeToTmpFile(taskId: Int, content: Object): File = {
+    val descrFile = File.createTempFile(s"task_$taskId-", ".json", tmpDir)
+    val writer = new BufferedWriter(new FileWriter(descrFile.toString))
+    writer.write(objectMapper.writeValueAsString(content))
+    writer.close()
+    descrFile
+  }
+
+  private def addCCFileAndGetName(ccId: Int, isUploaded: Boolean, getPath: Int => Option[Path],
+                                  files: ListBuffer[Archiver.ArchiveFile])
+  : Option[String] = {
+    Option.when(isUploaded)({
+      val path = getPath(ccId).get.toAbsolutePath
+      val filename = f"$ccId-${path.getFileName}"
+      files += Archiver.ArchiveFile(path.toFile, Option(filename))
+      filename
+    })
   }
 
   case class TaskExport(task: Task, configs: List[ConfigExport])
