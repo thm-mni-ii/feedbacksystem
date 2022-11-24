@@ -43,7 +43,7 @@ class TaskExportService {
         Archiver.pack(archive, files.toArray: _*)
         descrFile.delete()
         archive
-      case None => null // TODO ERROR
+      case None => throw new InternalServerException(f"Could not export task with id = $taskId.")
     }
   }
 
