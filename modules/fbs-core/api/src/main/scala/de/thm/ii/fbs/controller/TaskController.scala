@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
-import de.thm.ii.fbs.services.checker.excel.SpreadsheetService
+import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash

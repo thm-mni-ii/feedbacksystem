@@ -6,10 +6,11 @@ import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
+
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -57,8 +58,9 @@ class CourseController {
 
   /**
     * Create a new course
-    * @param req http request
-    * @param res http response
+    *
+    * @param req  http request
+    * @param res  http response
     * @param body contains JSON request
     * @return JSON
     */
@@ -82,6 +84,7 @@ class CourseController {
 
   /**
     * Get a single course
+    *
     * @param cid Course id
     * @param req http request
     * @param res http response
@@ -95,7 +98,7 @@ class CourseController {
 
     courseService.find(cid) match {
       case Some(course) =>
-        if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isSubscribed || course.visible))  {
+        if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isSubscribed || course.visible)) {
           throw new ForbiddenException()
         } else {
           course
@@ -106,21 +109,22 @@ class CourseController {
 
   /**
     * Update course
-    * @param cid Course id
-    * @param req http request
-    * @param res http response
+    *
+    * @param cid  Course id
+    * @param req  http request
+    * @param res  http response
     * @param body Request Body
     */
   @PutMapping(value = Array("/{cid}"))
   def update(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
-                   @RequestBody body: JsonNode): Unit = {
+             @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
 
     (user.globalRole, someCourseRole) match {
       case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
         (
-          body.retrive("semester").asInt(),
+          body.retrive("semesterId").asInt(),
           body.retrive("name").asText(),
           body.retrive("description").asText(),
           body.retrive("visible").asBool()
@@ -135,6 +139,7 @@ class CourseController {
 
   /**
     * Delete course
+    *
     * @param cid Course id
     * @param req http request
     * @param res http response
@@ -161,6 +166,7 @@ class CourseController {
 
   /**
     * Export course
+    *
     * @param cid Course id
     * @param req http request
     * @param res http response

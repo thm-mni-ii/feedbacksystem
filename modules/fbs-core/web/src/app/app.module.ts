@@ -61,6 +61,7 @@ import { MenuBarComponent } from "./tool-components/menu-bar/menu-bar.component"
 import { NewCheckerDialogComponent } from "./dialogs/new-checker-dialog/new-checker-dialog.component";
 import { ConfirmDialogComponent } from "./dialogs/confirm-dialog/confirm-dialog.component";
 import { TextConfirmDialogComponent } from "./dialogs/text-confirm-dialog/text-confirm-dialog.component";
+import { NewDbDialogComponent } from "./dialogs/new-db-dialog/new-db-dialog.component";
 
 import {
   NgxMatDatetimePickerModule,
@@ -89,6 +90,13 @@ import { MAT_MOMENT_DATE_ADAPTER_OPTIONS } from "@angular/material-moment-adapte
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
+import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
+import { SqlInputTabsComponent } from "./page-components/sql-playground/sql-input-tabs/sql-input-tabs.component";
+import { DbSchemeComponent } from "./page-components/sql-playground/db-scheme/db-scheme.component";
+import { DbSchemeViewsComponent } from "./page-components/sql-playground/db-scheme/db-scheme-views/db-scheme-views.component";
+import { DbSchemeTriggersComponent } from "./page-components/sql-playground/db-scheme/db-scheme-triggers/db-scheme-triggers.component";
+import { DbSchemeRoutinesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-routines/db-scheme-routines.component";
+import { DbSchemeTablesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-tables/db-scheme-tables.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -169,6 +177,14 @@ export const httpInterceptorProviders = [
     SqlPlaygroundComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
+    DbControlPanelComponent,
+    SqlInputTabsComponent,
+    DbSchemeComponent,
+    DbSchemeViewsComponent,
+    DbSchemeTriggersComponent,
+    DbSchemeRoutinesComponent,
+    DbSchemeTablesComponent,
+    NewDbDialogComponent,
   ],
   imports: [
     BrowserModule,

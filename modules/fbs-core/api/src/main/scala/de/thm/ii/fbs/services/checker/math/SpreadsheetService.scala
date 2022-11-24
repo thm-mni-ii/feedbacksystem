@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.services.checker.excel
+package de.thm.ii.fbs.services.checker.math
 
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}

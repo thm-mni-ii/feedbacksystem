@@ -4,7 +4,7 @@ plugins {
     id 'idea'
     id 'distribution'
     id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.8.4'
+    id 'com.github.kt3k.coveralls' version '2.12.0'
 }
 
 apply plugin: 'application'

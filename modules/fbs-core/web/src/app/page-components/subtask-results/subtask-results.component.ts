@@ -21,6 +21,9 @@ export class SubtaskResultsComponent {
 
   @Input()
   set displayedSubmission(submission: Submission) {
+    if (submission === undefined) {
+      return;
+    }
     this._displayedSubmission = submission;
     const { uid, cid, tid } = this.context;
     this.submissionService

@@ -20,7 +20,9 @@ object DockerService {
     val builder = Seq.newBuilder[String]
     builder += DOCKER_CMD
     builder += DOCKER_RUN
-    builder += DOCKER_REMOVE
+    if (System.getenv("RUNNER_DOCKER_DISABLE_REMOVE") != "true") {
+      builder += DOCKER_REMOVE
+    }
     builder ++= config.mount.flatMap(getMountString)
     builder ++= config.env.flatMap(getEnvString)
     builder ++= config.networks.flatMap(getNetworkString)
@@ -28,7 +30,8 @@ object DockerService {
     builder += config.image
     builder ++= config.runOptions
 
-    builder.result()
+    val res = builder.result()
+    res
   }
 
   private def getMountString(mount: (String, String)): Seq[String] = {
