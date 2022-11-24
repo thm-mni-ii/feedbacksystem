@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.checker
 
 import java.nio.file.{Files, NoSuchFileException, Path}
 import de.thm.ii.fbs.model.checker.{RunnerConfiguration, RunnerRequest, SqlRunnerSubmission, Submission, User}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, Submission => FBSSubmission, User => FBSUser}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, storageBucketName, storageFileName, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.http.HttpStatus
@@ -49,16 +49,15 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu           the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    //solFile = storageService.getFileFromBucket("submissions", s"$submissionID/solution-file")
-    //taskFile = storageService.getFileFromBucket()
-    val solFile = new File("submission-file")
-    storageService.getFileFromBucket("submissions", s"$submissionID/solution-file", "submission-file")
-    val taskFile = new File("subtask-file")
-    storageService.getFileFromBucket("submissions", s"$submissionID/subtask-file", "subtask-file")
+    val solFile = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"$submissionID/${storageFileName.SOLUTION_FILE}")
+    val taskFile = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"$submissionID/${storageFileName.SUBTASK_FILE}")
     val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username),
       solFile.getPath,
       taskFile.getPath,
     )
+    solFile.delete()
+    taskFile.delete()
+
     sendNotificationToRemote(taskID, submission, cc)
   }
 
@@ -88,16 +87,18 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
 
   protected def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = {
     if (cc.isInBlockStorage) {
-      //mainFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
-      //secFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/secondary-file")
+      val mainFile = storageService.getFileFromBucket(storageBucketName.TASKS_BUCKET, s"${cc.taskId}/${storageFileName.MAIN_FILE}")
+      val secFile = storageService.getFileFromBucket(storageBucketName.TASKS_BUCKET, s"${cc.taskId}/${storageFileName.SECONDARY_FILE}")
 
-      val mainFile = new File("main-file")
-      val secFile = new File("secondary-file")
-      storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file", "main-file")
-      storageService.getFileFromBucket("tasks", s"${cc.taskId}/secondary-file", "secondary-file")
+      val mainPath = mainFile.getPath
+      val secPath = secFile.getPath
+
+      mainFile.delete()
+      secFile.delete()
+
       RunnerConfiguration(
-        cc.id, cc.checkerType, Option(mainFile.getPath),
-        cc.secondaryFileUploaded, Option(secFile.getPath)
+        cc.id, cc.checkerType, Option(mainPath),
+        cc.secondaryFileUploaded, Option(secPath)
       )
     } else {
       RunnerConfiguration(
@@ -110,11 +111,10 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
 
   private def handleSubTasks(sid: Int, cc: CheckrunnerConfiguration): Unit = {
-    //val subTaskPath = storageService.getFileFromBucket("submissions", s"$sid/subtask-file")
-    val subTaskPath = new File("subtask-file")
-    storageService.getFileFromBucket("submissions", s"$sid/subtask-file", "subtask-file")
+    val subTaskPath = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"$sid/${storageFileName.SUBTASK_FILE}")
     try {
       val content = Files.readString(subTaskPath.toPath)
+      subTaskPath.delete()
       val tasks = new JSONArray(content)
       val results = (0 to tasks.length()).map(i => SubTaskResult.fromJSON(tasks.getJSONObject(i)))
       for (SubTaskResult(name, maxPoints, points) <- results) {

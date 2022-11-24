@@ -71,12 +71,7 @@ class CheckerApiController {
     }
 
     var solution: String = ""
-    if (cc.isInBlockStorage){
-      solution = storageService.getSolutionFileFromBucket(submissionID)
-    }
-    else {
-      solution = storageService.getSolutionFile(submissionID)
-    }
+    solution = storageService.getSolutionFileContent(cc.isInBlockStorage, submissionID)
 
     checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, solution)
   }

@@ -5,8 +5,8 @@ services:
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --sql_mode=""
     restart: unless-stopped
-    #ports:
-    #  - "127.0.0.1:3306:3306"
+    ports:
+      - "127.0.0.1:3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: twRuvi2ejllDdA4nnQLa08O
       MYSQL_DATABASE: fbs
@@ -120,8 +120,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data/mongodb:/data/db
-    #ports:
-    #  - "127.0.0.1:27017:27017"
+    ports:
+      - "127.0.0.1:27017:27017"
     networks:
       fbs:
     healthcheck:
@@ -138,7 +138,6 @@ services:
       - "127.0.0.1:9001:9001"
     volumes:
       - ./data/minio_storage:/data
-      #- mino:/data
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel

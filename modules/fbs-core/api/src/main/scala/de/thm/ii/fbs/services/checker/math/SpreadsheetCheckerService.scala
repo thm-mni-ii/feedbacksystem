@@ -57,34 +57,21 @@ class SpreadsheetCheckerService extends CheckerService {
 
   private def getFields(cc: CheckrunnerConfiguration, spreadsheetMediaInformation: SpreadsheetMediaInformation
                         , username: String, fields: String): Seq[(String, String)] = {
-    var spreadsheetFile: File = null
-    if (cc.isInBlockStorage) {
-      //spreadsheetFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
-      spreadsheetFile = new File("main-file")
-      storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file", "main-file")
-    } else {
-      val path = this.storageService.pathToMainFile(cc.id).get.toString
-      spreadsheetFile = new File(path)
-    }
+    val spreadsheetFile: File = storageService.getFileMainFile(cc)
 
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
-    this.spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
+    val fields = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
+    spreadsheetFile.delete()
+    fields
   }
 
   private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
-    var submissionFile: File = null
-    if (cc.isInBlockStorage) {
-      //submissionFile = storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file")
-      submissionFile = new File("solution-file")
-      storageService.getFileFromBucket("submission", s"$submissionID/solution-file", "solution-file")
-    } else {
-      val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-      submissionFile = new File(submissionPath)
-    }
+    val submissionFile = storageService.getFileSolutionFile(cc, submissionID)
 
     val mapper = new JsonMapper()
     val resultFields = mapper.readValue(submissionFile, classOf[UtilMap[String, String]])
+    submissionFile.delete()
     resultFields
   }
 

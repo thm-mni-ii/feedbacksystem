@@ -31,7 +31,6 @@ security:
 server:
   host: ${SERVER_HOST:https://localhost}
   port: 443
-  #port: 8443
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
@@ -76,7 +75,7 @@ spring:
 minio:
   user: admin
   password: SqfyBWhiFGr7FK60cVR2rel
-  url: "http://127.0.0.1"
+  url: "http://minio"
   port: 9000
 
 url:

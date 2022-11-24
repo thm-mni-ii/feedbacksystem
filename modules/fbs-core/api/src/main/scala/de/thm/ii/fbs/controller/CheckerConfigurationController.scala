@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream}
 import java.nio.file.{Files, Path, Paths}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
@@ -195,9 +195,9 @@ class CheckerConfigurationController {
   def updateMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile("main-file",
+    uploadFile(storageFileName.MAIN_FILE,
       (cc) => {
-        // ?? //notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
+        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
         this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
       })(cid, tid, ccid, file, req, res)
 
@@ -213,7 +213,7 @@ class CheckerConfigurationController {
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def getMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                   req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(storageService.pathToMainFile)("main-file", cid, tid, ccid, req, res)
+    getFile(storageService.pathToMainFile)(storageFileName.MAIN_FILE, cid, tid, ccid, req, res)
 
   /**
     * Upload a the secondary file for a task configuration
@@ -229,7 +229,7 @@ class CheckerConfigurationController {
   def uploadSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                           @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
-    uploadFile("secondary-file",
+    uploadFile(storageFileName.SECONDARY_FILE,
       (cc) => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
 
   /**
@@ -244,7 +244,7 @@ class CheckerConfigurationController {
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def getSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                        req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(storageService.pathToSecondaryFile)("secondary-file", cid, tid, ccid, req, res)
+    getFile(storageService.pathToSecondaryFile)(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
 
   private def uploadFile(fileName: String, postHook: (CheckrunnerConfiguration) => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
@@ -255,13 +255,12 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
-          val bucketName = "tasks"
-          if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
-            minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+          if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.TASKS_BUCKET).build())) {
+            minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.TASKS_BUCKET).build())
           }
           val tempDesc = Files.createTempFile("fbs", ".tmp")
           file.transferTo(tempDesc)
-          minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(bucketName)
+          minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(storageBucketName.TASKS_BUCKET)
             .`object`("/" + tid.toString + "/" + fileName).filename(tempDesc.toString).build())
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
@@ -280,21 +279,8 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
-          // check ob bucket oder fs
-          if (checkrunnerConfiguration.isInBlockStorage) {
-            // bucket
-            val fileContent = storageService.getFileContentBucket("tasks", tid, fileName)
-            val mainFileInputStream = new ByteArrayInputStream(fileContent.getBytes())
-            mainFileInputStream.transferTo(res.getOutputStream)
-          } else {
-            // fs
-            pathFn(ccid) match {
-              case Some(mainFilePath) =>
-                val mainFileInputStream = new FileInputStream(mainFilePath.toFile)
-                mainFileInputStream.transferTo(res.getOutputStream)
-              case _ => throw new ResourceNotFoundException()
-            }
-          }
+          val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, tid, fileName)
+          mainFileInputStream.transferTo(res.getOutputStream)
         case _ => throw new ResourceNotFoundException()
       }
     } else {

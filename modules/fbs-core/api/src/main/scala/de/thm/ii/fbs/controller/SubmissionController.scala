@@ -134,7 +134,6 @@ class SubmissionController {
           }
           if (true) { // TODO: Check media type compatibility
             val submission = submissionService.create(uid, tid)
-            //storageService.storeSolutionFile(submission.id, tempDesc)
             storageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)

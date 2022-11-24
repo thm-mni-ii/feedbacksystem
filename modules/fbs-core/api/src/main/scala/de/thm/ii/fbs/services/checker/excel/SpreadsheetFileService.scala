@@ -22,24 +22,10 @@ class SpreadsheetFileService {
   }
 
   def getSubmissionFile(submissionID: Int, cc: CheckrunnerConfiguration): File = {
-    if (cc.isInBlockStorage) {
-      val tmpFile = new File("solution-file")
-      storageService.getFileFromBucket("submissions", s"${cc.taskId}/solution-file", "solution-file")
-      tmpFile
-    } else {
-      val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-      new File(submissionPath)
-    }
+    storageService.getFileSolutionFile(cc, submissionID)
   }
 
   def getSolutionFile(cc: CheckrunnerConfiguration): File = {
-    if (cc.isInBlockStorage) {
-      val tmpFile = new File("main-file")
-      storageService.getFileFromBucket("tasks", s"${cc.taskId}/main-file", "main-file")
-      tmpFile
-    } else {
-      val mainFilePath = this.storageService.pathToMainFile(cc.id).get.toString
-      new File(mainFilePath)
-    }
+    storageService.getFileMainFile(cc)
   }
 }
