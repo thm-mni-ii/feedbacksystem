@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
-import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,19 +25,19 @@ class ExcelCheckerService extends CheckerService {
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
   /**
-   * Notify about the new submission
-   *
-   * @param taskID       the taskID for the submission
-   * @param submissionID the id of the submission
-   * @param cc           the check runner of the submission
-   * @param fu           the user which triggered the submission
-   */
+    * Notify about the new submission
+    *
+    * @param taskID       the taskID for the submission
+    * @param submissionID the id of the submission
+    * @param cc           the check runner of the submission
+    * @param fu           the user which triggered the submission
+    */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc.id)
       val submission = this.submissionService.getOne(submissionID, fu.id).get
-      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission.id)
-      val solutionFile = this.spreadsheetFileService.getSolutionFile(cc.id)
+      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission.id, cc)
+      val solutionFile = this.spreadsheetFileService.getSolutionFile(cc)
 
       val submissionResult = checkSubmission(excelMediaInformation, submissionFile, solutionFile)
       val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
