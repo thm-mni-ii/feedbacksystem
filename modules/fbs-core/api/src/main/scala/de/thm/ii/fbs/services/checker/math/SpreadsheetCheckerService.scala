@@ -61,9 +61,9 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
-    val fields = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
+    val field = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
     spreadsheetFile.delete()
-    fields
+    field
   }
 
   private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
