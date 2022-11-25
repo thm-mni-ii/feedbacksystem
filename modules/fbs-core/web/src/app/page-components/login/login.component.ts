@@ -36,6 +36,7 @@ export class LoginComponent implements OnInit {
     const token = this.cookieService.get("jwt");
     if (token) {
       localStorage.setItem("token", token);
+      this.cookieService.delete("jwt");
     }
 
     if (this.auth.isAuthenticated()) {
