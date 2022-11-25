@@ -56,8 +56,6 @@ class CheckerApiController {
       .map(checker => (checker, checkerServiceFactoryService(checker.checkerType)))
       .filter(checker => checker._2.isInstanceOf[CheckerServiceFormatSubmission])
 
-
-
     val cco = if (ccs.length == 1) {
       ccs.headOption
     } else if (typ != "") {

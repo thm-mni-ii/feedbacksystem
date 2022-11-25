@@ -29,7 +29,6 @@ class StorageService extends App {
   @Autowired
   private val ccs: CheckerConfigurationService = null
 
-
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
   @Value("${minio.url}") private val minioUrl: String = null
@@ -106,7 +105,6 @@ class StorageService extends App {
     minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET)
       .`object`(s"$sid/${storageFileName.SOLUTION_FILE}").filename(tempDesc.toString).build())
   }
-
 
   /**
     * Get the path to the main file of a task
@@ -244,7 +242,6 @@ class StorageService extends App {
     //minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename(tmpFile).build)
   }
 
-
   /**
     * gets the content of a file depending on the source
     * @param isInBlockStorage True if the content is the Minio
@@ -259,7 +256,6 @@ class StorageService extends App {
       getSolutionFile(submissionId)
     }
   }
-
 
   /**
     * Gets the Content of the solution file
@@ -343,7 +339,6 @@ class StorageService extends App {
       minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket(storageBucketName.TASKS_BUCKET).`object`(filePath).build())
     }
   }
-
 
   /**
     * Delete the Configuration Folder with all Files inside

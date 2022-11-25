@@ -18,5 +18,4 @@ class MinioService {
       .endpoint(minioUrl, port, false)
       .credentials(minioUser, minioPassword).build()
   }
-
 }
