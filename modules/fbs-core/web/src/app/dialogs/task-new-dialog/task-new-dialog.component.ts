@@ -20,7 +20,7 @@ import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
-import { MatCheckbox } from "@angular/material/checkbox";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
@@ -46,11 +46,14 @@ export class TaskNewDialogComponent implements OnInit {
     outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
+    expCheck: new UntypedFormControl(),
   });
   isUpdate: boolean;
   courseId: number;
+  datePickerDisabled: boolean = this.taskForm.get("expCheck").value;
   task: Task = {
     deadline: this.getDefaultDeadline(),
+    expCheck: this.datePickerDisabled,
     description: "",
     mediaType: "",
     name: "",
@@ -73,6 +76,7 @@ export class TaskNewDialogComponent implements OnInit {
 
   ngOnInit() {
     this.courseId = this.data.courseId;
+    //this.datePickerDisabled = true;
     if (this.data.task) {
       this.isUpdate = true;
       this.task = this.data.task;
@@ -93,6 +97,7 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.description = this.taskForm.get("description").value;
     this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
+    this.task.expCheck = this.taskForm.get("expCheck").value;
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.task.mediaInformation = {
         idField: this.taskForm.get("userIDField").value,
@@ -115,6 +120,8 @@ export class TaskNewDialogComponent implements OnInit {
       this.task.requirementType
     );
     this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
+    this.taskForm.controls["expCheck"].setValue(this.task.expCheck);
+
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.taskForm.controls["exelFile"].setValue("loading...");
       this.checkerService
@@ -274,8 +281,6 @@ export class TaskNewDialogComponent implements OnInit {
       });
   }
 
-  public datePickerDisabled: boolean = false;
-
   // the deadline does not accept the nullable Value (*as it should according to Api)
   getDefaultDeadline() {
     const currentDateAndOneMonthLater = new Date();
@@ -285,12 +290,7 @@ export class TaskNewDialogComponent implements OnInit {
     return currentDateAndOneMonthLater.toISOString();
   }
 
-  public setMaxExpirationDate(event: MatCheckbox) {
+  setMaxExpirationDate(event: MatSlideToggle) {
     this.datePickerDisabled = event.checked;
-    if (this.datePickerDisabled) {
-      this.task.deadline = undefined;
-    } else {
-      this.task.deadline = this.getDefaultDeadline();
-    }
   }
 }

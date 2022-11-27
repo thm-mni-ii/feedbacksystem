@@ -69,12 +69,13 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-checkbox
-     
+    <mat-slide-toggle
+      formControlName="expCheck"
       class="noDeadline"
       (change)="setMaxExpirationDate($event)"
-      >Ohne Deadline</mat-checkbox
     >
+      Ohne Deadline
+    </mat-slide-toggle>
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">
