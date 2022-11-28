@@ -19,8 +19,7 @@ export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);
   description = new UntypedFormControl("");
   isVisible = true;
-  enableSemester = new UntypedFormControl(false);
-  selectedSemester = new UntypedFormControl(null);
+  selectedSemester = new UntypedFormControl(0);
   semesterList: Semester[] = [];
   isUpdateDialog = false;
 
@@ -46,8 +45,8 @@ export class CourseUpdateDialogComponent implements OnInit {
       this.isVisible = course.visible;
       this.selectedSemester.setValue(course.semesterId);
 
-      if (course.semesterId != null) {
-        this.enableSemester.setValue(true);
+      if (course.semesterId == null) {
+        this.selectedSemester.setValue(0);
       }
     }
   }
@@ -60,7 +59,7 @@ export class CourseUpdateDialogComponent implements OnInit {
       return;
     }
 
-    if (!this.enableSemester.value) {
+    if (this.selectedSemester.value == 0) {
       this.selectedSemester.setValue(null);
     }
 
