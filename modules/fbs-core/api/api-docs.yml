@@ -1126,7 +1126,7 @@ paths:
           content:
             application/octet-stream:
               schema:
-                type: file
+                type: string
                 format: tar
         "401":
           description: Unauthorized
