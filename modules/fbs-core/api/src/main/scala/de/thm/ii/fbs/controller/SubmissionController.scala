@@ -29,7 +29,7 @@ class SubmissionController {
   @Autowired
   private val taskService: TaskService = null
   @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
+  private val checkerConfigurationService: CheckrunnerConfigurationService = null
   @Autowired
   private val checkerServiceFactoryService: CheckerServiceFactoryService = null
   @Autowired
