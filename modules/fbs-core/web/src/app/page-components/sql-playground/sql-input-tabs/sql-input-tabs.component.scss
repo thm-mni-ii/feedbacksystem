@@ -1,0 +1,35 @@
+
+.closeBtn {
+  margin-left: 20px;
+}
+
+.inputField {
+  width: 97%;
+  margin-top: 15px;
+  margin-left: 1.5%;
+  margin-right: 1.5%;
+  margin-bottom: 0;
+}
+
+.downloadBtn {
+  left: 1.5%;
+}
+
+.excuteBtn {
+  margin-left: 31%;
+}
+
+.spinner{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bottom-container{
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  justify-content: flex-start;
+}

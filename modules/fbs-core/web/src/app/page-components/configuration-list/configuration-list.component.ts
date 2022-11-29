@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { Observable, of } from "rxjs";
 import { CheckerService } from "../../service/checker.service";
+import { TaskService } from "../../service/task.service";
 import { ActivatedRoute } from "@angular/router";
 import { NewCheckerDialogComponent } from "../../dialogs/new-checker-dialog/new-checker-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
@@ -23,6 +24,7 @@ export class ConfigurationListComponent implements OnInit {
 
   constructor(
     private checkerService: CheckerService,
+    private TaskService: TaskService,
     private route: ActivatedRoute,
     private authService: AuthService,
     private dialog: MatDialog,
@@ -153,12 +155,15 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadMainFile(checker: CheckerConfig) {
     if (checker.mainFileUploaded) {
-      this.checkerService.getFile(
-        this.courseId,
-        this.taskId,
-        checker.id,
-        CheckerFileType.MainFile
-      );
+      this.TaskService.getTask(this.courseId, this.taskId).subscribe((task) => {
+        this.checkerService.getFile(
+          this.courseId,
+          this.taskId,
+          checker.id,
+          CheckerFileType.MainFile,
+          task.name
+        );
+      });
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
     }
@@ -166,12 +171,15 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadSecondaryFile(checker: CheckerConfig) {
     if (checker.secondaryFileUploaded) {
-      this.checkerService.getFile(
-        this.courseId,
-        this.taskId,
-        checker.id,
-        CheckerFileType.SecondaryFile
-      );
+      this.TaskService.getTask(this.courseId, this.taskId).subscribe((task) => {
+        this.checkerService.getFile(
+          this.courseId,
+          this.taskId,
+          checker.id,
+          CheckerFileType.SecondaryFile,
+          task.name
+        );
+      });
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
     }

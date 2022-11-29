@@ -9,4 +9,5 @@ export class BorderedContainerComponent {
   @Input() title?: string;
   @Input() yScrollable: boolean = false;
   @Input() xScrollable: boolean = false;
+  @Input() input: boolean = false;
 }

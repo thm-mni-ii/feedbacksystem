@@ -23,3 +23,6 @@ data/
 master-runner/upload-dir/*
 
 docker-config
+
+chart/charts
+chart/vals.yaml

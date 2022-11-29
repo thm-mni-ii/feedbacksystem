@@ -27,12 +27,13 @@ changelog:
       labels:
         - checker-api
     - title: Dependency updates ⬆️
-      labels: 
+      labels:
         - dependencies
     - title: Internal 🔒
       labels:
         - "CI/CD"
         - Docker
+        - helm
         - internal
     - title: Other Changes
       labels:

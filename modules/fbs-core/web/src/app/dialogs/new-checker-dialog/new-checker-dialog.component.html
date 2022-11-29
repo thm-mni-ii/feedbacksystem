@@ -23,33 +23,20 @@
         required
       />
     </mat-form-field>
-    <div *ngIf="choosedSQLChecker === false">
+    <div>
       <app-dropzone
         class="pad"
         (update)="updateMainFile($event)"
-        [usage]="'Hauptdatei hochladen'"
+        [usage]="mainFileName"
         [submissionFile]="mainFile"
       ></app-dropzone>
       <app-dropzone
         (update)="updateSecondaryFile($event)"
-        [usage]="'sekundäre Datei hochladen'"
+        [usage]="secondaryFileName"
         [submissionFile]="secondaryFile"
       ></app-dropzone>
     </div>
     <div *ngIf="choosedSQLChecker">
-      <div>
-        <app-dropzone
-          class="pad"
-          (update)="updateMainFile($event)"
-          [usage]="'Hauptdatei hochladen'"
-          [submissionFile]="mainFile"
-        ></app-dropzone>
-        <app-dropzone
-          (update)="updateSecondaryFile($event)"
-          [usage]="'sekundäre Datei hochladen'"
-          [submissionFile]="secondaryFile"
-        ></app-dropzone>
-      </div>
       <div>
         <mat-checkbox
           formControlName="showHints"
