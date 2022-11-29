@@ -161,15 +161,4 @@ class CourseController {
       case _ => throw new ForbiddenException()
     }
   }
-
-  /**
-    * Export course
-    *
-    * @param cid Course id
-    * @param req http request
-    * @param res http response
-    */
-  @GetMapping(value = Array("/{cid}/export"))
-  @ResponseBody
-  def export(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = ??? // TODO: Impl
 }
