@@ -42,23 +42,23 @@
         placeholder="Deadline"
         formControlName="deadline"
         (dateChange)="addDate($event)"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <ngx-mat-datetime-picker
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <ngx-mat-datetime-picker
         #picker
         [showSeconds]="true"
-        ></ngx-mat-datetime-picker>
-      </mat-form-field>
+      ></ngx-mat-datetime-picker>
+    </mat-form-field>
 
-      <mat-slide-toggle
-        value="datePickerDisabled"
-        formControlName="expCheck"
-        class="noDeadline"
-        (change)="setMaxExpirationDate($event)"
-      >
-        Ohne Deadline
-      </mat-slide-toggle>
-   
+    <mat-slide-toggle
+      value="datePickerDisabled"
+      formControlName="expCheck"
+      class="noDeadline"
+      (change)="setMaxExpirationDate($event)"
+    >
+      Ohne Deadline
+    </mat-slide-toggle>
+
     <!-- Task Mediatype -->
     <mat-form-field class="col">
       <mat-label>Medientyp</mat-label>
@@ -77,7 +77,6 @@
         <mat-option value="optional">Bonus</mat-option>
       </mat-select>
     </mat-form-field>
-
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">
