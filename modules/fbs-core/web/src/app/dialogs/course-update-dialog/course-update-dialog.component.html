@@ -28,6 +28,19 @@
           matInput
         />
       </mat-form-field>
+
+      <mat-form-field id="semesterFormField">
+        <mat-label>Semester</mat-label>
+        <mat-select [formControl]="selectedSemester">
+          <mat-option [value]="0">Kein Semester</mat-option>
+          <mat-option
+            *ngFor="let semester of semesterList"
+            [value]="semester.id"
+          >
+            {{ semester.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <mat-slide-toggle [(ngModel)]="isVisible"
         ><p *ngIf="isVisible">Kurs anzeigen</p>
         <p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle
