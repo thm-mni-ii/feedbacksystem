@@ -3,7 +3,6 @@ export interface Task {
   name: string;
   description?: string;
   deadline?: string;
-  expCheck?: boolean;
   requirementType: string;
   mediaType?: string;
   mediaInformation?:

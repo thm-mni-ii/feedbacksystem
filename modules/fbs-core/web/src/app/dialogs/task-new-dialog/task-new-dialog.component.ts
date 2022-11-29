@@ -6,6 +6,7 @@ import {
 } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import {
+  FormControl,
   UntypedFormControl,
   UntypedFormGroup,
   Validators,
@@ -46,14 +47,13 @@ export class TaskNewDialogComponent implements OnInit {
     outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
-    expCheck: new UntypedFormControl(),
+    expCheck: new FormControl<Boolean>(false),
   });
   isUpdate: boolean;
   courseId: number;
-  datePickerDisabled: boolean = this.taskForm.get("expCheck").value;
+  datePickerDisabled: boolean = false;
   task: Task = {
     deadline: this.getDefaultDeadline(),
-    expCheck: this.datePickerDisabled,
     description: "",
     mediaType: "",
     name: "",
@@ -97,7 +97,9 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.description = this.taskForm.get("description").value;
     this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
-    this.task.expCheck = this.taskForm.get("expCheck").value;
+    if (this.taskForm.get("expCheck").value) {
+      this.task.deadline = null;
+    }
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.task.mediaInformation = {
         idField: this.taskForm.get("userIDField").value,
@@ -119,8 +121,15 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["requirementType"].setValue(
       this.task.requirementType
     );
-    this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
-    this.taskForm.controls["expCheck"].setValue(this.task.expCheck);
+    //this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
+    if (!this.task.deadline) {
+      this.taskForm.controls["deadline"].setValue(this.getDefaultDeadline());
+      this.task.deadline = this.getDefaultDeadline();
+      this.taskForm.controls["expCheck"].setValue(true);
+      this.datePickerDisabled = true;
+    } else {
+      this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
+    }
 
     if (this.task.mediaType === "application/x-spreadsheet") {
       this.taskForm.controls["exelFile"].setValue("loading...");
