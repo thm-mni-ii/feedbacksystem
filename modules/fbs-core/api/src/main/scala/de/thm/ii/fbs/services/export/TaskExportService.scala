@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.controller.exception.InternalServerException
+import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, Task}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
@@ -43,7 +43,7 @@ class TaskExportService {
         Archiver.pack(archive, files.toArray: _*)
         descrFile.delete()
         archive
-      case None => throw new InternalServerException(f"Could not export task with id = $taskId.")
+      case None => throw new ResourceNotFoundException(f"Could not export task with id = $taskId.")
     }
   }
 
