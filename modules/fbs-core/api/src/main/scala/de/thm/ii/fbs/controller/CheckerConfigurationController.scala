@@ -255,13 +255,7 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
-          if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.TASKS_BUCKET).build())) {
-            minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.TASKS_BUCKET).build())
-          }
-          val tempDesc = Files.createTempFile("fbs", ".tmp")
-          file.transferTo(tempDesc)
-          minioService.minioClient.uploadObject(UploadObjectArgs.builder().bucket(storageBucketName.TASKS_BUCKET)
-            .`object`("/" + tid.toString + "/" + fileName).filename(tempDesc.toString).build())
+          storageService.storeConfigurationFileInBucket(tid, file, fileName)
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }

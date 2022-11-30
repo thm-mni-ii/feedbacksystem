@@ -87,8 +87,8 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
 
   protected def rcFromCC(cc: CheckrunnerConfiguration): RunnerConfiguration = {
     if (cc.isInBlockStorage) {
-      val mainFile = storageService.getFileFromBucket(storageBucketName.TASKS_BUCKET, s"${cc.taskId}/${storageFileName.MAIN_FILE}")
-      val secFile = storageService.getFileFromBucket(storageBucketName.TASKS_BUCKET, s"${cc.taskId}/${storageFileName.SECONDARY_FILE}")
+      val mainFile = storageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"${cc.taskId}/${storageFileName.MAIN_FILE}")
+      val secFile = storageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"${cc.taskId}/${storageFileName.SECONDARY_FILE}")
 
       val mainPath = mainFile.getPath
       val secPath = secFile.getPath
