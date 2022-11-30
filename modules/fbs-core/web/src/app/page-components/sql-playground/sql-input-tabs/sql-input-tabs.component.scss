@@ -1,4 +1,3 @@
-
 .closeBtn {
   margin-left: 20px;
 }
@@ -13,23 +12,60 @@
 
 .downloadBtn {
   left: 1.5%;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.downloadBtn:hover {
+  color: black;
+}
+
+.submission-inactive-container button {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.submission-inactive-container button:hover {
+  color: black;
+}
+
+.submission-active-container button {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.submission-active-container button:hover {
+  color: black;
 }
 
 .excuteBtn {
   margin-left: 31%;
 }
 
-.spinner{
+.spinner {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.bottom-container{
+.bottom-container {
   position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
   justify-content: flex-start;
+}
+
+.submission-inactive-container {
+  position: absolute;
+  right: 0px;
+}
+
+.submission-active-container {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.closeBtn {
+  position: absolute;
+  right: 0px;
 }

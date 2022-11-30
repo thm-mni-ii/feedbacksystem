@@ -29,11 +29,16 @@ export class SqlInputTabsComponent implements OnInit {
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
+  submitModeActive: boolean = false;
 
   ngOnInit(): void {
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
+  }
+
+  updateMode(value: boolean) {
+    this.submitModeActive = value;
   }
 
   closeTab(index: number) {
