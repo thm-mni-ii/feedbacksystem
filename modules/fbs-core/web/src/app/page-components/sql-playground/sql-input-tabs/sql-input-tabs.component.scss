@@ -23,11 +23,11 @@
   color: black;
 }
 
-.submission-active-container button {
+.submitBtn {
   color: rgba(0, 0, 0, 0.54);
 }
 
-.submission-active-container button:hover {
+.submitBtn:hover {
   color: black;
 }
 
@@ -41,4 +41,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.courseBtn {
+  background-color: rgba(219, 219, 219, 0.54);
+  font-weight: normal;
+  border-radius: 0;
 }

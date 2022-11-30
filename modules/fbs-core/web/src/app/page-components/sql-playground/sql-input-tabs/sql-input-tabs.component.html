@@ -58,6 +58,7 @@
     >
       Abgeben<mat-icon>insert_drive_file</mat-icon>
     </button>
+
     <button
       *ngIf="submitModeActive"
       [disabled]="isSubmissionEmpty()"
@@ -71,22 +72,41 @@
       </span>
       <span *ngIf="!pending">Abgeben</span>
     </button>
-    <mat-icon *ngIf="submitModeActive">remove_red_eye</mat-icon>
-    <mat-icon *ngIf="submitModeActive">cancel</mat-icon>
-    <button mat-button *ngIf="submitModeActive" [matMenuTriggerFor]="menu">
-      Aufgabe
+
+    <mat-icon matTooltip="Beschreibung anzeigen" *ngIf="submitModeActive">remove_red_eye</mat-icon>
+
+    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive">cancel</mat-icon>
+
+<!--     <mat-form-field class="form-field" *ngIf="submitModeActive">
+      <mat-label>Kurs</mat-label>
+      <mat-select [(value)]="selectedCourseName">
+        <mat-option
+          *ngFor="let course of filteredCourses | async"
+          [value]="course.name"
+        >
+          {{ course.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field> -->
+
+    <button class="courseBtn" *ngIf="submitModeActive" mat-button [matMenuTriggerFor]="course">
+      {{selectedCourseName}} <mat-icon>expand_more</mat-icon>
     </button>
-    <mat-menu *ngIf="submitModeActive" #menu="matMenu">
-      <button mat-menu-item>Item 1</button>
-      <button mat-menu-item>Item 2</button>
+    <mat-menu #course="matMenu">
+      <button (click)="changeValue(course.name)" mat-menu-item *ngFor="let course of filteredCourses | async">
+        {{ course.name }}
+      </button>
     </mat-menu>
-    <button *ngIf="submitModeActive" mat-button [matMenuTriggerFor]="menu">
-      Kurs
+
+    <button class="courseBtn" *ngIf="submitModeActive" mat-button [matMenuTriggerFor]="course">
+      {{selectedCourseName}} <mat-icon>expand_more</mat-icon>
     </button>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item>Item 1</button>
-      <button mat-menu-item>Item 2</button>
+    <mat-menu #course="matMenu">
+      <button (click)="changeValue(course.name)" mat-menu-item *ngFor="let course of filteredCourses | async">
+        {{ course.name }}
+      </button>
     </mat-menu>
+
     <button
       *ngIf="submitModeActive"
       class="closeBtn"

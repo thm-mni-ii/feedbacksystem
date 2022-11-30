@@ -6,6 +6,10 @@ import { UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { Observable, of } from "rxjs";
+import { Course } from "src/app/model/Course";
+import { CourseRegistrationService } from "../../../service/course-registration.service";
+import { mergeMap, startWith } from "rxjs/operators";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -21,7 +25,8 @@ export class SqlInputTabsComponent implements OnInit {
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private authService: AuthService,
-    private sqlPlaygroundService: SqlPlaygroundService
+    private sqlPlaygroundService: SqlPlaygroundService,
+    private courseRegistrationService: CourseRegistrationService
   ) {}
 
   fileName = "New_Query";
@@ -30,8 +35,18 @@ export class SqlInputTabsComponent implements OnInit {
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
   submitModeActive: boolean = false;
+  courses: Observable<Course[]> = of();
+  filteredCourses: Observable<Course[]> = of();
+  control: UntypedFormControl = new UntypedFormControl();
+  selectedCourseName: String = "Kurs";
 
   ngOnInit(): void {
+    const userID = this.authService.getToken().id;
+    this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
+    this.filteredCourses = this.control.valueChanges.pipe(
+      startWith(""),
+      mergeMap((value) => this._filter(value))
+    );
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
@@ -169,4 +184,29 @@ export class SqlInputTabsComponent implements OnInit {
       }
     );
   }
+
+  private _filter(value: string): Observable<Course[]> {
+    const filterValue = this._normalizeValue(value);
+    return this.courses.pipe(
+      mergeMap((courseList) => {
+        if (filterValue.length > 0) {
+          return of(
+            courseList.filter((course) =>
+              this._normalizeValue(course.name).includes(filterValue)
+            )
+          );
+        } else {
+          return this.courses;
+        }
+      })
+    );
+  }
+
+  private _normalizeValue(value: string): string {
+    return value.toLowerCase().replace(/\s/g, "");
+  }
+
+  changeValue(name: string) {
+    this.selectedCourseName = name;
+  } 
 }
