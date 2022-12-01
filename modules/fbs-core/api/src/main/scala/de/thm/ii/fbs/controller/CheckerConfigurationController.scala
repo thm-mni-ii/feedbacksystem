@@ -7,7 +7,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import io.minio.{BucketExistsArgs, MakeBucketArgs, UploadObjectArgs}
@@ -30,7 +30,7 @@ class CheckerConfigurationController {
   @Autowired
   private val crs: CourseRegistrationService = null
   @Autowired
-  private val ccs: CheckerConfigurationService = null
+  private val ccs: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired

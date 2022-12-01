@@ -5,7 +5,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, StorageService, SubmissionService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, StorageService, SubmissionService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}
@@ -22,7 +22,7 @@ class CheckerApiController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
+  private val checkerConfigurationService: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired

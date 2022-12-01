@@ -38,6 +38,7 @@
       <input
         matInput
         [ngxMatDatetimePicker]="picker"
+        [disabled]="datePickerDisabled"
         placeholder="Deadline"
         formControlName="deadline"
         (dateChange)="addDate($event)"
@@ -49,8 +50,17 @@
       ></ngx-mat-datetime-picker>
     </mat-form-field>
 
+    <mat-slide-toggle
+      value="datePickerDisabled"
+      formControlName="expCheck"
+      class="noDeadline"
+      (change)="setMaxExpirationDate($event)"
+    >
+      Ohne Deadline
+    </mat-slide-toggle>
+
     <!-- Task Mediatype -->
-    <mat-form-field class="col pad">
+    <mat-form-field class="col">
       <mat-label>Medientyp</mat-label>
       <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
         <mat-option value="text/plain">Text</mat-option>
@@ -60,7 +70,7 @@
     </mat-form-field>
 
     <!-- Task Mediatype -->
-    <mat-form-field class="col">
+    <mat-form-field class="col pad">
       <mat-label>Verbindlichkeit</mat-label>
       <mat-select formControlName="requirementType">
         <mat-option value="mandatory">Pflicht</mat-option>
