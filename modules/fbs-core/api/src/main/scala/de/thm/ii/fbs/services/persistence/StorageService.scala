@@ -4,18 +4,15 @@ import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
-
-import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream, IOException, InputStream}
-import java.nio.file._
-import org.apache.commons.io.FileUtils
-import org.springframework.beans.factory.annotation.{Autowired, Value}
-import org.springframework.stereotype.Component
-import io.minio.{BucketExistsArgs, DownloadObjectArgs, GetObjectArgs, GetPresignedObjectUrlArgs, MakeBucketArgs,
-  RemoveBucketArgs, RemoveObjectArgs, UploadObjectArgs}
 import io.minio.http.Method
+import io.minio._
+import _root_.org.apache.commons.io.FileUtils
+import _root_.org.springframework.beans.factory.annotation.{Autowired, Value}
+import _root_.org.springframework.stereotype.Component
+import _root_.org.springframework.web.multipart.MultipartFile
 
-import org.springframework.web.multipart.MultipartFile
-
+import java.io._
+import java.nio.file._
 import scala.io.Source
 
 /**
@@ -30,7 +27,7 @@ class StorageService extends App {
   @Autowired
   private val taskService: TaskService = null
   @Autowired
-  private val ccs: CheckerConfigurationService = null
+  private val ccs: CheckrunnerConfigurationService = null
 
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
