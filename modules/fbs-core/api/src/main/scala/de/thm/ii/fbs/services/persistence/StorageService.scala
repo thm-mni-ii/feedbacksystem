@@ -94,9 +94,6 @@ class StorageService extends App {
     */
   @throws[IOException]
   def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit = {
-    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())) {
-      minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())
-    }
     val tempDesc = Files.createTempFile(storageFileName.SOLUTION_FILE, ".tmp")
     file.transferTo(tempDesc)
     minioService.minioClient.uploadObject(UploadObjectArgs.builder().contentType(file.getContentType).bucket(storageBucketName.SUBMISSIONS_BUCKET)
@@ -105,9 +102,6 @@ class StorageService extends App {
 
   @throws[IOException]
   def storeConfigurationFileInBucket(tid: Int, file: MultipartFile, fileName: String): Unit = {
-    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())) {
-      minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())
-    }
     val tempDesc = Files.createTempFile("fbs", ".tmp")
     file.transferTo(tempDesc)
     minioService.minioClient.uploadObject(UploadObjectArgs.builder().contentType(file.getContentType).bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET)

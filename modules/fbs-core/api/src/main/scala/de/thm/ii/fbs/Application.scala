@@ -1,7 +1,9 @@
 package de.thm.ii.fbs
 
-import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService
-, MinioService}
+import de.thm.ii.fbs.model.storageBucketName
+import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService, MinioService}
+import io.minio.{BucketExistsArgs, MakeBucketArgs}
+
 import java.nio.file.{Files, Paths}
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -50,6 +52,12 @@ class Application {
   @EventListener(value = Array(classOf[ApplicationReadyEvent]))
   private def initializeMinio(): Unit = {
     minioService.initialMinio()
+    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())) {
+      minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())
+    }
+    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())) {
+      minioService.minioClient.makeBucket(MakeBucketArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())
+    }
     logger.info("Minioclient connected")
   }
 }
