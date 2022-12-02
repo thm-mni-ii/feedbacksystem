@@ -72,7 +72,7 @@ export class TaskNewDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.courseId = this.data.courseId;
@@ -254,7 +254,7 @@ export class TaskNewDialogComponent implements OnInit {
   }
 
   addDate(event: MatDatepickerInputEvent<Date>) {
-    this.task.deadline = event.value.toISOString();
+    // this.task.deadline = event.value.toISOString();
   }
 
   uploadExel(event: Event) {
