@@ -209,6 +209,3 @@ services:
 networks:
   classroom:
   fbs:
-
-#volumes:
-#  minio:
