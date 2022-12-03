@@ -123,7 +123,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
         mycollection.insert_one(record)
 
 
