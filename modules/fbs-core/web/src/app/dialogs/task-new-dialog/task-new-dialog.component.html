@@ -78,6 +78,16 @@
       </mat-select>
     </mat-form-field>
 
+    <!-- Task Visibility  -->
+
+    <mat-form-field class="col">
+      <mat-label>Sichtbarkeit</mat-label>
+      <mat-select formControlName="isPrivate">
+        <mat-option value="Studenten">Studenten</mat-option>
+        <mat-option value="Tutoren">Tutoren</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">
         <input
