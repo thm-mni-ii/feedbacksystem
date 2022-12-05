@@ -1,4 +1,4 @@
-FROM bash:5.2.2
+FROM bash:5.2.12
 
 RUN apk add --no-cache php php-json php7-pecl-mcrypt build-base flex
 
