@@ -30,6 +30,9 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
+  <p class="description" *ngIf="selectedTask != null && isDescriptionMode">
+    <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
+  </p>
   <div class="bottom-container">
     <button mat-button class="downloadBtn" (click)="downloadFile()">
       <mat-icon>download</mat-icon> Download
@@ -73,11 +76,18 @@
       <span *ngIf="!pending">Abgeben</span>
     </button>
 
-    <mat-icon matTooltip="Beschreibung anzeigen" *ngIf="submitModeActive">remove_red_eye</mat-icon>
+    <mat-icon
+      matTooltip="Beschreibung anzeigen"
+      *ngIf="submitModeActive"
+      (click)="isDescriptionMode = !isDescriptionMode"
+      >remove_red_eye</mat-icon
+    >
 
-    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive">cancel</mat-icon>
+    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive"
+      >cancel</mat-icon
+    >
 
-<!--     <mat-form-field class="form-field" *ngIf="submitModeActive">
+    <!--     <mat-form-field class="form-field" *ngIf="submitModeActive">
       <mat-label>Kurs</mat-label>
       <mat-select [(value)]="selectedCourseName">
         <mat-option
@@ -89,20 +99,38 @@
       </mat-select>
     </mat-form-field> -->
 
-    <button class="courseBtn" *ngIf="submitModeActive" mat-button [matMenuTriggerFor]="course">
-      {{selectedCourseName}} <mat-icon>expand_more</mat-icon>
+    <button
+      class="courseBtn"
+      *ngIf="submitModeActive"
+      mat-button
+      [matMenuTriggerFor]="task"
+    >
+      {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
     </button>
-    <mat-menu #course="matMenu">
-      <button (click)="changeValue(course.name)" mat-menu-item *ngFor="let course of filteredCourses | async">
-        {{ course.name }}
+    <mat-menu #task="matMenu">
+      <button
+        (click)="changeTask(task)"
+        mat-menu-item
+        *ngFor="let task of tasks | async"
+      >
+        {{ task.name }}
       </button>
     </mat-menu>
 
-    <button class="courseBtn" *ngIf="submitModeActive" mat-button [matMenuTriggerFor]="course">
-      {{selectedCourseName}} <mat-icon>expand_more</mat-icon>
+    <button
+      class="courseBtn"
+      *ngIf="submitModeActive"
+      mat-button
+      [matMenuTriggerFor]="course"
+    >
+      {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
     </button>
     <mat-menu #course="matMenu">
-      <button (click)="changeValue(course.name)" mat-menu-item *ngFor="let course of filteredCourses | async">
+      <button
+        (click)="changeCourse(course)"
+        mat-menu-item
+        *ngFor="let course of filteredCourses | async"
+      >
         {{ course.name }}
       </button>
     </mat-menu>

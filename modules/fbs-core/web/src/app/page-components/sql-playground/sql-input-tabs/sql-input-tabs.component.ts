@@ -10,6 +10,8 @@ import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";
 import { CourseRegistrationService } from "../../../service/course-registration.service";
 import { mergeMap, startWith } from "rxjs/operators";
+import { TaskService } from "src/app/service/task.service";
+import { Task } from "src/app/model/Task";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -26,7 +28,8 @@ export class SqlInputTabsComponent implements OnInit {
     private snackbar: MatSnackBar,
     private authService: AuthService,
     private sqlPlaygroundService: SqlPlaygroundService,
-    private courseRegistrationService: CourseRegistrationService
+    private courseRegistrationService: CourseRegistrationService,
+    private taskService: TaskService,
   ) {}
 
   fileName = "New_Query";
@@ -39,6 +42,11 @@ export class SqlInputTabsComponent implements OnInit {
   filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
   selectedCourseName: String = "Kurs";
+  selectedTaskName: String = "Aufgabe";
+  selectedCourse: Course;
+  selectedTask: Task;
+  tasks: Observable<Task[]>;
+  isDescriptionMode: boolean = false;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -206,7 +214,28 @@ export class SqlInputTabsComponent implements OnInit {
     return value.toLowerCase().replace(/\s/g, "");
   }
 
-  changeValue(name: string) {
-    this.selectedCourseName = name;
+  changeCourse(course: Course) {
+    this.selectedCourse = course;
+    this.selectedCourseName = this.selectedCourse.name;
+    //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
+    this.getTasks();
+    this.emptyTask();
   } 
+
+  getTasks() {
+    var allTasks: Observable<Task[]>;
+    allTasks = this.taskService.getAllTasks(this.selectedCourse.id);
+    // filtern
+    this.tasks = allTasks;
+  }
+
+  changeTask(task: Task) {
+    this.selectedTask = task;
+    this.selectedTaskName = this.selectedTask.name;
+  }
+
+  emptyTask() {
+    this.selectedTask = null;
+    this.selectedTaskName = "Aufgabe";
+  }
 }
