@@ -53,6 +53,7 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/
       - MONGODB_DATABASE=sql-checker
       - SELF_URL=https://core
+      - MINIO_URL=http://minio
     networks:
       classroom:
       fbs:

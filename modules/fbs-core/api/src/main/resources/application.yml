@@ -73,10 +73,10 @@ spring:
       matching-strategy: ant_path_matcher
 
 minio:
-  user: admin
-  password: SqfyBWhiFGr7FK60cVR2rel
-  url: "http://localhost"
-  port: 9000
+  user: ${MINIO_USER:admin}
+  password: ${MINIO_USER_PASSWORD:SqfyBWhiFGr7FK60cVR2rel}
+  url: ${MINIO_URL:http://localhost}
+  port: ${MINIO_PORT:9000}
 
 url:
   expiration:
