@@ -238,4 +238,32 @@ export class SqlInputTabsComponent implements OnInit {
     this.selectedTask = null;
     this.selectedTaskName = "Aufgabe";
   }
+
+  submit() {
+    this.pending = true;
+    const token = this.authService.getToken();
+    this.submissionService
+      .submitSolution(
+        token.id,
+        this.courseId,
+        this.task.id,
+        this.submissionData
+      )
+      .subscribe(
+        () => {
+          this.refreshByPolling(true);
+          this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
+            duration: 3000,
+          });
+        },
+        (error) => {
+          console.error(error);
+          this.snackbar.open(
+            "Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",
+            "OK",
+            { duration: 3000 }
+          );
+        }
+      );
+  }
 }
