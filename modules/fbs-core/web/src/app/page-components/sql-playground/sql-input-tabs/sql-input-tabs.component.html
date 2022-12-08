@@ -64,11 +64,11 @@
 
     <button
       *ngIf="submitModeActive"
-      [disabled]="isSubmissionEmpty()"
+      [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
       mat-flat-button
       color="accent"
       class="excuteBtn"
-      (click)="submission()"
+      (click)="submissionToTask()"
     >
       <span class="spinner" *ngIf="pending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
@@ -77,6 +77,7 @@
     </button>
 
     <mat-icon
+      [ngStyle]="{ color: isDescriptionMode == true ? 'black' : 'grey' }"
       class="material-icons.color_green"
       matTooltip="Beschreibung anzeigen"
       *ngIf="submitModeActive"
@@ -84,21 +85,12 @@
       >remove_red_eye</mat-icon
     >
 
-    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive"
+    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive && !wasSubmissionCorrect()"
       >cancel</mat-icon
     >
-
-    <!--     <mat-form-field class="form-field" *ngIf="submitModeActive">
-      <mat-label>Kurs</mat-label>
-      <mat-select [(value)]="selectedCourseName">
-        <mat-option
-          *ngFor="let course of filteredCourses | async"
-          [value]="course.name"
-        >
-          {{ course.name }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field> -->
+    <mat-icon matTooltip="Status der Abgabe" *ngIf="submitModeActive && wasSubmissionCorrect()"
+      >check_circle</mat-icon
+    >
 
     <button
       class="courseBtn"

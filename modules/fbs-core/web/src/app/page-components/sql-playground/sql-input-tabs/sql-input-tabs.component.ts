@@ -12,6 +12,8 @@ import { CourseRegistrationService } from "../../../service/course-registration.
 import { mergeMap, startWith } from "rxjs/operators";
 import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
+import { SubmissionService } from "../../../service/submission.service";
+import { Submission } from "src/app/model/Submission";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -29,7 +31,8 @@ export class SqlInputTabsComponent implements OnInit {
     private authService: AuthService,
     private sqlPlaygroundService: SqlPlaygroundService,
     private courseRegistrationService: CourseRegistrationService,
-    private taskService: TaskService,
+    private submissionService: SubmissionService,
+    private taskService: TaskService
   ) {}
 
   fileName = "New_Query";
@@ -47,6 +50,7 @@ export class SqlInputTabsComponent implements OnInit {
   selectedTask: Task;
   tasks: Observable<Task[]>;
   isDescriptionMode: boolean = false;
+  submissionRes: number = -1;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -220,7 +224,7 @@ export class SqlInputTabsComponent implements OnInit {
     //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
     this.getTasks();
     this.emptyTask();
-  } 
+  }
 
   getTasks() {
     var allTasks: Observable<Task[]>;
@@ -239,22 +243,48 @@ export class SqlInputTabsComponent implements OnInit {
     this.selectedTaskName = "Aufgabe";
   }
 
-  submit() {
+  hasDeadlinePassed(): boolean {
+    return Date.now() > Date.parse(this.selectedTask.deadline);
+  }
+
+  wasSubmissionCorrect(): boolean {
+    if(this.submissionRes != 0) {
+      return false;
+    }
+    return true;
+  }
+
+  submissionToTask(): void {
+    if (this.isSubmissionEmpty()) {
+      this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
+      return;
+    }
+    this.submitToTask();
+    //this.submissionService.emitFileSubmission();
+  }
+
+  private submitToTask() {
     this.pending = true;
+    this.isPending.emit(true);
     const token = this.authService.getToken();
     this.submissionService
       .submitSolution(
         token.id,
-        this.courseId,
-        this.task.id,
-        this.submissionData
+        this.selectedCourse.id,
+        this.selectedTask.id,
+        this.activeTab.content
       )
       .subscribe(
-        () => {
-          this.refreshByPolling(true);
-          this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
-            duration: 3000,
-          });
+        (subResult) => {
+          if(subResult.results.length < 1) {
+            this.submissionRes = 1;
+          } else {
+            this.submissionRes = subResult.results[0].exitCode;
+          }
+          console.log(subResult);
+          console.log(this.submissionRes);
+          this.pending = false;
+          this.isPending.emit(false);
         },
         (error) => {
           console.error(error);
@@ -263,7 +293,10 @@ export class SqlInputTabsComponent implements OnInit {
             "OK",
             { duration: 3000 }
           );
-        }
+          this.pending = false;
+          this.isPending.emit(false);
+        },
+        () => console.log("Request Complete")
       );
   }
 }
