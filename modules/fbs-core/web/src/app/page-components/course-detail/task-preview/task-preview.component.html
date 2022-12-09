@@ -11,6 +11,9 @@
     ></span
   >
   <span class="meta">
+    <mat-icon class="visibility" *ngIf="!task.isPrivate"
+      >visibility_off</mat-icon
+    >
     <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
       >access_time</mat-icon
     >
