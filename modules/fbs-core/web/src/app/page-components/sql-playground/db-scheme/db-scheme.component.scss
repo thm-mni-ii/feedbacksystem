@@ -17,10 +17,6 @@ mat-expansion-panel {
   text-decoration: underline;
 }
 
-::ng-deep .mat-tab-label-content {
-  min-width: 230px !important;
-}
-
 ::ng-deep .mat-expansion-panel-body {
   padding: 5px 0 10px 0 !important;
 }

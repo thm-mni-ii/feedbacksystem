@@ -77,3 +77,12 @@ mat-card-title {
   justify-content: center;
   align-items: center;
 }
+
+.info-card{
+  //center the card
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 15px 40px;
+}
