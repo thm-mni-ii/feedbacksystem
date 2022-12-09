@@ -5,10 +5,10 @@ import {
   OnChanges,
   SimpleChanges,
   QueryList,
+  AfterViewInit,
 } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-import { SQLResponse } from "../../../model/sql_playground/SQLResponse";
 
 export interface Content {
   head: any[];
@@ -20,7 +20,7 @@ export interface Content {
   templateUrl: "./dynamic-result-table.component.html",
   styleUrls: ["./dynamic-result-table.component.scss"],
 })
-export class DynamicResultTableComponent implements OnChanges {
+export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
   @ViewChildren(MatPaginator) paginator = new QueryList<MatPaginator>();
   @Input() resultset: any;
   @Input() isQueryPending: boolean = false;
@@ -85,6 +85,4 @@ export class DynamicResultTableComponent implements OnChanges {
   closeTab(index: number) {
     this.tabs.splice(index, 1);
   }
-
-  tabChanged(event: any) {}
 }
