@@ -9,11 +9,7 @@ import {
 } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
-
-export interface Content {
-  head: any[];
-  body: any[];
-}
+import { ResultTab } from "src/app/model/ResultTab";
 
 @Component({
   selector: "app-dynamic-result-table",
@@ -31,7 +27,7 @@ export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
 
   activeResId: number = 0;
   tabCounter: number = 0;
-  tabs: any[] = [];
+  tabs: ResultTab[] = [];
 
   ngAfterViewInit() {
     this.paginator.changes.subscribe(() => {
@@ -60,29 +56,42 @@ export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
         this.dataSource = new MatTableDataSource<string[]>(
           this.resultset.result[0].rows
         );
+        this.displayedColumns = this.resultset.result[0].head;
       }
 
-      let newTab: any = {};
-      newTab.id = this.tabCounter;
-      newTab.name = "Result";
-      newTab.error = this.resultset.error;
-      if (this.resultset.error == true) {
-        newTab.errorMsg = this.resultset.errorMsg;
-      } else if (this.resultset.error == false) {
-        newTab.dataSource = this.dataSource;
-        newTab.displayedColumns = this.resultset.result[0].head;
-      } else {
-        throw new Error("Unknown error");
+      if (this.tabs.length === 0) {
+        this.addTab();
       }
 
-      this.tabs.push(newTab);
-
-      this.tabCounter++;
-      this.activeResId = this.tabs.length - 1;
+      this.updateActiveTab(this.activeResId);
     }
   }
 
   closeTab(index: number) {
     this.tabs.splice(index, 1);
+  }
+
+  updateActiveTab(index: number) {
+    this.tabs[index].error = this.resultset.error;
+    if (this.resultset.error == true) {
+      this.tabs[index].errorMsg = this.resultset.errorMsg;
+    } else if (this.resultset.error == false) {
+      this.tabs[index].dataSource = this.dataSource;
+      this.tabs[index].displayedColumns = this.resultset.result[0].head;
+    } else {
+      throw new Error("Unknown error");
+    }
+  }
+
+  addTab() {
+    this.tabs.push({
+      id: this.tabCounter,
+      name: "Ergebnis Nr.",
+    });
+    this.tabCounter++;
+
+    setTimeout(() => {
+      this.activeResId = this.tabs.length - 1;
+    }, 10);
   }
 }

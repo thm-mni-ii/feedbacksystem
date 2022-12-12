@@ -7,14 +7,16 @@
     </mat-card-header>
   </mat-card>
 
-  <mat-tab-group>
-    *ngIf="tabs.length > 0" [selectedIndex]="activeResId">
+  <mat-tab-group *ngIf="tabs.length > 0" [(selectedIndex)]="activeResId">
     <ng-container>
       <mat-tab *ngFor="let tab of tabs; let index = index">
         <ng-template [mat-tab-label]>
-          {{ tab.name }} {{ tab.id }}
-          <button mat-icon-button (click)="closeTab(index)">
+          {{ tab.name }} {{ tab.id + 1 }}
+          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
             <mat-icon>remove_circle_outline</mat-icon>
+          </button>
+          <button mat-icon-button (click)="addTab()">
+            <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>
         <div class="inputField">
