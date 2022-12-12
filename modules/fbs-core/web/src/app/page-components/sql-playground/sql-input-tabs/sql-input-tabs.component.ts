@@ -244,6 +244,9 @@ export class SqlInputTabsComponent implements OnInit {
   }
 
   hasDeadlinePassed(): boolean {
+    if(this.selectedTask == null) {
+      return true;
+    }
     return Date.now() > Date.parse(this.selectedTask.deadline);
   }
 
@@ -276,11 +279,9 @@ export class SqlInputTabsComponent implements OnInit {
       )
       .subscribe(
         (subResult) => {
-          if(subResult.results.length < 1) {
-            this.submissionRes = 1;
-          } else {
-            this.submissionRes = subResult.results[0].exitCode;
-          }
+          this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
+            duration: 3000,
+          });
           console.log(subResult);
           console.log(this.submissionRes);
           this.pending = false;
