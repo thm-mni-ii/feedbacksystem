@@ -292,8 +292,10 @@ class TaskController {
       val success = taskService.delete(cid, tid)
 
       // If the configuration was deleted in the database -> delete all files
-      success && submissions.forall(s => storageService.deleteSolutionFileFromBucket(s.id)) &&
-        configurations.forall(cc => storageService.deleteConfigurationFromBucket(cc.id))
+      if (success) {
+        submissions.foreach(s => storageService.deleteSolutionFileFromBucket(s.id))
+        configurations.foreach(cc => storageService.deleteConfigurationFromBucket(cc.id))
+      }
     } else {
       throw new ForbiddenException()
     }

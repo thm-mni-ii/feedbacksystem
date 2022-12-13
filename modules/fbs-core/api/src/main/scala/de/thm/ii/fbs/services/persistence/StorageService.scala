@@ -93,20 +93,12 @@ class StorageService extends App {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit = {
-    val inputStream = file.getInputStream
-    minioService.minioClient.putObject(PutObjectArgs.builder().contentType(file.getContentType)
-      .bucket(storageBucketName.SUBMISSIONS_BUCKET).`object`(s"$sid/${storageFileName.SOLUTION_FILE}").stream(inputStream, file.getSize, -1).build())
-    inputStream.close()
-  }
+  def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit =
+    minioService.putObject(file, s"$sid/${storageFileName.SOLUTION_FILE}", storageBucketName.SUBMISSIONS_BUCKET)
 
   @throws[IOException]
-  def storeConfigurationFileInBucket(ccid: Int, file: MultipartFile, fileName: String): Unit = {
-    val inputStream = file.getInputStream
-    minioService.minioClient.putObject(PutObjectArgs.builder().contentType(file.getContentType)
-      .bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).`object`(s"$ccid/$fileName").stream(inputStream, file.getSize, -1).build())
-    inputStream.close()
-  }
+  def storeConfigurationFileInBucket(ccid: Int, file: MultipartFile, fileName: String): Unit =
+    minioService.putObject(file, s"$ccid/$fileName", storageBucketName.CHECKER_CONFIGURATION_BUCKET)
 
   /**
     * Get the path to the main file of a task
@@ -209,38 +201,11 @@ class StorageService extends App {
   }
 
   def getFileContentBucket(bucketName: String, id: Int, fileName: String): String = {
-    if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
-      ""
-    } else {
-      get(bucketName, s"$id/$fileName")
-    }
+    minioService.getObjectAsString(bucketName, s"$id/$fileName")
   }
 
-  /**
-    * Get object from minio storage
-    *
-    * @param bucket bucket name
-    * @param id     object it
-    */
-  private def get(bucket: String, id: String): String = {
-    // get object as byte array
-    try {
-      val stream = minioService.minioClient.getObject(GetObjectArgs.builder().bucket(bucket).`object`(id).build())
-      val content = stream.readAllBytes()
-      val t = content.map(_.toChar)
-      t.mkString
-    } catch {
-      case e: Exception => ""
-    }
-  }
-
-  def getFileFromBucket(bucketName: String, objName: String): File = {
-    val tmpFile = new File("temp-file")
-    minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename("temp-file").build)
-    tmpFile
-
-    //minioService.minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objName).filename(tmpFile).build)
-  }
+  def getFileFromBucket(bucketName: String, objName: String): File =
+    minioService.getObjectAsFile(bucketName, objName)
 
   /**
     * gets the content of a file depending on the source
@@ -291,69 +256,14 @@ class StorageService extends App {
   def getSubTaskFromBucket(ccid: Int): String = getFileContentBucket(storageBucketName.SUBMISSIONS_BUCKET, ccid, storageFileName.SUBTASK_FILE)
 
   /**
-    * Delete a main file
-    *
-    * @param tid Task id
-    * @return True if deteled, false if not file exists
-    * @throws IOException If the i/o operation fails
-    */
-  @throws[IOException]
-  def deleteMainFileFromBucket(tid: Int): Boolean = {
-    val str = getMainFileFromBucket(tid)
-    if (!str.equals("")) {
-      // remove obj from bucket
-      val path = tid.toString + s"/${storageFileName.MAIN_FILE}"
-      deleteFileFromBucket(path)
-    }
-    true
-  }
-
-  /**
-    * Delete a secondary file
-    *
-    * @param tid Task id
-    * @return True if deteled, false if not file exists
-    * @throws IOException If the i/o operation fails
-    */
-  @throws[IOException]
-  def deleteSecondaryFileFromBucket(tid: Int): Boolean = {
-    val str = getSecondaryFileFromBucket(tid)
-    if (str.nonEmpty) {
-      deleteFileFromBucket(s"$tid/${storageFileName.SECONDARY_FILE}")
-    }
-    true
-  }
-
-  /**
-    * Delete a secondary file
-    *
-    * @param filePath path aus id und filename
-    * @return True if deteled, false if not file exists
-    * @throws IOException If the i/o operation fails
-    */
-  @throws[IOException]
-  def deleteFileFromBucket(filePath: String): Unit = {
-    // remove obj from bucket
-    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())) {
-      minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).`object`(filePath).build())
-    }
-  }
-
-  /**
     * Delete the Configuration Folder with all Files inside
     *
-    * @param tid Task id
+    * @param ccid Checker Configuration id
     * @return True if deteled, false if not Directory exists
     * @throws IOException If the i/o operation fails
     */
-  def deleteConfigurationFromBucket(tid: Int): Boolean = {
-    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())) {
-      minioService.minioClient.removeBucket(RemoveBucketArgs.builder().bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).build())
-      true
-    }
-    else {
-      false
-    }
+  def deleteConfigurationFromBucket(ccid: Int): Unit = {
+    minioService.deleteObject(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid.toString)
   }
 
   /**
@@ -365,17 +275,8 @@ class StorageService extends App {
     */
   @throws[IOException]
   def deleteSolutionFileFromBucket(sid: Int): Boolean = {
-    if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())) {
-      val str = getSolutionFileFromBucket(sid)
-      if (str.nonEmpty) {
-        minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET)
-          .`object`(s"$sid/${storageFileName.SOLUTION_FILE}").build())
-      }
-      true
-    }
-    else {
-      false
-    }
+    minioService.deleteObject(storageBucketName.SUBMISSIONS_BUCKET, sid.toString)
+    true
   }
 
   /**
@@ -385,7 +286,7 @@ class StorageService extends App {
     * @param cid  course id
     * @param ccid checker config id
     * @param cc   checker config cc.id == ccid ??
-    * @throws
+    * @throws IOException If the i/o operation fails
     * @return
     */
   @throws[IOException]
@@ -393,14 +294,9 @@ class StorageService extends App {
     try {
       if (ccs.delete(cid, tid, ccid)) {
         if (cc.isInBlockStorage) {
-          deleteSecondaryFileFromBucket(tid)
-          deleteMainFileFromBucket(tid)
-          //storageService.deleteConfigurationFromBucket(ccid)
+          deleteConfigurationFromBucket(ccid)
         } else {
-          // FS
-          deleteSecondaryFile(tid)
-          deleteMainFile(tid)
-          //storageService.deleteConfiguration(ccid)
+          deleteConfiguration(ccid)
         }
         notifyCheckerDelete(tid, cc)
       }
@@ -415,12 +311,11 @@ class StorageService extends App {
     * returns a main-file depending whether it is in the bucket or not
     *
     * @param config CheckrunnerConfiguration
-    * @param tId    task id
     * @return
     */
   def getFileMainFile(config: CheckrunnerConfiguration): File = {
     if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"${config.taskId}/${storageFileName.MAIN_FILE}")
+      getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"${config.id}/${storageFileName.MAIN_FILE}")
     } else {
       val path = pathToMainFile(config.id).get.toString
       new File(path)
@@ -431,7 +326,6 @@ class StorageService extends App {
     * returns a secondary-file depending whether it is in the bucket or not
     *
     * @param config CheckrunnerConfiguration
-    * @param tId    task id
     * @return
     */
   def getFileSolutionFile(config: CheckrunnerConfiguration, sid: Int): File = {
@@ -453,14 +347,10 @@ class StorageService extends App {
     * @param fileName
     * @return
     */
-  def getFileContentStream(pathFn: (Int) => Option[Path])(isInBlockStorage: Boolean, ccid: Int, tid: Int, fileName: String): InputStream = {
-    // check ob bucket oder fs
+  def getFileContentStream(pathFn: Int => Option[Path])(isInBlockStorage: Boolean, ccid: Int, tid: Int, fileName: String): InputStream = {
     if (isInBlockStorage) {
-      // bucket
-      val fileContent = getFileContentBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, tid, fileName)
-      new ByteArrayInputStream(fileContent.getBytes())
+      new ByteArrayInputStream(minioService.getObjectAsBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"$tid/$fileName"))
     } else {
-      // fs
       pathFn(ccid) match {
         case Some(mainFilePath) =>
           new FileInputStream(mainFilePath.toFile)
