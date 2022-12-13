@@ -1,15 +1,15 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
-import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
-import io.minio.http.Method
-import io.minio._
 import _root_.org.apache.commons.io.FileUtils
 import _root_.org.springframework.beans.factory.annotation.{Autowired, Value}
 import _root_.org.springframework.stereotype.Component
 import _root_.org.springframework.web.multipart.MultipartFile
+import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
+import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
+import io.minio._
+import io.minio.http.Method
 
 import java.io._
 import java.nio.file._
@@ -88,24 +88,24 @@ class StorageService extends App {
   /**
     * Store (replace if exists) the solution file a submission
     *
-    * @param sid Submission id
+    * @param sid  Submission id
     * @param file the file
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
   def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit = {
-    val tempDesc = Files.createTempFile(storageFileName.SOLUTION_FILE, ".tmp")
-    file.transferTo(tempDesc)
-    minioService.minioClient.uploadObject(UploadObjectArgs.builder().contentType(file.getContentType).bucket(storageBucketName.SUBMISSIONS_BUCKET)
-      .`object`(s"$sid/${storageFileName.SOLUTION_FILE}").filename(tempDesc.toString).build())
+    val inputStream = file.getInputStream
+    minioService.minioClient.putObject(PutObjectArgs.builder().contentType(file.getContentType)
+      .bucket(storageBucketName.SUBMISSIONS_BUCKET).`object`(s"$sid/${storageFileName.SOLUTION_FILE}").stream(inputStream, file.getSize, -1).build())
+    inputStream.close()
   }
 
   @throws[IOException]
-  def storeConfigurationFileInBucket(tid: Int, file: MultipartFile, fileName: String): Unit = {
-    val tempDesc = Files.createTempFile("fbs", ".tmp")
-    file.transferTo(tempDesc)
-    minioService.minioClient.uploadObject(UploadObjectArgs.builder().contentType(file.getContentType).bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET)
-      .`object`(s"$tid/$fileName").filename(tempDesc.toString).build())
+  def storeConfigurationFileInBucket(ccid: Int, file: MultipartFile, fileName: String): Unit = {
+    val inputStream = file.getInputStream
+    minioService.minioClient.putObject(PutObjectArgs.builder().contentType(file.getContentType)
+      .bucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET).`object`(s"$ccid/$fileName").stream(inputStream, file.getSize, -1).build())
+    inputStream.close()
   }
 
   /**
@@ -209,12 +209,10 @@ class StorageService extends App {
   }
 
   def getFileContentBucket(bucketName: String, id: Int, fileName: String): String = {
-    // muss ein bucket angelegt werden oder geschieht dies automatisch beim hinzufügen zu einem bucketName
     if (!minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())) {
       ""
     } else {
-      val concat = id.toString + "/" + fileName
-      get(bucketName, concat)
+      get(bucketName, s"$id/$fileName")
     }
   }
 
@@ -246,8 +244,9 @@ class StorageService extends App {
 
   /**
     * gets the content of a file depending on the source
+    *
     * @param isInBlockStorage True if the content is the Minio
-    * @param submissionId submission id
+    * @param submissionId     submission id
     * @return
     */
   def getSolutionFileContent(isInBlockStorage: Boolean, submissionId: Int): String = {
@@ -319,10 +318,8 @@ class StorageService extends App {
   @throws[IOException]
   def deleteSecondaryFileFromBucket(tid: Int): Boolean = {
     val str = getSecondaryFileFromBucket(tid)
-    if (!str.equals("")) { // check ob existiert
-      // remove obj from bucket
-      val path = tid.toString + "/secondary-file"
-      deleteFileFromBucket(path)
+    if (str.nonEmpty) {
+      deleteFileFromBucket(s"$tid/${storageFileName.SECONDARY_FILE}")
     }
     true
   }
@@ -370,7 +367,7 @@ class StorageService extends App {
   def deleteSolutionFileFromBucket(sid: Int): Boolean = {
     if (minioService.minioClient.bucketExists(BucketExistsArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET).build())) {
       val str = getSolutionFileFromBucket(sid)
-      if (!str.equals("")) {
+      if (str.nonEmpty) {
         minioService.minioClient.removeObject(RemoveObjectArgs.builder().bucket(storageBucketName.SUBMISSIONS_BUCKET)
           .`object`(s"$sid/${storageFileName.SOLUTION_FILE}").build())
       }
@@ -415,9 +412,10 @@ class StorageService extends App {
   }
 
   /**
-    *  returns a main-file depending whether it is in the bucket or not
+    * returns a main-file depending whether it is in the bucket or not
+    *
     * @param config CheckrunnerConfiguration
-    * @param tId task id
+    * @param tId    task id
     * @return
     */
   def getFileMainFile(config: CheckrunnerConfiguration): File = {
@@ -438,7 +436,7 @@ class StorageService extends App {
     */
   def getFileSolutionFile(config: CheckrunnerConfiguration, sid: Int): File = {
     if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"${sid}/${storageFileName.SOLUTION_FILE}")
+      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"$sid/${storageFileName.SOLUTION_FILE}")
     } else {
       val path = pathToSolutionFile(config.id).get.toString
       new File(path)
@@ -447,6 +445,7 @@ class StorageService extends App {
 
   /**
     * returns a input stream depending whether it is in the bucket or not
+    *
     * @param pathFn
     * @param isInBlockStorage
     * @param ccid
@@ -472,6 +471,7 @@ class StorageService extends App {
 
   /**
     * url expires in 1 min
+    *
     * @param bucketName
     * @param fileName
     * @return a presigned url for a get request
@@ -483,6 +483,7 @@ class StorageService extends App {
 
   /**
     * url expires in 1 min
+    *
     * @param bucketName
     * @param fileName
     * @return a presigned url for a put request
