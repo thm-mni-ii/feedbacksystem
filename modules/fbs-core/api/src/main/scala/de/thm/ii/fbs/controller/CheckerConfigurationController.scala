@@ -1,22 +1,20 @@
 package de.thm.ii.fbs.controller
 
-import java.io.{ByteArrayInputStream, File, FileInputStream, FileOutputStream}
-import java.nio.file.{Files, Path, Paths}
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CourseRole, GlobalRole, SqlCheckerInformation, Task, storageBucketName, storageFileName}
+import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
-import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CourseRegistrationService, MinioService, StorageService, TaskService}
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import io.minio.{BucketExistsArgs, MakeBucketArgs, UploadObjectArgs}
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
+
+import java.nio.file.Path
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * UserController defines all routes for /users (insert, delete, update)
@@ -196,7 +194,7 @@ class CheckerConfigurationController {
                      @RequestParam file: MultipartFile,
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.MAIN_FILE,
-      (cc) => {
+      cc => {
         notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
         this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
       })(cid, tid, ccid, file, req, res)
@@ -230,7 +228,7 @@ class CheckerConfigurationController {
                           @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.SECONDARY_FILE,
-      (cc) => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
+      cc => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the secondary file for a task configuration
@@ -246,7 +244,7 @@ class CheckerConfigurationController {
                        req: HttpServletRequest, res: HttpServletResponse): Unit =
     getFile(storageService.pathToSecondaryFile)(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
 
-  private def uploadFile(fileName: String, postHook: (CheckrunnerConfiguration) => Unit)
+  private def uploadFile(fileName: String, postHook: CheckrunnerConfiguration => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
@@ -255,7 +253,7 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
-          storageService.storeConfigurationFileInBucket(tid, file, fileName)
+          storageService.storeConfigurationFileInBucket(ccid, file, fileName)
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }
@@ -264,8 +262,8 @@ class CheckerConfigurationController {
     }
   }
 
-  private def getFile(pathFn: (Int) => Option[Path])(fileName: String, cid: Int, tid: Int, ccid: Int,
-                                                     req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  private def getFile(pathFn: Int => Option[Path])(fileName: String, cid: Int, tid: Int, ccid: Int,
+                                                   req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
