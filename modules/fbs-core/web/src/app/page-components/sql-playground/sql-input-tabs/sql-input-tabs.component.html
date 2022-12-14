@@ -37,7 +37,7 @@
     </button>
 
     <button
-      [disabled]="isSubmissionEmpty()"
+      [disabled]="isSubmissionEmpty() || isPending"
       mat-flat-button
       color="accent"
       class="excuteBtn"
@@ -46,7 +46,7 @@
       <span class="spinner" *ngIf="isPending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Ausführen (strg + enter)</span>
+      <span *ngIf="!isPending">Ausführen (strg + enter)</span>
     </button>
   </div>
 </mat-card-actions>
