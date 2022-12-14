@@ -42,10 +42,10 @@
       class="excuteBtn"
       (click)="submission()"
     >
-      <span class="spinner" *ngIf="pending">
+      <span class="spinner" *ngIf="isPending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Abgeben</span>
+      <span *ngIf="!isPending">Abgeben</span>
     </button>
   </div>
 </mat-card-actions>

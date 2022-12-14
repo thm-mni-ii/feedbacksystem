@@ -13,9 +13,8 @@
   <div class="input-grid">
     <app-bordered-container [input]="true">
       <app-sql-input-tabs
-        [activeDb]="activeDb"
-        (resultset)="changeResultset($event)"
-        (isPending)="changeQueryPending($event)"
+        [isPending]="isQueryPending"
+        (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
