@@ -5,7 +5,6 @@ import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkb
 import org.springframework.stereotype.Service
 
 import java.io.{File, FileInputStream}
-import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.Locale
 import scala.util.matching.Regex
