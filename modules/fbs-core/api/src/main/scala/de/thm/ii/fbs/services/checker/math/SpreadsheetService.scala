@@ -92,6 +92,7 @@ class SpreadsheetService {
     col.toInt - 64
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+  germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)
 
   /**
     * @param row the row where the errror occured
