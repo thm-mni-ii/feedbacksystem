@@ -11,6 +11,7 @@ import { AuthService } from "src/app/service/auth.service";
 export class DbControlPanelComponent implements OnInit {
   @Input() activeDbId: number;
   @Output() changeActiveDbId = new EventEmitter<number>();
+  @Output() submitStatement = new EventEmitter<string>();
 
   constructor(private auth: AuthService) {}
 
@@ -27,5 +28,9 @@ export class DbControlPanelComponent implements OnInit {
   changeDb(db: any) {
     this.activeDb = db;
     this.changeActiveDbId.emit(db.id);
+  }
+
+  submitStatementToParent(statement: string) {
+    this.submitStatement.emit(statement);
   }
 }

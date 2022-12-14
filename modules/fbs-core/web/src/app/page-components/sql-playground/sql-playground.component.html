@@ -22,6 +22,7 @@
     <app-bordered-container [title]="'Steuerung'">
       <app-db-control-panel
         (changeActiveDbId)="changeActiveDbId($event)"
+        (submitStatement)="submitStatement($event)"
       ></app-db-control-panel
     ></app-bordered-container>
   </div>

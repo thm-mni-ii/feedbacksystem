@@ -45,11 +45,6 @@ export class SqlPlaygroundComponent implements OnInit {
     this.updateScheme();
   }
 
-  changeResultset($event) {
-    this.resultset = $event;
-    this.updateScheme();
-  }
-
   changeQueryPending($event) {
     this.isQueryPending = $event;
   }
@@ -125,6 +120,7 @@ export class SqlPlaygroundComponent implements OnInit {
           // emit if success
           this.isQueryPending = false;
           this.resultset = res;
+          this.updateScheme();
         },
         () => {}, //handle error
         () => console.log("Request Complete")

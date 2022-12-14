@@ -9,6 +9,7 @@
     <app-db-control-templates
       [activeDb]="activeDb"
       [isAdmin]="isAdmin"
+      (submitStatement)="submitStatementToParent($event)"
     ></app-db-control-templates>
   </mat-tab>
   <mat-tab label="Co-Working" [disabled]="!isAdmin">
