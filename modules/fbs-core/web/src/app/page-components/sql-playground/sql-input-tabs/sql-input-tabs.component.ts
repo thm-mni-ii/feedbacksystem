@@ -6,14 +6,10 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
-import { delay, retryWhen } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { AuthService } from "src/app/service/auth.service";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
-import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 
 @Component({
   selector: "app-sql-input-tabs",

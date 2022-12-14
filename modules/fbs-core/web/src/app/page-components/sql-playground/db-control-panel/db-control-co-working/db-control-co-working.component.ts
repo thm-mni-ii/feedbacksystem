@@ -172,10 +172,6 @@ export class DbControlCoWorkingComponent implements OnInit {
       );
   }
 
-  activateGroup(dbId: number) {
-    //
-  }
-
   private openTextConfirmDialog(
     title: string,
     message: string,

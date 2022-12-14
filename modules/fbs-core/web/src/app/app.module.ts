@@ -96,10 +96,10 @@ import { DbSchemeViewsComponent } from "./page-components/sql-playground/db-sche
 import { DbSchemeTriggersComponent } from "./page-components/sql-playground/db-scheme/db-scheme-triggers/db-scheme-triggers.component";
 import { DbSchemeRoutinesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-routines/db-scheme-routines.component";
 import { DbSchemeTablesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-tables/db-scheme-tables.component";
-import { DbControlTemplatesComponent } from './page-components/sql-playground/db-control-panel/db-control-templates/db-control-templates.component';
-import { DbControlCoWorkingComponent } from './page-components/sql-playground/db-control-panel/db-control-co-working/db-control-co-working.component';
-import { DbControlDbOverviewComponent } from './page-components/sql-playground/db-control-panel/db-control-db-overview/db-control-db-overview.component';
-import { NewSqlTemplateComponent } from './dialogs/new-sql-template/new-sql-template.component';
+import { DbControlTemplatesComponent } from "./page-components/sql-playground/db-control-panel/db-control-templates/db-control-templates.component";
+import { DbControlCoWorkingComponent } from "./page-components/sql-playground/db-control-panel/db-control-co-working/db-control-co-working.component";
+import { DbControlDbOverviewComponent } from "./page-components/sql-playground/db-control-panel/db-control-db-overview/db-control-db-overview.component";
+import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {

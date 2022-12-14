@@ -1,13 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
 import { NewSqlTemplateComponent } from "src/app/dialogs/new-sql-template/new-sql-template.component";
 import { JWTToken } from "src/app/model/JWTToken";
 import { Database } from "src/app/model/sql_playground/Database";
 import { SqlTemplates } from "src/app/model/sql_playground/SqlTemplates";
 import { TemplateCategory } from "src/app/model/sql_playground/TemplateCategory";
 import { AuthService } from "src/app/service/auth.service";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 
 @Component({
   selector: "app-db-control-templates",
