@@ -5,6 +5,7 @@ import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkb
 import org.springframework.stereotype.Service
 
 import java.io.{File, FileInputStream}
+import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.Locale
 import scala.util.matching.Regex
@@ -92,6 +93,7 @@ class SpreadsheetService {
     col.toInt - 64
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+  germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)
 
   /**
     * @param row the row where the errror occured
