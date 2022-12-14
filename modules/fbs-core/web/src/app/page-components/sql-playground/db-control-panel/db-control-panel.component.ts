@@ -16,6 +16,7 @@ export class DbControlPanelComponent implements OnInit {
   constructor(private auth: AuthService) {}
 
   isAdmin: boolean;
+  selectedTab: number = 0;
 
   ngOnInit(): void {
     const globalRole = this.auth.getToken().globalRole;
@@ -31,6 +32,7 @@ export class DbControlPanelComponent implements OnInit {
   }
 
   submitStatementToParent(statement: string) {
+    this.selectedTab = 0;
     this.submitStatement.emit(statement);
   }
 }

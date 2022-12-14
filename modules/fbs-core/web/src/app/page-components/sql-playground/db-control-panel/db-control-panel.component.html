@@ -1,4 +1,8 @@
-<mat-tab-group class="tabs" mat-stretch-tabs="false">
+<mat-tab-group
+  class="tabs"
+  mat-stretch-tabs="false"
+  [(selectedIndex)]="selectedTab"
+>
   <mat-tab label="DB">
     <app-db-control-db-overview
       (changeActiveDb)="changeDb($event)"
