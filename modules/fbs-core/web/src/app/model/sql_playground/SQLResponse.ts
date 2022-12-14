@@ -5,6 +5,6 @@ export interface SQLResponse {
 }
 
 interface ResponseTable {
-  head: string;
-  rows: string;
+  head: string[];
+  rows: string[];
 }

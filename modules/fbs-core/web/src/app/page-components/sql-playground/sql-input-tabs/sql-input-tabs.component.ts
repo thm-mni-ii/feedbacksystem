@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { delay, retryWhen } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
@@ -6,6 +13,7 @@ import { UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
+import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -15,6 +23,13 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 export class SqlInputTabsComponent implements OnInit {
   @Input() isPending: boolean;
   @Output() submitStatement = new EventEmitter<string>();
+  @HostListener("window:keyup", ["$event"])
+  keyEvent(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === "Enter") {
+      // Your row selection code
+      this.submission();
+    }
+  }
 
   constructor(private dialog: MatDialog, private snackbar: MatSnackBar) {}
 
