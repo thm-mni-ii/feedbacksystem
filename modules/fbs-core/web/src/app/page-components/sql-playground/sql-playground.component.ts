@@ -37,8 +37,8 @@ export class SqlPlaygroundComponent implements OnInit {
     this.titlebar.emitTitle("SQL Playground");
   }
 
-  changeActiveDb($event) {
-    this.activeDb = $event;
+  changeActiveDbId(dbId: number) {
+    this.activeDb = dbId;
     this.updateScheme();
   }
 

@@ -1,0 +1,42 @@
+<div class="container">
+  <p class="info-text" *ngIf="this.activeDb !== undefined">
+    Ausgewählte DB:
+    <span class="highlight">
+      {{ this.activeDb.name }}
+    </span>
+  </p>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Vorlagen</mat-label>
+    <mat-select [(value)]="selectedTemplateId">
+      <mat-option>-- None --</mat-option>
+      <mat-optgroup
+        *ngFor="let category of templatesByCategory"
+        [label]="category.category.name"
+      >
+        <mat-option
+          *ngFor="let template of category.templates"
+          [value]="template.id"
+        >
+          {{ template.name }}
+        </mat-option>
+      </mat-optgroup>
+    </mat-select>
+  </mat-form-field>
+  <button
+    mat-raised-button
+    class="insert-btn"
+    [disabled]="selectedTemplateId === 0 || selectedTemplateId === undefined"
+    (click)="insertTemplate()"
+  >
+    Einfügen
+  </button>
+  <button
+    *ngIf="isAdmin"
+    mat-raised-button
+    class="orange-btn"
+    (click)="editTemplates()"
+  >
+    Bearbeiten
+  </button>
+</div>
