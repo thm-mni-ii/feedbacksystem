@@ -8,8 +8,6 @@ import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
-import io.minio._
-import io.minio.http.Method
 
 import java.io._
 import java.nio.file._
@@ -352,12 +350,6 @@ class StorageService extends App {
   /**
     * returns a input stream depending whether it is in the bucket or not
     *
-    * @param pathFn
-    * @param isInBlockStorage
-    * @param ccid
-    * @param tid task id
-    * @param fileName
-    * @return
     */
   def getFileContentStream(pathFn: Int => Option[Path])(isInBlockStorage: Boolean, ccid: Int, tid: Int, fileName: String): InputStream = {
     if (isInBlockStorage) {
@@ -369,30 +361,6 @@ class StorageService extends App {
         case _ => throw new ResourceNotFoundException()
       }
     }
-  }
-
-  /**
-    * url expires in 1 min
-    *
-    * @param bucketName
-    * @param fileName
-    * @return a presigned url for a get request
-    */
-  def presignedUrlGet(bucketName: String, fileName: String): String = {
-    minioService.minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET)
-      .bucket(bucketName).`object`(fileName).expiry(60).build())
-  }
-
-  /**
-    * url expires in 1 min
-    *
-    * @param bucketName
-    * @param fileName
-    * @return a presigned url for a put request
-    */
-  def presignedUrlPut(bucketName: String, fileName: String): String = {
-    minioService.minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
-      .bucket(bucketName).`object`(fileName).expiry(60).build())
   }
 
   private def notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration): Unit = {

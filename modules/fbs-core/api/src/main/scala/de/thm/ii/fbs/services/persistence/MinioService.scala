@@ -4,6 +4,7 @@ import _root_.org.springframework.beans.factory.annotation.Value
 import _root_.org.springframework.stereotype.Component
 import _root_.org.springframework.web.multipart.MultipartFile
 import io.minio._
+import io.minio.http.Method
 
 import java.io.{File, IOException}
 
@@ -90,7 +91,8 @@ class MinioService {
     * @return the file
     */
   def getObjectAsFile(bucketName: String, objectName: String): File = {
-    val tmpFile = File.createTempFile(bucketName, objectName)
+    val tmpPrefix = s"${bucketName}_${objectName.replaceAll("/", "_")}"
+    val tmpFile = File.createTempFile(tmpPrefix, null)
     minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objectName).filename(tmpFile.toString).build)
     tmpFile
   }
@@ -111,5 +113,31 @@ class MinioService {
 
   def bucketExists(bucketName: String): Boolean = {
     minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())
+  }
+
+  /**
+    * generates a pre signed get url for the given object
+    *
+    * @param bucketName the name of the Bucket to generate a presigned url for
+    * @param objectName the name of the Object to generate a presigned url for
+    * @param expiry     Seconds after the URL has expired (default 1 min)
+    * @return a presigned url for a get request
+    */
+  def generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 60): String = {
+    minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET)
+      .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+  }
+
+  /**
+    * generates a pre signed put url for the given object
+    *
+    * @param bucketName the name of the Bucket to generate a presigned url for
+    * @param objectName the name of the Object to generate a presigned url for
+    * @param expiry     Seconds after the URL has expired (default 1 min)
+    * @return a presigned url for a put request
+    */
+  def generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 60): String = {
+    minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
+      .bucket(bucketName).`object`(objectName).expiry(expiry).build())
   }
 }
