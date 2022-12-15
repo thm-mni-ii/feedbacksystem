@@ -11,11 +11,11 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
         private val rangeRefsRegex = "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
     }
 
-    val references: Map<String, Map<String, Set<String>>>
+    val references: Map<Int, Map<String, Set<String>>>
 
 
     init {
-        val refs: MutableMap<String, Map<String, Set<String>>> = HashMap()
+        val refs: MutableMap<Int, Map<String, Set<String>>> = HashMap()
         for (sheet in workbook.sheetIterator()) {
             val sheetRefs: MutableMap<String, Set<String>> = HashMap()
             for (row in sheet.rowIterator()) {
@@ -25,7 +25,7 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
                     }
                 }
             }
-            refs[sheet.sheetName] = sheetRefs.toMap()
+            refs[workbook.getSheetIndex(sheet)] = sheetRefs.toMap()
         }
         references = refs.toMap()
     }
