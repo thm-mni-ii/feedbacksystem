@@ -21,7 +21,7 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
             for (row in sheet.rowIterator()) {
                 for (cell in row.cellIterator()) {
                     if (cell.cellType == CellType.FORMULA) {
-                        sheetRefs[cell.toString()] = getCells(cell.cellFormula)
+                        sheetRefs[cell.address.formatAsString()] = getCells(cell.cellFormula)
                     }
                 }
             }
