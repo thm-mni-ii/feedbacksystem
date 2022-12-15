@@ -195,7 +195,7 @@ class CheckerConfigurationController {
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.MAIN_FILE,
       cc => {
-        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc, storageService.pathToMainFile(ccid).get)
+        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc)
         this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
       })(cid, tid, ccid, file, req, res)
 
@@ -289,11 +289,11 @@ class CheckerConfigurationController {
     }
   }
 
-  private def notifyCheckerMainFileUpload(cid: Int, task: Task, cc: CheckrunnerConfiguration, mainFile: Path): Unit = {
+  private def notifyCheckerMainFileUpload(cid: Int, task: Task, cc: CheckrunnerConfiguration): Unit = {
     val checker = checkerService(cc.checkerType)
     checker match {
       case change: CheckerServiceOnMainFileUpload =>
-        change.onCheckerMainFileUpload(cid, task, cc, mainFile)
+        change.onCheckerMainFileUpload(cid, task, cc)
       case _ =>
     }
   }

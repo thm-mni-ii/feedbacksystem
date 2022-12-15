@@ -1,4 +1,5 @@
 package de.thm.ii.fbs.services.checker
+
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerSubmission, User}
@@ -10,7 +11,6 @@ import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 
-import java.nio.file.{Files, Path}
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
@@ -35,6 +35,8 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   private val userService: UserService = null
   @Autowired
   private val checkerService: CheckrunnerConfigurationService = null
+  @Autowired
+  private val storageService: StorageService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
   @Value("${spring.data.mongodb.uri}")
@@ -51,7 +53,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, false)) {
       val apiUrl = new URIBuilder(selfUrl)
-        .setPath(s"/api/v1/checker/submissions/${submissionID}")
+        .setPath(s"/api/v1/checker/submissions/$submissionID")
         .setParameter("typ", "sql-checker")
         .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
         .build().toString
@@ -140,7 +142,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
 
   def formatConfiguration(checker: CheckrunnerConfiguration): Any = {
     checker.checkerTypeInformation match {
-      case Some(sci: SqlCheckerInformation) => {
+      case Some(sci: SqlCheckerInformation) =>
         new ObjectMapper().createObjectNode()
           .put("passed", true)
           .put("isSol", true)
@@ -151,7 +153,6 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           .put("attempt", 1)
           .put("submission", sci.solution)
           .toString
-      }
       case _ => new ObjectMapper().createObjectNode().toString
     }
   }
@@ -167,22 +168,21 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           .setParameter("token", tokenService.issue(s"checkers/${checkerConfiguration.id}", 60))
           .build().toString
 
-        val request = RunnerRequest(task.id, rcFromCC(checkerConfiguration), SqlCheckerSubmission(0, User(0, ""), apiUrl, mongodbUrl))
+        val request = RunnerRequest(task.id, generateRunnerConfiguration(checkerConfiguration), SqlCheckerSubmission(0, User(0, ""), apiUrl, mongodbUrl))
         restTemplate.postForEntity(masterRunnerURL + "/runner/start", request.toJson, classOf[Unit])
       case _ =>
     }
   }
 
-  override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration, mainFile: Path): Unit = {
-    val content = Files.readString(mainFile)
+  override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    val content = storageService.getMainFileContent(checkerConfiguration)
     val json = new ObjectMapper().readValue(content, classOf[JsonNode])
     Option(json.get("sections").get(0).get("query")).map(query => query.asText()) match {
       case Some(query: String) => checkerConfiguration.checkerTypeInformation match {
-        case Some(sqlCheckerInformation: SqlCheckerInformation) => {
+        case Some(sqlCheckerInformation: SqlCheckerInformation) =>
           checkerService.setCheckerTypeInformation(cid, checkerConfiguration.taskId, checkerConfiguration.id,
             Some(sqlCheckerInformation.copy(solution = query)))
           onCheckerConfigurationChange(task, checkerConfiguration)
-        }
         case _ =>
       }
       case _ =>

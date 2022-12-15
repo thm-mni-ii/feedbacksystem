@@ -94,11 +94,11 @@ class StorageService extends App {
     */
   @throws[IOException]
   def storeSolutionFileInBucket(sid: Int, file: MultipartFile): Unit =
-    minioService.putObject(file, s"$sid/${storageFileName.SOLUTION_FILE}", storageBucketName.SUBMISSIONS_BUCKET)
+    minioService.putObject(file, storageFileName.getSolutionFilePath(sid), storageBucketName.SUBMISSIONS_BUCKET)
 
   @throws[IOException]
   def storeConfigurationFileInBucket(ccid: Int, file: MultipartFile, fileName: String): Unit =
-    minioService.putObject(file, s"$ccid/$fileName", storageBucketName.CHECKER_CONFIGURATION_BUCKET)
+    minioService.putObject(file, storageFileName.getFilePath(ccid, fileName), storageBucketName.CHECKER_CONFIGURATION_BUCKET)
 
   /**
     * Get the path to the main file of a task
@@ -208,6 +208,19 @@ class StorageService extends App {
     minioService.getObjectAsFile(bucketName, objName)
 
   /**
+    * gets the content of a the main File
+    *
+    * @param cc the Checkerunner Configuration
+    */
+  def getMainFileContent(cc: CheckrunnerConfiguration): String = {
+    if (cc.isInBlockStorage) {
+      getMainFileFromBucket(cc.id)
+    } else {
+      getMainFile(cc.id)
+    }
+  }
+
+  /**
     * gets the content of a file depending on the source
     *
     * @param isInBlockStorage True if the content is the Minio
@@ -217,8 +230,7 @@ class StorageService extends App {
   def getSolutionFileContent(isInBlockStorage: Boolean, submissionId: Int): String = {
     if (isInBlockStorage) {
       getSolutionFileFromBucket(submissionId)
-    }
-    else {
+    } else {
       getSolutionFile(submissionId)
     }
   }
@@ -315,7 +327,7 @@ class StorageService extends App {
     */
   def getFileMainFile(config: CheckrunnerConfiguration): File = {
     if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"${config.id}/${storageFileName.MAIN_FILE}")
+      getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(config.id))
     } else {
       val path = pathToMainFile(config.id).get.toString
       new File(path)
@@ -330,7 +342,7 @@ class StorageService extends App {
     */
   def getFileSolutionFile(config: CheckrunnerConfiguration, sid: Int): File = {
     if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, s"$sid/${storageFileName.SOLUTION_FILE}")
+      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(sid))
     } else {
       val path = pathToSolutionFile(config.id).get.toString
       new File(path)
@@ -349,7 +361,7 @@ class StorageService extends App {
     */
   def getFileContentStream(pathFn: Int => Option[Path])(isInBlockStorage: Boolean, ccid: Int, tid: Int, fileName: String): InputStream = {
     if (isInBlockStorage) {
-      new ByteArrayInputStream(minioService.getObjectAsBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, s"$tid/$fileName"))
+      new ByteArrayInputStream(minioService.getObjectAsBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getFilePath(tid, fileName)))
     } else {
       pathFn(ccid) match {
         case Some(mainFilePath) =>
