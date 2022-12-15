@@ -5,6 +5,12 @@ import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
+    companion object {
+        private val cellStringsRegex = "\"[^\"]*\"".toRegex()
+        private val cellRefsRegex = "$?[A-Z]+\$?[1-9][0-9]*".toRegex()
+        private val rangeRefsRegex = "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
+    }
+
     val references: Map<String, Map<String, Set<String>>>
 
 
@@ -26,10 +32,10 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
 
     private fun getCells(orgFormula: String): MutableSet<String> {
         // TODO do the regex' work in any case?
-        val formula: String = orgFormula.replace("\"[^\"]*\"".toRegex(), "")
+        val formula: String = orgFormula.replace(cellStringsRegex, "")
         val cellRefs: MutableSet<String> =
-            "$?[A-Z]+\$?[1-9][0-9]*".toRegex().findAll(formula).map { mr -> mr.value }.toMutableSet()
-        "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex().findAll(formula)
+            cellRefsRegex.findAll(formula).map { mr -> mr.value }.toMutableSet()
+        rangeRefsRegex.findAll(formula)
             .forEach { mr -> getRangeCells(mr.value, cellRefs) }
         return cellRefs
     }
