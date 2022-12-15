@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.utils.spreadsheet
 
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.util.CellRangeAddress
@@ -27,8 +27,10 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
     private fun getCells(orgFormula: String): MutableSet<String> {
         // TODO do the regex' work in any case?
         val formula: String = orgFormula.replace("\"[^\"]*\"".toRegex(), "")
-        val cellRefs: MutableSet<String> = "$?[A-Z]+\$?[1-9][0-9]*".toRegex().findAll(formula).map { mr -> mr.value }.toMutableSet()
-        "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex().findAll(formula).forEach { mr -> getRangeCells(mr.value, cellRefs) }
+        val cellRefs: MutableSet<String> =
+            "$?[A-Z]+\$?[1-9][0-9]*".toRegex().findAll(formula).map { mr -> mr.value }.toMutableSet()
+        "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex().findAll(formula)
+            .forEach { mr -> getRangeCells(mr.value, cellRefs) }
         return cellRefs
     }
 

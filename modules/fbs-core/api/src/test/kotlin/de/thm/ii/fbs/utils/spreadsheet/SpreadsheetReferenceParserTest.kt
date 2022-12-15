@@ -1,7 +1,6 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.utils.spreadsheet
 
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
 
 class SpreadsheetReferenceParserTest {
     @Test
