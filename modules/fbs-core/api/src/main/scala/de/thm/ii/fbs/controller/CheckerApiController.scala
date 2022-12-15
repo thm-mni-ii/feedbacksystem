@@ -49,7 +49,7 @@ class CheckerApiController {
       case Some(submission) => submission
       case None => throw new ResourceNotFoundException()
     }
-    val soluion = storageService.getSolutionFile(submissionID)
+    val solution = storageService.getSolutionFile(submissionID)
     val ccs = checkerConfigurationService
       .getAllForSubmission(submissionID)
       .map(checker => (checker, checkerServiceFactoryService(checker.checkerType)))
@@ -67,7 +67,7 @@ class CheckerApiController {
       case _ => throw new BadRequestException()
     }
 
-    checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, soluion)
+    checker.asInstanceOf[CheckerServiceFormatSubmission].formatSubmission(submission, cc, solution)
   }
 
   @GetMapping(value = Array("/checkers/{checkerID}"))

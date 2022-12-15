@@ -139,6 +139,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   }
 
   def formatConfiguration(checker: CheckrunnerConfiguration): Any = {
+    val task = taskService.getOne(checker.taskId).get
     checker.checkerTypeInformation match {
       case Some(sci: SqlCheckerInformation) => {
         new ObjectMapper().createObjectNode()
@@ -146,6 +147,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           .put("isSol", true)
           .put("resultText", "OK")
           .put("userId", 0)
+          .put("cid", task.courseID)
           .put("tid", checker.taskId)
           .put("sid", UUID.randomUUID().toString)
           .put("attempt", 1)
