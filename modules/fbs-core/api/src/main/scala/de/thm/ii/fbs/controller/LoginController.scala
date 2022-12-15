@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.UserService
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import de.thm.ii.fbs.util.LDAPConnector
+
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
 import org.slf4j.LoggerFactory
@@ -24,6 +25,8 @@ class LoginController extends CasClientConfigurerAdapter {
   private implicit val userService: UserService = null
   @Autowired
   private val authService: AuthService = null
+  @Autowired
+  private val loginService: LocalLoginService = null
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
   @Value("${ldap.url}")
@@ -127,7 +130,7 @@ class LoginController extends CasClientConfigurerAdapter {
     val login = for {
       username <- jsonNode.retrive("username").asText()
       password <- jsonNode.retrive("password").asText()
-      user <- userService.find(username, password)
+      user <- loginService.login(username, password)
     } yield user
 
     login match {

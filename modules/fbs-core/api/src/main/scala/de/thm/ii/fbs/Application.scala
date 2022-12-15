@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.domain.EntityScan
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.boot.web.servlet.MultipartConfigFactory
@@ -27,7 +28,7 @@ import scala.io.Source
   *
   * @author Andrej Sajenko
   */
-@SpringBootApplication
+@SpringBootApplication(exclude = { Array(classOf[SecurityAutoConfiguration]) })
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired

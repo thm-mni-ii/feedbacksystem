@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -22,6 +23,8 @@ class UserController {
   private val userService: UserService = null
   @Autowired
   private val authService: AuthService = null
+  @Autowired
+  private val loginService: LocalLoginService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
 
@@ -85,7 +88,7 @@ class UserController {
 
     (user.globalRole, user.id) match {
       case (GlobalRole.ADMIN, _) | (_, `uid`) =>
-        userService.updatePasswordFor(uid, password.get)
+        loginService.upgradePassword(user, password.get)
       case _ => throw new ForbiddenException()
     }
   }
@@ -134,7 +137,7 @@ class UserController {
       body.retrive("globalRole").asText()
     ) match {
       case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
-        userService.create(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+        loginService.createUser(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }

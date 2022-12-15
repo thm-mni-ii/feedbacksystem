@@ -29,7 +29,6 @@ class UserService {
   /**
     * Find the first user by username and password
     * @param username username
-    * @param password plain user password
     * @return The found user
     */
   def find(username: String, password: String): Option[User] =
@@ -62,8 +61,7 @@ class UserService {
     */
   def create(user: User, password: String): User = {
     DB.insert("INSERT INTO user (prename, surname, email, username, alias, global_role, password) VALUES (?,?,?,?,?,?,?);",
-      user.prename, user.surname, user.email, user.username, user.alias.orNull, user.globalRole.id,
-      if (password == null) null else Hash.hash(password))
+      user.prename, user.surname, user.email, user.username, user.alias.orNull, user.globalRole.id, password)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(user) => user
@@ -78,7 +76,7 @@ class UserService {
     * @return True if successfully updated
     */
   def updatePasswordFor(id: Int, password: String): Boolean =
-    1 == DB.update("UPDATE user set password = ? WHERE user_id = ?;", if (password == null) null else Hash.hash(password), id)
+    1 == DB.update("UPDATE user set password = ? WHERE user_id = ?;", password, id)
 
   /**
     * Update the global role of a user with id
@@ -119,6 +117,13 @@ class UserService {
     1 == DB.update("UPDATE user SET prename = 'Deleted User', surname = 'Deleted User', " +
     "username = 'duser " + id + "', email = '' WHERE user_id = ?", id)
   }
+
+  /**
+    * Get the password for the user with the given username
+    * @param username the username of the user to get the password for
+    */
+  def getPassword(username: String): Option[String] = DB.query("SELECT password FROM user WHERE username = ?",
+    (res, _) => res.getString("password"), username).headOption
 
   private def parseResult(res: ResultSet): User = new User(
     prename = res.getString("prename"),
