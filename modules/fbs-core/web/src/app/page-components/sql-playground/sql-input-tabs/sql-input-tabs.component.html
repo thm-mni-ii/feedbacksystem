@@ -103,7 +103,7 @@
       <button
         (click)="changeTask(task)"
         mat-menu-item
-        *ngFor="let task of tasks | async"
+        *ngFor="let task of allTasksFromCourse"
       >
         {{ task.name }}
       </button>
@@ -121,7 +121,7 @@
       <button
         (click)="changeCourse(course)"
         mat-menu-item
-        *ngFor="let course of filteredCourses | async"
+        *ngFor="let course of courses | async"
       >
         {{ course.name }}
       </button>

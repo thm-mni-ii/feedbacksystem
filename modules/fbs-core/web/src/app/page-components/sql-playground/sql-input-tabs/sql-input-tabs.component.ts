@@ -42,23 +42,19 @@ export class SqlInputTabsComponent implements OnInit {
   pending: boolean = false;
   submitModeActive: boolean = false;
   courses: Observable<Course[]> = of();
-  filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
   selectedCourseName: String = "Kurs";
   selectedTaskName: String = "Aufgabe";
   selectedCourse: Course;
   selectedTask: Task;
-  tasks: Observable<Task[]>;
+  allTasksFromCourse: Task[];
+  filteredTasksFromCourse: Task[];
   isDescriptionMode: boolean = false;
   submissionRes: number = -1;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
-    this.filteredCourses = this.control.valueChanges.pipe(
-      startWith(""),
-      mergeMap((value) => this._filter(value))
-    );
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
@@ -197,45 +193,38 @@ export class SqlInputTabsComponent implements OnInit {
     );
   }
 
-  private _filter(value: string): Observable<Course[]> {
-    const filterValue = this._normalizeValue(value);
-    return this.courses.pipe(
-      mergeMap((courseList) => {
-        if (filterValue.length > 0) {
-          return of(
-            courseList.filter((course) =>
-              this._normalizeValue(course.name).includes(filterValue)
-            )
-          );
-        } else {
-          return this.courses;
-        }
-      })
-    );
-  }
-
-  private _normalizeValue(value: string): string {
-    return value.toLowerCase().replace(/\s/g, "");
-  }
-
   changeCourse(course: Course) {
     this.selectedCourse = course;
     this.selectedCourseName = this.selectedCourse.name;
     //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
     this.getTasks();
+    //this.filterTasks();
     this.emptyTask();
-  }
-
-  getTasks() {
-    var allTasks: Observable<Task[]>;
-    allTasks = this.taskService.getAllTasks(this.selectedCourse.id);
-    // filtern
-    this.tasks = allTasks;
   }
 
   changeTask(task: Task) {
     this.selectedTask = task;
     this.selectedTaskName = this.selectedTask.name;
+  }
+
+  getTasks() {
+    this.taskService.getAllTasks(this.selectedCourse.id).subscribe(
+      (allTasks) => {
+        console.log(allTasks);
+        this.allTasksFromCourse = allTasks;
+        this.filterTasks();
+      },
+      () => {}
+    );
+  }
+
+  private filterTasks() {
+    console.log(this.allTasksFromCourse[0]);
+    for(let task of this.allTasksFromCourse) {
+      if(task.mediaType == "text/plain") {
+
+      }
+    }
   }
 
   emptyTask() {
@@ -244,14 +233,14 @@ export class SqlInputTabsComponent implements OnInit {
   }
 
   hasDeadlinePassed(): boolean {
-    if(this.selectedTask == null) {
+    if (this.selectedTask == null) {
       return true;
     }
     return Date.now() > Date.parse(this.selectedTask.deadline);
   }
 
   wasSubmissionCorrect(): boolean {
-    if(this.submissionRes != 0) {
+    if (this.submissionRes != 0) {
       return false;
     }
     return true;
