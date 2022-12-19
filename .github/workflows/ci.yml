@@ -46,6 +46,7 @@ jobs:
       lintArguments: :fbs-core.api:scalastyleCheck
       testArguments: :fbs-core.api:test
       startMysqlService: true
+      problemMatcher: java.json
 
   fbs-core-web:
     name: fbs-core.web
@@ -62,6 +63,7 @@ jobs:
       name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
       testArguments: :fbs-runner.checker:test
+      problemMatcher: java.json
 
   build:
     name: Build Docker images
