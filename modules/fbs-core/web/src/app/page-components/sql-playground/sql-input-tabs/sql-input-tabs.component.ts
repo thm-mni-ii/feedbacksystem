@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+} from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
@@ -12,7 +19,7 @@ import { repeat, delay, takeWhile, retryWhen } from "rxjs/operators";
 import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
-import { Submission } from "src/app/model/Submission";
+import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -21,8 +28,15 @@ import { Submission } from "src/app/model/Submission";
 })
 export class SqlInputTabsComponent implements OnInit {
   @Input() activeDb: number;
-  @Output() resultset = new EventEmitter<any>();
-  @Output() isPending = new EventEmitter<any>();
+  @Output() resultset = new EventEmitter<SQLResponse>();
+  @Output() isPending = new EventEmitter<boolean>();
+  @HostListener("window:keyup", ["$event"])
+  keyEvent(event: KeyboardEvent) {
+    if (event.ctrlKey && event.key === "Enter") {
+      // Your row selection code
+      this.submission();
+    }
+  }
 
   constructor(
     private dialog: MatDialog,
