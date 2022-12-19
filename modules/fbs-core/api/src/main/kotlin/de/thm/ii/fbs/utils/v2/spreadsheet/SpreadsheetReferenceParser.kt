@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.utils.spreadsheet
+package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.util.CellRangeAddress

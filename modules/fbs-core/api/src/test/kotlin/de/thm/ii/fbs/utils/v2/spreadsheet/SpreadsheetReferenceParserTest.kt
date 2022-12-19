@@ -1,6 +1,5 @@
-package de.thm.ii.fbs.utils.spreadsheet
+package de.thm.ii.fbs.utils.v2.spreadsheet
 
-import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetReferenceParser
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.junit.Assert
 import org.junit.Test
