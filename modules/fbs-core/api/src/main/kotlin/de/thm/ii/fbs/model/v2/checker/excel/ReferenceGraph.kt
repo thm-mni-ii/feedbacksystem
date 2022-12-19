@@ -26,5 +26,3 @@ class ReferenceGraph(references: Map<Int, Map<String, Set<String>>>) {
         }
     }
 }
-
-data class Cell(val sheet: Int, val cell: String)
