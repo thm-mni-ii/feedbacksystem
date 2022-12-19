@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { delay, retryWhen } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { UntypedFormControl } from "@angular/forms";
@@ -9,7 +8,7 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";
 import { CourseRegistrationService } from "../../../service/course-registration.service";
-import { mergeMap, startWith } from "rxjs/operators";
+import { repeat, delay, takeWhile, retryWhen } from "rxjs/operators";
 import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
@@ -40,17 +39,18 @@ export class SqlInputTabsComponent implements OnInit {
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
-  submitModeActive: boolean = false;
   courses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
+  isSubmitMode = false;
   selectedCourseName: String = "Kurs";
   selectedTaskName: String = "Aufgabe";
   selectedCourse: Course;
   selectedTask: Task;
   allTasksFromCourse: Task[];
-  filteredTasksFromCourse: Task[];
+  filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
-  submissionRes: number = -1;
+  isSubCorr = false;
+  submitted = false;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -58,10 +58,6 @@ export class SqlInputTabsComponent implements OnInit {
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
-  }
-
-  updateMode(value: boolean) {
-    this.submitModeActive = value;
   }
 
   closeTab(index: number) {
@@ -193,24 +189,40 @@ export class SqlInputTabsComponent implements OnInit {
     );
   }
 
+  updateMode(value: boolean) {
+    this.isSubmitMode = value;
+  }
+
+  hasDeadlinePassed(task: Task = this.selectedTask): boolean {
+    if (task == null) {
+      return true;
+    }
+    return Date.now() > Date.parse(task.deadline);
+  }
+
+  emptyTask() {
+    this.selectedTask = null;
+    this.filteredTasksFromCourse = [];
+    this.selectedTaskName = "Aufgabe";
+  }
+
   changeCourse(course: Course) {
     this.selectedCourse = course;
     this.selectedCourseName = this.selectedCourse.name;
     //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
     this.getTasks();
-    //this.filterTasks();
     this.emptyTask();
   }
 
   changeTask(task: Task) {
     this.selectedTask = task;
     this.selectedTaskName = this.selectedTask.name;
+    this.submitted = false;
   }
 
   getTasks() {
     this.taskService.getAllTasks(this.selectedCourse.id).subscribe(
       (allTasks) => {
-        console.log(allTasks);
         this.allTasksFromCourse = allTasks;
         this.filterTasks();
       },
@@ -219,45 +231,54 @@ export class SqlInputTabsComponent implements OnInit {
   }
 
   private filterTasks() {
-    console.log(this.allTasksFromCourse[0]);
-    for(let task of this.allTasksFromCourse) {
-      if(task.mediaType == "text/plain") {
-
+    for (let task of this.allTasksFromCourse) {
+      if (task.mediaType == "text/plain" && !this.hasDeadlinePassed(task)) {
+        this.filteredTasksFromCourse.push(task);
       }
     }
-  }
-
-  emptyTask() {
-    this.selectedTask = null;
-    this.selectedTaskName = "Aufgabe";
-  }
-
-  hasDeadlinePassed(): boolean {
-    if (this.selectedTask == null) {
-      return true;
+    if (this.filteredTasksFromCourse.length < 1) {
+      this.snackbar.open("Dieser Kurs hat keine SQL Aufgaben!", "OK", {
+        duration: 3000,
+      });
     }
-    return Date.now() > Date.parse(this.selectedTask.deadline);
   }
 
-  wasSubmissionCorrect(): boolean {
-    if (this.submissionRes != 0) {
-      return false;
+  wasSubmissionCorrect(subResult: number) {
+    if (subResult != 0) {
+      this.isSubCorr = false;
+    } else {
+      this.isSubCorr = true;
     }
-    return true;
   }
 
-  submissionToTask(): void {
-    if (this.isSubmissionEmpty()) {
-      this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
-      return;
-    }
-    this.submitToTask();
-    //this.submissionService.emitFileSubmission();
+  waitForSubDone(sid: number) {
+    const token = this.authService.getToken();
+    this.submissionService
+      .getSubmission(
+        token.id,
+        this.selectedCourse.id,
+        this.selectedTask.id,
+        sid
+      )
+      .pipe(
+        repeat(),
+        takeWhile((sub) => !sub.done, true)
+      )
+      .subscribe(
+        (res) => {
+          if (res.done) {
+            this.wasSubmissionCorrect(res.results[0].exitCode);
+            this.pending = false;
+          }
+        },
+        () => {}, //handle error
+        () => console.log("Submission Request Complete")
+      );
   }
 
   private submitToTask() {
+    this.submitted = true;
     this.pending = true;
-    this.isPending.emit(true);
     const token = this.authService.getToken();
     this.submissionService
       .submitSolution(
@@ -271,10 +292,7 @@ export class SqlInputTabsComponent implements OnInit {
           this.snackbar.open("Deine Abgabe wird ausgewertet.", "OK", {
             duration: 3000,
           });
-          console.log(subResult);
-          console.log(this.submissionRes);
-          this.pending = false;
-          this.isPending.emit(false);
+          this.waitForSubDone(subResult.id);
         },
         (error) => {
           console.error(error);
@@ -284,9 +302,19 @@ export class SqlInputTabsComponent implements OnInit {
             { duration: 3000 }
           );
           this.pending = false;
-          this.isPending.emit(false);
         },
-        () => console.log("Request Complete")
+        () => {
+          console.log("Request Complete");
+        }
       );
+  }
+
+  submissionToTask(): void {
+    if (this.isSubmissionEmpty()) {
+      this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
+      return;
+    }
+    this.submitToTask();
+    //this.submissionService.emitFileSubmission();
   }
 }
