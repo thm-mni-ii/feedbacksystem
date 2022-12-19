@@ -31,7 +31,7 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <p class="description" *ngIf="selectedTask != null && isDescriptionMode">
+  <p class="description" *ngIf="selectedTask !== null && isDescriptionMode">
     <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
   </p>
   <div class="bottom-container">
@@ -78,7 +78,7 @@
 
       <mat-icon
         class="submit-item"
-        [ngStyle]="{ color: isDescriptionMode == true ? 'black' : 'grey' }"
+        [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
         matTooltip="Beschreibung anzeigen"
         (click)="isDescriptionMode = !isDescriptionMode"
         >remove_red_eye</mat-icon
