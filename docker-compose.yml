@@ -31,8 +31,8 @@ services:
       - mysql1
       - runner
     ports:
-      - "443:443"
-      - "80:80"
+      - "127.0.0.1:443:443"
+      - "127.0.0.1:80:80"
     volumes:
       - ./data/upload-dir:/upload-dir
       - ./conf/fbs-core.api:/usr/local/fbs-core.api/conf
@@ -79,7 +79,7 @@ services:
       retries: 3
 
   psql-checker:
-    image: postgres
+    image: postgres:14
     restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
@@ -95,6 +95,24 @@ services:
       start_period: 10s
       retries: 3
 
+  psql-playground:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres-playground:/var/lib/postgresql/data
+    networks:
+      fbs:
+    healthcheck:
+      test: pg_isready
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+
+
   mongodb:
     image: mongo:5.0.6
     restart: unless-stopped
@@ -109,6 +127,27 @@ services:
       start_period: 10s
       retries: 3
 
+  minio:
+    image: minio/minio:RELEASE.2022-10-29T06-21-33Z
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - ./data/minio_storage:/data
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    command: server --console-address ":9001" /data
+    restart: unless-stopped
+    networks:
+      fbs:
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+
   runner:
     build:
       context: .
@@ -118,7 +157,7 @@ services:
       - mysql-checker
       - psql-checker
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     environment:
       BASH_DOCKER: thmmniii/fbs-runtime-bash:dev-latest
       HOST_TMP_DIR: /tmp/feebi # Need to be the same folder as mounted to /dockertemp
@@ -129,6 +168,10 @@ services:
       PSQL_SERVER_URL: jdbc:postgresql://psql-checker:5432/?allowMultiQueries=true
       PSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
       PSQL_SERVER_USERNAME: postgres
+      SQL_PLAYGROUND_PSQL_SERVER_URL: jdbc:postgresql://psql-playground:5432/?allowMultiQueries=true
+      SQL_PLAYGROUND_PSQL_SERVER_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+      SQL_PLAYGROUND_PSQL_SERVER_USERNAME: postgres
+      HMAC_SECRET: uigbduhegafudegufqu8o3q4tgru4ieubfiel
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
       - /var/run/docker.sock:/var/run/docker.sock
@@ -146,7 +189,7 @@ services:
     image: ghcr.io/thm-mni-ii/digital-classroom:latest
     restart: unless-stopped
     ports:
-      - "8085:8085"
+      - "127.0.0.1:8085:8085"
     environment:
       - CLASSROOM_SSL_ENABLED=false
       - CLASSROOM_BBB_UPSTREAM_URL=https://localhost/bbb

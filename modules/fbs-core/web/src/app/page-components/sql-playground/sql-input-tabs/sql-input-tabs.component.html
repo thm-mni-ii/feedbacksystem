@@ -1,0 +1,52 @@
+<mat-card-actions>
+  <mat-tab-group
+    [selectedIndex]="activeTabId.value"
+    (selectedIndexChange)="activeTabId.setValue($event)"
+    [backgroundColor]=""
+  >
+    <ng-container>
+      <mat-tab *ngFor="let tab of tabs; let index = index">
+        <ng-template class="tab-label" [mat-tab-label]>
+          <div class="col" style="margin-left: 20px">
+            <input
+              matInput
+              type="text"
+              placeholder="New_Query"
+              [(ngModel)]="tabs[index].name"
+            />
+          </div>
+          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
+            <mat-icon>remove_circle_outline</mat-icon>
+          </button>
+          <button mat-icon-button (click)="addTab()">
+            <mat-icon>add_circle_outline</mat-icon>
+          </button>
+        </ng-template>
+        <div class="inputField">
+          <app-submission-text
+            title="Eingabe SQL"
+            (update)="updateSubmissionContent($event)"
+          ></app-submission-text>
+        </div>
+      </mat-tab>
+    </ng-container>
+  </mat-tab-group>
+  <div class="bottom-container">
+    <button mat-button class="downloadBtn" (click)="downloadFile()">
+      <mat-icon>download</mat-icon> Download
+    </button>
+
+    <button
+      [disabled]="isSubmissionEmpty()"
+      mat-flat-button
+      color="accent"
+      class="excuteBtn"
+      (click)="submission()"
+    >
+      <span class="spinner" *ngIf="pending">
+        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+      </span>
+      <span *ngIf="!pending">Ausführen (strg + enter)</span>
+    </button>
+  </div>
+</mat-card-actions>

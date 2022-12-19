@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult, Course, SubTaskResult}
+import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult, SubTaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -23,7 +23,7 @@ class CheckrunnerSubTaskService {
     * @return List of subtasks
     */
   def getAll(configurationId: Int): List[CheckrunnerSubTask] = DB.query(
-    "SELECT configuration_id, sub_task_id, submission_id, points FROM checkrunner_sub_task WHERE configuration_id = ?",
+    "SELECT configuration_id, sub_task_id, points, name FROM checkrunner_sub_task WHERE configuration_id = ?",
     (res, _) => parseSubTaskResult(res),
     configurationId
   )

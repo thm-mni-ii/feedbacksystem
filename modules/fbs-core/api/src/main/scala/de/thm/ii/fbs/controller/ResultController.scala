@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceHandle
 import de.thm.ii.fbs.services.checker.{CheckerServiceFactoryService, RemoteCheckerService}
-import de.thm.ii.fbs.services.persistence.{CheckerConfigurationService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SubmissionService, TaskService}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
@@ -21,7 +21,7 @@ class ResultController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
+  private val checkerConfigurationService: CheckrunnerConfigurationService = null
   @Autowired
   private val taskService: TaskService = null
 

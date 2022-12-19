@@ -2,6 +2,8 @@ plugins {
     id "org.springframework.boot" version "2.6.6"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.4.1"
+    id "org.jetbrains.kotlin.jvm" version "1.7.20"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.7.20"
 }
 
 apply plugin: 'scala'
@@ -40,6 +42,7 @@ startScripts {
 }
 
 dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
@@ -51,7 +54,6 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     implementation('org.json:json:20210307')
@@ -70,10 +72,14 @@ dependencies {
     implementation 'org.mongodb:bson:4.5.0'
     implementation 'org.mongodb:mongodb-driver-core:4.5.0'
     implementation 'org.mongodb:mongodb-driver-sync:4.5.0'
-    implementation 'org.springframework.data:spring-data-commons:2.6.1'
-    implementation 'org.springframework.data:spring-data-mongodb:3.3.1'
+    implementation 'org.springframework.data:spring-data-bom:2021.2.5'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.data:spring-data-commons'
+    implementation 'org.springframework.data:spring-data-mongodb'
+    implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8'
     testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
+    implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.22'
 }

@@ -1,0 +1,88 @@
+.container {
+  display: block;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-container {
+  position: relative;
+  bottom: 0px;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 40px;
+  margin-top: 5px;
+  height: 40px;
+
+  mat-paginator {
+    background: transparent;
+  }
+
+  button {
+    grid-row-start: 1;
+    grid-row-end: 1;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    height: fit-content;
+    width: fit-content;
+    background: inherit;
+    border: none;
+    color: rgba(0, 0, 0, 0.54);
+    cursor: pointer;
+  }
+
+  button:hover {
+    color: black;
+  }
+}
+
+.table-container {
+  display: block;
+  min-height: 100px;
+  max-height: 350px;
+  overflow-x: auto;
+
+  table {
+    width: 90%;
+    margin: 10px;
+  }
+}
+
+.cells {
+  width: fit-content;
+  padding: 5px 15px 5px 15px;
+  white-space: nowrap;
+}
+
+.table-row {
+  height: 10px;
+}
+
+.error-icon {
+  color: #f44336;
+}
+
+mat-card-title {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.spinner {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-card{
+  //center the card
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 15px 40px;
+}

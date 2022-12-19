@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.verticles
 
+import de.thm.ii.fbs.services.runner.SQLPlaygroundService
 import de.thm.ii.fbs.verticles.HttpVerticle.SEND_COMPLETION
-import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlRunnerVerticle}
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -90,6 +91,9 @@ class HttpVerticle extends ScalaVerticle {
       case "sql-checker" =>
         vertx.eventBus().send(SqlCheckerVerticle.RUN_ADDRESS, body)
         ctx.response().setStatusCode(202).end()
+      case "sql-playground" =>
+        vertx.eventBus().send(SqlPlaygroundVerticle.RUN_ADDRESS, body)
+        ctx.response().setStatusCode(202).end()
       case _ => ctx.response().setStatusCode(404).end("Invalid Runner Type")
     }
   }
@@ -98,8 +102,15 @@ class HttpVerticle extends ScalaVerticle {
     val resultJson = msg.body()
 
     // Configure Client
-    val request = client.get
-      .post(s"/results/${resultJson.getInteger("sid")}/${resultJson.getInteger("ccid")}")
+    val resource = if (SQLPlaygroundService.isPlaygroundResult(resultJson)) {
+      "/playground"
+    } else {
+      s"/${resultJson.getInteger("sid")}/${resultJson.getInteger("ccid")}"
+    }
+    val request = client.get.post(s"/results/$resource")
+
+    // Remove resultType as is not needed by fbs-core
+    resultJson.remove("resultType")
 
     // Add handler
     request.exceptionHandler({ e =>

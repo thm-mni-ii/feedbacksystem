@@ -34,7 +34,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   @Autowired
   private val userService: UserService = null
   @Autowired
-  private val checkerService: CheckerConfigurationService = null
+  private val checkerService: CheckrunnerConfigurationService = null
   @Value("${services.masterRunner.selfUrl}")
   private val selfUrl: String = null
   @Value("${spring.data.mongodb.uri}")
@@ -130,6 +130,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       .put("passed", false)
       .put("isSol", false)
       .put("userId", submission.userID.get)
+      .put("cid", task.courseID)
       .put("tid", checker.taskId)
       .put("sid", submission.id)
       .put("attempt", attempts)

@@ -1,0 +1,37 @@
+<div class="container">
+  <div>
+    <p *ngIf="this.activeDb !== undefined">
+      Activ: <b> {{ this.activeDb.name }} </b> <br />
+      Version:
+      <span class="highlight">
+        {{ this.activeDb.version }}
+      </span>
+    </p>
+  </div>
+
+  <mat-form-field appearance="fill">
+    <mat-label>Select Database</mat-label>
+    <mat-select [(value)]="selectedDb">
+      <mat-option *ngFor="let db of dbs" [value]="db.id">
+        {{ db.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div class="btn-container">
+    <button mat-raised-button color="warn" (click)="deleteDatabase()">
+      Löschen
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="activateDb()"
+      [disabled]="isSelectDbActive()"
+    >
+      <span class="spinner" *ngIf="pending">
+        <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+      </span>
+      <span *ngIf="!pending">Aktivieren</span>
+    </button>
+    <button mat-raised-button class="new-btn" (click)="addDb()">Neue DB</button>
+  </div>
+</div>

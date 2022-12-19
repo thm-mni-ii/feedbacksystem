@@ -1,0 +1,7 @@
+<p class="title">{{ title }}</p>
+<mat-expansion-panel *ngFor="let view of views; index as i">
+  <mat-expansion-panel-header>
+    <mat-panel-title> {{ view.table }} </mat-panel-title>
+  </mat-expansion-panel-header>
+  <pre class="view-definition">{{ view.definition }}</pre>
+</mat-expansion-panel>

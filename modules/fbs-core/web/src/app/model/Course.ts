@@ -3,4 +3,5 @@ export interface Course {
   name: string;
   description?: string;
   visible?: boolean;
+  semesterId?: number;
 }

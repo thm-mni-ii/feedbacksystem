@@ -1,0 +1,94 @@
+<mat-card-actions>
+  <mat-card *ngIf="tabs.length === 0" class="info-card">
+    <mat-card-header>
+      <mat-card-title>
+        Erstelle deine erste Query im unteren Eingabefeld
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-tab-group *ngIf="tabs.length > 0" [(selectedIndex)]="activeResId">
+    <ng-container>
+      <mat-tab *ngFor="let tab of tabs; let index = index">
+        <ng-template [mat-tab-label]>
+          {{ tab.name }} {{ tab.id + 1 }}
+          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
+            <mat-icon>remove_circle_outline</mat-icon>
+          </button>
+          <button mat-icon-button (click)="addTab()">
+            <mat-icon>add_circle_outline</mat-icon>
+          </button>
+        </ng-template>
+        <div class="inputField">
+          <div class="spinner" *ngIf="isQueryPending">
+            <mat-spinner [diameter]="100"></mat-spinner>&nbsp;
+          </div>
+          <div class="container" *ngIf="tab !== undefined && !isQueryPending">
+            <div *ngIf="tab.error === true">
+              <mat-card>
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon class="error-icon">close</mat-icon>
+                    <span>SQL Error</span>
+                    <mat-icon class="error-icon">close</mat-icon>
+                  </mat-card-title>
+                  <mat-card-subtitle
+                    >Bitte überprüfe deine Eingabe</mat-card-subtitle
+                  >
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ tab.errorMsg }}</p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <div *ngIf="tab.error === false && !isQueryPending">
+              <div class="table-container">
+                <table mat-table [dataSource]="tab.dataSource">
+                  <ng-container
+                    matColumnDef="{{ col }}"
+                    *ngFor="let col of tab.displayedColumns; let index = index"
+                  >
+                    <th mat-header-cell class="cells" *matHeaderCellDef>
+                      {{ col }}
+                    </th>
+                    <td
+                      mat-cell
+                      class="cells"
+                      *matCellDef="let row; let i = index"
+                    >
+                      {{ row[index] }}
+                    </td>
+                  </ng-container>
+
+                  <tr
+                    mat-header-row
+                    class="table-row"
+                    *matHeaderRowDef="tab.displayedColumns"
+                  ></tr>
+                  <tr
+                    mat-row
+                    class="table-row"
+                    *matRowDef="let row; columns: tab.displayedColumns"
+                  ></tr>
+                </table>
+              </div>
+              <div class="action-container">
+                <!-- Placeholder for Downloar button -->
+                <!-- <button mat-button><mat-icon>download</mat-icon>&nbsp;Download</button> -->
+                <div></div>
+                <mat-paginator
+                  class="custom-paginator"
+                  hidePageSize="true"
+                  pageSize="9"
+                  showFirstLastButtons
+                >
+                </mat-paginator>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </ng-container>
+  </mat-tab-group>
+</mat-card-actions>

@@ -1,20 +1,19 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.services.persistence._
-
-import java.io.File
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SpreadsheetMediaInformation, SpreadsheetResponseInformation, SubtaskStatisticsTask, Task, UserTaskResult}
-import de.thm.ii.fbs.services.checker.excel.SpreadsheetService
+import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.services.checker.math.SpreadsheetService
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
+
+import java.io.File
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * TaskController implement routes for submitting task and receive results
@@ -32,7 +31,7 @@ class TaskController {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
-  private val checkerConfigurationService: CheckerConfigurationService = null
+  private val checkerConfigurationService: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired
@@ -49,8 +48,15 @@ class TaskController {
   @GetMapping(value = Array("/{cid}/tasks"))
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
-    authService.authorize(req, res)
-    taskService.getAll(cid)
+    val auth = authService.authorize(req, res)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+
+    if (noPrivateAccess) {
+      taskService.getAll(cid).filter(task => !task.isPrivate)
+    } else {
+      taskService.getAll(cid)
+    }
   }
 
   /**
@@ -65,7 +71,14 @@ class TaskController {
   @ResponseBody
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    taskService.getTaskResults(cid, auth.id)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+
+    if (noPrivateAccess) {
+      taskService.getTaskResults(cid, auth.id).filter(res => !res.isPrivate)
+    } else {
+      taskService.getTaskResults(cid, auth.id)
+    }
   }
 
   /**
@@ -94,6 +107,7 @@ class TaskController {
 
   /**
     * Get a single task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req http request
@@ -104,21 +118,31 @@ class TaskController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
-    taskService.getOne(tid) match {
-      case Some(task) => task.mediaInformation match {
-        case Some(smi: SpreadsheetMediaInformation) =>
-          val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
-          val config = this.checkerConfigurationService.getAll(cid, tid).head
-          val path = this.storageService.pathToMainFile(config.id).get.toString
-          val spreadsheetFile = new File(path)
-          val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
-          val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
-          val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
-          task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
-            decimals, smi)))
-        case _ => task
-      }
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+
+    val task = taskService.getOne(tid) match {
+      case Some(task) =>
+        task.mediaInformation match {
+          case Some(smi: SpreadsheetMediaInformation) =>
+            val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
+            val config = this.checkerConfigurationService.getAll(cid, tid).head
+            val path = this.storageService.pathToMainFile(config.id).get.toString
+            val spreadsheetFile = new File(path)
+            val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
+            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
+            val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
+            task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
+              decimals, smi)))
+          case _ => task
+        }
       case _ => throw new ResourceNotFoundException()
+    }
+
+    if (noPrivateAccess && task.isPrivate) {
+      throw new ForbiddenException()
+    } else {
+      task
     }
   }
 
@@ -132,16 +156,26 @@ class TaskController {
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/result"))
   @ResponseBody
-  def getTaskResult(@PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Option[UserTaskResult] = {
+  def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): UserTaskResult = {
     val auth = authService.authorize(req, res)
-    taskService.getTaskResult(tid, auth.id)
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+
+    val taskResult = taskService.getTaskResult(tid, auth.id).getOrElse(throw new ResourceNotFoundException())
+
+    if (noPrivateAccess && taskResult.isPrivate) {
+      throw new ForbiddenException()
+    } else {
+      taskResult
+    }
   }
 
   /**
     * Create a new task
-    * @param cid Course id
-    * @param req http request
-    * @param res http response
+    *
+    * @param cid  Course id
+    * @param req  http request
+    * @param res  http response
     * @param body contains JSON request
     * @return JSON
     */
@@ -153,7 +187,8 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("name").asText(),
+      (body.retrive("name").asText(),
+        body.retrive("isPrivate").asBool(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
         body.retrive("description").asText(),
@@ -161,9 +196,10 @@ class TaskController {
         body.retrive("requirementType").asText() match {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
-          case _ => throw new BadRequestException("Invalid requirement type.")}
+          case _ => throw new BadRequestException("Invalid requirement type.")
+        }
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -171,12 +207,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
-            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -186,10 +222,11 @@ class TaskController {
 
   /**
     * Update task
-    * @param cid Course id
-    * @param tid Task id
-    * @param req http request
-    * @param res http response
+    *
+    * @param cid  Course id
+    * @param tid  Task id
+    * @param req  http request
+    * @param res  http response
     * @param body Request Body
     */
   @PutMapping(value = Array("/{cid}/tasks/{tid}"), consumes = Array())
@@ -200,17 +237,19 @@ class TaskController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      ( body.retrive("name").asText(),
+      (body.retrive("name").asText(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
+        body.retrive("isPrivate").asBool(),
         body.retrive("description").asText(),
         body.retrive("mediaInformation").asObject(),
         body.retrive("requirementType").asText() match {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
-          case _ => throw new BadRequestException("Invalid requirement type.")}
+          case _ => throw new BadRequestException("Invalid requirement type.")
+        }
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -218,12 +257,12 @@ class TaskController {
           mediaInformation.retrive("decimals").asInt()
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
-            Task(name, deadline, "application/x-spreadsheet", desc.getOrElse(""),
+            Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
               Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, desc.getOrElse(""), None, requirementType))
+        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -233,6 +272,7 @@ class TaskController {
 
   /**
     * Delete a task
+    *
     * @param cid Course id
     * @param tid Task id
     * @param req http request

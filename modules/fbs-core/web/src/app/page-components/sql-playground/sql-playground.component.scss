@@ -1,0 +1,47 @@
+.container {
+  display: block;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(8, 80px);
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.results-grid {
+  width: 100%;
+  grid-row-start: 1;
+  grid-row-end: 5;
+  grid-column-start: 1;
+  grid-column-end: 8;
+}
+
+.input-grid {
+  width: 100%;
+  grid-row-start: 6;
+  grid-row-end: 7;
+  grid-column-start: 1;
+  grid-column-end: 8;
+}
+
+.db-grid {
+  width: 100%;
+  grid-row-start: 1;
+  grid-row-end: 4;
+  grid-column-start: 8;
+  grid-column-end: 11;
+  padding: none;
+}
+
+.db-schema-grid {
+  width: 100%;
+  margin-top: 20px;
+  grid-row-start: 4;
+  grid-row-end: 9;
+  grid-column-start: 8;
+  grid-column-end: 11;
+}

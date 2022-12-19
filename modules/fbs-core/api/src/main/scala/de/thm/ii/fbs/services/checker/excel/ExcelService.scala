@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
+import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
@@ -23,7 +24,7 @@ class ExcelService {
     * @param excelMediaInformation the spreadsheet Configurations
     * @return the values
     */
-  def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation, checkFields: ExcelMediaInformationCheck): Seq[(String, XSSFCell)] = {
+  def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation, checkFields: ExcelMediaInformationCheck): Seq[SpreadsheetCell] = {
     val sheet = this.initSheet(spreadsheet, excelMediaInformation)
     val (start, end) = this.parseCellRange(checkFields.range)
     val values = this.getInCol(sheet, end.col, start.row, end.row)
@@ -39,7 +40,7 @@ class ExcelService {
     sheet
   }
 
-  private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[(String, XSSFCell)] =
+  private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[SpreadsheetCell] =
     (start to end).map(i => {
       val row = sheet.getRow(i)
       val cell = if (row != null) {
@@ -65,7 +66,7 @@ class ExcelService {
           case _ => ""
         }
       }
-      (res, cell)
+      SpreadsheetCell(res, cell.getReference)
     })
 
   private def setCells(workbook: XSSFWorkbook, changeFields: List[ExcelMediaInformationChange]): Unit = {
