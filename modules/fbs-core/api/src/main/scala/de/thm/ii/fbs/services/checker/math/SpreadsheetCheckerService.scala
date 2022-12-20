@@ -28,6 +28,8 @@ class SpreadsheetCheckerService extends CheckerService {
   private val storageService: StorageService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
+  @Autowired
+  private val mathParserService: MathParserService = null
 
   /**
     * Handles the submission notification
@@ -116,6 +118,7 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
+    val entered = mathParserService.parse(enteredValue)
     (parseDouble(enteredValue, germanFormat), parseDouble(value, germanFormat)) match {
       case (Some(enteredValue), Some(value)) =>
         round(enteredValue, decimals) == round(value, decimals)

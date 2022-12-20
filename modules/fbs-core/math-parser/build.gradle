@@ -1,0 +1,12 @@
+apply plugin: 'antlr'
+apply plugin: 'java-library'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    antlr 'org.antlr:antlr4:4.11.1'
+}
+
+generateGrammarSource {arguments += ["-package", "de.thm.ii.fbs.mathParser"]}
