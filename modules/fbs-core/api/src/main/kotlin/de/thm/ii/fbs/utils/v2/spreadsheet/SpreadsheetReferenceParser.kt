@@ -1,27 +1,30 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
+import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
+class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
     companion object {
         private val cellStringsRegex = "\"[^\"]*\"".toRegex()
-        private val cellRefsRegex = "$?[A-Z]+\$?[1-9][0-9]*".toRegex()
-        private val rangeRefsRegex = "(\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
+        private val cellRefsRegex = "([A-Za-z0-9]+!)?$?[A-Z]+$?[1-9][0-9]*".toRegex()
+        private val rangeRefsRegex =
+            "(([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
     }
 
-    val references: Map<Int, Map<String, Set<String>>>
+    val references: Map<Int, Map<String, Set<Cell>>>
 
 
     init {
-        val refs: MutableMap<Int, Map<String, Set<String>>> = HashMap()
+        val refs: MutableMap<Int, Map<String, Set<Cell>>> = HashMap()
         for (sheet in workbook.sheetIterator()) {
-            val sheetRefs: MutableMap<String, Set<String>> = HashMap()
+            val sheetRefs: MutableMap<String, Set<Cell>> = HashMap()
             for (row in sheet.rowIterator()) {
                 for (cell in row.cellIterator()) {
                     if (cell.cellType == CellType.FORMULA) {
-                        sheetRefs[cell.address.formatAsString()] = getCells(cell.cellFormula)
+                        sheetRefs[cell.address.formatAsString()] = getCells(cell.cellFormula, sheet)
                     }
                 }
             }
@@ -30,17 +33,37 @@ class SpreadsheetReferenceParser(workbook: XSSFWorkbook) {
         references = refs.toMap()
     }
 
-    private fun getCells(orgFormula: String): MutableSet<String> {
+    private fun getCells(orgFormula: String, sheet: Sheet): MutableSet<Cell> {
         // TODO do the regex' work in any case?
-        val formula: String = orgFormula.replace(cellStringsRegex, "")
-        val cellRefs: MutableSet<String> =
-            cellRefsRegex.findAll(formula).map { mr -> mr.value }.toMutableSet()
-        rangeRefsRegex.findAll(formula)
-            .forEach { mr -> getRangeCells(mr.value, cellRefs) }
+        var formula: String = orgFormula.replace(cellStringsRegex, "")
+        val cellRefs = mutableSetOf<Cell>()
+        formula = formula.replace(rangeRefsRegex) { mr -> getRangeCells(mr.value, cellRefs, sheet); "" }
+        cellRefs += cellRefsRegex.findAll(formula).map { mr -> refToCell(mr.value, sheet.sheetName) }.toMutableSet()
         return cellRefs
     }
 
-    private fun getRangeCells(range: String, cellRefs: MutableSet<String>) {
-        CellRangeAddress.valueOf(range).forEach { cell -> cellRefs.add(cell.toString()) }
+    private fun getRangeCells(range: String, cellRefs: MutableSet<Cell>, sheet: Sheet) {
+        val (sheetName, _) = getRefAndSheet(cellRefsRegex.find(range)!!.value, sheet.sheetName)
+        CellRangeAddress.valueOf(range).forEach { cell -> cellRefs.add(refToCell(cell.toString(), sheetName)) }
+    }
+
+    private fun refToCell(ref: String, sheet: String): Cell {
+        val (sheetName, cellRef) = getRefAndSheet(ref, sheet)
+
+        return Cell(workbook.getSheetIndex(sheetName), cellRef)
+    }
+
+    private fun getRefAndSheet(ref: String, defaultSheetName: String): Pair<String, String> {
+        var sheetName = defaultSheetName
+        var cellRef = ref
+
+        // If the reference targets another sheet -> get and use the correct sheet name
+        val externalReference = ref.split(Cell.SHEET_DELIMITER)
+        if (externalReference.size == 2) {
+            sheetName = externalReference[0]
+            cellRef = externalReference[1]
+        }
+
+        return Pair(sheetName, cellRef)
     }
 }
