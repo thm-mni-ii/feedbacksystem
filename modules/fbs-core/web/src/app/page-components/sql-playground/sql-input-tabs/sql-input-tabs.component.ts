@@ -27,9 +27,8 @@ import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
 export class SqlInputTabsComponent implements OnInit {
-  @Input() activeDb: number;
-  @Output() resultset = new EventEmitter<SQLResponse>();
-  @Output() isPending = new EventEmitter<boolean>();
+  @Input() isPending: boolean;
+  @Output() submitStatement = new EventEmitter<string>();
   @HostListener("window:keyup", ["$event"])
   keyEvent(event: KeyboardEvent) {
     if (event.ctrlKey && event.key === "Enter") {
@@ -131,76 +130,7 @@ export class SqlInputTabsComponent implements OnInit {
       this.snackbar.open("Sie haben keine Lösung abgegeben", "Ups!");
       return;
     }
-    this.submit();
-    //this.submissionService.emitFileSubmission();
-  }
-
-  private submit() {
-    this.pending = true;
-    this.isPending.emit(true);
-    const token = this.authService.getToken();
-
-    this.sqlPlaygroundService
-      .submitStatement(token.id, this.activeDb, this.activeTab.content)
-      .subscribe(
-        (result) => {
-          this.getResultsbyPolling(result.id);
-        },
-        (error) => {
-          console.error(error);
-          this.snackbar.open(
-            "Beim Versenden ist ein Fehler aufgetreten. Versuche es später erneut.",
-            "OK",
-            { duration: 3000 }
-          );
-          this.pending = false;
-          this.isPending.emit(false);
-        }
-      );
-  }
-
-  getResultsbyPolling(rId: number) {
-    const token = this.authService.getToken();
-
-    // this.sqlPlaygroundService
-    //   .getResults(token.id, this.activeDb, rId)
-    //   .pipe(delay(2500), retry())
-    //   .subscribe((res) => {
-    //     if (res !== undefined) {
-    //       this.resultset.emit(res);
-    //     }
-    //   });
-
-    this.sqlPlaygroundService
-      .getResults(token.id, this.activeDb, rId)
-      .pipe(
-        retryWhen((err) => {
-          return err.pipe(delay(1000));
-        })
-      )
-      .subscribe(
-        (res) => {
-          // emit if success
-          this.pending = false;
-          this.isPending.emit(false);
-          this.resultset.emit(res);
-        },
-        () => {}, //handle error
-        () => console.log("Request Complete")
-      );
-  }
-
-  getResultsList() {
-    const token = this.authService.getToken();
-
-    this.sqlPlaygroundService.getResultsList(token.id, this.activeDb).subscribe(
-      (result) => {
-        console.log(result);
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+    this.submitStatement.emit(this.activeTab.content);
   }
 
   updateMode(value: boolean) {

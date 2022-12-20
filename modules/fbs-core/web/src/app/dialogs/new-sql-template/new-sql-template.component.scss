@@ -1,0 +1,94 @@
+@import "../../../colors.scss";
+
+.container {
+  height: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.content {
+  //grid
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+
+  .templates {
+    margin: 10px;
+    //stroked border
+    padding: 10px;
+    border: 2px dashed $grey-dark;
+    border-radius: 3px;
+
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .edit-area {
+    margin: 10px;
+  }
+}
+
+.list-item {
+  width: 100%;
+  margin-left: 15px;
+  //grid center
+  display: grid;
+  column-gap: 5px;
+  grid-template-columns: 10fr 1fr 1fr;
+  align-items: center;
+  justify-items: flex-start;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+
+  .select {
+    grid-row: span 2;
+    width: 100%;
+  }
+
+  button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+}
+
+.grey {
+  color: $grey-dark;
+}
+
+.red {
+  color: $red-light;
+}
+
+.btn-green {
+  color: white;
+  background: $green;
+}
+
+::ng-deep .edit-area .mat-card-header-text {
+  margin: 0;
+}
+
+// Simple
+::-webkit-scrollbar {
+  width: 1px;
+  height: 1px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0);
+}
