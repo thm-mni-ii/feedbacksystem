@@ -210,4 +210,8 @@ export class DbControlCoWorkingComponent implements OnInit {
         }
       });
   }
+
+  activateGroup(groupId: number) {
+    throw new Error("Method not implemented.");
+  }
 }
