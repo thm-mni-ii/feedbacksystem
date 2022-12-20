@@ -219,6 +219,19 @@ class StorageService extends App {
   }
 
   /**
+    * gets the content of a the secondary File
+    *
+    * @param cc the Checkerunner Configuration
+    */
+  def getSecondaryFileContent(cc: CheckrunnerConfiguration): String = {
+    if (cc.isInBlockStorage) {
+      getSecondaryFileFromBucket(cc.id)
+    } else {
+      getSecondaryFile(cc.id)
+    }
+  }
+
+  /**
     * gets the content of a file depending on the source
     *
     * @param isInBlockStorage True if the content is the Minio

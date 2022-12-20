@@ -15,17 +15,23 @@ class SpreadsheetFileService {
   private val storageService: StorageService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-  def getMediaInfo(ccId: Int): ExcelMediaInformationTasks = {
-    val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
-    val file = new File(secondaryFilePath)
-    objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
+  def getMediaInfo(cc: CheckrunnerConfiguration): ExcelMediaInformationTasks = {
+    val content = this.storageService.getSecondaryFileContent(cc)
+    objectMapper.readValue(content, classOf[ExcelMediaInformationTasks])
   }
 
   def getSubmissionFile(submissionID: Int, cc: CheckrunnerConfiguration): File = {
     storageService.getFileSolutionFile(cc, submissionID)
   }
 
-  def getSolutionFile(cc: CheckrunnerConfiguration): File = {
+  def getMainFile(cc: CheckrunnerConfiguration): File = {
     storageService.getFileMainFile(cc)
+  }
+
+  def cleanup(cc: CheckrunnerConfiguration, mainFile: File, submissionFile: File): Unit = {
+    if (cc.isInBlockStorage) {
+      mainFile.delete()
+      submissionFile.delete()
+    }
   }
 }
