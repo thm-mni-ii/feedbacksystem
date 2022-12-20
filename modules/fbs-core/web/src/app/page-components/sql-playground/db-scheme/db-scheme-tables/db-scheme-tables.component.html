@@ -28,7 +28,7 @@
         >
           <span class="constraints">
             <span> Name: {{ constraint.name }} </span>
-            <span> {{ constraint.type }} on {{ constraint.name }} </span>
+            <span> {{ constraint.type }} on {{ constraint.columnName }} </span>
             <span *ngIf="constraint.checkClause !== null">
               Clause: {{ constraint.checkClause }}
             </span>

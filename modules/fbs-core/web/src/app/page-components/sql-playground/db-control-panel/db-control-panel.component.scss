@@ -1,32 +1,3 @@
-.container{
-    display: flex;
-    flex-direction: column;
-}
-
-.highlight{
-    font-style: italic;
-    color: red;
-}
-
-mat-form-field{
-    width: 100%;
-}
-
-.btn-container{
-    // align items vertically
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-}
-
-.new-btn{
-    color: white;
-    background-color: rgb(72, 179, 51);
-}
-
-.spinner{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.tabs {
+  margin-top: -10px;
 }

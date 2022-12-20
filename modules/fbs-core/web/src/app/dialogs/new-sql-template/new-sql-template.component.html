@@ -1,0 +1,110 @@
+<div class="container">
+  <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
+  <div *ngIf="!isUpdateDialog" matDialogTitle>
+    Template erstellen/bearbeiten
+  </div>
+  <mat-dialog-content style="max-height: 80%; overflow: auto">
+    <mat-card-content class="content">
+      <div class="templates">
+        <mat-list role="list">
+          <mat-list-item>
+            <div class="list-item">
+              <span class="item-text">Neue Vorlage erstellen</span>
+              <span></span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="list-icon grey">add-circle</mat-icon>
+              </button>
+            </div>
+          </mat-list-item>
+        </mat-list>
+        <mat-list
+          role="list"
+          class="template-list"
+          *ngFor="let category of templatesByCategory"
+        >
+          <div mat-subheader>
+            {{ category.category.name }}
+          </div>
+          <mat-divider></mat-divider>
+          <mat-list-item *ngFor="let template of category.templates">
+            <div class="list-item">
+              <span class="item-text">{{ template.name }}</span>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="list-icon grey">edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="closeDialog()">
+                <mat-icon class="list-icon red">delete</mat-icon>
+              </button>
+            </div>
+            <mat-divider></mat-divider>
+          </mat-list-item>
+        </mat-list>
+      </div>
+      <mat-card class="edit-area">
+        <mat-card-header>
+          <mat-card-title>Vorlage Erstellen/Bearbeiten</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-form-field>
+            <mat-label>Vorlagenname</mat-label>
+            <input
+              [formControl]="templateName"
+              name="newCourseName"
+              type="text"
+              matInput
+              required
+              minlength="3"
+              maxlength="100"
+            />
+            <mat-error *ngIf="templateName.errors"
+              >Der Vorlagenname ist erforderlich! Und muss mindestens 3 Zeichen
+              besitzen</mat-error
+            >
+          </mat-form-field>
+          <div class="category-grid">
+            <mat-form-field class="select" appearance="fill">
+              <mat-label>Kategorie</mat-label>
+              <mat-select [(value)]="selectedCategory">
+                <mat-option>-- None --</mat-option>
+                <mat-option
+                  *ngFor="let category of categories"
+                  [value]="category.id"
+                >
+                  {{ category.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button mat-button>
+              <mat-icon outline>add_circle</mat-icon>
+              Kategorie hinzufügen
+            </button>
+            <button mat-button>
+              <mat-icon outline>do_not_disturb_on</mat-icon>
+              Kategorie entfernen
+            </button>
+          </div>
+          <mat-form-field>
+            <mat-label>Vorlage</mat-label>
+            <textarea
+              style="height: 130px"
+              matInput
+              type="text"
+              [(ngModel)]="templateText"
+            ></textarea>
+          </mat-form-field>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button class="btn-green" (click)="closeDialog()">
+            Erstellen
+          </button>
+          <button mat-raised-button class="btn-green" (click)="closeDialog()">
+            Speichern
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-card-content>
+  </mat-dialog-content>
+  <mat-dialog-actions class="actions">
+    <button mat-flat-button color="warn" (click)="closeDialog()">Zurück</button>
+  </mat-dialog-actions>
+</div>
