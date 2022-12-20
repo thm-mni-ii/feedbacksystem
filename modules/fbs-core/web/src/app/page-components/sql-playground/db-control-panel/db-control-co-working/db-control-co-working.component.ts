@@ -212,6 +212,7 @@ export class DbControlCoWorkingComponent implements OnInit {
   }
 
   activateGroup(groupId: number) {
+    console.log(groupId);
     throw new Error("Method not implemented.");
   }
 }
