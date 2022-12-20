@@ -3,7 +3,8 @@ package de.thm.ii.fbs.services.checker.math
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
-import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
+import de.thm.ii.fbs.services.checker.excel.SpreadsheetFileService
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.Hash
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -25,16 +26,17 @@ class SpreadsheetCheckerService extends CheckerService {
   @Autowired
   private val spreadsheetService: SpreadsheetService = null
   @Autowired
-  private val storageService: StorageService = null
+  private val spreadsheetFileService: SpreadsheetFileService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
 
   /**
     * Handles the submission notification
-    * @param taskID the taskID for the submission
+    *
+    * @param taskID       the taskID for the submission
     * @param submissionID the id of the sumission
-    * @param cc the check runner of the sumission
-    * @param fu the user which triggered the sumission
+    * @param cc           the check runner of the sumission
+    * @param fu           the user which triggered the sumission
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     val task = this.taskService.getOne(taskID).get
@@ -47,7 +49,11 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
-    val exitCode = if (correctCount == fields.length) {0} else {1}
+    val exitCode = if (correctCount == fields.length) {
+      0
+    } else {
+      1
+    }
     val resultText = this.generateResultText(results)
 
     val extInfo = new JsonMapper().writeValueAsString(submittedFields)
@@ -57,21 +63,21 @@ class SpreadsheetCheckerService extends CheckerService {
 
   private def getFields(cc: CheckrunnerConfiguration, spreadsheetMediaInformation: SpreadsheetMediaInformation
                         , username: String, fields: String): Seq[(String, String)] = {
-    val spreadsheetFile: File = storageService.getFileMainFile(cc)
+    val spreadsheetFile: File = spreadsheetFileService.getMainFile(cc)
 
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
     val field = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
-    spreadsheetFile.delete()
+    spreadsheetFileService.cleanup(cc, spreadsheetFile)
     field
   }
 
   private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
-    val submissionFile = storageService.getFileSolutionFile(cc, submissionID)
+    val submissionFile = spreadsheetFileService.getSubmissionFile(submissionID, cc)
 
     val mapper = new JsonMapper()
     val resultFields = mapper.readValue(submissionFile, classOf[UtilMap[String, String]])
-    submissionFile.delete()
+    spreadsheetFileService.cleanup(cc, submissionFile)
     resultFields
   }
 
@@ -110,7 +116,11 @@ class SpreadsheetCheckerService extends CheckerService {
       val maxPoints = pointsMap.flatMap(pm => pm.get(key))
         .flatMap(str => str.toFloatOption).map(flo => flo.toInt)
         .getOrElse(1)
-      val points = if (correct) {maxPoints} else {0}
+      val points = if (correct) {
+        maxPoints
+      } else {
+        0
+      }
 
       val subTask = subTaskService.getOrCrate(configurationId, key, maxPoints)
       subTaskService.createResult(configurationId, subTask.subTaskId, submissionId, points)

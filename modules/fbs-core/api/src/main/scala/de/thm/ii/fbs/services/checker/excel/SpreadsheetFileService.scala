@@ -28,6 +28,12 @@ class SpreadsheetFileService {
     storageService.getFileMainFile(cc)
   }
 
+  def cleanup(cc: CheckrunnerConfiguration, file: File): Unit = {
+    if (cc.isInBlockStorage) {
+      file.delete()
+    }
+  }
+
   def cleanup(cc: CheckrunnerConfiguration, mainFile: File, submissionFile: File): Unit = {
     if (cc.isInBlockStorage) {
       mainFile.delete()
