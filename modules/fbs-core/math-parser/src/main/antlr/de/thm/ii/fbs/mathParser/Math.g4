@@ -1,16 +1,20 @@
 grammar Math;
-expr: (SQR|LB|LN|LG) ' '* expr
-    | (RAD|LOG) ' '* expr ' '+ expr
+expr:   (SQR|LB|LN|LG) ' '* expr
+    |   (RAD|LOG) ' '* expr ' '+ expr
     |   expr ' '* EXP ' '* expr
-    |   expr ' '* (MUL|DIV) ' '* expr
+    |   expr ' '* (mul|DIV) ' '* expr
     |   expr ' '* (ADD|SUB) ' '* expr
-    |   NUMBER
+    |   (NUMBER|VAR)
     |   '(' ' '* expr ' '* ')'
     ;
+
+mul: MUL?;
 
 NUMBER: FULL DECIMAL?;
 FULL: [0-9]+;
 DECIMAL: ',' FULL;
+
+VAR: [a-z];
 
 ADD: '+';
 SUB: '-';

@@ -222,4 +222,50 @@ internal class MathParserHelperTest {
             MathParserHelper.parse("((1 + 5) * (3 + 8)) / 10")
         )
     }
+
+    @Test
+    fun parseVariables() {
+        assertEquals(
+            Ast(
+                Operation(Operator.ADD, Var("a"), Var("b"))
+            ),
+            MathParserHelper.parse("a+b")
+        )
+    }
+
+    @Test
+    fun parseVariablesExplicitMul() {
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL, Var("a"), Var("b"))
+            ),
+            MathParserHelper.parse("a*b")
+        )
+    }
+
+    @Test
+    fun parseVariablesImplicitMul() {
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL, Var("a"), Var("b"))
+            ),
+            MathParserHelper.parse("ab")
+        )
+    }
+
+    @Test
+    fun parseMixed() {
+        assertEquals(
+            Ast(
+                Operation(Operator.ADD,
+                    Operation(Operator.ADD,
+                        Operation(Operator.MUL, Num(1), Var("a")),
+                        Operation(Operator.MUL, Num(2), Var("b")),
+                    ),
+                    Operation(Operator.MUL, Num(3), Var("c")),
+                )
+            ),
+            MathParserHelper.parse("1a+2*b+3c")
+        )
+    }
 }

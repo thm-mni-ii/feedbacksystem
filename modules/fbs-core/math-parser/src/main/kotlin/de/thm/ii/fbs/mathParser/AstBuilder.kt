@@ -20,14 +20,16 @@ class AstBuilder(val expr: MathParser.ExprContext) {
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         if (expr.NUMBER() !== null) {
             buildNumber(expr)
+        } else if (expr.VAR() !== null) {
+            buildVariable(expr)
         } else if (expr.SQR() != null) {
-            Operation(Operator.RAD, Num(2), buildExpr(expr.expr(0)))
+            buildDefaultOperation(expr, Operator.RAD, 2)
         } else if (expr.LB() != null) {
-            Operation(Operator.LOG, Num(2), buildExpr(expr.expr(0)))
+            buildDefaultOperation(expr, Operator.LOG, 2)
         } else if (expr.LN() != null) {
-            Operation(Operator.LOG, Num(Math.E), buildExpr(expr.expr(0)))
+            buildDefaultOperation(expr, Operator.LOG, Math.E)
         } else if (expr.LG() != null) {
-            Operation(Operator.LOG, Num(10), buildExpr(expr.expr(0)))
+            buildDefaultOperation(expr, Operator.LOG, 10)
         } else if (expr.expr().size == 1) {
             buildExpr(expr.expr(0))
         } else {
@@ -37,10 +39,13 @@ class AstBuilder(val expr: MathParser.ExprContext) {
     private fun buildOperation(expr: MathParser.ExprContext): Expr =
             Operation(extractOperator(expr), buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
 
+    private fun buildDefaultOperation(expr: MathParser.ExprContext, operator: Operator, default: Number) =
+        Operation(operator, Num(default), buildExpr(expr.expr(0)))
+
     private fun extractOperator(expr: MathParser.ExprContext): Operator =
             if (expr.ADD() !== null) Operator.ADD
             else if (expr.SUB() !== null) Operator.SUB
-            else if (expr.MUL() !== null) Operator.MUL
+            else if (expr.mul() !== null) Operator.MUL
             else if (expr.DIV() !== null) Operator.DIV
             else if (expr.EXP() !== null) Operator.EXP
             else if (expr.RAD() !== null) Operator.RAD
@@ -49,6 +54,9 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildNumber(expr: MathParser.ExprContext) =
         Num(germanFormat.parse(expr.NUMBER().text))
+
+    private fun buildVariable(expr: MathParser.ExprContext): Expr =
+        Var(expr.VAR().text)
 
     private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
     init {
