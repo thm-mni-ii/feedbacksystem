@@ -48,14 +48,9 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu           the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    val solFile = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submissionID))
-    val taskFile = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSubtaskFilePath(submissionID))
-    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username),
-      solFile.getPath,
-      taskFile.getPath,
-    )
-    solFile.delete()
-    taskFile.delete()
+    val solUrl = storageService.urlToSolutionFile(submissionID)
+    val taskUrl = storageService.urlToSubTaskFile(submissionID)
+    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username), solUrl, taskUrl)
 
     sendNotificationToRemote(taskID, submission, cc)
   }
