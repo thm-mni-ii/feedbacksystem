@@ -15,11 +15,10 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";
 import { CourseRegistrationService } from "../../../service/course-registration.service";
-import { repeat, delay, takeWhile, retryWhen } from "rxjs/operators";
+import { repeat, takeWhile } from "rxjs/operators";
 import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
-import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
 
 @Component({
   selector: "app-sql-input-tabs",
