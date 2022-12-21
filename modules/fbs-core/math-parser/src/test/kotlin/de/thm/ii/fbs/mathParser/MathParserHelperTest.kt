@@ -268,4 +268,14 @@ internal class MathParserHelperTest {
             MathParserHelper.parse("1a+2*b+3c")
         )
     }
+
+    @Test
+    fun parseInvalid() {
+        assertThrows(MathParserException::class.java) { MathParserHelper.parse("1+") }
+    }
+
+    @Test
+    fun parseInvalidText() {
+        assertThrows(MathParserException::class.java) { MathParserHelper.parse("\$foo") }
+    }
 }
