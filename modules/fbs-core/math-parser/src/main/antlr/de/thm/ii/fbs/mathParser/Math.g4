@@ -1,10 +1,11 @@
 grammar Math;
-expr: (SQRT|LOGS) ' '? expr
-    |   expr EXP expr
-    |   expr (MUL|DIV) expr
-    |   expr (ADD|SUB) expr
+expr: (SQR|LB|LN|LG) ' '* expr
+    | (RAD|LOG) ' '* expr ' '+ expr
+    |   expr ' '* EXP ' '* expr
+    |   expr ' '* (MUL|DIV) ' '* expr
+    |   expr ' '* (ADD|SUB) ' '* expr
     |   NUMBER
-    |   '(' expr ')'
+    |   '(' ' '* expr ' '* ')'
     ;
 
 NUMBER: FULL DECIMAL?;
@@ -16,8 +17,9 @@ SUB: '-';
 MUL: '*';
 DIV: '/';
 EXP: '^';
-SQRT: 'sqrt';
-LOGS: (LB|LN|LG);
+SQR: 'sqrt';
 LB: 'lb';
 LN: 'ln';
 LG: 'lg';
+RAD: 'rad';
+LOG: 'log';

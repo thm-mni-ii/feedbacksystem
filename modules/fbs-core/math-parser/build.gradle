@@ -1,3 +1,7 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.7.20"
+}
+
 apply plugin: 'antlr'
 apply plugin: 'java-library'
 
@@ -7,6 +11,13 @@ repositories {
 
 dependencies {
     antlr 'org.antlr:antlr4:4.11.1'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.22'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
 generateGrammarSource {arguments += ["-package", "de.thm.ii.fbs.mathParser"]}
+
+test {
+    useJUnitPlatform()
+}
