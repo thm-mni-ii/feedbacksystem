@@ -80,26 +80,20 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   }
 
   protected def generateRunnerConfiguration(cc: CheckrunnerConfiguration): RunnerConfiguration = {
-    if (cc.isInBlockStorage) {
-      val mainFile = storageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(cc.id))
-      val secFile = storageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(cc.id))
+    val files =
+      if (cc.isInBlockStorage) {
+        val mainFileUrl = storageService.urlToMainFile(cc)
+        val secFileUrl = storageService.urlToSecondaryFile(cc)
 
-      val mainPath = mainFile.getPath
-      val secPath = secFile.getPath
+        RunnerConfigurationFiles(RunnerConfigurationFilesType.URL, mainFileUrl, secFileUrl)
+      } else {
+        val mainFilePath = storageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString)
+        val secFilePath = storageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
 
-      mainFile.delete()
-      secFile.delete()
+        RunnerConfigurationFiles(RunnerConfigurationFilesType.PATH, mainFilePath, secFilePath)
+      }
 
-      RunnerConfiguration(
-        cc.id, cc.checkerType, Option(mainPath),
-        cc.secondaryFileUploaded, Option(secPath)
-      )
-    } else {
-      RunnerConfiguration(
-        cc.id, cc.checkerType, storageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString),
-        cc.secondaryFileUploaded, storageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
-      )
-    }
+    RunnerConfiguration(cc.id, cc.checkerType, files)
   }
 
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)

@@ -1,27 +1,49 @@
 package de.thm.ii.fbs.model.checker
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import de.thm.ii.fbs.model.checker
+import de.thm.ii.fbs.model.checker.RunnerConfigurationFilesType.RunnerConfigurationFilesType
 
-case class RunnerConfiguration(id: Int, typ: String,
-                                         mainFileLocation: Option[String], hasSecondaryFile: Boolean,
-                                         secondaryFileLocation: Option[String]) {
+case class RunnerConfiguration(id: Int,
+                               typ: String,
+                               files: RunnerConfigurationFiles
+                              ) {
   /**
     * Transforms RunnerConfiguration to JsonNode
+    *
     * @return json representation
     */
   def toJson: JsonNode = {
     val json = new ObjectMapper().createObjectNode()
     json.put("id", this.id)
     json.put("type", this.typ)
-    this.mainFileLocation match {
-      case Some(mainFileLocation) => json.put("mainFileLocation", mainFileLocation)
-      case None => json.putNull("mainFileLocation")
-    }
-    json.put("hasSecondaryFile", this.hasSecondaryFile)
-    this.secondaryFileLocation match {
-      case Some(secondaryFileLocation) => json.put("secondaryFileLocation", secondaryFileLocation)
-      case None => json.putNull("secondaryFileLocation")
-    }
+    json.set("files", this.files.toJson)
     json
   }
+}
+
+case class RunnerConfigurationFiles(typ: RunnerConfigurationFilesType, mainFile: Option[String], secondaryFile: Option[String]) {
+  def toJson: JsonNode = {
+    val json = new ObjectMapper().createObjectNode()
+    json.put("type", this.typ.toString)
+    addOptionToJson(json, this.mainFile, "mainFile")
+    addOptionToJson(json, this.secondaryFile, "secondaryFile")
+    json
+  }
+
+  private def addOptionToJson(json: ObjectNode, value: Option[String], key: String) = {
+    json.put(f"has${key.capitalize}", value.isDefined)
+
+    if (value.isDefined) {
+      json.put(key, value.get)
+    }
+  }
+}
+
+object RunnerConfigurationFilesType extends Enumeration {
+  type RunnerConfigurationFilesType = Value
+
+  val PATH: checker.RunnerConfigurationFilesType.Value = Value("path")
+  val URL: checker.RunnerConfigurationFilesType.Value = Value("url")
 }
