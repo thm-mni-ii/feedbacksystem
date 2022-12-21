@@ -72,7 +72,6 @@ export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
             this.displayedColumns[index] = columnName + " ".repeat(index);
           }
         });
-        console.log(columnNames);
       }
 
       if (this.tabs.length === 0) {
