@@ -57,6 +57,22 @@ export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
           this.resultset.result[0].rows
         );
         this.displayedColumns = this.resultset.result[0].head;
+        // rename duplicate column names
+        let columnNames = this.displayedColumns;
+        let columnNamesCount = {};
+        columnNames.forEach((columnName) => {
+          if (columnNamesCount[columnName] === undefined) {
+            columnNamesCount[columnName] = 1;
+          } else {
+            columnNamesCount[columnName]++;
+          }
+        });
+        columnNames.forEach((columnName, index) => {
+          if (columnNamesCount[columnName] > 1) {
+            this.displayedColumns[index] = columnName + " ".repeat(index);
+          }
+        });
+        console.log(columnNames);
       }
 
       if (this.tabs.length === 0) {
@@ -77,7 +93,7 @@ export class DynamicResultTableComponent implements OnChanges, AfterViewInit {
       this.tabs[index].errorMsg = this.resultset.errorMsg;
     } else if (this.resultset.error == false) {
       this.tabs[index].dataSource = this.dataSource;
-      this.tabs[index].displayedColumns = this.resultset.result[0].head;
+      this.tabs[index].displayedColumns = this.displayedColumns;
     } else {
       throw new Error("Unknown error");
     }
