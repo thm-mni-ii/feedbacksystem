@@ -120,10 +120,10 @@ class MinioService {
     *
     * @param bucketName the name of the Bucket to generate a presigned url for
     * @param objectName the name of the Object to generate a presigned url for
-    * @param expiry     Seconds after the URL has expired (default 1 min)
+    * @param expiry     Seconds after the URL has expired (default 24h)
     * @return a presigned url for a get request
     */
-  def generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 60): String = {
+  def generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String = {
     minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET)
       .bucket(bucketName).`object`(objectName).expiry(expiry).build())
   }
@@ -133,10 +133,10 @@ class MinioService {
     *
     * @param bucketName the name of the Bucket to generate a presigned url for
     * @param objectName the name of the Object to generate a presigned url for
-    * @param expiry     Seconds after the URL has expired (default 1 min)
+    * @param expiry     Seconds after the URL has expired (default 24h)
     * @return a presigned url for a put request
     */
-  def generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 60): String = {
+  def generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String = {
     minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
       .bucket(bucketName).`object`(objectName).expiry(expiry).build())
   }
