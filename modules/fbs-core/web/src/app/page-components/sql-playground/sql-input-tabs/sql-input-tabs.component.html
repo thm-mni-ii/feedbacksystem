@@ -31,7 +31,10 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <p class="description" *ngIf="selectedTask !== null && isDescriptionMode">
+  <p
+    class="description"
+    *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
+  >
     <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
   </p>
   <div class="bottom-container">
@@ -49,7 +52,7 @@
       <span class="spinner" *ngIf="isPending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!isPending">Ausführen (strg + enter)</span>
+      <span *ngIf="!isPending">Ausführen</span>
     </button>
 
     <button
