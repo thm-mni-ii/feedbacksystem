@@ -40,4 +40,10 @@ app-db-scheme-table {
   .mat-expansion-panel-body {
     padding: 5px 0 10px 0 !important;
   }
+
+  .mat-content {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+    grid-gap: 10px;
+  }
 }
