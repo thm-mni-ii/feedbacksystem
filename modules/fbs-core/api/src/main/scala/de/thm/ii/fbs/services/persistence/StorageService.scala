@@ -8,6 +8,7 @@ import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
+import io.minio.errors.ErrorResponseException
 
 import java.io._
 import java.nio.file._
@@ -382,6 +383,37 @@ class StorageService extends App {
       case change: CheckerServiceOnDelete =>
         change.onCheckerConfigurationDelete(taskService.getOne(tid).get, cc)
       case _ =>
+    }
+  }
+
+  def urlToSolutionFile(submissionID: Int): String = {
+    minioService.generatePresignedGetUrl(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submissionID))
+  }
+
+  def urlToSubTaskFile(submissionID: Int): Option[String] = {
+    try {
+      val url = minioService.generatePresignedGetUrl(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSubtaskFilePath(submissionID))
+      Option(url)
+    } catch {
+      case _: ErrorResponseException => None
+    }
+  }
+
+  def urlToMainFile(cc: CheckrunnerConfiguration): Option[String] = {
+    if (cc.mainFileUploaded) {
+      val url = minioService.generatePresignedGetUrl(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(cc.id))
+      Option(url)
+    } else {
+      None
+    }
+  }
+
+  def urlToSecondaryFile(cc: CheckrunnerConfiguration): Option[String] = {
+    if (cc.secondaryFileUploaded) {
+      val url = minioService.generatePresignedGetUrl(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(cc.id))
+      Option(url)
+    } else {
+      None
     }
   }
 }
