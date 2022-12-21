@@ -2,7 +2,7 @@ package de.thm.ii.fbs.model.checker
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 
-case class SqlRunnerSubmission(id: Int, user: User, solutionFileUrl: String, subTaskFileUrl: Option[String])
+case class SqlRunnerSubmission(id: Int, user: User, solutionFileUrl: String)
   extends Submission {
   /**
     * Transforms RunnerConfiguration to JsonNode
@@ -14,10 +14,6 @@ case class SqlRunnerSubmission(id: Int, user: User, solutionFileUrl: String, sub
     json.put("id", this.id)
     json.set("user", this.user.toJson)
     json.put("solutionFileUrl", this.solutionFileUrl)
-    json.put("hasSubTaskFileUrl", this.subTaskFileUrl.isDefined)
-    if (this.subTaskFileUrl.isDefined) {
-      json.put("subTaskFileUrl", this.subTaskFileUrl.get)
-    }
     json
   }
 }

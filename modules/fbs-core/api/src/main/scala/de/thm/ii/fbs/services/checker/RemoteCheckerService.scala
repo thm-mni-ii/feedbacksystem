@@ -1,18 +1,17 @@
 package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.model.checker._
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SubTaskResult, Task, storageBucketName, storageFileName, Submission => FBSSubmission, User => FBSUser}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Task, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
 import de.thm.ii.fbs.util.RestTemplateFactory
-import org.json.JSONArray
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
-import java.nio.file.{Files, NoSuchFileException, Path}
+import java.nio.file.Path
 
 /**
   * Communicate with an remote checker to notify him about new submissions
@@ -49,8 +48,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
     val solUrl = storageService.urlToSolutionFile(submissionID)
-    val taskUrl = storageService.urlToSubTaskFile(submissionID)
-    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username), solUrl, taskUrl)
+    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username), solUrl)
 
     sendNotificationToRemote(taskID, submission, cc)
   }
@@ -76,7 +74,6 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
              resultText: String, extInfo: String): Unit = {
     submissionService.storeResult(submission.id, checkerConfiguration.id, exitCode, resultText, extInfo)
-    handleSubTasks(submission.id, checkerConfiguration)
   }
 
   protected def generateRunnerConfiguration(cc: CheckrunnerConfiguration): RunnerConfiguration = {
@@ -97,20 +94,4 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   }
 
   private def relativeToUploadDir(path: Path) = uploadDirPath.relativize(path)
-
-  private def handleSubTasks(sid: Int, cc: CheckrunnerConfiguration): Unit = {
-    val subTaskPath = storageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSubtaskFilePath(sid))
-    try {
-      val content = Files.readString(subTaskPath.toPath)
-      subTaskPath.delete()
-      val tasks = new JSONArray(content)
-      val results = (0 to tasks.length()).map(i => SubTaskResult.fromJSON(tasks.getJSONObject(i)))
-      for (SubTaskResult(name, maxPoints, points) <- results) {
-        val subTask = subTaskServier.getOrCrate(cc.id, name, maxPoints)
-        subTaskServier.createResult(cc.id, subTask.subTaskId, sid, points)
-      }
-    } catch {
-      case _: NoSuchFileException =>
-    }
-  }
 }

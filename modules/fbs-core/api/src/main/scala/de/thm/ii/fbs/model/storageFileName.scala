@@ -39,17 +39,6 @@ object storageFileName {
   }
 
   /**
-    * Get the Subtask File Path for Minio.
-    *
-    * <strong>Warning</strong>: these paths should only be used with minio, as they do not use the correct separator for the current operating system
-    *
-    * @param sid the Submission Id
-    */
-  def getSubtaskFilePath(sid: Int): String = {
-    getFilePath(sid, SUBTASK_FILE)
-  }
-
-  /**
     * Get th Solution File Path for Minio.
     *
     * <strong>Warning</strong>: these paths should only be used with minio, as they do not use the correct separator for the current operating system
