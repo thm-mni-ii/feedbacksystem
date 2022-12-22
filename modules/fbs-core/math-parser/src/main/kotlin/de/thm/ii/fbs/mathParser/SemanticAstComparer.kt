@@ -2,15 +2,10 @@ package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.*
 
-class SemanticAstComparer(baseAst: Ast) {
-    private val normalized = normalize(baseAst)
-
-    fun compare(other: Ast): Boolean {
-        val otherNorm = normalize(other)
-        println(normalized)
-        println(otherNorm)
-        return otherNorm == normalized
-    }
+object SemanticAstComparer {
+    @JvmStatic
+    fun compare(base: Ast, other: Ast): Boolean =
+        normalize(base) == normalize(other)
 
     private fun normalize(baseAst: Ast): Ast =
         Ast(normalize(baseAst.root))

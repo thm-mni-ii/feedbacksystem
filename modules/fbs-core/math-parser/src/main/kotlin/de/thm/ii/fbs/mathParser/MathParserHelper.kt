@@ -17,7 +17,7 @@ object MathParserHelper {
         try {
             return AstBuilder(parser.expr()).build()
         } catch (e: ParseCancellationException) {
-            throw MathParserException(expr, e.message)
+            throw MathParserException(expr, "invalid expr", e)
         }
     }
 }

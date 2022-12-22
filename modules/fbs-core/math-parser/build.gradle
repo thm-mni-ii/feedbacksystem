@@ -3,7 +3,6 @@ plugins {
 }
 
 apply plugin: 'antlr'
-apply plugin: 'java-library'
 
 repositories {
     mavenCentral()
@@ -20,4 +19,10 @@ generateGrammarSource {arguments += ["-package", "de.thm.ii.fbs.mathParser"]}
 
 test {
     useJUnitPlatform()
+}
+
+compileKotlin.dependsOn generateGrammarSource
+
+sourceSets {
+    main.kotlin.srcDirs = ['build/generated-src/antlr/main', 'src/main/kotlin']
 }

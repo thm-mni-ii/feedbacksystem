@@ -1,10 +1,12 @@
 package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
+import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper, SemanticAstComparer}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.Hash
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -18,6 +20,8 @@ import scala.collection.mutable
   */
 @Service
 class SpreadsheetCheckerService extends CheckerService {
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
   @Autowired
   private val taskService: TaskService = null
   @Autowired
@@ -28,8 +32,6 @@ class SpreadsheetCheckerService extends CheckerService {
   private val storageService: StorageService = null
   @Autowired
   private val subTaskService: CheckrunnerSubTaskService = null
-  @Autowired
-  private val mathParserService: MathParserService = null
 
   /**
     * Handles the submission notification
@@ -82,9 +84,13 @@ class SpreadsheetCheckerService extends CheckerService {
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
       var correct = false
-      if (enteredValue != null && compare(enteredValue, value, decimals)) {
-        correct = true
-        correctCount += 1
+      try {
+        if (enteredValue != null && compare(enteredValue, value, decimals)) {
+          correct = true
+          correctCount += 1
+        }
+      } catch {
+        case e: MathParserException => logger.error(e.toString) // TODO: give feedback about error to user
       }
       result = result.appended(CheckResult(key, value, enteredValue, correct))
     }
@@ -118,12 +124,9 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
-    val entered = mathParserService.parse(enteredValue)
-    (parseDouble(enteredValue, germanFormat), parseDouble(value, germanFormat)) match {
-      case (Some(enteredValue), Some(value)) =>
-        round(enteredValue, decimals) == round(value, decimals)
-      case _ => enteredValue == value
-    }
+    val enteredAst = MathParserHelper.parse(enteredValue)
+    val valueAst = MathParserHelper.parse(value)
+    SemanticAstComparer.compare(valueAst, enteredAst)
   }
 
   private def round(input: Double, toDecimals: Int): String =
