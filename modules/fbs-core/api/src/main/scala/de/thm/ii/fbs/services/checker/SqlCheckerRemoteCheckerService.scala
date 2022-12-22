@@ -110,6 +110,15 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 if (!query.stringsRight.get) {
                   hints ++= "falsche Zeichenketten verwendet\n"
                 }
+                if (!query.orderByRight.get) {
+                  hints ++= "falsche Order By verwendet\n"
+                }
+                if (!query.groupByRight.get) {
+                  hints ++= "falsche Group By verwendet\n"
+                }
+                if (!query.joinsRight.get) {
+                  hints ++= "falsche Joins verwendet\n"
+                }
               }
               if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
                 //ToDo
