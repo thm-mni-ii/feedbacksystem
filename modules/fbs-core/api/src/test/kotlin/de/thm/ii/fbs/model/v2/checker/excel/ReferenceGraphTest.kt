@@ -7,13 +7,13 @@ class ReferenceGraphTest {
 
     @Test
     fun testInit() {
-        val a1 = Cell(0, "A1")
-        val a2 = Cell(0, "A2")
-        val a3 = Cell(0, "A3")
-        val a1on1 = Cell(1, "A1")
+        val a1 = Cell(0, "A1", "0")
+        val a2 = Cell(0, "A2", "1")
+        val a3 = Cell(0, "A3", "2")
+        val a1on1 = Cell(1, "A1", "3")
         val testMap = mapOf(
-            0 to mapOf("A1" to setOf(), "A2" to setOf(a1), "A3" to setOf(a1)),
-            1 to mapOf("A1" to setOf(a3, a2))
+                0 to mapOf("A1" to Pair("0", setOf()), "A2" to Pair("1", setOf(a1)), "A3" to Pair("2", setOf(a1))),
+                1 to mapOf("A1" to Pair("3", setOf(a3, a2)))
         )
         val graph = ReferenceGraph(testMap)
 

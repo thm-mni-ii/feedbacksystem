@@ -4,13 +4,15 @@ import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
 
-class ReferenceGraph(references: Map<Int, Map<String, Set<Cell>>>) {
+class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>) {
     val data: Graph<Cell, DefaultEdge> = DefaultDirectedGraph(DefaultEdge::class.java)
 
     init {
         references.forEach { (index, sheet) ->
-            sheet.forEach { (cell, refs) ->
-                val cellVertex = Cell(index, cell)
+            sheet.forEach { (cell, valueAndRefs) ->
+                val value = valueAndRefs.first
+                val refs = valueAndRefs.second
+                val cellVertex = Cell(index, cell, value)
                 data.addVertex(cellVertex) // inserts vertex if it not already exists
                 refs.forEach { ref ->
                     data.addVertex(ref) // inserts vertex if it not already exists
