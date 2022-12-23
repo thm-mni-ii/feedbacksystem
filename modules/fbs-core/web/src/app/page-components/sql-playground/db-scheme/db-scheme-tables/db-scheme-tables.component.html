@@ -1,11 +1,52 @@
-<p class="title">{{ title }}</p>
-<mat-expansion-panel *ngFor="let element of tables; index as i">
-  <mat-expansion-panel-header>
-    <mat-panel-title> {{ element.name }} </mat-panel-title>
-  </mat-expansion-panel-header>
-  <div *ngFor="let column of element.columns; index as j">
-    <p>{{ element.columns[j].name }} {{ element.columns[j].udtName }}</p>
-    <p>isNullable: {{ element.columns[j].nullable }}</p>
-    <hr />
-  </div>
-</mat-expansion-panel>
+<div *ngIf="this.tables !== undefined && this.constraints !== undefined">
+  <p class="title">{{ title }}</p>
+  <mat-expansion-panel *ngFor="let table of tables; index as i">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        {{ table.name }}
+      </mat-panel-title>
+      <mat-panel-description>
+        <button
+          mat-icon-button
+          color="grey-light"
+          matTooltip="Alle Daten anzeigen"
+          (click)="showTableData($event, table.name)"
+        >
+          <mat-icon>table_chart</mat-icon>
+        </button>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <ul class="attribute-list">
+      <li *ngFor="let column of table.columns; index as j">
+        <span class="attribute">
+          <span [ngClass]="{ 'primary-key': column.isPrimaryKey }">
+            {{ column.name }}
+          </span>
+          <span>
+            <i>{{ column.udtName }}</i>
+          </span>
+        </span>
+        <span class="attribute info" *ngIf="column.isNullable === false">
+          not_null
+        </span>
+      </li>
+
+      <li *ngIf="table.constraints !== undefined">
+        <span class="constraints"><b>Constraints:</b></span>
+      </li>
+      <div *ngIf="table.constraints !== undefined">
+        <li
+          *ngFor="let constraint of table.constraints.constraints; index as k"
+        >
+          <span class="constraints">
+            <span> Name: {{ constraint.name }} </span>
+            <span> {{ constraint.type }} on {{ constraint.columnName }} </span>
+            <span *ngIf="constraint.checkClause !== null">
+              Clause: {{ constraint.checkClause }}
+            </span>
+          </span>
+        </li>
+      </div>
+    </ul>
+  </mat-expansion-panel>
+</div>

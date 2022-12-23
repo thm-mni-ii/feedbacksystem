@@ -1,23 +1,25 @@
-<div class="container">
-  <div>
-    <p>
-      Version:
-      <span class="highlight">
-        {{ this.activeDb.version }}
-      </span>
-    </p>
-  </div>
-
-  <mat-form-field appearance="fill">
-    <mat-label>Select Database</mat-label>
-    <mat-select [(value)]="selectedDb">
-      <mat-option *ngFor="let db of dbs" [value]="db.id">
-        {{ db.name }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <div>
-    <button mat-flat-button color="warn">Delete DB</button>
-    <button mat-flat-button color="accent">Load DB</button>
-  </div>
-</div>
+<mat-tab-group
+  class="tabs"
+  mat-stretch-tabs="false"
+  [(selectedIndex)]="selectedTab"
+>
+  <mat-tab label="DB">
+    <app-db-control-db-overview
+      (changeActiveDb)="changeDb($event)"
+      [(collaborativeMode)]="collaborativeMode"
+    ></app-db-control-db-overview>
+  </mat-tab>
+  <mat-tab label="Vorlagen">
+    <app-db-control-templates
+      [activeDb]="activeDb"
+      [isAdmin]="isAdmin"
+      (submitStatement)="submitStatementToParent($event)"
+    ></app-db-control-templates>
+  </mat-tab>
+  <mat-tab label="Co-Working" [disabled]="!isAdmin">
+    <app-db-control-co-working
+      [(collaborativeMode)]="collaborativeMode"
+      (changeActiveDb)="changeDb($event)"
+    ></app-db-control-co-working>
+  </mat-tab>
+</mat-tab-group>

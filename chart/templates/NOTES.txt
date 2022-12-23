@@ -1,0 +1,4 @@
+Feedbackssystem deployed 🎉
+{{ if and .Values.core.enabled .Values.core.ingress.enabled }}
+You can reach it under {{ include "host" . }}
+{{ end }}

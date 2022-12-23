@@ -1,6 +1,7 @@
-import { Component, OnInit } from "@angular/core";
-import { Database } from "../../../model/sql_playground/Database";
-import databases from "./test-data/databases.json";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Roles } from "src/app/model/Roles";
+import { Database } from "src/app/model/sql_playground/Database";
+import { AuthService } from "src/app/service/auth.service";
 
 @Component({
   selector: "app-db-control-panel",
@@ -8,18 +9,30 @@ import databases from "./test-data/databases.json";
   styleUrls: ["./db-control-panel.component.scss"],
 })
 export class DbControlPanelComponent implements OnInit {
-  dbs: Database[] = databases.databases;
-  activeDb: Database = this.getActiveDb();
-  selectedDb: Number = this.activeDb.id;
+  @Input() activeDbId: number;
+  @Output() changeActiveDbId = new EventEmitter<number>();
+  @Output() submitStatement = new EventEmitter<string>();
 
-  constructor() {}
+  constructor(private auth: AuthService) {}
+
+  isAdmin: boolean;
+  selectedTab: number = 0;
 
   ngOnInit(): void {
-    // TODO: show active db in dropdown
-    console.log("");
+    const globalRole = this.auth.getToken().globalRole;
+    this.isAdmin = Roles.GlobalRole.isAdmin(globalRole);
   }
 
-  getActiveDb(): Database {
-    return this.dbs.find((db) => db.active);
+  activeDb: Database;
+  collaborativeMode: boolean = false;
+
+  changeDb(db: any) {
+    this.activeDb = db;
+    this.changeActiveDbId.emit(db.id);
+  }
+
+  submitStatementToParent(statement: string) {
+    this.selectedTab = 0;
+    this.submitStatement.emit(statement);
   }
 }

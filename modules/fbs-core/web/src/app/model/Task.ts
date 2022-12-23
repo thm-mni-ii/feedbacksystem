@@ -1,8 +1,9 @@
 export interface Task {
   id?: number;
   name: string;
+  isPrivate?: boolean;
   description?: string;
-  deadline: string;
+  deadline?: string;
   requirementType: string;
   mediaType?: string;
   mediaInformation?:

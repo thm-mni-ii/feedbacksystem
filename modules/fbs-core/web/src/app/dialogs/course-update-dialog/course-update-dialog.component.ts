@@ -3,7 +3,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Course } from "../../model/Course";
+import { Semester } from "../../model/Semester";
 import { CourseService } from "../../service/course.service";
+import { SemesterService } from "../../service/semester.service";
 
 /**
  * Updates course information in dialog
@@ -17,10 +19,13 @@ export class CourseUpdateDialogComponent implements OnInit {
   name = new UntypedFormControl("", [Validators.required]);
   description = new UntypedFormControl("");
   isVisible = true;
+  selectedSemester = new UntypedFormControl(0);
+  semesterList: Semester[] = [];
   isUpdateDialog = false;
 
   constructor(
     private courseService: CourseService,
+    private semesterService: SemesterService,
     private snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: any,
     public dialogRef: MatDialogRef<CourseUpdateDialogComponent>
@@ -28,11 +33,21 @@ export class CourseUpdateDialogComponent implements OnInit {
 
   ngOnInit() {
     this.isUpdateDialog = this.data.isUpdateDialog;
+
+    this.semesterService.getSemesterList().subscribe((result) => {
+      this.semesterList = result;
+    });
+
     if (this.isUpdateDialog) {
       const course: Course = this.data.course;
       this.name.setValue(course.name);
       this.description.setValue(course.description);
       this.isVisible = course.visible;
+      this.selectedSemester.setValue(course.semesterId);
+
+      if (course.semesterId == null) {
+        this.selectedSemester.setValue(0);
+      }
     }
   }
 
@@ -44,10 +59,15 @@ export class CourseUpdateDialogComponent implements OnInit {
       return;
     }
 
+    if (this.selectedSemester.value == 0) {
+      this.selectedSemester.setValue(null);
+    }
+
     const course: Course = {
       name: this.name.value,
       description: this.description.value,
       visible: this.isVisible,
+      semesterId: this.selectedSemester.value,
     };
 
     if (this.isUpdateDialog) {
