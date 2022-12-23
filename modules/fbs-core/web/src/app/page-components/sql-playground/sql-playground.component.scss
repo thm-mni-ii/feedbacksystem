@@ -4,17 +4,12 @@
 }
 
 .grid {
-  height: 85vh;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   grid-template-rows: repeat(9, 1fr);
   gap: 10px;
   padding: 16px;
   margin-bottom: 16px;
-}
-
-.results-grid > app-bordered-container {
-height: 100%;
 }
 
 .results-grid {

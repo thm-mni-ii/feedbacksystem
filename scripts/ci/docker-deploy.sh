@@ -9,7 +9,7 @@ function dockerPush(){
     docker tag feedbacksystem_runner thmmniii/fbs-runner:$tag
     docker tag feedbacksystem_core thmmniii/fbs-core:$tag
     docker tag feedbacksystem_runtime-bash thmmniii/fbs-runtime-bash:$tag
-    docker tag sql-checker thmmniii/fbs-sql-checker:$tag
+    docker tag feedbacksystem_sql-checker thmmniii/fbs-sql-checker:$tag
     
     docker push thmmniii/fbs-core:$tag
     docker push thmmniii/fbs-runner:$tag

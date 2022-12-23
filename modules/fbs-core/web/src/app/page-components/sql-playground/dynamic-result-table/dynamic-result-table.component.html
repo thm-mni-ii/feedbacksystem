@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="table-container">
+    <table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
+      <ng-container
+        matColumnDef="{{ col }}"
+        *ngFor="let col of displayedColumns; let index = index"
+      >
+        <th mat-header-cell class="cells" *matHeaderCellDef>{{ col }}</th>
+        <td mat-cell class="cells" *matCellDef="let row; let i = index">
+          {{ row[index] }}
+        </td>
+      </ng-container>
+
+      <tr
+        mat-header-row
+        class="table-row"
+        *matHeaderRowDef="displayedColumns"
+      ></tr>
+      <tr
+        mat-row
+        class="table-row"
+        *matRowDef="let row; columns: displayedColumns"
+      ></tr>
+    </table>
+  </div>
+  <div class="action-container">
+    <button mat-button><mat-icon>download</mat-icon>&nbsp;Downlaod</button>
+    <mat-paginator
+      class="custom-paginator"
+      hidePageSize="true"
+      pageSize="10"
+      showFirstLastButtons
+    >
+    </mat-paginator>
+  </div>
+</div>
