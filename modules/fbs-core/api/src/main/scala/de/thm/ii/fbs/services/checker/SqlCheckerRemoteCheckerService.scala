@@ -102,10 +102,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                   hints ++= "falsche Tabellen verwendet\n"
                 }
                 if (!query.selAttributesRight.get) {
-                  hints ++= "falsche Select-Attribute verwendet\n"
+                  hints ++= "falsche Where-Attribute verwendet\n"
                 }
                 if (!query.proAttributesRight.get) {
-                  hints ++= "falsche Where-Attribute verwendet\n"
+                  hints ++= "falsche Select-Attribute verwendet\n"
                 }
                 if (!query.stringsRight.get) {
                   hints ++= "falsche Zeichenketten verwendet\n"
