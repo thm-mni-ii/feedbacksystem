@@ -6,6 +6,7 @@ from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
+import re
 
 rightStatements = []
 rightTables = []
@@ -40,6 +41,8 @@ def parse_single_stat_upload_db(data, client):
         if "submission" in data:
             # Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
+                if " as " or " AS " in data["submission"]:
+                    data["submission"] = replace_function(data["submission"])
                 table_list = extract_tables(data["submission"], client)
                 tables2.extend(table_list[0])
                 if table_list[1] != ["Empty"]:
@@ -528,3 +531,28 @@ def return_json_not_parsable(elem):
     if "submission" in elem:
         user_data.append(elem["submission"])
     return user_data
+
+
+def replace_function(query):
+    alias_with_as_list = list(
+        set(re.findall("as\s'.+?'|as\s\w+", query, re.IGNORECASE))
+    )
+    for k in range(len(alias_with_as_list)):
+        list_of_as_and_name = alias_with_as_list[k].split(" ")
+        alias_from_as = list_of_as_and_name[1]
+        alias_with_dot_list0 = list(set(re.findall("\w+\.\w+", query, re.IGNORECASE)))
+        word = "alias"
+        for j in range(len(alias_with_dot_list0)):
+            list_aliases = alias_with_dot_list0[j].split(".")
+            if list_aliases[1] == alias_from_as:
+                query = query.replace(
+                    alias_with_dot_list0[j], list_aliases[0] + "." + word + str(k)
+                )
+                query = query.replace(alias_with_as_list[k], "as " + word + str(k))
+            if list_aliases[0] == alias_from_as:
+                query = query.replace(
+                    alias_with_dot_list0[j], word + str(k) + "." + list_aliases[1]
+                )
+                query = query.replace(alias_with_as_list[k], "as " + word + str(k))
+        query = query.replace(alias_with_as_list[k], "")
+    return query
