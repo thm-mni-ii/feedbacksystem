@@ -37,7 +37,7 @@ ID_JSON = "{id:'%s'}" % (  # pylint: disable=c0209 # pylint: disable=bad-option-
 )
 print(ID_JSON)
 TESTDIC = {
-    "submission": "SELECT rezept.titel as Titel, COUNT(schritt_zutat.nr_schritt) as TotalCount from rezept JOIN rezept_schritt ON rezept.id_rezept = rezept_schritt.id_rezept JOIN schritt_zutat ON rezept.id_rezept = schritt_zutat.id_rezept GROUP BY schritt_zutat.zutat Having (count (schritt_zutat.zutat) > 1) ORDER by rezept.id_rezept",
+    "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name ",
     "passed": False,  # True if submission produced the right return in SQL-Runner
     "resultText": "OK",
     "userId": 1,
