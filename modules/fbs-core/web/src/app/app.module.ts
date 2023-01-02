@@ -96,6 +96,7 @@ import { DbSchemeViewsComponent } from "./page-components/sql-playground/db-sche
 import { DbSchemeTriggersComponent } from "./page-components/sql-playground/db-scheme/db-scheme-triggers/db-scheme-triggers.component";
 import { DbSchemeRoutinesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-routines/db-scheme-routines.component";
 import { DbSchemeTablesComponent } from "./page-components/sql-playground/db-scheme/db-scheme-tables/db-scheme-tables.component";
+import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -184,6 +185,7 @@ export const httpInterceptorProviders = [
     DbSchemeRoutinesComponent,
     DbSchemeTablesComponent,
     NewDbDialogComponent,
+    HighlightedInputComponent,
   ],
   imports: [
     BrowserModule,

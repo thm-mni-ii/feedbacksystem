@@ -1,0 +1,88 @@
+<!-- <mat-form-field
+  style="width: 100%"
+  appearance="outline"
+> 
+  <mat-label>Eingabe sql</mat-label>
+  <Form [formGroup]="groupForm">
+    <div class="code-container line-numbers">
+      <textarea
+      #textArea
+      class="text-area-code-editor"
+      matInput
+      type="text"
+      (ngModelChange)="updateSubmission($event)"
+      [(ngModel)]="toSubmit"
+      ></textarea>
+      <pre
+        aria-hidden="true"
+        class="pre line-numbers"
+        #pre 
+        > 
+        <code class="code1" [ngClass]="['code', 'language-' + codeType]" #codeContent></code> 
+     </pre>
+    </div>
+  </Form>
+</mat-form-field> -->
+
+<!-- <Form [formGroup]="groupForm">
+    <div class="code-container line-numbers">
+        <textarea
+        #textArea
+        placeholder=""
+        class="text-area-code-editor"
+        formControlName="content"
+        spellcheck="false"
+        (ngModelChange)="updateSubmission($event)"
+        [(ngModel)]="toSubmit"
+        ></textarea>
+      <pre
+        aria-hidden="true"
+        class="pre line-numbers"
+        #pre 
+        > 
+        <code class="code1" [ngClass]="['code', 'language-' + codeType]" #codeContent></code> 
+     </pre>
+    </div>
+  </Form> -->
+
+<!-- <Form [formGroup]="groupForm">
+    <div class="code-container line-numbers">
+        <textarea
+        #textArea
+        placeholder=""
+        class="text-area-code-editor"
+        formControlName="content"
+        spellcheck="false"
+        (ngModelChange)="updateSubmission($event)"
+        [(ngModel)]="toSubmit"
+        ></textarea>
+        <pre
+        aria-hidden="true"
+        class="pre line-numbers"
+        #pre 
+        > 
+        <code class="code1" [ngClass]="['code', 'language-' + codeType]" #codeContent></code> 
+     </pre>
+    </div>
+  </Form> -->
+
+<form [formGroup]="groupForm">
+  <div class="code-container line-numbers">
+    <textarea
+      #textArea
+      placeholder="Add your code (default sql)"
+      class="text-area-code-editor"
+      formControlName="content"
+      spellcheck="false"
+      spellcheck="false"
+      (ngModelChange)="updateSubmission($event)"
+      [(ngModel)]="toSubmit"
+    ></textarea>
+    <pre
+      aria-hidden="true"
+      class="pre line-numbers"
+      #pre
+    ><code [ngClass]="['code', 'language-' + codeType]" #codeContent></code>
+    </pre>
+  </div>
+</form>

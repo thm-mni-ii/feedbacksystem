@@ -23,10 +23,14 @@
           </button>
         </ng-template>
         <div class="inputField">
-          <app-submission-text
+          <!-- <app-submission-text
             title="Eingabe SQL"
             (update)="updateSubmissionContent($event)"
-          ></app-submission-text>
+          ></app-submission-text> -->
+          <!-- <mat-label class="title">Eingabe SQL :</mat-label> -->
+          <app-highlighted-input
+            (update)="updateSubmissionContent($event)"
+          ></app-highlighted-input>
         </div>
       </mat-tab>
     </ng-container>

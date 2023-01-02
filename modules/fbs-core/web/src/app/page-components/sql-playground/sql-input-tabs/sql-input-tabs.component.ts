@@ -1,26 +1,37 @@
 import {
+  AfterViewChecked,
+  AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
   Input,
+  OnDestroy,
   OnInit,
   Output,
+  Renderer2,
+  ViewChild,
 } from "@angular/core";
 import { delay, retryWhen } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
-import { UntypedFormControl } from "@angular/forms";
+import { FormControl, FormGroup, UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { SQLResponse } from "src/app/model/sql_playground/SQLResponse";
+import { PrismService } from "src/app/service/prism.service";
+import { FormBuilder } from "@angular/forms";
+import { fromEvent, Subscription } from "rxjs";
 
 @Component({
   selector: "app-sql-input-tabs",
   templateUrl: "./sql-input-tabs.component.html",
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
-export class SqlInputTabsComponent implements OnInit {
+export class SqlInputTabsComponent
+  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+{
   @Input() activeDb: number;
   @Output() resultset = new EventEmitter<SQLResponse>();
   @Output() isPending = new EventEmitter<boolean>();
@@ -31,13 +42,46 @@ export class SqlInputTabsComponent implements OnInit {
       this.submission();
     }
   }
+  @ViewChild("textArea", { static: true })
+  textArea!: ElementRef;
+  @ViewChild("codeContent", { static: true })
+  codeContent!: ElementRef;
+  @ViewChild("pre", { static: true })
+  pre!: ElementRef;
+
+  sub!: Subscription;
+  highlighted = false;
+  codeType = "sql";
+
+  groupForm = new FormGroup({
+    content: new FormControl(""),
+  });
+
+  get contentControl() {
+    return this.groupForm.get("content")?.value;
+  }
 
   constructor(
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private authService: AuthService,
-    private sqlPlaygroundService: SqlPlaygroundService
+    private sqlPlaygroundService: SqlPlaygroundService,
+    private prismService: PrismService,
+    private fb: FormBuilder,
+    private renderer: Renderer2
   ) {}
+  ngAfterViewChecked() {
+    if (this.highlighted) {
+      this.prismService.highlightAll();
+      this.highlighted = false;
+    }
+  }
+  ngAfterViewInit() {
+    this.prismService.highlightAll();
+  }
+  ngOnDestroy(): void {
+    throw new Error("Method not implemented.");
+  }
 
   fileName = "New_Query";
   tabs = [{ name: this.fileName, content: "" }];
@@ -49,6 +93,8 @@ export class SqlInputTabsComponent implements OnInit {
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
+    this.listenForm();
+    this.synchronizeScroll();
   }
 
   closeTab(index: number) {
@@ -178,5 +224,39 @@ export class SqlInputTabsComponent implements OnInit {
         console.error(error);
       }
     );
+  }
+
+  private listenForm() {
+    this.sub = this.groupForm.valueChanges.subscribe((val: any) => {
+      const modifiedContent = this.prismService.convertHtmlIntoString(
+        val.content
+      );
+
+      this.renderer.setProperty(
+        this.codeContent.nativeElement,
+        "innerHTML",
+        modifiedContent
+      );
+
+      this.highlighted = true;
+    });
+  }
+
+  private synchronizeScroll() {
+    const localSub = fromEvent(this.textArea.nativeElement, "scroll").subscribe(
+      () => {
+        const toTop = this.textArea.nativeElement.scrollTop;
+        const toLeft = this.textArea.nativeElement.scrollLeft;
+
+        this.renderer.setProperty(this.pre.nativeElement, "scrollTop", toTop);
+        this.renderer.setProperty(
+          this.pre.nativeElement,
+          "scrollLeft",
+          toLeft + 0.2
+        );
+      }
+    );
+
+    this.sub.add(localSub);
   }
 }
