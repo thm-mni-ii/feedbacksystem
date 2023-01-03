@@ -112,9 +112,7 @@ class MinioService {
     */
   @throws[IOException]
   def deleteObject(bucketName: String, objectName: String): Unit = {
-    if (bucketExists(bucketName)) {
-      minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).`object`(objectName).build())
-    }
+    minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).`object`(objectName).build())
   }
 
   /**
@@ -126,16 +124,14 @@ class MinioService {
     */
   @throws[IOException]
   def deleteFolder(bucketName: String, folderName: String): Unit = {
-    if (bucketExists(bucketName)) {
-      val toDelete = minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).prefix(folderName).recursive(true).build())
-      val objects = toDelete.map(o => new DeleteObject(o.get().objectName())).asJava
+    val toDelete = minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).prefix(folderName).recursive(true).build())
+    val objects = toDelete.map(o => new DeleteObject(o.get().objectName())).asJava
 
-      val results = minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build())
-      results.foreach(e => {
-        val error = e.get()
-        logger.error(s"Error in deleting object ${error.objectName()}; ${error.message()}")
-      })
-    }
+    val results = minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build())
+    results.foreach(e => {
+      val error = e.get()
+      logger.error(s"Error in deleting object ${error.objectName()}; ${error.message()}")
+    })
   }
 
   def bucketExists(bucketName: String): Boolean = {
