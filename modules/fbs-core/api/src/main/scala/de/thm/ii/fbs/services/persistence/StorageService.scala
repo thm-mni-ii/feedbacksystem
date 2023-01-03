@@ -24,8 +24,6 @@ class StorageService extends App {
   private val checkerService: CheckerServiceFactoryService = null
   @Autowired
   private val taskService: TaskService = null
-  @Autowired
-  private val ccs: CheckrunnerConfigurationService = null
 
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
@@ -314,14 +312,12 @@ class StorageService extends App {
   @throws[IOException]
   def deleteAllConfigurations(tid: Int, cid: Int, cc: CheckrunnerConfiguration): Boolean = {
     try {
-      if (ccs.delete(cid, tid, cc.id)) {
-        if (cc.isInBlockStorage) {
-          deleteConfigurationFromBucket(cc.id)
-        } else {
-          deleteConfiguration(cc.id)
-        }
-        notifyCheckerDelete(tid, cc)
+      if (cc.isInBlockStorage) {
+        deleteConfigurationFromBucket(cc.id)
+      } else {
+        deleteConfiguration(cc.id)
       }
+      notifyCheckerDelete(tid, cc)
       true
     }
     catch {

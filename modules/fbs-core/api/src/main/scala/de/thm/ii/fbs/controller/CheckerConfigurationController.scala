@@ -171,7 +171,9 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ccs.getOne(ccid) match {
         case Some(cc) =>
-          storageService.deleteAllConfigurations(tid, cid, cc)
+          if (ccs.delete(cid, tid, cc.id)) {
+            storageService.deleteAllConfigurations(tid, cid, cc)
+          }
         case None => throw new ResourceNotFoundException()
       }
     } else {
