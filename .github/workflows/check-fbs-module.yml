@@ -20,6 +20,10 @@ on:
         required: false
         type: boolean
         default: false
+      setupNode:
+        required: false
+        type: boolean
+        default: false
       problemMatcher:
         required: false
         type: string
@@ -40,6 +44,10 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+      - uses: actions/setup-node@v1
+        if: ${{ inputs.setupNode }}
+        with:
+          node-version: "16.13.1"
       - uses: gradle/gradle-build-action@v2
         name: Lint ${{ inputs.name }}
         with:
@@ -61,6 +69,10 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
+      - uses: actions/setup-node@v1
+        if: ${{ inputs.setupNode }}
+        with:
+          node-version: "16.13.1"
       - uses: gradle/gradle-build-action@v2
         name: Run ${{ inputs.name }} Tests
         with:

@@ -55,6 +55,7 @@ jobs:
       name: fbs-core.web
       lintArguments: :fbs-core.web:lint
       testArguments: :fbs-core.web:test
+      setupNode: true
 
   fbs-runner-checker:
     name: fbs-runner.checker
