@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
@@ -172,7 +172,11 @@ class SubmissionController {
     val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
     if (allowed) {
       submissionService.getOne(sid, uid) match {
-        case Some(_) =>
+        case Some(submission) =>
+          if (!submission.isInBlockStorage) {
+            throw new ConflictException("resubmit is not supported for this submission")
+          }
+
           submissionService.clearResults(sid, uid)
           checkerConfigurationService.getAll(cid, tid).foreach(cc => {
             val checkerService = checkerServiceFactoryService(cc.checkerType)
@@ -203,7 +207,7 @@ class SubmissionController {
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
     if (adminPrivileged) {
-      submissionService.getAllByTask(cid, tid).foreach(submission => {
+      submissionService.getAllByTask(cid, tid).filter(s => s.isInBlockStorage).foreach(submission => {
         submissionService.clearResults(submission.id, submission.userID.get)
         checkerConfigurationService.getAll(cid, tid).foreach(cc => {
           val checkerService = checkerServiceFactoryService(cc.checkerType)
