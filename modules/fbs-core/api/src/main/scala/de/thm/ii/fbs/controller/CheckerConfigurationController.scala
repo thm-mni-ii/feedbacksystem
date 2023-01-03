@@ -273,7 +273,7 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
-          val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, tid, fileName)
+          val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, fileName)
           mainFileInputStream.transferTo(res.getOutputStream)
         case _ => throw new ResourceNotFoundException()
       }

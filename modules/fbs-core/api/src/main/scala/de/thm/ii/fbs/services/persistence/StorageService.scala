@@ -341,9 +341,9 @@ class StorageService extends App {
     * returns a input stream depending whether it is in the bucket or not
     *
     */
-  def getFileContentStream(pathFn: Int => Option[Path])(isInBlockStorage: Boolean, ccid: Int, tid: Int, fileName: String): InputStream = {
+  def getFileContentStream(pathFn: Int => Option[Path])(isInBlockStorage: Boolean, ccid: Int, fileName: String): InputStream = {
     if (isInBlockStorage) {
-      new ByteArrayInputStream(minioService.getObjectAsBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getFilePath(tid, fileName)))
+      new ByteArrayInputStream(minioService.getObjectAsBytes(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getFilePath(ccid, fileName)))
     } else {
       pathFn(ccid) match {
         case Some(mainFilePath) =>
