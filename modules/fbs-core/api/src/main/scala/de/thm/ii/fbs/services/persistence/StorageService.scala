@@ -48,26 +48,8 @@ class StorageService extends App {
     }
   }
 
-  /**
-    * Store (replace if exists) the main file of a task
-    *
-    * @param tid Task id
-    * @param src Current path to the file
-    * @throws IOException If the i/o operation fails
-    */
   @throws[IOException]
-  def storeMainFile(tid: Int, src: Path): Unit =
-    Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(storageFileName.MAIN_FILE), StandardCopyOption.REPLACE_EXISTING)
-
-  /**
-    * Store (replace if exists) the secondary file of a task
-    *
-    * @param tid Task id
-    * @param src Current path to the file
-    * @throws IOException If the i/o operation fails
-    */
-  @throws[IOException]
-  def storeSecondaryFile(tid: Int, src: Path): Unit =
+  def storeConfigurationFile(tid: Int, src: Path, fileName: String): Unit =
     Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(storageFileName.SECONDARY_FILE), StandardCopyOption.REPLACE_EXISTING)
 
   /**
@@ -399,6 +381,23 @@ class StorageService extends App {
       Option(url)
     } else {
       None
+    }
+  }
+
+  /**
+    * Stores the Configuration File
+    *
+    * @param cc       the Check runner Configuration
+    * @param file     the File to Store
+    * @param fileName the name of the file
+    */
+  def storeConfigurationFile(cc: CheckrunnerConfiguration, file: MultipartFile, fileName: String): Unit = {
+    if (cc.isInBlockStorage) {
+      this.storeConfigurationFileInBucket(cc.id, file, fileName)
+    } else {
+      val tempDesc = Files.createTempFile("fbs", ".tmp")
+      file.transferTo(tempDesc)
+      this.storeConfigurationFile(cc.id, tempDesc, fileName)
     }
   }
 }

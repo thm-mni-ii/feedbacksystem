@@ -255,7 +255,7 @@ class CheckerConfigurationController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
-          storageService.storeConfigurationFileInBucket(ccid, file, fileName)
+          storageService.storeConfigurationFile(checkerConfiguration, file, fileName)
           postHook(checkerConfiguration)
         case _ => throw new ResourceNotFoundException()
       }
