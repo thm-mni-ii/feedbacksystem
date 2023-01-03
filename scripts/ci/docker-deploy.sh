@@ -19,7 +19,7 @@ function dockerPush(){
 
 echo "START DOCKER DEPLOY"
 
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml build
+docker-compose build
 
 echo "DOCKER IMAGES"
 docker images
