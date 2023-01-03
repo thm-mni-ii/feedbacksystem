@@ -14,12 +14,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: swagger-validator
-        uses: mbowman100/swagger-validator-action@2.0
+      - uses: actions/setup-node@v3.5.1
+        if: ${{ inputs.setupNode }}
         with:
-          files: |
-            modules/fbs-core/api/api-docs.yml
-            modules/fbs-runner/checker/api-docs.yml
+          node-version: "16.13.1"
+      - run: bash ./scripts/ci/validate-api-docs/validate-api-docs.sh
 
   validate-gradle-warpper:
     name: Gradle Warpper Validation
