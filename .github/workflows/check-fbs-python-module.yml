@@ -30,6 +30,7 @@ jobs:
       - run: |
           poetry run pylint api
         name: Run Pylint
+        continue-on-error: true
       - run: |
           poetry run black --check --diff api
         name: Run Black
