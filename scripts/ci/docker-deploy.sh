@@ -34,7 +34,7 @@ tag=$(generateDockerTag)
 
 echo "START DOCKER BUILD"
 
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml build
+docker-compose build
 
 echo "START DOCKER DEPLOY"
 
