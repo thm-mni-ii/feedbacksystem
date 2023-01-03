@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function dockerPush() {
     tag=$1
     echo "tag is: "$tag
