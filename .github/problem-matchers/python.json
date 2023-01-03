@@ -4,12 +4,12 @@
       "owner": "pylint",
       "pattern": [
         {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s([EF]\\d+):\\s([.\\s\\S]*?)\\s\\((.*)\\)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s([EF]\\d+):\\s(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
-          "message": 4,
-          "code": 5
+          "code": 4,
+          "message": 5
         }
       ]
     },
@@ -18,12 +18,12 @@
       "severity": "warning",
       "pattern": [
         {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s([CRW]\\d+):\\s([.\\s\\S]*?)\\s\\((.*)\\)$",
+          "regexp": "^(.*):(\\d+):(\\d+):\\s([CRW]\\d+):\\s(.*)$",
           "file": 1,
           "line": 2,
           "column": 3,
-          "message": 4,
-          "code": 5
+          "code": 4,
+          "message": 5
         }
       ]
     },
@@ -32,7 +32,7 @@
       "severity": "warning",
       "pattern": [
         {
-          "regexp": "^(--- .*.py\\s+[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{6} \\+[0]{4}[.\\s\\S]*?would reformat (.*))$",
+          "regexp": "^(would reformat\\s(.*))$",
           "message": 1,
           "file": 2
         }
