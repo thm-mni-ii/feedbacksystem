@@ -18,6 +18,8 @@ jobs:
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
+      - name: Add Problem Matcher
+        run: echo "::add-matcher::.github/problem-matchers/validate-api-docs.json"
       - run: bash ./scripts/ci/validate-api-docs/validate-api-docs.sh
 
   validate-gradle-warpper:
