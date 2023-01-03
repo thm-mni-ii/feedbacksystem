@@ -1,0 +1,53 @@
+<div class="container">
+  <mat-form-field class="select" appearance="fill">
+    <mat-label>Select Group</mat-label>
+    <mat-select
+      [(value)]="selectedDbGroup"
+      (selectionChange)="activateGroup($event.value)"
+      [disabled]="!collaborativeMode"
+    >
+      <mat-option *ngFor="let group of groups" [value]="group.id">
+        {{ group.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field class="select" appearance="fill">
+    <mat-label>Select Database</mat-label>
+    <mat-select
+      [(value)]="selectedDb"
+      (selectionChange)="activateDb($event.value)"
+      [disabled]="!collaborativeMode"
+    >
+      <mat-option *ngFor="let db of dbs" [value]="db.id">
+        {{ db.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div class="btn-container">
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="deleteDatabase()"
+      [disabled]="!collaborativeMode"
+    >
+      Löschen
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="co-working-btn"
+      [disabled]="collaborativeMode"
+      (click)="changeCollaborativeMode()"
+    >
+      Co-Working
+    </button>
+    <button
+      mat-raised-button
+      class="new-btn"
+      (click)="addDb()"
+      [disabled]="!collaborativeMode"
+    >
+      Neue DB
+    </button>
+  </div>
+</div>

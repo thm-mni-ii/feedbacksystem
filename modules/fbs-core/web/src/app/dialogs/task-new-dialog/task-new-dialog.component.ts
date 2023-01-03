@@ -25,6 +25,7 @@ import { MatSlideToggle } from "@angular/material/slide-toggle";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
+const defualtVisiblity = "Studenten";
 
 /**
  * Dialog to create or update a task
@@ -37,6 +38,7 @@ const defaultrequirement = "mandatory";
 export class TaskNewDialogComponent implements OnInit {
   taskForm = new UntypedFormGroup({
     name: new UntypedFormControl("", [Validators.required]),
+    isPrivate: new UntypedFormControl(defualtVisiblity),
     description: new UntypedFormControl(""),
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
@@ -54,6 +56,7 @@ export class TaskNewDialogComponent implements OnInit {
   datePickerDisabled: boolean = false;
   task: Task = {
     deadline: this.getDefaultDeadline(),
+    isPrivate: true,
     description: "",
     mediaType: "",
     name: "",
@@ -95,6 +98,11 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
+    if (this.taskForm.get("isPrivate").value === "Studenten") {
+      this.task.isPrivate = true;
+    } else {
+      this.task.isPrivate = false;
+    }
     this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
     if (this.taskForm.get("expCheck").value) {
@@ -121,6 +129,11 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["requirementType"].setValue(
       this.task.requirementType
     );
+    if (this.task.isPrivate) {
+      this.taskForm.controls["isPrivate"].setValue("Studenten");
+    } else {
+      this.taskForm.controls["isPrivate"].setValue("Tutoren");
+    }
     //this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
     if (!this.task.deadline) {
       this.taskForm.controls["deadline"].setValue(this.getDefaultDeadline());

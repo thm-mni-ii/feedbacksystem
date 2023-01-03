@@ -104,13 +104,22 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                   hints ++= "falsche Tabellen verwendet\n"
                 }
                 if (!query.selAttributesRight.get) {
-                  hints ++= "falsche Select-Attribute verwendet\n"
+                  hints ++= "falsche Where-Attribute verwendet\n"
                 }
                 if (!query.proAttributesRight.get) {
-                  hints ++= "falsche Where-Attribute verwendet\n"
+                  hints ++= "falsche Select-Attribute verwendet\n"
                 }
                 if (!query.stringsRight.get) {
                   hints ++= "falsche Zeichenketten verwendet\n"
+                }
+                if (!query.orderByRight.get) {
+                  hints ++= "falsche Order By verwendet\n"
+                }
+                if (!query.groupByRight.get) {
+                  hints ++= "falsche Group By verwendet\n"
+                }
+                if (!query.joinsRight.get) {
+                  hints ++= "falsche Joins verwendet\n"
                 }
               }
               if (sci.showExtendedHints && sci.showExtendedHintsAt <= attempts) {
@@ -141,6 +150,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   }
 
   def formatConfiguration(checker: CheckrunnerConfiguration): Any = {
+    val task = taskService.getOne(checker.taskId).get
     checker.checkerTypeInformation match {
       case Some(sci: SqlCheckerInformation) =>
         new ObjectMapper().createObjectNode()
@@ -148,6 +158,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           .put("isSol", true)
           .put("resultText", "OK")
           .put("userId", 0)
+          .put("cid", task.courseID)
           .put("tid", checker.taskId)
           .put("sid", UUID.randomUUID().toString)
           .put("attempt", 1)

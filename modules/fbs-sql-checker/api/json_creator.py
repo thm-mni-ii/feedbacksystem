@@ -20,7 +20,7 @@ tables, selAttributes, proAttributes, strings = [], [], [], []
 def parse_single_stat_upload_db(data, client):
     # create DB-connection
     client = MongoClient(client, 27107)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Queries"]
     (
         tables2,
@@ -33,8 +33,9 @@ def parse_single_stat_upload_db(data, client):
         course_id,
         order_by2,
         group_by2,
+        having2,
         joins2,
-    ) = ([], [], [], [], [], [], [], [], [], [], [])
+    ) = ([], [], [], [], [], [], [], [], [], [], [], [])
     try:
         if "submission" in data:
             # Extract tables, selAttributes, proAttributes and strings
@@ -65,6 +66,9 @@ def parse_single_stat_upload_db(data, client):
             extracted_group_by = AWC.extract_group_by(data["submission"], client)
             if extracted_group_by != "Unknown":
                 group_by2.extend(extracted_group_by)
+            extracted_having = AWC.extract_having(data["submission"], client)
+            if extracted_having != "Unknown":
+                having2.extend(extracted_having)
             strings2.extend(list(set(AWC.literal)))
             # If TaskID or Submission ID not in data, return
             if "tid" not in data or "sid" not in data:
@@ -86,6 +90,7 @@ def parse_single_stat_upload_db(data, client):
             order_by2,
             group_by2,
             joins2,
+            having2,
         ) = check_solution_chars(
             data,
             task_nr,
@@ -97,6 +102,7 @@ def parse_single_stat_upload_db(data, client):
             order_by2,
             group_by2,
             joins2,
+            having2,
             client,
         )
         # produce a JSON
@@ -113,17 +119,19 @@ def parse_single_stat_upload_db(data, client):
             order_by2,
             group_by2,
             joins2,
+            having2,
             client,
         )
         # save JSON to DB
         mycollection.insert_one(record)
-    except Exception:
+    except Exception as e:
+        print(e)
         task_nr = data["tid"]
         my_uuid = data["sid"]
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
         mycollection.insert_one(record)
 
 
@@ -139,6 +147,7 @@ def check_solution_chars(
     order_by2,
     group_by2,
     joins2,
+    having2,
     client,
 ):
     new_solution = True
@@ -150,7 +159,8 @@ def check_solution_chars(
         order_by_right,
         group_by_right,
         joins_right,
-    ) = (False, False, False, False, False, False, False)
+        having_right,
+    ) = (False, False, False, False, False, False, False, False)
     mydb = client["sql-checker"]
     mycol = mydb["Solutions"]
     # For every solution for given task
@@ -164,8 +174,10 @@ def check_solution_chars(
             strings,  # pylint: disable=W0621
             order_by,
             group_by,
+            having,
             joins,
         ) = (  # pylint: disable=W0621
+            [],
             [],
             [],
             [],
@@ -188,8 +200,7 @@ def check_solution_chars(
             strings.append(y["string"])
         mycol = mydb["OrderBy"]
         for y in mycol.find({"id": id}, {"orderBy": 1, "sort": 1}):
-            order_by_value = []
-            order_by_value.append(y["orderBy"])
+            order_by_value = [y["orderBy"]]
             if (
                 "sort" in y
             ):  # if there is no order in sort the default "asc" will be used
@@ -202,8 +213,7 @@ def check_solution_chars(
             group_by.append(y["groupBy"])
         mycol = mydb["Joins"]
         for y in mycol.find({"id": id}, {"type": 1, "attr1": 1, "attr2": 1}):
-            join_value = []
-            join_value.append(y["type"])
+            join_value = [y["type"]]
             if (
                 "attr1" in y and "attr2" in y
             ):  # if there is no order in sort the default "asc" will be used
@@ -212,6 +222,10 @@ def check_solution_chars(
             else:
                 join_value.append("Empty")
             joins.append(join_value)
+        mycol = mydb["Having"]
+        for y in mycol.find({"id": id}, {"havingAttribute": 1}):
+            having_value = y["havingAttribute"]
+            having.append(having_value)
         if len(joins) == 0:
             joins.append("Empty")
         if data["passed"]:
@@ -223,6 +237,7 @@ def check_solution_chars(
                 and set(strings) == set(strings2)
                 and order_by == order_by2
                 and joins == joins2
+                and having == having2
             ):
                 # If they alle are same, it is not a new solution
                 new_solution = False
@@ -242,11 +257,13 @@ def check_solution_chars(
                 group_by_right = True
             if joins == joins2:
                 joins_right = True
+            if having == having2:
+                having_right = True
     if data["passed"]:
         if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
-        return (True, True, True, True, True, True, True)
+        return (True, True, True, True, True, True, True, True)
     # return if characteristics are True or False
     return (
         tables_right,
@@ -256,12 +273,13 @@ def check_solution_chars(
         order_by_right,
         group_by_right,
         joins_right,
+        having_right,
     )
 
 
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Solutions"]
     record = prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
@@ -281,6 +299,7 @@ def return_json(  # pylint: disable=R1710
     order_by_right,
     group_by_right,
     joins_right,
+    having_right,
     client,
 ):
     # Extract informations from a sql-query-json
@@ -306,21 +325,22 @@ def return_json(  # pylint: disable=R1710
                 order_by_right,
                 group_by_right,
                 joins_right,
+                having_right,
             )
             return record
         # produce a json if the sql-query is not parsable
-        record = prod_json_not_parsable(my_uuid, course_id, elem["submission"], task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         return record
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(_id, cid, test_sql, task_nr):
+def prod_json_not_parsable(_id, cid, task_nr):
     # Create dictionary
     value = {
         "id": str(_id),
         "cid": cid,
         "taskNumber": task_nr,
-        "statement": test_sql,
+        "statement": user_data[3],
         "queryRight": user_data[0],
         "parsable": False,
         "tablesRight": None,
@@ -330,6 +350,7 @@ def prod_json_not_parsable(_id, cid, test_sql, task_nr):
         "userId": user_data[1],
         "attempt": user_data[2],
         "orderbyRight": None,
+        "havingRight": None,
     }
     return value
 
@@ -426,6 +447,19 @@ def insert_tables(mydb, elem, my_uuid, client):
         for val in AWC.extract_group_by(elem["submission"], client):
             record = json_group_by_attribute(my_uuid, val)
             mycollection.insert_one(record)
+    if len(AWC.extract_having(elem["submission"], client)) == 1:
+        mycollection = mydb["Having"]
+        record = json_having_attribute(
+            my_uuid, AWC.extract_having(elem["submission"], client)[0]
+        )
+        mycollection.insert_one(record)
+    elif len(AWC.extract_having(elem["submission"], client)) > 1 and not isinstance(
+        AWC.extract_having(elem["submission"], client), str
+    ):
+        mycollection = mydb["Having"]
+        for val in AWC.extract_having(elem["submission"], client):
+            record = json_having_attribute(my_uuid, val)
+            mycollection.insert_one(record)
     AWC.literal = []
     user_data.clear()
 
@@ -445,6 +479,7 @@ def prod_json(
     order_by_right,
     group_by_right,
     joins_right,
+    having_right,
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -468,6 +503,7 @@ def prod_json(
         "orderByRight": order_by_right,
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
+        "havingRight": having_right,
     }
     user_data.clear()
     AWC.literal = []
@@ -475,7 +511,7 @@ def prod_json(
 
 
 def insert_not_parsable(my_uuid, submission, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["NotParsable"]
     record = json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
