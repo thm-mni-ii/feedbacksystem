@@ -9,7 +9,7 @@ core:
   image:
     registry: docker.io
     name: thmmniii/fbs-core
-    tag: "v1.2.1"
+    tag: "v1.4.0"
     pullPolicy: "IfNotPresent"
   volumes:
     config:
