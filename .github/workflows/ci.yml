@@ -67,6 +67,12 @@ jobs:
       testArguments: :fbs-runner.checker:test
       problemMatcher: java.json
 
+  fbs-sql-checker:
+    name: fbs-sql-checker
+    uses: ./.github/workflows/check-fbs-python-module.yml
+    with:
+      working-directory: ./modules/fbs-sql-checker
+
   build:
     name: Build Docker images
     runs-on: ubuntu-latest
@@ -78,6 +84,7 @@ jobs:
         "fbs-core-api",
         "fbs-core-web",
         "fbs-runner-checker",
+        "fbs-sql-checker",
       ]
 
     steps:

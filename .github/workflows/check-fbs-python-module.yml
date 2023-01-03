@@ -1,11 +1,11 @@
-name: SQL Checker
+name: Check FBS Python Module
 
 on:
-  push:
-    branches: [dev, main, v*.x]
-    tags:
-      - v**
-  pull_request:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: true
+        type: string
 
 jobs:
   lint:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./modules/fbs-sql-checker
+        working-directory: ${{ inputs.working-directory }}
 
     steps:
       - uses: actions/checkout@v3
@@ -27,12 +27,15 @@ jobs:
       - run: |
           poetry run pylint api
         name: Run Pylint
-  format:
-    name: Format
+      - run: |
+          poetry run black --check --diff api
+        name: Run Black
+  test:
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./modules/fbs-sql-checker
+        working-directory: ${{ inputs.working-directory }}
 
     steps:
       - uses: actions/checkout@v3
@@ -43,6 +46,5 @@ jobs:
         uses: snok/install-poetry@v1
       - name: Install library
         run: poetry install --no-interaction  --only dev
-      - run: |
-          poetry run black --check --diff api
-        name: Run Black
+      - name: Run unittest
+        run: poetry run python -m unittest
