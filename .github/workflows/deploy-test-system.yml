@@ -6,11 +6,18 @@ on:
     branches: [main, dev, "v**"]
     types: [completed]
 
+concurrency:
+  group: "testsystem-deplyment"
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy to testsystem
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: testsystem
+      url: https://fk-feedback-test.mni.thm.de/
 
     steps:
       - name: Redeploy testsystem via ssh.
