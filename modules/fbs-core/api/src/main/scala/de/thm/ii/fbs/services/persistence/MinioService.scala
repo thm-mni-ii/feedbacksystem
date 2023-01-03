@@ -3,10 +3,14 @@ package de.thm.ii.fbs.services.persistence
 import _root_.org.springframework.beans.factory.annotation.Value
 import _root_.org.springframework.stereotype.Component
 import _root_.org.springframework.web.multipart.MultipartFile
+import org.slf4j.LoggerFactory
 import io.minio._
 import io.minio.http.Method
+import io.minio.messages.DeleteObject
 
 import java.io.{File, IOException}
+import scala.collection.convert.ImplicitConversions.`iterable AsScalaIterable`
+import scala.jdk.CollectionConverters.IterableHasAsJava
 
 @Component
 class MinioService {
@@ -16,6 +20,7 @@ class MinioService {
   @Value("${minio.port}") private val port: Integer = null
 
   var minioClient: MinioClient = _
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * initialize Minio Client
@@ -98,7 +103,8 @@ class MinioService {
   }
 
   /**
-    * Delete a an object from the bucket
+    * Delete a an object from the bucket.
+    * Warning: It is not possible to delete folders with this method, use `deleteFolder` instead.
     *
     * @param bucketName the name of the Bucket to delete
     * @param objectName the name of the Object to delete
@@ -108,6 +114,27 @@ class MinioService {
   def deleteObject(bucketName: String, objectName: String): Unit = {
     if (bucketExists(bucketName)) {
       minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).`object`(objectName).build())
+    }
+  }
+
+  /**
+    * Delete a an folder from the bucket
+    *
+    * @param bucketName the name of the Bucket to delete
+    * @param folderName the name of the folder to delete
+    * @throws IOException If the i/o operation fails
+    */
+  @throws[IOException]
+  def deleteFolder(bucketName: String, folderName: String): Unit = {
+    if (bucketExists(bucketName)) {
+      val toDelete = minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).prefix(folderName).recursive(true).build())
+      val objects = toDelete.map(o => new DeleteObject(o.get().objectName())).asJava
+
+      val results = minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build())
+      results.foreach(e => {
+        val error = e.get()
+        logger.error(s"Error in deleting object ${error.objectName()}; ${error.message()}")
+      })
     }
   }
 

@@ -198,6 +198,10 @@ class StorageService extends App {
     }
   }
 
+  def deleteSolution(sid: Int): Boolean = {
+    deleteSolutionFileFromBucket(sid) || deleteSolutionFile(sid)
+  }
+
   def getFileContentBucket(bucketName: String, id: Int, fileName: String): String = {
     minioService.getObjectAsString(bucketName, s"$id/$fileName")
   }
@@ -277,8 +281,8 @@ class StorageService extends App {
     * @return True if deteled, false if not Directory exists
     * @throws IOException If the i/o operation fails
     */
-  def deleteConfigurationFromBucket(ccid: Int): Unit = {
-    minioService.deleteObject(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid.toString)
+  private def deleteConfigurationFromBucket(ccid: Int): Unit = {
+    minioService.deleteFolder(storageBucketName.CHECKER_CONFIGURATION_BUCKET, ccid.toString)
   }
 
   /**
@@ -290,28 +294,31 @@ class StorageService extends App {
     */
   @throws[IOException]
   def deleteSolutionFileFromBucket(sid: Int): Boolean = {
-    minioService.deleteObject(storageBucketName.SUBMISSIONS_BUCKET, sid.toString)
-    true
+    try {
+      minioService.deleteFolder(storageBucketName.SUBMISSIONS_BUCKET, sid.toString)
+      true
+    } catch {
+      case _: Throwable => false
+    }
   }
 
   /**
     * Deletes the configuration files from minio or FS and the DB entry
     *
-    * @param tid  task id
-    * @param cid  course id
-    * @param ccid checker config id
-    * @param cc   checker config cc.id == ccid ??
+    * @param tid task id
+    * @param cid course id
+    * @param cc  checker configuration
     * @throws IOException If the i/o operation fails
     * @return
     */
   @throws[IOException]
-  def deleteAllConfigurations(tid: Int, cid: Int, ccid: Int, cc: CheckrunnerConfiguration): Boolean = {
+  def deleteAllConfigurations(tid: Int, cid: Int, cc: CheckrunnerConfiguration): Boolean = {
     try {
-      if (ccs.delete(cid, tid, ccid)) {
+      if (ccs.delete(cid, tid, cc.id)) {
         if (cc.isInBlockStorage) {
-          deleteConfigurationFromBucket(ccid)
+          deleteConfigurationFromBucket(cc.id)
         } else {
-          deleteConfiguration(ccid)
+          deleteConfiguration(cc.id)
         }
         notifyCheckerDelete(tid, cc)
       }

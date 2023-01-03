@@ -293,8 +293,8 @@ class TaskController {
 
       // If the configuration was deleted in the database -> delete all files
       if (success) {
-        submissions.foreach(s => storageService.deleteSolutionFileFromBucket(s.id))
-        configurations.foreach(cc => storageService.deleteConfigurationFromBucket(cc.id))
+        submissions.foreach(s => storageService.deleteSolution(s.id))
+        configurations.foreach(cc => storageService.deleteAllConfigurations(tid, cid, cc))
       }
     } else {
       throw new ForbiddenException()
