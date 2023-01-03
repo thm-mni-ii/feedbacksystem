@@ -71,6 +71,14 @@ jobs:
     name: Build Docker images
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    needs:
+      [
+        "validate-gradle-warpper",
+        "validate-migration",
+        "fbs-core-api",
+        "fbs-core-web",
+        "fbs-runner-checker",
+      ]
 
     steps:
       - uses: actions/checkout@v3
