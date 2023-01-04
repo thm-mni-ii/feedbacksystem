@@ -35,7 +35,7 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
         }
 
         // Graph Construction - DFS
-        val references = Graphs.neighborSetOf(graph.data, cell)
+        val references = Graphs.successorListOf(graph.data, cell)
         for (reference in references) {
             if (!visited.contains(reference)) {
                 findPropagatedErrors(reference, errors, visited)
@@ -44,7 +44,7 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
 
         // Graph Deconstruction
         // eval cell again and compare again with solution cell
-        evaluator.evaluateFormulaCell(workbookCell)
+        evaluator.evaluateInCell(workbookCell)
         val eval = cellEqualsSolution(cell, workbookCell)
         if (!eval) {
             errors.add(cell) // add to original errors set
