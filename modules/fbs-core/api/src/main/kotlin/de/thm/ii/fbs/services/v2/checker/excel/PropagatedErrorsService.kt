@@ -24,14 +24,14 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
         return errors
     }
 
-    private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, visited: MutableSet<Cell>): Boolean {
+    private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, visited: MutableSet<Cell>) {
         visited.add(cell)
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
         // compare cell with solution cell (or it is an input)
         if (cellEqualsSolution(cell, workbookCell)) {
-            return true
+            return
         }
 
         // Graph Construction - DFS
@@ -45,13 +45,12 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
         // Graph Deconstruction
         // eval cell again and compare again with solution cell
         evaluator.evaluateInCell(workbookCell)
-        val eval = cellEqualsSolution(cell, workbookCell)
-        if (!eval) {
+        if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
             workbookCell.setCellValue(solution[cell]) // substitute cell value with solution value
         }
 
-        return eval
+        return
     }
 
     private fun getCellFromWorkbook(cell: Cell): XSSFCell {
