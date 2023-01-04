@@ -44,6 +44,21 @@ spec:
               secretKeyRef:
                 name: {{ .Release.Name }}-core
                 key: mysqlPassword
+          - name: MINIO_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Release.Name }}-core
+                key: minioUrl
+          - name: MINIO_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-minio
+                key: root-user
+          - name: MINIO_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-minio
+                key: root-password
           - name: JWT_SECRET
             valueFrom:
               secretKeyRef:
@@ -107,6 +122,7 @@ metadata:
 data:
   mysqlJdbclUri: {{ print "jdbc:mysql://" .Release.Name "-mysql" ":3306" }}
   mysqlUser:  {{ .Values.mysql.auth.username }}
+  minioUrl: {{ print "http://" .Release.Name "-minio" }}
 ---
 apiVersion: v1
 kind: Secret

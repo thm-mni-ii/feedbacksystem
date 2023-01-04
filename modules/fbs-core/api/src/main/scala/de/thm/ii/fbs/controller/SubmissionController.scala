@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
-import java.nio.file.Files
 import java.time.Instant
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -133,10 +132,8 @@ class SubmissionController {
             throw new BadRequestException("Deadline Before Now")
           }
           if (true) { // TODO: Check media type compatibility
-            val tempDesc = Files.createTempFile("fbs", ".tmp")
-            file.transferTo(tempDesc)
             val submission = submissionService.create(uid, tid)
-            storageService.storeSolutionFile(submission.id, tempDesc)
+            storageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)
               checkerService.notify(tid, submission.id, cc, user)
@@ -175,7 +172,11 @@ class SubmissionController {
     val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
     if (allowed) {
       submissionService.getOne(sid, uid) match {
-        case Some(_) =>
+        case Some(submission) =>
+          if (!submission.isInBlockStorage) {
+            throw new ConflictException("resubmit is not supported for this submission")
+          }
+
           submissionService.clearResults(sid, uid)
           checkerConfigurationService.getAll(cid, tid).foreach(cc => {
             val checkerService = checkerServiceFactoryService(cc.checkerType)
@@ -206,7 +207,7 @@ class SubmissionController {
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
 
     if (adminPrivileged) {
-      submissionService.getAllByTask(cid, tid).foreach(submission => {
+      submissionService.getAllByTask(cid, tid).filter(s => s.isInBlockStorage).foreach(submission => {
         submissionService.clearResults(submission.id, submission.userID.get)
         checkerConfigurationService.getAll(cid, tid).foreach(cc => {
           val checkerService = checkerServiceFactoryService(cc.checkerType)
