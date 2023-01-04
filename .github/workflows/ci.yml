@@ -42,6 +42,7 @@ jobs:
   fbs-core-api:
     name: fbs-core.api
     uses: ./.github/workflows/check-fbs-module.yml
+    needs: ["validate-gradle-warpper", "validate-migration"]
     with:
       name: fbs-core.api
       lintArguments: :fbs-core.api:scalastyleCheck
@@ -53,6 +54,7 @@ jobs:
   fbs-core-web:
     name: fbs-core.web
     uses: ./.github/workflows/check-fbs-module.yml
+    needs: ["validate-gradle-warpper"]
     with:
       name: fbs-core.web
       lintArguments: :fbs-core.web:lint
@@ -62,6 +64,7 @@ jobs:
   fbs-runner-checker:
     name: fbs-runner.checker
     uses: ./.github/workflows/check-fbs-module.yml
+    needs: ["validate-gradle-warpper"]
     with:
       name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
@@ -78,15 +81,7 @@ jobs:
     name: Build Docker images
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    needs:
-      [
-        "validate-gradle-warpper",
-        "validate-migration",
-        "fbs-core-api",
-        "fbs-core-web",
-        "fbs-runner-checker",
-        "fbs-sql-checker",
-      ]
+    needs: ["validate-gradle-warpper", "validate-migration"]
 
     steps:
       - uses: actions/checkout@v3
