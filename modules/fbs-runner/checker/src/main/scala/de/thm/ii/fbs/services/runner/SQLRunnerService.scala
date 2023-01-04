@@ -33,20 +33,20 @@ object SQLRunnerService {
   def prepareRunnerStart(runArgs: RunArgs): SqlRunArgs = {
     try {
       // Check if all files exist
-      if (!(runArgs.runner.mainFile.toFile.exists() &&
-        runArgs.runner.secondaryFile.toFile.exists() &&
+      if (!(runArgs.runner.paths.mainFile.toFile.exists() &&
+        runArgs.runner.paths.secondaryFile.exists(p => p.toFile.exists()) &&
         runArgs.submission.solutionFileLocation.toFile.exists())) {
         throw new RunnerException("Config or Submission files are missing")
       }
 
-      val taskQueries = yamlMapper.readValue(runArgs.runner.mainFile.toFile, classOf[TaskQueries])
+      val taskQueries = yamlMapper.readValue(runArgs.runner.paths.mainFile.toFile, classOf[TaskQueries])
 
       val sections = if (taskQueries.sections == null) List(new TaskQuery("OK", "Select 1;", "variable")).toArray else taskQueries.sections
       // Make dbType Optional
       // TODO Solve in TaskQueries Case Class
       val dbType = if (taskQueries.dbType == null) DBTypes.MYSQL_CONFIG_KEY else taskQueries.dbType
       val queryType = if (taskQueries.queryType == null) "dql" else taskQueries.queryType
-      val dbConfig = FileService.fileToString(runArgs.runner.secondaryFile.toFile)
+      val dbConfig = FileService.fileToString(runArgs.runner.paths.secondaryFile.get.toFile)
       val submissionQuarry = FileService.fileToString(runArgs.submission.solutionFileLocation.toFile)
 
       if (submissionQuarry.isBlank) {

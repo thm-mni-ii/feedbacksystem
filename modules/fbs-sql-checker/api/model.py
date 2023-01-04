@@ -64,3 +64,8 @@ def json_not_parsable(_id, submission):
         "submission": submission,
     }
     return value
+
+
+def json_having_attribute(_id, having_attribute):
+    value = {"id": str(_id), "havingAttribute": having_attribute}
+    return value

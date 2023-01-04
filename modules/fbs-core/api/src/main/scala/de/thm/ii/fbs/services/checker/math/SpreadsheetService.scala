@@ -67,7 +67,9 @@ class SpreadsheetService {
     })
 
   private def setCell(sheet: XSSFSheet, cords: Cords, value: String): Unit = {
-    sheet.getRow(cords.row).getCell(cords.col).setCellValue(value)
+    val row = Option(sheet.getRow(cords.row)).getOrElse(sheet.createRow(cords.row))
+    val cell = Option(row.getCell(cords.col)).getOrElse(row.createCell(cords.col))
+    cell.setCellValue(value)
   }
 
   private def parseCellRange(range: String): (Cords, Cords) = {
@@ -92,6 +94,7 @@ class SpreadsheetService {
     col.toInt - 64
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+  germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)
 
   /**
     * @param row the row where the errror occured
