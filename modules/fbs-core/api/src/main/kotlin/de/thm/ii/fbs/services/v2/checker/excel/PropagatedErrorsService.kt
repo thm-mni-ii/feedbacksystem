@@ -24,9 +24,8 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
         return errors
     }
 
-    private fun findPropagatedErrors(cell: Cell, errors: Set<Cell>,
-                                     visited: Set<Cell>): Boolean {
-        visited.plus(cell)
+    private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, visited: MutableSet<Cell>): Boolean {
+        visited.add(cell)
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
@@ -48,7 +47,7 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
         evaluator.evaluateFormulaCell(workbookCell)
         val eval = cellEqualsSolution(cell, workbookCell)
         if (!eval) {
-            errors.plus(cell) // add to original errors set
+            errors.add(cell) // add to original errors set
             workbookCell.setCellValue(solution[cell]) // substitute cell value with solution value
         }
 
