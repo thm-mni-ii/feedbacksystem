@@ -323,6 +323,21 @@ class StorageService extends App {
   }
 
   /**
+    * returns a main-file depending whether it is in the bucket or not
+    *
+    * @param config CheckrunnerConfiguration
+    * @return
+    */
+  def getFileScondaryFile(config: CheckrunnerConfiguration): File = {
+    if (config.isInBlockStorage) {
+      getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(config.id))
+    } else {
+      val path = pathToSecondaryFile(config.id).get.toString
+      new File(path)
+    }
+  }
+
+  /**
     * returns a secondary-file depending whether it is in the bucket or not
     *
     * @param config CheckrunnerConfiguration
