@@ -47,6 +47,7 @@ jobs:
       lintArguments: :fbs-core.api:scalastyleCheck
       testArguments: :fbs-core.api:test
       startMysqlService: true
+      startMinioService: true
       problemMatcher: java.json
 
   fbs-core-web:
