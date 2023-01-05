@@ -16,6 +16,12 @@ on:
       testArguments:
         required: true
         type: string
+      coverageArguments:
+        required: false
+        type: string
+      coverageFilesLocation:
+        required: false
+        type: string
       startMysqlService:
         required: false
         type: boolean
@@ -87,6 +93,17 @@ jobs:
         name: Run ${{ inputs.name }} Tests
         with:
           arguments: ${{ inputs.testArguments }}
+      - uses: gradle/gradle-build-action@v2
+        name: Generate ${{ inputs.name }} Coverage
+        if: ${{ inputs.coverageArguments }}
+        with:
+          arguments: ${{ inputs.coverageArguments }}
+      - uses: codecov/codecov-action@v3
+        if: ${{ inputs.coverageFilesLocation }}
+        with:
+          files: ${{ inputs.coverageFilesLocation }}
+          flags: ${{ inputs.name }}
+          fail_ci_if_error: true
       - name: Stop mysql service container
         if: ${{ inputs.startMysqlService }}
         run: docker stop mysql

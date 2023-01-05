@@ -47,6 +47,8 @@ jobs:
       name: fbs-core.api
       lintArguments: :fbs-core.api:scalastyleCheck
       testArguments: :fbs-core.api:test
+      coverageArguments: :fbs-core.api:jacocoReport
+      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml
       startMysqlService: true
       startMinioService: true
       problemMatcher: java.json
@@ -69,6 +71,8 @@ jobs:
       name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
       testArguments: :fbs-runner.checker:test
+      coverageArguments: :fbs-core.api:jacocoReport
+      coverageFilesLocation: modules/fbs-runner/checker/build/reports/jacoco/jacocoReport/jacocoReport.xml
       problemMatcher: java.json
 
   fbs-sql-checker:
