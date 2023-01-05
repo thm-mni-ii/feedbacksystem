@@ -1,0 +1,17 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "scalastyle",
+      "pattern": [
+        {
+          "regexp": "^(error|warning|info)\\sfile=(.+)\\smessage=(.+)\\sline=(\\d+)\\scolumn=(\\d+)$",
+          "severity": 1,
+          "file": 2,
+          "message": 3,
+          "line": 4,
+          "column": 5
+        }
+      ]
+    }
+  ]
+}

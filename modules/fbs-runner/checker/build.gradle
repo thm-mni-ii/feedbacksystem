@@ -1,5 +1,6 @@
 plugins {
     id "com.github.alisiikh.scalastyle" version "3.4.1"
+    id 'jacoco'
 }
 
 apply plugin: 'scala'
@@ -23,8 +24,6 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyleCheck
-
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.12.12'
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
@@ -44,5 +43,18 @@ jar {
     manifest {
         attributes 'Main-Class': mainClassName
         attributes 'Main-Verticle': mainVerticle
+    }
+}
+
+task jacocoReport(type: JacocoReport) {
+    dependsOn = ['test']
+    additionalSourceDirs.setFrom files('src/main/scala')
+    sourceDirectories.setFrom files('src/main/scala')
+    classDirectories.setFrom files('build/classes/scala/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
     }
 }

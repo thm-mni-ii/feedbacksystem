@@ -35,8 +35,6 @@ scalastyle {
     config = file(scalaStyleConfig)
 }
 
-test.dependsOn scalastyleCheck
-
 // customize start scripts
 startScripts {
     // customize application name
@@ -86,4 +84,17 @@ dependencies {
     testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.22'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
+}
+
+task jacocoReport(type: JacocoReport) {
+    dependsOn = ['test']
+    additionalSourceDirs.setFrom files('src/main/scala')
+    sourceDirectories.setFrom files('src/main/scala')
+    classDirectories.setFrom files('build/classes/scala/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
 }
