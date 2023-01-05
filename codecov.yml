@@ -1,0 +1,23 @@
+flags:
+  fbs-core.api:
+    paths:
+      - modules/fbs-core/api
+  fbs-runner.checker:
+    paths:
+      - modules/fbs-runner/checker
+
+coverage:
+  status:
+    project:
+      default: false
+      fbs-core.api:
+        flags:
+          - fbs-core.api
+        target: auto
+        threshold: 2%
+      fbs-runner.checker:
+        flags:
+          - fbs-runner.checker
+        target: auto
+        threshold: 2%
+comment: false
