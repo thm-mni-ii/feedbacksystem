@@ -15,7 +15,7 @@ import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, RequestBody, RequestParam, ResponseBody, RestController}
 import org.springframework.web.multipart.MultipartFile
 
-import java.io.File
+import java.io.{File, InputStream, SequenceInputStream}
 import java.nio.charset.{Charset, StandardCharsets}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -56,7 +56,7 @@ class ExportController {
   @PostMapping(value = Array("/tasks/export"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def exportAllTasksFromList(@PathVariable(value = "cid", required = true) cid: Int, @RequestBody body: JsonNode,
-                             req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[List[InputStreamResource]] = {
+                             req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
@@ -66,18 +66,18 @@ class ExportController {
         case Some(taskIds) => {
           if (taskIds.isArray) {
             var size: Long = 0
-            var contentList: List[InputStreamResource] = List()
-            taskService.getAll(cid).foreach(task => {
-              val (contentLength, resource) = taskExportService.responseFromTaskId(task.id)
+            var contentList: InputStream = null
+            taskIds.forEach(id => {
+              val (contentLength, resource) = taskExportService.responseFromTaskId(id.asInt())
               size += contentLength
-              contentList = contentList.concat(List(resource))
+              contentList = new SequenceInputStream(resource.getInputStream, contentList)
             })
 
             ResponseEntity.ok()
               .contentType(MediaType.APPLICATION_OCTET_STREAM)
               .contentLength(size)
               .header("Content-Disposition", s"attachment;filename=course_${cid}_only.fbs-export")
-              .body(contentList)
+              .body(new InputStreamResource(contentList))
           } else {
             throw new BadRequestException("No task ids provided")
           }
@@ -92,24 +92,25 @@ class ExportController {
   @GetMapping(value = Array("/tasks/export/all"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def exportAllTasksOfCourse(@PathVariable(value = "cid", required = true) cid: Int,
-                             req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[List[InputStreamResource]] = {
+                             req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       var size: Long = 0
-      var contentList: List[InputStreamResource] = List()
+      var contentList: InputStream = null
+      // 1 stream
       taskService.getAll(cid).foreach(task => {
         val (contentLength, resource) = taskExportService.responseFromTaskId(task.id)
         size += contentLength
-        contentList = contentList.concat(List(resource))
+        contentList = new SequenceInputStream(resource.getInputStream, contentList)
       })
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(size)
         .header("Content-Disposition", s"attachment;filename=course_${cid}_all.fbs-export")
-        .body(contentList)
+        .body(new InputStreamResource(contentList))
     } else {
       throw new ForbiddenException()
     }

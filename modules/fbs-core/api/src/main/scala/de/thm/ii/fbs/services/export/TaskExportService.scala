@@ -55,6 +55,7 @@ class TaskExportService {
           }*/
         }))
         val descrFile = writeToTmpFile(taskId, export)
+        // neues archive für jede task
         files += Archiver.ArchiveFile(descrFile, Option(f"task_$taskId.json"))
         val archive = File.createTempFile(s"task_$taskId-", ".fbs-export", tmpDir)
         Archiver.pack(archive, files.toArray: _*)
