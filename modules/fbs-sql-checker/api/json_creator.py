@@ -1,12 +1,12 @@
 # JSONCreator.py
 
+import re
 from parser import parse_query
 from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
-import re
 
 rightStatements = []
 rightTables = []
@@ -41,7 +41,7 @@ def parse_single_stat_upload_db(data, client):
         if "submission" in data:
             # Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
-                if " as " or " AS " in data["submission"]:
+                if " as " in data["submission"].lower():
                     data["submission"] = replace_function(data["submission"])
                 table_list = extract_tables(data["submission"], client)
                 tables2.extend(table_list[0])
@@ -537,12 +537,12 @@ def replace_function(query):
     alias_with_as_list = list(
         set(re.findall("as\s'.+?'|as\s\w+", query, re.IGNORECASE))
     )
-    for k in range(len(alias_with_as_list)):
+    for k in enumerate(alias_with_as_list):
         list_of_as_and_name = alias_with_as_list[k].split(" ")
         alias_from_as = list_of_as_and_name[1]
         alias_with_dot_list0 = list(set(re.findall("\w+\.\w+", query, re.IGNORECASE)))
         word = "alias"
-        for j in range(len(alias_with_dot_list0)):
+        for j in enumerate(alias_with_dot_list0):
             list_aliases = alias_with_dot_list0[j].split(".")
             if list_aliases[1] == alias_from_as:
                 query = query.replace(
@@ -555,4 +555,5 @@ def replace_function(query):
                 )
                 query = query.replace(alias_with_as_list[k], "as " + word + str(k))
         query = query.replace(alias_with_as_list[k], "")
+    query = " ".join(query.split())
     return query
