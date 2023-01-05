@@ -71,7 +71,7 @@ jobs:
       name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
       testArguments: :fbs-runner.checker:test
-      coverageArguments: :fbs-core.api:jacocoReport
+      coverageArguments: :fbs-runner.checker:jacocoReport
       coverageFilesLocation: modules/fbs-runner/checker/build/reports/jacoco/jacocoReport/jacocoReport.xml
       problemMatcher: java.json
 
