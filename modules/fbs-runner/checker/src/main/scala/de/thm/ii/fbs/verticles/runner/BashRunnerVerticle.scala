@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.verticles.runner
 
+import de.thm.ii.fbs.services.DockerService
 import de.thm.ii.fbs.services.runner.BashRunnerService
-import de.thm.ii.fbs.services.{DockerService, FileService}
 import de.thm.ii.fbs.types.RunArgs
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.BashRunnerVerticle.RUN_ADDRESS
@@ -46,9 +46,7 @@ class BashRunnerVerticle extends ScalaVerticle {
       logger.info(s"BashRunner received submission ${runArgs.submission.id}")
 
       // Configure Runner
-      FileService.addUploadDir(runArgs)
-      bashRunner.checkFiles()
-      bashRunner.prepareRunnerStart()
+      bashRunner.prepareRunnerStart(runArgs)
 
       val dockerCmd = bashRunner.getDockerCmd
 

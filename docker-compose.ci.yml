@@ -1,5 +1,0 @@
-version: '3'
-
-services:
-  sql-checker:
-    build: modules/fbs-sql-checker
