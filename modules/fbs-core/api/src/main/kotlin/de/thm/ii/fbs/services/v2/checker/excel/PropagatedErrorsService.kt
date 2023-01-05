@@ -10,10 +10,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.jgrapht.Graphs
 
 
-class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
+class PropagatedErrorsService(
+    private val workbook: XSSFWorkbook,
+    private val graph: ReferenceGraph, /* TODO get dependency graph from solution entry in db */
+    private val solution: Map<Cell, String> /* TODO maybe usa a kotlin set with indexing; get solution values from solution entry in db */
+) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
-    private val graph = ReferenceGraph(HashMap()) // TODO get dependency graph from solution entry in db
-    private val solution = HashMap<Cell, String>() // TODO get solution values from solution entry in db
 
     fun findAllPropagatedErrors(invalidCells: List<Cell>): Set<Cell> {
         val errors = HashSet<Cell>()
@@ -49,8 +51,6 @@ class PropagatedErrorsService(private val workbook: XSSFWorkbook) {
             errors.add(cell) // add to original errors set
             workbookCell.setCellValue(solution[cell]) // substitute cell value with solution value
         }
-
-        return
     }
 
     private fun getCellFromWorkbook(cell: Cell): XSSFCell {
