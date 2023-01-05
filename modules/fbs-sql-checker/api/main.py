@@ -22,7 +22,7 @@ else:
     print(answer.json())
     parse_single_stat_upload_db(answer.json(), client)
 
-# # The following Code is for debugging purposes
+# The following Code is for debugging purposes
 # CLIENT = (
 #     # Define MongoDB for debugging purposes
 #     "mongodb://admin:password@localhost:27017/"
@@ -32,21 +32,19 @@ else:
 #         random.SystemRandom().choice(string.ascii_letters + string.digits)
 #         for _ in range(8)
 #     )  # Generate random ID for the MongoDB
-# ID_JSON = "{id:'%s'}" % (TEST_ID)
+# ID_JSON = "{id:'%s'}" % (  # pylint: disable=c0209 # pylint: disable=bad-option-value
+#     TEST_ID
+# )
 # print(ID_JSON)
 # TESTDIC = {
-#     "submission": "SELECT rezept.titel, benutzer.benutzername "
-#                   "FROM rezept OUTER JOIN benutzer ON rezept.id_benutzer=benutzer.id_benutzer "
-#                   "WHERE (SELECT SUM(schritt_zutat.menge) AS Milch "
-#                   "FROM schritt_zutat OUTER JOIN zutat ON schritt_zutat.zutat = zutat.id_zutat "
-#                   "WHERE zutat.bezeichnung = 'Milch' AND schritt_zutat.id_rezept = rezept.id_rezept "
-#                   "GROUP BY zutat.id_zutat, schritt_zutat.id_rezept) > 200 "
-#                   "ORDER BY rezept.id_rezept;",
+#     "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name "
+#     "HAVING AVG( Quantity ) > 3 * (SELECT AVG( Quantity ) "
+#     "FROM SalesOrderItems);",
 #     "passed": False,  # True if submission produced the right return in SQL-Runner
 #     "resultText": "OK",
 #     "userId": 1,
-#     "attempt": 1,
-#     "tid": 8,
+#     "attempt": 2,
+#     "tid": 10,
 #     "sid": TEST_ID,
 #     "cid": 5,
 #     "isSol": False,  # True solution is from docent

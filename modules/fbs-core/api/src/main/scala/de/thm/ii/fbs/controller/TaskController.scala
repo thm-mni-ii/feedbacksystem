@@ -127,11 +127,11 @@ class TaskController {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
             val config = this.checkerConfigurationService.getAll(cid, tid).head
-            val path = this.storageService.pathToMainFile(config.id).get.toString
-            val spreadsheetFile = new File(path)
+            val spreadsheetFile: File = storageService.getFileMainFile(config)
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
+            spreadsheetFile.delete()
             task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
               decimals, smi)))
           case _ => task
@@ -292,8 +292,10 @@ class TaskController {
       val success = taskService.delete(cid, tid)
 
       // If the configuration was deleted in the database -> delete all files
-      success && submissions.forall(s => storageService.deleteSolutionFile(s.id)) &&
-        configurations.forall(cc => storageService.deleteConfiguration(cc.id))
+      if (success) {
+        submissions.foreach(s => storageService.deleteSolution(s.id))
+        configurations.foreach(cc => storageService.deleteAllConfigurations(tid, cid, cc))
+      }
     } else {
       throw new ForbiddenException()
     }

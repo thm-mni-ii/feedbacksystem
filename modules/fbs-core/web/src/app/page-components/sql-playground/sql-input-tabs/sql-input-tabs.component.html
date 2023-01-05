@@ -31,22 +31,122 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
+  <p
+    class="description"
+    *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
+  >
+    <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
+  </p>
   <div class="bottom-container">
     <button mat-button class="downloadBtn" (click)="downloadFile()">
       <mat-icon>download</mat-icon> Download
     </button>
 
     <button
-      [disabled]="isSubmissionEmpty()"
+      [disabled]="isSubmissionEmpty() || isPending"
       mat-flat-button
       color="accent"
       class="excuteBtn"
       (click)="submission()"
     >
-      <span class="spinner" *ngIf="pending">
+      <span class="spinner" *ngIf="isPending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Ausführen (strg + enter)</span>
+      <span *ngIf="!isPending">Ausführen</span>
     </button>
+
+    <button
+      mat-flat-button
+      class="submitBtn"
+      *ngIf="!isSubmitMode"
+      matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
+      [matTooltipPosition]="'above'"
+      (click)="updateMode(true)"
+    >
+      Abgeben<mat-icon>insert_drive_file</mat-icon>
+    </button>
+    <div class="submit-container" *ngIf="isSubmitMode">
+      <button
+        [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
+        mat-flat-button
+        color="accent"
+        class="excuteBtn"
+        (click)="submissionToTask()"
+      >
+        <span class="spinner" *ngIf="pending">
+          <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+        </span>
+        <span *ngIf="!pending">Abgeben</span>
+      </button>
+
+      <mat-icon
+        class="submit-item"
+        [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
+        matTooltip="Beschreibung anzeigen"
+        (click)="isDescriptionMode = !isDescriptionMode"
+        >remove_red_eye</mat-icon
+      >
+
+      <mat-icon
+        class="submit-item material-icons color_red"
+        matTooltip="Status der Abgabe: Deine Abgabge war leider nicht richtig."
+        *ngIf="submitted && !pending && !isSubCorr"
+        >cancel</mat-icon
+      >
+      <mat-icon
+        class="submit-item material-icons color_green"
+        matTooltip="Status der Abgabe: Deine Abgabe war korrekt."
+        *ngIf="submitted && !pending && isSubCorr"
+        >check_circle</mat-icon
+      >
+      <mat-icon class="state submit-item" *ngIf="pending"
+        ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</mat-icon
+      >
+
+      <button
+        [disabled]="selectedCourse === undefined || pending"
+        class="courseBtn submit-item"
+        mat-button
+        [matMenuTriggerFor]="task"
+      >
+        {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
+      </button>
+      <mat-menu #task="matMenu">
+        <button
+          (click)="changeTask(task)"
+          mat-menu-item
+          *ngFor="let task of filteredTasksFromCourse"
+        >
+          {{ task.name }}
+        </button>
+      </mat-menu>
+
+      <button
+        [disabled]="pending"
+        class="courseBtn submit-item"
+        mat-button
+        [matMenuTriggerFor]="course"
+      >
+        {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
+      </button>
+      <mat-menu #course="matMenu">
+        <button
+          (click)="changeCourse(course)"
+          mat-menu-item
+          *ngFor="let course of courses | async"
+        >
+          {{ course.name }}
+        </button>
+      </mat-menu>
+
+      <button
+        class="submit-item"
+        class="closeBtn"
+        mat-flat-button
+        (click)="updateMode(false)"
+      >
+        <mat-icon>closeTab</mat-icon>
+      </button>
+    </div>
   </div>
 </mat-card-actions>
