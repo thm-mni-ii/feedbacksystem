@@ -24,7 +24,7 @@ bootRun {
             [
                     "-Dconfdir=" + confidir
             ]
-    
+
 }
 
 repositories {
@@ -34,8 +34,6 @@ repositories {
 scalastyle {
     config = file(scalaStyleConfig)
 }
-
-test.dependsOn scalastyleCheck
 
 // customize start scripts
 startScripts {
@@ -48,6 +46,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
     implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
+    implementation group: 'io.minio', name: 'minio', version: '8.0.0'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.1'
     implementation 'mysql:mysql-connector-java:8.0.19'
@@ -85,4 +84,18 @@ dependencies {
     testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8'
     testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.22'
+    implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
+}
+
+task jacocoReport(type: JacocoReport) {
+    dependsOn = ['test']
+    additionalSourceDirs.setFrom files('src/main/scala')
+    sourceDirectories.setFrom files('src/main/scala')
+    classDirectories.setFrom files('build/classes/scala/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
 }

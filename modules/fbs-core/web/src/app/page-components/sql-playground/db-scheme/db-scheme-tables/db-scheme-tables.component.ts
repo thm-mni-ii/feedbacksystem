@@ -1,4 +1,10 @@
-import { Component, Input, OnChanges } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from "@angular/core";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
 import { Table } from "src/app/model/sql_playground/Table";
 import { DbSchemeComponent } from "../db-scheme.component";
@@ -14,6 +20,7 @@ export class DbSchemeTablesComponent
 {
   @Input() tables: Table[];
   @Input() constraints: Constraint[];
+  @Output() submitStatement = new EventEmitter<string>();
 
   ngOnChanges() {
     if (this.tables !== undefined && this.constraints !== undefined) {
@@ -41,5 +48,10 @@ export class DbSchemeTablesComponent
         }
       });
     }
+  }
+
+  showTableData(event: any, tableName: string): void {
+    event.stopPropagation();
+    this.submitStatement.emit(`SELECT * FROM ${tableName};`);
   }
 }

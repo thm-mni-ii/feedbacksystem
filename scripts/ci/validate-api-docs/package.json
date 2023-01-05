@@ -1,0 +1,13 @@
+{
+  "name": "validate-api-docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npm exec @redocly/cli lint -- --format checkstyle ../../../modules/fbs-core/api/api-docs.yml ../../../modules/fbs-runner/checker/api-docs.yml"
+  },
+  "author": "",
+  "dependencies": {
+    "@redocly/cli": "^1.0.0-beta.118"
+  }
+}
