@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
@@ -12,8 +13,8 @@ class SpreadsheetTestUtils {
                 val ref = CellReference(cellInfo.cell)
                 val row = sheet.getRow(ref.row) ?: sheet.createRow(ref.row)
                 val cell = row.createCell(ref.col.toInt())
-                cellInfo.value?.let { cell.setCellValue(cellInfo.value) }
                 cellInfo.formula?.let { cell.cellFormula = cellInfo.formula }
+                    ?: cellInfo.value?.let { setValueOfCell(cell, cellInfo.value!!) }
             }
         }
 

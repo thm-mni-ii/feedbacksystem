@@ -2,6 +2,7 @@ package de.thm.ii.fbs.services.v2.checker.excel
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.FormulaEvaluator
 import org.apache.poi.ss.util.CellReference
@@ -49,7 +50,7 @@ class PropagatedErrorsService(
         evaluator.evaluateInCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
-            workbookCell.setCellValue(solution[cell]) // substitute cell value with solution value
+            setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
         }
     }
 
