@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.v2.checker.excel
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
-import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetReferenceParser
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.FormulaEvaluator
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
@@ -59,6 +59,6 @@ class PropagatedErrorsService(
     }
 
     private fun cellEqualsSolution(cell: Cell, workbookCell: XSSFCell): Boolean {
-        return solution[cell].equals(SpreadsheetReferenceParser.valueOfCell(workbookCell))
+        return solution[cell].equals(valueOfCell(workbookCell))
     }
 }
