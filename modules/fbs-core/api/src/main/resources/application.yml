@@ -12,8 +12,15 @@ jwt:
   expiration:
     time: 300
 ldap:
-  basedn: dc=fh-giessen-friedberg,dc=de
-  url: ldaps://ldap.fh-giessen.de
+  enabled: ${LDAP_ENABLED:false}
+  baseDn: ${LDAP_BASE_DN:dc=fh-giessen-friedberg,dc=de}
+  url: ${LDAP_URL:ldaps://ldap.fh-giessen.de}
+  startTls: ${LDAP_START_TLS:false}
+  filter: ${LDAP_FILTER:(uid={user})}
+  bind:
+    enabled: ${LDAP_BIND_ENABLED:false}
+    dn: ${LDAP_BIND_DN:}
+    password: ${LDAP_BIND_PASSWORD:}
 logging:
   level:
     root: INFO

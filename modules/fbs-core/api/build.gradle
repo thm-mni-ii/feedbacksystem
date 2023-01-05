@@ -67,7 +67,7 @@ dependencies {
     //compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.2.1.RELEASE'
     //compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.0.RELEASE'
     //compile "org.springframework.boot:spring-boot-starter-security:$springVersion"
-    implementation group: 'org.ldaptive', name: 'ldaptive', version: '1.2.4'
+    implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation group: 'au.com.bytecode', name: 'opencsv', version: '2.4'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
