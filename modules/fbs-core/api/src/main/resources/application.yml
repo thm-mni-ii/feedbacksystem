@@ -59,9 +59,9 @@ spring:
     username: ${MYSQL_USER:root}
   jpa:
     database: mysql
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: create-drop
+  #    show-sql: true
+  #    hibernate:
+  #      ddl-auto: create-drop
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/}
@@ -71,6 +71,13 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+
+minio:
+  user: ${MINIO_USER:admin}
+  password: ${MINIO_USER_PASSWORD:SqfyBWhiFGr7FK60cVR2rel}
+  url: ${MINIO_URL:http://localhost}
+  port: ${MINIO_PORT:9000}
+
 url:
   expiration:
     time: 300
