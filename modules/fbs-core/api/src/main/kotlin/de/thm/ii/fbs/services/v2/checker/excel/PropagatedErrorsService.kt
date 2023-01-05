@@ -17,11 +17,11 @@ class PropagatedErrorsService(
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
 
-    fun findAllPropagatedErrors(invalidCells: List<Cell>): Set<Cell> {
+    fun findAllPropagatedErrors(outputCells: List<Cell>): Set<Cell> {
         val errors = HashSet<Cell>()
         val visited = HashSet<Cell>()
-        for (invalidCell in invalidCells) {
-            findPropagatedErrors(invalidCell, errors, visited)
+        for (outputCell in outputCells) {
+            findPropagatedErrors(outputCell, errors, visited)
         }
         return errors
     }
