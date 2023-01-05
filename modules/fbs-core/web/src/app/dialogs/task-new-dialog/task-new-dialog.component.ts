@@ -99,9 +99,9 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
     if (this.taskForm.get("isPrivate").value === "Studenten") {
-      this.task.isPrivate = true;
-    } else {
       this.task.isPrivate = false;
+    } else {
+      this.task.isPrivate = true;
     }
     this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
