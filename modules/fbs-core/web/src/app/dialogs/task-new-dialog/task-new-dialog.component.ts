@@ -130,9 +130,9 @@ export class TaskNewDialogComponent implements OnInit {
       this.task.requirementType
     );
     if (this.task.isPrivate) {
-      this.taskForm.controls["isPrivate"].setValue("Studenten");
-    } else {
       this.taskForm.controls["isPrivate"].setValue("Tutoren");
+    } else {
+      this.taskForm.controls["isPrivate"].setValue("Studenten");
     }
     //this.taskForm.controls["deadline"].setValue(new Date(this.task.deadline));
     if (!this.task.deadline) {
