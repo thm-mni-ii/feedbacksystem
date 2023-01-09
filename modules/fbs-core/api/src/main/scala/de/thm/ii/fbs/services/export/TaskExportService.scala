@@ -44,15 +44,12 @@ class TaskExportService {
         val files: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
         val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
         val export = TaskExport(task, ccs.map(cc => {
-          //if (cc.isInBlockStorage) {
-            val main = addCCFileAndGetNameFromBucket(cc.id, cc.mainFileUploaded, storageService.getFileMainFile(cc), files)
-            val secondary = addCCFileAndGetNameFromBucket(cc.id, cc.secondaryFileUploaded, storageService.getFileScondaryFile(cc), files)
-            ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
-          /*} else {
-            val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
+          val main = addCCFileAndGetNameFromBucket(cc, cc.mainFileUploaded, storageService.getFileMainFile, files)
+          val secondary = addCCFileAndGetNameFromBucket(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, files)
+          ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
+          /*val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
             val secondary = addCCFileAndGetName(cc.id, cc.secondaryFileUploaded, storageService.pathToSecondaryFile, files)
-            ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
-          }*/
+            ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)*/
         }))
         val descrFile = writeToTmpFile(taskId, export)
         // neues archive für jede task
@@ -84,11 +81,11 @@ class TaskExportService {
     })
   }
 
-  private def addCCFileAndGetNameFromBucket(ccId: Int, isUploaded: Boolean, file: File,
-                                  files: ListBuffer[Archiver.ArchiveFile]): Option[String] = {
+  private def addCCFileAndGetNameFromBucket(cc: CheckrunnerConfiguration, isUploaded: Boolean, getFile: CheckrunnerConfiguration => File,
+                                            files: ListBuffer[Archiver.ArchiveFile]): Option[String] = {
     Option.when(isUploaded)({
-      val filename = f"$ccId-${file.getName}"
-      files += Archiver.ArchiveFile(file, Option(filename))
+      val filename = f"${cc.id}-${getFile(cc).getName}"
+      files += Archiver.ArchiveFile(getFile(cc), Option(filename))
       filename
     })
   }
