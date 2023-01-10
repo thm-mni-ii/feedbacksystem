@@ -116,12 +116,33 @@ class LoginController extends CasClientConfigurerAdapter {
 
   /**
     * Login via local database.
-    * @param request Http request gives access to the http request information.
+    *
+    * @param request  Http request gives access to the http request information.
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     */
   @RequestMapping(value = Array("/local"), method = Array(RequestMethod.POST))
   def userLocalLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
+    val login = for {
+      username <- jsonNode.retrive("username").asText()
+      password <- jsonNode.retrive("password").asText()
+      user <- userService.find(username, password)
+    } yield user
+
+    login match {
+      case Some(user) => authService.renewAuthentication(user, response)
+      case None => throw new UnauthorizedException()
+    }
+  }
+
+  /**
+    * Login via local database or ldap.
+    * @param request Http request gives access to the http request information.
+    * @param response HTTP Answer (contains also cookies)
+    * @param jsonNode Request Body of User login
+    */
+  @RequestMapping(value = Array("/"), method = Array(RequestMethod.POST))
+  def userUnifiedLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
     val credentials = for {
       username <- jsonNode.retrive("username").asText()
       password <- jsonNode.retrive("password").asText()
