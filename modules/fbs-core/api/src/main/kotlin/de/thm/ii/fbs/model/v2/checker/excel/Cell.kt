@@ -8,7 +8,7 @@ data class Cell(val sheet: Int, val cell: String) {
         const val SHEET_DELIMITER = "!"  // TODO implement delimiter for ODF
     }
 
-    constructor(sheet: Int, cell: String, value: String? = null, formula: String?) : this(sheet, cell) {
+    constructor(sheet: Int, cell: String, value: String? = null, formula: String? = null) : this(sheet, cell) {
         this.value = value
         this.formula = formula
     }
