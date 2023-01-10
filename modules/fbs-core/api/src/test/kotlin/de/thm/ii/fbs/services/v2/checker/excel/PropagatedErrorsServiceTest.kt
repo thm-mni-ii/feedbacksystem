@@ -128,6 +128,29 @@ class PropagatedErrorsServiceTest {
         assertEquals(setOf(c1), res)
     }
 
+    @Test
+    fun multipleOutputTest() {
+        val c3 = Cell(0, "C1", formula = "D1 - E1")
+        val c8 = Cell(0, "A2", formula = "C1 + C2 - 2")
+
+        val service = PropagatedErrorsService(
+            workbook(
+                MultipleOutputTestCase.c1,
+                MultipleOutputTestCase.c2,
+                c3,
+                MultipleOutputTestCase.c4,
+                MultipleOutputTestCase.c5,
+                MultipleOutputTestCase.c6,
+                MultipleOutputTestCase.c7,
+                c8,
+                MultipleOutputTestCase.c9
+            ), MultipleOutputTestCase.sGraph, MultipleOutputTestCase.sMap
+        )
+        val res = service.findAllPropagatedErrors(listOf(MultipleOutputTestCase.c1, c8))
+
+        assertEquals(setOf(MultipleOutputTestCase.c3, c8), res)
+    }
+
     class BasicTestCase {
         companion object {
             val c1 = Cell(0, "A1", "3", "B1 + C1")
@@ -227,6 +250,38 @@ class PropagatedErrorsServiceTest {
             )
 
             val sMap = solutionMap(listOf(c1, c2, c3, c4, c5))
+        }
+    }
+
+    class MultipleOutputTestCase {
+        companion object {
+            val c1 = Cell(0, "A1", "12", "B1 + C1")
+            val c2 = Cell(0, "B1", "10", "SUM(B2:B3)")
+            val c3 = Cell(0, "C1", "2", "D1 + E1")
+            val c4 = Cell(0, "D1", "1")
+            val c5 = Cell(0, "E1", "1")
+            val c6 = Cell(0, "B2", "1")
+            val c7 = Cell(0, "B3", "9")
+            val c8 = Cell(0, "A2", "42", "C1 + C2")
+            val c9 = Cell(0, "C2", "40")
+
+            val sGraph = ReferenceGraph(
+                mapOf(
+                    0 to mapOf(
+                        c1.cell to Pair(c1.value!!, setOf(c2, c3)),
+                        c2.cell to Pair(c2.value!!, setOf(c6, c7)),
+                        c3.cell to Pair(c3.value!!, setOf(c4, c5)),
+                        c4.cell to Pair(c4.value!!, setOf()),
+                        c5.cell to Pair(c5.value!!, setOf()),
+                        c6.cell to Pair(c6.value!!, setOf()),
+                        c7.cell to Pair(c7.value!!, setOf()),
+                        c8.cell to Pair(c8.value!!, setOf(c3, c9)),
+                        c9.cell to Pair(c9.value!!, setOf())
+                    )
+                )
+            )
+
+            val sMap = solutionMap(listOf(c1, c2, c3, c4, c5, c6, c7, c8, c9))
         }
     }
 }
