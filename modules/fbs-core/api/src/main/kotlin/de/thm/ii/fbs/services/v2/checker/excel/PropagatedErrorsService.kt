@@ -51,6 +51,7 @@ class PropagatedErrorsService(
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
             setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
+            evaluator.notifyUpdateCell(workbookCell)
         }
     }
 
