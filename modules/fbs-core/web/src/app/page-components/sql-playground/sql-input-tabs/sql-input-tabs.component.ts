@@ -17,7 +17,6 @@ import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-d
 import { FormControl, FormGroup, UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";
 import { CourseRegistrationService } from "../../../service/course-registration.service";
@@ -26,8 +25,7 @@ import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
 import { PrismService } from "src/app/service/prism.service";
-import { FormBuilder } from "@angular/forms";
-import { fromEvent, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -69,12 +67,10 @@ export class SqlInputTabsComponent
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private authService: AuthService,
-    private sqlPlaygroundService: SqlPlaygroundService,
     private courseRegistrationService: CourseRegistrationService,
     private submissionService: SubmissionService,
     private taskService: TaskService,
     private prismService: PrismService,
-    private fb: FormBuilder,
     private renderer: Renderer2
   ) {}
   ngAfterViewChecked() {
@@ -114,8 +110,6 @@ export class SqlInputTabsComponent
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
-    this.listenForm();
-    this.synchronizeScroll();
   }
 
   closeTab(index: number) {
@@ -305,39 +299,5 @@ export class SqlInputTabsComponent
     }
     this.submitToTask();
     //this.submissionService.emitFileSubmission();
-  }
-
-  private listenForm() {
-    this.sub = this.groupForm.valueChanges.subscribe((val: any) => {
-      const modifiedContent = this.prismService.convertHtmlIntoString(
-        val.content
-      );
-
-      this.renderer.setProperty(
-        this.codeContent.nativeElement,
-        "innerHTML",
-        modifiedContent
-      );
-
-      this.highlighted = true;
-    });
-  }
-
-  private synchronizeScroll() {
-    const localSub = fromEvent(this.textArea.nativeElement, "scroll").subscribe(
-      () => {
-        const toTop = this.textArea.nativeElement.scrollTop;
-        const toLeft = this.textArea.nativeElement.scrollLeft;
-
-        this.renderer.setProperty(this.pre.nativeElement, "scrollTop", toTop);
-        this.renderer.setProperty(
-          this.pre.nativeElement,
-          "scrollLeft",
-          toLeft + 0.2
-        );
-      }
-    );
-
-    this.sub.add(localSub);
   }
 }
