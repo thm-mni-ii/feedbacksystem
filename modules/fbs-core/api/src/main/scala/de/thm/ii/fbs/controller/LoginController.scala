@@ -28,6 +28,14 @@ class LoginController extends CasClientConfigurerAdapter {
   private val ldapService: LdapService = null
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
+  @Value("${ldap.attributeNames.uid}")
+  private val uidAttributeName: String = null
+  @Value("${ldap.attributeNames.sn}")
+  private val snAttributeName: String = null
+  @Value("${ldap.attributeNames.name}")
+  private val nameAttributeName: String = null
+  @Value("${ldap.attributeNames.mail}")
+  private val mailAttributeName: String = null
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
@@ -85,10 +93,10 @@ class LoginController extends CasClientConfigurerAdapter {
   private def loadUserFromLdap(uid: String): Option[User] =
     ldapService.getEntryByUid(uid)
       .map(entry => new User(
-      entry.getAttribute("givenName").getStringValue,
-      entry.getAttribute("sn").getStringValue,
-      entry.getAttribute("mail").getStringValue,
-      entry.getAttribute("uid").getStringValue,
+      entry.getAttribute(nameAttributeName).getStringValue,
+      entry.getAttribute(snAttributeName).getStringValue,
+      entry.getAttribute(mailAttributeName).getStringValue,
+      entry.getAttribute(uidAttributeName).getStringValue,
       GlobalRole.USER))
 
   /**
@@ -141,7 +149,7 @@ class LoginController extends CasClientConfigurerAdapter {
     * @param response HTTP Answer (contains also cookies)
     * @param jsonNode Request Body of User login
     */
-  @RequestMapping(value = Array("/"), method = Array(RequestMethod.POST))
+  @RequestMapping(value = Array("/unified"), method = Array(RequestMethod.POST))
   def userUnifiedLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
     val credentials = for {
       username <- jsonNode.retrive("username").asText()
@@ -151,7 +159,7 @@ class LoginController extends CasClientConfigurerAdapter {
     val user = credentials.flatMap(creds =>
         userService.find(creds._1, creds._2).orElse(for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
-            ldapUser <- loadUserFromLdap(ldapLogin.getAttribute("uid").getStringValue)
+            ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
               .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
           } yield ldapUser)
     )

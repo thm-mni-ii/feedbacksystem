@@ -84,7 +84,7 @@ export class AuthService {
     username: string,
     password: string
   ): Observable<JWTToken> {
-    return this.login(username, password, "/api/v1/login");
+    return this.login(username, password, "/api/v1/login/unified");
   }
 
   /**

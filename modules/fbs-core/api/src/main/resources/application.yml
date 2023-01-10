@@ -17,10 +17,16 @@ ldap:
   url: ${LDAP_URL:ldaps://ldap.fh-giessen.de}
   startTls: ${LDAP_START_TLS:false}
   filter: ${LDAP_FILTER:(uid={user})}
+  timeout: ${LDAP_TIMEOUT:5000}
   bind:
     enabled: ${LDAP_BIND_ENABLED:false}
     dn: ${LDAP_BIND_DN:}
     password: ${LDAP_BIND_PASSWORD:}
+  attributeNames:
+    uid: ${LDAP_ATTRIBUTE_NAMES_UID:uid}
+    sn: ${LDAP_ATTRIBUTE_NAMES_SN:sn}
+    name: ${LDAP_ATTRIBUTE_NAMES_NAME:givenName}
+    mail: ${LDAP_ATTRIBUTE_NAMES_MAIL:mail}
 logging:
   level:
     root: INFO

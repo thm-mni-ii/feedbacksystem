@@ -1,9 +1,11 @@
 package de.thm.ii.fbs.services.security
 
-import org.ldaptive.{BindConnectionInitializer, ConnectionConfig, Credential, DefaultConnectionFactory, FilterTemplate, LdapEntry, SearchOperation}
+import org.ldaptive.{BindConnectionInitializer, ConnectionConfig, Credential, DefaultConnectionFactory, DerefAliases, FilterTemplate, LdapEntry, SearchOperation, SearchRequest}
 import org.ldaptive.auth.{AuthenticationRequest, Authenticator, SearchDnResolver, SimpleBindAuthenticationHandler}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+import java.time.Duration
 
 @Component
 class LdapService(
@@ -17,12 +19,22 @@ class LdapService(
   private val useStartTls: Boolean,
   @Value("${ldap.filter}")
   private val ldapFilter: String,
+  @Value("${ldap.timeout}")
+  private val timeout: Int,
   @Value("${ldap.bind.enabled}")
   private val bindingEnabled: Boolean,
   @Value("${ldap.bind.dn}")
   private val bindingDn: String,
   @Value("${ldap.bind.password}")
   private val bindingPassword: String,
+  @Value("${ldap.attributeNames.uid}")
+  private val uidAttributeName: String,
+  @Value("${ldap.attributeNames.sn}")
+  private val snAttributeName: String,
+  @Value("${ldap.attributeNames.name}")
+  private val nameAttributeName: String,
+  @Value("${ldap.attributeNames.mail}")
+  private val mailAttributeName: String,
  ) {
   private val connectionFactory = createConnectionFactory()
 
@@ -36,7 +48,7 @@ class LdapService(
 
     val authHandler = new SimpleBindAuthenticationHandler(connectionFactory)
     val auth = new Authenticator(dnResolver, authHandler)
-    val response = auth.authenticate(new AuthenticationRequest(username, new Credential(password), "uid"))
+    val response = auth.authenticate(new AuthenticationRequest(username, new Credential(password), uidAttributeName))
     if (!response.isSuccess) {
       None
     } else {
@@ -46,12 +58,18 @@ class LdapService(
 
   def getEntryByUid(uid: String): Option[LdapEntry] = runWithConnectionFactory(connectionFactory => {
     val search = new SearchOperation(connectionFactory, baseDn)
-    val result = search.execute(
-      FilterTemplate.builder()
-        .filter(ldapFilter)
-        .parameter("user", uid)
-        .build(),
-      "uid", "sn", "givenName", "mail"
+    val result = search.execute(SearchRequest.builder()
+      .dn(baseDn)
+      .filter(
+        FilterTemplate.builder()
+          .filter(ldapFilter)
+          .parameter("user", uid)
+          .build()
+      )
+      .returnAttributes(uidAttributeName, snAttributeName, nameAttributeName, mailAttributeName)
+      .timeLimit(Duration.ofMillis(timeout))
+      .aliases(DerefAliases.ALWAYS)
+      .build()
     )
     Option(result.getEntry)
   })
