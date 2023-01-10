@@ -17,6 +17,72 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+app-db-control-panel {
+  .mat-tab-label {
+    min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
+    padding: 5px;
+  }
+
+  .mat-form-field-wrapper {
+    margin-bottom: -1.25em;
+  }
+}
+
+app-sql-input-tabs {
+  .mat-tab-label {
+    min-width: 230px !important;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+}
+
+app-db-scheme-table {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+
+  .mat-content {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+    grid-gap: 10px;
+  }
+}
+
+app-db-control-panel {
+  .mat-tab-label {
+    min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
+    padding: 5px;
+  }
+
+  .mat-form-field-wrapper {
+    margin-bottom: -1.25em;
+  }
+}
+
+app-sql-input-tabs {
+  .mat-tab-label {
+    min-width: 230px !important;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+}
+
+app-db-scheme-table {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+
+  .mat-content {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+    grid-gap: 10px;
+  }
+}
+
 
 // Prism.js line numbers plugin
 .line-numbers .line-numbers-rows {

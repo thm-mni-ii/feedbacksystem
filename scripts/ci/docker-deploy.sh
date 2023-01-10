@@ -1,8 +1,8 @@
 #!/bin/bash
 
-branch=$1
+set -e
 
-function dockerPush(){
+function dockerPush() {
     tag=$1
     echo "tag is: "$tag
     
@@ -17,21 +17,25 @@ function dockerPush(){
     docker push thmmniii/fbs-sql-checker:$tag
 }
 
+function generateDockerTag() {
+    if [[ "dev" == "$branch" ]]
+    then
+        echo "dev-latest"
+    elif [[ "main" == "$branch" ]]
+    then
+        echo "latest"
+    else
+        echo $branch
+    fi
+}
+
+branch=$1
+tag=$(generateDockerTag)
+
+echo "START DOCKER BUILD"
+
+docker-compose build
+
 echo "START DOCKER DEPLOY"
 
-docker-compose -f docker-compose.yml -f docker-compose.ci.yml build
-
-echo "DOCKER IMAGES"
-docker images
-
-echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
-
-if [[ "dev" == "$branch" ]]
-then
-    dockerPush dev-latest
-elif [[ "main" == "$branch" ]]
-then
-    dockerPush latest
-else
-    dockerPush $branch
-fi
+dockerPush $tag

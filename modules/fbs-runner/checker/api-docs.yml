@@ -8,14 +8,18 @@ info:
   license:
     name: CC BY-NC-SA 4.0
     url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+servers:
+  - url: https://feedback.mni.thm.de/runner
 tags:
   - name: Runner
     description: Runner api
   - name: Runner Extern
     description: Api that the runner will Call on Complition
+security: []
 paths:
   /runner/start:
     post:
+      operationId: startRunner
       tags:
         - Runner
       summary: Start a runner
@@ -44,6 +48,7 @@ paths:
           description: Bad Request
   /results/{sid}/{ccid}:
     post:
+      operationId: storeResults
       tags:
         - Runner Extern
       summary: Requst that will the Runner call to notify about an Submission result
@@ -65,12 +70,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/result'
+              $ref: "#/components/schemas/result"
 
       responses:
         "204":
           description: ok
-
+        "400":
+          description: Bad Request
 
 components:
   schemas:

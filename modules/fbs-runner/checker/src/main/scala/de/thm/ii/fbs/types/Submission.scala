@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.types
 
-import java.nio.file.Path
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import java.nio.file.Path
 
 /**
   * class that stores the Submission config
@@ -10,12 +10,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
   * @param id                   the Submission id
   * @param solutionFileLocation the Solution File Path
   * @param user                 the User that submitted the files
-  * @param subTaskFileLocation  path to the subtask File
   */
 class Submission(@JsonProperty("id") val id: Int,
-                 @JsonProperty("solutionFileLocation") var solutionFileLocation: Path,
+                 @JsonIgnore @JsonProperty("solutionFileLocation") var solutionFileLocation: Path,
+                 @JsonProperty("solutionFileUrl") var solutionFileUrl: String,
                  @JsonProperty("user") val user: User,
-                 @JsonProperty("subTaskFileLocation") val subTaskFileLocation: Path,
                  @JsonProperty("apiUrl") val apiUrl: String,
                  @JsonProperty("mongodbUrl") val mongodbUrl: String,
-)
+                )

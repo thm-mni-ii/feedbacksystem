@@ -166,7 +166,8 @@ disable=raw-checker-failed,
         W4901,
         E0401,
         R0401,
-        R0801
+        R0801,
+        E1121
 
 
 # Enable the message, report, category or checker with the given id(s). You can
@@ -262,6 +263,8 @@ good-names=i,
            z,
            s,
            f,
+           t,
+           r,
            _
 
 # Good variable names regexes, separated by a comma. If names match any regex,

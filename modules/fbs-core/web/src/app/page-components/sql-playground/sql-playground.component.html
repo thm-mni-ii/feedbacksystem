@@ -13,16 +13,16 @@
   <div class="input-grid">
     <app-bordered-container [input]="true">
       <app-sql-input-tabs
-        [activeDb]="activeDb"
-        (resultset)="changeResultset($event)"
-        (isPending)="changeQueryPending($event)"
+        [isPending]="isQueryPending"
+        (submitStatement)="submitStatement($event)"
       ></app-sql-input-tabs>
     </app-bordered-container>
   </div>
   <div class="db-grid">
-    <app-bordered-container [title]="'DB'">
+    <app-bordered-container [title]="'Steuerung'">
       <app-db-control-panel
-        (changeActiveDb)="changeActiveDb($event)"
+        (changeActiveDbId)="changeActiveDbId($event)"
+        (submitStatement)="submitStatement($event)"
       ></app-db-control-panel
     ></app-bordered-container>
   </div>
@@ -32,6 +32,7 @@
         [title]="'Tabellen'"
         [tables]="tables"
         [constraints]="constraints"
+        (submitStatement)="submitStatement($event)"
       ></app-db-scheme-table>
       <app-db-scheme-views
         [title]="'Views'"

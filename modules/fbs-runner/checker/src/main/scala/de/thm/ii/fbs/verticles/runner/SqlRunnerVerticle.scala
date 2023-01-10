@@ -65,21 +65,25 @@ class SqlRunnerVerticle extends ScalaVerticle {
   }
 
   private def startSqlRunner(msg: Message[JsonObject]): Future[Unit] = Future {
-    val runArgs = msg.body().mapTo(classOf[RunArgs])
-
     try {
-      val sqlRunArgs: SqlRunArgs = getRunArgs(runArgs)
+      val runArgs = msg.body().mapTo(classOf[RunArgs])
 
-      logger.info(s"SqlRunner received submission ${sqlRunArgs.submissionId}")
+      try {
+        val sqlRunArgs: SqlRunArgs = getRunArgs(runArgs)
 
-      val connections = getConnections(runArgs, sqlRunArgs)
+        logger.info(s"SqlRunner received submission ${sqlRunArgs.submissionId}")
 
-      if (connections.isDefined) {
-        runQueries(runArgs, sqlRunArgs, connections.get._1, connections.get._2)
+        val connections = getConnections(runArgs, sqlRunArgs)
+
+        if (connections.isDefined) {
+          runQueries(runArgs, sqlRunArgs, connections.get._1, connections.get._2)
+        }
+      } catch {
+        case e: RunnerException => handleError(runArgs, e.getMessage, e)
+        case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.", e)
       }
     } catch {
-      case e: RunnerException => handleError(runArgs, e.getMessage, e)
-      case e: Exception => handleError(runArgs, s"Der SQL Runner hat einen Fehler geworfen: ${e.getMessage}.", e)
+      case e: Throwable => logger.error("Cold not Parse runArgs", e)
     }
   }
 
@@ -97,7 +101,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
   private def getRunArgs(runArgs: RunArgs): SqlRunArgs = {
     // change file paths
-    FileService.addUploadDir(runArgs)
+    FileService.prepareRunArgsFiles(runArgs)
 
     SQLRunnerService.prepareRunnerStart(runArgs)
   }
@@ -116,6 +120,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
         logger.info(s"Submission-${sqlRunArgs.submissionId} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
         vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
+        this.cleanup(runArgs)
 
       case Failure(ex: SQLTimeoutException) =>
         handleError(runArgs, s"Das Query hat zu lange gedauert: ${ex.getMessage}", ex)
@@ -131,6 +136,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
   private def handleError(runArgs: RunArgs, msg: String, e: Throwable): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg", e)
     vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
+    this.cleanup(runArgs)
   }
 
   private def getSQLErrorMsg(ex: SQLException): String = {
@@ -140,5 +146,9 @@ class SqlRunnerVerticle extends ScalaVerticle {
     errorMsg = errorMsg.replaceAll("'[0-9]*_[0-9]*_[0-9a-zA-z]*_[a-z]*'@'[0-9.]*'", "'submission'")
 
     s"Es gab eine SQLException: $errorMsg"
+  }
+
+  private def cleanup(runArgs: RunArgs): Unit = {
+    FileService.cleanUpRunArgsFiles(runArgs.runner, runArgs.submission)
   }
 }
