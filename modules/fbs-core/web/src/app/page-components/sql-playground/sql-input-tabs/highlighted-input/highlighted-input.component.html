@@ -74,9 +74,8 @@
       class="text-area-code-editor"
       formControlName="content"
       spellcheck="false"
-      spellcheck="false"
+      (keydown.tab)="onTab($event)"
       (ngModelChange)="updateSubmission($event)"
-      [(ngModel)]="toSubmit"
     ></textarea>
     <pre
       aria-hidden="true"

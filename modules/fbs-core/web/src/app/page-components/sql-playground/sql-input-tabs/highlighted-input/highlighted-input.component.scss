@@ -2,7 +2,7 @@
   max-width: 1000px;
   margin: 0 auto;
   position: relative;
-  overflow: hidden;
+  overflow: none;
   min-height: 150px;
   border: 1px solid black;
   border-radius: 5px;
@@ -32,12 +32,12 @@
   height: 100%;
   min-height: inherit;
   z-index: 1;
-  overflow: auto;
+  overflow: none;
   padding: 15px 0 0 70px;
 
   .code {
     min-height: inherit;
-    overflow: hidden;
+    overflow: none;
     height: 100%;
   }
 }
@@ -45,8 +45,8 @@
 .text-area-code-editor {
   caret-color: rgb(0, 0, 0);
   white-space: nowrap;
-  overflow-y: auto;
-  max-height: 200px;
+  overflow: hidden;
+  overflow-wrap: normal;
   text-align: left;
   display: block;
   resize: none;

@@ -22,13 +22,9 @@ import { PrismService } from "src/app/service/prism.service";
 export class HighlightedInputComponent
   implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
 {
-  @ViewChild("textArea", { static: true })
-  textArea!: ElementRef;
-  @ViewChild("codeContent", { static: true })
-  codeContent!: ElementRef;
-  @ViewChild("pre", { static: true })
-  pre!: ElementRef;
-  toSubmit = "";
+  @ViewChild("textArea", { static: true }) textArea!: ElementRef;
+  @ViewChild("codeContent", { static: true }) codeContent!: ElementRef;
+  @ViewChild("pre", { static: true }) pre!: ElementRef;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
   sub!: Subscription;
@@ -53,7 +49,7 @@ export class HighlightedInputComponent
 
   ngOnInit(): void {
     this.listenForm();
-    //this.synchronizeScroll();
+    this.synchronizeScroll();
   }
 
   ngAfterViewInit() {
@@ -72,7 +68,14 @@ export class HighlightedInputComponent
   }
 
   updateSubmission(event) {
-    this.update.emit({ content: event });
+    let cleanedText = this.cleanupTextarea(event);
+
+    //check if cleanedText is different from event -> prevent infinite loop
+    //if different, update the text area
+    if (cleanedText !== event) {
+      this.groupForm.patchValue({ content: cleanedText });
+    }
+    this.update.emit({ content: cleanedText });
   }
 
   listenForm() {
@@ -107,5 +110,38 @@ export class HighlightedInputComponent
     );
 
     this.sub.add(localSub);
+  }
+
+  cleanupTextarea(textToCheck: string) {
+    // rule: max 80 char per line -> if more, add a line break
+
+    const lines = textToCheck.split("\n");
+    let newLines = [];
+
+    lines.forEach((line) => {
+      if (line.length > 80) {
+        const newLine = line.match(/.{1,80}/g);
+        newLines = [...newLines, ...newLine];
+      } else {
+        newLines = [...newLines, line];
+      }
+    });
+
+    return newLines.join("\n");
+  }
+
+  onTab(event) {
+    event.preventDefault();
+    var start = event.target.selectionStart;
+    var end = event.target.selectionEnd;
+    this.groupForm.patchValue({
+      content:
+        this.contentControl.substring(0, start) +
+        "\t" +
+        this.contentControl.substring(end),
+    });
+
+    // put caret at right position again
+    event.target.selectionStart = event.target.selectionEnd = start + 1;
   }
 }
