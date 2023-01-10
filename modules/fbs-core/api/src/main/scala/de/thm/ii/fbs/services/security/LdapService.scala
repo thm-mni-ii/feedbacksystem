@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.security
 
-import org.ldaptive.{BindConnectionInitializer, ConnectionConfig, Credential, DefaultConnectionFactory, DerefAliases, FilterTemplate, LdapEntry, SearchOperation, SearchRequest}
+import org.ldaptive.{BindConnectionInitializer, ConnectionConfig, Credential, DefaultConnectionFactory, DerefAliases,
+  FilterTemplate, LdapEntry, SearchOperation, SearchRequest}
 import org.ldaptive.auth.{AuthenticationRequest, Authenticator, SearchDnResolver, SimpleBindAuthenticationHandler}
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
