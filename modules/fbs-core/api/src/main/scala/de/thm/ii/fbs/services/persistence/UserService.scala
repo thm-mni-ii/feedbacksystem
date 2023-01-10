@@ -27,15 +27,6 @@ class UserService {
       + (if (ignoreDeleted)  " where deleted = 0" else ""), (res, _) => parseResult(res))
 
   /**
-    * Find the first user by username and password
-    * @param username username
-    * @return The found user
-    */
-  def find(username: String, password: String): Option[User] =
-    DB.query("SELECT user_id, prename, surname, email, username, alias, global_role FROM user where username = ? and password = ?", (res, _) =>
-      parseResult(res), username, Hash.hash(password)).headOption
-
-  /**
     * Find the first user by id
     * @param id The users id
     * @return The found user

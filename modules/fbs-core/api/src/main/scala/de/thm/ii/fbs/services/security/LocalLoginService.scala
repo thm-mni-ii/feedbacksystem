@@ -22,12 +22,16 @@ class LocalLoginService {
     userService.find(username) match {
       case Some(user) =>
         var passwordHash = userService.getPassword(username).get
-        if (passwordHash.length == 40 && Hash.hash(password) == passwordHash) { // Check for SHA1 Hash
-          upgradePassword(user, password)
-          passwordHash = userService.getPassword(username).get
-        }
-        if (BCrypt.checkpw(password, passwordHash)) {
-          Some(user)
+        if (passwordHash != null) {
+          if (passwordHash.length == 40 && Hash.hash(password) == passwordHash) { // Check for SHA1 Hash
+            upgradePassword(user, password)
+            passwordHash = userService.getPassword(username).get
+          }
+          if (BCrypt.checkpw(password, passwordHash)) {
+            Some(user)
+          } else {
+            None
+          }
         } else {
           None
         }
