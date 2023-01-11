@@ -1,12 +1,15 @@
 package de.thm.ii.fbs.util
 
-import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
+import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveInputStream, TarArchiveOutputStream}
 import org.apache.commons.compress.utils.IOUtils
+import org.slf4j.LoggerFactory
 
 import java.io._
 import java.nio.file.Files
 
 object Archiver {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   @throws[IOException]
   def pack(name: File, files: ArchiveFile*): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
@@ -15,6 +18,19 @@ object Archiver {
     }
     out.close()
   }
+
+  @throws[IOException]
+  def unpack(files: TarArchiveInputStream): Unit = {
+    //val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    logger.info(files.available().toString)
+    //logger.info(files.readAllBytes().mkString("Array(", ", ", ")"))
+    //logger.info(files.getCurrentEntry.toString)
+    /*logger.info(files.getCurrentEntry.toString)
+    logger.info(files.getCurrentEntry.isFile.toString)
+    logger.info(files.getCurrentEntry.getName)
+    logger.info(files.getCurrentEntry.getFile.toString)*/
+  }
+
 
   def addToArchive(out: TarArchiveOutputStream, file: File, dir: String, name: String): Unit = {
     val entry = dir + File.separator + name

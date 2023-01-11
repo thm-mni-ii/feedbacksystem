@@ -5,6 +5,8 @@ import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.CourseRegistrationService
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.Archiver
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,17 +42,31 @@ class ImportController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       // die conig files fehlen noch
 
+      val inputStream = body.getInputStream
+      inputStream.mark(5)
+      val magicBytes = Array.ofDim[Byte](5)
+      val magicString = "ustar"
+      val read = inputStream.read(magicBytes)
+      inputStream.reset()
+
+      if (read == 5 && magicBytes.map(_.toChar).mkString == magicString) {
+        logger.info("This is a valid TAR archive.")
+      } else {
+        logger.info("This is not a valid TAR archive.")
+      }
+      Archiver.unpack(new TarArchiveInputStream(body.getInputStream))
+
       val f = new File("tmp/")
       FileUtils.writeStringToFile(f, body.toString, Charset.forName("UTF-8"))
 
       //logger.info(body.getFile.isDirectory.toString)
-      logger.info(body.getResource.getFile.isHidden.toString)
+      /*logger.info(body.getResource.getFile.isHidden.toString)
       logger.info(body.getResource.getFile.isDirectory.toString)
       body.getResource.getFile.list().foreach(f => logger.info(f))
       val str = new String(body.getBytes, StandardCharsets.UTF_8)
       val files = str.split("\\./")
       files.foreach(f => logger.info(f))
-      logger.info(files.length.toString)
+      logger.info(files.length.toString)*/
 
       //val f = new File("tmp/")
       //FileUtils.writeStringToFile(f, files, Charset.forName("UTF-8"))
