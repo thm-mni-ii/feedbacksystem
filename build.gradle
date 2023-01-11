@@ -3,8 +3,6 @@ import org.codehaus.groovy.runtime.GStringImpl
 plugins {
     id 'idea'
     id 'distribution'
-    id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.12.0'
 }
 
 apply plugin: 'application'
@@ -57,22 +55,8 @@ distributions {
     }
 }
 
-task jacocoRootReport(type: JacocoReport) {
-    dependsOn = ['fbs-core.api:test', 'fbs-runner.checker:test']
-    additionalSourceDirs.setFrom files('modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala')
-    sourceDirectories.setFrom files('modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala')
-    classDirectories.setFrom files('modules/fbs-core/api/build/classes/scala/main', 'modules/fbs-runner/checker/build/classes/scala/main')
-    executionData.setFrom files('modules/fbs-core/api/build/jacoco/test.exec', 'modules/fbs-runner/checker/build/jacoco/test.exec')
-
-    reports {
-        xml.enabled true
-        html.enabled true
-    }
-}
-
-coveralls {
-    sourceDirs = ['modules/fbs-core/api/src/main/scala', 'modules/fbs-runner/checker/src/main/scala']
-    jacocoReportPath "build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+task jacocoRootReport() {
+    dependsOn = ['fbs-core.api:jacocoReport', 'fbs-runner.checker:jacocoReport']
 }
 
 dependencies {
