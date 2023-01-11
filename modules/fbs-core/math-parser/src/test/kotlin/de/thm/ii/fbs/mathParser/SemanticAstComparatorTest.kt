@@ -59,10 +59,40 @@ internal class SemanticAstComparatorTest {
 
     @Test
     fun compareThree() {
-        assertFalse(
+        assertTrue(
             semanticAstComparator.compare(
                 MathParserHelper.parse("a+b+c"),
                 MathParserHelper.parse("c+b+a")
+            )
+        )
+    }
+
+    @Test
+    fun compareThreeMull() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("abc"),
+                MathParserHelper.parse("c*b*a")
+            )
+        )
+    }
+
+    @Test
+    fun compareRealExp() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("1,23*10^3"),
+                MathParserHelper.parse("10^3*1,23")
+            )
+        )
+    }
+
+    @Test
+    fun compareRealComplex() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("2,1x-7,6x+19x-4,5x"),
+                MathParserHelper.parse("x2,1-x*19+7,6x-4,5*x")
             )
         )
     }

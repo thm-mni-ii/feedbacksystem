@@ -10,8 +10,6 @@ class SemanticAstComparator(private val decimals: Int, private val roundingMode:
     fun compare(base: Ast, other: Ast): Boolean {
         val l = normalize(base)
         val r = normalize(other)
-        println(l)
-        println(r)
         return l == r
     }
 
@@ -30,9 +28,11 @@ class SemanticAstComparator(private val decimals: Int, private val roundingMode:
             }
         }
 
-        if ((operation.operator == Operator.ADD || operation.operator == Operator.MUL) &&
-            normalizedLeft.toString() > normalizedRight.toString()) {
-            return Operation(operation.operator, normalizedRight, normalizedLeft)
+        if ((operation.operator == Operator.ADD || operation.operator == Operator.MUL)) {
+            val collected = treeCollect(normalizedLeft, operation.operator) + treeCollect(normalizedRight, operation.operator)
+            val sorted = collected.sortedByDescending { it.toString() }
+
+            return retree(sorted, operation.operator)
         }
 
         return Operation(operation.operator, normalizedLeft, normalizedRight)
@@ -43,4 +43,17 @@ class SemanticAstComparator(private val decimals: Int, private val roundingMode:
 
     private fun normalize(expr: Expr): Expr =
         if (expr is Operation) normalize(expr) else if (expr is Num) normalize(expr) else expr
+
+
+    private fun treeCollect(operation: Operation, parentOperator: Operator): List<Expr> =
+        if (operation.operator == parentOperator)
+            treeCollect(operation.left, operation.operator) + treeCollect(operation.right, operation.operator)
+        else
+            listOf(operation)
+
+    private fun treeCollect(expr: Expr, parentOperator: Operator): List<Expr> =
+        if (expr is Operation) treeCollect(expr, parentOperator) else listOf(expr)
+
+    private fun retree(exprs: List<Expr>, operator: Operator): Operation =
+        Operation(operator, if (exprs.size > 2) retree(exprs.subList(1, exprs.size), operator) else exprs[1], exprs[0])
 }

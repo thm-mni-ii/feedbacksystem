@@ -2,8 +2,10 @@ grammar Math;
 expr:   (SQR|LB|LN|LG) ' '* expr
     |   (RAD|LOG) ' '* expr ' '+ expr
     |   expr ' '* EXP ' '* expr
-    |   expr ' '* (mul|DIV) ' '* expr
-    |   expr ' '* (ADD|SUB) ' '* expr
+    |   expr ' '* mul ' '* expr
+    |   expr ' '* DIV ' '* expr
+    |   expr ' '* ADD ' '* expr
+    |   expr ' '* SUB ' '* expr
     |   (NUMBER|VAR)
     |   '(' ' '* expr ' '* ')'
     ;
