@@ -44,8 +44,8 @@ class TaskExportService {
         val files: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
         val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
         val export = TaskExport(task, ccs.map(cc => {
-          val main = addCCFileAndGetNameFromBucket(cc, cc.mainFileUploaded, storageService.getFileMainFile, files)
-          val secondary = addCCFileAndGetNameFromBucket(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, files)
+          val main = addCCFileAndGetName(cc, cc.mainFileUploaded, storageService.getFileMainFile, files)
+          val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, files)
           ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
           /*val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
             val secondary = addCCFileAndGetName(cc.id, cc.secondaryFileUploaded, storageService.pathToSecondaryFile, files)
@@ -70,19 +70,8 @@ class TaskExportService {
     descrFile
   }
 
-  private def addCCFileAndGetName(ccId: Int, isUploaded: Boolean, getPath: Int => Option[Path],
+  private def addCCFileAndGetName(cc: CheckrunnerConfiguration, isUploaded: Boolean, getFile: CheckrunnerConfiguration => File,
                                   files: ListBuffer[Archiver.ArchiveFile]): Option[String] = {
-    Option.when(isUploaded)({
-      val path = getPath(ccId).get.toAbsolutePath
-      logger.info("abs " + path.toString)
-      val filename = f"$ccId-${path.getFileName}"
-      files += Archiver.ArchiveFile(path.toFile, Option(filename))
-      filename
-    })
-  }
-
-  private def addCCFileAndGetNameFromBucket(cc: CheckrunnerConfiguration, isUploaded: Boolean, getFile: CheckrunnerConfiguration => File,
-                                            files: ListBuffer[Archiver.ArchiveFile]): Option[String] = {
     Option.when(isUploaded)({
       val filename = f"${cc.id}-${getFile(cc).getName}"
       files += Archiver.ArchiveFile(getFile(cc), Option(filename))
