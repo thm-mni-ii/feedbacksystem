@@ -9,7 +9,6 @@
         placeholder="Name"
         matInput
         formControlName="name"
-        required
       />
     </mat-form-field>
 
@@ -62,7 +61,7 @@
     <!-- Task Mediatype -->
     <mat-form-field class="col">
       <mat-label>Medientyp</mat-label>
-      <mat-select formControlName="mediaType" [disabled]="disableTypeChange">
+      <mat-select formControlName="mediaType" [disabled]="disableTypeChange" (selectionChange)="changedMediaType()">
         <mat-option value="text/plain">Text</mat-option>
         <mat-option value="application/octet-stream">Datei</mat-option>
         <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
@@ -95,14 +94,14 @@
           type="text"
           placeholder="Exel-Datei"
           formControlName="exelFile"
-          required
+          
           readonly
         />
         <input
           hidden
           #fileInput
           type="file"
-          required
+        
           (change)="uploadExel($event)"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
@@ -114,7 +113,7 @@
           type="text"
           placeholder="Nutzer-ID Feld"
           formControlName="userIDField"
-          required
+          
         />
         <mat-icon
           matSuffix
@@ -129,7 +128,7 @@
           type="text"
           placeholder="Eingabeparameter Felder"
           formControlName="inputFields"
-          required
+          
         />
         <mat-icon
           matSuffix
@@ -144,7 +143,7 @@
           type="text"
           placeholder="Ergebniss Felder"
           formControlName="outputFields"
-          required
+          
         />
         <mat-icon
           matSuffix
@@ -173,7 +172,6 @@
           type="number"
           placeholder="Nachkommastellen"
           formControlName="decimals"
-          required
         />
       </mat-form-field>
     </div>

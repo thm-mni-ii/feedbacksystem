@@ -43,12 +43,12 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
     requirementType: new UntypedFormControl(defaultrequirement),
-    exelFile: new UntypedFormControl(""),
-    userIDField: new UntypedFormControl(""),
-    inputFields: new UntypedFormControl(""),
-    outputFields: new UntypedFormControl(""),
+    exelFile: new UntypedFormControl(""), //val
+    userIDField: new UntypedFormControl(""), //val
+    inputFields: new UntypedFormControl(""), // val
+    outputFields: new UntypedFormControl(""), //val
     pointFields: new UntypedFormControl(""),
-    decimals: new UntypedFormControl(2),
+    decimals: new UntypedFormControl(2), //val
     expCheck: new FormControl<Boolean>(false),
   });
   isUpdate: boolean;
@@ -66,6 +66,28 @@ export class TaskNewDialogComponent implements OnInit {
 
   spreadsheet: File = null;
   disableTypeChange = false;
+
+  changedMediaType() {
+    if(this.taskForm.controls["mediaType"].value == "application/x-spreadsheet") {
+      console.log("hallo");
+      this.taskForm.controls["exelFile"].setValidators([Validators.required]);
+      this.taskForm.controls["userIDField"].setValidators([Validators.required]);
+      this.taskForm.controls["inputFields"].setValidators([Validators.required]);
+      this.taskForm.controls["outputFields"].setValidators([Validators.required]);
+      this.taskForm.controls["expCheck"].setValidators([Validators.required]);
+    } else {
+      this.taskForm.controls["exelFile"].clearValidators();
+      this.taskForm.controls["userIDField"].clearValidators();
+      this.taskForm.controls["inputFields"].clearValidators();
+      this.taskForm.controls["outputFields"].clearValidators();
+      this.taskForm.controls["expCheck"].clearValidators();
+    }
+      this.taskForm.controls["exelFile"].updateValueAndValidity();
+      this.taskForm.controls["userIDField"].updateValueAndValidity();
+      this.taskForm.controls["inputFields"].updateValueAndValidity();
+      this.taskForm.controls["outputFields"].updateValueAndValidity();
+      this.taskForm.controls["expCheck"].updateValueAndValidity();
+  }
 
   constructor(
     public dialogRef: MatDialogRef<TaskNewDialogComponent>,
