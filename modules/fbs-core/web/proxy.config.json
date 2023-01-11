@@ -1,6 +1,6 @@
 {
   "/api/**": {
-    "target": "https://localhost:443",
+    "target": "https://172.19.0.3:443",
     "secure": false,
     "logLevel": "debug",
     "changeOrigin": true

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
-import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper, SemanticAstComparer}
+import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper, SemanticAstComparator}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetFileService
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
+import java.math.RoundingMode
 import java.text.{NumberFormat, ParseException, ParsePosition}
 import java.util.{Locale, Map => UtilMap}
 import scala.collection.mutable
@@ -85,7 +86,7 @@ class SpreadsheetCheckerService extends CheckerService {
     resultFields
   }
 
-  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
+  def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
     var result = mutable.ListBuffer[CheckResult]()
     var correctCount = 0
 
@@ -135,10 +136,10 @@ class SpreadsheetCheckerService extends CheckerService {
     }
   }
 
-  private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
+  def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
     val enteredAst = MathParserHelper.parse(enteredValue)
     val valueAst = MathParserHelper.parse(value)
-    SemanticAstComparer.compare(valueAst, enteredAst)
+    new SemanticAstComparator(decimals, RoundingMode.HALF_UP).compare(valueAst, enteredAst)
   }
 
   private def round(input: Double, toDecimals: Int): String =
@@ -159,5 +160,5 @@ class SpreadsheetCheckerService extends CheckerService {
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
-  private case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
+  case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
 }

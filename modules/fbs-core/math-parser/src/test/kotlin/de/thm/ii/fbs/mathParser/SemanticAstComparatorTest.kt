@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 
-internal class SemanticAstComparerTest {
+internal class SemanticAstComparatorTest {
+    private val semanticAstComparator = SemanticAstComparator(2)
+    
     @Test
     fun compareSimple() {
         assertTrue(
-            SemanticAstComparer.compare(
+            semanticAstComparator.compare(
                 MathParserHelper.parse("1+2"),
                 MathParserHelper.parse("2+1")
             )
@@ -18,7 +20,7 @@ internal class SemanticAstComparerTest {
     @Test
     fun compareMulti() {
         assertTrue(
-            SemanticAstComparer.compare(
+            semanticAstComparator.compare(
                 MathParserHelper.parse("1a+2b"),
                 MathParserHelper.parse("b2+a1")
             )
@@ -28,7 +30,7 @@ internal class SemanticAstComparerTest {
     @Test
     fun compareOneMul() {
         assertTrue(
-            SemanticAstComparer.compare(
+            semanticAstComparator.compare(
                 MathParserHelper.parse("1a+2b"),
                 MathParserHelper.parse("a+2b")
             )
@@ -38,7 +40,7 @@ internal class SemanticAstComparerTest {
     @Test
     fun compareNotEqual() {
         assertFalse(
-            SemanticAstComparer.compare(
+            semanticAstComparator.compare(
                 MathParserHelper.parse("1a+2b"),
                 MathParserHelper.parse("2a+1b")
             )
@@ -48,9 +50,19 @@ internal class SemanticAstComparerTest {
     @Test
     fun compareNotEqualVars() {
         assertFalse(
-            SemanticAstComparer.compare(
+            semanticAstComparator.compare(
                 MathParserHelper.parse("1a+2b"),
                 MathParserHelper.parse("1b+2a")
+            )
+        )
+    }
+
+    @Test
+    fun compareThree() {
+        assertFalse(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a+b+c"),
+                MathParserHelper.parse("c+b+a")
             )
         )
     }
