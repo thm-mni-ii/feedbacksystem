@@ -86,11 +86,14 @@ dependencies {
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
 }
 
+jacoco {
+    toolVersion = "0.8.8"
+}
+
 task jacocoReport(type: JacocoReport) {
     dependsOn = ['test']
-    additionalSourceDirs.setFrom files('src/main/scala')
-    sourceDirectories.setFrom files('src/main/scala')
-    classDirectories.setFrom files('build/classes/scala/main')
+    sourceDirectories.setFrom files('src/main/scala', 'src/main/kotlin')
+    classDirectories.setFrom files('build/classes/scala/main', 'build/classes/kotlin/main')
     executionData.setFrom files('build/jacoco/test.exec')
 
     reports {
