@@ -23,11 +23,12 @@ class LocalLoginService {
       case Some(user) =>
         var passwordHash = userService.getPassword(username).get
         if (passwordHash != null) {
-          if (passwordHash.length == 40 && Hash.hash(password) == passwordHash) { // Check for SHA1 Hash
-            upgradePassword(user, password)
-            passwordHash = userService.getPassword(username).get
+          val ok = if (passwordHash.length == 40) { // Check for SHA1 Hash
+            migrateSha1(user, password, passwordHash)
+          } else {
+            BCrypt.checkpw(password, passwordHash)
           }
-          if (BCrypt.checkpw(password, passwordHash)) {
+          if (ok) {
             Some(user)
           } else {
             None
@@ -38,6 +39,14 @@ class LocalLoginService {
       case _ => None
     }
   }
+
+  private def migrateSha1(user: User, password: String, passwordHash: String): Boolean =
+    if (Hash.hash(password) == passwordHash) {
+      upgradePassword(user, password)
+      true
+    } else {
+      false
+    }
 
   /**
     * Create a new user with the given password
