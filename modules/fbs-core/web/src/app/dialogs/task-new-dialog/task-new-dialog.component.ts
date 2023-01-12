@@ -43,12 +43,12 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
     requirementType: new UntypedFormControl(defaultrequirement),
-    exelFile: new UntypedFormControl(""), //val
-    userIDField: new UntypedFormControl(""), //val
-    inputFields: new UntypedFormControl(""), // val
-    outputFields: new UntypedFormControl(""), //val
+    exelFile: new UntypedFormControl(""),
+    userIDField: new UntypedFormControl(""),
+    inputFields: new UntypedFormControl(""),
+    outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
-    decimals: new UntypedFormControl(2), //val
+    decimals: new UntypedFormControl(2),
     expCheck: new FormControl<Boolean>(false),
   });
   isUpdate: boolean;
@@ -71,7 +71,6 @@ export class TaskNewDialogComponent implements OnInit {
     if (
       this.taskForm.controls["mediaType"].value == "application/x-spreadsheet"
     ) {
-      console.log("hallo");
       this.taskForm.controls["exelFile"].setValidators([Validators.required]);
       this.taskForm.controls["userIDField"].setValidators([
         Validators.required,
