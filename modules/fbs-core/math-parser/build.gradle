@@ -1,5 +1,6 @@
 plugins {
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
+    id 'jacoco'
 }
 
 apply plugin: 'antlr'
@@ -15,7 +16,7 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 
-generateGrammarSource {arguments += ["-package", "de.thm.ii.fbs.mathParser"]}
+generateGrammarSource { arguments += ["-package", "de.thm.ii.fbs.mathParser"] }
 
 test {
     useJUnitPlatform()
@@ -25,4 +26,20 @@ compileKotlin.dependsOn generateGrammarSource
 
 sourceSets {
     main.kotlin.srcDirs = ['build/generated-src/antlr/main', 'src/main/kotlin']
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+task jacocoReport(type: JacocoReport) {
+    dependsOn = ['test']
+    sourceDirectories.setFrom files('src/main/kotlin')
+    classDirectories.setFrom files('build/classes/kotlin/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
 }

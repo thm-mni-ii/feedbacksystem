@@ -17,6 +17,8 @@ ldap:
 logging:
   level:
     root: INFO
+    sql: INFO
+    de.thm: INFO
 message:
   topic:
     name: java
@@ -26,7 +28,7 @@ security:
   antiBruteForce:
     trustedProxyCount: ${TRUSTED_PROXIES:0}
     interval: ${BRUTEFORCE_INTERVAL:600}
-    maxAttempts: ${BRUTEFORCE_ATTEMPTS:10}
+    maxAttempts: ${BRUTEFORCE_ATTEMPTS:10000000}
     protectedPaths: "/api/v1/login/ldap,/api/v1/login/local"
 server:
   host: ${SERVER_HOST:https://localhost}
@@ -34,7 +36,7 @@ server:
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
-    key-store-password: passwd
+    key-store-password: changeit
     key-store-type: PKCS12
 services:
   classroom:
