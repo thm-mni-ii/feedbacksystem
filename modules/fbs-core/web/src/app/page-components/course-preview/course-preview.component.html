@@ -1,4 +1,11 @@
 <mat-card class="card" (click)="goToCourse()">
   <span>{{ data.name }}</span
   ><mat-icon class="invisible" *ngIf="!data.visible">visibility_off</mat-icon>
+  <span
+    >Fortschritt:<span class="passed"> {{ passed }} </span>/<span
+      class="failed"
+    >
+      {{ failed }} </span
+    >/<span class="all"> {{ getNrOfAllTasks() }} </span></span
+  >
 </mat-card>
