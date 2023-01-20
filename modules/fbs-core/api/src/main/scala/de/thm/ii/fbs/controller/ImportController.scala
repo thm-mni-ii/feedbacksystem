@@ -2,10 +2,11 @@ package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.`export`.TaskExportService
+import de.thm.ii.fbs.services.`export`.{TaskExportService, TaskImportService}
 import de.thm.ii.fbs.services.persistence.CourseRegistrationService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Archiver
+import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
@@ -15,8 +16,9 @@ import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, RequestBody, RequestParam, ResponseBody, RestController}
 import org.springframework.web.multipart.MultipartFile
 
-import java.io.File
+import java.io.{BufferedWriter, File, FileWriter}
 import java.nio.charset.{Charset, StandardCharsets}
+import java.nio.file.Files
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 @RestController
@@ -28,6 +30,8 @@ class ImportController {
   private val taskExportService: TaskExportService = null
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val taskImportService: TaskImportService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
 
 
@@ -40,36 +44,9 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      // die conig files fehlen noch
+      val taskImportFiles = Archiver.unpack(cid, body.getInputStream)
 
-      logger.info(body.getSize.toString)
-      Archiver.unpack(new TarArchiveInputStream(body.getInputStream))
-
-      val f = new File("tmp/")
-      FileUtils.writeStringToFile(f, body.toString, Charset.forName("UTF-8"))
-
-      //logger.info(body.getFile.isDirectory.toString)
-      /*logger.info(body.getResource.getFile.isHidden.toString)
-      logger.info(body.getResource.getFile.isDirectory.toString)
-      body.getResource.getFile.list().foreach(f => logger.info(f))
-      val str = new String(body.getBytes, StandardCharsets.UTF_8)
-      val files = str.split("\\./")
-      files.foreach(f => logger.info(f))
-      logger.info(files.length.toString)*/
-
-      //val f = new File("tmp/")
-      //FileUtils.writeStringToFile(f, files, Charset.forName("UTF-8"))
-
-      /*(body..getResource..retrive("main-file").asObject(), // main config
-        body.retrive("secondary-file").asObject(), // sec config
-        body.retrive().asObject() // task
-      ) match {
-        case (Some(main), Some(secondary), Some(task)) => {
-          test(task)
-          createMainFile(main)
-          createSecondaryFile(secondary)
-        }
-      }*/
+      taskImportService.createTask(cid, taskImportFiles)
     } else {
       throw new ForbiddenException()
     }

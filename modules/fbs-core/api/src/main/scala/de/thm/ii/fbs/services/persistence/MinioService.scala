@@ -8,7 +8,7 @@ import io.minio._
 import io.minio.http.Method
 import io.minio.messages.DeleteObject
 
-import java.io.{File, IOException}
+import java.io.{File, IOException, InputStream}
 import scala.collection.convert.ImplicitConversions.`iterable AsScalaIterable`
 import scala.jdk.CollectionConverters.IterableHasAsJava
 
@@ -49,13 +49,16 @@ class MinioService {
     * @param objectName the Name of the Object
     * @param bucket     the Name of the Bucket
     */
-  def putObject(file: MultipartFile, objectName: String, bucket: String): Unit = {
-    val inputStream = file.getInputStream
-    minioClient.putObject(PutObjectArgs.builder().contentType(file.getContentType)
-      .bucket(bucket).`object`(objectName).stream(inputStream, file.getSize, -1).build())
+  def putObjectStream(file: InputStream, size: Long, contentType: String, objectName: String, bucket: String): Unit = {
+    val inputStream = file
+    minioClient.putObject(PutObjectArgs.builder().contentType(contentType)
+      .bucket(bucket).`object`(objectName).stream(inputStream, size, -1).build())
     inputStream.close()
   }
 
+  def putObject(file: MultipartFile, objectName: String, bucket: String): Unit = {
+    putObjectStream(file.getInputStream, file.getSize, file.getContentType, objectName, bucket)
+  }
   /**
     * Get object from minio storage as String
     *

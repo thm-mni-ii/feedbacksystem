@@ -1,5 +1,8 @@
 package de.thm.ii.fbs.model
 
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.sun.xml.bind.v2.runtime.unmarshaller.LocatorEx.Snapshot
 import org.json.{JSONException, JSONObject}
 
 object CheckerTypeInformation {
@@ -41,6 +44,14 @@ object CheckerTypeInformation {
 /**
   * An abstract class represendinc checker type dependent information for checkrunner configuration
   */
+@JsonTypeInfo(
+  use = JsonTypeInfo.Id.NAME,
+  include = JsonTypeInfo.As.PROPERTY,
+  property = "type"
+)
+@JsonSubTypes(Array(
+  new Type(value = classOf[SqlCheckerInformation], name = "sqlCheckerInformation"),
+))
 abstract sealed class CheckerTypeInformation
 
 /**

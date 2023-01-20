@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, Task}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, ConfigExport, Task, TaskExport}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
 import org.springframework.beans.factory.annotation.Autowired
@@ -66,7 +66,6 @@ class TaskExportService {
     })
   }
 
-  case class TaskExport(task: Task, configs: List[ConfigExport])
 
-  case class ConfigExport(config: CheckrunnerConfiguration, subTasks: List[CheckrunnerSubTask], mainFile: Option[String], secondaryFile: Option[String])
+
 }

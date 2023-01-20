@@ -75,6 +75,10 @@ class StorageService extends App {
     minioService.putObject(file, storageFileName.getSolutionFilePath(sid), storageBucketName.SUBMISSIONS_BUCKET)
 
   @throws[IOException]
+  def storeConfigurationFileInBucket(ccid: Int, file: InputStream, size: Long, contentType: String, fileName: String): Unit =
+    minioService.putObjectStream(file, size, contentType, storageFileName.getFilePath(ccid, fileName), storageBucketName.CHECKER_CONFIGURATION_BUCKET)
+
+  @throws[IOException]
   def storeConfigurationFileInBucket(ccid: Int, file: MultipartFile, fileName: String): Unit =
     minioService.putObject(file, storageFileName.getFilePath(ccid, fileName), storageBucketName.CHECKER_CONFIGURATION_BUCKET)
 
