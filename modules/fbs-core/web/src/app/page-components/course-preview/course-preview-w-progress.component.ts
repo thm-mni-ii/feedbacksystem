@@ -32,7 +32,7 @@ export class CoursePreviewWProgressComponent implements OnInit {
     this.getProgress();
   }
 
-  countResults(task: Task, allSubmissions: any[], failed: boolean) {
+  countResults(allSubmissions: any[], failed: boolean) {
     if (allSubmissions.length != 0) {
       for (var submission of allSubmissions) {
         if (!failed) {
@@ -63,31 +63,13 @@ export class CoursePreviewWProgressComponent implements OnInit {
             this.submissionService
               .getAllSubmissions(this.userID, this.data.id, task.id)
               .subscribe((allSubmissions) => {
-                this.countResults(task, allSubmissions, failed);
+                this.countResults(allSubmissions, failed);
               });
           }
         }
       },
       () => {}
     );
-  }
-
-  getSubmissions() {
-    let results = [];
-    for (let i = 0; i < this.allTasksFromCourse.length; i++) {
-      this.submissionService
-        .getAllSubmissions(
-          this.userID,
-          this.data.id,
-          this.allTasksFromCourse[i].id
-        )
-        .subscribe(
-          (allSubmission) => {
-            console.log(allSubmission);
-          },
-          () => {}
-        );
-    }
   }
 
   /**

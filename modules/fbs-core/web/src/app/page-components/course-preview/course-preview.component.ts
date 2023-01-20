@@ -7,12 +7,10 @@ import { Router } from "@angular/router";
   templateUrl: "./course-preview.component.html",
   styleUrls: ["./course-preview.component.scss"],
 })
-export class CoursePreviewComponent implements OnInit {
+export class CoursePreviewComponent {
   @Input() data: Course;
 
   constructor(private router: Router) {}
-
-  ngOnInit(): void {}
 
   /**
    * Show course in detail
