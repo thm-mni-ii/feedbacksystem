@@ -1158,9 +1158,13 @@ paths:
           "application/json":
             schema:
               type: object
+              required:
+                - taskIds
               properties:
-                formula:
-                  type: List[Int]
+                taskIds:
+                  type: array
+                  items:
+                    type: integer
       parameters:
         - name: cid
           in: path
