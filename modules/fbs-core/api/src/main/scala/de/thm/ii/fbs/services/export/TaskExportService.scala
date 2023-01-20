@@ -30,7 +30,6 @@ class TaskExportService {
   private val tmpDir: File = new File("/tmp")
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-
   def responseFromTaskId(taskId: Int): (Long, InputStreamResource) = {
     val file = exportTask(taskId)
     val contentLength = file.length()
