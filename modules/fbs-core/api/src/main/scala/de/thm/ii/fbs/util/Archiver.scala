@@ -22,7 +22,11 @@ object Archiver {
   @throws[IOException]
   def unpack(files: TarArchiveInputStream): Unit = {
     //val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    //logger.info(files.available().toString)
+    files.read();
+
     logger.info(files.available().toString)
+    logger.info(files.getNextEntry.getName)
     //logger.info(files.readAllBytes().mkString("Array(", ", ", ")"))
     //logger.info(files.getCurrentEntry.toString)
     /*logger.info(files.getCurrentEntry.toString)

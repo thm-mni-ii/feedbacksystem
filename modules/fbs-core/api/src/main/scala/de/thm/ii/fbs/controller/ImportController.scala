@@ -42,18 +42,7 @@ class ImportController {
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       // die conig files fehlen noch
 
-      val inputStream = body.getInputStream
-      inputStream.mark(5)
-      val magicBytes = Array.ofDim[Byte](5)
-      val magicString = "ustar"
-      val read = inputStream.read(magicBytes)
-      inputStream.reset()
-
-      if (read == 5 && magicBytes.map(_.toChar).mkString == magicString) {
-        logger.info("This is a valid TAR archive.")
-      } else {
-        logger.info("This is not a valid TAR archive.")
-      }
+      logger.info(body.getSize.toString)
       Archiver.unpack(new TarArchiveInputStream(body.getInputStream))
 
       val f = new File("tmp/")
