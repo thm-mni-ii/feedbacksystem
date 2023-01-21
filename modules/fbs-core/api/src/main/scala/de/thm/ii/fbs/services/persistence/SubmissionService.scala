@@ -86,13 +86,22 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
-  def create(uid: Int, tid: Int): Submission =
-    DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
-      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-      .flatMap(id => getOne(id, uid)) match {
-      case Some(submission) => submission
-      case None => throw new SQLException("Submission could not be created")
-    }
+ def create(uid: Int, tid: Int): Submission =
+    try {
+        DB.insert("INSERT INTO user_task_submission (user_id, task_id) VALUES (?, ?)", uid, tid)
+         .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+         .flatMap(id => getOne(id, uid)) match {
+         case Some(submission) => submission
+          case None => throw new SQLException("Submission could not be created")
+        }
+       } catch {
+        case e: UncategorizedSQLException =>
+               if (e.getSQLException.getSQLState == "45000") {
+                 throw new ForbiddenException("Number of tries exceeded")
+               } else {
+                 throw e
+               }
+       }
 
   /**
     * Stores a result
