@@ -49,7 +49,7 @@ export class HighlightedInputComponent
 
   ngOnInit(): void {
     this.listenForm();
-    this.synchronizeScroll();
+    //this.synchronizeScroll();
   }
 
   ngAfterViewInit() {
@@ -73,7 +73,7 @@ export class HighlightedInputComponent
     //check if cleanedText is different from event -> prevent infinite loop
     //if different, update the text area
     if (cleanedText !== event) {
-      this.groupForm.patchValue({ content: cleanedText });
+      //this.groupForm.patchValue({ content: cleanedText });
     }
     this.update.emit({ content: cleanedText });
   }
