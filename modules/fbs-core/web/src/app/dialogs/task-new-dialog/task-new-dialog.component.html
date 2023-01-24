@@ -37,12 +37,10 @@
       <mat-label>Deadline</mat-label>
       <input
         matInput
-        type="datetime-local"
         [ngxMatDatetimePicker]="picker"
         [disabled]="datePickerDisabled"
         placeholder="Deadline"
         formControlName="deadline"
-        (dateChange)="addDate($event)"
       />
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <ngx-mat-datetime-picker

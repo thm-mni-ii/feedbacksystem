@@ -22,9 +22,23 @@ import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { NgxMatDateAdapter, NgxMatDateFormats, NGX_MAT_DATE_FORMATS } from "@angular-material-components/datetime-picker";
+import { MAT_DATE_LOCALE } from "@angular/material/core";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
+
+const CUSTOM_DATE_FORMATS: NgxMatDateFormats = {
+  parse: {
+    dateInput: 'l, LTS'
+  },
+  display: {
+    dateInput: 'YYYY-MM-DD HH:mm:ss',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  }
+};
 
 /**
  * Dialog to create or update a task
@@ -33,6 +47,14 @@ const defaultrequirement = "mandatory";
   selector: "app-task-new-dialog",
   templateUrl: "./task-new-dialog.component.html",
   styleUrls: ["./task-new-dialog.component.scss"],
+  providers: [
+    {
+      provide: NgxMatDateAdapter,
+      useClass: CustomNgxDatetimeAdapter,
+      deps: [MAT_DATE_LOCALE, NGX_MAT_MOMENT_DATE_ADAPTER_OPTIONS]
+    },
+    { provide: NGX_MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS }
+  ],
 })
 export class TaskNewDialogComponent implements OnInit {
   taskForm = new UntypedFormGroup({
@@ -72,7 +94,7 @@ export class TaskNewDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.courseId = this.data.courseId;
@@ -95,6 +117,7 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
+    this.task.deadline = this.taskForm.get("deadline").value;
     this.task.requirementType = this.taskForm.get("requirementType").value;
     this.task.mediaType = this.taskForm.get("mediaType").value;
     if (this.taskForm.get("expCheck").value) {
@@ -251,10 +274,6 @@ export class TaskNewDialogComponent implements OnInit {
     } else {
       this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
     }
-  }
-
-  addDate(event: MatDatepickerInputEvent<Date>) {
-    // this.task.deadline = event.value.toISOString();
   }
 
   uploadExel(event: Event) {
