@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.UnauthorizedException
+import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.{AuthService, LdapService}
@@ -36,6 +36,8 @@ class LoginController extends CasClientConfigurerAdapter {
   private val nameAttributeName: String = null
   @Value("${ldap.attributeNames.mail}")
   private val mailAttributeName: String = null
+  @Value("${ldap.allowLogin}")
+  private val allowLdapLogin: Boolean = false
 
   private val logger = LoggerFactory.getLogger(this.getClass)
   /**
@@ -107,18 +109,22 @@ class LoginController extends CasClientConfigurerAdapter {
     */
   @RequestMapping(value = Array("/ldap"), method = Array(RequestMethod.POST))
   def userLDAPLogin(request: HttpServletRequest, response: HttpServletResponse, @RequestBody jsonNode: JsonNode): Unit = {
-    val login = for {
-      username <- jsonNode.retrive("username").asText()
-      password <- jsonNode.retrive("password").asText()
-      ldapUser <- ldapService.login(username, password)
-      user <- loadUserFromLdap(ldapUser.getAttribute("uid").getStringValue)
-    } yield (user, password)
+    if (allowLdapLogin) {
+      val login = for {
+        username <- jsonNode.retrive("username").asText()
+        password <- jsonNode.retrive("password").asText()
+        ldapUser <- ldapService.login(username, password)
+        user <- loadUserFromLdap(ldapUser.getAttribute("uid").getStringValue)
+      } yield (user, password)
 
-    login match {
-      case Some((user, password)) =>
-        val localUser = userService.find(user.username).getOrElse(userService.create(user, password))
-        authService.renewAuthentication(localUser, response)
-      case None => throw new UnauthorizedException()
+      login match {
+        case Some((user, password)) =>
+          val localUser = userService.find(user.username).getOrElse(userService.create(user, password))
+          authService.renewAuthentication(localUser, response)
+        case None => throw new UnauthorizedException()
+      }
+    } else {
+      throw new ForbiddenException()
     }
   }
 
@@ -159,8 +165,8 @@ class LoginController extends CasClientConfigurerAdapter {
     val user = credentials.flatMap(creds =>
         userService.find(creds._1, creds._2).orElse(for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
-            ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
+            ldapUser <- if (allowLdapLogin) {loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
+              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))} else {None}
           } yield ldapUser)
     )
 

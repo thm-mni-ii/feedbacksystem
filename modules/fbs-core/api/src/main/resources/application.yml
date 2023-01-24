@@ -13,6 +13,7 @@ jwt:
     time: 300
 ldap:
   enabled: ${LDAP_ENABLED:false}
+  allowLogin: ${LDAP_ALLOW_LOGIN:false}
   baseDn: ${LDAP_BASE_DN:dc=fh-giessen-friedberg,dc=de}
   url: ${LDAP_URL:ldaps://ldap.fh-giessen.de}
   startTls: ${LDAP_START_TLS:false}
