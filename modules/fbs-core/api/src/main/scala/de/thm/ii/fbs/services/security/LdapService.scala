@@ -45,6 +45,7 @@ class LdapService(
       .dn(baseDn)
       .filter(ldapFilter)
       .subtreeSearch(true)
+      .aliases(DerefAliases.ALWAYS)
       .build
 
     val authHandler = new SimpleBindAuthenticationHandler(connectionFactory)
