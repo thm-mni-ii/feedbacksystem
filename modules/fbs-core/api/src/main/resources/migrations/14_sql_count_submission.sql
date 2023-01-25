@@ -1,38 +1,20 @@
 
 BEGIN;
+CREATE TRIGGER checkAttempts before insert on user_task_submission FOR EACH ROW BEGIN
+    set @attempts = (SELECT count(submission_id)
+          FROM user_task_submission
+          WHERE user_id = New.user_id AND task_id = New.task_id);
 
-ALTER TABLE task ADD COLUMN try INTEGER ;
+    set @maxAttempts = (SELECT CASE WHEN attempts IS NULL THEN -1 ELSE attempts END
+    FROM task
+    WHERE task_id = NEW.task_id);
 
-DELIMITER //
-
-CREATE TRIGGER checktry before insert on submission
-FOR EACH ROW
-
-BEGIN
-DECLARE anzahl INT;
-DECLARE maxAnzahl INT;
-
-
-SELECT count(submission_id) INTO anzahl
-      FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id)
-      LEFT JOIN checkrunner_configuration using (configuration_id)
-      WHERE user_id = ? AND user_task_submission.task_id = ?
-;
-
-SELECT t.try INTO maxAnzahl
-FROM submission s
-JOIN checker c USING (checker_id)
-JOIN task t USING (task_id)
-WHERE s.submission_id = NEW.submission_id
-;
-
-if anzahl > maxAnzahl + 1 then
- signal sqlstate '45000';
- set new.val = NULL;
-END IF;
+    IF @maxAttempts != -1 AND @attempts + 1 > @maxAttempts THEN
+     signal sqlstate '45000';
+    END IF;
 END;
-DELIMITER ;
 
+ALTER TABLE task ADD COLUMN attempts INTEGER;
 
 INSERT INTO migration (number) VALUES (14);
 
