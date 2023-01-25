@@ -34,6 +34,6 @@ END;
 DELIMITER ;
 
 
-INSERT INTO migration (number) VALUES (12);
+INSERT INTO migration (number) VALUES (14);
 
 COMMIT;
