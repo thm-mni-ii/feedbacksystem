@@ -6,11 +6,14 @@ import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+import org.springframework.jdbc
+import javax.ws.rs
 
 import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
 import scala.collection.mutable
+
 
 /**
   * Handles submission state
