@@ -151,6 +151,22 @@ class PropagatedErrorsServiceTest {
         assertEquals(setOf(MultipleOutputTestCase.c3, c8), res)
     }
 
+    @Test
+    fun wrongInputTest() {
+        val c2 = Cell(0, "B1", "2")
+
+        val service = PropagatedErrorsService(
+            workbook(BasicTestCase.c1, c2, BasicTestCase.c3),
+            BasicTestCase.sGraph,
+            BasicTestCase.sMap
+        )
+        val res = service.findAllPropagatedErrors(listOf(BasicTestCase.c1))
+
+        assertEquals(setOf(c2), res)
+
+
+    }
+
     class BasicTestCase {
         companion object {
             val c1 = Cell(0, "A1", "3", "B1 + C1")

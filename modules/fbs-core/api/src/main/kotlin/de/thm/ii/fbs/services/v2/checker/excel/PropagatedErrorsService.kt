@@ -32,7 +32,7 @@ class PropagatedErrorsService(
 
         // Base Case
         // compare cell with solution cell (or it is an input)
-        if (cellEqualsSolution(cell, workbookCell)) {
+        if (graph.isInput(cell) && cellEqualsSolution(cell, workbookCell)) {
             return
         }
 
