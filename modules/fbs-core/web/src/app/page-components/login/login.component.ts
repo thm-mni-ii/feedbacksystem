@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
    * Login user locally into the system
    */
   localLogin() {
-    this.auth.localLogin(this.username, this.password).subscribe(
+    this.auth.unifiedLogin(this.username, this.password).subscribe(
       (token) => {
         this.checktermsOfUse(token.id);
       },
