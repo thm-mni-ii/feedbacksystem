@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.UserService
-import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
+import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-import de.thm.ii.fbs.util.LDAPConnector
 
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -24,12 +23,11 @@ class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private implicit val userService: UserService = null
   @Autowired
-  private val authService: 
-  = null
+  private val authService: AuthService = null
   @Autowired
   private val loginService: LocalLoginService = null
   @Autowired
-  private val ldapService: LdapService = nul
+  private val ldapService: LdapService = null
   
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
