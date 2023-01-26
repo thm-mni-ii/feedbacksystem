@@ -30,4 +30,12 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
     fun isOutput(cell: Cell): Boolean {
         return !Graphs.vertexHasPredecessors(data, cell)
     }
+
+    fun successors(cell: Cell): List<Cell> {
+        return Graphs.successorListOf(data, cell)
+    }
+
+    fun predecessors(cell: Cell): List<Cell> {
+        return Graphs.predecessorListOf(data, cell)
+    }
 }

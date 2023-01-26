@@ -8,7 +8,6 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.jgrapht.Graphs
 
 
 class PropagatedErrorsService(
@@ -38,7 +37,7 @@ class PropagatedErrorsService(
         }
 
         // Graph Construction - DFS
-        val references = Graphs.successorListOf(graph.data, cell)
+        val references = graph.successors(cell)
         for (reference in references) {
             if (!visited.contains(reference)) {
                 findPropagatedErrors(reference, errors, visited)
