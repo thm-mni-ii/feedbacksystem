@@ -12,7 +12,7 @@ expr:   (SQR|LB|LN|LG) ' '* expr
 
 mul: MUL?;
 
-NUMBER: FULL DECIMAL?;
+NUMBER: SUB? FULL DECIMAL?;
 FULL: [0-9]+;
 DECIMAL: ',' FULL;
 
@@ -24,7 +24,7 @@ MUL: '*';
 DIV: '/';
 EXP: '^';
 SQR: 'sqrt';
-LB: 'lb';
+LB: 'lb'|'ld';
 LN: 'ln';
 LG: 'lg';
 RAD: 'rad';

@@ -111,6 +111,16 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseSimpleLd() {
+        assertEquals(
+            Ast(
+                Operation(Operator.LOG, Num(2), Num(4))
+            ),
+            MathParserHelper.parse("ld 4")
+        )
+    }
+
+    @Test
     fun parseSimpleLn() {
         assertEquals(
             Ast(
@@ -177,6 +187,26 @@ internal class MathParserHelperTest {
                 Operation(Operator.RAD, Num(5), Operation(Operator.ADD, Num(10), Num(10)))
             ),
             MathParserHelper.parse("rad 5 (10+10)")
+        )
+    }
+
+    @Test
+    fun parseSimpleUnaryMinus() {
+        assertEquals(
+            Ast(
+                Num(-5)
+            ),
+            MathParserHelper.parse("-5")
+        )
+    }
+
+    @Test
+    fun parseWithMultiplicationUnaryMinus() {
+        assertEquals(
+            Ast(
+                Operation(Operator.EXP, Num(-5), Num(2))
+            ),
+            MathParserHelper.parse("-5^2")
         )
     }
 
