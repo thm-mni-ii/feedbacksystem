@@ -28,4 +28,18 @@ class ReferenceGraphTest {
         assert(graph.data.containsEdge(a1on1, a2))
         assert(graph.data.containsEdge(a1on1, a3))
     }
+
+    @Test
+    fun testInputOutput() {
+        val a1 = Cell(0, "A1", "0")
+        val a2 = Cell(0, "A2", "1")
+        val a3 = Cell(0, "A3", "2")
+        val testMap =
+            mapOf(0 to mapOf("A1" to Pair("0", setOf()), "A2" to Pair("1", setOf(a1)), "A3" to Pair("2", setOf(a1))))
+        val graph = ReferenceGraph(testMap)
+        assert(graph.isInput(a1) && !graph.isOutput(a1))
+        assert(!graph.isInput(a2) && graph.isOutput(a2))
+        assert(!graph.isInput(a3) && graph.isOutput(a3))
+
+    }
 }
