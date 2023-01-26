@@ -70,11 +70,10 @@ export class HighlightedInputComponent
   updateSubmission(event) {
     let cleanedText = this.cleanUpTextAreaRegx(event);
 
-
     //check if cleanedText is different from event -> prevent infinite loop
     //if different, update the text area
     //if (cleanedText !== event) {
-      //this.groupForm.patchValue({ content: cleanedText });
+    //this.groupForm.patchValue({ content: cleanedText });
     //}
     this.update.emit({ content: cleanedText });
   }
@@ -83,8 +82,6 @@ export class HighlightedInputComponent
     let temp = sqlInput.replace(/[\n\t]/g, "");
     return temp;
   }
-
-
 
   listenForm() {
     this.sub = this.groupForm.valueChanges.subscribe((val: any) => {
