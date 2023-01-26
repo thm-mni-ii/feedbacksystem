@@ -42,4 +42,34 @@ class ReferenceGraphTest {
         assert(!graph.isInput(a3) && graph.isOutput(a3))
 
     }
+
+    @Test
+    fun testSuccessorPredecessor() {
+        val a1 = Cell(0, "A1", "0")
+        val a2 = Cell(0, "A2", "1")
+        val a3 = Cell(0, "A3", "2")
+        val a4 = Cell(0, "A4", "3")
+        val testMap =
+            mapOf(
+                0 to mapOf(
+                    "A1" to Pair("0", setOf()),
+                    "A2" to Pair("1", setOf(a1)),
+                    "A3" to Pair("2", setOf(a1)),
+                    "A4" to Pair("3", setOf(a2, a3))
+                )
+            )
+        val graph = ReferenceGraph(testMap)
+
+        assertEquals(graph.successors(a1), listOf<Cell>())
+        assertEquals(graph.predecessors(a1), listOf(a2, a3))
+
+        assertEquals(graph.successors(a2), listOf(a1))
+        assertEquals(graph.predecessors(a2), listOf(a4))
+
+        assertEquals(graph.successors(a3), listOf(a1))
+        assertEquals(graph.predecessors(a3), listOf(a4))
+
+        assertEquals(graph.successors(a4), listOf(a2, a3))
+        assertEquals(graph.predecessors(a4), listOf<Cell>())
+    }
 }
