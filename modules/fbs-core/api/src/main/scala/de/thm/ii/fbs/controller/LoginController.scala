@@ -28,7 +28,7 @@ class LoginController extends CasClientConfigurerAdapter {
   private val loginService: LocalLoginService = null
   @Autowired
   private val ldapService: LdapService = null
-  
+
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
   @Value("${ldap.attributeNames.uid}")
