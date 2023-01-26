@@ -166,7 +166,7 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield (username, password)
 
     val user = credentials.flatMap(creds =>
-        userService.find(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
+        loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
               .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
