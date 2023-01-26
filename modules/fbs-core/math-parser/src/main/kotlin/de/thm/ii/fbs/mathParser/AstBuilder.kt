@@ -3,20 +3,11 @@ package de.thm.ii.fbs.mathParser
 import de.thm.ii.fbs.mathParser.ast.*
 import java.text.NumberFormat
 import java.util.*
-import kotlin.math.exp
+import javax.annotation.processing.Generated
 
 class AstBuilder(val expr: MathParser.ExprContext) {
-    var ast: Ast? = null
-
-    fun build(): Ast {
-        if (ast != null) {
-            return ast as Ast
-        }
-
-        ast = Ast(buildExpr(expr))
-
-        return ast as Ast
-    }
+    fun build(): Ast =
+        Ast(buildExpr(expr))
 
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         when {

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
 internal class MathParserHelperTest {
-
     @Test
     fun parseSimpleAdd() {
         assertEquals(
@@ -278,4 +277,10 @@ internal class MathParserHelperTest {
     fun parseInvalidText() {
         assertThrows(MathParserException::class.java) { MathParserHelper.parse("\$foo") }
     }
+
+    @Test
+    fun parseInvalidEmpty() {
+        assertThrows(MathParserException::class.java) { MathParserHelper.parse("") }
+    }
+
 }
