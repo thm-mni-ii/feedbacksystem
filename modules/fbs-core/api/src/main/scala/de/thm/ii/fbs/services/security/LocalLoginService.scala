@@ -65,6 +65,6 @@ class LocalLoginService {
   def upgradePassword(user: User, newPassword: String): Unit =
     userService.updatePasswordFor(user.id, hash(newPassword))
 
-  private def hash(password: String): String =
+  def hash(password: String): String =
     BCrypt.hashpw(password, BCrypt.gensalt())
 }
