@@ -3081,6 +3081,7 @@ components:
           enum:
             - "mandatory"
             - "optional"
+            - "practice"
     SpreadsheetInformationRequest:
       type: object
       properties:
