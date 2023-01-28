@@ -1136,6 +1136,84 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+  "/courses/{cid}/tasks/import":
+    post:
+      security:
+        - JWT: [ ]
+      tags:
+        - Task
+      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks/import/list":
+    post:
+      security:
+        - JWT: [ ]
+      tags:
+        - Task
+      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   "/courses/evaluation/formula/validate":
     post:
       security:
