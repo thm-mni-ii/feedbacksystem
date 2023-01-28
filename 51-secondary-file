@@ -1,0 +1,36 @@
+{
+  "tasks": [
+    {
+      "sheetIdx": 1,
+      "changeFields": [
+        {
+          "sheetIdx": 1,
+          "cell": "C7",
+          "newValue": "60000"
+        }
+      ],
+      "outputFields": "O7:O33",
+      "name": "Aufgabe 2.1",
+      "hideInvalidFields": false
+    },
+   {
+      "sheetIdx": 2,
+      "changeFields": [
+        {
+          "sheetIdx": 2,
+          "cell": "D38:D38",
+          "newValue": "4"
+        }
+      ],
+      "outputFields": "O33:O33",
+      "name": "Aufgabe 2.2",
+      "hideInvalidFields": false
+    },
+   {
+      "sheetIdx": 3,
+      "outputFields": "C24:C24",
+      "name": "Aufgabe 3",
+      "hideInvalidFields": false
+    }
+  ]
+}

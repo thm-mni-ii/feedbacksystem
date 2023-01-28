@@ -1,17 +1,10 @@
 package de.thm.ii.fbs.util
 
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import de.thm.ii.fbs.model.{ArchivIterator, Task, TaskExport, TaskImportFiles, storageFileName}
-import de.thm.ii.fbs.services.`export`.TaskExportService
-import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
+import de.thm.ii.fbs.model.TaskImportFiles
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveInputStream, TarArchiveOutputStream}
 import org.apache.commons.compress.utils.IOUtils
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.web.multipart.commons.CommonsMultipartFile
 
 import java.io._
 import java.nio.file.Files
@@ -30,39 +23,72 @@ object Archiver {
   }
 
   @throws[IOException]
-  def unpack(cid: Int, files: InputStream): TaskImportFiles = {
-    var test = 0.toLong
+  def unpack(cid: Int, files: InputStream): (TaskImportFiles, List[TaskImportFiles]) = {
     val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
     val taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
+    val test: List[TaskImportFiles] = List()
     var entry: TarArchiveEntry = null
     while ( {
       entry = tmp.getNextTarEntry;
       entry != null
     }) {
-      //new ArchivIterator(tmp).foreach(entry => {
-      var s = entry.getSize
-      val name = entry.getName
-      var c = 0
-      val fileWriter = new BufferedWriter(new FileWriter(name))
-      if (name.endsWith(".json")) {
-        taskImportFiles.taskConfigPath = name
-      } else {
-        taskImportFiles.configFiles += name
+      if (entry.isFile) {
+        //new ArchivIterator(tmp).foreach(entry => {
+        val s = entry.getSize
+        val name = entry.getName
+        var c = 0
+        val fileWriter = new BufferedWriter(new FileWriter(name))
+        if (name.endsWith(".json")) {
+          taskImportFiles.taskConfigPath = name
+        } else {
+          taskImportFiles.configFiles += name
+        }
+        var test = 0
+        while (test < s) {
+          //for (size <- test to entry.getSize - 1) {
+          c = tmp.read
+          fileWriter.write(c)
+          test += 1
+        }
+        fileWriter.close()
+        taskImportFiles
       }
-      test = 0
-      while (test < s) {
-        //for (size <- test to entry.getSize - 1) {
-        c = tmp.read
-        fileWriter.write(c)
-        test += 1
+      else
+      {
+        test.appended(p(tmp, entry, test))
       }
-      fileWriter.close()
+    }
+    (taskImportFiles, test)
+  }
+
+  def p(tmp: TarArchiveInputStream, entry: TarArchiveEntry, test: List[TaskImportFiles]): TaskImportFiles = {
+    val taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
+    for(e <- entry.getDirectoryEntries) {
+      if (entry.isFile) {
+        //new ArchivIterator(tmp).foreach(entry => {
+        val s = entry.getSize
+        val name = entry.getName
+        var c = 0
+        val fileWriter = new BufferedWriter(new FileWriter(name))
+        if (name.endsWith(".json")) {
+          taskImportFiles.taskConfigPath = name
+        } else {
+          taskImportFiles.configFiles += name
+        }
+        var test = 0
+        while (test < s) {
+          c = tmp.read
+          fileWriter.write(c)
+          test += 1
+        }
+        fileWriter.close()
+      }
+      else {
+        test.appended(p(tmp, entry, test))
+      }
     }
     taskImportFiles
   }
-
-
-
 
   def addToArchive(out: TarArchiveOutputStream, file: File, dir: String, name: String): Unit = {
     val entry = dir + File.separator + name
