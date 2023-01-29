@@ -22,6 +22,7 @@ run {
 
 scalastyle {
     config = file(scalaStyleConfig)
+    failOnWarning = true
 }
 
 dependencies {
