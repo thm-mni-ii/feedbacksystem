@@ -37,6 +37,7 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { NewCourseComponent } from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
 import { CoursePreviewComponent } from "./page-components/course-preview/course-preview.component";
+import { CoursePreviewWProgressComponent } from "./page-components/course-preview/course-preview-w-progress.component";
 import { CourseDetailComponent } from "./page-components/course-detail/course-detail.component";
 import { TaskDetailComponent } from "./page-components/task-detail/task-detail.component";
 import { UserManagementComponent } from "./page-components/user-management/user-management.component";
@@ -145,6 +146,7 @@ export const httpInterceptorProviders = [
     UserTeacherFilter,
     SearchCoursesComponent,
     CoursePreviewComponent,
+    CoursePreviewWProgressComponent,
     CourseDetailComponent,
     TaskDetailComponent,
     UserManagementComponent,
