@@ -106,7 +106,7 @@ helm repo add thm-mni-ii https://thm-mni-ii.github.io/helm-charts
 ```
 5. Install 
 ```
-helm install -n <namepsace> --create-namespace --wait -f vals.yaml fbs feedbackssystem/feedbackssystem
+helm install -n <namepsace> --create-namespace --wait -f vals.yaml fbs thm-mni-ii/feedbackssystem
 ```
 
 ## API
