@@ -62,7 +62,7 @@ class LocalLoginServiceTest {
   @Test
   def failedLoginTest(): Unit = {
     createTestUser()
-    val user = localLoginService.login(exampleUsername, examplePassword)
+    val user = localLoginService.login(exampleUsername, "1234")
     Assert.assertEquals(None, user)
   }
 
