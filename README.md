@@ -1,6 +1,6 @@
-<div style="text-align: center">
+<div align="center">
 
-![logo](docs/images/logo.png | width=100)
+<img alt="logo" src="docs/images/logo.png" width=100>
 
 # Feedbacksystem
 
