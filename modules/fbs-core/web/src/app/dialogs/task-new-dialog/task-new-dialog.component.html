@@ -59,20 +59,25 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- limit the number of submission -->
-    <div class="submitLimiter">
-      <mat-checkbox formControlName="limiterCheckbox">
-        Anzahl der Versuche</mat-checkbox
-      >
-      <mat-form-field class="example-full-width" appearance="fill">
-        <input
-          matInput
-          type="number"
-          formControlName="submitLimiter"
-          (change)="addLimitTask($event)"
-        />
-      </mat-form-field>
-    </div>
+    <!-- Task Mediatype -->
+    <mat-form-field class="col pad">
+      <mat-label>Verbindlichkeit</mat-label>
+      <mat-select formControlName="requirementType">
+        <mat-option value="mandatory">Pflicht</mat-option>
+        <mat-option value="optional">Bonus</mat-option>
+        <mat-option value="practice">Übung</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Task Visibility  -->
+
+    <mat-form-field class="col">
+      <mat-label>Sichtbarkeit</mat-label>
+      <mat-select formControlName="isPrivate">
+        <mat-option value="Studenten">Studenten</mat-option>
+        <mat-option value="Tutoren">Tutoren</mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
       <mat-form-field class="col" (click)="fileInput.click()">

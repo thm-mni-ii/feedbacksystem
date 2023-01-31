@@ -23,6 +23,25 @@
   }
 }
 
+.task-title {
+  display: flex;
+  align-items: center;
+  .mat-icon {
+    margin-right: 10px;
+  }
+  .practice {
+    color: green;
+  }
+  
+  .mandatory {
+    color: red;
+  }
+  
+  .bonus {
+    color: orange;
+  }
+}
+
 .task-container:hover {
   background: #d4dadd;
 }
@@ -85,4 +104,15 @@
   h3 {
     color: $red;
   }
+}
+<<<<<<< HEAD
+=======
+
+.visibility {
+  color: #cccccc;
+}
+>>>>>>> f16666eceb142269595b4d437614fdb5d7c324a9
+
+.visibility {
+  color: #cccccc;
 }
