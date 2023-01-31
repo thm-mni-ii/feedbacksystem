@@ -102,7 +102,7 @@ deno run --reload=https://raw.githubusercontent.com https://raw.githubuserconten
 ```
 4. Add the helm repository 
 ```
-helm repo add feedbackssystem <url>
+helm repo add thm-mni-ii https://thm-mni-ii.github.io/helm-charts
 ```
 5. Install 
 ```
