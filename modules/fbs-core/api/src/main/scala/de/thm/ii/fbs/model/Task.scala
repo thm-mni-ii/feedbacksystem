@@ -21,7 +21,8 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
                 @JsonProperty("id") id: Int = 0,
-                @JsonProperty("courseID") courseID: Int = 0
+                @JsonProperty("courseID") courseID: Int = 0,
+                @JsonProperty("attempts") attempts: Option[Int] = None
                )
 
 object Task {

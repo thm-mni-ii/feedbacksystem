@@ -197,9 +197,10 @@ class TaskController {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
-        }
+        },
+        body.retrive("attempts").asInt()
       ) match {
-        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType, attempts) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -208,11 +209,11 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType, attempts = attempts))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
+        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType, attempts) => taskService.create(cid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -247,9 +248,10 @@ class TaskController {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
-        }
+        },
+        body.retrive("attempts").asInt()
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType, attempts) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -258,11 +260,11 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType, attempts = attempts))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
+        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType, attempts) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
