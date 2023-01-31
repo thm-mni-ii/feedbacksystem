@@ -91,7 +91,7 @@ internal class SemanticAstComparatorTest {
     fun compareRealComplex() {
         assertTrue(
             semanticAstComparator.compare(
-                MathParserHelper.parse("2,1x-7,6x+19x-4,5x"),
+                MathParserHelper.parse("2,1x+7,6x-19x-4,5x"),
                 MathParserHelper.parse("x2,1-x*19+7,6x-4,5*x")
             )
         )

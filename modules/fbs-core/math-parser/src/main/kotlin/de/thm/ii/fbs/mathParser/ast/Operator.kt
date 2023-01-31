@@ -5,7 +5,10 @@ enum class Operator {
     SUB,
     MUL,
     DIV,
+    MOD,
     EXP,
     RAD,
     LOG,
 }
+
+data class UnaryOperation(val operator: Operator, val target: Expr) : Expr()

@@ -3,7 +3,6 @@ package de.thm.ii.fbs.mathParser
 import de.thm.ii.fbs.mathParser.ast.*
 import java.text.NumberFormat
 import java.util.*
-import javax.annotation.processing.Generated
 
 class AstBuilder(val expr: MathParser.ExprContext) {
     fun build(): Ast =
@@ -11,42 +10,62 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         when {
-            expr.NUMBER() !== null -> buildNumber(expr)
-            expr.VAR() !== null -> buildVariable(expr)
-            expr.SQR() !== null -> buildDefaultOperation(expr, Operator.RAD, 2)
-            expr.LB() !== null ->  buildDefaultOperation(expr, Operator.LOG, 2)
-            expr.LN() !== null ->  buildDefaultOperation(expr, Operator.LOG, Math.E)
-            expr.LG() !== null ->  buildDefaultOperation(expr, Operator.LOG, 10)
-            expr.expr().size == 1 -> buildExpr(expr.expr(0))
-            else -> buildOperation(expr)
+            expr.ADD() !== null -> Operation(Operator.ADD, buildExpr(expr.expr(0)), buildTerm(expr.term()))
+            expr.SUB() !== null -> Operation(Operator.SUB, buildExpr(expr.expr(0)), buildTerm(expr.term()))
+            expr.RAD() !== null -> Operation(Operator.RAD, buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
+            expr.LOG() !== null -> Operation(Operator.LOG, buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
+            expr.term() !== null -> buildTerm(expr.term())
+            else -> throw IllegalArgumentException("not a legal expression: ${expr.text}")
         }
 
-    private fun buildOperation(expr: MathParser.ExprContext): Expr =
-            Operation(extractOperator(expr), buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
-
-    private fun buildDefaultOperation(expr: MathParser.ExprContext, operator: Operator, default: Number) =
-        Operation(operator, Num(default), buildExpr(expr.expr(0)))
-
-    private fun extractOperator(expr: MathParser.ExprContext): Operator =
+    private fun buildTerm(term: MathParser.TermContext): Expr =
         when {
-            expr.ADD() !== null -> Operator.ADD
-            expr.SUB() !== null -> Operator.SUB
-            expr.mul() !== null -> Operator.MUL
-            expr.DIV() !== null -> Operator.DIV
-            expr.EXP() !== null -> Operator.EXP
-            expr.RAD() !== null -> Operator.RAD
-            expr.LOG() !== null -> Operator.LOG
-            else -> throw IllegalArgumentException("no operator found")
+            term.MUL() !== null -> Operation(Operator.MUL, buildTerm(term.term()), buildExpo(term.expo()))
+            term.DIV() !== null -> Operation(Operator.DIV, buildTerm(term.term()), buildExpo(term.expo()))
+            term.MOD() !== null -> Operation(Operator.MOD, buildTerm(term.term()), buildExpo(term.expo()))
+            term.expo() !== null -> buildExpo(term.expo())
+            else -> throw IllegalArgumentException("not a legal term: ${term.text}")
         }
 
-    private fun buildNumber(expr: MathParser.ExprContext) =
-        Num(germanFormat.parse(expr.NUMBER().text))
+    private fun buildExpo(expo: MathParser.ExpoContext): Expr =
+        when {
+            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), buildFunct(expo.funct()))
+            expo.funct() !== null -> buildFunct(expo.funct())
+            else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
+        }
 
-    private fun buildVariable(expr: MathParser.ExprContext): Expr =
-        Var(expr.VAR().text)
+    private fun buildFunct(funct: MathParser.FunctContext): Expr =
+        when {
+            funct.SQR() !== null -> Operation(Operator.RAD, Num(2), buildFunct(funct.funct()))
+            funct.LB() !== null -> Operation(Operator.LOG, Num(2), buildFunct(funct.funct()))
+            funct.LN() !== null -> Operation(Operator.LOG, Num(Math.E), buildFunct(funct.funct()))
+            funct.LG() !== null -> Operation(Operator.LOG, Num(10), buildFunct(funct.funct()))
+            funct.unary() !== null -> buildUnary(funct.unary())
+            else -> throw IllegalArgumentException("not a legal function: ${funct.text}")
+        }
+
+    private fun buildUnary(unary: MathParser.UnaryContext): Expr =
+        when {
+            unary.mulFactor() !== null -> if (unary.SUB() !== null) UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor())) else buildMulFactor(unary.mulFactor())
+            else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
+        }
+
+
+    private fun buildMulFactor(mulFactor: MathParser.MulFactorContext): Expr =
+        when {
+            mulFactor.mulFactor() !== null -> Operation(Operator.MUL, buildMulFactor(mulFactor.mulFactor()), buildFactor(mulFactor.factor()))
+            mulFactor.factor() !== null -> buildFactor(mulFactor.factor())
+            else -> throw IllegalArgumentException("not a legal mulFactor: ${mulFactor.text}")
+        }
+
+    private fun buildFactor(factor: MathParser.FactorContext): Expr =
+        when {
+            factor.expr() !== null -> buildExpr(factor.expr())
+            factor.NUMBER() !== null -> Num(germanFormat.parse(factor.NUMBER().text))
+            factor.VAR() !== null -> Var(factor.VAR().text)
+            else -> throw IllegalArgumentException("not a legal factor: ${factor.text}")
+        }
 
     private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
-    init {
-        germanFormat.maximumFractionDigits = germanFormat.maximumIntegerDigits
-    }
+
 }
