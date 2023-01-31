@@ -33,6 +33,7 @@ repositories {
 
 scalastyle {
     config = file(scalaStyleConfig)
+	failOnWarning = true
 }
 
 // customize start scripts

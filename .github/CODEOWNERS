@@ -10,4 +10,4 @@
 Dockerfile                    @thm-mni-ii/feedbacksystem-api-mods
 
 /.github/                     @thm-mni-ii/feedbacksystem-admins
-
+*.gradle                      @thm-mni-ii/feedbacksystem-mods
