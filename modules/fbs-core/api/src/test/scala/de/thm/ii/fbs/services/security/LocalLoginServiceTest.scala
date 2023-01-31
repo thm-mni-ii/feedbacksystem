@@ -25,9 +25,11 @@ class LocalLoginServiceTest {
     databaseMigrationService.resetDatabase()
   }
 
-  private val exampleUser = new User("Test", "Tester", "test@example.ork", "test", GlobalRole.USER)
-  private val outdatedPasswordHash = Hash.hash("test")
-  private def passwordHash = localLoginService.hash("test")
+  private val exampleUsername = "test"
+  private val examplePassword = "test"
+  private val exampleUser = new User("Test", "Tester", "test@example.ork", exampleUsername, GlobalRole.USER)
+  private val outdatedPasswordHash = Hash.hash(examplePassword)
+  private def passwordHash = localLoginService.hash(examplePassword)
 
   private def createTestUserWithOutdatedPasswordHash() = userService.create(
     exampleUser,
@@ -42,48 +44,48 @@ class LocalLoginServiceTest {
   @Test
   def failedMigrationTest(): Unit = {
     createTestUserWithOutdatedPasswordHash()
-    val user = localLoginService.login("test", "1234")
+    val user = localLoginService.login(exampleUsername, "1234")
     Assert.assertEquals(None, user)
-    val password = userService.getPassword("test")
+    val password = userService.getPassword(exampleUsername)
     Assert.assertEquals(Some(outdatedPasswordHash), password)
   }
 
   @Test
   def successfulMigrationTest(): Unit = {
     createTestUserWithOutdatedPasswordHash()
-    val user = localLoginService.login("test", "test")
+    val user = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(Some(exampleUser), user)
-    val password = userService.getPassword("test")
+    val password = userService.getPassword(exampleUsername)
     Assert.assertNotEquals(Some(outdatedPasswordHash), password)
   }
 
   @Test
   def failedLoginTest(): Unit = {
     createTestUser()
-    val user = localLoginService.login("test", "1234")
+    val user = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(None, user)
   }
 
   @Test
   def failedLoginTestWrongUsername(): Unit = {
     createTestUser()
-    val user = localLoginService.login("1234", "test")
+    val user = localLoginService.login("1234", examplePassword)
     Assert.assertEquals(None, user)
   }
 
   @Test
   def loginTest(): Unit = {
     createTestUser()
-    val user = localLoginService.login("test", "test")
+    val user = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(Some(exampleUser), user)
   }
 
   @Test
   def createUserTest(): Unit = {
     createTestUser()
-    val user = localLoginService.createUser(exampleUser, "test")
+    val user = localLoginService.createUser(exampleUser, examplePassword)
     Assert.assertNotNull(user)
-    val loginUser = localLoginService.login("test", "test")
+    val loginUser = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(Some(exampleUser), loginUser)
   }
 }
