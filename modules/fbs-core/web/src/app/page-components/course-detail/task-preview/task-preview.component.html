@@ -3,14 +3,18 @@
   class="task-container"
   id="{{ task.id }}"
 >
-  <span
-    >{{ task.name }}
-    <span *ngIf="task.requirementType === 'mandatory'">&nbsp; (Pflicht)</span
-    ><span *ngIf="task.requirementType === 'optional'">&nbsp; (Bonus)</span
-    ><span *ngIf="task.requirementType === 'practice'"
-      >&nbsp; (Practice)</span
-    ></span
-  >
+  <div class="task-title">
+    <span *ngIf="task.requirementType === 'mandatory'">
+      <mat-icon class="mandatory" matTooltip="Pflicht">priority_high</mat-icon>
+    </span>
+    <span *ngIf="task.requirementType === 'optional'">
+      <mat-icon class="bonus" matTooltip="Bonus">star</mat-icon>
+    </span>
+    <span *ngIf="task.requirementType === 'practice'">
+      <mat-icon class="practice" matTooltip="Übung">school</mat-icon>
+    </span>
+    <span>{{ task.name }}</span>
+  </div>
   <span class="meta">
     <mat-icon class="visibility" *ngIf="task.isPrivate"
       >visibility_off</mat-icon
