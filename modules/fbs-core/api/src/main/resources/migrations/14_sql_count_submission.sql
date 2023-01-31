@@ -1,4 +1,3 @@
-
 BEGIN;
 CREATE TRIGGER checkAttempts before insert on user_task_submission FOR EACH ROW BEGIN
     set @attempts = (SELECT count(submission_id)
