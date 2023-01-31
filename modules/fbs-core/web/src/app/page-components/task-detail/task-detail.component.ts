@@ -37,6 +37,8 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
+  submitNumber: number;
+  circleBackgroundColor: string;
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -100,6 +102,7 @@ export class TaskDetailComponent implements OnInit {
         }),
         tap((submissions) => {
           this.submissions = submissions;
+          this.submitNumber = submissions.length;
           if (submissions.length !== 0) {
             this.pending = !submissions[submissions.length - 1].done;
             this.lastSubmission = submissions[submissions.length - 1];
@@ -112,6 +115,8 @@ export class TaskDetailComponent implements OnInit {
         },
         (error) => console.error(error)
       );
+
+    this.backgroundColorOfCircle();
   }
 
   private refreshByPolling(force = false) {
@@ -154,10 +159,21 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  backgroundColorOfCircle() {
+    const red = Math.floor(255 * (this.submitNumber / this.task.attempts));
+    const green = Math.floor(
+      255 * (1 - this.submitNumber / this.task.attempts)
+    );
+    this.circleBackgroundColor = `rgb(${red}, ${green}, 0)`;
+  }
+
   /**
    * Submission of user solution
    */
   submission() {
+    if (this.task.attempts > this.submitNumber) {
+      this.submitNumber++;
+    }
     if (this.isSubmissionEmpty()) {
       this.snackbar.open(
         "Sie haben keine Lösung für die Aufgabe " +
@@ -286,6 +302,14 @@ export class TaskDetailComponent implements OnInit {
           );
         }
       );
+  }
+
+  maxAttempts(): boolean {
+    if (this.submitNumber == 0) {
+      return false;
+    } else {
+      return this.task.attempts == this.submitNumber;
+    }
   }
 
   /**
