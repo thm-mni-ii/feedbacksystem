@@ -1,9 +1,15 @@
+<div style="text-align: center">
+
+![logo](docs/images/logo.png)
+
 # Feedbacksystem
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![CI](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml/badge.svg)](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/thm-mni-ii/feedbacksystem/branch/dev/graph/badge.svg?token=HLGM9MC0F2)](https://codecov.io/gh/thm-mni-ii/feedbacksystem)
 [![code style: Scalastyle](https://img.shields.io/badge/code_style-Scalastyle-c22d40.svg?style=flat)](https://github.com/scalastyle/scalastyle)
+
+</div>
 
 Intelligent, personalized feedback for students using artificial intelligence
 
