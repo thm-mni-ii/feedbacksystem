@@ -30,6 +30,7 @@
     <mat-form-field class="col">
       <mat-label>Deadline</mat-label>
       <input
+        [readonly]="true"
         matInput
         [ngxMatDatetimePicker]="picker"
         [disabled]="datePickerDisabled"
