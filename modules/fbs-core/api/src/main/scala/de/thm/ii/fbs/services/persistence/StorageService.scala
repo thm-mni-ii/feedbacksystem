@@ -5,7 +5,7 @@ import _root_.org.springframework.beans.factory.annotation.{Autowired, Value}
 import _root_.org.springframework.stereotype.Component
 import _root_.org.springframework.web.multipart.MultipartFile
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
 
@@ -324,14 +324,14 @@ class StorageService extends App {
   /**
     * returns a secondary-file depending whether it is in the bucket or not
     *
-    * @param config CheckrunnerConfiguration
+    * @param submission the Submission
     * @return
     */
-  def getFileSolutionFile(config: CheckrunnerConfiguration, sid: Int): File = {
-    if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(sid))
+  def getFileSolutionFile(submission: Submission): File = {
+    if (submission.isInBlockStorage) {
+      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submission.id))
     } else {
-      pathToMainFile(config.id).get.toFile
+      pathToSolutionFile(submission.id).get.toFile
     }
   }
 

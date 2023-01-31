@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, Submission, User}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetFileService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService, TaskService}
@@ -45,7 +45,7 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val fields = this.getFields(cc, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
     val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc, spreadsheetMediaInformation, fu.username, pointsFields))
-    val submittedFields = this.getSubmittedFields(submission.id, cc)
+    val submittedFields = this.getSubmittedFields(submission)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
@@ -68,16 +68,16 @@ class SpreadsheetCheckerService extends CheckerService {
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
     val field = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
-    spreadsheetFileService.cleanup(cc, spreadsheetFile)
+    spreadsheetFileService.cleanup(cc.isInBlockStorage, spreadsheetFile)
     field
   }
 
-  private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
-    val submissionFile = spreadsheetFileService.getSubmissionFile(submissionID, cc)
+  private def getSubmittedFields(submission: Submission): UtilMap[String, String] = {
+    val submissionFile = spreadsheetFileService.getSubmissionFile(submission)
 
     val mapper = new JsonMapper()
     val resultFields = mapper.readValue(submissionFile, classOf[UtilMap[String, String]])
-    spreadsheetFileService.cleanup(cc, submissionFile)
+    spreadsheetFileService.cleanup(submission.isInBlockStorage, submissionFile)
     resultFields
   }
 

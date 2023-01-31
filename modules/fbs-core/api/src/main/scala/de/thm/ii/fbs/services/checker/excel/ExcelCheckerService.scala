@@ -37,7 +37,7 @@ class ExcelCheckerService extends CheckerService {
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
       val submission = this.submissionService.getOne(submissionID, fu.id).get
-      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission.id, cc)
+      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission)
       val mainFile = this.spreadsheetFileService.getMainFile(cc)
 
       executeChecker(cc, submission, submissionFile, mainFile)
