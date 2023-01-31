@@ -5,50 +5,110 @@
 [![codecov](https://codecov.io/gh/thm-mni-ii/feedbacksystem/branch/dev/graph/badge.svg?token=HLGM9MC0F2)](https://codecov.io/gh/thm-mni-ii/feedbacksystem)
 [![code style: Scalastyle](https://img.shields.io/badge/code_style-Scalastyle-c22d40.svg?style=flat)](https://github.com/scalastyle/scalastyle)
 
-As a student you have to submit a lot of tasks
-for your lectures. Usually the only reply you
-get is that you passed or failed. This is a situation
-we want to change.
-Feedbacksystem is an application to automatically check
-your submissions and give an immediate result.
-With the result we want to provide suggestions
-to the students about their mistakes,
-collect the most common mistakes and
-present them to the lecturers such that they
-can address them in the lectures.
+Intelligent, personalized feedback for students using artificial intelligence
 
-## Getting it Running for Production
+![sql-animation](docs/images/SQL-Checker.gif)
 
-TODO:
+## Table of Contents
 
-## Getting it Running for Development
+- [Table of Contents](#table-of-contents)
+- [Security](#security)
+  - [Vulnerabilities](#vulnerabilities)
+- [Background](#background)
+- [Install](#install)
+  - [Development](#development)
+  - [Production](#production)
+- [API](#api)
+- [License](#license)
 
-First you have to install some dependencies.
+## Security
 
-- Java JDK 14+ (e.g., OpenJDK 14)
-- Gradle 6.4.1+ (a gradlew wrapper is included in the project)
-- Node 13.8.0+
-- NPM 6.13.7+
-- Docker 19.03.8+
-- Scala 2.12.8 (your IDE might install it automatically if using an scala plugin)
+### Vulnerabilities
 
-After getting your dependencies installed download and import this repository in your favourite IDE (e.g., InteliJ IDEA Ultimate). The Feedbacksystem is a distributed system. Use a terminal and build the whole system by executing `./gradlew dist` once.
-After a successfull build run `docker-compose up -d` to run every part of the system and check it by executing `docker-compose ps`. You should see something like the following.
+If you find a vulnerability in this system, please report it at the following url:
 
-```bash
-               Name                              Command                State                          Ports
-----------------------------------------------------------------------------------------------------------------------------------
-feedbacksystem_bashenv_1              docker-entrypoint.sh /bin/ ...   Exit 127
-feedbacksystem_kafka1_1               /app-entrypoint.sh /run.sh       Up         0.0.0.0:29092->29092/tcp, 0.0.0.0:9092->9092/tcp
-feedbacksystem_mysql1_1               docker-entrypoint.sh --def ...   Up         0.0.0.0:3308->3306/tcp, 33060/tcp
-feedbacksystem_mysql2_1               docker-entrypoint.sh --def ...   Up         0.0.0.0:3309->3306/tcp, 33060/tcp
-feedbacksystem_nodeenv_1              docker-entrypoint.sh node        Exit 0
-feedbacksystem_secrettokenchecker_1   ./secrettoken-checker            Up         2375/tcp, 2376/tcp
-feedbacksystem_sqlchecker_1           ./sql-checker                    Up
-feedbacksystem_ws_1                   ./wsd                            Up         0.0.0.0:443->8080/tcp
-feedbacksystem_zoo1_1                 /app-entrypoint.sh /run.sh       Up         0.0.0.0:2181->2181/tcp, 2888/tcp, 3888/tcp
+[https://github.com/thm-mni-ii/feedbacksystem/security/advisories/new](https://github.com/thm-mni-ii/feedbacksystem/security/advisories/new)
+
+## Background
+
+As a student you have to submit a lot of tasks for your lectures. Usually the only reply you get is that you passed or failed. This is a situation we want to change. Feedbacksystem is an application to automatically check your submissions and give an immediate result. With the result we want to provide suggestions to the students about their mistakes, collect the most common mistakes and present them to the lecturers such that they can address them in the lectures.
+
+## Install
+
+### Development
+
+The following software is required for the development:
+    
+- Java (Version 11)
+- Docker
+- Git
+
+Clone this Repository to your locale Directory
+```
+git clone git@github.com:thm-mni-ii/feedbacksystem.git
 ```
 
-Note that _bashenv_ and _nodeenv_ exited with some status code and are not running. This behaiviour is intended (do not try to _fix_ it.) These parts of the system are started on demand if neccessary.
+Change to the cloned directory
+```
+cd feedbacksystem
+```
 
-At this point the system is up and running. To modify one part of the system, e.g., _ws_, we recommend to lookup its container id (with `docker ps`), kill it (with `docker kill the-id`) and start _ws_ locally with your IDE to be able to use the IDE debugger and restart the system fast.
+Build all container an start them with `docker compose`
+```
+docker compose up -d --build
+```
+
+The System can now be accessed at `https://localhost`.
+
+#### Frontend
+
+For frontend development the following software is needed:
+
+- node
+- npm
+
+Change to the Directory of the frontend code
+```
+cd modules/fbs-core/web
+```
+
+Install neccessary npm packages and start the dev-server
+```
+npm i
+npm run start
+```
+
+### Production
+
+#### Requirements
+
+* A Kubernetes Cluster
+* [kubectl](https://kubernetes.io/docs/tasks/tools/)
+* [helm](https://helm.sh/docs/intro/install/)
+* [deno](https://deno.land/manual/getting_started/installation)
+
+#### Steps
+
+1. Ensure the requirements are met
+3. Generate values 
+```
+deno run --reload=https://raw.githubusercontent.com https://raw.githubusercontent.com/thm-mni-ii/feedbacksystem/dev/chart/generate-values.ts --allow-write=vals.yaml vals.yaml
+```
+4. Add the helm repository 
+```
+helm repo add feedbackssystem <url>
+```
+5. Install 
+```
+helm install -n <namepsace> --create-namespace --wait -f vals.yaml fbs feedbackssystem/feedbackssystem
+```
+
+## API
+
+The specification of the interfaces of the feedbacksystem can be found under the following link:
+
+[https://github.com/thm-mni-ii/feedbacksystem/blob/dev/modules/fbs-core/api/api-docs.yml](https://github.com/thm-mni-ii/feedbacksystem/blob/dev/modules/fbs-core/api/api-docs.yml)
+
+## License
+
+[Apache-2.0 © 2023 Technischen Hochschule Mittelhessen](LICENSE)
