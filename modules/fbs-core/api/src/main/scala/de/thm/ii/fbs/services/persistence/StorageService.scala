@@ -5,7 +5,7 @@ import _root_.org.springframework.beans.factory.annotation.{Autowired, Value}
 import _root_.org.springframework.stereotype.Component
 import _root_.org.springframework.web.multipart.MultipartFile
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, storageBucketName, storageFileName}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission, storageBucketName, storageFileName}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceOnDelete
 
@@ -30,7 +30,7 @@ class StorageService extends App {
 
   private def uploadDirPath: Path = Path.of(uploadDir)
 
-  private def tasksDir(tid: Int) = uploadDirPath.resolve(storageBucketName.CHECKER_CONFIGURATION_BUCKET).resolve(String.valueOf(tid))
+  private def tasksDir(tid: Int) = uploadDirPath.resolve(storageBucketName.CHECKER_CONFIGURATION_FOLDER).resolve(String.valueOf(tid))
 
   private def submissionDir(sid: Int) = uploadDirPath.resolve(storageBucketName.SUBMISSIONS_BUCKET).resolve(String.valueOf(sid))
 
@@ -50,7 +50,7 @@ class StorageService extends App {
 
   @throws[IOException]
   def storeConfigurationFile(tid: Int, src: Path, fileName: String): Unit =
-    Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(storageFileName.SECONDARY_FILE), StandardCopyOption.REPLACE_EXISTING)
+    Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(fileName), StandardCopyOption.REPLACE_EXISTING)
 
   /**
     * Store (replace if exists) the solution file a submission
@@ -317,23 +317,21 @@ class StorageService extends App {
     if (config.isInBlockStorage) {
       getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(config.id))
     } else {
-      val path = pathToMainFile(config.id).get.toString
-      new File(path)
+      pathToMainFile(config.id).get.toFile
     }
   }
 
   /**
     * returns a secondary-file depending whether it is in the bucket or not
     *
-    * @param config CheckrunnerConfiguration
+    * @param submission the Submission
     * @return
     */
-  def getFileSolutionFile(config: CheckrunnerConfiguration, sid: Int): File = {
-    if (config.isInBlockStorage) {
-      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(sid))
+  def getFileSolutionFile(submission: Submission): File = {
+    if (submission.isInBlockStorage) {
+      getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submission.id))
     } else {
-      val path = pathToSolutionFile(config.id).get.toString
-      new File(path)
+      pathToSolutionFile(submission.id).get.toFile
     }
   }
 
