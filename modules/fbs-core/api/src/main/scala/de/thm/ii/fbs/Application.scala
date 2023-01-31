@@ -5,6 +5,8 @@ import de.thm.ii.fbs.services.persistence.{DatabaseMigrationService, MinioServic
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.domain.EntityScan
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.web.servlet.MultipartConfigFactory
@@ -23,7 +25,7 @@ import javax.servlet.MultipartConfigElement
   *
   * @author Andrej Sajenko
   */
-@SpringBootApplication
+@SpringBootApplication(exclude = { Array(classOf[SecurityAutoConfiguration]) })
 class Application {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
