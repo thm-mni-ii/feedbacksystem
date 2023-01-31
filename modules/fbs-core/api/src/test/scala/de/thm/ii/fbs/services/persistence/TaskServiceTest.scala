@@ -28,6 +28,27 @@ class TaskServiceTest {
   }
 
   @Test
+  def emptyAttemptsShouldBeNone(): Unit = {
+    val task = Task("Test", None, "type", isPrivate = false, "A Task", None, "optional", 1, 1, None)
+    taskService.create(1, task)
+    Assert.assertEquals(taskService.getAll(1).head, task)
+  }
+
+  @Test
+  def getZeroAttempts(): Unit = {
+    val task = Task("Test", None, "type", isPrivate = false, "A Task", None, "optional", 1, 1, Option(0))
+    taskService.create(1, task)
+    Assert.assertEquals(taskService.getAll(1).head, task)
+  }
+
+  @Test
+  def getCorrectAttempts(): Unit = {
+    val task = Task("Test", None, "type", isPrivate = false, "A Task", None, "optional", 1, 1, Option(10))
+    taskService.create(1, task)
+    Assert.assertEquals(taskService.getAll(1).head, task)
+  }
+
+  @Test
   def update(): Unit = {
     create()
     taskService.update(1, 1, Task("Test", None, "type", isPrivate = false, "A Task", None, "mandatory", 1, 1, None))
