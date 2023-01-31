@@ -1,3 +1,7 @@
 package de.thm.ii.fbs.mathParser.ast
 
-data class Ast(val root: Expr)
+import java.lang.StringBuilder
+
+data class Ast(val root: Expr) {
+    fun toDot(): String = "strict graph {\nrankdir=BT\n${StringBuilder().let {root.toDot(it, 0); return@let it.toString()}}}"
+}
