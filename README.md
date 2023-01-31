@@ -98,7 +98,7 @@ npm run start
 1. Ensure the requirements are met
 3. Generate values 
 ```
-deno run --reload=https://raw.githubusercontent.com https://raw.githubusercontent.com/thm-mni-ii/feedbacksystem/dev/chart/generate-values.ts --allow-write=vals.yaml vals.yaml
+deno run --reload=https://raw.githubusercontent.com https://raw.githubusercontent.com/thm-mni-ii/helm-charts/main/charts/feedbacksystem/generate-values.ts --allow-write=vals.yaml vals.yaml
 ```
 4. Add the helm repository 
 ```
