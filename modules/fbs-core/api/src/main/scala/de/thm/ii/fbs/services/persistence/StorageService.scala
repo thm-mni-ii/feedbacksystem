@@ -30,7 +30,7 @@ class StorageService extends App {
 
   private def uploadDirPath: Path = Path.of(uploadDir)
 
-  private def tasksDir(tid: Int) = uploadDirPath.resolve(storageBucketName.CHECKER_CONFIGURATION_BUCKET).resolve(String.valueOf(tid))
+  private def tasksDir(tid: Int) = uploadDirPath.resolve(storageBucketName.CHECKER_CONFIGURATION_FOLDER).resolve(String.valueOf(tid))
 
   private def submissionDir(sid: Int) = uploadDirPath.resolve(storageBucketName.SUBMISSIONS_BUCKET).resolve(String.valueOf(sid))
 
@@ -50,7 +50,7 @@ class StorageService extends App {
 
   @throws[IOException]
   def storeConfigurationFile(tid: Int, src: Path, fileName: String): Unit =
-    Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(storageFileName.SECONDARY_FILE), StandardCopyOption.REPLACE_EXISTING)
+    Files.move(src, Files.createDirectories(tasksDir(tid)).resolve(fileName), StandardCopyOption.REPLACE_EXISTING)
 
   /**
     * Store (replace if exists) the solution file a submission
