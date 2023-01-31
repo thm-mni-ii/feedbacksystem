@@ -111,9 +111,7 @@ helm install -n <namepsace> --create-namespace --wait -f vals.yaml fbs feedbacks
 
 ## API
 
-The specification of the interfaces of the feedbacksystem can be found under the following link:
-
-[https://github.com/thm-mni-ii/feedbacksystem/blob/dev/modules/fbs-core/api/api-docs.yml](https://github.com/thm-mni-ii/feedbacksystem/blob/dev/modules/fbs-core/api/api-docs.yml)
+The specification of the interfaces of the feedbacksystem can be found [here](https://thm-mni-ii.github.io/feedbacksystem/api-docs/).
 
 ## License
 
