@@ -1,13 +1,13 @@
 package de.thm.ii.fbs.services.persistence
 
-import java.math.BigInteger
-import java.sql.{ResultSet, SQLException}
-
 import de.thm.ii.fbs.model.Course
 import de.thm.ii.fbs.util._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
+
+import java.math.BigInteger
+import java.sql.{ResultSet, SQLException}
 
 /**
   * CourseService provides interaction with DB
@@ -48,6 +48,19 @@ class CourseService {
     "SELECT course_id, semester_id, name, description, visible FROM course WHERE course_id = ?",
     (res, _) => parseResult(res), id).headOption
 
+  def findByPassword(id: Int, password: Option[String]): Option[Course] = {
+    val pwd = password.map(Hash.hash).orNull
+    if (pwd == null) {
+      DB.query(
+        s"SELECT * FROM course WHERE course_id = ? AND password IS NULL",
+        (res, _) => parseResult(res), id).headOption
+    } else {
+      DB.query(
+        s"SELECT * FROM course WHERE course_id = ? AND password = ?",
+        (res, _) => parseResult(res), id, pwd).headOption
+    }
+  }
+
   /**
     * Create a new course
     *
@@ -55,8 +68,10 @@ class CourseService {
     * @return The created course with id
     */
   def create(course: Course): Course = {
-    DB.insert("INSERT INTO course (semester_id, name, description, visible) VALUES (?,?,?,?);",
-      course.semesterId.orNull, course.name, course.description, course.visible)
+    DB.insert("INSERT INTO course (semester_id, name, description, visible, password) VALUES (?,?,?,?,?);",
+      course.semesterId.orNull, course.name, course.description, course.visible,
+      course.password.map(Hash.hash).orNull
+    )
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => find(id)) match {
       case Some(course) => course
