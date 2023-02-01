@@ -39,7 +39,6 @@ export class TaskDetailComponent implements OnInit {
   deadlinePassed = false;
   submitNumber: number = 0;
   circleBackgroundColor: string;
-  submissionConfirmation: boolean = true;
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -177,28 +176,10 @@ export class TaskDetailComponent implements OnInit {
     });
     return dialogRef.afterClosed();
   }
-  lastAttemptDialog() {
-    this.openConfirmDialog(
-      "Achtung!",
-      "Das wird deine letzter Versuch sein!"
-    ).subscribe((result) => {
-      if (result !== false) {
-        this.submissionConfirmation == false;
-      }
-    });
-  }
   /**
    * Submission of user solution
    */
   submission() {
-    if (this.task.attempts > this.submitNumber) {
-      this.submitNumber++;
-      if (this.submitNumber == this.task.attempts) {
-        this.lastAttemptDialog();
-        //this.submitNumber--;
-      }
-    }
-
     if (this.isSubmissionEmpty()) {
       this.snackbar.open(
         "Sie haben keine Lösung für die Aufgabe " +
@@ -208,8 +189,25 @@ export class TaskDetailComponent implements OnInit {
       );
       return;
     }
-    this.submit();
-    this.submissionService.emitFileSubmission();
+
+    if (this.task.attempts > this.submitNumber || this.task.attempts === 0) {
+      if (this.submitNumber === this.task.attempts - 1) {
+        this.openConfirmDialog(
+          "Achtung!",
+          "Dies wird Ihr letzter Versuch für diese Übung sein. Möchten Sie fortfahren?"
+        ).subscribe((result) => {
+          if (result === true) {
+            this.submit();
+            this.submissionService.emitFileSubmission();
+            this.submitNumber++;
+          }
+        });
+      } else {
+        this.submitNumber++;
+        this.submit();
+        this.submissionService.emitFileSubmission();
+      }
+    }
   }
 
   private submit() {
