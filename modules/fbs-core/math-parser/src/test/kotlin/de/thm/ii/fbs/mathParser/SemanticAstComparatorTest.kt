@@ -96,4 +96,14 @@ internal class SemanticAstComparatorTest {
             )
         )
     }
+
+    @Test
+    fun subSwapTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a-b+c"),
+                MathParserHelper.parse("a+c-b")
+            )
+        )
+    }
 }
