@@ -28,10 +28,14 @@ class TaskExportService {
   private val objectMapper: ObjectMapper = new ScalaObjectMapper()
 
   private val tmpDir: File = new File("/tmp")
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def responseFromTaskId(taskId: Int): (Long, InputStreamResource) = {
-    val file = exportTask(taskId)
+  def responseFromTaskId(tasks: List[Task], isOneTask: Boolean, taskId: Int): (Long, InputStreamResource) = {
+    var file: File = null
+    if (isOneTask) {
+      file = exportTask(taskId)
+    } else {
+      file = exportTasks(tasks)
+    }
     val contentLength = file.length()
     (contentLength, new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
   }
@@ -59,6 +63,33 @@ class TaskExportService {
         archive
       case None => throw new ResourceNotFoundException(f"Could not export task with id = $taskId.")
     }
+  }
+
+  def exportTasks(tasks: List[Task]): File = {
+    val archive = File.createTempFile(s"task-", ".fbs-export", tmpDir)
+    val files: ListBuffer[ListBuffer[Archiver.ArchiveFile]] = ListBuffer()
+    tasks.foreach(task => {
+      val filesForTask: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
+      val optionalTask = taskService.getOne(task.id)
+      optionalTask match {
+        case Some(task) =>
+          val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
+          val export = TaskExport(task, ccs.map(cc => {
+            val main = addCCFileAndGetName(cc, cc.mainFileUploaded, storageService.getFileMainFile, filesForTask)
+            val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, filesForTask)
+            ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
+          }))
+          val descrFile = writeToTmpFile(task.id, export)
+          // neues archive für jede task
+          filesForTask += Archiver.ArchiveFile(descrFile, Option(f"task_$task.id.json"))
+
+          descrFile.delete()
+        case None => throw new ResourceNotFoundException(f"Could not export task with id = $task.id.")
+      }
+      files += filesForTask
+    })
+    Archiver.packDir(tasks, archive, files)
+    archive
   }
 
   private def writeToTmpFile(taskId: Int, content: Object): File = {

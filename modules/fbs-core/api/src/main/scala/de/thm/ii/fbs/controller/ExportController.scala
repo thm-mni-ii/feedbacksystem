@@ -2,7 +2,7 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -15,7 +15,7 @@ import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, RequestBody, RequestParam, ResponseBody, RestController}
 import org.springframework.web.multipart.MultipartFile
 
-import java.io.{File, InputStream, SequenceInputStream}
+import java.io.{ByteArrayInputStream, File, InputStream, SequenceInputStream}
 import java.nio.charset.{Charset, StandardCharsets}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -42,7 +42,7 @@ class ExportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val (contentLength, resource) = taskExportService.responseFromTaskId(taskId)
+      val (contentLength, resource) = taskExportService.responseFromTaskId(List(), true, taskId)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(contentLength)
@@ -65,19 +65,21 @@ class ExportController {
       body.retrive("taskIds").asObject() match {
         case Some(taskIds) => {
           if (taskIds.isArray) {
-            var size: Long = 0
-            var contentList: InputStream = null
+            logger.info(taskIds.toString)
+            var list: List[Task] = List()
             taskIds.forEach(id => {
-              val (contentLength, resource) = taskExportService.responseFromTaskId(id.asInt())
-              size += contentLength
-              contentList = new SequenceInputStream(resource.getInputStream, contentList)
+              val t = taskService.getOne(id.asInt()).get
+              list ::= t
+              logger.info(t.toString)
             })
+            logger.info(list.toString())
+            val (contentLength, resource) = taskExportService.responseFromTaskId(list, false, -1)
 
             ResponseEntity.ok()
               .contentType(MediaType.APPLICATION_OCTET_STREAM)
-              .contentLength(size)
+              .contentLength(contentLength)
               .header("Content-Disposition", s"attachment;filename=course_${cid}_only.fbs-export")
-              .body(new InputStreamResource(contentList))
+              .body(resource)
           } else {
             throw new BadRequestException("No task ids provided")
           }
@@ -98,19 +100,12 @@ class ExportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      var size: Long = 0
-      var contentList: InputStream = null
-      // 1 stream
-      taskService.getAll(cid).foreach(task => {
-        val (contentLength, resource) = taskExportService.responseFromTaskId(task.id)
-        size += contentLength
-        contentList = new SequenceInputStream(resource.getInputStream, contentList)
-      })
+      val (contentLength, resource) = taskExportService.responseFromTaskId(taskService.getAll(cid), false, -1)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .contentLength(size)
+        .contentLength(contentLength)
         .header("Content-Disposition", s"attachment;filename=course_${cid}_all.fbs-export")
-        .body(new InputStreamResource(contentList))
+        .body(resource)
     } else {
       throw new ForbiddenException()
     }
