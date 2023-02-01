@@ -37,8 +37,9 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
-  submitNumber: number;
+  submitNumber: number = 0;
   circleBackgroundColor: string;
+  submissionConfirmation: boolean = true;
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -167,13 +168,37 @@ export class TaskDetailComponent implements OnInit {
     this.circleBackgroundColor = `rgb(${red}, ${green}, 0)`;
   }
 
+  openConfirmDialog(title: string, message: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: title,
+        message: message,
+      },
+    });
+    return dialogRef.afterClosed();
+  }
+  lastAttemptDialog() {
+    this.openConfirmDialog(
+      "Achtung!",
+      "Das wird deine letzter Versuch sein!"
+    ).subscribe((result) => {
+      if (result !== false) {
+        this.submissionConfirmation == false;
+      }
+    });
+  }
   /**
    * Submission of user solution
    */
   submission() {
     if (this.task.attempts > this.submitNumber) {
       this.submitNumber++;
+      if (this.submitNumber == this.task.attempts) {
+        this.lastAttemptDialog();
+        //this.submitNumber--;
+      }
     }
+
     if (this.isSubmissionEmpty()) {
       this.snackbar.open(
         "Sie haben keine Lösung für die Aufgabe " +
