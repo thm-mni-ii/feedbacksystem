@@ -2,6 +2,7 @@ flags:
   fbs-core.api:
     paths:
       - modules/fbs-core/api
+      - modules/fbs-core/math-parser
   fbs-runner.checker:
     paths:
       - modules/fbs-runner/checker
