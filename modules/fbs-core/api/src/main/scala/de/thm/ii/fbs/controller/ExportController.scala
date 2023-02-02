@@ -1,12 +1,13 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,8 +32,9 @@ class ExportController {
   @Autowired
   private val taskService: TaskService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
+  val objectMapper = new ScalaObjectMapper
 
-  @GetMapping(value = Array("/tasks/{taskId}/export"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @GetMapping(value = Array("/tasks/{taskId}/export"))
   @ResponseBody
   def exportTask(@PathVariable(value = "taskId", required = true) taskId: Int,
                  @PathVariable(value = "cid", required = true) cid: Int,
@@ -42,7 +44,8 @@ class ExportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val (contentLength, resource) = taskExportService.responseFromTaskId(List(), true, taskId)
+      val task: Task = taskService.getOne(taskId).get
+      val (contentLength, resource) = taskExportService.responseFromTaskId(List(task))
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(contentLength)
@@ -53,7 +56,7 @@ class ExportController {
     }
   }
 
-  @PostMapping(value = Array("/tasks/export"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PostMapping(value = Array("/tasks/export"))
   @ResponseBody
   def exportAllTasksFromList(@PathVariable(value = "cid", required = true) cid: Int, @RequestBody body: JsonNode,
                              req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
@@ -65,15 +68,9 @@ class ExportController {
       body.retrive("taskIds").asObject() match {
         case Some(taskIds) => {
           if (taskIds.isArray) {
-            logger.info(taskIds.toString)
-            var list: List[Task] = List()
-            taskIds.forEach(id => {
-              val t = taskService.getOne(id.asInt()).get
-              list ::= t
-              logger.info(t.toString)
-            })
-            logger.info(list.toString())
-            val (contentLength, resource) = taskExportService.responseFromTaskId(list, false, -1)
+            val tasks: List[Int] = objectMapper.readerForListOf(classOf[Array[Int]]).readValue(taskIds)
+            val list: List[Task] = tasks.map(id => taskService.getOne(id).get)
+            val (contentLength, resource) = taskExportService.responseFromTaskId(list)
 
             ResponseEntity.ok()
               .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -91,7 +88,7 @@ class ExportController {
     }
   }
 
-  @GetMapping(value = Array("/tasks/export/all"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  @GetMapping(value = Array("/tasks/export/all"))
   @ResponseBody
   def exportAllTasksOfCourse(@PathVariable(value = "cid", required = true) cid: Int,
                              req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
@@ -100,7 +97,7 @@ class ExportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val (contentLength, resource) = taskExportService.responseFromTaskId(taskService.getAll(cid), false, -1)
+      val (contentLength, resource) = taskExportService.responseFromTaskId(taskService.getAll(cid))
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(contentLength)

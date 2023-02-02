@@ -1109,7 +1109,6 @@ paths:
   "/courses/{cid}/tasks/{tid}/export":
     get:
       operationId: exportCourseTask
-
       tags:
         - Task
       summary: Get a Tar-Archive of the Task which contains all Checker Configurations of the Task
@@ -1147,8 +1146,7 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/export":
     post:
-      security:
-        - JWT: [ ]
+      operationId: exportTasks
       tags:
         - Task
       summary: Get a Tar-Archive of all the chosen Tasks which contain all Checker Configurations of those Tasks
@@ -1193,8 +1191,7 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/export/all":
     get:
-      security:
-        - JWT: [ ]
+      operationId: exportTasks
       tags:
         - Task
       summary: Get a Tar-Archive of all the Tasks which contain all Checker Configurations of all the Tasks from a specified course

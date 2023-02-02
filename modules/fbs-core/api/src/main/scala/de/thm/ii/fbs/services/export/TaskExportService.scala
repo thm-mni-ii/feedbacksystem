@@ -29,40 +29,10 @@ class TaskExportService {
 
   private val tmpDir: File = new File("/tmp")
 
-  def responseFromTaskId(tasks: List[Task], isOneTask: Boolean, taskId: Int): (Long, InputStreamResource) = {
-    var file: File = null
-    if (isOneTask) {
-      file = exportTask(taskId)
-    } else {
-      file = exportTasks(tasks)
-    }
+  def responseFromTaskId(tasks: List[Task]): (Long, InputStreamResource) = {
+    val file: File = exportTasks(tasks)
     val contentLength = file.length()
     (contentLength, new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
-  }
-
-  def exportTask(taskId: Int): File = {
-    val optionalTask = taskService.getOne(taskId)
-    optionalTask match {
-      case Some(task) =>
-        val files: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
-        val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
-        val export = TaskExport(task, ccs.map(cc => {
-          val main = addCCFileAndGetName(cc, cc.mainFileUploaded, storageService.getFileMainFile, files)
-          val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, files)
-          ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
-          /*val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
-            val secondary = addCCFileAndGetName(cc.id, cc.secondaryFileUploaded, storageService.pathToSecondaryFile, files)
-            ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)*/
-        }))
-        val descrFile = writeToTmpFile(taskId, export)
-        // neues archive für jede task
-        files += Archiver.ArchiveFile(descrFile, Option(f"task_$taskId.json"))
-        val archive = File.createTempFile(s"task_$taskId-", ".fbs-export", tmpDir)
-        Archiver.pack(archive, files.toArray: _*)
-        descrFile.delete()
-        archive
-      case None => throw new ResourceNotFoundException(f"Could not export task with id = $taskId.")
-    }
   }
 
   def exportTasks(tasks: List[Task]): File = {
@@ -80,7 +50,6 @@ class TaskExportService {
             ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
           }))
           val descrFile = writeToTmpFile(task.id, export)
-          // neues archive für jede task
           filesForTask += Archiver.ArchiveFile(descrFile, Option(f"task_$task.id.json"))
 
           descrFile.delete()

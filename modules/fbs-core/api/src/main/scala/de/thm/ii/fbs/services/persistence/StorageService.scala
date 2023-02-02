@@ -317,8 +317,7 @@ class StorageService extends App {
     if (config.isInBlockStorage) {
       getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(config.id))
     } else {
-      val path = pathToMainFile(config.id).get.toString
-      new File(path)
+      pathToMainFile(config.id).get.toFile
     }
   }
 
@@ -332,8 +331,7 @@ class StorageService extends App {
     if (config.isInBlockStorage) {
       getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(config.id))
     } else {
-      val path = pathToSecondaryFile(config.id).get.toString
-      new File(path)
+      pathToSecondaryFile(config.id).get.toFile
     }
   }
 
