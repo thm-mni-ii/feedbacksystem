@@ -31,8 +31,6 @@ ldap:
 logging:
   level:
     root: INFO
-    sql: INFO
-    de.thm: INFO
 message:
   topic:
     name: java
@@ -50,7 +48,7 @@ server:
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}
-    key-store-password: changeit
+    key-store-password: passwd
     key-store-type: PKCS12
 services:
   classroom:
