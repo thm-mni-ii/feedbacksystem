@@ -313,4 +313,31 @@ internal class MathParserHelperTest {
         assertThrows(MathParserException::class.java) { MathParserHelper.parse("") }
     }
 
+    @Test
+    fun parseToDot() {
+        assertEquals("""
+            strict graph {
+            rankdir=BT
+            1 [label=1]
+            2 [label=5]
+            3 [label=ADD]
+            1 -- 3 [label=l]
+            2 -- 3 [label=r]
+            4 [label=3]
+            5 [label=8]
+            6 [label=ADD]
+            4 -- 6 [label=l]
+            5 -- 6 [label=r]
+            7 [label=MUL]
+            3 -- 7 [label=l]
+            6 -- 7 [label=r]
+            8 [label=SUB]
+            7 -- 8
+            9 [label=10]
+            10 [label=DIV]
+            8 -- 10 [label=l]
+            9 -- 10 [label=r]
+            }
+        """.trimIndent(), MathParserHelper.parse("-((1 + 5) * (3 + 8)) / 10").toDot())
+    }
 }
