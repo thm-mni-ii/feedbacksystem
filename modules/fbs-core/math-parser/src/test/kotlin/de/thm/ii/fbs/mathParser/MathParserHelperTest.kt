@@ -325,19 +325,34 @@ internal class MathParserHelperTest {
             2 -- 3 [label=r]
             4 [label=3]
             5 [label=8]
-            6 [label=ADD]
-            4 -- 6 [label=l]
-            5 -- 6 [label=r]
+            6 [label=a]
             7 [label=MUL]
-            3 -- 7 [label=l]
+            5 -- 7 [label=l]
             6 -- 7 [label=r]
-            8 [label=SUB]
-            7 -- 8
-            9 [label=10]
-            10 [label=DIV]
-            8 -- 10 [label=l]
-            9 -- 10 [label=r]
+            8 [label=ADD]
+            4 -- 8 [label=l]
+            7 -- 8 [label=r]
+            9 [label=MUL]
+            3 -- 9 [label=l]
+            8 -- 9 [label=r]
+            10 [label=SUB]
+            9 -- 10
+            11 [label=10]
+            12 [label=DIV]
+            10 -- 12 [label=l]
+            11 -- 12 [label=r]
             }
-        """.trimIndent(), MathParserHelper.parse("-((1 + 5) * (3 + 8)) / 10").toDot())
+        """.trimIndent(), MathParserHelper.parse("-((1 + 5) * (3 + 8a)) / 10").toDot())
+    }
+
+    @Test
+    fun parseLongDecimal() {
+        println(MathParserHelper.parse("1,23456789"))
+        assertEquals(
+            Ast(
+                Num(1.23456789)
+            ),
+            MathParserHelper.parse("1,23456789")
+        )
     }
 }
