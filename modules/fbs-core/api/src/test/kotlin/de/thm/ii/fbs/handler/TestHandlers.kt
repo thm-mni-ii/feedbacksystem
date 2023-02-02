@@ -21,7 +21,7 @@ class TestAfterHandler : Handler<String, Boolean> {
 }
 
 @Handle(When.ONVISIT)
-//@Handle(When.ONERROR)
+@Handle(When.ONERROR)
 class TestOnHandler : Handler<String, Boolean> {
     override fun handle(input: String): Boolean {
         println(input)

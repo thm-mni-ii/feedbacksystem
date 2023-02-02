@@ -35,8 +35,8 @@ class HandlerServiceTest {
 
     @Test
     fun testGetOn() {
-        //assertEquals(listOf(onHandler), service.getHandlers(When.ONERROR))
+        assertEquals(listOf(onHandler), service.getHandlers(When.ONERROR))
         assertEquals(listOf(onHandler), service.getHandlers(When.ONVISIT))
-        //assertEquals(listOf(onHandler), service.getHandlers(When.ONERROR, When.ONVISIT))
+        assertEquals(listOf(onHandler), service.getHandlers(When.ONERROR, When.ONVISIT))
     }
 }
