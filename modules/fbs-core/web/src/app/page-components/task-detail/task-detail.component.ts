@@ -37,6 +37,8 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
+  submitNumber: number = 0;
+  circleBackgroundColor: string;
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -100,6 +102,7 @@ export class TaskDetailComponent implements OnInit {
         }),
         tap((submissions) => {
           this.submissions = submissions;
+          this.submitNumber = submissions.length;
           if (submissions.length !== 0) {
             this.pending = !submissions[submissions.length - 1].done;
             this.lastSubmission = submissions[submissions.length - 1];
@@ -112,6 +115,8 @@ export class TaskDetailComponent implements OnInit {
         },
         (error) => console.error(error)
       );
+
+    this.backgroundColorOfCircle();
   }
 
   private refreshByPolling(force = false) {
@@ -154,6 +159,23 @@ export class TaskDetailComponent implements OnInit {
     }
   }
 
+  backgroundColorOfCircle() {
+    const red = Math.floor(255 * (this.submitNumber / this.task.attempts));
+    const green = Math.floor(
+      255 * (1 - this.submitNumber / this.task.attempts)
+    );
+    this.circleBackgroundColor = `rgb(${red}, ${green}, 0)`;
+  }
+
+  openConfirmDialog(title: string, message: string) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: title,
+        message: message,
+      },
+    });
+    return dialogRef.afterClosed();
+  }
   /**
    * Submission of user solution
    */
@@ -167,8 +189,25 @@ export class TaskDetailComponent implements OnInit {
       );
       return;
     }
-    this.submit();
-    this.submissionService.emitFileSubmission();
+
+    if (this.task.attempts > this.submitNumber || this.task.attempts === 0) {
+      if (this.submitNumber === this.task.attempts - 1) {
+        this.openConfirmDialog(
+          "Achtung!",
+          "Dies wird Ihr letzter Versuch für diese Übung sein. Möchten Sie fortfahren?"
+        ).subscribe((result) => {
+          if (result === true) {
+            this.submit();
+            this.submissionService.emitFileSubmission();
+            this.submitNumber++;
+          }
+        });
+      } else {
+        this.submitNumber++;
+        this.submit();
+        this.submissionService.emitFileSubmission();
+      }
+    }
   }
 
   private submit() {
@@ -286,6 +325,14 @@ export class TaskDetailComponent implements OnInit {
           );
         }
       );
+  }
+
+  maxAttempts(): boolean {
+    if (this.submitNumber == 0) {
+      return false;
+    } else {
+      return this.task.attempts == this.submitNumber;
+    }
   }
 
   /**
