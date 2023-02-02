@@ -4,7 +4,7 @@ import de.thm.ii.fbs.mathParser.ast.*
 
 class CommutativeLawTransformer : BaseTransformer() {
     override fun transformOperation(input: Operation): Expr {
-        if ((input.operator == Operator.ADD || input.operator == Operator.MUL)) {
+        if (input.operator == Operator.ADD || input.operator == Operator.MUL) {
             val normalizedLeft = transformExpresion(input.left)
             val normalizedRight = transformExpresion(input.right)
 

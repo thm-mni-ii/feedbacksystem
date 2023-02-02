@@ -67,5 +67,7 @@ class AstBuilder(val expr: MathParser.ExprContext) {
         }
 
     private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
-
+    init {
+        germanFormat.maximumFractionDigits = germanFormat.maximumIntegerDigits
+    }
 }
