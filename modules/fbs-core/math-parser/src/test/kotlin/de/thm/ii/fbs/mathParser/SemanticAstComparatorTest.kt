@@ -106,4 +106,14 @@ internal class SemanticAstComparatorTest {
             )
         )
     }
+
+    @Test
+    fun multiplicationWithBracketsTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("5*(x-1)"),
+                MathParserHelper.parse("5(x-1)")
+            )
+        )
+    }
 }
