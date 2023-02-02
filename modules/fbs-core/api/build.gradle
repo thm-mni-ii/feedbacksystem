@@ -33,6 +33,7 @@ repositories {
 
 scalastyle {
     config = file(scalaStyleConfig)
+	failOnWarning = true
 }
 
 // customize start scripts
@@ -77,6 +78,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'

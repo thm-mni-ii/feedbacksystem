@@ -67,6 +67,35 @@ export class TaskNewDialogComponent implements OnInit {
   spreadsheet: File = null;
   disableTypeChange = false;
 
+  changedMediaType() {
+    if (
+      this.taskForm.controls["mediaType"].value == "application/x-spreadsheet"
+    ) {
+      this.taskForm.controls["exelFile"].setValidators([Validators.required]);
+      this.taskForm.controls["userIDField"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["inputFields"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["outputFields"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["expCheck"].setValidators([Validators.required]);
+    } else {
+      this.taskForm.controls["exelFile"].clearValidators();
+      this.taskForm.controls["userIDField"].clearValidators();
+      this.taskForm.controls["inputFields"].clearValidators();
+      this.taskForm.controls["outputFields"].clearValidators();
+      this.taskForm.controls["expCheck"].clearValidators();
+    }
+    this.taskForm.controls["exelFile"].updateValueAndValidity();
+    this.taskForm.controls["userIDField"].updateValueAndValidity();
+    this.taskForm.controls["inputFields"].updateValueAndValidity();
+    this.taskForm.controls["outputFields"].updateValueAndValidity();
+    this.taskForm.controls["expCheck"].updateValueAndValidity();
+  }
+
   constructor(
     public dialogRef: MatDialogRef<TaskNewDialogComponent>,
     private courseService: CourseService,

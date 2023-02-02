@@ -10,6 +10,7 @@ import io.minio.messages.DeleteObject
 
 import java.io.{File, IOException}
 import scala.collection.convert.ImplicitConversions.`iterable AsScalaIterable`
+import scala.io.Source
 import scala.jdk.CollectionConverters.IterableHasAsJava
 
 @Component
@@ -65,9 +66,7 @@ class MinioService {
   def getObjectAsString(bucketName: String, objectName: String): String = {
     try {
       val stream = minioClient.getObject(GetObjectArgs.builder().bucket(bucketName).`object`(objectName).build())
-      val content = stream.readAllBytes()
-      val t = content.map(_.toChar)
-      t.mkString
+      Source.fromInputStream(stream).mkString
     } catch {
       case e: Exception => ""
     }
