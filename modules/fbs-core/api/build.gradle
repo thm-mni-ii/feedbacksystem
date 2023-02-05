@@ -47,7 +47,7 @@ dependencies {
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     implementation group: 'io.minio', name: 'minio', version: '8.0.0'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
-    compileOnly 'org.scala-lang:scala-library:2.13.1'
+    compileOnly 'org.scala-lang:scala-library:2.13.10'
     implementation 'mysql:mysql-connector-java:8.0.19'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
