@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [dev, main, v*.x]
+    branches: [ dev, main, v*.x ]
     tags:
       - v**
   pull_request:
@@ -42,13 +42,13 @@ jobs:
   fbs-core-api:
     name: fbs-core.api
     uses: ./.github/workflows/check-fbs-module.yml
-    needs: ["validate-gradle-warpper", "validate-migration"]
+    needs: [ "validate-gradle-warpper", "validate-migration" ]
     with:
       name: fbs-core.api
       lintArguments: :fbs-core.api:scalastyleCheck
-      testArguments: :fbs-core.api:test
-      coverageArguments: :fbs-core.api:jacocoReport
-      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml
+      testArguments: :fbs-core.api:test :fbs-core.math-parser:test
+      coverageArguments: :fbs-core.api:jacocoReport :fbs-core.math-parser:jacocoReport
+      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
       startMysqlService: true
       startMinioService: true
       problemMatcher: java.json
@@ -56,7 +56,7 @@ jobs:
   fbs-core-web:
     name: fbs-core.web
     uses: ./.github/workflows/check-fbs-module.yml
-    needs: ["validate-gradle-warpper"]
+    needs: [ "validate-gradle-warpper" ]
     with:
       name: fbs-core.web
       lintArguments: :fbs-core.web:lint
@@ -66,7 +66,7 @@ jobs:
   fbs-runner-checker:
     name: fbs-runner.checker
     uses: ./.github/workflows/check-fbs-module.yml
-    needs: ["validate-gradle-warpper"]
+    needs: [ "validate-gradle-warpper" ]
     with:
       name: fbs-runner.checker
       lintArguments: :fbs-runner.checker:scalastyleCheck
@@ -85,7 +85,7 @@ jobs:
     name: Build Docker images
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    needs: ["validate-gradle-warpper", "validate-migration"]
+    needs: [ "validate-gradle-warpper", "validate-migration" ]
 
     steps:
       - uses: actions/checkout@v3

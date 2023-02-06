@@ -50,6 +50,7 @@ export class TaskNewDialogComponent implements OnInit {
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
     expCheck: new FormControl<Boolean>(false),
+    attempts: new FormControl<Number>(null),
   });
   isUpdate: boolean;
   courseId: number;
@@ -62,10 +63,40 @@ export class TaskNewDialogComponent implements OnInit {
     name: "",
     mediaInformation: null,
     requirementType: "",
+    attempts: null,
   };
 
   spreadsheet: File = null;
   disableTypeChange = false;
+
+  changedMediaType() {
+    if (
+      this.taskForm.controls["mediaType"].value == "application/x-spreadsheet"
+    ) {
+      this.taskForm.controls["exelFile"].setValidators([Validators.required]);
+      this.taskForm.controls["userIDField"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["inputFields"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["outputFields"].setValidators([
+        Validators.required,
+      ]);
+      this.taskForm.controls["expCheck"].setValidators([Validators.required]);
+    } else {
+      this.taskForm.controls["exelFile"].clearValidators();
+      this.taskForm.controls["userIDField"].clearValidators();
+      this.taskForm.controls["inputFields"].clearValidators();
+      this.taskForm.controls["outputFields"].clearValidators();
+      this.taskForm.controls["expCheck"].clearValidators();
+    }
+    this.taskForm.controls["exelFile"].updateValueAndValidity();
+    this.taskForm.controls["userIDField"].updateValueAndValidity();
+    this.taskForm.controls["inputFields"].updateValueAndValidity();
+    this.taskForm.controls["outputFields"].updateValueAndValidity();
+    this.taskForm.controls["expCheck"].updateValueAndValidity();
+  }
 
   constructor(
     public dialogRef: MatDialogRef<TaskNewDialogComponent>,
@@ -98,6 +129,7 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
+    this.task.attempts = this.taskForm.get("attempts").value;
     if (this.taskForm.get("isPrivate").value === "Studenten") {
       this.task.isPrivate = false;
     } else {
@@ -129,6 +161,7 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["requirementType"].setValue(
       this.task.requirementType
     );
+    this.taskForm.controls["attempts"].setValue(this.task.attempts);
     if (this.task.isPrivate) {
       this.taskForm.controls["isPrivate"].setValue("Tutoren");
     } else {

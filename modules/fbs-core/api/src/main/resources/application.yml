@@ -12,8 +12,22 @@ jwt:
   expiration:
     time: 300
 ldap:
-  basedn: dc=fh-giessen-friedberg,dc=de
-  url: ldaps://ldap.fh-giessen.de
+  enabled: ${LDAP_ENABLED:false}
+  allowLogin: ${LDAP_ALLOW_LOGIN:false}
+  baseDn: ${LDAP_BASE_DN:dc=fh-giessen-friedberg,dc=de}
+  url: ${LDAP_URL:ldaps://ldap.fh-giessen.de}
+  startTls: ${LDAP_START_TLS:false}
+  filter: ${LDAP_FILTER:(uid={user})}
+  timeout: ${LDAP_TIMEOUT:5000}
+  bind:
+    enabled: ${LDAP_BIND_ENABLED:false}
+    dn: ${LDAP_BIND_DN:}
+    password: ${LDAP_BIND_PASSWORD:}
+  attributeNames:
+    uid: ${LDAP_ATTRIBUTE_NAMES_UID:uid}
+    sn: ${LDAP_ATTRIBUTE_NAMES_SN:sn}
+    name: ${LDAP_ATTRIBUTE_NAMES_NAME:givenName}
+    mail: ${LDAP_ATTRIBUTE_NAMES_MAIL:mail}
 logging:
   level:
     root: INFO
@@ -27,7 +41,7 @@ security:
     trustedProxyCount: ${TRUSTED_PROXIES:0}
     interval: ${BRUTEFORCE_INTERVAL:600}
     maxAttempts: ${BRUTEFORCE_ATTEMPTS:10}
-    protectedPaths: "/api/v1/login/ldap,/api/v1/login/local"
+    protectedPaths: "/api/v1/login/ldap,/api/v1/login/local,/api/v1/login/unified"
 server:
   host: ${SERVER_HOST:https://localhost}
   port: 443
@@ -55,7 +69,7 @@ spring:
       max-active: 50
       max-wait: 10000
       test-on-borrow: true
-    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3306}/fbs?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false&allowMultiQueries=true
     username: ${MYSQL_USER:root}
   jpa:
     database: mysql

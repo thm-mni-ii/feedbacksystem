@@ -22,6 +22,7 @@ run {
 
 scalastyle {
     config = file(scalaStyleConfig)
+    failOnWarning = true
 }
 
 dependencies {
@@ -46,9 +47,12 @@ jar {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.8"
+}
+
 task jacocoReport(type: JacocoReport) {
     dependsOn = ['test']
-    additionalSourceDirs.setFrom files('src/main/scala')
     sourceDirectories.setFrom files('src/main/scala')
     classDirectories.setFrom files('build/classes/scala/main')
     executionData.setFrom files('build/jacoco/test.exec')

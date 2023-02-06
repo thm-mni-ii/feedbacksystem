@@ -9,3 +9,12 @@ services:
       MYSQL_DATABASE: fbs
     ports:
       - 127.0.0.1:3306:3306
+  test-minio:
+    image: minio/minio:RELEASE.2022-10-29T06-21-33Z
+    command: server --console-address ":9001" /data
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: SqfyBWhiFGr7FK60cVR2rel
+    ports:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001

@@ -3157,6 +3157,10 @@ components:
           enum:
             - "mandatory"
             - "optional"
+            - "practice"
+        attempts:
+          type: number
+          nullable: true
     SpreadsheetInformationRequest:
       type: object
       properties:

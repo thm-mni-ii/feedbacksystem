@@ -11,5 +11,20 @@
 }
 
 .card .invisible {
+  font-weight: bold;
   color: #cccccc;
+}
+
+.passed {
+  font-weight: bold;
+  color: rgba(100,223,89,255);
+}
+
+.failed {
+  font-weight: bold;
+  color: red;
+}
+
+.all {
+  font-weight: bold; 
 }
