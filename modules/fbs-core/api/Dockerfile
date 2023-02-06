@@ -23,7 +23,7 @@ COPY modules/fbs-core/math-parser /build/modules/fbs-core/math-parser/
 COPY modules/fbs-core/api /build/modules/fbs-core/api/
 RUN gradle fbs-core.web:copyWebToWS fbs-core.api:installDist
 
-FROM eclipse-temurin:18.0.2_9-jre-alpine
+FROM eclipse-temurin:18.0.2.1_1-jre-alpine
 
 RUN apk add --no-cache curl
 
