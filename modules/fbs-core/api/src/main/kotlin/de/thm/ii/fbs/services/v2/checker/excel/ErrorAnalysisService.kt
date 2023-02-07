@@ -13,27 +13,29 @@ import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 
-class PropagatedErrorsService(
+class ErrorAnalysisService(
     private val workbook: XSSFWorkbook,
     private val graph: ReferenceGraph, /* TODO get dependency graph from solution entry in db */
     private val solution: Map<Cell, String>, /* TODO maybe usa a kotlin set with indexing; get solution values from solution entry in db */
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
+    private val errors = HashSet<Cell>()
+    private val perrors = HashSet<Cell>()
+    private val visited = HashSet<Cell>()
+    val result = Result()
 
-    fun findAllPropagatedErrors(outputCells: List<Cell>): Set<Cell> {
-        val errors = HashSet<Cell>()
-        val perrors = HashSet<Cell>()
-        val visited = HashSet<Cell>()
-        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
+    fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
+
+        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, result)) }
         for (outputCell in outputCells) {
-            findPropagatedErrors(outputCell, errors, perrors, visited)
+            findErrors(outputCell)
         }
         handleService?.getHandlers(When.AFTER)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
         return errors
     }
 
-    private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, perrors: MutableSet<Cell>, visited: MutableSet<Cell>) {
+    private fun findErrors(cell: Cell) {
         visited.add(cell)
         handleService?.getHandlers(When.ONVISIT)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
         val workbookCell = getCellFromWorkbook(cell)
@@ -48,7 +50,7 @@ class PropagatedErrorsService(
         val references = graph.successors(cell)
         for (reference in references) {
             if (!visited.contains(reference)) {
-                findPropagatedErrors(reference, errors, perrors, visited)
+                findErrors(reference)
             }
         }
 
