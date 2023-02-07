@@ -3,7 +3,6 @@ package de.thm.ii.fbs.util
 import de.thm.ii.fbs.model.Task
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
 import org.apache.commons.compress.utils.IOUtils
-import org.slf4j.LoggerFactory
 
 import java.io._
 import java.nio.file.Files
@@ -21,14 +20,13 @@ object Archiver {
 
   @throws[IOException]
   def packDir(tid: List[Task], name: File, files: ListBuffer[ListBuffer[ArchiveFile]]): Unit = {
-    var s: Int = 0
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
-    files.foreach(f => {
-      for (archiveFile <- f) {
-        addToArchive(out, archiveFile.file, s"./${tid(s).id}", archiveFile.filename.getOrElse(archiveFile.file.getName))
-      }
-      s+=1
-    })
+    files.zip(tid).foreach { case (f, task) =>
+      f.foreach(archiveFile => {
+        addToArchive(out, archiveFile.file, s"./${task.id}", archiveFile.filename.getOrElse(archiveFile.file.getName))
+        archiveFile.file.delete()
+      })
+    }
     out.close()
   }
 
