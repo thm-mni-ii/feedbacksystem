@@ -4,8 +4,6 @@ on:
   workflow_run:
     workflows: ["CI"]
     branches: [main, dev, "v**"]
-    tags:
-      - v**
     types: [completed]
 
 jobs:
@@ -19,7 +17,7 @@ jobs:
       url: https://hub.docker.com/u/thmmniii
 
     concurrency:
-      group: "docker-hub-deploy"
+      group: "docker-hub-deploy-${{ github.event.workflow_run.head_branch }}"
       cancel-in-progress: true
 
     steps:
@@ -33,4 +31,4 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Deploy Docker images to Dockerhub
-        run: bash ./scripts/ci/docker-deploy.sh ${GITHUB_REF##*/} true
+        run: bash ./scripts/ci/docker-deploy.sh ${{ github.event.workflow_run.head_branch }} true
