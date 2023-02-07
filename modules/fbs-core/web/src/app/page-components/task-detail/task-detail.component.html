@@ -105,9 +105,10 @@
           [content]="latestResult?.extInfo || {}"
         ></app-submission-spreadsheet>
       </div>
+
       <mat-card-actions>
         <button
-          [disabled]="deadlinePassed || isSubmissionEmpty() || maxAttempts()"
+          [disabled]="deadlinePassed || isSubmissionEmpty()"
           mat-flat-button
           color="accent"
           (click)="submission()"
@@ -115,14 +116,6 @@
           Abgeben
         </button>
       </mat-card-actions>
-      <span class="outsideCircle" *ngIf="task?.attempts !== 0">
-        Anzahl der Versuche: {{ task?.attempts }} | Versuch:
-        <span
-          [ngStyle]="{ 'background-color': circleBackgroundColor }"
-          class="circle1"
-          ><p>{{ this.submitNumber }}</p></span
-        >
-      </span>
       <app-results
         *ngIf="submissions"
         [submissions]="submissions"

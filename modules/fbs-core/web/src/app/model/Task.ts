@@ -6,7 +6,6 @@ export interface Task {
   deadline?: string;
   requirementType: string;
   mediaType?: string;
-  attempts?: number | null;
   mediaInformation?:
     | SpreadsheetMediaInformation
     | SpreadsheetResponseMediaInformation;
