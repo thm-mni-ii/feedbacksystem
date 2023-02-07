@@ -25,17 +25,17 @@ class PropagatedErrorsService(
         val errors = HashSet<Cell>()
         val perrors = HashSet<Cell>()
         val visited = HashSet<Cell>()
-        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
+        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
         for (outputCell in outputCells) {
             findPropagatedErrors(outputCell, errors, perrors, visited)
         }
-        handleService?.getHandlers(When.AFTER)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
+        handleService?.getHandlers(When.AFTER)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
         return errors
     }
 
     private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, perrors: MutableSet<Cell>, visited: MutableSet<Cell>) {
-        handleService?.getHandlers(When.ONVISIT)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
         visited.add(cell)
+        handleService?.getHandlers(When.ONVISIT)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
@@ -56,8 +56,8 @@ class PropagatedErrorsService(
         // eval cell again and compare again with solution cell
         evaluator.evaluateInCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
-            handleService?.getHandlers(When.ONERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
             errors.add(cell) // add to original errors set
+            handleService?.getHandlers(When.ONERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
             setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
         } else {
