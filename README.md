@@ -5,9 +5,10 @@
 # Feedbacksystem
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![release](https://img.shields.io/github/v/release/thm-mni-ii/feedbacksystem?display_name=tag&sort=semver)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/feedbacksystem)](https://artifacthub.io/packages/helm/thm-mni-ii/feedbacksystem)
 [![CI](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml/badge.svg)](https://github.com/thm-mni-ii/feedbacksystem/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/thm-mni-ii/feedbacksystem/branch/dev/graph/badge.svg?token=HLGM9MC0F2)](https://codecov.io/gh/thm-mni-ii/feedbacksystem)
-[![code style: Scalastyle](https://img.shields.io/badge/code_style-Scalastyle-c22d40.svg?style=flat)](https://github.com/scalastyle/scalastyle)
 
 </div>
 
