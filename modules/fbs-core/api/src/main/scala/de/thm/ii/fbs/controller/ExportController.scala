@@ -19,7 +19,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import scala.jdk.CollectionConverters.IterableHasAsScala
 
 @RestController
-@GetMapping(path = Array("/api/v1/courses/{cid}"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+@GetMapping(path = Array("/api/v1/courses/{cid}"))
 class ExportController {
   @Autowired
   private val authService: AuthService = null
