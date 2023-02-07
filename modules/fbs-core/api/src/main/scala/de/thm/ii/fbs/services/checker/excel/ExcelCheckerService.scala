@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
-import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -23,30 +24,45 @@ class ExcelCheckerService extends CheckerService {
   @Autowired
   private val spreadsheetFileService: SpreadsheetFileService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Notify about the new submission
-   *
-   * @param taskID       the taskID for the submission
-   * @param submissionID the id of the submission
-   * @param cc           the check runner of the submission
-   * @param fu           the user which triggered the submission
-   */
+    * Notify about the new submission
+    *
+    * @param taskID       the taskID for the submission
+    * @param submissionID the id of the submission
+    * @param cc           the check runner of the submission
+    * @param fu           the user which triggered the submission
+    */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
-      val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc.id)
       val submission = this.submissionService.getOne(submissionID, fu.id).get
-      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission.id)
-      val solutionFile = this.spreadsheetFileService.getSolutionFile(cc.id)
+      val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission)
+      val mainFile = this.spreadsheetFileService.getMainFile(cc)
 
-      val submissionResult = checkSubmission(excelMediaInformation, submissionFile, solutionFile)
+      executeChecker(cc, submission, submissionFile, mainFile)
+    } catch {
+      case e: Throwable =>
+        logger.error("Bei der Überprüfung des Excel-Checkers ist ein Fehler aufgetreten", e)
+        storeError(submissionID, cc, e.getMessage)
+    }
+  }
+
+  private def executeChecker(cc: CheckrunnerConfiguration, submission: Submission, submissionFile: File, mainFile: File): Unit = {
+    try {
+      val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
+      val submissionResult = checkSubmission(excelMediaInformation, submissionFile, mainFile)
       val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
-      submissionService.storeResult(submissionID, cc.id, submissionResult.exitCode, resultText,
+      submissionService.storeResult(submission.id, cc.id, submissionResult.exitCode, resultText,
         objectMapper.writeValueAsString(this.buildExtendedRes(submissionResult.mergedResults, excelMediaInformation))
       )
       this.submitSubTasks(cc.id, submission.id, submissionResult.mergedResults, excelMediaInformation)
     } catch {
-      case e: Throwable => storeError(submissionID, cc, e.getMessage)
+      case e: Throwable =>
+        logger.error("Bei der Überprüfung des Excel-Checkers ist ein Fehler aufgetreten", e)
+        storeError(submission.id, cc, e.getMessage)
+    } finally {
+      this.spreadsheetFileService.cleanup(cc, mainFile, submissionFile)
     }
   }
 

@@ -39,9 +39,14 @@ tags:
     description: Routes used for SQL-Checker quering
   - name: SQL Playground API
     description: API used to interact with the SQL Playground
+security:
+  - JWT: [ ]
+
 paths:
   /login/cas:
     post:
+      security: [ ]
+      operationId: casLogin
       tags:
         - Login
       summary: Login into system via the cas protocol
@@ -57,6 +62,8 @@ paths:
           description: Unauthorized
   /login/ldap:
     post:
+      security: [ ]
+      operationId: ldapLogin
       tags:
         - Login
       summary: Login into system via username and password
@@ -85,6 +92,8 @@ paths:
           description: Unauthorized
   /login/local:
     post:
+      security: [ ]
+      operationId: localLogin
       tags:
         - Login
       summary: Login into system via username and password
@@ -113,8 +122,8 @@ paths:
           description: Unauthorized
   /users:
     get:
-      security:
-        - JWT: [ ]
+      operationId: getUsers
+
       tags:
         - User
       summary: Get user list
@@ -138,8 +147,8 @@ paths:
         "403":
           description: Forbidden
     post:
-      security:
-        - JWT: [ ]
+      operationId: createUser
+
       tags:
         - User
       summary: Create a new user
@@ -169,8 +178,8 @@ paths:
           description: Already Existing
   "/users/{uid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getUser
+
       tags:
         - User
       summary: Find user by ID
@@ -201,8 +210,8 @@ paths:
         "404":
           description: Not found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteUser
+
       tags:
         - User
       summary: Delete user by ID
@@ -228,8 +237,8 @@ paths:
           description: Forbidden
   "/users/{uid}/passwd":
     put:
-      security:
-        - JWT: [ ]
+      operationId: changeUserPassword
+
       tags:
         - User
       summary: Change password of a local user
@@ -274,8 +283,8 @@ paths:
           description: Not found
   "/users/{uid}/global-role":
     put:
-      security:
-        - JWT: [ ]
+      operationId: getUserGlobalRole
+
       tags:
         - User
       summary: Change global role of a user
@@ -317,8 +326,8 @@ paths:
           description: Not found
   "/users/{uid}/courses":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getUserCourses
+
       tags:
         - Course Registration
       summary: Get all registered courses
@@ -352,8 +361,8 @@ paths:
           description: Not found
   "/courses/{cid}/participants":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseParticipants
+
       tags:
         - Course Registration
       summary: Get all participants of a course
@@ -387,8 +396,8 @@ paths:
           description: Not found
   "/users/{uid}/courses/{cid}":
     put:
-      security:
-        - JWT: [ ]
+      operationId: registerCourseUser
+
       tags:
         - Course Registration
       summary: Register a user into a course
@@ -431,8 +440,8 @@ paths:
         "404":
           description: Not found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deRegisterCourseUser
+
       tags:
         - Course Registration
       summary: De-register a user from a course
@@ -463,8 +472,8 @@ paths:
           description: Forbidden
   "/courses/{cid}/deregisterrole":
     put:
-      security:
-        - JWT: [ ]
+      operationId: deregisterAllCourseUsersWithRole
+
       tags:
         - Course Registration
       summary: Deregister all users with a specific role
@@ -501,9 +510,9 @@ paths:
         "404":
           description: Not found
   "/courses/{cid}/deregisterall":
-    get:
-      security:
-        - JWT: [ ]
+    put:
+      operationId: deregisterAllCourseUsersExceptCurrent
+
       tags:
         - Course Registration
       summary: Deregister all users except the current user from the course
@@ -530,8 +539,8 @@ paths:
           description: Not found
   /courses:
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourses
+
       tags:
         - Course
       summary: Get a list of all courses
@@ -561,8 +570,8 @@ paths:
         "403":
           description: Forbidden
     post:
-      security:
-        - JWT: [ ]
+      operationId: createCourse
+
       tags:
         - Course
       summary: Create a new course
@@ -596,8 +605,8 @@ paths:
           description: Forbidden
   "/courses/{cid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourse
+
       tags:
         - Course
       summary: Get a course
@@ -627,8 +636,8 @@ paths:
         "404":
           description: Not found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourse
+
       tags:
         - Course
       summary: Update course
@@ -664,8 +673,8 @@ paths:
         "404":
           description: Not found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteCourse
+
       tags:
         - Course
       summary: Delete course by ID
@@ -691,8 +700,8 @@ paths:
           description: Forbidden
   /semester:
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSemesters
+
       tags:
         - Semester
       summary: Get a list of all Semester-contents
@@ -722,8 +731,8 @@ paths:
         "403":
           description: Forbidden
     post:
-      security:
-        - JWT: [ ]
+      operationId: createSemester
+
       tags:
         - Semester
       summary: Create a new Semester
@@ -757,8 +766,8 @@ paths:
           description: Forbidden
   "/semester/{sid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSemester
+
       tags:
         - Semester
       summary: Get a semester
@@ -788,8 +797,8 @@ paths:
         "404":
           description: Not found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateSemester
+
       tags:
         - Semester
       summary: Update Semester
@@ -825,8 +834,8 @@ paths:
         "404":
           description: Not found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteSemester
+
       tags:
         - Semester
       summary: Delete Semester by ID
@@ -852,8 +861,8 @@ paths:
           description: Forbidden
   "/courses/{cid}/tasks":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTasks
+
       tags:
         - Task
       summary: Get all tasks of a course
@@ -885,8 +894,8 @@ paths:
         "404":
           description: Not found
     post:
-      security:
-        - JWT: [ ]
+      operationId: createCourseTask
+
       tags:
         - Task
       summary: Create a new task for this course
@@ -919,8 +928,8 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/results":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTasksResults
+
       tags:
         - Task
       summary: Get all the result for the tasks
@@ -953,8 +962,8 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/{tid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTask
+
       tags:
         - Task
       summary: Get a task by id
@@ -990,8 +999,8 @@ paths:
         "404":
           description: Not found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourseTask
+
       tags:
         - Task
       summary: Update an existing task for this course
@@ -1029,8 +1038,8 @@ paths:
         "404":
           description: Not found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteCourseTask
+
       tags:
         - Task
       summary: Delete a task by id
@@ -1061,8 +1070,8 @@ paths:
           description: Forbidden
   "/courses/{cid}/tasks/{tid}/result":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskResult
+
       tags:
         - Task
       summary: Gets the task result by id
@@ -1099,8 +1108,7 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/{tid}/export":
     get:
-      security:
-        - JWT: [ ]
+      operationId: exportCourseTask
       tags:
         - Task
       summary: Get a Tar-Archive of the Task which contains all Checker Configurations of the Task
@@ -1136,10 +1144,87 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+  "/courses/{cid}/tasks/export":
+    post:
+      operationId: exportTasks
+      tags:
+        - Task
+      summary: Get a Tar-Archive of all the chosen Tasks which contain all Checker Configurations of those Tasks
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - taskIds
+              properties:
+                taskIds:
+                  type: array
+                  items:
+                    type: integer
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks/export/all":
+    get:
+      operationId: exportAllTasks
+      tags:
+        - Task
+      summary: Get a Tar-Archive of all the Tasks which contain all Checker Configurations of all the Tasks from a specified course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   "/courses/evaluation/formula/validate":
     post:
-      security:
-        - JWT: [ ]
+      operationId: validateCourseEvaluationFormula
+
       tags:
         - Course evaluation
       summary: Validate a evaluation formula
@@ -1191,8 +1276,8 @@ paths:
           description: Not Found
   "/courses/{cid}/evaluation/container":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseEvaluationContainers
+
       tags:
         - Course evaluation
       summary: Get all Course evaluation Containers
@@ -1216,7 +1301,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EvaluationContainer'
+                  $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1224,8 +1309,8 @@ paths:
         "404":
           description: Not Found
     post:
-      security:
-        - JWT: [ ]
+      operationId: createCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Create a Course evaluation Container
@@ -1240,7 +1325,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddEvaluationContainer'
+              $ref: "#/components/schemas/AddEvaluationContainer"
       responses:
         "200":
           description: OK
@@ -1252,7 +1337,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1262,8 +1347,8 @@ paths:
 
   "/courses/{cid}/evaluation/container/{ctid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Get a Course evaluation Container
@@ -1291,7 +1376,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1299,8 +1384,8 @@ paths:
         "404":
           description: Not Found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Update a Course evaluation Container
@@ -1322,7 +1407,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddEvaluationContainer'
+              $ref: "#/components/schemas/AddEvaluationContainer"
       responses:
         "200":
           description: OK
@@ -1334,7 +1419,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1342,8 +1427,8 @@ paths:
         "404":
           description: Not Found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Delete a Course evaluation Container
@@ -1371,7 +1456,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1380,8 +1465,8 @@ paths:
           description: Not Found
   "/courses/{cid}/evaluation/container/{ctid}/task/{tid}":
     post:
-      security:
-        - JWT: [ ]
+      operationId: addTaskToCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Add a Task to an Course evaluation Container
@@ -1415,7 +1500,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1423,8 +1508,8 @@ paths:
         "404":
           description: Not Found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteTaskFromCourseEvaluationContainer
+
       tags:
         - Course evaluation
       summary: Delate a Task from an Course evaluation Container
@@ -1458,7 +1543,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationContainer'
+                $ref: "#/components/schemas/EvaluationContainer"
         "401":
           description: Unauthorized
         "403":
@@ -1468,8 +1553,8 @@ paths:
 
   "/courses/{cid}/results":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseResults
+
       tags:
         - Course Results
       summary: Get the Results for a Course
@@ -1491,7 +1576,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/CourseResult'
+                $ref: "#/components/schemas/CourseResult"
         "401":
           description: Unauthorized
         "403":
@@ -1501,8 +1586,8 @@ paths:
 
   "/courses/{cid}/evaluation/results":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseEvaluationResults
+
       tags:
         - Course Results
       summary: Get the Evaluation Results for a Course
@@ -1524,7 +1609,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/EvaluationResults'
+                $ref: "#/components/schemas/EvaluationResults"
         "401":
           description: Unauthorized
         "403":
@@ -1534,8 +1619,8 @@ paths:
 
   "/courses/{cid}/statistics/subtasks":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseSubtaskStatistic
+
       tags:
         - Course Statistics
       summary: Get the Subtask statistic for a course
@@ -1557,7 +1642,7 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/SubTaskStatistics'
+                $ref: "#/components/schemas/SubTaskStatistics"
         "401":
           description: Unauthorized
         "403":
@@ -1566,8 +1651,8 @@ paths:
           description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskSubmissions
+
       tags:
         - Submission
       summary: Get all submissions for a task
@@ -1616,8 +1701,8 @@ paths:
         "404":
           description: Not Found
     post:
-      security:
-        - JWT: [ ]
+      operationId: submitCourseTaskSolution
+
       tags:
         - Submission
       summary: Submit a solution for a task
@@ -1667,8 +1752,8 @@ paths:
           description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskSubmissionSubresults
+
       tags:
         - Submission
       summary: Get all subresults for a submission
@@ -1719,8 +1804,8 @@ paths:
           description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}":
     put:
-      security:
-        - JWT: [ ]
+      operationId: restartCourseTaskSubmission
+
       tags:
         - Submission
       summary: Restart the submission process
@@ -1764,8 +1849,8 @@ paths:
         "404":
           description: Not Found
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskSubmission
+
       tags:
         - Submission
       summary: Get the current submission state
@@ -1814,6 +1899,7 @@ paths:
           description: Not Found
   "/submissions/{submissionID}":
     get:
+      operationId: getCourseTaskSubmissionContent
       tags:
         - Submission
       summary: Get the content of a submission
@@ -1851,8 +1937,8 @@ paths:
           description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskCheckerConfigurations
+
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -1890,8 +1976,8 @@ paths:
         "404":
           description: Not Found
     post:
-      security:
-        - JWT: [ ]
+      operationId: createCourseTaskCheckerConfigurations
+
       tags:
         - Checker Configuration
       summary: Create a new checker configuration
@@ -1936,8 +2022,8 @@ paths:
           description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}":
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourseTaskCheckerConfigurations
+
       tags:
         - Checker Configuration
       summary: Update an existing checker configuration
@@ -1964,7 +2050,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CheckerConfig'
+              $ref: "#/components/schemas/CheckerConfig"
       responses:
         "200":
           description: OK
@@ -1982,8 +2068,8 @@ paths:
         "404":
           description: Not Found
     delete:
-      security:
-        - JWT: [ ]
+      operationId: deleteCourseTaskCheckerConfigurations
+
       tags:
         - Checker Configuration
       summary: Delete an existing checker configuration
@@ -2024,8 +2110,8 @@ paths:
           description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskCheckerConfigurationsMainFile
+
       tags:
         - Checker Configuration
       summary: Get a the main file of the configuration
@@ -2072,8 +2158,8 @@ paths:
         "404":
           description: Not Found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourseTaskCheckerConfigurationsMainFile
+
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2120,8 +2206,8 @@ paths:
           description: Not Found
   "/courses/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getCourseTaskCheckerConfigurationsSecondaryFile
+
       tags:
         - Checker Configuration
       summary: Get a list of configured checkers
@@ -2168,8 +2254,8 @@ paths:
         "404":
           description: Not Found
     put:
-      security:
-        - JWT: [ ]
+      operationId: updateCourseTaskCheckerConfigurationsSecondaryFile
+
       tags:
         - Checker Configuration
       summary: Update / upload a new file
@@ -2216,6 +2302,7 @@ paths:
           description: Not Found
   /legal/impressum:
     get:
+      operationId: getImpressum
       tags:
         - Legal
       summary: Returns the imprint
@@ -2227,8 +2314,13 @@ paths:
               schema:
                 type: string
                 format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   /legal/privacy-text:
     get:
+      operationId: getPrivacyText
       tags:
         - Legal
       summary: Returns the information how user data is treated in the system
@@ -2240,8 +2332,13 @@ paths:
               schema:
                 type: string
                 format: binary
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/legal/termsofuse/{uid}":
     get:
+      operationId: getTermsOfUse
       tags:
         - Legal
       summary: Get the information if a user accepted the terms of usage
@@ -2272,6 +2369,7 @@ paths:
         "404":
           description: Not Found
     put:
+      operationId: acceptTermsOfUse
       tags:
         - Legal
       summary: Accept the terms of usage
@@ -2295,6 +2393,7 @@ paths:
           description: Not Found
   "/results/{sid}/{cid}":
     put:
+      operationId: storeCheckerResults
       tags:
         - Result
       summary: Incomming checker results
@@ -2324,8 +2423,8 @@ paths:
           description: Not Found
   "/analysis/courses/{cid}/results/{tid}":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getAnonymisedCourseTaskResults
+
       tags:
         - Analysis
       summary: Get anonymised results of a course from an task
@@ -2353,21 +2452,21 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/AnalysisCourseResult'
+                $ref: "#/components/schemas/AnalysisCourseResult"
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
   "/sqlChecker/{tid}/queries/sumUpCorrect":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSqlCheckerQueriesSumUpCorrect
+
       tags:
         - SQL Checker
       summary: Add up correct in false for give conditon
       parameters:
         - name: tid
-          in: query
+          in: path
           description: Task id
           required: true
           schema:
@@ -2377,7 +2476,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: [ 'tables', 'attributes' ]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -2401,14 +2500,14 @@ paths:
           description: Forbidden
   "/sqlChecker/{tid}/queries/sumUpCorrectCombined":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSqlCheckerQueriesSumUpCorrectCombined
+
       tags:
         - SQL Checker
       summary: Add up correct in false for give conditon
       parameters:
         - name: tid
-          in: query
+          in: path
           description: Task id
           required: true
           schema:
@@ -2418,7 +2517,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: [ 'tables', 'attributes' ]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -2442,14 +2541,14 @@ paths:
           description: Forbidden
   "/sqlChecker/{tid}/queries/listByType":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSqlCheckerQueriesListByType
+
       tags:
         - SQL Checker
       summary: Add up correct in false for give conditon
       parameters:
         - name: tid
-          in: query
+          in: path
           description: Task id
           required: true
           schema:
@@ -2459,7 +2558,7 @@ paths:
           description: what queries to return
           schema:
             type: string
-            enum: [ 'tables', 'attributes' ]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -2473,21 +2572,21 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SQLCheckerQuery'
+                  $ref: "#/components/schemas/SQLCheckerQuery"
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
   "/sqlChecker/{tid}/queries/listByTypes":
     get:
-      security:
-        - JWT: [ ]
+      operationId: getSqlCheckerQueriesListByTypes
+
       tags:
         - SQL Checker
       summary: Add up correct in false for give conditon
       parameters:
         - name: tid
-          in: query
+          in: path
           description: Task id
           required: true
           schema:
@@ -2515,15 +2614,17 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/SQLCheckerQuery'
+                  $ref: "#/components/schemas/SQLCheckerQuery"
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
   "/api/v2/playground/{uid}/databases":
     get:
+      operationId: getPlaygroundDatabases
       tags:
         - SQL Playground API
+      summary: Get all playground databases for a given user
       parameters:
         - name: uid
           in: path
@@ -2531,7 +2632,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: index
       responses:
         "200":
           description: OK
@@ -2541,10 +2641,15 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Database"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
     post:
       tags:
         - SQL Playground API
-      operationId: create
+      operationId: createPlaygroundDatabase
+      summary: Create a new playground databases for a given user
       parameters:
         - name: uid
           in: path
@@ -2565,11 +2670,16 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/Database"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/results":
-    post:
+    get:
       tags:
         - SQL Playground API
-      operationId: results
+      operationId: getPlaygroundDatabaseResults
+      summary: Get playground database results for a given user
       parameters:
         - name: uid
           in: path
@@ -2592,11 +2702,16 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/results/{rId}":
-    post:
+    get:
       tags:
         - SQL Playground API
-      operationId: result
+      operationId: getPlaygroundDatabaseResult
+      summary: Get playground database result for a given user and result
       parameters:
         - name: uid
           in: path
@@ -2623,8 +2738,14 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/SQLResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/reset":
     post:
+      operationId: resetPlaygroundDatabase
+      summary: Rest playground database for a given user and database
       tags:
         - SQL Playground API
       parameters:
@@ -2640,15 +2761,19 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: reset
       responses:
         "200":
           description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/execute":
     post:
       tags:
         - SQL Playground API
-      operationId: execute
+      operationId: executePlaygroundDatabaseStatement
+      summary: Execute a statment on the given Playground Database
       parameters:
         - name: uid
           in: path
@@ -2675,8 +2800,14 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/SQLExecuteResponse"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}":
     get:
+      operationId: getPlaygroundDatabase
+      summary: Get the given Playground database
       tags:
         - SQL Playground API
       parameters:
@@ -2692,7 +2823,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: get
       responses:
         "200":
           description: OK
@@ -2700,10 +2830,15 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/Database"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
     delete:
       tags:
         - SQL Playground API
-      operationId: delete
+      operationId: deletePlaygroudDatabase
+      summary: Delete the given Playground database
       parameters:
         - name: uid
           in: path
@@ -2724,8 +2859,14 @@ paths:
             "*/*":
               schema:
                 $ref: "#/components/schemas/Database"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/tables":
     get:
+      operationId: getPlaygroundDatabaseTables
+      summary: Get all Tabels from the given Playground Database
       tags:
         - SQL Playground API
       parameters:
@@ -2741,7 +2882,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: tables
       responses:
         "200":
           description: OK
@@ -2751,8 +2891,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLTable"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/views":
     get:
+      operationId: getPlaygroundDatabaseViews
+      summary: Get all Views from the given Playground Database
       tags:
         - SQL Playground API
       parameters:
@@ -2768,7 +2914,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: tableViews
       responses:
         "200":
           description: OK
@@ -2778,8 +2923,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLView"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/triggers":
     get:
+      operationId: getPlaygroundDatabaseTriggers
+      summary: Get all Triggers from the given Playground Database
       tags:
         - SQL Playground API
       parameters:
@@ -2795,7 +2946,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: tableTriggers
       responses:
         "200":
           description: OK
@@ -2805,8 +2955,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLTrigger"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/routines":
     get:
+      operationId: getPlaygroundDatabaseRoutines
+      summary: Get all Routines from the given Playground Database
       tags:
         - SQL Playground API
       parameters:
@@ -2822,7 +2978,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: tableRoutines
       responses:
         "200":
           description: OK
@@ -2832,8 +2987,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLRoutine"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/constraints":
     get:
+      operationId: getPlaygroundDatabaseConstraints
+      summary: Get all Constraints from the given Playground Database
       tags:
         - SQL Playground API
       parameters:
@@ -2849,7 +3010,6 @@ paths:
           required: true
           schema:
             type: integer
-      operationId: tableConstrains
       responses:
         "200":
           description: OK
@@ -2859,11 +3019,16 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/SQLTableConstraints"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   "/api/v2/playground/{uid}/databases/{dbId}/activate":
     post:
       tags:
         - SQL Playground API
-      operationId: activate
+      operationId: activatePlaygroundDatabase
+      summary: Activate the given Playground Database
       parameters:
         - name: uid
           in: path
@@ -2880,20 +3045,14 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
 servers:
   - url: https://feedback.mni.thm.de/api/v1
 components:
   requestBodies:
-    postCourses_cid_tasks_tid_checkerConfigurations:
-      content:
-        multipart/form-data:
-          schema:
-            type: object
-            properties:
-              upfile:
-                description: The file to upload.
-                type: string
-                format: binary
     Task:
       content:
         application/json:
@@ -2989,8 +3148,8 @@ components:
         mediaInformation:
           description: Media type spezific Information
           oneOf:
-            - $ref: '#/components/schemas/SpreadsheetInformationRequest'
-            - $ref: '#/components/schemas/SpreadsheetInformationResponse'
+            - $ref: "#/components/schemas/SpreadsheetInformationRequest"
+            - $ref: "#/components/schemas/SpreadsheetInformationResponse"
         requirementType:
           type: string
           description: The type of requirment like "mandatory", "bonus/additional", etc.
@@ -2998,6 +3157,10 @@ components:
           enum:
             - "mandatory"
             - "optional"
+            - "practice"
+        attempts:
+          type: number
+          nullable: true
     SpreadsheetInformationRequest:
       type: object
       properties:
@@ -3044,7 +3207,7 @@ components:
           type: array
           description: The check results of each configured checker, may be empty
           items:
-            $ref: '#/components/schemas/CheckResult'
+            $ref: "#/components/schemas/CheckResult"
     CheckResult:
       type: object
       required:
@@ -3097,28 +3260,6 @@ components:
         role:
           type: string
           description: Users course role name. Either DOCENT, TUTOR, or STUDENT.
-    JWTToken:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: The users id
-        username:
-          type: string
-          description: The users username
-        globalRole:
-          type: string
-          description: The users global role id
-        courseRoles:
-          type: object
-          description: "Associative array: course id -> role id (Either, DOCENT, TUTOR, or STUDENT)"
-          properties:
-            key:
-              type: integer
-              description: The course id
-            value:
-              type: integer
-              description: "The course role "
     AddEvaluationContainer:
       type: object
       required:
@@ -3248,7 +3389,7 @@ components:
             $ref: "#/components/schemas/EvaluationContainerResult"
     EvaluationContainerResult:
       allOf:
-        - $ref: '#/components/schemas/EvaluationContainer'
+        - $ref: "#/components/schemas/EvaluationContainer"
         - type: object
           required:
             - id

@@ -18,4 +18,5 @@ case class CheckrunnerConfiguration(@JsonProperty checkerType: String,
                                     @JsonIgnore id: Int = 0,
                                     @JsonIgnore taskId: Int = 0,
                                     @JsonProperty checkerTypeInformation: Option[CheckerTypeInformation] = None,
-                                   )
+                                    @JsonProperty isInBlockStorage: Boolean = false
+)
