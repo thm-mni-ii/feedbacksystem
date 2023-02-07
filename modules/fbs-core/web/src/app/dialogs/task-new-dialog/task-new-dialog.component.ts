@@ -50,7 +50,6 @@ export class TaskNewDialogComponent implements OnInit {
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
     expCheck: new FormControl<Boolean>(false),
-    attempts: new FormControl<Number>(null),
   });
   isUpdate: boolean;
   courseId: number;
@@ -63,7 +62,6 @@ export class TaskNewDialogComponent implements OnInit {
     name: "",
     mediaInformation: null,
     requirementType: "",
-    attempts: null,
   };
 
   spreadsheet: File = null;
@@ -129,7 +127,6 @@ export class TaskNewDialogComponent implements OnInit {
   getValues() {
     this.task.name = this.taskForm.get("name").value;
     this.task.description = this.taskForm.get("description").value;
-    this.task.attempts = this.taskForm.get("attempts").value;
     if (this.taskForm.get("isPrivate").value === "Studenten") {
       this.task.isPrivate = false;
     } else {
@@ -161,7 +158,6 @@ export class TaskNewDialogComponent implements OnInit {
     this.taskForm.controls["requirementType"].setValue(
       this.task.requirementType
     );
-    this.taskForm.controls["attempts"].setValue(this.task.attempts);
     if (this.task.isPrivate) {
       this.taskForm.controls["isPrivate"].setValue("Tutoren");
     } else {

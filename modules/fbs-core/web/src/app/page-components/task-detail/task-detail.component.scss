@@ -112,23 +112,3 @@ mat-radio-button {
 .spacer {
   flex: 1 1 auto;
 }
-
-.outsideCircle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.circle1 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  //background-color: rgb(255, 255, 255);
-  height: 20px;
-  width: 20px;
-  font-size: 13px;
-  color: white;
-  margin-left: 5px;
-  padding: 2px;
-}
