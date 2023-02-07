@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
 import de.thm.ii.fbs.services.`export`.TaskExportService
@@ -8,17 +8,15 @@ import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskServic
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import de.thm.ii.fbs.util.ScalaObjectMapper
-import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.{MediaType, ResponseEntity}
-import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, RequestBody, RequestParam, ResponseBody, RestController}
-import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.bind.annotation._
 
-import java.io.{ByteArrayInputStream, File, InputStream, SequenceInputStream}
-import java.nio.charset.{Charset, StandardCharsets}
+import java.util
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.jdk.CollectionConverters.IterableHasAsScala
 
 @RestController
 @GetMapping(path = Array("/api/v1/courses/{cid}"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -66,9 +64,9 @@ class ExportController {
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       body.retrive("taskIds").asObject() match {
-        case Some(taskIds) => {
+        case Some(taskIds) =>
           if (taskIds.isArray) {
-            val tasks: List[Int] = objectMapper.readerForListOf(classOf[Array[Int]]).readValue(taskIds)
+            val tasks: List[Int] = objectMapper.readerForListOf(classOf[Int]).readValue[util.ArrayList[Int]](taskIds).asScala.toList
             val list: List[Task] = tasks.map(id => taskService.getOne(id).get)
             val (contentLength, resource) = taskExportService.responseFromTaskId(list)
 
@@ -80,7 +78,6 @@ class ExportController {
           } else {
             throw new BadRequestException("No task ids provided")
           }
-        }
         case _ => throw new BadRequestException("No tasks selected")
       }
     } else {
