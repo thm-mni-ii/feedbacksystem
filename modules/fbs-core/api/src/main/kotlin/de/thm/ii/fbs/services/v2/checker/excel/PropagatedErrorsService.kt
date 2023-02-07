@@ -62,6 +62,7 @@ class PropagatedErrorsService(
             evaluator.notifyUpdateCell(workbookCell)
         } else {
             perrors.add(cell)
+            handleService?.getHandlers(When.ONPERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
         }
     }
 
