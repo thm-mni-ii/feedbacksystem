@@ -87,6 +87,9 @@ npm run start
 
 ### Production
 
+> **Note**  
+> See [here](https://artifacthub.io/packages/helm/thm-mni-ii/feedbacksystem) for more information and an overview of the configuration variables.
+
 #### Requirements
 
 * A Kubernetes Cluster
@@ -97,9 +100,9 @@ npm run start
 #### Steps
 
 1. Ensure the requirements are met
-3. Generate values 
+3. Generate values (See [here](https://artifacthub.io/packages/helm/thm-mni-ii/feedbacksystem#script) for details)
 ```
-deno run --reload=https://raw.githubusercontent.com https://raw.githubusercontent.com/thm-mni-ii/helm-charts/main/charts/feedbacksystem/generate-values.ts --allow-write=vals.yaml vals.yaml
+deno run --reload=https://raw.githubusercontent.com --allow-write=vals.yaml https://raw.githubusercontent.com/thm-mni-ii/helm-charts/main/charts/feedbacksystem/generate-values.ts vals.yaml
 ```
 4. Add the helm repository 
 ```
