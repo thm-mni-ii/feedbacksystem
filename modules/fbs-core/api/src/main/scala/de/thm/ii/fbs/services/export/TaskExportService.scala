@@ -32,12 +32,12 @@ class TaskExportService {
       case Some(task) =>
         val files: ListBuffer[Archiver.ArchiveFile] = ListBuffer()
         val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
-        val export = TaskExport(task, ccs.map(cc => {
+        val `export` = TaskExport(task, ccs.map(cc => {
           val main = addCCFileAndGetName(cc.id, cc.mainFileUploaded, storageService.pathToMainFile, files)
           val secondary = addCCFileAndGetName(cc.id, cc.secondaryFileUploaded, storageService.pathToSecondaryFile, files)
           ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
         }))
-        val descrFile = writeToTmpFile(taskId, export)
+        val descrFile = writeToTmpFile(taskId, `export`)
         files += Archiver.ArchiveFile(descrFile, Option(f"task_$taskId.json"))
         val archive = File.createTempFile(s"task_$taskId-", ".fbs-export", tmpDir)
         Archiver.pack(archive, files.toArray: _*)
