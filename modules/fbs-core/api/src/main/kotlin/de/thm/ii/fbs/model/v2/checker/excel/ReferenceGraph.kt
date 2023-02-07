@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model.v2.checker.excel
 
 import org.jgrapht.Graph
+import org.jgrapht.Graphs
 import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
 
@@ -20,5 +21,21 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
                 }
             }
         }
+    }
+
+    fun isInput(cell: Cell): Boolean {
+        return !Graphs.vertexHasSuccessors(data, cell)
+    }
+
+    fun isOutput(cell: Cell): Boolean {
+        return !Graphs.vertexHasPredecessors(data, cell)
+    }
+
+    fun successors(cell: Cell): List<Cell> {
+        return Graphs.successorListOf(data, cell)
+    }
+
+    fun predecessors(cell: Cell): List<Cell> {
+        return Graphs.predecessorListOf(data, cell)
     }
 }

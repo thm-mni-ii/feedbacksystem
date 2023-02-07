@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "2.6.6"
+    id "org.springframework.boot" version "2.7.8"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.4.1"
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
@@ -33,9 +33,8 @@ repositories {
 
 scalastyle {
     config = file(scalaStyleConfig)
+    failOnWarning = true
 }
-
-test.dependsOn scalastyleCheck
 
 // customize start scripts
 startScripts {
@@ -45,33 +44,21 @@ startScripts {
 
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
-    // https://mvnrepository.com/artifact/org.json4s/json4s-jackson
-    implementation group: 'org.json4s', name: 'json4s-jackson_2.13', version: '3.6.7'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     implementation group: 'io.minio', name: 'minio', version: '8.0.0'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
-    compileOnly 'org.scala-lang:scala-library:2.13.1'
-    implementation 'mysql:mysql-connector-java:8.0.19'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    implementation "com.sun.xml.bind:jaxb-core:3.0.1"
-    implementation "com.sun.xml.bind:jaxb-impl:2.3.2"
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
-    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.11.3'
+    compileOnly 'org.scala-lang:scala-library:2.13.10'
+    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
+    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
     implementation('org.json:json:20210307')
-    implementation 'org.apache.poi:poi:5.0.0'
-    implementation 'org.apache.poi:poi-ooxml:5.0.0'
-    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
-    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
-    //compile group: 'org.springframework.security', name: 'spring-security-core', version: '5.2.1.RELEASE'
-    //compile group: 'org.springframework.security', name: 'spring-security-jwt', version: '1.1.0.RELEASE'
-    //compile "org.springframework.boot:spring-boot-starter-security:$springVersion"
-    implementation group: 'org.ldaptive', name: 'ldaptive', version: '1.2.4'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
-    implementation group: 'au.com.bytecode', name: 'opencsv', version: '2.4'
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
-    implementation 'com.udojava:EvalEx:2.5'
+    implementation 'com.udojava:EvalEx:2.7'
     implementation 'org.mongodb:bson:4.5.0'
     implementation 'org.mongodb:mongodb-driver-core:4.5.0'
     implementation 'org.mongodb:mongodb-driver-sync:4.5.0'
@@ -79,11 +66,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-    testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '3.10.8'
-    testImplementation group: 'org.mock-server', name: 'mockserver-client-java', version: '3.10.8'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.22'
     implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+tasks.register('jacocoReport', JacocoReport) {
+    dependsOn = ['test']
+    sourceDirectories.setFrom files('src/main/scala', 'src/main/kotlin')
+    classDirectories.setFrom files('build/classes/scala/main', 'build/classes/kotlin/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
 }
