@@ -42,12 +42,12 @@ class TaskExportService {
       optionalTask match {
         case Some(task) =>
           val ccs = checkerConfigurationService.getAll(task.courseID, task.id)
-          val export = TaskExport(task, ccs.map(cc => {
+          val `export` = TaskExport(task, ccs.map(cc => {
             val main = addCCFileAndGetName(cc, cc.mainFileUploaded, storageService.getFileMainFile, storageFileName.MAIN_FILE, filesForTask)
             val secondary = addCCFileAndGetName(cc, cc.secondaryFileUploaded, storageService.getFileScondaryFile, storageFileName.SECONDARY_FILE, filesForTask)
             ConfigExport(cc, checkrunnerSubTaskService.getAll(cc.id), main, secondary)
           }))
-          val descrFile = writeToTmpFile(task.id, export)
+          val descrFile = writeToTmpFile(task.id, `export`)
           filesForTask += Archiver.ArchiveFile(descrFile, Option(f"task_config.json"))
         case None => throw new ResourceNotFoundException(f"Could not export task with id = $task.id.")
       }

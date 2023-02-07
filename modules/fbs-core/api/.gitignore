@@ -1,2 +1,3 @@
 src/main/resources/static/*
 upload-dir/*
+src/main/resources/application.override.yml

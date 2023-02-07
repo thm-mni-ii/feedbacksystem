@@ -48,7 +48,7 @@
     <mat-slide-toggle
       value="datePickerDisabled"
       formControlName="expCheck"
-      class="col pad"
+      class="noDeadline"
       (change)="setMaxExpirationDate($event)"
     >
       Ohne Deadline
@@ -86,18 +86,6 @@
         <mat-option value="Studenten">Studenten</mat-option>
         <mat-option value="Tutoren">Tutoren</mat-option>
       </mat-select>
-    </mat-form-field>
-
-    <!-- Task Attempt -->
-    <mat-form-field class="col pad">
-      <mat-label>Anzahl der Versuche</mat-label>
-      <input
-        matInput
-        type="number"
-        min="0"
-        placeholder=""
-        formControlName="attempts"
-      />
     </mat-form-field>
 
     <div *ngIf="taskForm.value.mediaType === 'application/x-spreadsheet'">
