@@ -22,11 +22,42 @@ object Archiver {
     out.close()
   }
 
-  @throws[IOException]
-  def unpack(cid: Int, files: InputStream): (TaskImportFiles, List[TaskImportFiles]) = {
+  def unpack(cid: Int, files: InputStream): TaskImportFiles = {
+    var test = 0.toLong
     val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
     val taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
-    val test: List[TaskImportFiles] = List()
+    var entry: TarArchiveEntry = null
+    while ( {
+      entry = tmp.getNextTarEntry;
+      entry != null
+    }) {
+      //new ArchivIterator(tmp).foreach(entry => {
+      var s = entry.getSize
+      val name = entry.getName
+      var c = 0
+      val fileWriter = new BufferedWriter(new FileWriter(name))
+      if (name.endsWith(".json")) {
+        taskImportFiles.taskConfigPath = name
+      } else {
+        taskImportFiles.configFiles += name
+      }
+      test = 0
+      while (test < s) {
+        //for (size <- test to entry.getSize - 1) {
+        c = tmp.read
+        fileWriter.write(c)
+        test += 1
+      }
+      fileWriter.close()
+    }
+    taskImportFiles
+  }
+  @throws[IOException]
+  def tmp(files: InputStream): ListBuffer[TaskImportFiles] = {
+    val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
+    var taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
+    val list: ListBuffer[TaskImportFiles] = ListBuffer()
+    var current = ""
     var entry: TarArchiveEntry = null
     while ( {
       entry = tmp.getNextTarEntry;
@@ -35,12 +66,26 @@ object Archiver {
       if (entry.isFile) {
         //new ArchivIterator(tmp).foreach(entry => {
         val s = entry.getSize
-        val name = entry.getName
+        val split = entry.getName.split("/")
+        val name = split(split.length - 1)
+        if (!current.matches(split(split.length - 2))) {
+          if (!current.isBlank) {
+            list += taskImportFiles
+            taskImportFiles = TaskImportFiles("", ListBuffer())
+          }
+          current = split(split.length - 2)
+        }
         var c = 0
-        val fileWriter = new BufferedWriter(new FileWriter(name))
+        var fileWriter: BufferedWriter = null
         if (name.endsWith(".json")) {
-          taskImportFiles.taskConfigPath = name
+          var t = name
+          if (current.matches(name)) {
+            t = current + name
+          }
+          fileWriter = new BufferedWriter(new FileWriter(t))
+          taskImportFiles.taskConfigPath = t
         } else {
+          fileWriter = new BufferedWriter(new FileWriter(name))
           taskImportFiles.configFiles += name
         }
         var test = 0
@@ -50,45 +95,14 @@ object Archiver {
           fileWriter.write(c)
           test += 1
         }
+
         fileWriter.close()
-        taskImportFiles
-      }
-      else
-      {
-        test.appended(p(tmp, entry, test))
       }
     }
-    (taskImportFiles, test)
+    list += taskImportFiles
+    list
   }
 
-  def p(tmp: TarArchiveInputStream, entry: TarArchiveEntry, test: List[TaskImportFiles]): TaskImportFiles = {
-    val taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
-    for(e <- entry.getDirectoryEntries) {
-      if (entry.isFile) {
-        //new ArchivIterator(tmp).foreach(entry => {
-        val s = entry.getSize
-        val name = entry.getName
-        var c = 0
-        val fileWriter = new BufferedWriter(new FileWriter(name))
-        if (name.endsWith(".json")) {
-          taskImportFiles.taskConfigPath = name
-        } else {
-          taskImportFiles.configFiles += name
-        }
-        var test = 0
-        while (test < s) {
-          c = tmp.read
-          fileWriter.write(c)
-          test += 1
-        }
-        fileWriter.close()
-      }
-      else {
-        test.appended(p(tmp, entry, test))
-      }
-    }
-    taskImportFiles
-  }
 
   def addToArchive(out: TarArchiveOutputStream, file: File, dir: String, name: String): Unit = {
     val entry = dir + File.separator + name

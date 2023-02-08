@@ -21,6 +21,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 import java.nio.charset.{Charset, StandardCharsets}
 import java.nio.file.Files
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.collection.mutable.ListBuffer
 
 @RestController
 @GetMapping(path = Array("/api/v1/courses/{cid}"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
@@ -35,7 +36,6 @@ class ImportController {
   private val taskImportService: TaskImportService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-
   @PostMapping(value = Array("/tasks/import"))
   @ResponseBody
   def importTasks(@PathVariable(value = "cid", required = true) cid: Int, @RequestParam("file") body: MultipartFile,
@@ -45,7 +45,7 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val (taskImportFiles, _) = Archiver.unpack(cid, body.getInputStream)
+      val taskImportFiles = Archiver.unpack(1, body.getInputStream)
 
       logger.info(taskImportFiles.toString)
       taskImportService.createTask(cid, taskImportFiles)
@@ -63,7 +63,7 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val (_, taskImportFiles: List[TaskImportFiles]) = Archiver.unpack(cid, body.getInputStream)
+      val taskImportFiles: ListBuffer[TaskImportFiles] = Archiver.tmp(body.getInputStream)
 
       logger.info(taskImportFiles.toString)
       taskImportFiles.foreach(tif => taskImportService.createTask(cid, tif))
@@ -71,6 +71,4 @@ class ImportController {
       throw new ForbiddenException()
     }
   }
-
-
 }
