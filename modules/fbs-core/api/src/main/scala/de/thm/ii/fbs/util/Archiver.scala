@@ -3,6 +3,7 @@ package de.thm.ii.fbs.util
 import de.thm.ii.fbs.model.TaskImportFiles
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveInputStream, TarArchiveOutputStream}
+import de.thm.ii.fbs.model.Task
 import org.apache.commons.compress.utils.IOUtils
 import org.slf4j.LoggerFactory
 
@@ -103,6 +104,17 @@ object Archiver {
     list
   }
 
+  @throws[IOException]
+  def packDir(tid: List[Task], name: File, files: ListBuffer[ListBuffer[ArchiveFile]]): Unit = {
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    files.zip(tid).foreach { case (f, task) =>
+      f.foreach(archiveFile => {
+        addToArchive(out, archiveFile.file, s"./${task.id}", archiveFile.filename.getOrElse(archiveFile.file.getName))
+        archiveFile.file.delete()
+      })
+    }
+    out.close()
+  }
 
   def addToArchive(out: TarArchiveOutputStream, file: File, dir: String, name: String): Unit = {
     val entry = dir + File.separator + name

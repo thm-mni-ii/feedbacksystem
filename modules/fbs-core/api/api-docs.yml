@@ -40,12 +40,12 @@ tags:
   - name: SQL Playground API
     description: API used to interact with the SQL Playground
 security:
-  - JWT: []
+  - JWT: [ ]
 
 paths:
   /login/cas:
     post:
-      security: []
+      security: [ ]
       operationId: casLogin
       tags:
         - Login
@@ -62,7 +62,7 @@ paths:
           description: Unauthorized
   /login/ldap:
     post:
-      security: []
+      security: [ ]
       operationId: ldapLogin
       tags:
         - Login
@@ -92,7 +92,7 @@ paths:
           description: Unauthorized
   /login/local:
     post:
-      security: []
+      security: [ ]
       operationId: localLogin
       tags:
         - Login
@@ -1109,7 +1109,6 @@ paths:
   "/courses/{cid}/tasks/{tid}/export":
     get:
       operationId: exportCourseTask
-
       tags:
         - Task
       summary: Get a Tar-Archive of the Task which contains all Checker Configurations of the Task
@@ -1145,23 +1144,29 @@ paths:
           description: Forbidden
         "404":
           description: Not found
-  "/courses/{cid}/tasks/import":
+  "/courses/{cid}/tasks/export":
     post:
-      security:
-        - JWT: [ ]
+      operationId: exportTasks
       tags:
         - Task
-      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      summary: Get a Tar-Archive of all the chosen Tasks which contain all Checker Configurations of those Tasks
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              required:
+                - taskIds
+              properties:
+                taskIds:
+                  type: array
+                  items:
+                    type: integer
       parameters:
         - name: cid
           in: path
           description: course id
-          required: true
-          schema:
-            type: integer
-        - name: tid
-          in: path
-          description: task id
           required: true
           schema:
             type: integer
@@ -1184,23 +1189,16 @@ paths:
           description: Forbidden
         "404":
           description: Not found
-  "/courses/{cid}/tasks/import/list":
-    post:
-      security:
-        - JWT: [ ]
+  "/courses/{cid}/tasks/export/all":
+    get:
+      operationId: exportAllTasks
       tags:
         - Task
-      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      summary: Get a Tar-Archive of all the Tasks which contain all Checker Configurations of all the Tasks from a specified course
       parameters:
         - name: cid
           in: path
           description: course id
-          required: true
-          schema:
-            type: integer
-        - name: tid
-          in: path
-          description: task id
           required: true
           schema:
             type: integer
@@ -1223,6 +1221,88 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+"/courses/{cid}/tasks/import":
+  post:
+    operationId: importTask
+    tags:
+      - Task
+    summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+    parameters:
+      - name: cid
+        in: path
+        description: course id
+        required: true
+        schema:
+          type: integer
+        requestBody:
+          required: true
+          content:
+            "application/json":
+              schema:
+              type: object
+              properties:
+              formula:
+                type: string
+    responses:
+      "200":
+        description: OK
+        headers:
+          Authorization:
+            description: Bearer
+            schema:
+              type: string
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: tar
+      "401":
+        description: Unauthorized
+      "403":
+        description: Forbidden
+      "404":
+        description: Not found
+"/courses/{cid}/tasks/import/list":
+  post:
+    operationId: importTasks
+    tags:
+      - Task
+    summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+    parameters:
+      - name: cid
+        in: path
+        description: course id
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        "application/json":
+          schema:
+          type: object
+          properties:
+          formula:
+            type: string
+    responses:
+      "200":
+        description: OK
+        headers:
+          Authorization:
+            description: Bearer
+            schema:
+              type: string
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: tar
+      "401":
+        description: Unauthorized
+      "403":
+        description: Forbidden
+      "404":
+        description: Not found
   "/courses/evaluation/formula/validate":
     post:
       operationId: validateCourseEvaluationFormula
@@ -2478,7 +2558,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ["tables", "attributes"]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -2519,7 +2599,7 @@ paths:
           description: what summs to return
           schema:
             type: string
-            enum: ["tables", "attributes"]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -2560,7 +2640,7 @@ paths:
           description: what queries to return
           schema:
             type: string
-            enum: ["tables", "attributes"]
+            enum: [ "tables", "attributes" ]
       responses:
         "200":
           description: OK
@@ -3561,7 +3641,7 @@ components:
           type: array
           items:
             type: string
-            enum: [INSERT, UPDATE, DELETE]
+            enum: [ INSERT, UPDATE, DELETE ]
         objectTable:
           type: string
     SQLRoutine:
