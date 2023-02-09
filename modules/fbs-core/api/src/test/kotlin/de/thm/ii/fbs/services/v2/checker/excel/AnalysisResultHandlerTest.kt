@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
-import de.thm.ii.fbs.handler.ErrorHandler
-import de.thm.ii.fbs.handler.PropagatedErrorHandler
-import de.thm.ii.fbs.handler.context.ErrorAnalysisContext
+import de.thm.ii.fbs.model.v2.checker.excel.handler.ErrorHandler
+import de.thm.ii.fbs.model.v2.checker.excel.handler.PropagatedErrorHandler
+import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.model.v2.checker.excel.AnalysisResult
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.services.v2.handler.HandlerService
