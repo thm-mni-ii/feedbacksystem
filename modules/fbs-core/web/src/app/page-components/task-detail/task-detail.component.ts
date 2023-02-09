@@ -347,8 +347,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   downloadTask() {
-    console.log("Hallo");
-
     this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
   }
 }
