@@ -7,7 +7,7 @@ data class CellResult(val isPropagated: Boolean = false) {
         feedback.append(value)
     }
 
-    fun getFeedback(): String {
-        return feedback.toString()
+    fun getFeedback(): StringBuilder {
+        return feedback
     }
 }
