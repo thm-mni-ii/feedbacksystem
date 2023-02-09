@@ -6,4 +6,8 @@ data class CellResult(val isPropagated: Boolean) {
     fun addFeedback(value: String) {
         feedback.append(value)
     }
+
+    fun getFeedback(): String {
+        return feedback.toString()
+    }
 }
