@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{CourseResult, EvaluationContainer, EvaluationContainerResult, EvaluationContainerWithTaskResults, EvaluationUserResult, Task, TaskResult}
+import de.thm.ii.fbs.model.{CourseResult, EvaluationContainer, EvaluationContainerResult,
+  EvaluationContainerWithTaskResults, EvaluationUserResult, Task, TaskResult}
 import org.junit.{Assert, Test}
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
