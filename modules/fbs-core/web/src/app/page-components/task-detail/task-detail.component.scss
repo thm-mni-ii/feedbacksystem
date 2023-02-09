@@ -36,6 +36,8 @@
 mat-card-actions {
   display: flex;
   margin-top: 16px;
+  margin-left: 16px;
+  margin-right: 16px;
   justify-content: space-around;
 }
 
@@ -131,4 +133,21 @@ mat-radio-button {
   color: white;
   margin-left: 5px;
   padding: 2px;
+}
+
+.foo {
+  display: flex;
+}
+
+.foo2 {
+  margin: 0px 8px 0px 8px;
+}
+
+.foo3 {
+  margin-left: 4px;
+}
+
+.foo4 {
+  display: flex;
+  justify-content: center;
 }

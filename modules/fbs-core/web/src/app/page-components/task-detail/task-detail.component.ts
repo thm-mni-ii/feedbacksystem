@@ -39,6 +39,7 @@ export class TaskDetailComponent implements OnInit {
   deadlinePassed = false;
   submitNumber: number = 0;
   circleBackgroundColor: string;
+  allTasks: Task[];
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -71,12 +72,35 @@ export class TaskDetailComponent implements OnInit {
 
   submissionData: string | File;
 
+  getTasks() {
+    this.taskService.getAllTasks(this.courseId).subscribe(
+      (allTasks) => {
+        this.allTasks = allTasks;
+        console.log(this.allTasks);
+      },
+      () => {}
+    );
+  }
+
+  goToNextTask() {
+    console.log(this.task.id);
+
+    let currentTaskId = this.allTasks.indexOf(this.task);
+    console.log(currentTaskId);
+  }
+
+  goToPreviousTask() {
+    this.task = this.allTasks[this.task.id - 2];
+    console.log(this.task.id);
+  }
+
   ngOnInit() {
     this.route.params
       .pipe(
         mergeMap((params) => {
           this.courseId = params.id;
           const taskId = params.tid;
+          this.getTasks();
           return this.taskService.getTask(this.courseId, taskId);
         }),
         mergeMap((task) => {

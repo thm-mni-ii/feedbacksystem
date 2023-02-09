@@ -106,14 +106,36 @@
         ></app-submission-spreadsheet>
       </div>
       <mat-card-actions>
-        <button
-          [disabled]="deadlinePassed || isSubmissionEmpty() || maxAttempts()"
-          mat-flat-button
-          color="accent"
-          (click)="submission()"
-        >
-          Abgeben
-        </button>
+        <div class="foo4">
+          <div class="foo4 foo2">
+            <button mat-icon-button>
+              <mat-icon class="material-icons">
+                keyboard_double_arrow_left
+              </mat-icon>
+            </button>
+            <button mat-icon-button class="foo3" (click)="goToPreviousTask()">
+              <mat-icon>keyboard_arrow_left</mat-icon>
+            </button>
+          </div>
+          <button
+            [disabled]="deadlinePassed || isSubmissionEmpty() || maxAttempts()"
+            mat-flat-button
+            color="accent"
+            (click)="submission()"
+          >
+            Abgeben
+          </button>
+          <div class="foo4 foo2">
+            <button mat-icon-button (click)="goToNextTask()">
+              <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
+            <button mat-icon-button class="foo3">
+              <mat-icon class="material-icons">
+                keyboard_double_arrow_right
+              </mat-icon>
+            </button>
+          </div>
+        </div>
       </mat-card-actions>
       <span class="outsideCircle" *ngIf="task?.attempts !== 0">
         Anzahl der Versuche: {{ task?.attempts }} | Versuch:
