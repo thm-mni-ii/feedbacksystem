@@ -23,21 +23,23 @@ class ErrorAnalysisService(
     private val errors = HashSet<Cell>()
     private val perrors = HashSet<Cell>()
     private val visited = HashSet<Cell>()
-    val result = Result()
+
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
-
-        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, result)) }
+        handleService?.getHandlers(When.BEFORE)
+            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
         for (outputCell in outputCells) {
             findErrors(outputCell)
         }
-        handleService?.getHandlers(When.AFTER)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
+        handleService?.getHandlers(When.AFTER)
+            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
         return errors
     }
 
     private fun findErrors(cell: Cell) {
         visited.add(cell)
-        handleService?.getHandlers(When.ONVISIT)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+        handleService?.getHandlers(When.ONVISIT)
+            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
@@ -59,12 +61,14 @@ class ErrorAnalysisService(
         evaluator.evaluateInCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
-            handleService?.getHandlers(When.ONERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+            handleService?.getHandlers(When.ONERROR)
+                ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
             setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
         } else {
             perrors.add(cell)
-            handleService?.getHandlers(When.ONPERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+            handleService?.getHandlers(When.ONPERROR)
+                ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
         }
     }
 
