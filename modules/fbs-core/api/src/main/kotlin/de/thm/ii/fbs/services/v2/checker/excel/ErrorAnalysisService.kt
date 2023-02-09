@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
-import de.thm.ii.fbs.handler.context.ErrorAnalysisContext
+import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.services.v2.handler.HandlerService
@@ -13,29 +13,30 @@ import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 
-class PropagatedErrorsService(
+class ErrorAnalysisService(
     private val workbook: XSSFWorkbook,
     private val graph: ReferenceGraph, /* TODO get dependency graph from solution entry in db */
     private val solution: Map<Cell, String>, /* TODO maybe usa a kotlin set with indexing; get solution values from solution entry in db */
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
+    private val errors = HashSet<Cell>()
+    private val perrors = HashSet<Cell>()
+    private val visited = HashSet<Cell>()
 
-    fun findAllPropagatedErrors(outputCells: List<Cell>): Set<Cell> {
-        val errors = HashSet<Cell>()
-        val perrors = HashSet<Cell>()
-        val visited = HashSet<Cell>()
-        handleService?.getHandlers(When.BEFORE)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
+
+    fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)
         for (outputCell in outputCells) {
-            findPropagatedErrors(outputCell, errors, perrors, visited)
+            findErrors(outputCell)
         }
-        handleService?.getHandlers(When.AFTER)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.AFTER)
         return errors
     }
 
-    private fun findPropagatedErrors(cell: Cell, errors: MutableSet<Cell>, perrors: MutableSet<Cell>, visited: MutableSet<Cell>) {
-        handleService?.getHandlers(When.ONVISIT)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
+    private fun findErrors(cell: Cell) {
         visited.add(cell)
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
@@ -48,7 +49,7 @@ class PropagatedErrorsService(
         val references = graph.successors(cell)
         for (reference in references) {
             if (!visited.contains(reference)) {
-                findPropagatedErrors(reference, errors, perrors, visited)
+                findErrors(reference)
             }
         }
 
@@ -56,12 +57,13 @@ class PropagatedErrorsService(
         // eval cell again and compare again with solution cell
         evaluator.evaluateInCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
-            handleService?.getHandlers(When.ONERROR)?.forEach { handler -> handler.handle(ErrorAnalysisContext()) }
             errors.add(cell) // add to original errors set
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONERROR)
             setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
         } else {
             perrors.add(cell)
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONPERROR)
         }
     }
 
