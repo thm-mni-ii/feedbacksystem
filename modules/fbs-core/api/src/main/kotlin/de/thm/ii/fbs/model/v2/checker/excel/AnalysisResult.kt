@@ -5,23 +5,30 @@ data class AnalysisResult(
     private val subtasks: HashMap<Int, MutableSet<Cell>> = HashMap()
 ) {
 
+    // should only be once if it shall be consistent
     fun addCellResult(cell: Cell, isPropagated: Boolean = false) {
         errorCellResults[cell] = CellResult(isPropagated)
     }
 
-    fun addCellToSubtask(id: Int, cell: Cell) {
-        (subtasks[id] ?: HashSet()).add(cell)
+    fun getCellResult(cell: Cell): CellResult? {
+        return errorCellResults[cell]
     }
 
-    fun getAllErrorCells(): Collection<Cell> {
+    fun addCellToSubtask(id: Int, cell: Cell) {
+        val set = subtasks[id] ?: HashSet()
+        set.add(cell)
+        subtasks[id] = set
+    }
+
+    fun getAllErrorCells(): Set<Cell> {
         return errorCellResults.keys
     }
 
-    fun getErrorCells(): Collection<Cell> {
+    fun getErrorCells(): Set<Cell> {
         return errorCellResults.entries.filter { entry -> !entry.value.isPropagated }.map { entry -> entry.key }.toSet()
     }
 
-    fun getPropagatedErrorCells(): Collection<Cell> {
+    fun getPropagatedErrorCells(): Set<Cell> {
         return errorCellResults.entries.filter { entry -> entry.value.isPropagated }.map { entry -> entry.key }.toSet()
     }
 }
