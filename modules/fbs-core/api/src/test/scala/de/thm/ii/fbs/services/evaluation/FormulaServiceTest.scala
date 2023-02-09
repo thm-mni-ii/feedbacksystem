@@ -5,7 +5,7 @@ import org.junit.{Assert, Test}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringRunner
 
 /**
@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(classOf[SpringRunner])
 @SpringBootTest(classes = Array(classOf[RestTemplateAutoConfiguration]))
 @ContextConfiguration(classes = Array(classOf[FormulaService]))
+@ActiveProfiles(Array("test"))
 class FormulaServiceTest {
   @Autowired
   private val formulaService: FormulaService = null

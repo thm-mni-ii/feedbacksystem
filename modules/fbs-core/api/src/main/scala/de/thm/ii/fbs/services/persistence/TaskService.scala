@@ -166,7 +166,7 @@ class TaskService {
     deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
     requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"),
-    attempts = Option(res.getInt("attempts")))
+    attempts = Option(res.getInt("attempts")).filter(_ => !res.wasNull()))
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
     res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null, res.getBoolean("is_private"))

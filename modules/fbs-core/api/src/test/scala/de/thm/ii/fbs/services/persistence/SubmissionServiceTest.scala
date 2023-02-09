@@ -7,10 +7,12 @@ import org.junit.runner.RunWith
 import org.junit.{Assert, Before, Test}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(classOf[SpringRunner])
 @SpringBootTest(classes = Array(classOf[TestApplication]))
+@ActiveProfiles(Array("test"))
 class SubmissionServiceTest {
   @Autowired
   private val submissionService: SubmissionService = null

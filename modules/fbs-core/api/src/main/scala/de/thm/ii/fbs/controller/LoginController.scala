@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
 import de.thm.ii.fbs.model.{GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.UserService
-import de.thm.ii.fbs.services.security.{AuthService, LdapService}
+import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
@@ -25,7 +25,10 @@ class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private val authService: AuthService = null
   @Autowired
+  private val loginService: LocalLoginService = null
+  @Autowired
   private val ldapService: LdapService = null
+
   @Value("${cas.client-host-url}")
   private val CLIENT_HOST_URL: String = null
   @Value("${ldap.attributeNames.uid}")
@@ -140,7 +143,7 @@ class LoginController extends CasClientConfigurerAdapter {
     val login = for {
       username <- jsonNode.retrive("username").asText()
       password <- jsonNode.retrive("password").asText()
-      user <- userService.find(username, password)
+      user <- loginService.login(username, password)
     } yield user
 
     login match {
@@ -163,7 +166,7 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield (username, password)
 
     val user = credentials.flatMap(creds =>
-        userService.find(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
+        loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
               .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))

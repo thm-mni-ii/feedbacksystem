@@ -2,10 +2,9 @@ package de.thm.ii.fbs.services.classroom
 
 import de.thm.ii.fbs.model.CourseRole.{DOCENT, STUDENT, TUTOR}
 import de.thm.ii.fbs.model.GlobalRole.{ADMIN, MODERATOR}
-import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
+import de.thm.ii.fbs.model.{CourseRole, User}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
-import de.thm.ii.fbs.util.RestTemplateFactory
 import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -21,10 +20,11 @@ import scala.language.postfixOps
 
 /**
   * Handles BBB requests.
-  * @param templateBuilder Request template builder.
-  * @param classroomUrl the bbb api url
-  * @param secret the bbb secret
-  * @param courseService the CourseService
+  *
+  * @param templateBuilder           Request template builder.
+  * @param classroomUrl              the bbb api url
+  * @param secret                    the bbb secret
+  * @param courseService             the CourseService
   * @param courseRegistrationService the CourseRegistrationService
   * @author Dominik Kröll
   */
@@ -35,7 +35,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
                        @Value("${services.classroom.insecure}") private val insecure: Boolean,
                        courseService: CourseService,
                        courseRegistrationService: CourseRegistrationService
-                ) {
+                      ) {
   private val restTemplate = new RestTemplate()
 
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
@@ -48,8 +48,9 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Future feature? currently there is no attendance tracking in FBS
+    *
     * @param courseId the courseId
-    * @param user the user
+    * @param user     the user
     * @return
     */
   def leaveUser(courseId: Int, user: User): Boolean = {
@@ -58,6 +59,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Creates a new Conference using BBB
+    *
     * @param courseId the id for the new conference
     * @return the newly created conference
     */
@@ -81,10 +83,11 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Register a new conference.
-    * @param id Conference id to register.
-    * @param meetingName Conference id to register.
+    *
+    * @param id              Conference id to register.
+    * @param meetingName     Conference id to register.
     * @param studentPassword password to register.
-    * @param tutorPassword tutor passwort to register
+    * @param tutorPassword   tutor passwort to register
     * @param teacherPassword moderator password to register.
     * @return boolean showing if creation of room was successful
     */
@@ -103,9 +106,10 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Get join Link for conference users conference.
-    * @param user user name to join to classroom.
+    *
+    * @param user             user name to join to classroom.
     * @param digitalClassroom the digitalClassroomInstance to join a user to.
-    * @param courseRole The role (Docent, Tutor, Student) of the user within the course.
+    * @param courseRole       The role (Docent, Tutor, Student) of the user within the course.
     * @return The join URI for the specified user.
     */
   def getBBBConferenceLink(user: User, digitalClassroom: DigitalClassroom, courseRole: CourseRole.Value): URI = {
@@ -139,7 +143,8 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Ends the conference
-    * @param courseId the id of the meeting to end
+    *
+    * @param courseId        the id of the meeting to end
     * @param teacherPassword the teacherPassword of the meeting to end
     * @return true if request succeeds
     */
@@ -151,6 +156,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Sends a GET-Request to the BBB API
+    *
     * @param method The BBB methode to invoked
     * @param params The params to send
     * @return The ResponseEntity
@@ -162,6 +168,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
 
   /**
     * Builds a BBB API URL with checksum
+    *
     * @param method The method of the url
     * @param params The params of the url
     * @return The BBB API with checksum

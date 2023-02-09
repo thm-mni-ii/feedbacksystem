@@ -44,7 +44,7 @@ security:
     protectedPaths: "/api/v1/login/ldap,/api/v1/login/local,/api/v1/login/unified"
 server:
   host: ${SERVER_HOST:https://localhost}
-  port: 443
+  port: ${SERVER_PORT:443}
   ssl:
     enabled: true
     key-store: ${KEYSTORE_PATH:classpath:keystore.p12}

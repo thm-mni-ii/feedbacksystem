@@ -1,10 +1,12 @@
 package de.thm.ii.fbs.util
 
+import de.thm.ii.fbs.model.Task
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
 import org.apache.commons.compress.utils.IOUtils
 
 import java.io._
 import java.nio.file.Files
+import scala.collection.mutable.ListBuffer
 
 object Archiver {
   @throws[IOException]
@@ -12,6 +14,18 @@ object Archiver {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for (archiveFile <- files) {
       addToArchive(out, archiveFile.file, ".", archiveFile.filename.getOrElse(archiveFile.file.getName))
+    }
+    out.close()
+  }
+
+  @throws[IOException]
+  def packDir(tid: List[Task], name: File, files: ListBuffer[ListBuffer[ArchiveFile]]): Unit = {
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    files.zip(tid).foreach { case (f, task) =>
+      f.foreach(archiveFile => {
+        addToArchive(out, archiveFile.file, s"./${task.id}", archiveFile.filename.getOrElse(archiveFile.file.getName))
+        archiveFile.file.delete()
+      })
     }
     out.close()
   }

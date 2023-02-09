@@ -1,11 +1,11 @@
-*                             @thm-mni-ii/feedbacksystem-mods
-/modules/fbs-core/web/        @thm-mni-ii/feedbacksystem-frontend-mods
-/modules/fbs-core/api/        @thm-mni-ii/feedbacksystem-api-mods
-/modules/fbs-runner/checker/  @thm-mni-ii/feedbacksystem-datenanalyse-mods
+*                              @thm-mni-ii/feedbacksystem-mods
+/modules/fbs-core/web/         @thm-mni-ii/feedbacksystem-frontend-mods
+/modules/fbs-core/api/         @thm-mni-ii/feedbacksystem-api-mods
+/modules/fbs-core/math-parser/ @thm-mni-ii/feedbacksystem-api-mods
+/modules/fbs-runner/checker/   @thm-mni-ii/feedbacksystem-datenanalyse-mods
 
 /runtime-images/              @thm-mni-ii/feedbacksystem-api-mods
 /scripts/ci/                  @thm-mni-ii/feedbacksystem-api-mods
-/chart/                       @thm-mni-ii/feedbacksystem-api-mods
 /docker-compose*.yml          @thm-mni-ii/feedbacksystem-api-mods
 Dockerfile                    @thm-mni-ii/feedbacksystem-api-mods
 
