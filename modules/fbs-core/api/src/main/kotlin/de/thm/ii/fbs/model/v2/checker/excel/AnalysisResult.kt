@@ -5,7 +5,7 @@ data class AnalysisResult(
     private val subtasks: HashMap<Int, MutableSet<Cell>> = HashMap()
 ) {
 
-    fun addCellResult(cell: Cell, isPropagated: Boolean) {
+    fun addCellResult(cell: Cell, isPropagated: Boolean = false) {
         cellResults[cell] = CellResult(isPropagated)
     }
 
