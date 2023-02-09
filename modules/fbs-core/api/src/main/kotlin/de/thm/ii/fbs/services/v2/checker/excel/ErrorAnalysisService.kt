@@ -26,20 +26,17 @@ class ErrorAnalysisService(
 
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
-        handleService?.getHandlers(When.BEFORE)
-            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)
         for (outputCell in outputCells) {
             findErrors(outputCell)
         }
-        handleService?.getHandlers(When.AFTER)
-            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors)) }
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.AFTER)
         return errors
     }
 
     private fun findErrors(cell: Cell) {
         visited.add(cell)
-        handleService?.getHandlers(When.ONVISIT)
-            ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+        handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
         val workbookCell = getCellFromWorkbook(cell)
 
         // Base Case
@@ -61,14 +58,12 @@ class ErrorAnalysisService(
         evaluator.evaluateInCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
-            handleService?.getHandlers(When.ONERROR)
-                ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONERROR)
             setValueOfCell(workbookCell, solution[cell]!!) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
         } else {
             perrors.add(cell)
-            handleService?.getHandlers(When.ONPERROR)
-                ?.forEach { handler -> handler.handle(ErrorAnalysisContext(errors, perrors, cell)) }
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONPERROR)
         }
     }
 

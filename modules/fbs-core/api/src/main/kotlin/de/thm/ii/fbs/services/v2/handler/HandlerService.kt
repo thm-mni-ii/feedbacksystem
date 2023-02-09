@@ -12,10 +12,16 @@ class HandlerService<In, Out>(private vararg val handlers: Handler<In, Out>) {
     }
 
     fun getHandlers(vararg executions: When): Collection<Handler<In, Out>> {
-        return handlers.filter { handler ->
-            handler::class.findAnnotations(Handle::class).any { ann -> executions.contains(ann.execution) }
-
-        }
+        if (executions.isNotEmpty())
+            return handlers.filter { handler ->
+                handler::class.findAnnotations(Handle::class).any { ann -> executions.contains(ann.execution) }
+            }
+        return emptyList()
     }
 
+    fun runHandlers(input: In, vararg executions: When): Collection<Out> {
+        return getHandlers(*executions).map { handler ->
+            handler.handle(input)
+        }
+    }
 }
