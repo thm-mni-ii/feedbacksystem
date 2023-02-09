@@ -14,15 +14,16 @@ import scala.collection.mutable.ListBuffer
 object Archiver {
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  @throws[IOException]
+/*  @throws[IOException]
   def pack(name: File, files: ArchiveFile*): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for (archiveFile <- files) {
       addToArchive(out, archiveFile.file, ".", archiveFile.filename.getOrElse(archiveFile.file.getName))
     }
     out.close()
-  }
+  }*/
 
+/*
   def unpack(cid: Int, files: InputStream): TaskImportFiles = {
     var test = 0.toLong
     val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
@@ -53,8 +54,9 @@ object Archiver {
     }
     taskImportFiles
   }
+*/
   @throws[IOException]
-  def tmp(files: InputStream): ListBuffer[TaskImportFiles] = {
+  def unpack(files: InputStream): ListBuffer[TaskImportFiles] = {
     val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
     var taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
     val list: ListBuffer[TaskImportFiles] = ListBuffer()
@@ -80,7 +82,7 @@ object Archiver {
         var fileWriter: BufferedWriter = null
         if (name.endsWith(".json")) {
           var t = name
-          if (current.matches(name)) {
+          if (list.length > 0) {
             t = current + name
           }
           fileWriter = new BufferedWriter(new FileWriter(t))

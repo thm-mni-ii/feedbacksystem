@@ -3,14 +3,15 @@ package de.thm.ii.fbs.services.`export`
 import com.fasterxml.jackson.databind.DeserializationFeature
 import de.thm.ii.fbs.model.{TaskExport, TaskImportFiles, storageFileName}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
-import de.thm.ii.fbs.util.ScalaObjectMapper
+import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, InputStream}
 import java.nio.file.Files
+import scala.collection.mutable.ListBuffer
 
 @Service
 class TaskImportService {
@@ -25,7 +26,14 @@ class TaskImportService {
   val objectMapper = new ScalaObjectMapper
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def createTask(cid: Int, files: TaskImportFiles) {
+  def buildAllTasks(cid: Int, inputStream: InputStream): Unit = {
+    val taskImportFiles = Archiver.unpack(inputStream)
+    logger.info(taskImportFiles.toString())
+
+    taskImportFiles.foreach(tif => createTask(cid, tif))
+  }
+
+  private def createTask(cid: Int, files: TaskImportFiles) {
     val t = objectMapper.readValue(new File(files.taskConfigPath), classOf[TaskExport])
     val task = taskService.create(cid, t.task)
     t.configs.foreach(cc => {
@@ -41,7 +49,7 @@ class TaskImportService {
     })
   }
 
-  def storeFile(id: Int, file: Option[String], isMain: Boolean): Unit = {
+  private def storeFile(id: Int, file: Option[String], isMain: Boolean): Unit = {
     file match {
       case Some(fileName) => {
         val newFile = new File(fileName)

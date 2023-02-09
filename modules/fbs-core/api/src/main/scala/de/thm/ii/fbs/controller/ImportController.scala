@@ -45,10 +45,7 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val taskImportFiles = Archiver.unpack(1, body.getInputStream)
-
-      logger.info(taskImportFiles.toString)
-      taskImportService.createTask(cid, taskImportFiles)
+      taskImportService.buildAllTasks(cid, body.getInputStream)
     } else {
       throw new ForbiddenException()
     }
@@ -63,10 +60,7 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val taskImportFiles: ListBuffer[TaskImportFiles] = Archiver.tmp(body.getInputStream)
-
-      logger.info(taskImportFiles.toString)
-      taskImportFiles.foreach(tif => taskImportService.createTask(cid, tif))
+      taskImportService.buildAllTasks(cid, body.getInputStream)
     } else {
       throw new ForbiddenException()
     }
