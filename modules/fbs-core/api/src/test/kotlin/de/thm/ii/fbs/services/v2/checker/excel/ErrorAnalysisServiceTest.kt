@@ -7,7 +7,7 @@ import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils.Companion.workboo
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
-class ErroranalysisServiceTest {
+class ErrorAnalysisServiceTest {
     @Test
     fun originalErrorTest() {
         val c1 = Cell(0, "A1", formula = "B1")
