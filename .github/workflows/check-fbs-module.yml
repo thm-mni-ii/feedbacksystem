@@ -71,13 +71,13 @@ jobs:
         if: ${{ inputs.startMysqlService }}
         run: >
           docker run -d --rm --name mysql -e MYSQL_ROOT_PASSWORD=twRuvi2ejllDdA4nnQLa08O
-          -e MYSQL_DATABASE=fbs -p 127.0.0.1:3306:3306 mysql:8.0.30
+          -e MYSQL_DATABASE=fbs -p 127.0.0.1:3316:3306 mysql:8.0.30
           --default-authentication-plugin=mysql_native_password --sql_mode=""
       - name: Start minio service container
         if: ${{ inputs.startMinioService }}
         run: >
           docker run -d --rm --name minio -e MINIO_ROOT_USER=admin
-          -e MINIO_ROOT_PASSWORD=SqfyBWhiFGr7FK60cVR2rel -p 127.0.0.1:9000:9000 -p 127.0.0.1:9001:9001 minio/minio:RELEASE.2022-10-29T06-21-33Z
+          -e MINIO_ROOT_PASSWORD=SqfyBWhiFGr7FK60cVR2rel -p 127.0.0.1:9010:9000 -p 127.0.0.1:9011:9001 minio/minio:RELEASE.2022-10-29T06-21-33Z
           server --console-address ":9001" /data
       - uses: actions/checkout@v3
       - name: Set up JDK 11

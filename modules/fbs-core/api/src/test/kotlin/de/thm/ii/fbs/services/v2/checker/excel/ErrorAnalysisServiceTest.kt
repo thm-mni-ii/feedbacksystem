@@ -7,15 +7,15 @@ import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils.Companion.workboo
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
-class PropagatedErrorsServiceTest {
+class ErrorAnalysisServiceTest {
     @Test
     fun originalErrorTest() {
         val c1 = Cell(0, "A1", formula = "B1")
         val c2 = BasicTestCase.c2
         val c3 = BasicTestCase.c3
 
-        val service = PropagatedErrorsService(workbook(c1, c2, c3), BasicTestCase.sGraph, BasicTestCase.sMap)
-        val res = service.findAllPropagatedErrors(listOf(c1))
+        val service = ErrorAnalysisService(workbook(c1, c2, c3), BasicTestCase.sGraph, BasicTestCase.sMap)
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf(c1), res)
     }
@@ -26,8 +26,8 @@ class PropagatedErrorsServiceTest {
         val c2 = BasicTestCase.c2
         val c3 = BasicTestCase.c3
 
-        val service = PropagatedErrorsService(workbook(c1, c2, c3), BasicTestCase.sGraph, BasicTestCase.sMap)
-        val res = service.findAllPropagatedErrors(listOf(c1))
+        val service = ErrorAnalysisService(workbook(c1, c2, c3), BasicTestCase.sGraph, BasicTestCase.sMap)
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf<Cell>(), res)
     }
@@ -41,8 +41,8 @@ class PropagatedErrorsServiceTest {
         val c5 = SimpleTestCase.c5
 
         val service =
-            PropagatedErrorsService(workbook(c1, c2, c3, c4, c5), SimpleTestCase.sGraph, SimpleTestCase.sMap)
-        val res = service.findAllPropagatedErrors(listOf(c1))
+            ErrorAnalysisService(workbook(c1, c2, c3, c4, c5), SimpleTestCase.sGraph, SimpleTestCase.sMap)
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf(c3), res)
     }
@@ -50,7 +50,7 @@ class PropagatedErrorsServiceTest {
     @Test
     fun noErrorTest2() {
         val service =
-            PropagatedErrorsService(
+            ErrorAnalysisService(
                 workbook(
                     SimpleTestCase.c1,
                     SimpleTestCase.c2,
@@ -60,7 +60,7 @@ class PropagatedErrorsServiceTest {
                 ),
                 SimpleTestCase.sGraph, SimpleTestCase.sMap
             )
-        val res = service.findAllPropagatedErrors(listOf(SimpleTestCase.c1))
+        val res = service.findAllErrors(listOf(SimpleTestCase.c1))
 
         assertEquals(setOf<Cell>(), res)
     }
@@ -79,12 +79,12 @@ class PropagatedErrorsServiceTest {
         val c10 = Cell(0, "D4", formula = "1 + 2")
 
         val service =
-            PropagatedErrorsService(
+            ErrorAnalysisService(
                 workbook(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10),
                 ComplexTestCase.sGraph,
                 ComplexTestCase.sMap
             )
-        val res = service.findAllPropagatedErrors(listOf(c1))
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf(c2, c3, c7), res)
     }
@@ -103,12 +103,12 @@ class PropagatedErrorsServiceTest {
         val c10 = ComplexTestCase.c10
 
         val service =
-            PropagatedErrorsService(
+            ErrorAnalysisService(
                 workbook(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10),
                 ComplexTestCase.sGraph,
                 ComplexTestCase.sMap
             )
-        val res = service.findAllPropagatedErrors(listOf(c1))
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf(c1, c3, c7), res)
     }
@@ -122,8 +122,8 @@ class PropagatedErrorsServiceTest {
         val c5 = SumTestCase.c5
 
         val service =
-            PropagatedErrorsService(workbook(c1, c2, c3, c4, c5), SumTestCase.sGraph, SumTestCase.sMap)
-        val res = service.findAllPropagatedErrors(listOf(c1))
+            ErrorAnalysisService(workbook(c1, c2, c3, c4, c5), SumTestCase.sGraph, SumTestCase.sMap)
+        val res = service.findAllErrors(listOf(c1))
 
         assertEquals(setOf(c1), res)
     }
@@ -133,7 +133,7 @@ class PropagatedErrorsServiceTest {
         val c3 = Cell(0, "C1", formula = "D1 - E1")
         val c8 = Cell(0, "A2", formula = "C1 + C2 - 2")
 
-        val service = PropagatedErrorsService(
+        val service = ErrorAnalysisService(
             workbook(
                 MultipleOutputTestCase.c1,
                 MultipleOutputTestCase.c2,
@@ -146,7 +146,7 @@ class PropagatedErrorsServiceTest {
                 MultipleOutputTestCase.c9
             ), MultipleOutputTestCase.sGraph, MultipleOutputTestCase.sMap
         )
-        val res = service.findAllPropagatedErrors(listOf(MultipleOutputTestCase.c1, c8))
+        val res = service.findAllErrors(listOf(MultipleOutputTestCase.c1, c8))
 
         assertEquals(setOf(MultipleOutputTestCase.c3, c8), res)
     }
@@ -155,12 +155,12 @@ class PropagatedErrorsServiceTest {
     fun wrongInputTest() {
         val c2 = Cell(0, "B1", "2")
 
-        val service = PropagatedErrorsService(
+        val service = ErrorAnalysisService(
             workbook(BasicTestCase.c1, c2, BasicTestCase.c3),
             BasicTestCase.sGraph,
             BasicTestCase.sMap
         )
-        val res = service.findAllPropagatedErrors(listOf(BasicTestCase.c1))
+        val res = service.findAllErrors(listOf(BasicTestCase.c1))
 
         assertEquals(setOf(c2), res)
 
