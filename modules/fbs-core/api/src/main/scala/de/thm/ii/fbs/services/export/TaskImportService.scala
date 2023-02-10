@@ -24,12 +24,9 @@ class TaskImportService {
   @Autowired
   private val checkrunnerSubTaskService: CheckrunnerSubTaskService = null
   val objectMapper = new ScalaObjectMapper
-  private val logger = LoggerFactory.getLogger(this.getClass)
 
   def buildAllTasks(cid: Int, inputStream: InputStream): Unit = {
     val taskImportFiles = Archiver.unpack(inputStream)
-    logger.info(taskImportFiles.toString())
-
     taskImportFiles.foreach(tif => createTask(cid, tif))
   }
 
@@ -37,9 +34,6 @@ class TaskImportService {
     val t = objectMapper.readValue(new File(files.taskConfigPath), classOf[TaskExport])
     val task = taskService.create(cid, t.task)
     t.configs.foreach(cc => {
-      logger.info(cc.toString)
-      logger.info(cc.mainFile.toString)
-      logger.info(cc.secondaryFile.toString)
       val id = checkerConfigurationService.create(cid, task.id, cc.config).id
       cc.subTasks.foreach(st => {
         checkrunnerSubTaskService.create(id, st.name, st.points)

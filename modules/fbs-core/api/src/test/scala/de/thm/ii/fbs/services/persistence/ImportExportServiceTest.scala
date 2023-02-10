@@ -24,6 +24,8 @@ class ImportExportServiceTest {
   private val databaseMigrationService: DatabaseMigrationService = null
   @Autowired
   private val courseService: CourseService = null
+  @Autowired
+  private val taskService: TaskService = null
 
   @Before
   def resetDatabase(): Unit = {
@@ -31,11 +33,16 @@ class ImportExportServiceTest {
   }
 
   @Test
-  def singleTask(): Unit = {
+  def importExportTask(): Unit = {
     courseService.create(Course("Test", "A Test"))
-    val tasklist = List(new Task("Test", null, "", false))
+    val initialTask = Task("Test", None, "type", isPrivate = false, "A Task", None, "optional", 1, 1, None)
+    taskService.create(1, initialTask)
+    val tasklist = List(initialTask)
     val (size, stream) = taskExportService.responseFromTaskId(tasklist)
     taskImportService.buildAllTasks(1, stream.getInputStream)
-    //Assert.assertEquals()
+    val importedTask = taskService.getOne(1).get
+    print(initialTask)
+    print(importedTask)
+    Assert.assertEquals(initialTask, importedTask)
   }
 }
