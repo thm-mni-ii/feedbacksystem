@@ -1234,13 +1234,13 @@ paths:
           required: true
           schema:
             type: integer
-          requestBody:
-            required: true
-            content:
-              "application/json":
-                schema:
-                type: object
-                properties:
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
                 formula:
                   type: string
       responses:
@@ -1280,10 +1280,10 @@ paths:
         content:
           "application/json":
             schema:
-            type: object
-            properties:
-            formula:
-              type: string
+              type: object
+              properties:
+                formula:
+                  type: string
       responses:
         "200":
           description: OK
