@@ -61,6 +61,5 @@ class TaskImportService {
       }
       case None => {}
     }
-
   }
 }

@@ -14,5 +14,4 @@ class ArchivIterator(inputStream: TarArchiveInputStream) extends Iterator[TarArc
       current = inputStream.getNextTarEntry
       tmp
     }
-
 }

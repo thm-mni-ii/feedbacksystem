@@ -13,7 +13,6 @@ import scala.collection.mutable.ListBuffer
 
 object Archiver {
   private val logger = LoggerFactory.getLogger(this.getClass)
-  
   @throws[IOException]
   def unpack(files: InputStream): ListBuffer[TaskImportFiles] = {
     val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
@@ -21,7 +20,7 @@ object Archiver {
     val list: ListBuffer[TaskImportFiles] = ListBuffer()
     var current = ""
     var entry: TarArchiveEntry = null
-    while ( {
+    while ({
       entry = tmp.getNextTarEntry;
       entry != null
     }) {
