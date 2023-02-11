@@ -5,8 +5,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
 internal class SemanticAstComparatorTest {
-    private val semanticAstComparator = SemanticAstComparator(2)
-    
+    private val semanticAstComparator = SemanticAstComparator(
+        decimals = 2,
+        ignoreNeutralElements = true,
+        applyInverseElements = true,
+        applyCommutativeLaw = true
+    )
+
     @Test
     fun compareSimple() {
         assertTrue(
