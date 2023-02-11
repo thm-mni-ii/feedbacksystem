@@ -50,19 +50,4 @@ class ImportController {
       throw new ForbiddenException()
     }
   }
-
-  @PostMapping(value = Array("/tasks/import/list"))
-  @ResponseBody
-  def importTaskList(@PathVariable(value = "cid", required = true) cid: Int, @RequestParam("file") body: MultipartFile,
-                     req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      taskImportService.buildAllTasks(cid, body.getInputStream)
-    } else {
-      throw new ForbiddenException()
-    }
-  }
 }
