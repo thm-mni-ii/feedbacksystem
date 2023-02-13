@@ -140,7 +140,7 @@ export class CourseDetailComponent implements OnInit {
   openExportDialog() {
     this.dialog.open(ExportTasksDialogComponent, {
       height: "auto",
-      width: "50%",
+      width: "40%",
       data: { courseId: this.courseID, tasks: this.tasks },
     });
   }
