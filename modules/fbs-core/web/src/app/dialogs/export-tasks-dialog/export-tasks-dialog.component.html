@@ -14,10 +14,22 @@
 </mat-menu>
 
 <div class="content">
-  <mat-card class="task" *ngFor="let task of tasks">{{ task.name }}</mat-card>
+  <mat-card
+    [ngClass]="{
+      selected: task.selected
+    }"
+    class="task"
+    *ngFor="let task of tasks"
+    (click)="select(task.index)"
+    >{{ task.name }}</mat-card
+  >
 </div>
 
 <mat-dialog-actions class="actions">
-  <button mat-flat-button color="warn">Abbrechen</button>
-  <button mat-flat-button color="accent">Auswahl exportieren</button>
+  <button mat-flat-button color="warn" (click)="closeDialog()">
+    Abbrechen
+  </button>
+  <button mat-flat-button color="accent" (click)="export()">
+    Auswahl exportieren
+  </button>
 </mat-dialog-actions>

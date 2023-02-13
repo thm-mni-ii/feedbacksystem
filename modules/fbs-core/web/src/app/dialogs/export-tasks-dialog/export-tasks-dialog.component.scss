@@ -14,3 +14,9 @@
 .task {
   margin-bottom: 12px;
 }
+
+.selected {
+  background-color: #a8b3c9;
+  transition: none !important;
+  box-shadow: none !important;
+}
