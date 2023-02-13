@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Task } from "../../model/Task";
+import { TaskService } from "src/app/service/task.service";
 
 @Component({
   selector: "app-export-tasks-dialog",
@@ -11,7 +11,8 @@ export class ExportTasksDialogComponent implements OnInit {
   tasks: any[] = [];
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<ExportTasksDialogComponent>
+    public dialogRef: MatDialogRef<ExportTasksDialogComponent>,
+    private taskService: TaskService
   ) {}
 
   ngOnInit(): void {
@@ -19,8 +20,12 @@ export class ExportTasksDialogComponent implements OnInit {
   }
 
   export() {
-    console.log("hallo");
     this.dialogRef.close({ success: true });
+    for (let task of this.tasks) {
+      if (task.selected) {
+        this.taskService.downloadTask(this.data.courseId, task.id, task.name);
+      }
+    }
   }
 
   closeDialog() {
@@ -38,13 +43,23 @@ export class ExportTasksDialogComponent implements OnInit {
     }
   }
 
+  selectAll() {
+    this.tasks.map((task) => {
+      task.selected = true;
+    });
+  }
+
+  unSelectAll() {
+    this.tasks.map((task) => {
+      task.selected = false;
+    });
+  }
+
   select(index: number) {
-    console.log(this.tasks[index].selected);
     if (this.tasks[index].selected) {
       this.tasks[index].selected = false;
     } else {
       this.tasks[index].selected = true;
     }
-    console.log(this.tasks[index].selected);
   }
 }

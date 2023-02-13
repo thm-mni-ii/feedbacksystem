@@ -5,10 +5,10 @@
   </button>
 </div>
 <mat-menu #more="matMenu">
-  <button mat-menu-item>
+  <button mat-menu-item (click)="selectAll()">
     <span>Alle auswählen</span>
   </button>
-  <button mat-menu-item>
+  <button mat-menu-item (click)="unSelectAll()">
     <span>Auswahl aufheben</span>
   </button>
 </mat-menu>
