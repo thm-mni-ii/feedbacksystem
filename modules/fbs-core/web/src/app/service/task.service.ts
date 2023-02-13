@@ -91,7 +91,7 @@ export class TaskService {
       })
       .subscribe((response) => {
         const blob = new Blob([response], { type: "text/plain" });
-        saveAs(blob, filename ? filename + "_export.tar" : "_export.tar");
+        saveAs(blob, filename ? filename + ".fbs-export" : "export.fbs-export");
       });
   }
 }
