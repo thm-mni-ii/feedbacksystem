@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 @Service
 class ExcelCheckerServiceV2(private val errorAnalysisSolutionService: ErrorAnalysisSolutionService) {
     fun check(configurationId: Int, submission: XSSFWorkbook): AnalysisResult? {
-        errorAnalysisSolutionService.storeSolution(configurationId, submission)
         val solution = errorAnalysisSolutionService.getSolution(configurationId) ?: return null
         val result = AnalysisResult()
         val handlerService = HandlerService(ErrorHandler(result), PropagatedErrorHandler(result))
