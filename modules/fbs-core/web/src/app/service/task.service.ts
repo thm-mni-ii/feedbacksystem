@@ -86,12 +86,12 @@ export class TaskService {
 
   public downloadTask(cid: number, tid: number, filename?: string) {
     return this.http
-      .get(`/api/v1/courses/${cid}/tasks/${tid}`, {
+      .get(`/api/v1/courses/${cid}/tasks/${tid}/export`, {
         responseType: "arraybuffer",
       })
       .subscribe((response) => {
         const blob = new Blob([response], { type: "text/plain" });
-        saveAs(blob, filename ? filename + "_export.txt" : "_export.txt");
+        saveAs(blob, filename ? filename + ".fbs-export" : "export.fbs-export");
       });
   }
 }
