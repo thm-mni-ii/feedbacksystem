@@ -12,6 +12,4 @@ data class Cell(val sheet: Int, val cell: String) {
         this.value = value
         this.formula = formula
     }
-
-
 }
