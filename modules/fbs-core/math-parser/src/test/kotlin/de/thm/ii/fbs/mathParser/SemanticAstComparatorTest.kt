@@ -116,4 +116,14 @@ internal class SemanticAstComparatorTest {
             )
         )
     }
+
+    @Test
+    fun multiplicationWithExponentTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a^(-4)b^4"),
+                MathParserHelper.parse("4*a^(-4)*b^4")
+            )
+        )
+    }
 }

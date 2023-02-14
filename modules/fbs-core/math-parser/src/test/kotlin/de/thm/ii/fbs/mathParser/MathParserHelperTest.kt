@@ -347,12 +347,48 @@ internal class MathParserHelperTest {
 
     @Test
     fun parseLongDecimal() {
-        println(MathParserHelper.parse("1,23456789"))
         assertEquals(
             Ast(
                 Num(1.23456789)
             ),
             MathParserHelper.parse("1,23456789")
+        )
+    }
+
+    @Test
+    fun multiplicationWithExplicitTest() {
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL,
+                    Operation(Operator.MUL,
+                        Num(4), Operation(Operator.EXP,
+                            Var("a"),
+                            UnaryOperation(Operator.SUB, Num(4))
+                        )
+                    ),
+                    Operation(Operator.EXP, Var("b"), Num(4))
+                )
+            ),
+            MathParserHelper.parse("4*a^(-4)*b^4")
+        )
+    }
+
+    @Test
+    fun multiplicationWithExponentImplicitTest() {
+        print(MathParserHelper.parse("4a^(-4)b^4").toDot())
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL,
+                    Operation(Operator.MUL,
+                        Num(4), Operation(Operator.EXP,
+                            Var("a"),
+                            UnaryOperation(Operator.SUB, Num(4))
+                        )
+                    ),
+                    Operation(Operator.EXP, Var("b"), Num(4))
+                )
+            ),
+            MathParserHelper.parse("4a^(-4)b^4")
         )
     }
 }
