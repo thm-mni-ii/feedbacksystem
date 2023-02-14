@@ -1,22 +1,32 @@
 package de.thm.ii.fbs.services.v2.checker.storage
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.v2.checker.storage.CheckerStorageEntity
+import com.fasterxml.jackson.databind.module.SimpleModule
+import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.services.v2.persistence.CheckerStorageRepository
+import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphDeserializer
+import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphSerializer
 import org.springframework.stereotype.Service
+
 
 @Service
 class CheckerStorageService(val checkerStorageRepository: CheckerStorageRepository) {
     val objectMapper = ObjectMapper()
 
+    init {
+        val module = SimpleModule()
+        module.addSerializer(ReferenceGraph::class.java, ReferenceGraphSerializer())
+        module.addDeserializer(ReferenceGraph::class.java, ReferenceGraphDeserializer())
+        objectMapper.registerModule(module)
+    }
+
     private fun storeValueGen(configurationId: Int, storageKey: String, value: Any, submissionId: Int? = null) {
-        checkerStorageRepository.save(
-            CheckerStorageEntity(
-                configurationId = configurationId,
-                submissionId = submissionId,
-                storageKey = storageKey,
-                value = objectMapper.valueToTree(value)
-            )
+        checkerStorageRepository.insertOrUpdate(
+            configurationId,
+            submissionId,
+            storageKey,
+            objectMapper.valueToTree<JsonNode>(value).toString()
         )
     }
 

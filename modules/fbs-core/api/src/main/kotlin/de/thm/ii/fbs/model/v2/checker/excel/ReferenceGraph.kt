@@ -6,7 +6,7 @@ import org.jgrapht.graph.DefaultDirectedGraph
 import org.jgrapht.graph.DefaultEdge
 
 class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>) {
-    val data: Graph<Cell, DefaultEdge> = DefaultDirectedGraph(DefaultEdge::class.java)
+    var data: Graph<Cell, DefaultEdge> = DefaultDirectedGraph(DefaultEdge::class.java)
 
     init {
         references.forEach { (index, sheet) ->

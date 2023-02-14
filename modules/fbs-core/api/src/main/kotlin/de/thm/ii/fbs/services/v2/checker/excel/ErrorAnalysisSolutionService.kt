@@ -17,10 +17,8 @@ class ErrorAnalysisSolutionService(private val checkerStorageService: CheckerSto
     fun storeSolution(configurationId: Int, workbook: XSSFWorkbook) {
         val references = SpreadsheetReferenceParser(workbook).references
         val graph = ReferenceGraph(references)
-        val solution =
-            graph.data.vertexSet().associate { c -> c!! to c.value!! } // TODO: Check if it breaks sometimes
 
-        checkerStorageService.storeValue(configurationId, STORAGE_KEY, ErrorAnalysisSolution(graph, solution))
+        checkerStorageService.storeValue(configurationId, STORAGE_KEY, ErrorAnalysisSolution(graph))
     }
 
     fun getSolution(configurationId: Int): ErrorAnalysisSolution? {
