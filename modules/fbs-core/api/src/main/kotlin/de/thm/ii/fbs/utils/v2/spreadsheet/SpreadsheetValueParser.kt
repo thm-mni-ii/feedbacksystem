@@ -32,7 +32,11 @@ class SpreadsheetValueParser {
             }
         }
 
-        fun setValueOfCell(cell: XSSFCell, value: String) {
+        fun setValueOfCell(cell: XSSFCell, value: String?) {
+            if (value == null) {
+                return cell.setBlank()
+            }
+
             value.toDoubleOrNull()?.let {
                 cell.setCellValue(it)
             } ?: value.toBooleanStrictOrNull()?.let {
