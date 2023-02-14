@@ -6,7 +6,7 @@ import de.thm.ii.fbs.services.v2.persistence.CheckerStorageRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CheckerStorage(val checkerStorageRepository: CheckerStorageRepository) {
+class CheckerStorageService(val checkerStorageRepository: CheckerStorageRepository) {
     val objectMapper = ObjectMapper()
 
     private fun storeValueGen(configurationId: Int, storageKey: String, value: Any, submissionId: Int? = null) {
