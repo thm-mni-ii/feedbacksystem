@@ -1,13 +1,23 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import org.apache.poi.ss.usermodel.CellType
+import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFSheet
 import java.text.NumberFormat
 import java.util.*
 
 class SpreadsheetValueParser {
     companion object {
         private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+
+        @JvmStatic
+        fun valueByCellRef(sheet: XSSFSheet, ref: String): String {
+            val cellRef = CellReference(ref)
+            val cell = sheet.getRow(cellRef.row).getCell(cellRef.col.toInt())
+
+            return valueOfCell(cell)
+        }
 
         @JvmStatic
         fun valueOfCell(cell: XSSFCell?): String {
