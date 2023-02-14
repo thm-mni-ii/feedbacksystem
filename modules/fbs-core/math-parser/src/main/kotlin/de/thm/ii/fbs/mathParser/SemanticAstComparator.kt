@@ -11,6 +11,22 @@ class SemanticAstComparator(
     applyInverseElements: Boolean = false,
     applyCommutativeLaw: Boolean = false,
 ) {
+    class Builder {
+        private var decimals: Int = 2
+        private var roundingMode: RoundingMode = RoundingMode.HALF_UP
+        private var ignoreNeutralElements: Boolean = false
+        private var applyInverseElements: Boolean = false
+        private var applyCommutativeLaw: Boolean = false
+
+        fun decimals(decimals: Int) = apply { this.decimals = decimals }
+        fun roundingMode(roundingMode: RoundingMode) = apply { this.roundingMode = roundingMode }
+        fun ignoreNeutralElements(ignoreNeutralElements: Boolean) = apply { this.ignoreNeutralElements = ignoreNeutralElements }
+        fun applyInverseElements(applyInverseElements: Boolean) = apply { this.applyInverseElements = applyInverseElements }
+        fun applyCommutativeLaw(applyCommutativeLaw: Boolean) = apply { this.applyCommutativeLaw = applyCommutativeLaw }
+
+        fun build(): SemanticAstComparator =
+            SemanticAstComparator(decimals, roundingMode, ignoreNeutralElements, applyInverseElements, applyCommutativeLaw)
+    }
 
     private val transformerConfig = TransformerConfig(decimals, roundingMode)
 
