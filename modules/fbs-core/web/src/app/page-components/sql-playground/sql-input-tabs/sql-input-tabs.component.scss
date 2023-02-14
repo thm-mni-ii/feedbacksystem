@@ -3,7 +3,8 @@
   margin-top: 15px;
   margin-left: 1.5%;
   margin-right: 1.5%;
-  margin-bottom: 0;
+  margin-bottom: 10px;
+  //position: absolute;
 }
 
 .downloadBtn {
@@ -70,4 +71,10 @@
 
 .material-icons.color_red { 
   color: #e20000 
+}
+
+.title {
+  font-family: sans-serif;
+  font-size: medium;
+  font-style: oblique;
 }
