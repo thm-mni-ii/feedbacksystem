@@ -13,7 +13,8 @@ object ReferenceGraphSerialisation {
     const val EDGES_JSON_KEY = "edges"
     const val VERTEXES_JSON_KEY = "vertexes"
 
-    fun serialize(value: ReferenceGraph): Pair<List<ReferenceGraphEdge>, Map<String, Cell>> {
+    fun serialize(value: ReferenceGraph): Pair<Map<String, Cell>, List<ReferenceGraphEdge>> {
+        val vertexes = value.data.vertexSet().associateBy { v -> v.toMapKey() }
         val edges = value.data.edgeSet()
             .map { v ->
                 ReferenceGraphEdge(
@@ -21,9 +22,8 @@ object ReferenceGraphSerialisation {
                     value.data.getEdgeTarget(v).toMapKey()
                 )
             }
-        val vertexes = value.data.vertexSet().associateBy { v -> v.toMapKey() }
 
-        return Pair(edges, vertexes)
+        return Pair(vertexes, edges)
     }
 
     fun deserialize(node: JsonNode): ReferenceGraph {
