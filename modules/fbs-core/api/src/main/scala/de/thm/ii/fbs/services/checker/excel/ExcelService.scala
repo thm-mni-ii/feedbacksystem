@@ -1,9 +1,9 @@
 package de.thm.ii.fbs.services.checker.excel
 
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
-import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck}
+import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck, ExcelMediaInformationTasks}
 import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.xssf.usermodel.{XSSFCell, XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
+import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
 
 import java.io.{File, FileInputStream}
@@ -20,7 +20,8 @@ class ExcelService {
 
   /**
     * Gets the values in the selected field range
-    * @param spreadsheet the spreadsheet field
+    *
+    * @param spreadsheet           the spreadsheet field
     * @param excelMediaInformation the spreadsheet Configurations
     * @return the values
     */
@@ -29,6 +30,17 @@ class ExcelService {
     val (start, end) = this.parseCellRange(checkFields.range)
     val values = this.getInCol(sheet, end.col, start.row, end.row)
     values
+  }
+
+  def initWorkBook(spreadsheet: File, excelMediaInformation: ExcelMediaInformationTasks): XSSFWorkbook = {
+    val input = new FileInputStream(spreadsheet)
+    val workbook = new XSSFWorkbook(input)
+    excelMediaInformation.tasks.foreach(t => {
+      this.setCells(workbook, t.changeFields)
+      XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
+    })
+
+    workbook
   }
 
   private def initSheet(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): XSSFSheet = {
@@ -45,7 +57,9 @@ class ExcelService {
       val row = sheet.getRow(i)
       val cell = if (row != null) {
         row.getCell(col)
-      } else { null }
+      } else {
+        null
+      }
 
       val res = if (cell == null) {
         ""
@@ -94,7 +108,7 @@ class ExcelService {
       case Some(m) => m
       case _ => throw new IllegalArgumentException(address + " is not a valid cell address")
     }
-    Cords(Integer.parseInt(m.group(2))-1, this.colToInt(m.group(1).charAt(0))-1)
+    Cords(Integer.parseInt(m.group(2)) - 1, this.colToInt(m.group(1).charAt(0)) - 1)
   }
 
   private def colToInt(col: Char): Int =
@@ -111,8 +125,8 @@ class ExcelService {
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
   /**
-    * @param row the row where the errror occured
-    * @param col the col where the error occured
+    * @param row     the row where the errror occured
+    * @param col     the col where the error occured
     * @param message the error returned by the spreadsheet
     */
   class Exception(row: Int, col: Int, message: String) extends RuntimeException("SpreadsheetException@" + row.toString + "," + col.toString + ": " + message)
