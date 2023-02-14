@@ -10,11 +10,9 @@ class CheckerStorageEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
-    @ManyToOne(optional = false)
-    @JoinTable(name = "checkrunner_configuration")
+    @Column(nullable = false) // TODO: define FOREIGN Key
     var configurationId: Int,
-    @ManyToOne(optional = true)
-    @JoinTable(name = "user_task_submission")
+    @Column(nullable = true) // TODO: define FOREIGN Key
     var submissionId: Int? = null,
     @Column(nullable = false)
     var storageKey: String,
