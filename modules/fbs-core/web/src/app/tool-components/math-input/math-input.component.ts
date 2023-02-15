@@ -1,11 +1,18 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild} from "@angular/core";
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from "@angular/core";
 
 @Component({
   selector: "app-math-input",
   templateUrl: "./math-input.component.html",
   styleUrls: ["./math-input.component.scss"],
 })
-export class MathInputComponent implements OnChanges {
+export class MathInputComponent {
   @Input()
   label: string;
   @Input()
@@ -15,15 +22,8 @@ export class MathInputComponent implements OnChanges {
   @ViewChild("mathInput")
   input: ElementRef;
 
-
-
   handleChange($event: Event) {
-    this.update.emit(($event.currentTarget as HTMLInputElement).value)
-  }
-
-  ngOnChanges(): void {
-    /*(this.input as any).setOptions({
-      virtualKeyboardMode: "manual",
-    });*/
+    const mathJson = ($event.currentTarget as any).getValue("math-json");
+    this.update.emit(mathJson);
   }
 }

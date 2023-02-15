@@ -26,6 +26,7 @@
     "@angular/platform-browser-dynamic": "^14.1.0",
     "@angular/router": "^14.1.0",
     "@auth0/angular-jwt": "^5.0.2",
+    "@cortex-js/compute-engine": "^0.12.2",
     "@fontsource/material-icons": "^4.5.4",
     "@fontsource/roboto": "^4.5.8",
     "canvas-datagrid": "^0.4.5",
