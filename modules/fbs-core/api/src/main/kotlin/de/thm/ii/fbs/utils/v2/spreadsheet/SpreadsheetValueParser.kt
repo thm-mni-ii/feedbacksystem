@@ -14,7 +14,7 @@ class SpreadsheetValueParser {
         @JvmStatic
         fun valueByCellRef(sheet: XSSFSheet, ref: String): String {
             val cellRef = CellReference(ref)
-            val cell = sheet.getRow(cellRef.row).getCell(cellRef.col.toInt())
+            val cell = sheet.getRow(cellRef.row)?.getCell(cellRef.col.toInt())
 
             return valueOfCell(cell)
         }
