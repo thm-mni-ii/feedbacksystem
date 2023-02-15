@@ -31,8 +31,8 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
 
   constructor() {}
 
-  updateSubmission() {
-    const content = this.resultForm.value;
+  updateSubmission(value: string) {
+    const content = value;
     content["complete"] = this.outputFields.length > 0;
     this.update.emit({ content });
   }

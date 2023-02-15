@@ -22,7 +22,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": ["src/favicon.ico", "src/assets", { "glob": "**/*", "input": "node_modules/katex/dist", "output": "." }],
             "styles": ["src/theme.scss", "src/styles.scss"],
             "scripts": ["node_modules/marked/marked.min.js"],
             "aot": false,

@@ -13,16 +13,11 @@
   <hr />
   <form [formGroup]="resultForm">
     <div class="flex-container">
-      <mat-form-field *ngFor="let outputField of outputFields">
-        <input
-          matInput
-          type="text"
-          [placeholder]="outputField"
-          [formControlName]="outputField"
-          (input)="updateSubmission()"
-          required
-        />
-      </mat-form-field>
+      <app-math-input
+        *ngFor="let outputField of outputFields"
+        [label]="outputField"
+        (update)="updateSubmission($event)"
+      ></app-math-input>
     </div>
   </form>
   <small

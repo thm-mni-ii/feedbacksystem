@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { MatDialogModule } from "@angular/material/dialog";
-import { Injectable, NgModule } from "@angular/core";
+import {CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule} from "@angular/core";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { LayoutModule } from "@angular/cdk/layout";
@@ -103,6 +103,9 @@ import { DbControlDbOverviewComponent } from "./page-components/sql-playground/d
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
+import "mathlive";
+import {MathInputComponent} from "./tool-components/math-input/math-input.component";
+
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
@@ -196,6 +199,7 @@ export const httpInterceptorProviders = [
     DbControlDbOverviewComponent,
     NewSqlTemplateComponent,
     HighlightedInputComponent,
+    MathInputComponent
   ],
   imports: [
     BrowserModule,
@@ -244,6 +248,7 @@ export const httpInterceptorProviders = [
     { provide: MAT_DATE_LOCALE, useValue: "de" },
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
 
