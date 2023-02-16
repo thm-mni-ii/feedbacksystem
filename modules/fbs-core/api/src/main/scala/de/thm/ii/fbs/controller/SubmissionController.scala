@@ -265,16 +265,20 @@ class SubmissionController {
 
     val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
 
-    submissionService.getOne(sid, uid, privileged) match {
-      case Some(submission) => {
-        val file: File = storageService.getFileSolutionFile(submission)
-        ResponseEntity.ok()
-          .contentType(MediaType.APPLICATION_OCTET_STREAM)
-          .contentLength(file.length())
-          .header("Content-Disposition", s"attachment;filename=task_${task.id}.fbs-submission")
-          .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+    if (privileged) {
+      submissionService.getOne(sid, uid) match {
+        case Some(submission) => {
+          val file: File = storageService.getFileSolutionFile(submission)
+          ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentLength(file.length())
+            .header("Content-Disposition", s"attachment;filename=task_${task.id}.fbs-submission")
+            .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+        }
+        case None => throw new ResourceNotFoundException()
       }
-      case None => throw new ResourceNotFoundException()
+    } else {
+      throw new ResourceNotFoundException()
     }
   }
 }
