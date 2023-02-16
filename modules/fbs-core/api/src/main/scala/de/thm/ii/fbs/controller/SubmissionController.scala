@@ -1,14 +1,19 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
+import java.io.File
+import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -248,6 +253,28 @@ class SubmissionController {
       }
     } else {
       throw new ForbiddenException()
+    }
+  }
+
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content"))
+  @ResponseBody
+  def getContent(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+                         req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+
+    submissionService.getOne(sid, uid, privileged) match {
+      case Some(submission) => {
+        val file: File = storageService.getFileSolutionFile(submission)
+        ResponseEntity.ok()
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .contentLength(file.length())
+          .header("Content-Disposition", s"attachment;filename=task_${task.id}.fbs-submission")
+          .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+      }
+      case None => throw new ResourceNotFoundException()
     }
   }
 }
