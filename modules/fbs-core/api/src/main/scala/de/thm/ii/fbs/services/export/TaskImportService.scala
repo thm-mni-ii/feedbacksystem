@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.DeserializationFeature
-import de.thm.ii.fbs.model.{TaskExport, TaskImportFiles, storageFileName}
+import de.thm.ii.fbs.model.{Task, TaskExport, TaskImportFiles, storageFileName}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
 import org.slf4j.LoggerFactory
@@ -30,7 +30,17 @@ class TaskImportService {
     taskImportFiles.foreach(tif => createTask(cid, tif))
   }
 
-  private def createTask(cid: Int, files: TaskImportFiles) {
+  def showEditorContent(cid: Int, inputStream: InputStream): ListBuffer[Task] = {
+    val taskImportFiles = Archiver.unpack(inputStream)
+    val taskList: ListBuffer[Task] = ListBuffer()
+    for (x <- taskImportFiles) {
+      val t = objectMapper.readValue(new File(x.taskConfigPath), classOf[TaskExport])
+      taskList += t.task
+    }
+    taskList
+  }
+
+  private def createTask(cid: Int, files: TaskImportFiles): Unit = {
     val t = objectMapper.readValue(new File(files.taskConfigPath), classOf[TaskExport])
     val task = taskService.create(cid, t.task)
     t.configs.foreach(cc => {
@@ -51,7 +61,7 @@ class TaskImportService {
           case null => MediaType.APPLICATION_OCTET_STREAM.toString
           case value: String => value
         }
-        if (isMain){
+        if (isMain) {
           storageService.storeConfigurationFileInBucket(id, new FileInputStream(newFile), newFile.length(),
             contentType2, storageFileName.MAIN_FILE)
         } else {
