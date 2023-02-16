@@ -10,13 +10,6 @@ class ReferenceGraphSerializer : JsonSerializer<ReferenceGraph>() {
     override fun serialize(
         value: ReferenceGraph, jgen: JsonGenerator, provider: SerializerProvider?
     ) {
-        val values = ReferenceGraphSerialisation.serialize(value)
-
-        jgen.writeStartObject()
-        jgen.writeObjectFieldStart(ReferenceGraphSerialisation.DATA_JSON_KEY)
-        jgen.writeObjectField(ReferenceGraphSerialisation.VERTEXES_JSON_KEY, values.first)
-        jgen.writeObjectField(ReferenceGraphSerialisation.EDGES_JSON_KEY, values.second)
-        jgen.writeEndObject()
-        jgen.writeEndObject()
+        ReferenceGraphSerialisation.serialize(value, jgen)
     }
 }

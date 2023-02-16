@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.utils.v2.converters
 
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
@@ -13,7 +14,7 @@ object ReferenceGraphSerialisation {
     const val EDGES_JSON_KEY = "edges"
     const val VERTEXES_JSON_KEY = "vertexes"
 
-    fun serialize(value: ReferenceGraph): Pair<Map<String, Cell>, List<ReferenceGraphEdge>> {
+    fun serialize(value: ReferenceGraph, jgen: JsonGenerator) {
         val vertexes = value.data.vertexSet().associateBy { v -> v.toMapKey() }
         val edges = value.data.edgeSet()
             .map { v ->
@@ -23,7 +24,12 @@ object ReferenceGraphSerialisation {
                 )
             }
 
-        return Pair(vertexes, edges)
+        jgen.writeStartObject()
+        jgen.writeObjectFieldStart(DATA_JSON_KEY)
+        jgen.writeObjectField(VERTEXES_JSON_KEY, vertexes)
+        jgen.writeObjectField(EDGES_JSON_KEY, edges)
+        jgen.writeEndObject()
+        jgen.writeEndObject()
     }
 
     fun deserialize(node: JsonNode): ReferenceGraph {
