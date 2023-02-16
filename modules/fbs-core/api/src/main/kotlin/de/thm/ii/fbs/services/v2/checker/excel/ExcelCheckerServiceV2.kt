@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service
 
 @Service
 class ExcelCheckerServiceV2(private val errorAnalysisSolutionService: ErrorAnalysisSolutionService) {
-    fun check(configurationId: Int, submission: XSSFWorkbook): AnalysisResult? {
-        val solution = errorAnalysisSolutionService.getSolution(configurationId) ?: return null
+    fun check(configurationId: Int, solutionSheet: XSSFWorkbook, submissionSheet: XSSFWorkbook): AnalysisResult? {
+        val solution = errorAnalysisSolutionService.getSolution(configurationId, solutionSheet) ?: return null
         val result = AnalysisResult()
         val handlerService = HandlerService(ErrorHandler(result), PropagatedErrorHandler(result))
 
         val errorAnalysisService = ErrorAnalysisService(
-            submission,
+            submissionSheet,
             solution.graph,
             getSolutionMap(solution),
             handlerService

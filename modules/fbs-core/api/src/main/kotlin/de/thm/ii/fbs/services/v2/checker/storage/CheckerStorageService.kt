@@ -38,4 +38,27 @@ class CheckerStorageService(val checkerStorageRepository: CheckerStorageReposito
         )?.value
         return objectMapper.treeToValue(value, T::class.java)
     }
+
+    inline fun <reified T : Any> getOrStoreValue(configurationId: Int, storageKey: String, generateValue: () -> T): T {
+        var value = this.getValue<T>(configurationId, storageKey)
+
+        if (value != null) {
+            return value
+        }
+
+        value = generateValue()
+        this.storeValue(configurationId, storageKey, value)
+        return value
+
+    }
+
+    fun deleteValue(configurationId: Int, storageKey: String) {
+        checkerStorageRepository.delete(
+            CheckerStorageEntity(
+                configurationId,
+                storageKey,
+                objectMapper.createObjectNode()
+            )
+        )
+    }
 }

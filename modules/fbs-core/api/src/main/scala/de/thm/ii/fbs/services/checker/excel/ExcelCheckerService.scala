@@ -3,9 +3,9 @@ package de.thm.ii.fbs.services.checker.excel
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
-import de.thm.ii.fbs.services.checker.`trait`.CheckerService
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnMainFileUpload, CheckerServiceOnSecondaryFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
-import de.thm.ii.fbs.services.v2.checker.excel.ExcelCheckerServiceV2
+import de.thm.ii.fbs.services.v2.checker.excel.{ErrorAnalysisSolutionService, ExcelCheckerServiceV2}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ import java.io.File
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 @Service
-class ExcelCheckerService extends CheckerService {
+class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUpload with CheckerServiceOnSecondaryFileUpload {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -27,6 +27,8 @@ class ExcelCheckerService extends CheckerService {
   private val spreadsheetFileService: SpreadsheetFileService = null
   @Autowired
   private val excelCheckerServiceV2: ExcelCheckerServiceV2 = null
+  @Autowired
+  private val errorAnalysisSolutionService: ErrorAnalysisSolutionService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -52,6 +54,16 @@ class ExcelCheckerService extends CheckerService {
     }
   }
 
+
+  override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    // Delete stored solution to force the Checker to regenerate it on the next check
+    errorAnalysisSolutionService.deleteSolution(checkerConfiguration.id)
+  }
+
+  override def onCheckerSecondaryFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    onCheckerMainFileUpload(cid, task, checkerConfiguration)
+  }
+
   private def executeChecker(cc: CheckrunnerConfiguration, submission: Submission, submissionFile: File, mainFile: File): Unit = {
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
@@ -75,7 +87,7 @@ class ExcelCheckerService extends CheckerService {
                               submissionFile: File,
                               solutionFile: File): SubmissionResult = {
     if (excelMediaInformation.enableExperimentalFeatures) {
-      checkSubmissionExperimental(cc, excelMediaInformation, submissionFile)
+      checkSubmissionExperimental(cc, excelMediaInformation, submissionFile, solutionFile)
     } else {
       val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
       val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
@@ -85,9 +97,11 @@ class ExcelCheckerService extends CheckerService {
 
   private def checkSubmissionExperimental(cc: CheckrunnerConfiguration,
                                           excelMediaInformation: ExcelMediaInformationTasks,
-                                          submissionFile: File): SubmissionResult = {
+                                          submissionFile: File,
+                                          solutionFile: File): SubmissionResult = {
+    val solution = excelService.initWorkBook(solutionFile, excelMediaInformation) // TODO: do only if needed
     val submission = excelService.initWorkBook(submissionFile, excelMediaInformation)
-    val result = excelCheckerServiceV2.check(cc.id, submission)
+    val result = excelCheckerServiceV2.check(cc.id, solution, submission)
     val checkResult = CheckResult(result.getErrorCells.isEmpty, result.getErrorCells.asScala.map(c => c.getCell).toList)
 
     SubmissionResult(if (result.getErrorCells.isEmpty) 0 else 1, List(CheckResultTask(result.getErrorCells.isEmpty, List(checkResult))), List(checkResult))
