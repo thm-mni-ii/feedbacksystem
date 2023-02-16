@@ -420,4 +420,19 @@ internal class MathParserHelperTest {
         assertEquals(expected, MathParserHelper.parse("x^(-3)"))
         assertEquals(expected, MathParserHelper.parse("x^-3"))
     }
+
+    @Test
+    fun exponentOfExponentTest() {
+        val expected = Ast(
+            Operation(Operator.EXP,
+                Operation(Operator.EXP,
+                    Num(2),
+                    Num(3)
+                ),
+                Num(4)
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("(2^3)^4"))
+        assertEquals(expected, MathParserHelper.parse("2^3^4"))
+    }
 }
