@@ -10,6 +10,7 @@ import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
 
 import java.io.File
@@ -56,8 +57,13 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
 
 
   override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
-    // Delete stored solution to force the Checker to regenerate it on the next check
-    errorAnalysisSolutionService.deleteSolution(checkerConfiguration.id)
+    try {
+      // Delete stored solution to force the Checker to regenerate it on the next check
+      errorAnalysisSolutionService.deleteSolution(checkerConfiguration.id)
+    } catch {
+      // TODO: May find better solution with a version field
+      case _: ObjectOptimisticLockingFailureException => // Ignore if the row was already deleted by a parallel running update
+    }
   }
 
   override def onCheckerSecondaryFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {

@@ -53,12 +53,6 @@ class CheckerStorageService(val checkerStorageRepository: CheckerStorageReposito
     }
 
     fun deleteValue(configurationId: Int, storageKey: String) {
-        checkerStorageRepository.delete(
-            CheckerStorageEntity(
-                configurationId,
-                storageKey,
-                objectMapper.createObjectNode()
-            )
-        )
+        checkerStorageRepository.deleteByConfigurationIdAndStorageKey(configurationId, storageKey)
     }
 }
