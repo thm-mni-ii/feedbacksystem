@@ -391,4 +391,19 @@ internal class MathParserHelperTest {
             MathParserHelper.parse("4a^(-4)b^4")
         )
     }
+
+    @Test
+    fun multiplicationExponentTest() {
+        val expected = Ast(
+            Operation(Operator.MUL,
+                Operation(Operator.EXP,
+                    Num(5),
+                    Num(4)
+                ),
+                Var("a")
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("5^4a"))
+        assertEquals(expected, MathParserHelper.parse("5^4*a"))
+    }
 }
