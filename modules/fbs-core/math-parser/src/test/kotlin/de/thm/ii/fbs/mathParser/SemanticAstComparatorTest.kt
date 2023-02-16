@@ -3,10 +3,12 @@ package de.thm.ii.fbs.mathParser
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
+import java.math.RoundingMode
 
 internal class SemanticAstComparatorTest {
     private val semanticAstComparator = SemanticAstComparator.Builder()
         .decimals(2)
+        .roundingMode(RoundingMode.HALF_UP)
         .ignoreNeutralElements(true)
         .applyInverseElements(true)
         .applyCommutativeLaw(true)
