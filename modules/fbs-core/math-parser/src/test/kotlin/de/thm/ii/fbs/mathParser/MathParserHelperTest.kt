@@ -204,7 +204,7 @@ internal class MathParserHelperTest {
     fun parseWithMultiplicationUnaryMinus() {
         assertEquals(
             Ast(
-                Operation(Operator.EXP, UnaryOperation(Operator.SUB, Num(5)), Num(2))
+                UnaryOperation(Operator.SUB, Operation(Operator.EXP, Num(5), Num(2)))
             ),
             MathParserHelper.parse("-5^2")
         )
