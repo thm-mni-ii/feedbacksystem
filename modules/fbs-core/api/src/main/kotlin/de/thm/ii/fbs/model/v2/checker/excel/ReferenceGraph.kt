@@ -6,6 +6,7 @@ import org.jgrapht.graph.DefaultDirectedGraph
 
 class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>) {
     var data: Graph<Cell, ReferenceEdge> = DefaultDirectedGraph(ReferenceEdge::class.java)
+    var outputFields: List<Cell> = emptyList()
 
     init {
         references.forEach { (index, sheet) ->
@@ -20,6 +21,8 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
                 }
             }
         }
+
+        outputFields = data.vertexSet().filter { c -> this.isOutput(c) }
     }
 
     fun isInput(cell: Cell): Boolean {

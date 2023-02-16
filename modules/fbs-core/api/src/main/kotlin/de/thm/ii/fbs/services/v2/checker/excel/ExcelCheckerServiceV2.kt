@@ -22,13 +22,9 @@ class ExcelCheckerServiceV2(private val errorAnalysisSolutionService: ErrorAnaly
             getSolutionMap(solution),
             handlerService
         )
-        errorAnalysisService.findAllErrors(getOutputCells(solution))
+        errorAnalysisService.findAllErrors(solution.graph.outputFields)
 
         return result
-    }
-
-    private fun getOutputCells(solution: ErrorAnalysisSolution): List<Cell> {
-        return solution.graph.data.vertexSet().filter { c -> solution.graph.isOutput(c) } // TODO: Improve
     }
 
     private fun getSolutionMap(solution: ErrorAnalysisSolution): Map<Cell, String?> {
