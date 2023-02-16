@@ -406,4 +406,18 @@ internal class MathParserHelperTest {
         assertEquals(expected, MathParserHelper.parse("5^4a"))
         assertEquals(expected, MathParserHelper.parse("5^4*a"))
     }
+
+    @Test
+    fun negativeExponentTest() {
+        val expected = Ast(
+            Operation(Operator.EXP,
+                Var("x"),
+                UnaryOperation(Operator.SUB,
+                    Num(3)
+                )
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("x^(-3)"))
+        assertEquals(expected, MathParserHelper.parse("x^-3"))
+    }
 }

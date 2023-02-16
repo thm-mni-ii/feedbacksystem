@@ -20,7 +20,7 @@ mulFactor   : expo // higher presedence!
             | mulFactor ' '* expo
             ;
 
-expo        : expo ' '* EXP ' '* factor
+expo        : expo ' '* EXP ' '* SUB? factor
             | factor
             ;
 

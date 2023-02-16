@@ -53,7 +53,7 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildExpo(expo: MathParser.ExpoContext): Expr =
         when {
-            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), buildFactor(expo.factor()))
+            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor()))  else buildFactor(expo.factor()))
             expo.factor() !== null -> buildFactor(expo.factor())
             else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
