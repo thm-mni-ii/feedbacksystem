@@ -35,7 +35,7 @@ class SpreadsheetUtils {
          * @return The row at the given index
          */
         fun getRow(workbook: XSSFWorkbook, sheet: Int, row: Int): XSSFRow =
-            getSheet(workbook, sheet).getRow(row)
+            getSheet(workbook, sheet).let { it.getRow(row) ?: it.createRow(row) }
 
         /**
          * Get a cell from a row and create it as a blank cell if it doesn't exist yet.
