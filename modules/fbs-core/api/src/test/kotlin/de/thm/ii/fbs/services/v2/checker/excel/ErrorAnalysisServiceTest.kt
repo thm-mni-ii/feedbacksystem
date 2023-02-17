@@ -191,6 +191,38 @@ class ErrorAnalysisServiceTest {
         assertEquals(setOf(BasicTestCase.c2), res)
     }
 
+    @Test
+    fun nullCellsRowAndSheetTest() {
+        val c1 = Cell(0, "A1", "3", "A2 + A3")
+        val c2 = Cell(0, "A2", "1")
+        val c3 = Cell(0, "A3", "2")
+        val c4 = Cell(1, "B4", "4")
+
+        val sGraph = ReferenceGraph(
+            mapOf(
+                0 to mapOf(
+                    c1.cell to Pair(c1.value!!, setOf(c2, c3)),
+                    c2.cell to Pair(c2.value!!, setOf()),
+                    c3.cell to Pair(c3.value!!, setOf())
+                ),
+                1 to mapOf(
+                    c4.cell to Pair(c4.value!!, setOf())
+                )
+            )
+        )
+
+        val sMap = solutionMap(c1, c2, c3, c4)
+
+        val service = ErrorAnalysisService(
+            workbook(c1, c2),
+            sGraph,
+            sMap
+        )
+        val res = service.findAllErrors(listOf(c1, c4))
+
+        assertEquals(setOf(c3, c4), res)
+    }
+
     class BasicTestCase {
         companion object {
             val c1 = Cell(0, "A1", "3", "B1 + C1")
