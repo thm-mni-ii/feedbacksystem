@@ -14,7 +14,7 @@ class SpreadsheetReferenceParserTest {
     }
 
     private fun createTwoTestWorkbook(formula: String, formula2: String?): XSSFWorkbook {
-        return workbookWithSheets(listOf(listOf(Cell(0, "A1", formula = formula)), listOf(Cell(1, "A1", formula = formula2))))
+        return workbookWithSheets(listOf(Cell(0, "A1", formula = formula)), listOf(Cell(1, "A1", formula = formula2)))
     }
 
     @Test
