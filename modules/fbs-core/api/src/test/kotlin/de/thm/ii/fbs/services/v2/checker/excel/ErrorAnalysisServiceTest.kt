@@ -167,6 +167,30 @@ class ErrorAnalysisServiceTest {
 
     }
 
+    @Test
+    fun nullCellsTest() {
+        val service = ErrorAnalysisService(
+            workbook(BasicTestCase.c2, BasicTestCase.c3),
+            BasicTestCase.sGraph,
+            BasicTestCase.sMap
+        )
+        val res = service.findAllErrors(listOf(BasicTestCase.c1))
+
+        assertEquals(setOf(BasicTestCase.c1), res)
+    }
+
+    @Test
+    fun nullCellsPropagatedTest() {
+        val service = ErrorAnalysisService(
+            workbook(BasicTestCase.c1, BasicTestCase.c3),
+            BasicTestCase.sGraph,
+            BasicTestCase.sMap
+        )
+        val res = service.findAllErrors(listOf(BasicTestCase.c1))
+
+        assertEquals(setOf(BasicTestCase.c2), res)
+    }
+
     class BasicTestCase {
         companion object {
             val c1 = Cell(0, "A1", "3", "B1 + C1")
