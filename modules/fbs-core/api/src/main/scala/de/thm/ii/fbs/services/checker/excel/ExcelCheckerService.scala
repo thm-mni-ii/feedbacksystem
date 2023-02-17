@@ -54,7 +54,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
         storeError(submissionID, cc, e.getMessage)
     }
   }
-  
+
   override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
     try {
       // Delete stored solution to force the Checker to regenerate it on the next check
