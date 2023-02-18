@@ -20,7 +20,10 @@ tables, selAttributes, proAttributes, strings = [], [], [], []
 def parse_single_stat_upload_db(data, client):
     # create DB-connection
     client = MongoClient(client, 27107)
-    mydb = client.get_default_database()
+    # for livesystem
+    # mydb = client.get_default_database()
+    # for debugging
+    mydb = client["sql-checker"]
     mycollection = mydb["Queries"]
     (
         tables2,
@@ -131,7 +134,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         mycollection.insert_one(record)
 
 
@@ -161,7 +164,8 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client.get_default_database()
+    print("start")
+    mydb = client["sql-checker"]
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -259,6 +263,7 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
+    print("ende")
     if data["passed"]:
         if new_solution is True:
             # Upload as a new Solution to DB
@@ -279,7 +284,7 @@ def check_solution_chars(
 
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycollection = mydb["Solutions"]
     record = prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
@@ -511,7 +516,7 @@ def prod_json(
 
 
 def insert_not_parsable(my_uuid, submission, client):
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycollection = mydb["NotParsable"]
     record = json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
