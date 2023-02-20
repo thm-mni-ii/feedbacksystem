@@ -45,7 +45,7 @@ startScripts {
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
-    implementation group: 'io.minio', name: 'minio', version: '8.0.0'
+    implementation group: 'io.minio', name: 'minio', version: '8.5.2'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.10'
     implementation 'mysql:mysql-connector-java:8.0.32'
