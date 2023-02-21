@@ -133,7 +133,7 @@ services:
       test: echo 'db.runCommand("ping").ok' | mongo mongodb://localhost:27017/ --quiet
       timeout: 10s
       interval: 10s
-      start_period: 10s
+      #start_period: 10s
       retries: 3
 
   minio:

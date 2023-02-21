@@ -6,6 +6,7 @@ import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.{MediaType, ResponseEntity}
@@ -42,6 +43,7 @@ class SubmissionController {
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Get a list of all submissions for a task
@@ -259,7 +261,7 @@ class SubmissionController {
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content"))
   @ResponseBody
   def getContent(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
-                         req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+                 req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
@@ -277,6 +279,39 @@ class SubmissionController {
         }
         case None => throw new ResourceNotFoundException()
       }
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content"))
+  @ResponseBody
+  def solutionsOfCourse(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int,
+                        req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+
+    if (privileged) {
+      logger.info("test")
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content/download"))
+  @ResponseBody
+  def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+                        req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+
+    if (privileged) {
+      val t = submissionService.getLatestSubmissionByTask(cid, tid)
+      logger.info(t.toString())
     } else {
       throw new ResourceNotFoundException()
     }

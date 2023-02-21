@@ -53,6 +53,20 @@ class SubmissionService {
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
 
   /**
+    * Get all submission for a task
+    *
+    * @param cid Course id
+    * @param tid Task id
+    * @return List of submissions
+    */
+  def getLatestSubmissionByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
+    "SELECT submission_id, user_id, Max(submission_time) as submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
+      "FROM (SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+      "checker_type FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
+      "LEFT JOIN checkrunner_configuration using (configuration_id) " +
+      "WHERE course_id = ? AND user_task_submission.task_id = ?) as tab GROUP BY user_id", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
+
+  /**
     * Lookup a submission by id
     *
     * @param id         The sumissions id
