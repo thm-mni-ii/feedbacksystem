@@ -104,7 +104,7 @@ import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-temp
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
 import "mathlive";
-import "@cortex-js/compute-engine"
+import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 
 @Injectable()

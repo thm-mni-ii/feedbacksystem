@@ -6,7 +6,6 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
 
 @Component({
   selector: "app-submission-spreadsheet",
@@ -27,25 +26,23 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   @Input()
   content: object = {};
 
-  resultForm = new UntypedFormGroup({});
+  private results: Record<string, any> = {};
 
   constructor() {}
 
-  updateSubmission(value: string) {
-    const content = value;
-    content["complete"] = this.outputFields.length > 0;
-    this.update.emit({ content });
+  updateSubmission(field: string, value: string) {
+    this.results[field] = value;
+    this.results["complete"] = this.outputFields.length > 0;
+    this.update.emit({ content: this.results });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     for (const propName in changes) {
       if (propName === "outputFields" || propName === "content") {
-        this.resultForm = new UntypedFormGroup(
-          this.outputFields.reduce((acc, val) => {
-            acc[val] = new UntypedFormControl(this.content[val] ?? "");
-            return acc;
-          }, {})
-        );
+        this.results = this.outputFields.reduce((acc, val) => {
+          acc[val] = this.content[val] ?? "";
+          return acc;
+        }, {});
       }
     }
   }

@@ -1,22 +1,20 @@
 <div>
   <div class="flex-container">
-    <mat-form-field *ngFor="let inputField of inputFields">
-      <input
-        matInput
-        type="text"
-        [placeholder]="inputField[0]"
-        [value]="inputField[1]"
-        readonly
-      />
-    </mat-form-field>
+    <app-math-input
+      *ngFor="let inputField of inputFields"
+      [label]="inputField[0]"
+      [value]="inputField[1]"
+      (update)="updateSubmission(inputField[0], $event)"
+      [disabled]="true"
+    ></app-math-input>
   </div>
   <hr />
-  <form [formGroup]="resultForm">
+  <form>
     <div class="flex-container">
       <app-math-input
         *ngFor="let outputField of outputFields"
         [label]="outputField"
-        (update)="updateSubmission($event)"
+        (update)="updateSubmission(outputField, $event)"
       ></app-math-input>
     </div>
   </form>

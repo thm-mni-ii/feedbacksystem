@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.Ast
+import de.thm.ii.fbs.mathParser.marshal.MathJsonMarshal
 import org.antlr.v4.runtime.BailErrorStrategy
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.misc.ParseCancellationException
@@ -20,4 +21,12 @@ object MathParserHelper {
             throw MathParserException(expr, "invalid expr", e)
         }
     }
+
+    @JvmStatic
+    fun toMathJson(ast: Ast): String =
+        MathJsonMarshal().marshal(ast)
+
+    @JvmStatic
+    fun fromMathJson(json: String): Ast =
+        MathJsonMarshal().unmarshal(json)
 }

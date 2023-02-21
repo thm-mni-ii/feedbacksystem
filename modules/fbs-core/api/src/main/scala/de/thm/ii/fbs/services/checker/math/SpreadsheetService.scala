@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.checker.math
 
+import de.thm.ii.fbs.mathParser.MathParserHelper
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -28,7 +29,7 @@ class SpreadsheetService {
     val sheet = this.initSheet(spreadsheet, userIDField, userID)
     val (start, end) = this.parseCellRange(fields)
     val labels = this.getInCol(sheet, start.col, start.row, end.row)
-    val values = this.getInCol(sheet, end.col, start.row, end.row)
+    val values = this.parseValues(this.getInCol(sheet, end.col, start.row, end.row))
     labels.zip(values)
   }
 
@@ -92,6 +93,8 @@ class SpreadsheetService {
 
   private def colToInt(col: Char): Int =
     col.toInt - 64
+
+  private def parseValues(value: Seq[String]) = value.map(v => MathParserHelper.toMathJson(MathParserHelper.parse(v)))
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
   germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)

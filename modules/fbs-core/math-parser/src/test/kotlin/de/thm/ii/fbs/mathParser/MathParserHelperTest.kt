@@ -355,4 +355,24 @@ internal class MathParserHelperTest {
             MathParserHelper.parse("1,23456789")
         )
     }
+
+    @Test
+    fun fromJson() {
+        assertEquals(
+            Ast(
+                Operation(Operator.ADD, Num(1), Num(2))
+            ),
+            MathParserHelper.fromMathJson("""["Add",1,2]""")
+        )
+    }
+
+    @Test
+    fun toJson() {
+        assertEquals(
+            """["Add",1,2]""",
+            MathParserHelper.toMathJson(Ast(
+                Operation(Operator.ADD, Num(1), Num(2))
+            ))
+        )
+    }
 }
