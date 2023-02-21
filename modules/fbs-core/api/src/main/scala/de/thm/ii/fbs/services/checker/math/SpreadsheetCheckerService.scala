@@ -138,9 +138,7 @@ class SpreadsheetCheckerService extends CheckerService {
 
   def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
     val enteredAst = MathParserHelper.fromMathJson(enteredValue)
-    println(enteredAst)
-    val valueAst = MathParserHelper.parse(value)
-    println(valueAst)
+    val valueAst = MathParserHelper.fromMathJson(value)
     new SemanticAstComparator(decimals, RoundingMode.HALF_UP).compare(valueAst, enteredAst)
   }
 

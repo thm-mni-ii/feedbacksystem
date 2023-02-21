@@ -2,10 +2,7 @@ package de.thm.ii.fbs.mathParser.marshal
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.IntNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.databind.node.*
 import de.thm.ii.fbs.mathParser.ast.*
 import java.io.Serializable
 import java.lang.ArithmeticException
@@ -75,11 +72,12 @@ class MathJsonMarshal : Marshal {
             is ArrayNode -> unmarshalArray(obj)
             is ObjectNode -> unmarshalObject(obj)
             is TextNode -> unmarshalString(obj.asText())
-            is IntNode -> unmarshalInt(obj.asInt())
+            is IntNode -> unmarshalNumber(obj.asInt())
+            is DoubleNode -> unmarshalNumber(obj.asDouble())
             else -> throw IllegalArgumentException("${obj::class.qualifiedName} is not unmarshalable")
         }
 
-    private fun unmarshalInt(obj: Int): Expr =
+    private fun unmarshalNumber(obj: Number): Expr =
         Num(obj)
 
     private fun unmarshalString(obj: String): Expr =

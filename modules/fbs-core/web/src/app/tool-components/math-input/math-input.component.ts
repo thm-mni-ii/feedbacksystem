@@ -27,7 +27,6 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
   private input: ElementRef;
 
   handleChange($event: Event) {
-    console.log("changes");
     if (!$event.currentTarget) return;
     const mathJson = ($event.currentTarget as any).expression.json;
     console.log(mathJson);
@@ -48,6 +47,7 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
       readOnly: this.disabled,
       virtualKeyboardMode: !this.disabled ? "manual" : undefined,
       virtualKeyboards: "numeric",
+      decimalSeparator: ",",
     });
   }
 }

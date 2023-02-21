@@ -17,6 +17,14 @@ internal class MathJsonUnmarshalTest {
     }
 
     @Test
+    fun simpleDecimalUnmarshal() {
+        assertEquals(
+            Ast(Operation(Operator.ADD, Num(1.5), Num(2))),
+            marshal.unmarshal("""["Add",1.5,2]""")
+        )
+    }
+
+    @Test
     fun mixedUnmarshal() {
         assertEquals(
             Ast(
