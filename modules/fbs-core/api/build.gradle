@@ -90,3 +90,6 @@ tasks.register('jacocoReport', JacocoReport) {
         html.enabled true
     }
 }
+
+// Allow To import Kotlin Classes into Scala
+compileScala.classpath += files(compileKotlin.outputs)
