@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.*
 import de.thm.ii.fbs.mathParser.ast.*
 import java.io.Serializable
 import java.lang.ArithmeticException
+import java.math.BigDecimal
+import java.math.BigInteger
 
 class MathJsonMarshal : Marshal {
     private val objectMapper = ObjectMapper()
@@ -42,7 +44,10 @@ class MathJsonMarshal : Marshal {
         try {
             input.content.intValueExact()
         } catch (_: ArithmeticException) {
-            input.content.toString()
+            if (input.content == BigDecimal(input.content.toDouble()))
+                input.content.toDouble()
+            else
+                input.content.toString()
         }
 
     private fun marshalVar(input: Var): String =
@@ -129,5 +134,6 @@ private fun ArrayNode.add(marshalExpr: Serializable): ArrayNode = when (marshalE
     is JsonNode -> this.add(marshalExpr)
     is String -> this.add(marshalExpr)
     is Int -> this.add(marshalExpr)
+    is Double -> this.add(marshalExpr)
     else -> throw IllegalArgumentException("${marshalExpr::class.qualifiedName} is not a addable serializable")
 }
