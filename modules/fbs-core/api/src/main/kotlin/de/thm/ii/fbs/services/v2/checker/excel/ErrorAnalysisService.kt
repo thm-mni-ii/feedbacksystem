@@ -5,6 +5,7 @@ import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.handler.When
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.FormulaEvaluator
@@ -69,7 +70,7 @@ class ErrorAnalysisService(
 
     private fun getCellFromWorkbook(cell: Cell): XSSFCell {
         val cellRef = CellReference(cell.cell)
-        return workbook.getSheetAt(cell.sheet).getRow(cellRef.row).getCell(cellRef.col.toInt())
+        return getCell(workbook, cell.sheet, cellRef.row, cellRef.col.toInt())
     }
 
     private fun cellEqualsSolution(cell: Cell, workbookCell: XSSFCell): Boolean {
