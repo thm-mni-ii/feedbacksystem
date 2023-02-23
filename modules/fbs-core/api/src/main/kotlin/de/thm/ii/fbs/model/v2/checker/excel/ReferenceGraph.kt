@@ -3,10 +3,10 @@ package de.thm.ii.fbs.model.v2.checker.excel
 import org.jgrapht.Graph
 import org.jgrapht.Graphs
 import org.jgrapht.graph.DefaultDirectedGraph
-import org.jgrapht.graph.DefaultEdge
 
 class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>) {
-    val data: Graph<Cell, DefaultEdge> = DefaultDirectedGraph(DefaultEdge::class.java)
+    var data: Graph<Cell, ReferenceEdge> = DefaultDirectedGraph(ReferenceEdge::class.java)
+    var outputFields: List<Cell> = emptyList()
 
     init {
         references.forEach { (index, sheet) ->
@@ -21,6 +21,8 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
                 }
             }
         }
+
+        outputFields = data.vertexSet().filter { c -> this.isOutput(c) }
     }
 
     fun isInput(cell: Cell): Boolean {
@@ -37,5 +39,20 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
 
     fun predecessors(cell: Cell): List<Cell> {
         return Graphs.predecessorListOf(data, cell)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ReferenceGraph
+
+        if (data != other.data) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return data.hashCode()
     }
 }

@@ -129,4 +129,14 @@ internal class SemanticAstComparatorTest {
         assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
         assertNotNull(SemanticAstComparator())
     }
+
+    @Test
+    fun multiplicationWithExponentTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a^(-4)b^4"),
+                MathParserHelper.parse("4*a^(-4)*b^4")
+            )
+        )
+    }
 }
