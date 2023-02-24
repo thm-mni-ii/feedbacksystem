@@ -48,7 +48,7 @@ class SQLAliasMasker:
         return items
 
     def __build_alias_dict(self, aliases, prefix):
-        alias_dict = dict()
+        alias_dict = {}
         for idx, alias in enumerate(aliases):
             alias_mask = f"{prefix}_alias_{idx}"
             alias_dict[alias.get("name")] = alias_mask
@@ -56,7 +56,7 @@ class SQLAliasMasker:
         return alias_dict
 
     def __replace_column_alias_select(self, query, match, replacement, aliases):
-        if isinstance(query, dict) or isinstance(query, list):
+        if isinstance(query, (dict, list)):
             for k, v in (  # pylint: disable=invalid-name
                 query.items() if isinstance(query, dict) else enumerate(query)
             ):  # replace initial alias definition
@@ -66,7 +66,7 @@ class SQLAliasMasker:
                 self.__replace_column_alias_select(v, match, replacement, aliases)
 
     def __replace_column_alias_gen(self, query, match, replacement, aliases):
-        if isinstance(query, dict) or isinstance(query, list):
+        if isinstance(query, (dict, list)):
             for k, v in (  # pylint: disable=invalid-name
                 query.items() if isinstance(query, dict) else enumerate(query)
             ):
@@ -76,7 +76,7 @@ class SQLAliasMasker:
                 self.__replace_column_alias_gen(v, match, replacement, aliases)
 
     def __replace_table_alias_from(self, query, match, replacement, aliases, pattern):
-        if isinstance(query, dict) or isinstance(query, list):
+        if isinstance(query, (dict, list)):
             for k, v in (  # pylint: disable=invalid-name
                 query.items() if isinstance(query, dict) else enumerate(query)
             ):
@@ -96,7 +96,7 @@ class SQLAliasMasker:
                 self.__replace_table_alias_from(v, match, replacement, aliases, pattern)
 
     def __replace_table_alias_gen(self, query, aliases, pattern):
-        if isinstance(query, dict) or isinstance(query, list):
+        if isinstance(query, (dict, list)):
             for k, v in (  # pylint: disable=invalid-name
                 query.items() if isinstance(query, dict) else enumerate(query)
             ):
