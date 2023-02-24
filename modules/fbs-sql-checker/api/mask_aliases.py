@@ -92,7 +92,7 @@ class SQLAliasMasker:
                             tokens[0] in aliases.keys()
                         ):  # check if table is indeed an alias
                             tokens[0] = aliases.get(tokens[0])
-                            query[k] = ".".join(aliases)
+                            query[k] = ".".join(tokens)
                 self.__replace_table_alias_from(v, match, replacement, aliases, pattern)
 
     def __replace_table_alias_gen(self, query, aliases, pattern):
