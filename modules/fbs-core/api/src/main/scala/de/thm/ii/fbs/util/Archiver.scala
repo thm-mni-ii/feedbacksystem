@@ -10,9 +10,10 @@ import scala.collection.mutable.ListBuffer
 
 object Archiver {
   @throws[IOException]
-  def pack(name: File, files: ArchiveFile*): Unit = {
+  def packSubmissions(name: File, files: List[File]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
-    for (archiveFile <- files) {
+    for (file <- files) {
+      val archiveFile = Archiver.ArchiveFile(file)
       addToArchive(out, archiveFile.file, ".", archiveFile.filename.getOrElse(archiveFile.file.getName))
     }
     out.close()

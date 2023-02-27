@@ -53,18 +53,34 @@ class SubmissionService {
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
 
   /**
-    * Get all submission for a task
+    * Get all the latest submissions for a task of a Course
     *
     * @param cid Course id
     * @param tid Task id
     * @return List of submissions
     */
   def getLatestSubmissionByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, user_id, Max(submission_time) as submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
-      "FROM (SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      "checker_type FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
+    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, t3.is_in_block_storage, checker_type " +
+      "FROM (select t1.* from (select user_id, max(submission_time) as submax from fbs.user_task_submission where task_id = ? group by user_id) as t " +
+      "left join (select * from fbs.user_task_submission) as t1 ON t.user_id = t1.user_id and t.submax = t1.submission_time) as t3" +
+      " JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
-      "WHERE course_id = ? AND user_task_submission.task_id = ?) as tab GROUP BY user_id", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
+      "WHERE course_id = ? AND t3.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), tid, cid, tid))
+
+  /**
+    * Get all the latest submissions for all task of a Course
+    *
+    * @param cid Course id
+    * @param tid Task id
+    * @return List of submissions
+    */
+  def getLatestSubmissionByCourse(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
+    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
+      "from (select * from (select task_id, course_id from course left join task using(course_id) where course_id = ?) as t1 " +
+      "left join (select * from (select user_id, task_id, max(submission_time) as submax from user_task_submission group by user_id, task_id)" +
+      " as t left join user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id)) as tab left join " +
+      "checker_result using (submission_id) left join checkrunner_configuration using (configuration_id)",
+    (res, _) => parseResult(res, fetchUserId = true), cid))
 
   /**
     * Lookup a submission by id
@@ -102,7 +118,7 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
- def create(uid: Int, tid: Int): Submission =
+  def create(uid: Int, tid: Int): Submission =
     try {
       DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
         .map(gk => gk(0).asInstanceOf[BigInteger].intValue())

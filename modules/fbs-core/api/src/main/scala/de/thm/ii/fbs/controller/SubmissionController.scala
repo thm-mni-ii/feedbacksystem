@@ -6,6 +6,7 @@ import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.Archiver
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
@@ -17,6 +18,7 @@ import java.io.File
 import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.collection.mutable.ListBuffer
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -294,13 +296,22 @@ class SubmissionController {
     val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
 
     if (privileged) {
-      logger.info("test")
+      val submissionList = submissionService.getLatestSubmissionByCourse(cid, tid)
+      logger.info(submissionList.toString())
+      val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+      val f = new File("tmp")
+      Archiver.packSubmissions(f, subFiles)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=course_$cid.fbs-submission")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
     }
   }
 
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content/download"))
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content/download"))
   @ResponseBody
   def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
                         req: HttpServletRequest, res: HttpServletResponse): Unit = {
@@ -310,8 +321,15 @@ class SubmissionController {
     val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
 
     if (privileged) {
-      val t = submissionService.getLatestSubmissionByTask(cid, tid)
-      logger.info(t.toString())
+      val submissionList = submissionService.getLatestSubmissionByTask(cid, tid)
+      val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+      val f = new File("tmp")
+      Archiver.packSubmissions(f, subFiles)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=task_$tid.fbs-submission")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
     }
