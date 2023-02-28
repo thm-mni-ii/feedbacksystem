@@ -94,4 +94,21 @@ export class TaskService {
         saveAs(blob, filename ? filename + ".fbs-export" : "export.fbs-export");
       });
   }
+
+  public downloadMultipleTasks(
+    cid: number,
+    tIds: Array<number>,
+    filename?: string
+  ) {
+    return this.http
+      .post(
+        `/api/v1/courses/${cid}/tasks/export`,
+        { taskIds: tIds },
+        { responseType: "arraybuffer" }
+      )
+      .subscribe((response) => {
+        const blob = new Blob([response], { type: "text/plain" });
+        saveAs(blob, filename ? filename + ".fbs-export" : "export.fbs-export");
+      });
+  }
 }

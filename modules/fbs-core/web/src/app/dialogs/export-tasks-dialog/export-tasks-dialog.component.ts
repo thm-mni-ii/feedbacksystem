@@ -21,11 +21,34 @@ export class ExportTasksDialogComponent implements OnInit {
 
   export() {
     this.dialogRef.close({ success: true });
+    let selectedTasks = [];
     for (let task of this.tasks) {
+      if (task.selected) {
+        selectedTasks.push(task);
+      }
+    }
+    console.log(selectedTasks);
+
+    if (selectedTasks.length == 1) {
+      this.taskService.downloadTask(
+        this.data.courseId,
+        selectedTasks[0].id,
+        selectedTasks[0].name
+      );
+    }
+
+    if (selectedTasks.length > 1) {
+      let taskIds = [];
+      for (let task of selectedTasks) {
+        taskIds.push(task.id);
+      }
+      this.taskService.downloadMultipleTasks(this.data.courseId, taskIds);
+    }
+    /*     for (let task of this.tasks) {
       if (task.selected) {
         this.taskService.downloadTask(this.data.courseId, task.id, task.name);
       }
-    }
+    } */
   }
 
   closeDialog() {
