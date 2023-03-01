@@ -1,9 +1,8 @@
 package de.thm.ii.fbs.util
 
-import de.thm.ii.fbs.model.TaskImportFiles
+import de.thm.ii.fbs.model.{ArchivIterator, Task, TaskImportFiles}
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveInputStream, TarArchiveOutputStream}
-import de.thm.ii.fbs.model.Task
 import org.apache.commons.compress.utils.IOUtils
 import org.slf4j.LoggerFactory
 
@@ -20,12 +19,12 @@ object Archiver {
     val list: ListBuffer[TaskImportFiles] = ListBuffer()
     var current = ""
     var entry: TarArchiveEntry = null
-    while ({
+    /*while ({
       entry = tmp.getNextTarEntry;
       entry != null
-    }) {
+    }) {*/
+      new ArchivIterator(tmp).foreach(entry => {
       if (entry.isFile) {
-        //new ArchivIterator(tmp).foreach(entry => {
         val s = entry.getSize
         val split = entry.getName.split("/")
         val name = split(split.length - 1)
@@ -37,28 +36,27 @@ object Archiver {
           current = split(split.length - 2)
         }
         var c = 0
-        var fileWriter: BufferedWriter = null
-        if (name.endsWith(".json")) {
-            val tname = current + name
-          fileWriter = new BufferedWriter(new FileWriter(tname))
-          taskImportFiles.taskConfigPath = tname
-        } else {
-          fileWriter = new BufferedWriter(new FileWriter(name))
-          taskImportFiles.configFiles += name
-        }
-        var test = 0
-        while (test < s) {
-          //for (size <- test to entry.getSize - 1) {
+        val fileWriter: BufferedWriter = setTaskImportFile(name, current, taskImportFiles)
+        for (size <- 1 until s.toInt) {
           c = tmp.read
           fileWriter.write(c)
-          test += 1
         }
-
         fileWriter.close()
       }
-    }
+    })
     list += taskImportFiles
     list
+  }
+
+  private def setTaskImportFile(name: String, current: String, taskImportFiles: TaskImportFiles): BufferedWriter = {
+    if (name.endsWith(".json")) {
+      val tname = current + name
+      taskImportFiles.taskConfigPath = tname
+      new BufferedWriter(new FileWriter(tname))
+    } else {
+      taskImportFiles.configFiles += name
+      new BufferedWriter(new FileWriter(name))
+    }
   }
 
   @throws[IOException]

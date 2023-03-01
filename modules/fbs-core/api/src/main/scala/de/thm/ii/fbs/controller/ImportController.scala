@@ -36,22 +36,33 @@ class ImportController {
   private val taskImportService: TaskImportService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
 
-  @PostMapping(value = Array("/tasks/import"))
+  @PostMapping(value = Array("/tasks/import/download"))
   @ResponseBody
   def importTasks(@PathVariable(value = "cid", required = true) cid: Int, @RequestParam("file") body: MultipartFile,
-                  @RequestParam download: Boolean, req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[ListBuffer[Task]] = {
+                  req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[ListBuffer[Task]] = {
     val user = authService.authorize(req, res)
     val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      if (download) {
-        taskImportService.buildAllTasks(cid, body.getInputStream)
-        ResponseEntity.ok().build()
-      } else {
-        val t = taskImportService.showEditorContent(cid, body.getInputStream)
-        ResponseEntity.ok().body(t)
-      }
+      taskImportService.createAllTasks(cid, body.getInputStream)
+      ResponseEntity.ok().build()
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  @PostMapping(value = Array("/tasks/import"))
+  @ResponseBody
+  def importViewedTasks(@PathVariable(value = "cid", required = true) cid: Int, @RequestParam("file") body: MultipartFile,
+                        req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[ListBuffer[Task]] = {
+    val user = authService.authorize(req, res)
+    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+      val t = taskImportService.getAllTasks(cid, body.getInputStream)
+      ResponseEntity.ok().body(t)
     } else {
       throw new ForbiddenException()
     }

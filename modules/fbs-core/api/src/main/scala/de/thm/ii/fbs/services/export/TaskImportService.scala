@@ -10,7 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 
 import java.io.{File, FileInputStream, InputStream}
-import java.nio.file.Files
+import java.nio.file.{Files, Paths}
 import scala.collection.mutable.ListBuffer
 
 @Service
@@ -24,19 +24,29 @@ class TaskImportService {
   @Autowired
   private val checkrunnerSubTaskService: CheckrunnerSubTaskService = null
   val objectMapper = new ScalaObjectMapper
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
-  def buildAllTasks(cid: Int, inputStream: InputStream): Unit = {
+  def createAllTasks(cid: Int, inputStream: InputStream): Unit = {
     val taskImportFiles = Archiver.unpack(inputStream)
     taskImportFiles.foreach(tif => createTask(cid, tif))
+    logger.info(taskImportFiles.toString())
+    taskImportFiles.foreach(tif => {
+      Files.delete(Paths.get("./", tif.taskConfigPath))
+      tif.configFiles.foreach(config => Files.delete(Paths.get(config)))
+    })
   }
 
-  def showEditorContent(cid: Int, inputStream: InputStream): ListBuffer[Task] = {
+  def getAllTasks(cid: Int, inputStream: InputStream): ListBuffer[Task] = {
     val taskImportFiles = Archiver.unpack(inputStream)
     val taskList: ListBuffer[Task] = ListBuffer()
     for (x <- taskImportFiles) {
       val t = objectMapper.readValue(new File(x.taskConfigPath), classOf[TaskExport])
       taskList += t.task
     }
+    taskImportFiles.foreach(tif => {
+      Files.delete(Paths.get("./", tif.taskConfigPath))
+      tif.configFiles.foreach(config => Files.delete(Paths.get(config)))
+    })
     taskList
   }
 

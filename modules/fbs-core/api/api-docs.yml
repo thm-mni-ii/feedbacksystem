@@ -1262,12 +1262,12 @@ paths:
           description: Forbidden
         "404":
           description: Not found
-  "/courses/{cid}/tasks/import/list":
+  "/courses/{cid}/tasks/import/download":
     post:
-      operationId: importTasks
+      operationId: importTask
       tags:
         - Task
-      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      summary: returns a list of all Tasks that can be imported
       parameters:
         - name: cid
           in: path
