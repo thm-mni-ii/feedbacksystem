@@ -46,7 +46,7 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
     el.setOptions({
       readOnly: this.disabled,
       virtualKeyboardMode: !this.disabled ? "manual" : undefined,
-      virtualKeyboards: "numeric",
+      virtualKeyboards: "numeric roman greek",
       decimalSeparator: ",",
     });
   }
