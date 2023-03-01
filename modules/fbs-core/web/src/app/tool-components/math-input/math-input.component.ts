@@ -16,7 +16,7 @@ import {
 })
 export class MathInputComponent implements OnChanges, AfterViewInit {
   @Input()
-  value: string;
+  defaultValue: string;
   @Input()
   label: string = "";
   @Input()
@@ -25,11 +25,12 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
   update: EventEmitter<string> = new EventEmitter();
   @ViewChild("mathInput")
   private input: ElementRef;
+  private touched: boolean = false;
 
   handleChange($event: Event) {
     if (!$event.currentTarget) return;
     const mathJson = ($event.currentTarget as any).expression.json;
-    console.log(mathJson);
+    this.touched = true;
     this.update.emit(JSON.stringify(mathJson));
   }
 
@@ -40,12 +41,12 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
   ngAfterViewInit(): void {
     if (!this.input) return;
     const el = this.input.nativeElement;
-    if (this.value) {
-      el.expression = JSON.parse(this.value);
+    if (!this.touched && this.defaultValue) {
+      el.expression = JSON.parse(this.defaultValue);
     }
     el.setOptions({
       readOnly: this.disabled,
-      virtualKeyboardMode: !this.disabled ? "manual" : undefined,
+      virtualKeyboardMode: !this.disabled ? "manual" : "off",
       virtualKeyboards: "numeric roman greek",
       decimalSeparator: ",",
     });

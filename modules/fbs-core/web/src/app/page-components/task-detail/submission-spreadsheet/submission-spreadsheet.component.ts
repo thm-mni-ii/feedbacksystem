@@ -26,7 +26,7 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   @Input()
   content: object = {};
 
-  private results: Record<string, any> = {};
+  results: Record<string, any> = {};
 
   constructor() {}
 
