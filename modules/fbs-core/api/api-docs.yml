@@ -1264,7 +1264,7 @@ paths:
           description: Not found
   "/courses/{cid}/tasks/import/download":
     post:
-      operationId: importTask
+      operationId: downloadTask
       tags:
         - Task
       summary: returns a list of all Tasks that can be imported

@@ -41,7 +41,7 @@ class ImportExportServiceTest {
     taskService.create(1, initialTask)
     val tasklist = List(initialTask)
     val (size, stream) = taskExportService.responseFromTaskId(tasklist)
-    taskImportService.buildAllTasks(1, stream.getInputStream)
+    taskImportService.createAllTasks(1, stream.getInputStream)
     val importedTask = taskService.getOne(1).get
     Assert.assertEquals(initialTask, importedTask)
   }
