@@ -61,7 +61,7 @@ class ImportController {
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      val t = taskImportService.getAllTasks(cid, body.getInputStream)
+      val t = taskImportService.getAllTasks(body.getInputStream)
       ResponseEntity.ok().body(t)
     } else {
       throw new ForbiddenException()

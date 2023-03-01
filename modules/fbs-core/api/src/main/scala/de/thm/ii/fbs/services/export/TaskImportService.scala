@@ -29,25 +29,25 @@ class TaskImportService {
   def createAllTasks(cid: Int, inputStream: InputStream): Unit = {
     val taskImportFiles = Archiver.unpack(inputStream)
     taskImportFiles.foreach(tif => createTask(cid, tif))
-    logger.info(taskImportFiles.toString())
-    taskImportFiles.foreach(tif => {
-      Files.delete(Paths.get("./", tif.taskConfigPath))
-      tif.configFiles.foreach(config => Files.delete(Paths.get(config)))
-    })
+    deleteFilesAfterUse(taskImportFiles)
   }
 
-  def getAllTasks(cid: Int, inputStream: InputStream): ListBuffer[Task] = {
+  def getAllTasks(inputStream: InputStream): ListBuffer[Task] = {
     val taskImportFiles = Archiver.unpack(inputStream)
     val taskList: ListBuffer[Task] = ListBuffer()
-    for (x <- taskImportFiles) {
-      val t = objectMapper.readValue(new File(x.taskConfigPath), classOf[TaskExport])
+    taskImportFiles.foreach(tif => {
+      val t = objectMapper.readValue(new File(tif.taskConfigPath), classOf[TaskExport])
       taskList += t.task
-    }
+    })
+    deleteFilesAfterUse(taskImportFiles)
+    taskList
+  }
+
+  private def deleteFilesAfterUse(taskImportFiles: ListBuffer[TaskImportFiles]): Unit = {
     taskImportFiles.foreach(tif => {
       Files.delete(Paths.get("./", tif.taskConfigPath))
       tif.configFiles.foreach(config => Files.delete(Paths.get(config)))
     })
-    taskList
   }
 
   private def createTask(cid: Int, files: TaskImportFiles): Unit = {
