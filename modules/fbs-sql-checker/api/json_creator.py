@@ -7,6 +7,7 @@ from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
+from mask_aliases import SQLAliasMasker
 
 rightStatements = []
 rightTables = []
@@ -39,7 +40,11 @@ def parse_single_stat_upload_db(data, client):
     ) = ([], [], [], [], [], [], [], [], [], [], [], [])
     try:
         if "submission" in data:
-            # Extract tables, selAttributes, proAttributes and strings
+            query = data["submission"]
+            masker = SQLAliasMasker(query)
+            masker.mask_aliases_()
+            data["submission"] = masker.get_masked_query()
+            #Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
                 if " as " in data["submission"].lower():
                     data["submission"] = replace_function(data["submission"])
@@ -134,7 +139,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         mycollection.insert_one(record)
 
 
@@ -164,7 +169,7 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
