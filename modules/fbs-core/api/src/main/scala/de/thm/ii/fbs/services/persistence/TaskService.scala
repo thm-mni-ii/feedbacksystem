@@ -27,7 +27,7 @@ class TaskService {
     */
   def getAll(cid: Int): List[Task] =
     DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type , attempts ,hide_result" +
-      "FROM task WHERE course_id = ?",
+      " FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
   /**
@@ -38,7 +38,7 @@ class TaskService {
     */
   def getOne(id: Int): Option[Task] =
     DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id," +
-      " requirement_type, attempts ,hide_resultFROM task WHERE task_id = ?",
+      " requirement_type, attempts ,hide_result FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
