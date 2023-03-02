@@ -180,7 +180,7 @@ class SubmissionService {
 
   def getOrHidden(submission: Submission, hideResult: Boolean): Submission = {
     if (hideResult) {
-      Submission(submission.submissionTime, done = false, submission.id, isHidden = true)
+      Submission(submission.submissionTime, submission.done, submission.id, isHidden = true)
     } else {
       submission
     }
