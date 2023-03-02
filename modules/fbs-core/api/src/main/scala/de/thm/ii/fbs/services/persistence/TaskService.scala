@@ -72,7 +72,8 @@ class TaskService {
   def update(cid: Int, tid: Int, task: Task): Boolean =
     1 == DB.update(
       """
-        |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?, attempts = ?, hide_result = ?
+        |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?,
+        |requirement_type = ?, attempts = ?, hide_result = ?
         |WHERE task_id = ? AND course_id = ?
         |""".stripMargin,
       task.name, task.isPrivate, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
