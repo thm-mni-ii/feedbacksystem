@@ -177,4 +177,12 @@ class SubmissionService {
       case _: SQLException => defaultValue
     }
   }
+
+  def getOrHidden(submission: Submission, hideResult: Boolean): Submission = {
+    if (hideResult) {
+      Submission(submission.submissionTime, done = false, submission.id, isHidden = true)
+    } else {
+      submission
+    }
+  }
 }

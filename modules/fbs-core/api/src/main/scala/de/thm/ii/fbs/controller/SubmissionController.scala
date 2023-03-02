@@ -61,6 +61,7 @@ class SubmissionController {
 
     if (privileged) {
       submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
+        .map(submission => submissionService.getOrHidden(submission, task.hideResult))
     } else {
       throw new ForbiddenException()
     }
@@ -243,7 +244,8 @@ class SubmissionController {
 
     if (privileged) {
       submissionService.getOne(sid, uid, adminPrivileged) match {
-        case Some(submission) => submission
+        case Some(submission) =>
+          submissionService.getOrHidden(submission, task.hideResult)
         case None => throw new ResourceNotFoundException()
       }
     } else {
