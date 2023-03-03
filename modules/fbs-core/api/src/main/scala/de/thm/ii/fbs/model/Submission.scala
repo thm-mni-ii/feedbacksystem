@@ -11,6 +11,7 @@ import java.util.Date
   * @param results        The submission results
   */
 case class Submission(submissionTime: Date,
+                      taskID: Int,
                       done: Boolean, id: Int,
                       results: Array[CheckResult] = Array(),
                       userID: Option[Int] = None,

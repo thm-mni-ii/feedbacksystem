@@ -2,7 +2,7 @@ package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission, User}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence.{UserService, _}
 import de.thm.ii.fbs.services.security.AuthService
@@ -298,10 +298,16 @@ class SubmissionController {
 
     if (privileged) {
       val submissionList = submissionService.getLatestSubmissionByCourse(cid)
-      val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
-      val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+      val usersList: ListBuffer[List[User]] = ListBuffer()
+      val t = submissionList.map(s => s.taskID).distinct
+      val listSubInDir: ListBuffer[List[File]] = ListBuffer()
+      t.foreach(taskid => {
+        val tmp = submissionList.filter(s => s.taskID == taskid)
+        listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
+        usersList += tmp.map(submission => userService.find(submission.userID.get).get)
+      })
       val f = new File("tmp")
-      Archiver.packSubmissions(f, subFiles, usersList)
+      Archiver.packSubmissionsInDir(f, listSubInDir, usersList, t)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
@@ -324,7 +330,6 @@ class SubmissionController {
       val submissionList = submissionService.getLatestSubmissionByTask(cid, tid)
       val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
       val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-      logger.info(subFiles.toString())
       val f = new File("tmp")
       Archiver.packSubmissions(f, subFiles, usersList)
       ResponseEntity.ok()

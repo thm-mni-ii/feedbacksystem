@@ -22,6 +22,17 @@ object Archiver {
   }
 
   @throws[IOException]
+  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], listTaskId: List[Int]): Unit = {
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    files.zipWithIndex.foreach(listFiles => {
+      listFiles._1.zipWithIndex.foreach(f => {
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", users(listFiles._2)(f._2).getName)
+      })
+    })
+    out.close()
+  }
+
+  @throws[IOException]
   def packDir(tid: List[Task], name: File, files: ListBuffer[ListBuffer[ArchiveFile]]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     files.zip(tid).foreach { case (f, task) =>
