@@ -288,22 +288,18 @@ class SubmissionController {
     }
   }
 
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content"))
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/submissions/content"))
   @ResponseBody
-  def solutionsOfCourse(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int,
-                        req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  def solutionsOfCourse(@PathVariable uid: Int, @PathVariable cid: Int,
+                        req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
 
     val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
 
     if (privileged) {
-      val submissionList = submissionService.getLatestSubmissionByCourse(cid, tid)
+      val submissionList = submissionService.getLatestSubmissionByCourse(cid)
       val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
-      logger.info(submissionList.toString())
-      logger.info(usersList.toString())
       val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-      logger.info(subFiles.toString())
       val f = new File("tmp")
       Archiver.packSubmissions(f, subFiles, usersList)
       ResponseEntity.ok()
@@ -319,9 +315,8 @@ class SubmissionController {
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content/download"))
   @ResponseBody
   def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int,
-                      req: HttpServletRequest, res: HttpServletResponse): Unit = {
+                      req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
 
     val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
 

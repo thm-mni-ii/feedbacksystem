@@ -74,7 +74,7 @@ class SubmissionService {
     * @param tid Task id
     * @return List of submissions
     */
-  def getLatestSubmissionByCourse(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
+  def getLatestSubmissionByCourse(cid: Int): List[Submission] = reduceSubmissions(DB.query(
     "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
       "from (select * from (select task_id, course_id from course left join task using(course_id) where course_id = ?) as t1 " +
       "left join (select * from (select user_id, task_id, max(submission_time) as submax from user_task_submission group by user_id, task_id)" +
