@@ -82,7 +82,6 @@ class SubmissionService {
       "as tab left join checker_result using (submission_id) left join checkrunner_configuration using (configuration_id)",
     (res, _) => parseResult(res, fetchUserId = true), cid))
 
-  //SELECT * from (select * from (select task_id, course_id from fbs.course left join fbs.task using(course_id) where course_id = ?) as t1 left join (select * from (select user_id, task_id, max(submission_time) as submax from fbs.user_task_submission group by user_id, task_id) as t left join fbs.user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id) where submax is not null) as tab left join fbs.checker_result using (submission_id) left join fbs.checkrunner_configuration using (configuration_id);
 
   /**
     * Lookup a submission by id

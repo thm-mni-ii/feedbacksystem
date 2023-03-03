@@ -13,10 +13,7 @@ object Archiver {
   def packSubmissions(name: File, files: List[File], users: List[User]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for ((file, index) <- files.zipWithIndex) {
-      //val archiveFile = Archiver.ArchiveFile(file)
-      print(users(index).getName)
       addToArchive(out, file, ".", users(index).getName)
-      //addToArchive(out, archiveFile.file, ".", archiveFile.filename.getOrElse(archiveFile.file.getName))
     }
     out.close()
   }

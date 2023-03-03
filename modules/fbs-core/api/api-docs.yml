@@ -1806,9 +1806,9 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
-  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/content":
+  "/users/{uid}/courses/{cid}/tasks/submissions/content":
     get:
-      operationId: getCourseTaskSubmissionsContent
+      operationId: solutionsOfCourse
       tags:
         - Submission
       summary: Get the submission content for a task
@@ -1822,12 +1822,6 @@ paths:
         - name: cid
           in: path
           description: course id
-          required: true
-          schema:
-            type: integer
-        - name: tid
-          in: path
-          description: task id
           required: true
           schema:
             type: integer
@@ -1858,7 +1852,7 @@ paths:
           description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/content/download":
     get:
-      operationId: getCourseTaskSubmissionsContent
+      operationId: solutionsOfTask
       tags:
         - Submission
       summary: Get the submission content for a task
