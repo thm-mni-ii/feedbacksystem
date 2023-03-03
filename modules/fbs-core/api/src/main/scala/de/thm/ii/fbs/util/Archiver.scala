@@ -19,11 +19,11 @@ object Archiver {
     val list: ListBuffer[TaskImportFiles] = ListBuffer()
     var current = ""
     var entry: TarArchiveEntry = null
-    /*while ({
+    while ({
       entry = tmp.getNextTarEntry;
       entry != null
-    }) {*/
-      new ArchivIterator(tmp).foreach(entry => {
+    }) {
+      //new ArchivIterator(tmp).foreach(entry => {
       if (entry.isFile) {
         val s = entry.getSize
         val split = entry.getName.split("/")
@@ -37,13 +37,13 @@ object Archiver {
         }
         var c = 0
         val fileWriter: BufferedWriter = setTaskImportFile(name, current, taskImportFiles)
-        for (size <- 1 until s.toInt) {
+        for (size <- 1 until s.toInt + 1) {
           c = tmp.read
           fileWriter.write(c)
         }
         fileWriter.close()
       }
-    })
+    }
     list += taskImportFiles
     list
   }
