@@ -78,8 +78,8 @@ class SubmissionService {
     "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
       "from (select * from (select task_id, course_id from course left join task using(course_id) where course_id = ?) as t1 " +
       "left join (select * from (select user_id, task_id, max(submission_time) as submax from user_task_submission group by user_id, task_id)" +
-      " as t left join user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id)) as tab left join " +
-      "checker_result using (submission_id) left join checkrunner_configuration using (configuration_id)",
+      " as t left join user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id) where submax is not null) " +
+      "as tab left join checker_result using (submission_id) left join checkrunner_configuration using (configuration_id)",
     (res, _) => parseResult(res, fetchUserId = true), cid))
 
   /**

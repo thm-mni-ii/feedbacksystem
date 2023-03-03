@@ -4,7 +4,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictExceptio
 import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.{UserService, _}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Archiver
 import org.slf4j.LoggerFactory
@@ -43,6 +43,8 @@ class SubmissionController {
   private val courseRegistrationService: CourseRegistrationService = null
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
+  @Autowired
+  private val userService: UserService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
@@ -297,10 +299,13 @@ class SubmissionController {
 
     if (privileged) {
       val submissionList = submissionService.getLatestSubmissionByCourse(cid, tid)
+      val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
       logger.info(submissionList.toString())
+      logger.info(usersList.toString())
       val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+      logger.info(subFiles.toString())
       val f = new File("tmp")
-      Archiver.packSubmissions(f, subFiles)
+      Archiver.packSubmissions(f, subFiles, usersList)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
@@ -313,8 +318,8 @@ class SubmissionController {
 
   @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content/download"))
   @ResponseBody
-  def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
-                        req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int,
+                      req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
@@ -322,9 +327,11 @@ class SubmissionController {
 
     if (privileged) {
       val submissionList = submissionService.getLatestSubmissionByTask(cid, tid)
+      val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
       val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+      logger.info(subFiles.toString())
       val f = new File("tmp")
-      Archiver.packSubmissions(f, subFiles)
+      Archiver.packSubmissions(f, subFiles, usersList)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
