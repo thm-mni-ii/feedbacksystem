@@ -12,12 +12,13 @@ import { CourseService } from "../../service/course.service";
 import { AuthService } from "../../service/auth.service";
 import { Submission } from "../../model/Submission";
 import { SubmissionService } from "../../service/submission.service";
-import { tap, map, mergeMap } from "rxjs/operators";
-import { of } from "rxjs";
+import { tap, map, mergeMap, concatMap } from "rxjs/operators";
+import { of, from } from "rxjs";
 import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
+import { Location } from "@angular/common";
 
 /**
  * Shows a task in detail
@@ -28,6 +29,8 @@ import { UserTaskResult } from "../../model/UserTaskResult";
   styleUrls: ["./task-detail.component.scss"],
 })
 export class TaskDetailComponent implements OnInit {
+  allTasks: Task[];
+  currentTaskIndex: number;
   courseId: number;
   task: Task;
   taskResult: UserTaskResult;
@@ -46,6 +49,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   constructor(
+    private loation: Location,
     private route: ActivatedRoute,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
@@ -69,12 +73,102 @@ export class TaskDetailComponent implements OnInit {
 
   submissionData: string | File;
 
+  goToNextUnresolvedTask() {
+    let nextTasks = [];
+    let nextTaskId;
+    let isUnsolved = false;
+    for (
+      let index = this.currentTaskIndex + 1;
+      index < this.allTasks.length;
+      index++
+    ) {
+      nextTasks.push(this.allTasks[index]);
+    }
+    from(nextTasks)
+      .pipe(
+        concatMap((task) =>
+          this.taskService.getTaskResult(this.courseId, task.id)
+        )
+      )
+      .subscribe((result) => {
+        if (!result.passed) {
+          console.log(result);
+          isUnsolved = true;
+          nextTaskId = result.taskID;
+          this.router.navigate(["/courses", this.courseId, "task", nextTaskId]);
+        }
+      });
+  }
+
+  goToPreviousUnresolvedTask() {
+    let previousTasks = [];
+    let previousTaskId;
+    let isUnsolved = false;
+    for (let index = this.currentTaskIndex - 1; index >= 0; index--) {
+      previousTasks.push(this.allTasks[index]);
+    }
+    from(previousTasks)
+      .pipe(
+        concatMap((task) =>
+          this.taskService.getTaskResult(this.courseId, task.id)
+        )
+      )
+      .subscribe((result) => {
+        if (!result.passed) {
+          console.log(result);
+          isUnsolved = true;
+          previousTaskId = result.taskID;
+          this.router.navigate([
+            "/courses",
+            this.courseId,
+            "task",
+            previousTaskId,
+          ]);
+        }
+      });
+  }
+
+  goToNextTask() {
+    if (this.currentTaskIndex + 1 < this.allTasks.length) {
+      this.currentTaskIndex++;
+      this.router.navigate([
+        "/courses",
+        this.courseId,
+        "task",
+        this.allTasks[this.currentTaskIndex].id,
+      ]);
+    }
+  }
+
+  goToPreviousTask() {
+    if (this.currentTaskIndex - 1 >= 0) {
+      this.currentTaskIndex--;
+      this.router.navigate([
+        "/courses",
+        this.courseId,
+        "task",
+        this.allTasks[this.currentTaskIndex].id,
+      ]);
+    }
+  }
+
+  getTasks() {
+    this.taskService.getAllTasks(this.courseId).subscribe(
+      (allTasks) => {
+        this.allTasks = allTasks;
+        console.log(this.allTasks);
+      },
+      () => {}
+    );
+  }
+
   ngOnInit() {
     this.route.params
       .pipe(
         mergeMap((params) => {
           this.courseId = params.id;
           const taskId = params.tid;
+          this.getTasks();
           return this.taskService.getTask(this.courseId, taskId);
         }),
         mergeMap((task) => {
@@ -84,6 +178,9 @@ export class TaskDetailComponent implements OnInit {
         }),
         mergeMap(({ task, taskResult }) => {
           this.task = task;
+          this.currentTaskIndex = this.allTasks.findIndex(
+            (task) => task.id == this.task.id
+          );
           this.taskResult = taskResult;
           this.uid = this.authService.getToken().id;
           this.titlebar.emitTitle(this.task.name);
