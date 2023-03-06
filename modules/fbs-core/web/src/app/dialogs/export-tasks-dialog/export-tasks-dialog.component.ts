@@ -27,7 +27,6 @@ export class ExportTasksDialogComponent implements OnInit {
         selectedTasks.push(task);
       }
     }
-    console.log(selectedTasks);
 
     if (selectedTasks.length == 1) {
       this.taskService.downloadTask(
@@ -44,11 +43,6 @@ export class ExportTasksDialogComponent implements OnInit {
       }
       this.taskService.downloadMultipleTasks(this.data.courseId, taskIds);
     }
-    /*     for (let task of this.tasks) {
-      if (task.selected) {
-        this.taskService.downloadTask(this.data.courseId, task.id, task.name);
-      }
-    } */
   }
 
   closeDialog() {
