@@ -73,7 +73,7 @@ export class TaskDetailComponent implements OnInit {
 
   goToNextUnresolvedTask() {
     let nextTasks = [];
-    let nextTaskId;
+    let nextTaskId: number;
     let isUnsolved = false;
     for (
       let index = this.currentTaskIndex + 1;
@@ -94,7 +94,16 @@ export class TaskDetailComponent implements OnInit {
         if (!result.passed) {
           isUnsolved = true;
           nextTaskId = result.taskID;
-          this.router.navigate(["/courses", this.courseId, "task", nextTaskId]);
+          this.router
+            .navigateByUrl("/", { skipLocationChange: true })
+            .then(() => {
+              this.router.navigate([
+                "/courses",
+                this.courseId,
+                "task",
+                nextTaskId,
+              ]);
+            });
         }
       });
   }
@@ -118,28 +127,21 @@ export class TaskDetailComponent implements OnInit {
         if (!result.passed) {
           isUnsolved = true;
           previousTaskId = result.taskID;
-          this.router.navigate([
-            "/courses",
-            this.courseId,
-            "task",
-            previousTaskId,
-          ]);
+          this.router
+            .navigateByUrl("/", { skipLocationChange: true })
+            .then(() => {
+              this.router.navigate([
+                "/courses",
+                this.courseId,
+                "task",
+                previousTaskId,
+              ]);
+            });
         }
       });
   }
 
   goToNextTask() {
-    // if (this.currentTaskIndex + 1 < this.allTasks.length) {
-    //   this.currentTaskIndex++;
-    //   let nav = this.router.navigate([
-    //     "/courses",
-    //     this.courseId,
-    //     "task",
-    //     this.allTasks[this.currentTaskIndex].id,
-    //   ]);
-    // }
-
-    // a better way to reload the page
     if (this.currentTaskIndex + 1 < this.allTasks.length) {
       this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
         this.router.navigate([
@@ -150,21 +152,18 @@ export class TaskDetailComponent implements OnInit {
         ]);
       });
     }
-
-    console.log(this.allTasks.length);
-    console.log(this.currentTaskIndex);
-    console.log(this.currentTaskIndex + 1 < this.allTasks.length);
   }
 
   goToPreviousTask() {
     if (this.currentTaskIndex - 1 >= 0) {
-      this.currentTaskIndex--;
-      this.router.navigate([
-        "/courses",
-        this.courseId,
-        "task",
-        this.allTasks[this.currentTaskIndex].id,
-      ]);
+      this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
+        this.router.navigate([
+          "/courses",
+          this.courseId,
+          "task",
+          this.allTasks[this.currentTaskIndex - 1].id,
+        ]);
+      });
     }
   }
 
