@@ -12,7 +12,7 @@ import { CourseService } from "../../service/course.service";
 import { AuthService } from "../../service/auth.service";
 import { Submission } from "../../model/Submission";
 import { SubmissionService } from "../../service/submission.service";
-import { tap, map, mergeMap, concatMap } from "rxjs/operators";
+import { tap, map, mergeMap, concatMap, takeWhile } from "rxjs/operators";
 import { of, from } from "rxjs";
 import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
@@ -88,11 +88,12 @@ export class TaskDetailComponent implements OnInit {
       .pipe(
         concatMap((task) =>
           this.taskService.getTaskResult(this.courseId, task.id)
-        )
+        ),
+        map((result) => result),
+        takeWhile((result) => !isUnsolved)
       )
       .subscribe((result) => {
         if (!result.passed) {
-          console.log(result);
           isUnsolved = true;
           nextTaskId = result.taskID;
           this.router.navigate(["/courses", this.courseId, "task", nextTaskId]);
@@ -111,11 +112,12 @@ export class TaskDetailComponent implements OnInit {
       .pipe(
         concatMap((task) =>
           this.taskService.getTaskResult(this.courseId, task.id)
-        )
+        ),
+        map((result) => result),
+        takeWhile((result) => !isUnsolved)
       )
       .subscribe((result) => {
         if (!result.passed) {
-          console.log(result);
           isUnsolved = true;
           previousTaskId = result.taskID;
           this.router.navigate([
@@ -156,7 +158,6 @@ export class TaskDetailComponent implements OnInit {
     this.taskService.getAllTasks(this.courseId).subscribe(
       (allTasks) => {
         this.allTasks = allTasks;
-        console.log(this.allTasks);
       },
       () => {}
     );
