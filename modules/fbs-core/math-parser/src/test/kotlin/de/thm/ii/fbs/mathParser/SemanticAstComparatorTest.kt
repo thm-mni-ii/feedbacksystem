@@ -3,10 +3,17 @@ package de.thm.ii.fbs.mathParser
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
+import java.math.RoundingMode
 
 internal class SemanticAstComparatorTest {
-    private val semanticAstComparator = SemanticAstComparator(2)
-    
+    private val semanticAstComparator = SemanticAstComparator.Builder()
+        .decimals(2)
+        .roundingMode(RoundingMode.HALF_UP)
+        .ignoreNeutralElements(true)
+        .applyInverseElements(true)
+        .applyCommutativeLaw(true)
+        .build()
+
     @Test
     fun compareSimple() {
         assertTrue(
@@ -113,6 +120,22 @@ internal class SemanticAstComparatorTest {
             semanticAstComparator.compare(
                 MathParserHelper.parse("5*(x-1)"),
                 MathParserHelper.parse("5(x-1)")
+            )
+        )
+    }
+
+    @Test
+    fun constructionTest() {
+        assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
+        assertNotNull(SemanticAstComparator())
+    }
+
+    @Test
+    fun multiplicationWithExponentTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a^(-4)b^4"),
+                MathParserHelper.parse("4*a^(-4)*b^4")
             )
         )
     }

@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.mathParser.transformer
+package de.thm.ii.fbs.mathParser.transformers
 
 import de.thm.ii.fbs.mathParser.ast.*
 import java.lang.Exception
