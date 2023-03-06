@@ -129,15 +129,31 @@ export class TaskDetailComponent implements OnInit {
   }
 
   goToNextTask() {
+    // if (this.currentTaskIndex + 1 < this.allTasks.length) {
+    //   this.currentTaskIndex++;
+    //   let nav = this.router.navigate([
+    //     "/courses",
+    //     this.courseId,
+    //     "task",
+    //     this.allTasks[this.currentTaskIndex].id,
+    //   ]);
+    // }
+
+    // a better way to reload the page
     if (this.currentTaskIndex + 1 < this.allTasks.length) {
-      this.currentTaskIndex++;
-      this.router.navigate([
-        "/courses",
-        this.courseId,
-        "task",
-        this.allTasks[this.currentTaskIndex].id,
-      ]);
+      this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
+        this.router.navigate([
+          "/courses",
+          this.courseId,
+          "task",
+          this.allTasks[this.currentTaskIndex + 1].id,
+        ]);
+      });
     }
+
+    console.log(this.allTasks.length);
+    console.log(this.currentTaskIndex);
+    console.log(this.currentTaskIndex + 1 < this.allTasks.length);
   }
 
   goToPreviousTask() {
