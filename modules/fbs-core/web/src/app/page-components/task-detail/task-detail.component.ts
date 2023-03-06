@@ -18,7 +18,6 @@ import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
-import { Location } from "@angular/common";
 
 /**
  * Shows a task in detail
@@ -49,7 +48,6 @@ export class TaskDetailComponent implements OnInit {
   }
 
   constructor(
-    private loation: Location,
     private route: ActivatedRoute,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
@@ -90,7 +88,7 @@ export class TaskDetailComponent implements OnInit {
           this.taskService.getTaskResult(this.courseId, task.id)
         ),
         map((result) => result),
-        takeWhile((result) => !isUnsolved)
+        takeWhile(() => !isUnsolved)
       )
       .subscribe((result) => {
         if (!result.passed) {
@@ -114,7 +112,7 @@ export class TaskDetailComponent implements OnInit {
           this.taskService.getTaskResult(this.courseId, task.id)
         ),
         map((result) => result),
-        takeWhile((result) => !isUnsolved)
+        takeWhile(() => !isUnsolved)
       )
       .subscribe((result) => {
         if (!result.passed) {
