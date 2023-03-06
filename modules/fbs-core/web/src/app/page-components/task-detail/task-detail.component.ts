@@ -71,6 +71,20 @@ export class TaskDetailComponent implements OnInit {
 
   submissionData: string | File;
 
+  isLastTask() {
+    if (this.currentTaskIndex == this.allTasks.length - 1) {
+      return true;
+    }
+    return false;
+  }
+
+  isFirstTask() {
+    if (this.currentTaskIndex == 0) {
+      return true;
+    }
+    return false;
+  }
+
   goToNextUnresolvedTask() {
     let nextTasks = [];
     let nextTaskId: number;

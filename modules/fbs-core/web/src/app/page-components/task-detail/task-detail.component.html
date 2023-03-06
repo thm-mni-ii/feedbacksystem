@@ -110,6 +110,7 @@
         <div class="foo4">
           <div class="foo4 foo2">
             <button
+              [disabled]="isFirstTask()"
               mat-icon-button
               (click)="goToPreviousUnresolvedTask()"
               matTooltip="Vorherige ungelöste Aufgabe"
@@ -119,6 +120,7 @@
               </mat-icon>
             </button>
             <button
+              [disabled]="isFirstTask()"
               mat-icon-button
               class="foo3"
               (click)="goToPreviousTask()"
@@ -137,6 +139,7 @@
           </button>
           <div class="foo4 foo2">
             <button
+              [disabled]="isLastTask()"
               mat-icon-button
               (click)="goToNextTask()"
               matTooltip="Nächste Aufgabe"
@@ -144,6 +147,7 @@
               <mat-icon>keyboard_arrow_right</mat-icon>
             </button>
             <button
+              [disabled]="isLastTask()"
               mat-icon-button
               (click)="goToNextUnresolvedTask()"
               class="foo3"
