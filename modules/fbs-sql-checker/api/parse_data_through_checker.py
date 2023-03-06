@@ -40,7 +40,7 @@ from json_creator import parse_single_stat_upload_db
 CLIENT = "mongodb://admin:password@localhost:27017/"
 CID = "Course ID not Found"
 
-
+# path to data
 def parse_data_through_checker(path = r"C:\Users\artgr\Desktop\test.json"):
     if os.path.isfile(path):
         start(path)
