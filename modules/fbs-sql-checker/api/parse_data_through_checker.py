@@ -3,9 +3,16 @@ import random
 import string
 import os
 import sys
+import socket
+
+import sock as sock
 from tqdm import tqdm
 
+
+
 from json_creator import parse_single_stat_upload_db
+
+
 
 # Usage:
 # Execute "parse_data_through_checker.py" with a path to a json file or a directory in the console
@@ -34,7 +41,7 @@ CLIENT = "mongodb://admin:password@localhost:27017/"
 CID = "Course ID not Found"
 
 
-def parse_data_through_checker(path):
+def parse_data_through_checker(path = r"C:\Users\artgr\Desktop\test.json"):
     if os.path.isfile(path):
         start(path)
     elif os.path.isdir(path):
@@ -97,4 +104,9 @@ def start(path):
 
 if __name__ == "__main__":
     PATHTODATA = sys.argv[1:][0]
+    #sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
     parse_data_through_checker(PATHTODATA)

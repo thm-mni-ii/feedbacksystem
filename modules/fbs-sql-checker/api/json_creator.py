@@ -1,4 +1,8 @@
 # JSONCreator.py
+import cProfile
+import pstats
+import threading
+
 
 from parser import parse_query
 from table_checker import extract_tables
@@ -167,6 +171,14 @@ def check_solution_chars(
     print("start")
     mydb = client["sql-checker"]
     mycol = mydb["Solutions"]
+
+    #pr = cProfile.Profile()
+    #pr.enable()
+
+    #p = pstats.Stats('restats')
+    #p.strip_dirs().sort_stats(-1).print_stats()
+
+
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
         # Extract Tables, Attributes etc. (cut out for better overview)
@@ -263,6 +275,13 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
+
+
+    #pr.disable()
+    #pr.print_stats(sort='time')
+
+
+
     print("ende")
     if data["passed"]:
         if new_solution is True:
