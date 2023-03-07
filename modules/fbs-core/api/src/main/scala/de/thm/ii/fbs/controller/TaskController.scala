@@ -198,9 +198,11 @@ class TaskController {
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
         },
-        body.retrive("attempts").asInt()
+        body.retrive("attempts").asInt(),
+        body.retrive("hideResult").asBool()
+
       ) match {
-        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType, attempts) => (
+        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType, attempts, hideResult) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -209,11 +211,13 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType, attempts = attempts))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType,
+              attempts = attempts, hideResult = hideResult.getOrElse(false)))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType, attempts) => taskService.create(cid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts))
+        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType, attempts, hideResult) => taskService.create(cid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts,
+            hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -249,9 +253,11 @@ class TaskController {
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
         },
-        body.retrive("attempts").asInt()
+        body.retrive("attempts").asInt(),
+        body.retrive("hideResult").asBool()
+
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType, attempts) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType, attempts, hideResult) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -260,11 +266,13 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType, attempts = attempts))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType,
+              attempts = attempts, hideResult = hideResult.getOrElse(false)))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType, attempts) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts))
+        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType, attempts, hideResult) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts,
+            hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
