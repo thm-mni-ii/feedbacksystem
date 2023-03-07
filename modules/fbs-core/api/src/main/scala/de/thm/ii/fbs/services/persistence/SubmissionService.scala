@@ -5,9 +5,9 @@ import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
-import org.springframework.jdbc.UncategorizedSQLException
 
 import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
@@ -88,7 +88,7 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
- def create(uid: Int, tid: Int): Submission =
+  def create(uid: Int, tid: Int): Submission =
     try {
       DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
         .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
@@ -178,8 +178,8 @@ class SubmissionService {
     }
   }
 
-  def getOrHidden(submission: Submission, hideResult: Boolean): Submission = {
-    if (hideResult) {
+  def getOrHidden(submission: Submission, hideResult: Boolean, adminPrivileged: Boolean): Submission = {
+    if (hideResult && !adminPrivileged) {
       Submission(submission.submissionTime, submission.done, submission.id, isHidden = true)
     } else {
       submission
