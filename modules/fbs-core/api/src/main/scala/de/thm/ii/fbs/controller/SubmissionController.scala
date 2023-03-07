@@ -97,7 +97,7 @@ class SubmissionController {
       List()
     } else {
       checkerConfigurationService.getAll(cid, tid).headOption match {
-        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(cc.id, sid)
+        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(uid, cc.id, sid)
         case None => throw new ResourceNotFoundException()
       }
     }
