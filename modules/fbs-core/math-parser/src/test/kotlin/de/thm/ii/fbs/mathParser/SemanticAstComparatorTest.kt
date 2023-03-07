@@ -12,6 +12,7 @@ internal class SemanticAstComparatorTest {
         .ignoreNeutralElements(true)
         .applyInverseElements(true)
         .applyCommutativeLaw(true)
+        .applyExponentLaws(true)
         .build()
 
     @Test
@@ -115,6 +116,26 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
+    fun divisionAsFrac() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("(6a+8b)/x"),
+                MathParserHelper.parse("1/x*(6a+8b)")
+            )
+        )
+    }
+
+    @Test
+    fun divisionAsFracWithExp() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("(6a+8b)/x"),
+                MathParserHelper.parse("(6a+8b)*x^(-1)")
+            )
+        )
+    }
+
+    @Test
     fun multiplicationWithBracketsTest() {
         assertTrue(
             semanticAstComparator.compare(
@@ -125,12 +146,6 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
-    fun constructionTest() {
-        assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
-        assertNotNull(SemanticAstComparator())
-    }
-
-    @Test
     fun multiplicationWithExponentTest() {
         assertTrue(
             semanticAstComparator.compare(
@@ -138,5 +153,11 @@ internal class SemanticAstComparatorTest {
                 MathParserHelper.parse("4*a^(-4)*b^4")
             )
         )
+    }
+
+    @Test
+    fun constructionTest() {
+        assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
+        assertNotNull(SemanticAstComparator())
     }
 }
