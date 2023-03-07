@@ -44,7 +44,7 @@ def parse_single_stat_upload_db(data, client):
             masker = SQLAliasMasker(query)
             masker.mask_aliases_()
             data["submission"] = masker.get_masked_query()
-            #Extract tables, selAttributes, proAttributes and strings
+            # Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
                 if " as " in data["submission"].lower():
                     data["submission"] = replace_function(data["submission"])
