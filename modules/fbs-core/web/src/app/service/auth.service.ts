@@ -75,6 +75,19 @@ export class AuthService {
   }
 
   /**
+   * Use the unified local and ldap authentication method of the server to login via username and password
+   * @param username The username of a user
+   * @param password The password of a user
+   * @return Successful observable JWTToken, only if the token is valid.
+   */
+  public unifiedLogin(
+    username: string,
+    password: string
+  ): Observable<JWTToken> {
+    return this.login(username, password, "/api/v1/login/unified");
+  }
+
+  /**
    * Renews token taken from the http response.
    * @param response The http response.
    */

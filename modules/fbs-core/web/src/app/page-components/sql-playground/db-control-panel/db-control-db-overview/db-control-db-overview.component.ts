@@ -39,7 +39,7 @@ export class DbControlDbOverviewComponent implements OnInit {
 
         if (this.dbs.length == 0) {
           // create default database if none exists
-          this.createDatabase("Standard Datanbank").subscribe((result) => {
+          this.createDatabase("Standard Datenbank").subscribe((result) => {
             if (result != null) {
               this.activeDb = this.getActiveDb(this.dbs);
               this.selectedDb = this.activeDb.id;

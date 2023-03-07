@@ -61,6 +61,7 @@ class SubmissionController {
 
     if (privileged) {
       submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
+        .map(submission => submissionService.getOrHidden(submission, task.hideResult, adminPrivileged))
     } else {
       throw new ForbiddenException()
     }
@@ -88,13 +89,17 @@ class SubmissionController {
       || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
     val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
 
-    if (privileged) {
+    if (!privileged) {
+      throw new ForbiddenException()
+    }
+
+    if (task.hideResult && !adminPrivileged) {
+      List()
+    } else {
       checkerConfigurationService.getAll(cid, tid).headOption match {
-        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(cc.id, sid)
+        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(uid, cc.id, sid)
         case None => throw new ResourceNotFoundException()
       }
-    } else {
-      throw new ForbiddenException()
     }
   }
 
@@ -243,7 +248,8 @@ class SubmissionController {
 
     if (privileged) {
       submissionService.getOne(sid, uid, adminPrivileged) match {
-        case Some(submission) => submission
+        case Some(submission) =>
+          submissionService.getOrHidden(submission, task.hideResult, adminPrivileged)
         case None => throw new ResourceNotFoundException()
       }
     } else {

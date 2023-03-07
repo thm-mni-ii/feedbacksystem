@@ -20,7 +20,7 @@ class AntiBruteForceInterceptor extends HandlerInterceptor {
   @Value("${security.antiBruteForce.maxAttempts}")
   private val maxAttempts: Int = 10
   @Value("${security.antiBruteForce.protectedPaths}")
-  private val protectedPathsString: String = "/api/v1/login/ldap,/api/v1/login/local"
+  private val protectedPathsString: String = "/api/v1/login/ldap,/api/v1/login/local,/api/v1/login/unified"
   private val logins: mutable.Map[String, LoginAttempts] = mutable.HashMap()
   private val lock: Lock = new ReentrantLock(true)
   private var lastClean: Date = new Date()

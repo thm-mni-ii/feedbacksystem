@@ -5,10 +5,10 @@ WORKDIR /build
 
 RUN gradle fbs-runner.checker:installDist
 
-FROM openjdk:18.0.2-slim
+FROM eclipse-temurin:18.0.2_9-jre-alpine
 
 # Install Docker
-RUN apt-get update && apt-get install -y --no-install-recommends docker.io curl
+RUN apk add --no-cache docker curl
 
 COPY --from=build /build/modules/fbs-runner/checker/build/install/fbs-runner.checker /usr/local/fbs-runner.checker
 EXPOSE 8081

@@ -1,5 +1,6 @@
 plugins {
     id "com.github.alisiikh.scalastyle" version "3.4.1"
+    id 'jacoco'
 }
 
 apply plugin: 'scala'
@@ -21,21 +22,19 @@ run {
 
 scalastyle {
     config = file(scalaStyleConfig)
+    failOnWarning = true
 }
 
-test.dependsOn scalastyleCheck
-
 dependencies {
-    compileOnly 'org.scala-lang:scala-library:2.12.12'
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+    compileOnly 'org.scala-lang:scala-library:2.12.17'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-config-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-web-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-jdbc-client-scala_2.12:${vertxVersion}"
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3'
-    implementation 'mysql:mysql-connector-java:8.0.21'
-    implementation 'org.postgresql:postgresql:42.3.1'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
+    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation 'org.postgresql:postgresql:42.5.3'
     testImplementation 'junit:junit:4.13.2'
 }
 
@@ -44,5 +43,21 @@ jar {
     manifest {
         attributes 'Main-Class': mainClassName
         attributes 'Main-Verticle': mainVerticle
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+tasks.register('jacocoReport', JacocoReport) {
+    dependsOn = ['test']
+    sourceDirectories.setFrom files('src/main/scala')
+    classDirectories.setFrom files('build/classes/scala/main')
+    executionData.setFrom files('build/jacoco/test.exec')
+
+    reports {
+        xml.enabled true
+        html.enabled true
     }
 }

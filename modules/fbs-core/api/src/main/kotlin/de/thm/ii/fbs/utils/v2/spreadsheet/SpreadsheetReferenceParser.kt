@@ -1,46 +1,20 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueByCellRef
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import java.text.NumberFormat
-import java.util.*
-import kotlin.collections.HashMap
 import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
     companion object {
         private val cellStringsRegex = "\"[^\"]*\"".toRegex()
         private val cellRefsRegex = "([A-Za-z0-9]+!)?$?[A-Z]+$?[1-9][0-9]*".toRegex()
         private val rangeRefsRegex =
-                "(([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
-        private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
-
-        @JvmStatic
-        fun valueOfCell(cell: XSSFCell?): String {
-            if (cell == null) {
-                return ""
-            }
-
-            return when (cell.cellType) {
-                CellType.FORMULA -> try {
-                    germanFormat.format(cell.numericCellValue)
-                } catch (e: IllegalStateException) {
-                    try {
-                        cell.stringCellValue
-                    } catch (e: IllegalStateException) {
-                        throw RuntimeException("SpreadsheetException@" + cell.address.formatAsString() + ": " + cell.errorCellValue)
-                    }
-                }
-
-                CellType.NUMERIC -> germanFormat.format(cell.numericCellValue)
-                CellType.STRING -> cell.stringCellValue
-                else -> ""
-            }
-
-        }
+            "(([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
     }
 
     val references: Map<Int, Map<String, Pair<String, Set<Cell>>>>
@@ -53,7 +27,8 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
             for (row in sheet.rowIterator()) {
                 for (cell in row.cellIterator()) {
                     if (cell.cellType == CellType.FORMULA) {
-                        sheetRefs[cell.address.formatAsString()] = Pair(valueOfCell(cell as XSSFCell), getCells(cell.cellFormula, sheet))
+                        sheetRefs[cell.address.formatAsString()] =
+                            Pair(valueOfCell(cell as XSSFCell), getCells(cell.cellFormula, sheet))
                     }
                 }
             }
@@ -78,8 +53,9 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
 
     private fun refToCell(ref: String, sheet: String): Cell {
         val (sheetName, cellRef) = getRefAndSheet(ref, sheet)
+        val value = valueByCellRef(workbook.getSheet(sheetName), cellRef)
 
-        return Cell(workbook.getSheetIndex(sheetName), cellRef)
+        return Cell(workbook.getSheetIndex(sheetName), cellRef, value)
     }
 
     private fun getRefAndSheet(ref: String, defaultSheetName: String): Pair<String, String> {

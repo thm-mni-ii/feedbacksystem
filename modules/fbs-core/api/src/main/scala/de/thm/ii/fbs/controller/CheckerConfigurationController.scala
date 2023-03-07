@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceOnChange, CheckerServiceOnDelete, CheckerServiceOnMainFileUpload}
+import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -197,8 +197,9 @@ class CheckerConfigurationController {
                      req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.MAIN_FILE,
       cc => {
-        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc)
         this.ccs.setMainFileUploadedState(cid, tid, ccid, state = true)
+        cc.mainFileUploaded = true
+        notifyCheckerMainFileUpload(cid, taskService.getOne(tid).get, cc)
       })(cid, tid, ccid, file, req, res)
 
   /**
@@ -230,7 +231,11 @@ class CheckerConfigurationController {
                           @RequestParam file: MultipartFile,
                           req: HttpServletRequest, res: HttpServletResponse): Unit =
     uploadFile(storageFileName.SECONDARY_FILE,
-      cc => this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true))(cid, tid, ccid, file, req, res)
+      cc => {
+        this.ccs.setSecondaryFileUploadedState(cid, tid, ccid, state = true)
+        cc.secondaryFileUploaded = true
+        notifyCheckerSecondaryFileUpload(cid, taskService.getOne(tid).get, cc)
+      })(cid, tid, ccid, file, req, res)
 
   /**
     * Downloads the secondary file for a task configuration
@@ -296,6 +301,15 @@ class CheckerConfigurationController {
     checker match {
       case change: CheckerServiceOnMainFileUpload =>
         change.onCheckerMainFileUpload(cid, task, cc)
+      case _ =>
+    }
+  }
+
+  private def notifyCheckerSecondaryFileUpload(cid: Int, task: Task, cc: CheckrunnerConfiguration): Unit = {
+    val checker = checkerService(cc.checkerType)
+    checker match {
+      case change: CheckerServiceOnSecondaryFileUpload =>
+        change.onCheckerSecondaryFileUpload(cid, task, cc)
       case _ =>
     }
   }

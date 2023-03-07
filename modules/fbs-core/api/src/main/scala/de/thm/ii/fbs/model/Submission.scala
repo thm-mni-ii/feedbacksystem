@@ -14,4 +14,6 @@ case class Submission(submissionTime: Date,
                       done: Boolean, id: Int,
                       results: Array[CheckResult] = Array(),
                       userID: Option[Int] = None,
-                      isInBlockStorage: Boolean = false)
+                      isInBlockStorage: Boolean = false,
+                      isHidden: Boolean = false
+                     )
