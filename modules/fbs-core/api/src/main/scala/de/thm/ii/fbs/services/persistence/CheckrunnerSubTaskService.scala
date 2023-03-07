@@ -111,12 +111,13 @@ class CheckrunnerSubTaskService {
     * @param submissionId The id of the submission to get the subtasks results
     * @return List of subtasks results with tasks
     */
-  def listResultsWithTasks(configurationId: Int, submissionId: Int): List[SubTaskResult] = DB.query(
-    "SELECT st.name, st.points AS max_points, str.points FROM checkrunner_sub_task_result str JOIN " +
-      "checkrunner_sub_task st ON str.sub_task_id = st.sub_task_id " +
-      "WHERE str.configuration_id = ? AND str.submission_id = ?",
+  def listResultsWithTasks(userId: Int, configurationId: Int, submissionId: Int): List[SubTaskResult] = DB.query(
+    "SELECT st.name, st.points AS max_points, str.points FROM checkrunner_sub_task_result str " +
+      "JOIN checkrunner_sub_task st ON str.sub_task_id = st.sub_task_id " +
+      "JOIN user_task_submission uts ON str.submission_id = uts.submission_id " +
+      "WHERE str.configuration_id = ? AND str.submission_id = ? AND uts.user_id = ?",
     (res, _) => parseSubTaskResultWithSubTask(res),
-    configurationId, submissionId
+    configurationId, submissionId, userId
   )
 
   /**
