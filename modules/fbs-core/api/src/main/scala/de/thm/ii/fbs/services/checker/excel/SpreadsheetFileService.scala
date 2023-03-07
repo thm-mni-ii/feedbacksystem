@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import de.thm.ii.fbs.model.ExcelMediaInformationTasks
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformationTasks, Submission}
 import de.thm.ii.fbs.services.persistence.StorageService
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,19 +15,29 @@ class SpreadsheetFileService {
   private val storageService: StorageService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-  def getMediaInfo(ccId: Int): ExcelMediaInformationTasks = {
-    val secondaryFilePath = this.storageService.pathToSecondaryFile(ccId).get.toString
-    val file = new File(secondaryFilePath)
-    objectMapper.readValue(file, classOf[ExcelMediaInformationTasks])
+  def getMediaInfo(cc: CheckrunnerConfiguration): ExcelMediaInformationTasks = {
+    val content = this.storageService.getSecondaryFileContent(cc)
+    objectMapper.readValue(content, classOf[ExcelMediaInformationTasks])
   }
 
-  def getSubmissionFile(submissionID: Int): File = {
-    val submissionPath = this.storageService.pathToSolutionFile(submissionID).get.toString
-    new File(submissionPath)
+  def getSubmissionFile(submission: Submission): File = {
+    storageService.getFileSolutionFile(submission)
   }
 
-  def getSolutionFile(ccId: Int): File = {
-    val mainFilePath = this.storageService.pathToMainFile(ccId).get.toString
-    new File(mainFilePath)
+  def getMainFile(cc: CheckrunnerConfiguration): File = {
+    storageService.getFileMainFile(cc)
+  }
+
+  def cleanup(isInBlockStorage: Boolean, file: File): Unit = {
+    if (isInBlockStorage) {
+      file.delete()
+    }
+  }
+
+  def cleanup(cc: CheckrunnerConfiguration, mainFile: File, submissionFile: File): Unit = {
+    if (cc.isInBlockStorage) {
+      mainFile.delete()
+      submissionFile.delete()
+    }
   }
 }

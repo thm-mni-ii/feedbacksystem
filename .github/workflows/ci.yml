@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [ dev, main, v*.x ]
+    tags:
+      - v**
+  pull_request:
+
+jobs:
+  validate-api-docs:
+    name: API Docs Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.5.1
+        if: ${{ inputs.setupNode }}
+        with:
+          node-version: "16.13.1"
+      - name: Add Problem Matcher
+        run: echo "::add-matcher::.github/problem-matchers/validate-api-docs.json"
+      - run: bash ./scripts/ci/validate-api-docs/validate-api-docs.sh
+
+  validate-gradle-warpper:
+    name: Gradle Warpper Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@55e685c48d84285a5b0418cd094606e199cca3b6
+  validate-migration:
+    name: fbs-core.api / DB Migration Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check Migration files
+        run: bash ./scripts/ci/validate-migrations.sh modules/fbs-core/api/src/main/resources/migrations
+
+  fbs-core-api:
+    name: fbs-core.api
+    uses: ./.github/workflows/check-fbs-module.yml
+    needs: [ "validate-gradle-warpper", "validate-migration" ]
+    with:
+      name: fbs-core.api
+      lintArguments: :fbs-core.api:scalastyleCheck
+      testArguments: :fbs-core.api:test :fbs-core.math-parser:test
+      coverageArguments: :fbs-core.api:jacocoReport :fbs-core.math-parser:jacocoReport
+      coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
+      startMysqlService: true
+      startMinioService: true
+      problemMatcher: java.json
+
+  fbs-core-web:
+    name: fbs-core.web
+    uses: ./.github/workflows/check-fbs-module.yml
+    needs: [ "validate-gradle-warpper" ]
+    with:
+      name: fbs-core.web
+      lintArguments: :fbs-core.web:lint
+      testArguments: :fbs-core.web:build
+      setupNode: true
+
+  fbs-runner-checker:
+    name: fbs-runner.checker
+    uses: ./.github/workflows/check-fbs-module.yml
+    needs: [ "validate-gradle-warpper" ]
+    with:
+      name: fbs-runner.checker
+      lintArguments: :fbs-runner.checker:scalastyleCheck
+      testArguments: :fbs-runner.checker:test
+      coverageArguments: :fbs-runner.checker:jacocoReport
+      coverageFilesLocation: modules/fbs-runner/checker/build/reports/jacoco/jacocoReport/jacocoReport.xml
+      problemMatcher: java.json
+
+  fbs-sql-checker:
+    name: fbs-sql-checker
+    uses: ./.github/workflows/check-fbs-python-module.yml
+    with:
+      working-directory: ./modules/fbs-sql-checker
+
+  build:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: [ "validate-gradle-warpper", "validate-migration" ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker images
+        run: docker-compose build
+
+      # TODO: Move to modules
+      # - name: Coveralls
+      #   run: ./gradlew jacocoRootReport coveralls
+      #   env:
+      #     CI_NAME: github
+      #     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     COVERALLS_SERVICE_NAME: "github"
+      #     CI_PULL_REQUEST: ${{ github.event.number }}
+      #     COVERALLS_SERVICE_JOB_ID: ${{ github.run_id }}

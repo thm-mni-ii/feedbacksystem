@@ -127,11 +127,11 @@ class TaskController {
           case Some(smi: SpreadsheetMediaInformation) =>
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
             val config = this.checkerConfigurationService.getAll(cid, tid).head
-            val path = this.storageService.pathToMainFile(config.id).get.toString
-            val spreadsheetFile = new File(path)
+            val spreadsheetFile: File = storageService.getFileMainFile(config)
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
+            spreadsheetFile.delete()
             task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
               decimals, smi)))
           case _ => task
@@ -197,9 +197,12 @@ class TaskController {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
-        }
+        },
+        body.retrive("attempts").asInt(),
+        body.retrive("hideResult").asBool()
+
       ) match {
-        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), isPrivate, deadline, Some("application/x-spreadsheet"), desc, Some(mediaInformation), requirementType, attempts, hideResult) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -208,11 +211,13 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.create(cid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType,
+              attempts = attempts, hideResult = hideResult.getOrElse(false)))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType) => taskService.create(cid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
+        case (Some(name), isPrivate, deadline, Some(mediaType), desc, _, requirementType, attempts, hideResult) => taskService.create(cid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts,
+            hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -247,9 +252,12 @@ class TaskController {
           case Some(t) if Task.requirementTypes.contains(t) => t
           case None => Task.defaultRequirement
           case _ => throw new BadRequestException("Invalid requirement type.")
-        }
+        },
+        body.retrive("attempts").asInt(),
+        body.retrive("hideResult").asBool()
+
       ) match {
-        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType) => (
+        case (Some(name), deadline, Some("application/x-spreadsheet"), isPrivate, desc, Some(mediaInformation), requirementType, attempts, hideResult) => (
           mediaInformation.retrive("idField").asText(),
           mediaInformation.retrive("inputFields").asText(),
           mediaInformation.retrive("outputFields").asText(),
@@ -258,11 +266,13 @@ class TaskController {
         ) match {
           case (Some(idField), Some(inputFields), Some(outputFields), pointFields, Some(decimals)) => taskService.update(cid, tid,
             Task(name, deadline, "application/x-spreadsheet", isPrivate.getOrElse(false), desc.getOrElse(""),
-              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType))
+              Some(SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals)), requirementType,
+              attempts = attempts, hideResult = hideResult.getOrElse(false)))
           case _ => throw new BadRequestException("Malformed media information")
         }
-        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType) => taskService.update(cid, tid,
-          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType))
+        case (Some(name), deadline, Some(mediaType), isPrivate, desc, _, requirementType, attempts, hideResult) => taskService.update(cid, tid,
+          Task(name, deadline, mediaType, isPrivate.getOrElse(false), desc.getOrElse(""), None, requirementType, attempts = attempts,
+            hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
     } else {
@@ -292,8 +302,10 @@ class TaskController {
       val success = taskService.delete(cid, tid)
 
       // If the configuration was deleted in the database -> delete all files
-      success && submissions.forall(s => storageService.deleteSolutionFile(s.id)) &&
-        configurations.forall(cc => storageService.deleteConfiguration(cc.id))
+      if (success) {
+        submissions.foreach(s => storageService.deleteSolution(s.id))
+        configurations.foreach(cc => storageService.deleteAllConfigurations(tid, cid, cc))
+      }
     } else {
       throw new ForbiddenException()
     }

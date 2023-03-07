@@ -1,16 +1,17 @@
 package de.thm.ii.fbs.services.persistence
 
-import java.math.BigInteger
-import java.sql.{ResultSet, SQLException}
-import java.util.Date
-
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
+import java.math.BigInteger
+import java.sql.{ResultSet, SQLException}
+import java.util.Date
 import scala.collection.mutable
 
 /**
@@ -32,7 +33,8 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
+    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
@@ -45,7 +47,7 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, checker_type " +
+    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, checker_type " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
@@ -59,7 +61,8 @@ class SubmissionService {
     * @return The found task
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
+    s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
     (res, _) => parseResult(res), id, uid)).headOption
@@ -72,23 +75,34 @@ class SubmissionService {
     * @return The found submission
     */
   def getOneWithoutUser(id: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, checker_type${if (addExtInfo) ", ext_info" else ""} " +
+    s"SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ?",
     (res, _) => parseResult(res, fetchUserId = true), id)).headOption
 
   /**
     * Create a new submission
+    *
     * @param uid the user id
     * @param tid The task id
     * @return The created Submission with id
     */
   def create(uid: Int, tid: Int): Submission =
-    DB.insert("INSERT INTO user_task_submission (user_id, task_id) VALUES (?, ?)", uid, tid)
-      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-      .flatMap(id => getOne(id, uid)) match {
-      case Some(submission) => submission
-      case None => throw new SQLException("Submission could not be created")
+    try {
+      DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
+        .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+        .flatMap(id => getOne(id, uid)) match {
+        case Some(submission) => submission
+        case None => throw new SQLException("Submission could not be created")
+      }
+    } catch {
+      case e: UncategorizedSQLException =>
+        if (e.getSQLException.getSQLState == "45000") {
+          throw new ForbiddenException("Number of tries exceeded")
+        } else {
+          throw e
+        }
     }
 
   /**
@@ -106,6 +120,7 @@ class SubmissionService {
 
   /**
     * Removes all results stored for this submission
+    *
     * @param sid The submission id
     * @param uid The user id
     * @return True if results where deleted
@@ -116,6 +131,7 @@ class SubmissionService {
 
   /**
     * Delete a submission by id
+    *
     * @param sid The submission id
     * @return True if successful
     */
@@ -137,7 +153,10 @@ class SubmissionService {
         configurationId = res.getInt("configuration_id"),
         extInfo = if (extInfo != null) objectMapper.readTree(extInfo) else null
       ))
-    } else {Array[CheckResult]()}
+    } else {
+      Array[CheckResult]()
+    },
+    isInBlockStorage = res.getBoolean("is_in_block_storage")
   )
 
   private def reduceSubmissions(submissions: List[Submission]): List[Submission] = {
@@ -156,6 +175,14 @@ class SubmissionService {
       resultSet.getString(key)
     } catch {
       case _: SQLException => defaultValue
+    }
+  }
+
+  def getOrHidden(submission: Submission, hideResult: Boolean, adminPrivileged: Boolean): Submission = {
+    if (hideResult && !adminPrivileged) {
+      Submission(submission.submissionTime, submission.done, submission.id, isHidden = true)
+    } else {
+      submission
     }
   }
 }

@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.services.runner
 
-import java.nio.file.Path
-
 import de.thm.ii.fbs.services.{DockerService, FileService}
-import de.thm.ii.fbs.types.{DockerCmdConfig, Runner, Submission}
+import de.thm.ii.fbs.types.{DockerCmdConfig, RunArgs, Runner, Submission}
 import de.thm.ii.fbs.util.RunnerException
 import io.vertx.core.json.JsonObject
+
+import java.nio.file.Path
 
 /**
   * BashRunnerService provides all functions to start a Bash Runner
@@ -20,7 +20,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   private val SOURCE_FOLDER = s"/runner"
   private var tmpFolder: Option[Path] = None
 
-  /**0
+  /** 0
     * Create a DockerCmd Configuration for a BashRunner
     *
     * @return DockerCmd Config
@@ -28,21 +28,21 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   def getDockerCmd: DockerCmdConfig = {
     /*Get Docker Options*/
     // Read the first line of the Script File to check if is a php script TODO May improve/remove
-    val scriptContent = FileService.fileToString(runner.mainFile.toFile)
+    val scriptContent = FileService.fileToString(runner.paths.mainFile.toFile)
     val interpreter = if (scriptContent.split("\n").head.matches("#!.*php.*")) "php" else "bash"
 
     val submissionMount = s"$SOURCE_FOLDER/${submission.solutionFileLocation.getFileName}"
 
     /* Build Docker Command */
     var mountFiles = Seq(
-      (runner.mainFile.toString, MAIN_FILE_MOUNT),
+      (runner.paths.mainFile.toString, MAIN_FILE_MOUNT),
       (submission.solutionFileLocation.toString, submissionMount))
 
     var runOptions = Seq(interpreter, MAIN_FILE_MOUNT, submission.user.username, submissionMount)
 
     // If runner has secondary file add it to Docker configuration
-    if (runner.hasSecondaryFile) {
-      mountFiles = mountFiles :+ (runner.secondaryFile.toString, SECONDARY_FILE_MOUNT)
+    if (runner.paths.secondaryFile.isDefined) {
+      mountFiles = mountFiles :+ (runner.paths.secondaryFile.toString, SECONDARY_FILE_MOUNT)
       runOptions = runOptions :+ SECONDARY_FILE_MOUNT
     }
 
@@ -52,20 +52,14 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   /**
     * Copy all used files to an Tmp dir
     */
-  def prepareRunnerStart(): Unit = {
+  def prepareRunnerStart(runArgs: RunArgs): Unit = {
     // TODO improve?
     val tmp = FileService.createTempFolder(submission)
 
-    /* Copy Config and Submission File to prevent than from being changed during check */
-    runner.mainFile = FileService.copy(runner.mainFile, tmp)
+    FileService.prepareRunArgsFiles(runArgs, Option(tmp))
+    this.checkFiles()
 
-    if (runner.hasSecondaryFile) {
-      runner.secondaryFile = FileService.copy(runner.secondaryFile, tmp)
-    }
-
-    submission.solutionFileLocation = FileService.copy(submission.solutionFileLocation, tmp)
-
-    tmpFolder = Option(tmp)
+    tmpFolder = Option(FileService.createTempFolder(submission))
   }
 
   /**
@@ -73,9 +67,9 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
     *
     * @throws RuntimeException if the needed Files are not Present
     */
-  def checkFiles(): Unit = {
-    val checkMain = runner.mainFile.toFile.isFile
-    val checkSecond = !runner.hasSecondaryFile || runner.secondaryFile.toFile.isFile
+  private def checkFiles(): Unit = {
+    val checkMain = runner.paths.mainFile.toFile.isFile
+    val checkSecond = runner.paths.secondaryFile.isEmpty || runner.paths.secondaryFile.get.toFile.isFile
     val checkSubmission = submission.solutionFileLocation.toFile.isFile
 
     if (!(checkMain && checkSecond && checkSubmission)) {
@@ -95,7 +89,7 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
   def transformResult(exitCode: Int, stdout: String, stderr: String): JsonObject = {
     /*If stdout Contains Something change exit code to 42*/
     var checkedExitCode = exitCode
-    if (stderr.length > 0 && checkedExitCode == 0) checkedExitCode = 42
+    if (stderr.nonEmpty && checkedExitCode == 0) checkedExitCode = 42
 
     val res = new JsonObject()
     res.put("ccid", runner.id)
@@ -109,8 +103,6 @@ class BashRunnerService(val runner: Runner, val submission: Submission) {
     * Delete all Temporary created files
     */
   def cleanUp(): Unit = {
-    if (tmpFolder.isDefined) {
-      FileService.rmdir(tmpFolder.get.toFile)
-    }
+    FileService.cleanUpRunArgsFiles(runner, submission, tmpFolder)
   }
 }

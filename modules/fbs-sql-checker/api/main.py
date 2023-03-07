@@ -9,7 +9,7 @@ from json_creator import parse_single_stat_upload_db
 
 # The following Code is for productive purposes
 
-client = sys.argv[2]
+CLIENT = sys.argv[2]
 if len(sys.argv) < 3:
     print("Zu wenige Argumente übergeben.")
     print(
@@ -20,7 +20,7 @@ else:
     URL_ANSWER = sys.argv[1]
     answer = requests.get(URL_ANSWER, verify=False, timeout=25)
     print(answer.json())
-    parse_single_stat_upload_db(answer.json(), client)
+    parse_single_stat_upload_db(answer.json(), CLIENT)
 
 # The following Code is for debugging purposes
 # CLIENT = (

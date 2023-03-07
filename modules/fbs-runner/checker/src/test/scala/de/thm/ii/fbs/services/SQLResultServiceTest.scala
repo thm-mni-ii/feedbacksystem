@@ -4,7 +4,8 @@ import de.thm.ii.fbs.types.ExtResSql
 import io.vertx.lang.scala.json.JsonArray
 import io.vertx.scala.ext.sql.ResultSet
 import org.hamcrest.CoreMatchers.is
-import org.junit.Assert.{assertEquals, assertNotEquals, assertThat}
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.{assertEquals, assertNotEquals}
 import org.junit.Test
 
 import scala.collection.mutable

@@ -26,8 +26,8 @@ class TaskService {
     * @return List of tasks
     */
   def getAll(cid: Int): List[Task] =
-    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type " +
-      "FROM task WHERE course_id = ?",
+    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type , attempts ,hide_result" +
+      " FROM task WHERE course_id = ?",
       (res, _) => parseResult(res), cid)
 
   /**
@@ -37,7 +37,8 @@ class TaskService {
     * @return The found task
     */
   def getOne(id: Int): Option[Task] =
-    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id, requirement_type FROM task WHERE task_id = ?",
+    DB.query("SELECT task_id, name, is_private, media_type, description, deadline, media_information, course_id," +
+      " requirement_type, attempts ,hide_result FROM task WHERE task_id = ?",
       (res, _) => parseResult(res), id).headOption
 
   /**
@@ -48,11 +49,12 @@ class TaskService {
     * @return The created task with id
     */
   def create(cid: Int, task: Task): Task =
-    DB.insert("INSERT INTO task (name, is_private, media_type, description, deadline, media_information, course_id, requirement_type) VALUES " +
-      "(?, ?, ?, ?, ?, ?, ?, ?);",
+    DB.insert("INSERT INTO task (name, is_private, media_type, description, deadline, " +
+      "media_information, course_id, requirement_type, attempts,hide_result) VALUES " +
+      "(?, ?, ?, ?, ?, ?, ?, ?,?,?);",
       task.name, task.isPrivate, task.mediaType, task.description,
       parseTimestamp(task.deadline).orNull, task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull,
-      cid, task.requirementType)
+      cid, task.requirementType, task.attempts.orNull, task.hideResult)
       .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
       .flatMap(id => getOne(id)) match {
       case Some(task) => task
@@ -70,11 +72,12 @@ class TaskService {
   def update(cid: Int, tid: Int, task: Task): Boolean =
     1 == DB.update(
       """
-        |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?, requirement_type = ?
+        |UPDATE task SET name = ?, is_private = ?, media_type = ?, description = ?, deadline = ?, media_information = ?,
+        |requirement_type = ?, attempts = ?, hide_result = ?
         |WHERE task_id = ? AND course_id = ?
         |""".stripMargin,
       task.name, task.isPrivate, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
-      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, tid, cid)
+      task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, task.attempts.orNull, task.hideResult, tid, cid)
 
   /**
     * Delete a task by id
@@ -164,7 +167,10 @@ class TaskService {
     isPrivate = res.getBoolean("is_private"),
     deadline = Option(res.getTimestamp("deadline")).map(timestamp => timestamp.toInstant.toString), mediaType = res.getString("media_type"),
     description = res.getString("description"), mediaInformation = Option(res.getString("media_information")).map(mi => MediaInformation.fromJSONString(mi)),
-    requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"))
+    requirementType = res.getString("requirement_type"), id = res.getInt("task_id"), courseID = res.getInt("course_id"),
+    attempts = Option(res.getInt("attempts")).filter(_ => !res.wasNull()),
+    hideResult = res.getBoolean("hide_result")
+  )
 
   private def parseUserTaskResult(res: ResultSet): UserTaskResult = UserTaskResult(res.getInt("task_id"),
     res.getInt("points"), res.getInt("max_points"), res.getInt("status") == 0, res.getString("submission_id") != null, res.getBoolean("is_private"))

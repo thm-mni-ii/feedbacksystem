@@ -12,10 +12,10 @@ import org.springframework.util.FileCopyUtils
 
 import java.io.InputStreamReader
 
-@Component
 /**
   * DatabaseMigrationService
   */
+@Component
 class DatabaseMigrationService {
   private val logger = LoggerFactory.getLogger(this.getClass)
   @Autowired
@@ -58,12 +58,12 @@ class DatabaseMigrationService {
         migration
       })
       .map(migration => loadMigration(migration))
-      .foreach(migration => DB.batchUpdate(migration: _*))
+      .foreach(migration => DB.batchUpdate(migration))
   }
 
   def resetDatabase(): Unit = {
-    this.deleteAllTables();
-    this.migrate();
+    this.deleteAllTables()
+    this.migrate()
   }
 
   private def deleteAllTables(): Unit = {
@@ -80,7 +80,6 @@ class DatabaseMigrationService {
   private def listMigrations(): Array[Resource] = this.resourceResolver.getResources("migrations/*.sql")
     .sortBy(resource => resource.getFilename)
 
-  private def loadMigration(resource: Resource): Seq[String] =
+  private def loadMigration(resource: Resource): String =
     FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream))
-      .split(';').filterNot(_.isBlank).toSeq
 }

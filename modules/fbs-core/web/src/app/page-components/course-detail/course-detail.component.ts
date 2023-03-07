@@ -21,6 +21,7 @@ import { GoToService } from "../../service/goto.service";
 import { TaskPointsDialogComponent } from "../../dialogs/task-points-dialog/task-points-dialog.component";
 import { ExternalClassroomService } from "../../service/external-classroom.service";
 import { UserTaskResult } from "../../model/UserTaskResult";
+import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/export-tasks-dialog.component";
 
 @Component({
   selector: "app-course-detail",
@@ -71,6 +72,22 @@ export class CourseDetailComponent implements OnInit {
     }
   }
 
+  public canEdit(): boolean {
+    const globalRole = this.authService.getToken().globalRole;
+    if (
+      Roles.GlobalRole.isAdmin(globalRole) ||
+      Roles.GlobalRole.isModerator(globalRole)
+    ) {
+      return true;
+    }
+
+    const courseRole = this.authService.getToken().courseRoles[this.courseID];
+    return (
+      Roles.CourseRole.isTutor(courseRole) ||
+      Roles.CourseRole.isDocent(courseRole)
+    );
+  }
+
   private reloadCourse() {
     this.course = this.courseService.getCourse(this.courseID);
     this.course.subscribe((course) => {
@@ -118,6 +135,14 @@ export class CourseDetailComponent implements OnInit {
           this.reloadCourse();
         }
       });
+  }
+
+  openExportDialog() {
+    this.dialog.open(ExportTasksDialogComponent, {
+      height: "auto",
+      width: "40%",
+      data: { courseId: this.courseID, tasks: this.tasks },
+    });
   }
 
   createTask() {

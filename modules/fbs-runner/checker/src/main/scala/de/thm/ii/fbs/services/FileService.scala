@@ -1,13 +1,16 @@
 package de.thm.ii.fbs.services
 
-import java.io.File
-import java.nio.file._
-
-import de.thm.ii.fbs.types.{RunArgs, Runner, Submission}
+import de.thm.ii.fbs.types.{RunArgs, Runner, RunnerPaths, Submission}
 import de.thm.ii.fbs.util.RunnerException
 import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
+import io.vertx.lang.scala.ScalaLogger
 import org.apache.commons.io.FileUtils
 
+import java.io.File
+import java.net.URL
+import java.nio.file._
+import scala.language.postfixOps
+import scala.sys.process._
 import scala.util.Properties
 
 /**
@@ -17,6 +20,7 @@ object FileService {
   private val INSIDE_DOCKER: Boolean = Properties.envOrElse("INSIDE_DOCKER", "false").toBoolean
   private val ULDIR: Path = Path.of(if (INSIDE_DOCKER) "/upload-dir" else "upload-dir")
   private val CONTAINER_TEMP = Path.of("/dockertemp")
+  private val logger = ScalaLogger.getLogger(this.getClass.getName)
 
   /**
     * Get all content form a File
@@ -132,20 +136,86 @@ object FileService {
     }
   }
 
+  private def downloadToTmpFile(url: String, prefix: String, dir: Option[Path] = None): Path = {
+    val path = dir match {
+      case Some(dir) => Files.createTempFile(dir, prefix, null)
+      case _ => Files.createTempFile(prefix, null)
+    }
+
+    new URL(url) #> path.toFile !!;
+    path
+  }
+
   /**
     * Add the Upload Dir to the Config and Submission Files
     *
     * @param runArgs Runner arguments
     */
-  def addUploadDir(runArgs: RunArgs): Unit = {
+  def prepareRunArgsFiles(runArgs: RunArgs, dir: Option[Path] = None): Unit = {
     val runner: Runner = runArgs.runner
     val submission: Submission = runArgs.submission
 
-    runner.mainFile = ULDIR.resolve(runner.mainFile)
-    if (runner.hasSecondaryFile) {
-      runner.secondaryFile = ULDIR.resolve(runner.secondaryFile)
+    if (!runner.files.hasMainFile) {
+      throw new RunnerException(s"The 'mainFile' is required")
     }
 
-    submission.solutionFileLocation = ULDIR.resolve(submission.solutionFileLocation)
+    if (runner.files.typ == "path") {
+      prepareRunnerFilesPath(runner, dir)
+    } else if (runner.files.typ == "url") {
+      prepareRunnerFilesUrl(runner, dir)
+    } else {
+      throw new RunnerException(s"Invalid runner files type '${runner.files.typ}")
+    }
+
+    submission.solutionFileLocation = downloadToTmpFile(submission.solutionFileUrl, "solutionFile", dir)
+  }
+
+  def cleanUpRunArgsFiles(runner: Runner, submission: Submission, dir: Option[Path] = None): Unit = {
+    try {
+      if (dir.isDefined) {
+        FileService.rmdir(dir.get.toFile)
+      } else if (runner.files.typ == "url") {
+        runner.paths.mainFile.toFile.delete()
+        runner.paths.secondaryFile.foreach(p => p.toFile.delete())
+        submission.solutionFileLocation.toFile.delete()
+      }
+    } catch {
+      case e: Throwable => logger.error(s"Could not cleanup Submission '${submission.id}'", e)
+    }
+  }
+
+  private def prepareRunnerFilesPath(runner: Runner, dir: Option[Path]): Unit = {
+    val mainFile = ULDIR.resolve(runner.files.mainFile)
+    var secondaryFile: Option[Path] = None
+
+    if (runner.files.hasSecondaryFile) {
+      secondaryFile = Option(ULDIR.resolve(runner.files.secondaryFile))
+    }
+
+    runner.paths = RunnerPaths(mainFile, secondaryFile)
+
+    /* Copy files to defined directory */
+    if (dir.isDefined) {
+      this.copyRunnerFilesToDir(runner, dir.get)
+    }
+  }
+
+  private def prepareRunnerFilesUrl(runner: Runner, dir: Option[Path] = None): Unit = {
+    val mainFile = downloadToTmpFile(runner.files.mainFile, "mainFile", dir)
+    var secondaryFile: Option[Path] = None
+
+    if (runner.files.hasSecondaryFile) {
+      secondaryFile = Option(downloadToTmpFile(runner.files.secondaryFile, "secondaryFile", dir))
+    }
+
+    runner.paths = RunnerPaths(mainFile, secondaryFile)
+  }
+
+  private def copyRunnerFilesToDir(runner: Runner, dir: Path): Unit = {
+    runner.paths.mainFile = FileService.copy(runner.paths.mainFile, dir)
+
+    if (runner.paths.secondaryFile.isDefined) {
+      runner.paths.secondaryFile = Option(FileService.copy(runner.paths.secondaryFile.get, dir))
+    }
   }
 }

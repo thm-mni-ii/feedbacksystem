@@ -23,6 +23,25 @@
   }
 }
 
+.task-title {
+  display: flex;
+  align-items: center;
+  .mat-icon {
+    margin-right: 10px;
+  }
+  .practice {
+    color: green;
+  }
+  
+  .mandatory {
+    color: red;
+  }
+  
+  .bonus {
+    color: orange;
+  }
+}
+
 .task-container:hover {
   background: #d4dadd;
 }
