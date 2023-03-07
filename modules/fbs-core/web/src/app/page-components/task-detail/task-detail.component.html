@@ -107,8 +107,8 @@
       </div>
 
       <mat-card-actions>
-        <div class="foo4">
-          <div class="foo4 foo2">
+        <div class="center">
+          <div class="center margin-left-right">
             <button
               [disabled]="isFirstTask()"
               mat-icon-button
@@ -122,7 +122,7 @@
             <button
               [disabled]="isFirstTask()"
               mat-icon-button
-              class="foo3"
+              class="margin-left-4px"
               (click)="goToPreviousTask()"
               matTooltip="Vorherige Aufgabe"
             >
@@ -137,7 +137,7 @@
           >
             Abgeben
           </button>
-          <div class="foo4 foo2">
+          <div class="center margin-left-right">
             <button
               [disabled]="isLastTask()"
               mat-icon-button
@@ -150,7 +150,7 @@
               [disabled]="isLastTask()"
               mat-icon-button
               (click)="goToNextUnresolvedTask()"
-              class="foo3"
+              class="margin-left-4px"
               matTooltip="Nächste ungelöste Aufgabe"
             >
               <mat-icon class="material-icons">
