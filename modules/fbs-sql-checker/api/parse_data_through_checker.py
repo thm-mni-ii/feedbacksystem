@@ -41,7 +41,7 @@ CLIENT = "mongodb://admin:password@localhost:27017/"
 CID = "Course ID not Found"
 
 # path to data
-def parse_data_through_checker(path = r"C:\Users\artgr\Desktop\test.json"):
+def parse_data_through_checker(path = r"C:\Users\artgr\Desktop\testMiddle.json"):
     if os.path.isfile(path):
         start(path)
     elif os.path.isdir(path):

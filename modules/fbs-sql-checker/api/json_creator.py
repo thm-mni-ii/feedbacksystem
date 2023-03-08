@@ -202,48 +202,122 @@ def check_solution_chars(
             [],
             [],
         )
-        mycol = mydb["Tables"]
-        for y in mycol.find({"id": id}, {"table": 1}):
-            tables.append(y["table"])
-        mycol = mydb["ProAttributes"]
-        for y in mycol.find({"id": id}, {"proAttribute": 1}):
-            pro_attributes.append(y["proAttribute"])
-        mycol = mydb["SelAttributes"]
-        for y in mycol.find({"id": id}, {"selAttribute": 1}):
-            sel_attributes.append(y["selAttribute"])
-        mycol = mydb["Strings"]
-        for y in mycol.find({"id": id}, {"string": 1}):
-            strings.append(y["string"])
-        mycol = mydb["OrderBy"]
-        for y in mycol.find({"id": id}, {"orderBy": 1, "sort": 1}):
-            order_by_value = [y["orderBy"]]
-            if (
-                "sort" in y
-            ):  # if there is no order in sort the default "asc" will be used
-                order_by_value.append(y["sort"])
-            else:
-                order_by_value.append("asc")
-            order_by.append(order_by_value)
-        mycol = mydb["GroupBy"]
-        for y in mycol.find({"id": id}, {"groupBy": 1}):
-            group_by.append(y["groupBy"])
-        mycol = mydb["Joins"]
-        for y in mycol.find({"id": id}, {"type": 1, "attr1": 1, "attr2": 1}):
-            join_value = [y["type"]]
-            if (
-                "attr1" in y and "attr2" in y
-            ):  # if there is no order in sort the default "asc" will be used
-                join_value.append(y["attr1"])
-                join_value.append(y["attr2"])
-            else:
-                join_value.append("Empty")
-            joins.append(join_value)
-        mycol = mydb["Having"]
-        for y in mycol.find({"id": id}, {"havingAttribute": 1}):
-            having_value = y["havingAttribute"]
-            having.append(having_value)
-        if len(joins) == 0:
-            joins.append("Empty")
+
+        #mycol = mydb["Tables"]
+        #for y in mycol.find({"id": id}, {"table": 1}):
+        #    tables.append(y["table"])
+        #mycol = mydb["ProAttributes"]
+        #for y in mycol.find({"id": id}, {"proAttribute": 1}):
+        #    pro_attributes.append(y["proAttribute"])
+        #mycol = mydb["SelAttributes"]
+        #for y in mycol.find({"id": id}, {"selAttribute": 1}):
+        #    sel_attributes.append(y["selAttribute"])
+        #mycol = mydb["Strings"]
+        #for y in mycol.find({"id": id}, {"string": 1}):
+        #    strings.append(y["string"])
+        #mycol = mydb["OrderBy"]
+        #for y in mycol.find({"id": id}, {"orderBy": 1, "sort": 1}):
+        #    order_by_value = [y["orderBy"]]
+        #    if (
+        #            "sort" in y
+        #    ):  # if there is no order in sort the default "asc" will be used
+        #        order_by_value.append(y["sort"])
+        #    else:
+        #        order_by_value.append("asc")
+        #    order_by.append(order_by_value)
+        #mycol = mydb["GroupBy"]
+        #for y in mycol.find({"id": id}, {"groupBy": 1}):
+        #    group_by.append(y["groupBy"])
+        #mycol = mydb["Joins"]
+        #for y in mycol.find({"id": id}, {"type": 1, "attr1": 1, "attr2": 1}):
+        #    join_value = [y["type"]]
+        #    if (
+        #            "attr1" in y and "attr2" in y
+        #    ):  # if there is no order in sort the default "asc" will be used
+        #        join_value.append(y["attr1"])
+        #        join_value.append(y["attr2"])
+        #    else:
+        #        join_value.append("Empty")
+        #    joins.append(join_value)
+        #mycol = mydb["Having"]
+        #for y in mycol.find({"id": id}, {"havingAttribute": 1}):
+        #    having_value = y["havingAttribute"]
+        #    having.append(having_value)
+
+        def get_tables(id):
+            mycol = mydb["Tables"]
+            for y in mycol.find({"id": id}, {"table": 1}):
+                tables.append(y["table"])
+
+        def get_pro_attributes(id):
+            mycol = mydb["ProAttributes"]
+            for y in mycol.find({"id": id}, {"proAttribute": 1}):
+                pro_attributes.append(y["proAttribute"])
+
+        def get_sel_attributes(id):
+            mycol = mydb["SelAttributes"]
+            for y in mycol.find({"id": id}, {"selAttribute": 1}):
+                sel_attributes.append(y["selAttribute"])
+
+        def get_strings(id):
+            mycol = mydb["Strings"]
+            for y in mycol.find({"id": id}, {"string": 1}):
+                strings.append(y["string"])
+
+        def get_order_by(id):
+            mycol = mydb["OrderBy"]
+            for y in mycol.find({"id": id}, {"orderBy": 1, "sort": 1}):
+                order_by_value = [y["orderBy"]]
+                if "sort" in y:
+                    order_by_value.append(y["sort"])
+                else:
+                    order_by_value.append("asc")
+                order_by.append(order_by_value)
+
+        def get_group_by(id):
+            mycol = mydb["GroupBy"]
+            for y in mycol.find({"id": id}, {"groupBy": 1}):
+                group_by.append(y["groupBy"])
+
+        def get_joins(id):
+            mycol = mydb["Joins"]
+            for y in mycol.find({"id": id}, {"type": 1, "attr1": 1, "attr2": 1}):
+                join_value = [y["type"]]
+                if "attr1" in y and "attr2" in y:
+                    join_value.append(y["attr1"])
+                    join_value.append(y["attr2"])
+                else:
+                    join_value.append("Empty")
+                joins.append(join_value)
+            if len(joins) == 0:
+                joins.append("Empty")
+
+        def get_having(id):
+            mycol = mydb["Having"]
+            for y in mycol.find({"id": id}, {"havingAttribute": 1}):
+                having_value = y["havingAttribute"]
+                having.append(having_value)
+
+        # Erstellen der Threads
+        threads = []
+        threads.append(threading.Thread(target=get_tables, args=(id,)))
+        threads.append(threading.Thread(target=get_pro_attributes, args=(id,)))
+        threads.append(threading.Thread(target=get_sel_attributes, args=(id,)))
+        threads.append(threading.Thread(target=get_strings, args=(id,)))
+        threads.append(threading.Thread(target=get_order_by, args=(id,)))
+        threads.append(threading.Thread(target=get_group_by, args=(id,)))
+        threads.append(threading.Thread(target=get_joins, args=(id,)))
+        threads.append(threading.Thread(target=get_having, args=(id,)))
+
+        # Starten der Threads
+        for thread in threads:
+            thread.start()
+
+        # Warten auf das Ende aller Threads
+        for thread in threads:
+            thread.join()
+
+
         if data["passed"]:
             # Compare them to tabels, proAttributes etc of a given sql-query
             if (
