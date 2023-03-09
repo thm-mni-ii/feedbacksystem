@@ -37,6 +37,7 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { NewCourseComponent } from "./page-components/new-course/new-course.component";
 import { SearchCoursesComponent } from "./page-components/search-courses/search-courses.component";
 import { CoursePreviewComponent } from "./page-components/course-preview/course-preview.component";
+import { CoursePreviewWProgressComponent } from "./page-components/course-preview/course-preview-w-progress.component";
 import { CourseDetailComponent } from "./page-components/course-detail/course-detail.component";
 import { TaskDetailComponent } from "./page-components/task-detail/task-detail.component";
 import { UserManagementComponent } from "./page-components/user-management/user-management.component";
@@ -100,6 +101,8 @@ import { DbControlTemplatesComponent } from "./page-components/sql-playground/db
 import { DbControlCoWorkingComponent } from "./page-components/sql-playground/db-control-panel/db-control-co-working/db-control-co-working.component";
 import { DbControlDbOverviewComponent } from "./page-components/sql-playground/db-control-panel/db-control-db-overview/db-control-db-overview.component";
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
+import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
+import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -144,6 +147,7 @@ export const httpInterceptorProviders = [
     UserTeacherFilter,
     SearchCoursesComponent,
     CoursePreviewComponent,
+    CoursePreviewWProgressComponent,
     CourseDetailComponent,
     TaskDetailComponent,
     UserManagementComponent,
@@ -192,6 +196,8 @@ export const httpInterceptorProviders = [
     DbControlCoWorkingComponent,
     DbControlDbOverviewComponent,
     NewSqlTemplateComponent,
+    ExportTasksDialogComponent,
+    HighlightedInputComponent,
   ],
   imports: [
     BrowserModule,

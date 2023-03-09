@@ -1,9 +1,11 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
@@ -87,11 +89,20 @@ class SubmissionService {
     * @return The created Submission with id
     */
   def create(uid: Int, tid: Int): Submission =
-    DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
-      .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
-      .flatMap(id => getOne(id, uid)) match {
-      case Some(submission) => submission
-      case None => throw new SQLException("Submission could not be created")
+    try {
+      DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
+        .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
+        .flatMap(id => getOne(id, uid)) match {
+        case Some(submission) => submission
+        case None => throw new SQLException("Submission could not be created")
+      }
+    } catch {
+      case e: UncategorizedSQLException =>
+        if (e.getSQLException.getSQLState == "45000") {
+          throw new ForbiddenException("Number of tries exceeded")
+        } else {
+          throw e
+        }
     }
 
   /**
@@ -164,6 +175,14 @@ class SubmissionService {
       resultSet.getString(key)
     } catch {
       case _: SQLException => defaultValue
+    }
+  }
+
+  def getOrHidden(submission: Submission, hideResult: Boolean, adminPrivileged: Boolean): Submission = {
+    if (hideResult && !adminPrivileged) {
+      Submission(submission.submissionTime, submission.done, submission.id, isHidden = true)
+    } else {
+      submission
     }
   }
 }

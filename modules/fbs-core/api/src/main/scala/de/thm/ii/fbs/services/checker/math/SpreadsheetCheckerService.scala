@@ -1,15 +1,18 @@
 package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, User}
+import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper, SemanticAstComparator}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, Submission, User}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetFileService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService, TaskService}
 import de.thm.ii.fbs.util.Hash
+import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 import java.io.File
+import java.math.RoundingMode
 import java.text.{NumberFormat, ParseException, ParsePosition}
 import java.util.{Locale, Map => UtilMap}
 import scala.collection.mutable
@@ -19,6 +22,8 @@ import scala.collection.mutable
   */
 @Service
 class SpreadsheetCheckerService extends CheckerService {
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
   @Autowired
   private val taskService: TaskService = null
   @Autowired
@@ -45,7 +50,7 @@ class SpreadsheetCheckerService extends CheckerService {
 
     val fields = this.getFields(cc, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
     val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc, spreadsheetMediaInformation, fu.username, pointsFields))
-    val submittedFields = this.getSubmittedFields(submission.id, cc)
+    val submittedFields = this.getSubmittedFields(submission)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)
 
@@ -68,29 +73,33 @@ class SpreadsheetCheckerService extends CheckerService {
     val userID = Hash.decimalHash(username).abs().toString().slice(0, 7)
 
     val field = spreadsheetService.getFields(spreadsheetFile, spreadsheetMediaInformation.idField, userID, fields)
-    spreadsheetFileService.cleanup(cc, spreadsheetFile)
+    spreadsheetFileService.cleanup(cc.isInBlockStorage, spreadsheetFile)
     field
   }
 
-  private def getSubmittedFields(submissionID: Int, cc: CheckrunnerConfiguration): UtilMap[String, String] = {
-    val submissionFile = spreadsheetFileService.getSubmissionFile(submissionID, cc)
+  private def getSubmittedFields(submission: Submission): UtilMap[String, String] = {
+    val submissionFile = spreadsheetFileService.getSubmissionFile(submission)
 
     val mapper = new JsonMapper()
     val resultFields = mapper.readValue(submissionFile, classOf[UtilMap[String, String]])
-    spreadsheetFileService.cleanup(cc, submissionFile)
+    spreadsheetFileService.cleanup(submission.isInBlockStorage, submissionFile)
     resultFields
   }
 
-  private def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
+  def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
     var result = mutable.ListBuffer[CheckResult]()
     var correctCount = 0
 
     for ((key, value) <- fields) {
       val enteredValue = submittedFields.get(key)
       var correct = false
-      if (enteredValue != null && compare(enteredValue, value, decimals)) {
-        correct = true
-        correctCount += 1
+      try {
+        if (enteredValue != null && compare(enteredValue, value, decimals)) {
+          correct = true
+          correctCount += 1
+        }
+      } catch {
+        case e: MathParserException => logger.error(e.toString) // TODO: give feedback about error to user
       }
       result = result.appended(CheckResult(key, value, enteredValue, correct))
     }
@@ -127,12 +136,17 @@ class SpreadsheetCheckerService extends CheckerService {
     }
   }
 
-  private def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
-    (parseDouble(enteredValue, germanFormat), parseDouble(value, germanFormat)) match {
-      case (Some(enteredValue), Some(value)) =>
-        round(enteredValue, decimals) == round(value, decimals)
-      case _ => enteredValue == value
-    }
+  def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
+    val enteredAst = MathParserHelper.parse(enteredValue)
+    val valueAst = MathParserHelper.parse(value)
+    new SemanticAstComparator.Builder()
+      .decimals(decimals)
+      .roundingMode(RoundingMode.HALF_UP)
+      .ignoreNeutralElements(true)
+      .applyInverseElements(true)
+      .applyCommutativeLaw(true)
+      .build()
+      .compare(valueAst, enteredAst)
   }
 
   private def round(input: Double, toDecimals: Int): String =
@@ -153,5 +167,5 @@ class SpreadsheetCheckerService extends CheckerService {
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
 
-  private case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
+  case class CheckResult(name: String, expected: String, entered: String, correct: Boolean)
 }

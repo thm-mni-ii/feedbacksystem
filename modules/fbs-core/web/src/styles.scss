@@ -4,6 +4,8 @@
 @import "~@fontsource/roboto/400.css";
 @import "~@fontsource/roboto/500.css";
 @import "~@fontsource/material-icons";
+@import "~prismjs/themes/prism";
+
 
 html,
 body {
@@ -46,4 +48,77 @@ app-db-scheme-table {
     grid-template-columns: 5fr 1fr;
     grid-gap: 10px;
   }
+}
+
+app-db-control-panel {
+  .mat-tab-label {
+    min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
+    padding: 5px;
+  }
+
+  .mat-form-field-wrapper {
+    margin-bottom: -1.25em;
+  }
+}
+
+app-sql-input-tabs {
+  .mat-tab-label {
+    min-width: 230px !important;
+  }
+
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+}
+
+app-db-scheme-table {
+  .mat-expansion-panel-body {
+    padding: 5px 0 10px 0 !important;
+  }
+
+  .mat-content {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+    grid-gap: 10px;
+  }
+}
+
+
+// Prism.js line numbers plugin
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 15px;
+  font-size: 100%;
+  left: 0;
+  width: 3em;
+  letter-spacing: -1px;
+  border-right: 1px solid rgb(87, 87, 87);
+  user-select: none;
+  background-color: rgb(245,245,245);
+}
+
+.line-numbers-rows > span {
+  display: block;
+  counter-increment: linenumber;
+  
+}
+
+.line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: rgb(87, 87, 87);
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+ 
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #ffffff;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #000000;
 }

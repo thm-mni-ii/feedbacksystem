@@ -128,15 +128,4 @@ class SemesterController {
       case _ => throw new ForbiddenException()
     }
   }
-
-  /**
-    * Export Semester
-    *
-    * @param sid Semester id
-    * @param req http request
-    * @param res http response
-    */
-  @GetMapping(value = Array("/{sid}/export"))
-  @ResponseBody
-  def export(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = ??? // TODO: Impl
 }

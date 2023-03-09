@@ -21,10 +21,12 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("mediaInformation") mediaInformation: Option[MediaInformation] = None,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
                 @JsonProperty("id") id: Int = 0,
-                @JsonProperty("courseID") courseID: Int = 0
+                @JsonProperty("courseID") courseID: Int = 0,
+                @JsonProperty("attempts") attempts: Option[Int] = None,
+                @JsonProperty("hideResult") hideResult: Boolean = false,
                )
 
 object Task {
-  val requirementTypes: Array[String] = Array("mandatory", "optional")
+  val requirementTypes: Array[String] = Array("mandatory", "optional", "practice")
   val defaultRequirement: String = requirementTypes(0)
 }

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformationTasks}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformationTasks, Submission}
 import de.thm.ii.fbs.services.persistence.StorageService
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,16 +20,16 @@ class SpreadsheetFileService {
     objectMapper.readValue(content, classOf[ExcelMediaInformationTasks])
   }
 
-  def getSubmissionFile(submissionID: Int, cc: CheckrunnerConfiguration): File = {
-    storageService.getFileSolutionFile(cc, submissionID)
+  def getSubmissionFile(submission: Submission): File = {
+    storageService.getFileSolutionFile(submission)
   }
 
   def getMainFile(cc: CheckrunnerConfiguration): File = {
     storageService.getFileMainFile(cc)
   }
 
-  def cleanup(cc: CheckrunnerConfiguration, file: File): Unit = {
-    if (cc.isInBlockStorage) {
+  def cleanup(isInBlockStorage: Boolean, file: File): Unit = {
+    if (isInBlockStorage) {
       file.delete()
     }
   }

@@ -16,6 +16,15 @@
 
     <button
       mat-icon-button
+      *ngIf="canEdit()"
+      (click)="openExportDialog()"
+      matTooltip="Aufgaben Exportieren"
+    >
+      <mat-icon class="logout-icon">save_alt</mat-icon>
+    </button>
+
+    <button
+      mat-icon-button
       *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'results']"
       matTooltip="Bewertungsübersicht"
@@ -140,18 +149,11 @@
   <div class="task-list">
     <div *ngFor="let task of tasks">
       <app-task-preview
-        *ngIf="role === 'DOCENT' || role === 'TUTOR'"
         [courseId]="courseID"
         [task]="task"
         [taskResult]="taskResults[task.id]"
       >
       </app-task-preview>
-      <app-task-preview
-        *ngIf="role === 'STUDENT' && task.isPrivate === true"
-        [courseId]="courseID"
-        [task]="task"
-        [taskResult]="taskResults[task.id]"
-      ></app-task-preview>
     </div>
   </div>
 </div>
