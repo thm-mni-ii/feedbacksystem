@@ -29,7 +29,6 @@ class SubmissionService {
   private implicit val jdbc: JdbcTemplate = null
   private val objectMapper: ObjectMapper = new ObjectMapper()
 
-
   def writeSubmissionsOfTaskToFile(f: File, cid: Int, tid: Int): Unit = {
     val submissionList = getLatestSubmissionByTask(cid, tid)
     val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
@@ -108,7 +107,6 @@ class SubmissionService {
       " as t left join user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id) where submax is not null) " +
       "as tab left join checker_result using (submission_id) left join checkrunner_configuration using (configuration_id)",
     (res, _) => parseResult(res, fetchUserId = true), cid))
-
 
   /**
     * Lookup a submission by id
