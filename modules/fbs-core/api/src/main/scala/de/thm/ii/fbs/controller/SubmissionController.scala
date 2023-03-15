@@ -46,6 +46,8 @@ class SubmissionController {
   @Autowired
   private val userService: UserService = null
   @Autowired
+  private val courseService: CourseService = null
+  @Autowired
   private val courseRegistration: CourseRegistrationService = null
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -269,7 +271,8 @@ class SubmissionController {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
-    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
       submissionService.getOne(sid, uid) match {
@@ -278,7 +281,7 @@ class SubmissionController {
           ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=task_${task.id}.fbs-submission")
+            .header("Content-Disposition", s"attachment;filename=task_${task.id}.tar")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         }
         case None => throw new ResourceNotFoundException()
@@ -288,54 +291,44 @@ class SubmissionController {
     }
   }
 
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/submissions/content"))
+  @GetMapping(value = Array("/courses/{cid}/tasks/submissions/content"))
   @ResponseBody
-  def solutionsOfCourse(@PathVariable uid: Int, @PathVariable cid: Int,
+  def solutionsOfCourse(@PathVariable cid: Int,
                         req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
 
-    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
-      val submissionList = submissionService.getLatestSubmissionByCourse(cid)
-      val usersList: ListBuffer[List[User]] = ListBuffer()
-      val t = submissionList.map(s => s.taskID).distinct
-      val listSubInDir: ListBuffer[List[File]] = ListBuffer()
-      t.foreach(taskid => {
-        val tmp = submissionList.filter(s => s.taskID == taskid)
-        listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
-        usersList += tmp.map(submission => userService.find(submission.userID.get).get)
-      })
       val f = new File("tmp")
-      Archiver.packSubmissionsInDir(f, listSubInDir, usersList, t)
+      submissionService.writeSubmissionsOfCourseToFile(f, cid)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=course_$cid.fbs-submission")
+        .header("Content-Disposition", s"attachment;filename=course_$cid.tar")
         .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
     }
   }
 
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/content/download"))
+  @GetMapping(value = Array("/courses/{cid}/tasks/{tid}/submissions/content"))
   @ResponseBody
-  def solutionsOfTask(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int,
+  def solutionsOfTask(@PathVariable cid: Int, @PathVariable tid: Int,
                       req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
 
-    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
-      val submissionList = submissionService.getLatestSubmissionByTask(cid, tid)
-      val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
-      val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
       val f = new File("tmp")
-      Archiver.packSubmissions(f, subFiles, usersList)
+      submissionService.writeSubmissionsOfTaskToFile(f, cid, tid)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=task_$tid.fbs-submission")
+        .header("Content-Disposition", s"attachment;filename=task_$tid.tar")
         .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()

@@ -2,17 +2,19 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission}
-import de.thm.ii.fbs.util.DB
+import de.thm.ii.fbs.model.{CheckResult, Submission, User}
+import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.jdbc.UncategorizedSQLException
 
+import java.io.File
 import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
 import java.util.Date
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
   * Handles submission state
@@ -20,8 +22,33 @@ import scala.collection.mutable
 @Component
 class SubmissionService {
   @Autowired
+  private val storageService: StorageService = null
+  @Autowired
+  private val userService: UserService = null
+  @Autowired
   private implicit val jdbc: JdbcTemplate = null
   private val objectMapper: ObjectMapper = new ObjectMapper()
+
+
+  def writeSubmissionsOfTaskToFile(f: File, cid: Int, tid: Int): Unit = {
+    val submissionList = getLatestSubmissionByTask(cid, tid)
+    val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
+    val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
+    Archiver.packSubmissions(f, subFiles, usersList)
+  }
+
+  def writeSubmissionsOfCourseToFile(f: File, cid: Int): Unit = {
+    val submissionList = getLatestSubmissionByCourse(cid)
+    val usersList: ListBuffer[List[User]] = ListBuffer()
+    val t = submissionList.map(s => s.taskID).distinct
+    val listSubInDir: ListBuffer[List[File]] = ListBuffer()
+    t.foreach(taskid => {
+      val tmp = submissionList.filter(s => s.taskID == taskid)
+      listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
+      usersList += tmp.map(submission => userService.find(submission.userID.get).get)
+    })
+    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, t)
+  }
 
   /**
     * Get all submission for a task by a user
@@ -33,7 +60,7 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, task_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+    s"SELECT submission_id, task.id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
       s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
@@ -47,7 +74,7 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, task_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage," +
+    "SELECT submission_id, task.id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage," +
       " checker_type FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
@@ -92,7 +119,7 @@ class SubmissionService {
     * @return The found task
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, task_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+    s"SELECT submission_id, task.id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
       s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
