@@ -34,7 +34,7 @@ class SubmissionService {
     */
   def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
+      s"checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
@@ -47,8 +47,8 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, checker_type " +
-      "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
+    "SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, checker_type, " +
+      "additional_information FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
 
@@ -62,7 +62,7 @@ class SubmissionService {
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
+      s"checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
     (res, _) => parseResult(res), id, uid)).headOption
@@ -76,7 +76,7 @@ class SubmissionService {
     */
   def getOneWithoutUser(id: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
+      s"checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ?",
     (res, _) => parseResult(res, fetchUserId = true), id)).headOption
@@ -88,9 +88,10 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
- def create(uid: Int, tid: Int): Submission =
+ def create(uid: Int, tid: Int, additionalInformation: Option[Map[String, Any]] = None): Submission =
     try {
-      DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage) VALUES (?, ?, ?)", uid, tid, true)
+      DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage, additional_information) VALUES (?, ?, ?, ?)",
+        uid, tid, true, additionalInformation.map(additionalInformation => objectMapper.writeValueAsString(additionalInformation)).orNull)
         .map(gk => gk(0).asInstanceOf[BigInteger].intValue())
         .flatMap(id => getOne(id, uid)) match {
         case Some(submission) => submission
@@ -156,7 +157,8 @@ class SubmissionService {
     } else {
       Array[CheckResult]()
     },
-    isInBlockStorage = res.getBoolean("is_in_block_storage")
+    isInBlockStorage = res.getBoolean("is_in_block_storage"),
+    additionalInformation = Option(res.getString("additional_information")).map(s => objectMapper.readValue(s, classOf[Map[String, Any]]))
   )
 
   private def reduceSubmissions(submissions: List[Submission]): List[Submission] = {

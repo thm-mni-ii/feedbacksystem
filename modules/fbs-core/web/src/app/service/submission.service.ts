@@ -73,7 +73,8 @@ export class SubmissionService {
     uid: number,
     cid: number,
     tid: number,
-    solution: File | object | string
+    solution: File | object | string,
+    additionalInformation?: Record<string, any>
   ): Observable<Submission> {
     const formData: FormData = new FormData();
     let formSolution;
@@ -89,6 +90,12 @@ export class SubmissionService {
       throw new Error("solution is of invalid type");
     }
     formData.append("file", formSolution);
+    if (additionalInformation) {
+      formData.append(
+        "additionalInformation",
+        JSON.stringify(additionalInformation)
+      );
+    }
     return this.http.post<Submission>(
       `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions`,
       formData

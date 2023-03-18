@@ -68,6 +68,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   submissionData: string | File;
+  submissionAdditionalInformation: Record<string, any>;
 
   ngOnInit() {
     this.route.params
@@ -179,7 +180,8 @@ export class TaskDetailComponent implements OnInit {
         token.id,
         this.courseId,
         this.task.id,
-        this.submissionData
+        this.submissionData,
+        this.submissionAdditionalInformation
       )
       .subscribe(
         () => {
@@ -224,6 +226,7 @@ export class TaskDetailComponent implements OnInit {
     }
 
     this.submissionData = submissionData;
+    this.submissionAdditionalInformation = data["additionalInformation"];
   }
 
   // TODO: there is no route for this

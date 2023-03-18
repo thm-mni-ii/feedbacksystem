@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
 import java.time.Instant
+import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
@@ -37,6 +39,7 @@ class SubmissionController {
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  private val objectMapper = new ObjectMapper();
 
   /**
     * Get a list of all submissions for a task
@@ -60,7 +63,7 @@ class SubmissionController {
     val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
-      submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
+      submissionService.getAll(uid, cid, tid, adminPrivileged)
     } else {
       throw new ForbiddenException()
     }
@@ -112,7 +115,7 @@ class SubmissionController {
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             @RequestParam file: MultipartFile,
+             @RequestParam file: MultipartFile, @RequestParam additionalInformation: Option[String],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
@@ -132,7 +135,8 @@ class SubmissionController {
             throw new BadRequestException("Deadline Before Now")
           }
           if (true) { // TODO: Check media type compatibility
-            val submission = submissionService.create(uid, tid)
+            val submission = submissionService.create(uid, tid,
+              additionalInformation.map(ai => objectMapper.readValue(ai, classOf[Map[String, Any]])))
             storageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)

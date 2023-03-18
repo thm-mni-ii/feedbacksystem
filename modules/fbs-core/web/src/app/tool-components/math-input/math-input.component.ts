@@ -9,6 +9,11 @@ import {
   ViewChild,
 } from "@angular/core";
 
+export interface MathInputValue {
+  mathJson: string;
+  latex?: string;
+}
+
 @Component({
   selector: "app-math-input",
   templateUrl: "./math-input.component.html",
@@ -16,22 +21,24 @@ import {
 })
 export class MathInputComponent implements OnChanges, AfterViewInit {
   @Input()
-  defaultValue: string;
+  defaultValue: MathInputValue;
   @Input()
   label: string = "";
   @Input()
   disabled: boolean = false;
   @Output()
-  update: EventEmitter<string> = new EventEmitter();
+  update: EventEmitter<MathInputValue> = new EventEmitter();
   @ViewChild("mathInput")
   private input: ElementRef;
   private touched: boolean = false;
 
   handleChange($event: Event) {
     if (!$event.currentTarget) return;
-    const mathJson = ($event.currentTarget as any).expression.json;
+    const e = $event.currentTarget as any;
+    const mathJson = e.expression.json;
+    const latex = e.value;
     this.touched = true;
-    this.update.emit(JSON.stringify(mathJson));
+    this.update.emit({ mathJson: JSON.stringify(mathJson), latex });
   }
 
   ngOnChanges(): void {
@@ -42,7 +49,11 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
     if (!this.input) return;
     const el = this.input.nativeElement;
     if (!this.touched && this.defaultValue) {
-      el.expression = JSON.parse(this.defaultValue);
+      if (this.defaultValue.latex) {
+        el.value = this.defaultValue.latex;
+      } else {
+        el.expression = JSON.parse(this.defaultValue.mathJson);
+      }
     }
     el.setOptions({
       readOnly: this.disabled,

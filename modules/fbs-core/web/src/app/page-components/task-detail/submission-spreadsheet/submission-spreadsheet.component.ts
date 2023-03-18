@@ -6,6 +6,7 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
+import { MathInputValue } from "../../../tool-components/math-input/math-input.component";
 
 @Component({
   selector: "app-submission-spreadsheet",
@@ -27,13 +28,18 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   content: object = {};
 
   results: Record<string, any> = {};
+  latex: Record<string, any> = {};
 
   constructor() {}
 
-  updateSubmission(field: string, value: string) {
-    this.results[field] = value;
+  updateSubmission(field: string, value: MathInputValue) {
+    this.results[field] = value.mathJson;
+    this.results[field] = value.latex;
     this.results["complete"] = this.outputFields.length > 0;
-    this.update.emit({ content: this.results });
+    this.update.emit({
+      content: this.results,
+      additionalInformation: { latex: this.latex },
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
