@@ -11,6 +11,7 @@ import org.springframework.jdbc.UncategorizedSQLException
 
 import java.math.BigInteger
 import java.sql.{ResultSet, SQLException}
+import java.util
 import java.util.Date
 import scala.collection.mutable
 
@@ -88,7 +89,7 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
- def create(uid: Int, tid: Int, additionalInformation: Option[Map[String, Any]] = None): Submission =
+ def create(uid: Int, tid: Int, additionalInformation: Option[util.HashMap[String, Any]] = None): Submission =
     try {
       DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage, additional_information) VALUES (?, ?, ?, ?)",
         uid, tid, true, additionalInformation.map(additionalInformation => objectMapper.writeValueAsString(additionalInformation)).orNull)
@@ -158,7 +159,8 @@ class SubmissionService {
       Array[CheckResult]()
     },
     isInBlockStorage = res.getBoolean("is_in_block_storage"),
-    additionalInformation = Option(res.getString("additional_information")).map(s => objectMapper.readValue(s, classOf[Map[String, Any]]))
+    additionalInformation = Option(res.getString("additional_information"))
+      .map(s => objectMapper.readValue(s, classOf[util.HashMap[String, Any]]))
   )
 
   private def reduceSubmissions(submissions: List[Submission]): List[Submission] = {

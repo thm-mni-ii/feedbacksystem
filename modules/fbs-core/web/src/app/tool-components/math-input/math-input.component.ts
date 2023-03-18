@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 
 export interface MathInputValue {
-  mathJson: string;
+  mathJson?: string;
   latex?: string;
 }
 
@@ -51,7 +51,7 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
     if (!this.touched && this.defaultValue) {
       if (this.defaultValue.latex) {
         el.value = this.defaultValue.latex;
-      } else {
+      } else if (this.defaultValue.mathJson) {
         el.expression = JSON.parse(this.defaultValue.mathJson);
       }
     }

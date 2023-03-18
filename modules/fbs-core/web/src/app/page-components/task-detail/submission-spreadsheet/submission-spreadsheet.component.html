@@ -3,7 +3,7 @@
     <app-math-input
       *ngFor="let inputField of inputFields"
       [label]="inputField[0]"
-      [defaultValue]="inputField[1]"
+      [defaultValue]="{ mathJson: inputField[1] }"
       (update)="updateSubmission(inputField[0], $event)"
       [disabled]="true"
     ></app-math-input>
@@ -14,7 +14,7 @@
       <app-math-input
         *ngFor="let outputField of outputFields"
         [label]="outputField"
-        [defaultValue]="results[outputField]"
+        [defaultValue]="{ latex: latex[outputField] }"
         (update)="updateSubmission(outputField, $event)"
       ></app-math-input>
     </div>

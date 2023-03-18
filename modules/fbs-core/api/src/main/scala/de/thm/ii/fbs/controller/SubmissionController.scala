@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
 import java.time.Instant
+import java.util
 import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -115,7 +116,7 @@ class SubmissionController {
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             @RequestParam file: MultipartFile, @RequestParam additionalInformation: Option[String],
+             @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
@@ -136,7 +137,7 @@ class SubmissionController {
           }
           if (true) { // TODO: Check media type compatibility
             val submission = submissionService.create(uid, tid,
-              additionalInformation.map(ai => objectMapper.readValue(ai, classOf[Map[String, Any]])))
+              Option(additionalInformation.orElse(null)).map(ai => objectMapper.readValue(ai, classOf[util.HashMap[String, Any]])))
             storageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)

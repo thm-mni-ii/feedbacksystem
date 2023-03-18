@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model
 
+import java.util
 import java.util.Date
 
 /**
@@ -15,5 +16,5 @@ case class Submission(submissionTime: Date,
                       results: Array[CheckResult] = Array(),
                       userID: Option[Int] = None,
                       isInBlockStorage: Boolean = false,
-                      additionalInformation: Option[Map[String, Any]]
+                      additionalInformation: Option[util.HashMap[String, Any]]
 )
