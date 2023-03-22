@@ -33,7 +33,8 @@ class SubmissionService {
     val submissionList = getLatestSubmissionByTask(cid, tid)
     val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-    Archiver.packSubmissions(f, subFiles, usersList)
+    val contTypes = submissionList.map(submission => storageService.getContentTypeSolutionFile(submission))
+    Archiver.packSubmissions(f, subFiles, usersList, contTypes)
   }
 
   def writeSubmissionsOfCourseToFile(f: File, cid: Int): Unit = {
@@ -41,12 +42,14 @@ class SubmissionService {
     val usersList: ListBuffer[List[User]] = ListBuffer()
     val t = submissionList.map(s => s.taskID).distinct
     val listSubInDir: ListBuffer[List[File]] = ListBuffer()
+    val contTypes: ListBuffer[List[String]] = ListBuffer()
     t.foreach(taskid => {
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
       usersList += tmp.map(submission => userService.find(submission.userID.get).get)
+      contTypes += tmp.map(submission => storageService.getContentTypeSolutionFile(submission))
     })
-    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, t)
+    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, contTypes, t)
   }
 
   /**

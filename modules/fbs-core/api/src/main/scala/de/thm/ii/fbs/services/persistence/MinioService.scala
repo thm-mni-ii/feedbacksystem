@@ -162,4 +162,8 @@ class MinioService {
     minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
       .bucket(bucketName).`object`(objectName).expiry(expiry).build())
   }
+
+  def getStatsOfObject(bucketName: String, obj: String): String = {
+    minioClient.statObject(StatObjectArgs.builder().bucket(bucketName).`object`(obj).build()).contentType()
+  }
 }

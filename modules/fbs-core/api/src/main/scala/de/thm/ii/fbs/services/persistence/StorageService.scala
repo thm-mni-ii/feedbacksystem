@@ -350,6 +350,20 @@ class StorageService extends App {
   }
 
   /**
+    * returns a String which represents the content type
+    *
+    * @param submission the Submission
+    * @return
+    */
+  def getContentTypeSolutionFile(submission: Submission): String = {
+    if (submission.isInBlockStorage) {
+      minioService.getStatsOfObject(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submission.id))
+    } else {
+      Files.probeContentType(pathToSolutionFile(submission.id).get.toFile.toPath)
+    }
+  }
+
+  /**
     * returns a input stream depending whether it is in the bucket or not
     *
     */
