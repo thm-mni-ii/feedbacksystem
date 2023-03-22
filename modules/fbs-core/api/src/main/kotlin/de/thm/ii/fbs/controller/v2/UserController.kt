@@ -1,11 +1,12 @@
 package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.gson.Gson
 import de.thm.ii.fbs.model.v2.GlobalRole
+import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.model.v2.security.User
 import de.thm.ii.fbs.services.v2.persistence.UserRepository
+import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.BadRequestException
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
@@ -28,10 +29,10 @@ class UserController(
      */
     @GetMapping("users")
     @ResponseBody
-    fun getAll(req: HttpServletRequest, res: HttpServletResponse): List<User> {
-        val user = authService.authorize(req, res)
-        val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e . _2 == CourseRole . DOCENT)
-        if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent) {
+    @CurrentToken
+    fun getAll(@CurrentToken currentToken: LegacyToken, req: HttpServletRequest, res: HttpServletResponse): List<User> {
+        val isDocent = courseRegistrationService.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
+        if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR || isDocent) {
             return userRepository.findAll()
         } else {
             throw ForbiddenException()
@@ -47,17 +48,15 @@ class UserController(
      */
     @GetMapping("users/{uid}")
     @ResponseBody
-    fun getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User {
-        val user = authService.authorize(req, res)
-        val selfRequest = user.id == uid
-        val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e . _2 == CourseRole . DOCENT)
-        if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
+    fun getOne(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User {
+        val selfRequest = currentToken.id == uid
+        val isDocent = courseRegistrationService.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
+        if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
             return userRepository.findById(uid).orElse(throw NotFoundException())
         } else {
             throw ForbiddenException()
         }
     }
-
 
     /**
      * Update password of user
@@ -67,20 +66,19 @@ class UserController(
      * @param body Content
      */
     @PutMapping("users/{uid}/passwd", consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun updatePassword(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Void {
-        val user = authService.authorize(req, res)
+    fun updatePassword(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest
+                       , res: HttpServletResponse, @RequestBody body: JsonNode) {
         val password = body["passwd"].asText()
         val passwordRepeat = body["passwdRepeat"].asText()
 
         if (password.isBlank() || password != passwordRepeat) throw BadRequestException("Malformed Request Body")
 
-        if (user.globalRole == GlobalRole.ADMIN || user.id == uid) {
+        if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.id == uid) {
             userRepository.updateUserPassword(uid, password)
         } else {
             throw ForbiddenException()
         }
     }
-
 
     /**
      * Update global role of user
@@ -90,12 +88,11 @@ class UserController(
      * @param body Content
      */
     @PutMapping("users/{uid}/global-role", consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateGlobalRole(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode) {
-        val user = authService.authorize(req, res)
+    fun updateGlobalRole(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode) {
         if (body["roleName"] == null) throw BadRequestException("Malformed Request Body")
         val newRole = GlobalRole.parse(body["roleName"].asText())
 
-        if (user.globalRole == GlobalRole.ADMIN || user.id == uid) {
+        if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.id == uid) {
             userRepository.updateUserGlobalRole(uid, newRole)
         } else {
             throw ForbiddenException()
@@ -112,9 +109,8 @@ class UserController(
     @PostMapping("users", consumes = [MediaType.APPLICATION_JSON_VALUE],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User {
-        val user = authService.authorize(req, res)
-        if (user.globalRole != GlobalRole.ADMIN) {
+    fun create(@CurrentToken currentToken: LegacyToken, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User {
+        if (currentToken.globalRole != GlobalRole.ADMIN) {
             throw ForbiddenException()
         }
         try {
@@ -132,10 +128,8 @@ class UserController(
      * @param res http response
      */
     @DeleteMapping("users/{uid}")
-    fun delete(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Void {
-        //val auth =
-        // authService.authorize(req, res).globalRole match {
-        if (auth.globalRole == GlobalRole.ADMIN) {
+    fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse) {
+        if (currentToken.globalRole == GlobalRole.ADMIN) {
             userRepository.deleteById(uid)
         } else {
             throw ForbiddenException()
