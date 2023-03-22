@@ -14,6 +14,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.jvm.optionals.getOrElse
 
 @RestController
 @CrossOrigin
@@ -52,7 +53,7 @@ class UserController(
         val selfRequest = currentToken.id == uid
         val isDocent = courseRegistrationService.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
         if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
-            return userRepository.findById(uid).orElse(throw NotFoundException())
+            return userRepository.findById(uid).orElseGet{  throw NotFoundException() }
         } else {
             throw ForbiddenException()
         }
