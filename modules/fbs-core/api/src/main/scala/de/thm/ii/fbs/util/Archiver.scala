@@ -6,7 +6,6 @@ import org.apache.commons.compress.utils.IOUtils
 
 import java.io._
 import java.nio.file.Files
-import javax.mail.internet.ContentType
 import scala.collection.mutable.ListBuffer
 
 import org.apache.tika.mime.MimeType
@@ -18,9 +17,7 @@ object Archiver {
   def packSubmissions(name: File, files: List[File], users: List[User], contTypes: List[String]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for ((file, index) <- files.zipWithIndex) {
-      val allTypes = MimeTypes.getDefaultMimeTypes
-      val mimeType = allTypes.forName(contTypes(index))
-      addToArchive(out, file, ".", s"${users(index).getName}${mimeType.getExtension}")
+      addToArchive(out, file, ".", s"${users(index).getName}${fileExtensionFromContentType(contTypes(index))}")
     }
     out.close()
   }
@@ -31,12 +28,16 @@ object Archiver {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     files.zipWithIndex.foreach(listFiles => {
       listFiles._1.zipWithIndex.foreach(f => {
-        val allTypes = MimeTypes.getDefaultMimeTypes
-        val mimeType = allTypes.forName(contTypes(listFiles._2)(f._2))
-        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}${mimeType.getExtension}")
+        val fileExt = fileExtensionFromContentType(contTypes(listFiles._2)(f._2))
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}$fileExt")
       })
     })
     out.close()
+  }
+
+  private def fileExtensionFromContentType(contentType: String): String = {
+    val allTypes = MimeTypes.getDefaultMimeTypes
+    allTypes.forName(contentType).getExtension
   }
 
   @throws[IOException]
