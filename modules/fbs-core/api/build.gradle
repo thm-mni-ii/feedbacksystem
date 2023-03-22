@@ -90,3 +90,8 @@ tasks.register('jacocoReport', JacocoReport) {
         html.enabled true
     }
 }
+
+
+
+// Remove if spring-boot 2.7.10 is released
+ext['spring-framework.version'] = '5.3.26'
