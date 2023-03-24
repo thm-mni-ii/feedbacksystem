@@ -15,7 +15,15 @@
       mat-raised-button
       color="accent"
       *ngIf="isAuthorized()"
-      (click)="addConfig()"
+      [routerLink]="[
+        '/courses',
+        courseId,
+        'task',
+        taskId,
+        'configurations',
+        'add'
+      ]"
+      routerLinkActive="selected"
       matTooltip="Überprüfung hinzufügen"
     >
       <mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen

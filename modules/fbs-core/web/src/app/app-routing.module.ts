@@ -18,6 +18,7 @@ import { GoToComponent } from "./page-components/goto/goto.component";
 import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.component";
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { NewCheckerPageComponent } from "./page-components/new-checker-page/new-checker-page.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -76,6 +77,12 @@ const routes: Routes = [
       {
         path: "sqlplayground",
         component: SqlPlaygroundComponent,
+        canActivate: [AuthGuard],
+      },
+
+      {
+        path: "courses/:id/task/:tid/configurations/add",
+        component: NewCheckerPageComponent,
         canActivate: [AuthGuard],
       },
 

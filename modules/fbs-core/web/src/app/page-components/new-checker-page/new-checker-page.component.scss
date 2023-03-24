@@ -1,0 +1,97 @@
+.details {
+  margin-top: 50px;
+  height: 600px;
+}
+
+.container {
+  display: block;
+  padding: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  height: 100%;
+}
+
+.box {
+  border: 2px;
+  border-radius: 6px;
+  border-style: dotted;
+  border-color: #717386;
+  width: 90%;
+}
+
+.action {
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+
+mat-expansion-panel {
+  margin: 16px 16px 16px 16px;
+}
+
+.selectButton {
+  background-color: #d9d9d9;
+  font-weight: normal;
+  border-radius: 0;
+  width: 50%;
+  text-align: left;
+  justify-items: center;
+}
+
+.icon {
+  float: right;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.end {
+  justify-content: flex-end;
+  margin-right: 50px;
+}
+
+.center {
+  justify-content: center;
+}
+
+.circleNr {
+  margin-right: 6px;
+  width: 25px;
+  height: 25px;
+  line-height: 25px;
+  border-radius: 50%;
+  background-color: #757575;
+  color: #fafafa;
+  text-align: center;
+  display: block;
+}
+
+hr {
+  width: 150px;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+mat-card-actions {
+  margin-bottom: 0px !important;
+  padding: 0px;
+}
+
+.foo1 {
+  margin-top: 24px;
+  height: 400px;
+}
+
+.pad {
+  padding-right: 6%;
+}
+
+app-dropzone {
+  display: inline-block;
+  width: 47%;
+  padding-bottom: 10px;
+}

@@ -57,7 +57,7 @@ export class ConfigurationListComponent implements OnInit {
   }
 
   addConfig() {
-    this.dialog
+    /*     this.dialog
       .open(NewCheckerDialogComponent, {
         height: "auto",
         width: "50%",
@@ -87,7 +87,7 @@ export class ConfigurationListComponent implements OnInit {
             { duration: 3000 }
           );
         }
-      );
+      ); */
   }
 
   editConfig(checker: CheckerConfig) {

@@ -1,0 +1,92 @@
+<div class="container">
+  <app-menu-bar>
+    <button
+      mat-icon-button
+      [routerLink]="['/courses', courseId, 'tasks', taskId, 'configurations']"
+      matTooltip="Zurück zur Aufgabe"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="spacer"></span>
+  </app-menu-bar>
+
+  <mat-card class="details">
+    <mat-card-header><h4>Neue Überprüfung hinzufügen</h4></mat-card-header>
+    <mat-card-content>
+      <div class="flex foo center">
+        <div class="flex">
+          <div class="flex">
+            <div class="circleNr">1</div>
+            <p>Checker - Typ</p>
+          </div>
+          <hr />
+          <div class="flex">
+            <div class="circleNr">2</div>
+            <p>Dateiauswahl</p>
+          </div>
+          <hr />
+          <div class="flex">
+            <div class="circleNr">3</div>
+            <p>Aufgabenerstellung</p>
+          </div>
+        </div>
+      </div>
+      <div class="foo1">
+        <div *ngIf="step === 1" class="grid">
+          <div class="box">
+            <mat-expansion-panel hideToggle>
+              <mat-expansion-panel-header>
+                <mat-panel-title> SQL - Runner </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>This is the primary content of the panel.</p>
+            </mat-expansion-panel>
+            <mat-expansion-panel hideToggle>
+              <mat-expansion-panel-header>
+                <mat-panel-title> SQL - Checker </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>This is the primary content of the panel.</p>
+            </mat-expansion-panel>
+            <mat-expansion-panel hideToggle>
+              <mat-expansion-panel-header>
+                <mat-panel-title> Bash </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>This is the primary content of the panel.</p>
+            </mat-expansion-panel>
+            <mat-expansion-panel hideToggle>
+              <mat-expansion-panel-header>
+                <mat-panel-title> Excel </mat-panel-title>
+              </mat-expansion-panel-header>
+              <p>This is the primary content of the panel.</p>
+            </mat-expansion-panel>
+          </div>
+          <div class="action">
+            <p>Auswahl</p>
+            <button
+              class="selectButton"
+              mat-button
+              [matMenuTriggerFor]="checker"
+            >
+              aaaa
+              <mat-icon class="icon">expand_more</mat-icon>
+            </button>
+            <mat-menu #checker="matMenu">
+              <button mat-menu-item>SQL - Runner</button>
+              <button mat-menu-item>SQL - Checker</button>
+              <button mat-menu-item>Bash</button>
+              <button mat-menu-item>Excel</button>
+            </mat-menu>
+          </div>
+        </div>
+        <div>
+          <div>
+            <app-dropzone class="pad"></app-dropzone>
+            <app-dropzone></app-dropzone>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions class="flex end">
+      <button mat-flat-button color="accent">Weiter</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
