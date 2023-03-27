@@ -5,7 +5,7 @@ WORKDIR /build
 
 RUN gradle fbs-runner.checker:installDist
 
-FROM eclipse-temurin:18.0.2_9-jre-alpine
+FROM eclipse-temurin:19.0.2_7-jre-alpine
 
 # Install Docker
 RUN apk add --no-cache docker curl
