@@ -14,12 +14,20 @@ export class NewCheckerPageComponent implements OnInit {
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.step = 2;
+    this.step = 3;
     this.route.params.subscribe((params) => {
       if (params) {
         this.courseId = params.id;
         this.taskId = params.tid;
       }
     });
+  }
+
+  increaseStep() {
+    this.step++;
+  }
+
+  decreaseStep() {
+    this.step--;
   }
 }

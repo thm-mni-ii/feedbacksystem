@@ -13,54 +13,57 @@
   <mat-card class="details">
     <mat-card-header><h4>Neue Überprüfung hinzufügen</h4></mat-card-header>
     <mat-card-content>
-      <div class="flex foo center">
+      <div class="flex center">
         <div class="flex">
           <div class="flex">
-            <div class="circleNr">1</div>
+            <div [ngClass]="{ selected: step === 1 }" class="circleNr">1</div>
             <p>Checker - Typ</p>
           </div>
           <hr />
           <div class="flex">
-            <div class="circleNr">2</div>
+            <div [ngClass]="{ selected: step === 2 }" class="circleNr">2</div>
             <p>Dateiauswahl</p>
           </div>
           <hr />
           <div class="flex">
-            <div class="circleNr">3</div>
+            <div [ngClass]="{ selected: step === 3 }" class="circleNr">3</div>
             <p>Aufgabenerstellung</p>
           </div>
         </div>
       </div>
-      <div class="foo1">
+      <div class="foo1 center flex">
         <div *ngIf="step === 1" class="grid">
-          <div class="box">
-            <mat-expansion-panel hideToggle>
-              <mat-expansion-panel-header>
-                <mat-panel-title> SQL - Runner </mat-panel-title>
-              </mat-expansion-panel-header>
-              <p>This is the primary content of the panel.</p>
-            </mat-expansion-panel>
-            <mat-expansion-panel hideToggle>
-              <mat-expansion-panel-header>
-                <mat-panel-title> SQL - Checker </mat-panel-title>
-              </mat-expansion-panel-header>
-              <p>This is the primary content of the panel.</p>
-            </mat-expansion-panel>
-            <mat-expansion-panel hideToggle>
-              <mat-expansion-panel-header>
-                <mat-panel-title> Bash </mat-panel-title>
-              </mat-expansion-panel-header>
-              <p>This is the primary content of the panel.</p>
-            </mat-expansion-panel>
-            <mat-expansion-panel hideToggle>
-              <mat-expansion-panel-header>
-                <mat-panel-title> Excel </mat-panel-title>
-              </mat-expansion-panel-header>
-              <p>This is the primary content of the panel.</p>
-            </mat-expansion-panel>
+          <div>
+            <div class="box">
+              <mat-expansion-panel hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title> SQL - Runner </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>This is the primary content of the panel.</p>
+              </mat-expansion-panel>
+              <mat-expansion-panel hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title> SQL - Checker </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>This is the primary content of the panel.</p>
+              </mat-expansion-panel>
+              <mat-expansion-panel hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title> Bash </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>This is the primary content of the panel.</p>
+              </mat-expansion-panel>
+              <mat-expansion-panel hideToggle>
+                <mat-expansion-panel-header>
+                  <mat-panel-title> Excel </mat-panel-title>
+                </mat-expansion-panel-header>
+                <p>This is the primary content of the panel.</p>
+              </mat-expansion-panel>
+            </div>
           </div>
+
           <div class="action">
-            <p>Auswahl</p>
+            <h4>Auswahl</h4>
             <button
               class="selectButton"
               mat-button
@@ -77,16 +80,126 @@
             </mat-menu>
           </div>
         </div>
-        <div>
-          <div>
+        <div *ngIf="step === 2">
+          <div class="width-1000">
             <app-dropzone class="pad"></app-dropzone>
             <app-dropzone></app-dropzone>
+          </div>
+        </div>
+        <div *ngIf="step === 3" class="grid">
+          <div class="box"></div>
+          <div class="action">
+            <h4>Aufgabe erstellen</h4>
+            <form>
+              <div>
+                <mat-form-field>
+                  <input type="text" placeholder="Name" matInput />
+                </mat-form-field>
+              </div>
+              <div>
+                <label>Sheet:</label><br />
+                <button
+                  class="selectButton"
+                  mat-button
+                  [matMenuTriggerFor]="checker"
+                >
+                  aaaa
+                  <mat-icon class="icon">expand_more</mat-icon>
+                </button>
+                <mat-menu #checker="matMenu">
+                  <button mat-menu-item>SQL - Runner</button>
+                  <button mat-menu-item>SQL - Checker</button>
+                  <button mat-menu-item>Bash</button>
+                  <button mat-menu-item>Excel</button>
+                </mat-menu>
+              </div>
+
+              <div>
+                <div class="foo">
+                  <div>
+                    <label>Sheet:</label><br />
+                    <button
+                      class="selectButton"
+                      mat-button
+                      [matMenuTriggerFor]="checker"
+                    >
+                      aaaa
+                      <mat-icon class="icon">expand_more</mat-icon>
+                    </button>
+                    <mat-menu #checker="matMenu">
+                      <button mat-menu-item>SQL - Runner</button>
+                      <button mat-menu-item>SQL - Checker</button>
+                      <button mat-menu-item>Bash</button>
+                      <button mat-menu-item>Excel</button>
+                    </mat-menu>
+                  </div>
+                  <div>
+                    <label>Zelle:</label><br />
+                    <button mat-flat-button color="accent">fff</button>
+                  </div>
+                  <div>
+                    <label>Wert:</label><br />
+                    <mat-form-field class="foo2">
+                      <input type="text" placeholder="Wert" matInput />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <button mat-button>
+                  <mat-icon>add</mat-icon>weitere Zelle verändern
+                </button>
+              </div>
+              <div>
+                <div class="foo">
+                  <div>
+                    <label>Bereich:</label><br />
+                    <button mat-flat-button color="accent">fff</button>
+                  </div>
+                  <div class="flex">
+                    <mat-checkbox
+                      >Fehlerhafte Zellen nicht anzeigen</mat-checkbox
+                    >
+                  </div>
+                  <div>
+                    <label>Wert:</label><br />
+                    <mat-form-field class="foo2">
+                      <input type="text" placeholder="Wert" matInput />
+                    </mat-form-field>
+                  </div>
+                </div>
+                <button mat-button>
+                  <mat-icon>add</mat-icon>weitere Zelle verändern
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </mat-card-content>
     <mat-card-actions class="flex end">
-      <button mat-flat-button color="accent">Weiter</button>
+      <button
+        *ngIf="step >= 2"
+        (click)="decreaseStep()"
+        mat-flat-button
+        color="warn"
+      >
+        Zurück
+      </button>
+      <button
+        *ngIf="step < 3"
+        mat-flat-button
+        (click)="increaseStep()"
+        color="accent"
+      >
+        Weiter
+      </button>
+      <button
+        *ngIf="step === 3"
+        mat-flat-button
+        (click)="increaseStep()"
+        color="accent"
+      >
+        Abschließen
+      </button>
     </mat-card-actions>
   </mat-card>
 </div>
