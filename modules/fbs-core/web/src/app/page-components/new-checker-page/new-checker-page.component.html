@@ -64,20 +64,15 @@
 
           <div class="action">
             <h4>Auswahl</h4>
-            <button
-              class="selectButton"
-              mat-button
-              [matMenuTriggerFor]="checker"
-            >
-              aaaa
-              <mat-icon class="icon">expand_more</mat-icon>
-            </button>
-            <mat-menu #checker="matMenu">
-              <button mat-menu-item>SQL - Runner</button>
-              <button mat-menu-item>SQL - Checker</button>
-              <button mat-menu-item>Bash</button>
-              <button mat-menu-item>Excel</button>
-            </mat-menu>
+            <mat-form-field floatLabel="never" class="col">
+              <mat-label>Checkertyp</mat-label>
+              <mat-select>
+                <mat-option value="sql_runner">SQL Runner</mat-option>
+                <mat-option value="sql_checker">SQL Checker</mat-option>
+                <mat-option value="excel">Excel</mat-option>
+                <mat-option value="bash">Bash</mat-option>
+              </mat-select>
+            </mat-form-field>
           </div>
         </div>
         <div *ngIf="step === 2">
@@ -98,40 +93,31 @@
               </div>
               <div>
                 <label>Sheet:</label><br />
-                <button
-                  class="selectButton"
-                  mat-button
-                  [matMenuTriggerFor]="checker"
-                >
-                  aaaa
-                  <mat-icon class="icon">expand_more</mat-icon>
-                </button>
-                <mat-menu #checker="matMenu">
-                  <button mat-menu-item>SQL - Runner</button>
-                  <button mat-menu-item>SQL - Checker</button>
-                  <button mat-menu-item>Bash</button>
-                  <button mat-menu-item>Excel</button>
-                </mat-menu>
+                <mat-form-field class="col">
+                  <mat-label>Checkertyp</mat-label>
+                  <mat-select>
+                    <mat-option value="sql_runner">SQL Runner</mat-option>
+                    <mat-option value="sql_checker">SQL Checker</mat-option>
+                    <mat-option value="excel">Excel</mat-option>
+                    <mat-option value="bash">Bash</mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
 
               <div>
+                <label>Zellen verändern</label><br />
                 <div class="foo">
                   <div>
                     <label>Sheet:</label><br />
-                    <button
-                      class="selectButton"
-                      mat-button
-                      [matMenuTriggerFor]="checker"
-                    >
-                      aaaa
-                      <mat-icon class="icon">expand_more</mat-icon>
-                    </button>
-                    <mat-menu #checker="matMenu">
-                      <button mat-menu-item>SQL - Runner</button>
-                      <button mat-menu-item>SQL - Checker</button>
-                      <button mat-menu-item>Bash</button>
-                      <button mat-menu-item>Excel</button>
-                    </mat-menu>
+                    <mat-form-field class="col">
+                      <mat-label>Checkertyp</mat-label>
+                      <mat-select>
+                        <mat-option value="sql_runner">SQL Runner</mat-option>
+                        <mat-option value="sql_checker">SQL Checker</mat-option>
+                        <mat-option value="excel">Excel</mat-option>
+                        <mat-option value="bash">Bash</mat-option>
+                      </mat-select>
+                    </mat-form-field>
                   </div>
                   <div>
                     <label>Zelle:</label><br />
@@ -192,12 +178,7 @@
       >
         Weiter
       </button>
-      <button
-        *ngIf="step === 3"
-        mat-flat-button
-        (click)="increaseStep()"
-        color="accent"
-      >
+      <button *ngIf="step === 3" mat-flat-button color="accent">
         Abschließen
       </button>
     </mat-card-actions>
