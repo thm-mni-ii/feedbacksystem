@@ -40,7 +40,7 @@ class CourseRegistrationController(
         val globalRole = currentToken.globalRole
 
         if (globalRole == GlobalRole.ADMIN || globalRole == GlobalRole.MODERATOR || currentToken.id == uid) {
-            return courseRegistrationRepository.getRegisteredCourses(uid, false)
+            return courseRegistrationRepository.findAllCoursesByUserId(uid, false)
         } else {
             throw ForbiddenException()
         }
@@ -57,7 +57,7 @@ class CourseRegistrationController(
     @ResponseBody
     fun getParticipants(@CurrentToken currentToken: LegacyToken, @PathVariable("cid") cid: Int): List<Participant> {
         val globalRole = currentToken.globalRole
-        val participants = courseRegistrationRepository.getParticipants(cid)
+        val participants = courseRegistrationRepository.findAllParticipantsOfACourse(cid)
 
         val privilegedByCourse: CourseRole = participants.find { participant: Participant -> participant.user.id == currentToken.id }?.role
                 ?: throw UnauthorizedException()
@@ -103,7 +103,7 @@ class CourseRegistrationController(
         val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
                 courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged || uid == currentToken.id) courseRegistrationRepository.deregister(cid, uid)
+        if (privileged || uid == currentToken.id) courseRegistrationRepository.deleteRegisteredUserByCourseId(cid, uid)
         else throw ForbiddenException()
     }
 
@@ -121,7 +121,7 @@ class CourseRegistrationController(
         val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
                 courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged) courseRegistrationRepository.deregisterRole(cid, role)
+        if (privileged) courseRegistrationRepository.deleteRoleFromCourse(cid, role)
         else throw ForbiddenException()
     }
 

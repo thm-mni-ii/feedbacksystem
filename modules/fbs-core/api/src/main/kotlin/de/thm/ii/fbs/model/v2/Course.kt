@@ -20,6 +20,6 @@ class Course(
         @Column(columnDefinition = "int")
         val semesterId: Int? = null,
 
-        @OneToMany(mappedBy = "users")
-        val userList: List<User>,
+        @OneToMany(mappedBy = "course")
+        val registration: Set<CourseRegisteration>,
 )
