@@ -21,6 +21,7 @@ import kotlin.jvm.optionals.getOrElse
 @RequestMapping("/api/v1", produces = [MediaType.APPLICATION_JSON_VALUE])
 class UserController(
         private val userRepository: UserRepository,
+        private val courseRegistrationRepository: CourseRegistrationRepository,
 ) {
     /**
      * Get all users of the system
@@ -30,9 +31,8 @@ class UserController(
      */
     @GetMapping("users")
     @ResponseBody
-    @CurrentToken
-    fun getAll(@CurrentToken currentToken: LegacyToken, req: HttpServletRequest, res: HttpServletResponse): List<User> {
-        val isDocent = courseRegistrationService.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
+    fun getAll(@CurrentToken currentToken: LegacyToken): List<User> {
+        val isDocent = courseRegistrationRepository.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
         if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR || isDocent) {
             return userRepository.findAll()
         } else {
@@ -49,11 +49,11 @@ class UserController(
      */
     @GetMapping("users/{uid}")
     @ResponseBody
-    fun getOne(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User {
+    fun getOne(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int): User {
         val selfRequest = currentToken.id == uid
-        val isDocent = courseRegistrationService.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
+        val isDocent = courseRegistrationRepository.getCoursePrivileges(currentToken.id).exists(e => e . _2 == CourseRole . DOCENT)
         if (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
-            return userRepository.findById(uid).orElseGet{  throw NotFoundException() }
+            return userRepository.findById(uid).orElseGet { throw NotFoundException() }
         } else {
             throw ForbiddenException()
         }
@@ -67,8 +67,7 @@ class UserController(
      * @param body Content
      */
     @PutMapping("users/{uid}/passwd", consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun updatePassword(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest
-                       , res: HttpServletResponse, @RequestBody body: JsonNode) {
+    fun updatePassword(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, @RequestBody body: JsonNode) {
         val password = body["passwd"].asText()
         val passwordRepeat = body["passwdRepeat"].asText()
 
@@ -89,7 +88,7 @@ class UserController(
      * @param body Content
      */
     @PutMapping("users/{uid}/global-role", consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateGlobalRole(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode) {
+    fun updateGlobalRole(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, @RequestBody body: JsonNode) {
         if (body["roleName"] == null) throw BadRequestException("Malformed Request Body")
         val newRole = GlobalRole.parse(body["roleName"].asText())
 
@@ -110,7 +109,7 @@ class UserController(
     @PostMapping("users", consumes = [MediaType.APPLICATION_JSON_VALUE],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun create(@CurrentToken currentToken: LegacyToken, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User {
+    fun create(@CurrentToken currentToken: LegacyToken, @RequestBody body: JsonNode): User {
         if (currentToken.globalRole != GlobalRole.ADMIN) {
             throw ForbiddenException()
         }
@@ -129,7 +128,7 @@ class UserController(
      * @param res http response
      */
     @DeleteMapping("users/{uid}")
-    fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse) {
+    fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable uid: Int) {
         if (currentToken.globalRole == GlobalRole.ADMIN) {
             userRepository.deleteById(uid)
         } else {
