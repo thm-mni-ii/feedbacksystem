@@ -49,14 +49,23 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
     if (!this.lastSubmission) return;
     const latex = this.lastSubmission.additionalInformation["latex"];
     if (!latex) return;
-    console.log(this.lastSubmission);
+
     for (const propName in changes) {
-      if (propName === "outputFields" || propName === "lastSubmission") {
+      if (
+        propName === "outputFields" ||
+        propName === "lastSubmission" ||
+        propName === "content"
+      ) {
+        this.results = this.outputFields.reduce((acc, val) => {
+          acc[val] = this.content[val] ?? "";
+          return acc;
+        }, {});
+
         this.latex = this.outputFields.reduce((acc, val) => {
-          console.log(latex[val]);
           acc[val] = latex[val] ?? "";
           return acc;
         }, {});
+        break;
       }
     }
   }
