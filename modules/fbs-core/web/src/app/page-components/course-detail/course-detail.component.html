@@ -16,6 +16,15 @@
 
     <button
       mat-icon-button
+      *ngIf="canEdit()"
+      (click)="openExportDialog()"
+      matTooltip="Aufgaben Exportieren"
+    >
+      <mat-icon class="logout-icon">save_alt</mat-icon>
+    </button>
+
+    <button
+      mat-icon-button
       *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'results']"
       matTooltip="Bewertungsübersicht"

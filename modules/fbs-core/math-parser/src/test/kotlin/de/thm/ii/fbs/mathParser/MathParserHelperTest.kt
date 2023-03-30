@@ -204,7 +204,7 @@ internal class MathParserHelperTest {
     fun parseWithMultiplicationUnaryMinus() {
         assertEquals(
             Ast(
-                Operation(Operator.EXP, UnaryOperation(Operator.SUB, Num(5)), Num(2))
+                UnaryOperation(Operator.SUB, Operation(Operator.EXP, Num(5), Num(2)))
             ),
             MathParserHelper.parse("-5^2")
         )
@@ -347,7 +347,6 @@ internal class MathParserHelperTest {
 
     @Test
     fun parseLongDecimal() {
-        println(MathParserHelper.parse("1,23456789"))
         assertEquals(
             Ast(
                 Num(1.23456789)
@@ -374,5 +373,86 @@ internal class MathParserHelperTest {
                 Operation(Operator.ADD, Num(1), Num(2))
             ))
         )
+    }
+
+    @Test
+    fun multiplicationWithExplicitTest() {
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL,
+                    Operation(Operator.MUL,
+                        Num(4), Operation(Operator.EXP,
+                            Var("a"),
+                            UnaryOperation(Operator.SUB, Num(4))
+                        )
+                    ),
+                    Operation(Operator.EXP, Var("b"), Num(4))
+                )
+            ),
+            MathParserHelper.parse("4*a^(-4)*b^4")
+        )
+    }
+
+    @Test
+    fun multiplicationWithExponentImplicitTest() {
+        print(MathParserHelper.parse("4a^(-4)b^4").toDot())
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL,
+                    Operation(Operator.MUL,
+                        Num(4), Operation(Operator.EXP,
+                            Var("a"),
+                            UnaryOperation(Operator.SUB, Num(4))
+                        )
+                    ),
+                    Operation(Operator.EXP, Var("b"), Num(4))
+                )
+            ),
+            MathParserHelper.parse("4a^(-4)b^4")
+        )
+    }
+
+    @Test
+    fun multiplicationExponentTest() {
+        val expected = Ast(
+            Operation(Operator.MUL,
+                Operation(Operator.EXP,
+                    Num(5),
+                    Num(4)
+                ),
+                Var("a")
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("5^4a"))
+        assertEquals(expected, MathParserHelper.parse("5^4*a"))
+    }
+
+    @Test
+    fun negativeExponentTest() {
+        val expected = Ast(
+            Operation(Operator.EXP,
+                Var("x"),
+                UnaryOperation(Operator.SUB,
+                    Num(3)
+                )
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("x^(-3)"))
+        assertEquals(expected, MathParserHelper.parse("x^-3"))
+    }
+
+    @Test
+    fun exponentOfExponentTest() {
+        val expected = Ast(
+            Operation(Operator.EXP,
+                Operation(Operator.EXP,
+                    Num(2),
+                    Num(3)
+                ),
+                Num(4)
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("(2^3)^4"))
+        assertEquals(expected, MathParserHelper.parse("2^3^4"))
     }
 }

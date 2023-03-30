@@ -108,14 +108,58 @@
       </div>
 
       <mat-card-actions>
-        <button
-          [disabled]="deadlinePassed || isSubmissionEmpty()"
-          mat-flat-button
-          color="accent"
-          (click)="submission()"
-        >
-          Abgeben
-        </button>
+        <div class="center">
+          <div class="center margin-left-right">
+            <button
+              [disabled]="isFirstTask()"
+              mat-icon-button
+              (click)="goToPreviousUnresolvedTask()"
+              matTooltip="Vorherige ungelöste Aufgabe"
+            >
+              <mat-icon class="material-icons">
+                keyboard_double_arrow_left
+              </mat-icon>
+            </button>
+            <button
+              [disabled]="isFirstTask()"
+              mat-icon-button
+              class="margin-left-4px"
+              (click)="goToPreviousTask()"
+              matTooltip="Vorherige Aufgabe"
+            >
+              <mat-icon>keyboard_arrow_left</mat-icon>
+            </button>
+          </div>
+          <button
+            [disabled]="deadlinePassed || isSubmissionEmpty()"
+            mat-flat-button
+            color="accent"
+            (click)="submission()"
+          >
+            Abgeben
+          </button>
+          <div class="center margin-left-right">
+            <button
+              [disabled]="isLastTask()"
+              mat-icon-button
+              (click)="goToNextTask()"
+              matTooltip="Nächste Aufgabe"
+            >
+              <mat-icon>keyboard_arrow_right</mat-icon>
+            </button>
+            <button
+              [disabled]="isLastTask()"
+              mat-icon-button
+              (click)="goToNextUnresolvedTask()"
+              class="margin-left-4px"
+              matTooltip="Nächste ungelöste Aufgabe"
+            >
+              <mat-icon class="material-icons">
+                keyboard_double_arrow_right
+              </mat-icon>
+            </button>
+          </div>
+        </div>
       </mat-card-actions>
       <app-results
         *ngIf="submissions"

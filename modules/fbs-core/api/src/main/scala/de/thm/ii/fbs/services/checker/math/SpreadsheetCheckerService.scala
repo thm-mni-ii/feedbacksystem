@@ -139,7 +139,15 @@ class SpreadsheetCheckerService extends CheckerService {
   def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
     val enteredAst = MathParserHelper.fromMathJson(enteredValue)
     val valueAst = MathParserHelper.fromMathJson(value)
-    new SemanticAstComparator(decimals, RoundingMode.HALF_UP).compare(valueAst, enteredAst)
+
+    new SemanticAstComparator.Builder()
+      .decimals(decimals)
+      .roundingMode(RoundingMode.HALF_UP)
+      .ignoreNeutralElements(true)
+      .applyInverseElements(true)
+      .applyCommutativeLaw(true)
+      .build()
+      .compare(valueAst, enteredAst)
   }
 
   private def round(input: Double, toDecimals: Int): String =

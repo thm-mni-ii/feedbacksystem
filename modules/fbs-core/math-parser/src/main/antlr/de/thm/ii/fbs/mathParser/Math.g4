@@ -5,11 +5,7 @@ expr        : (RAD|LOG) ' '* expr ' '+ expr
             | term
             ;
 
-term        : term ' '* (MUL|DIV|MOD) ' '* expo
-            | expo
-            ;
-
-expo        : expo ' '* EXP ' '* funct
+term        : term ' '* (MUL|DIV|MOD) ' '* funct
             | funct
             ;
 
@@ -20,8 +16,12 @@ funct       : (SQR|LB|LN|LG) ' '* funct
 unary       : SUB? mulFactor
             ;
 
-mulFactor   : factor // higher presedence!
-            | mulFactor ' '* factor
+mulFactor   : expo // higher presedence!
+            | mulFactor ' '* expo
+            ;
+
+expo        : expo ' '* EXP ' '* SUB? factor
+            | factor
             ;
 
 factor      : '(' ' '* expr ' '* ')'
