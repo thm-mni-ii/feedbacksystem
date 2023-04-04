@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model.v2
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import de.thm.ii.fbs.model.v2.security.User
 
-data class Participant(val user: User, val role: CourseRole, val visible: Boolean = true)
+data class Participant(@JsonProperty val user: User, @JsonProperty val role: CourseRole, @JsonProperty val visible: Boolean = true)

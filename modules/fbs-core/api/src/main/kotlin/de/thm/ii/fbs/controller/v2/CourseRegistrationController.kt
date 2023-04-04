@@ -9,22 +9,13 @@ import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.services.v2.persistence.CourseRegistrationRepository
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.ForbiddenException
-import de.thm.ii.fbs.utils.v2.exceptions.UnauthorizedException
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@CrossOrigin
 @RequestMapping(path = ["/api/v2/"], produces = [MediaType.APPLICATION_JSON_VALUE])
-class CourseRegistrationController(
+class CourseRegistrationControllerV2(
+// TODO rename
         private val courseRegistrationRepository: CourseRegistrationRepository,
 ) {
     /**
@@ -40,7 +31,7 @@ class CourseRegistrationController(
         val globalRole = currentToken.globalRole
 
         if (globalRole == GlobalRole.ADMIN || globalRole == GlobalRole.MODERATOR || currentToken.id == uid) {
-            return courseRegistrationRepository.findAllCoursesByUserId(uid, false)
+            return courseRegistrationRepository.findAllCoursesByUid(uid)
         } else {
             throw ForbiddenException()
         }
@@ -57,10 +48,10 @@ class CourseRegistrationController(
     @ResponseBody
     fun getParticipants(@CurrentToken currentToken: LegacyToken, @PathVariable("cid") cid: Int): List<Participant> {
         val globalRole = currentToken.globalRole
-        val participants = courseRegistrationRepository.findAllParticipantsOfACourse(cid)
+        val participants = courseRegistrationRepository.findAllParticipantsByCourseId(cid)
 
         val privilegedByCourse: CourseRole = participants.find { participant: Participant -> participant.user.id == currentToken.id }?.role
-                ?: throw UnauthorizedException()
+                ?: CourseRole.STUDENT
 
         if (privilegedByCourse != CourseRole.STUDENT || globalRole != GlobalRole.USER) {
             return participants
@@ -82,11 +73,12 @@ class CourseRegistrationController(
                  @RequestBody body: JsonNode) {
 
         val role: CourseRole = CourseRole.valueOf(body["roleName"].asText())
-        val privileged = (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR) ||
-                courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
+        val privileged = (currentToken.globalRole == GlobalRole.ADMIN || currentToken.globalRole == GlobalRole.MODERATOR)
+                || courseRegistrationRepository.findAllCourseRolesOfCourseIdsByUser(currentToken.id)
+                .getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged) courseRegistrationRepository.register(cid, uid, role)
-        else if (uid == currentToken.id) courseRegistrationRepository.register(cid, uid, CourseRole.STUDENT)
+        if (privileged) courseRegistrationRepository.register(cid, uid, role.ordinal)
+        else if (uid == currentToken.id) courseRegistrationRepository.register(cid, uid, CourseRole.STUDENT.ordinal)
         else throw ForbiddenException()
     }
 
@@ -100,10 +92,11 @@ class CourseRegistrationController(
     @DeleteMapping("/users/{uid}/courses/{cid}")
     fun deregister(@CurrentToken currentToken: LegacyToken, @PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int) {
 
-        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-                courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
+        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+                || courseRegistrationRepository.findAllCourseRolesOfCourseIdsByUser(currentToken.id)
+                .getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged || uid == currentToken.id) courseRegistrationRepository.deleteRegisteredUserByCourseId(cid, uid)
+        if (privileged || uid == currentToken.id) courseRegistrationRepository.deleteByCourseIdAndUserId(cid, uid)
         else throw ForbiddenException()
     }
 
@@ -118,10 +111,11 @@ class CourseRegistrationController(
     fun deregisterRole(@CurrentToken currentToken: LegacyToken, @PathVariable("cid") cid: Int, @RequestBody body: JsonNode) {
         val role: CourseRole = CourseRole.valueOf(body["roleName"].asText())
 
-        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-                courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
+        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+                || courseRegistrationRepository.findAllCourseRolesOfCourseIdsByUser(currentToken.id)
+                .getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged) courseRegistrationRepository.deleteRoleFromCourse(cid, role)
+        if (privileged) courseRegistrationRepository.deleteCourseRoleByCidAndCourseRole(cid, role.ordinal)
         else throw ForbiddenException()
     }
 
@@ -133,10 +127,11 @@ class CourseRegistrationController(
      */
     @GetMapping("/courses/{cid}/deregisterall")
     fun deregisterAll(@CurrentToken currentToken: LegacyToken, @PathVariable("cid") cid: Int) {
-        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-                courseRegistrationRepository.getCoursePrivileges(currentToken.id).getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
+        val privileged = currentToken.globalRole.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
+                || courseRegistrationRepository.findAllCourseRolesOfCourseIdsByUser(currentToken.id)
+                .getOrElse(cid) { CourseRole.STUDENT } == CourseRole.DOCENT
 
-        if (privileged) courseRegistrationRepository.deregisterAll(cid, currentToken.id)
+        if (privileged) courseRegistrationRepository.deleteAllUsersByCourseId(cid, currentToken.id)
         else throw ForbiddenException()
     }
 }
