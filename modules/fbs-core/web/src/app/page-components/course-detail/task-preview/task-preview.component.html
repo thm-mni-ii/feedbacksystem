@@ -5,7 +5,9 @@
 >
   <div class="task-title">
     <span *ngIf="task.requirementType === 'mandatory'">
-      <mat-icon class="mandatory" matTooltip="Pflicht">priority_high</mat-icon>
+      <mat-icon class="mandatory" matTooltip="Pflicht"
+        >assignment-late</mat-icon
+      >
     </span>
     <span *ngIf="task.requirementType === 'optional'">
       <mat-icon class="bonus" matTooltip="Bonus">star</mat-icon>
