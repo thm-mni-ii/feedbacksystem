@@ -161,7 +161,7 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):

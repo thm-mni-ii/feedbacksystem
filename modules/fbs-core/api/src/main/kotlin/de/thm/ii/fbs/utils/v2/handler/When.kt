@@ -3,5 +3,6 @@ enum class When(val value: String) {
     BEFORE("Before"),
     AFTER("After"),
     ONVISIT("On Visit"),
-    ONERROR("On Error")
+    ONERROR("On Error"),
+    ONPERROR("On Propagated Error")
 }

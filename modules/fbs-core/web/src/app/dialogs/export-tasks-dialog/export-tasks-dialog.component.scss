@@ -1,0 +1,29 @@
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  button {
+    margin-left: 16px;
+  }
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.task {
+  margin-bottom: 12px;
+}
+
+.selected {
+  background-color: #a8b3c9;
+  transition: none !important;
+  box-shadow: none !important;
+}
+
+.content {
+  max-height: 50vh;
+  padding-right: 12px;
+  padding-left: 12px;
+  overflow-y: auto;
+}

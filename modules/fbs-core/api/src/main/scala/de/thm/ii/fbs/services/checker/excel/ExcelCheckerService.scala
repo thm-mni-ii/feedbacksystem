@@ -3,18 +3,21 @@ package de.thm.ii.fbs.services.checker.excel
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
-import de.thm.ii.fbs.services.checker.`trait`.CheckerService
+import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnMainFileUpload, CheckerServiceOnSecondaryFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
+import de.thm.ii.fbs.services.v2.checker.excel.{ErrorAnalysisSolutionService, ExcelCheckerServiceV2}
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
 
 import java.io.File
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 @Service
-class ExcelCheckerService extends CheckerService {
+class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUpload with CheckerServiceOnSecondaryFileUpload {
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -23,6 +26,10 @@ class ExcelCheckerService extends CheckerService {
   private val subTaskService: CheckrunnerSubTaskService = null
   @Autowired
   private val spreadsheetFileService: SpreadsheetFileService = null
+  @Autowired
+  private val excelCheckerServiceV2: ExcelCheckerServiceV2 = null
+  @Autowired
+  private val errorAnalysisSolutionService: ErrorAnalysisSolutionService = null
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -48,10 +55,24 @@ class ExcelCheckerService extends CheckerService {
     }
   }
 
+  override def onCheckerMainFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    try {
+      // Delete stored solution to force the Checker to regenerate it on the next check
+      errorAnalysisSolutionService.deleteSolution(checkerConfiguration.id)
+    } catch {
+      // TODO: May find better solution with a version field
+      case _: ObjectOptimisticLockingFailureException => // Ignore if the row was already deleted by a parallel running update
+    }
+  }
+
+  override def onCheckerSecondaryFileUpload(cid: Int, task: Task, checkerConfiguration: CheckrunnerConfiguration): Unit = {
+    onCheckerMainFileUpload(cid, task, checkerConfiguration)
+  }
+
   private def executeChecker(cc: CheckrunnerConfiguration, submission: Submission, submissionFile: File, mainFile: File): Unit = {
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
-      val submissionResult = checkSubmission(excelMediaInformation, submissionFile, mainFile)
+      val submissionResult = checkSubmission(cc: CheckrunnerConfiguration, excelMediaInformation, submissionFile, mainFile)
       val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
       submissionService.storeResult(submission.id, cc.id, submissionResult.exitCode, resultText,
         objectMapper.writeValueAsString(this.buildExtendedRes(submissionResult.mergedResults, excelMediaInformation))
@@ -66,10 +87,29 @@ class ExcelCheckerService extends CheckerService {
     }
   }
 
-  private def checkSubmission(excelMediaInformation: ExcelMediaInformationTasks, submissionFile: File, solutionFile: File): SubmissionResult = {
-    val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
-    val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
-    SubmissionResult(if (results.forall(r => r.success)) 0 else 1, results, mergedResults)
+  private def checkSubmission(cc: CheckrunnerConfiguration,
+                              excelMediaInformation: ExcelMediaInformationTasks,
+                              submissionFile: File,
+                              solutionFile: File): SubmissionResult = {
+    if (excelMediaInformation.enableExperimentalFeatures) {
+      checkSubmissionExperimental(cc, excelMediaInformation, submissionFile, solutionFile)
+    } else {
+      val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
+      val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
+      SubmissionResult(if (results.forall(r => r.success)) 0 else 1, results, mergedResults)
+    }
+  }
+
+  private def checkSubmissionExperimental(cc: CheckrunnerConfiguration,
+                                          excelMediaInformation: ExcelMediaInformationTasks,
+                                          submissionFile: File,
+                                          solutionFile: File): SubmissionResult = {
+    val solution = excelService.initWorkBook(solutionFile, excelMediaInformation) // TODO: do only if needed
+    val submission = excelService.initWorkBook(submissionFile, excelMediaInformation)
+    val result = excelCheckerServiceV2.check(cc.id, solution, submission)
+    val checkResult = CheckResult(result.getErrorCells.isEmpty, result.getErrorCells.asScala.map(c => c.getCell).toList)
+
+    SubmissionResult(if (result.getErrorCells.isEmpty) 0 else 1, List(CheckResultTask(result.getErrorCells.isEmpty, List(checkResult))), List(checkResult))
   }
 
   private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {

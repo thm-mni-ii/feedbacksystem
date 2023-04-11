@@ -1,17 +1,22 @@
 import {
+  AfterViewChecked,
+  AfterViewInit,
   Component,
+  ElementRef,
   EventEmitter,
   HostListener,
   Input,
+  OnDestroy,
   OnInit,
   Output,
+  Renderer2,
+  ViewChild,
 } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
-import { UntypedFormControl } from "@angular/forms";
+import { FormControl, FormGroup, UntypedFormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";
 import { CourseRegistrationService } from "../../../service/course-registration.service";
@@ -19,13 +24,17 @@ import { repeat, takeWhile } from "rxjs/operators";
 import { TaskService } from "src/app/service/task.service";
 import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
+import { PrismService } from "src/app/service/prism.service";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: "app-sql-input-tabs",
   templateUrl: "./sql-input-tabs.component.html",
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
-export class SqlInputTabsComponent implements OnInit {
+export class SqlInputTabsComponent
+  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+{
   @Input() isPending: boolean;
   @Output() submitStatement = new EventEmitter<string>();
   @HostListener("window:keyup", ["$event"])
@@ -35,16 +44,47 @@ export class SqlInputTabsComponent implements OnInit {
       this.submission();
     }
   }
+  @ViewChild("textArea", { static: true })
+  textArea!: ElementRef;
+  @ViewChild("codeContent", { static: true })
+  codeContent!: ElementRef;
+  @ViewChild("pre", { static: true })
+  pre!: ElementRef;
+
+  sub!: Subscription;
+  highlighted = false;
+  codeType = "sql";
+
+  groupForm = new FormGroup({
+    content: new FormControl(""),
+  });
+
+  get contentControl() {
+    return this.groupForm.get("content")?.value;
+  }
 
   constructor(
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private authService: AuthService,
-    private sqlPlaygroundService: SqlPlaygroundService,
     private courseRegistrationService: CourseRegistrationService,
     private submissionService: SubmissionService,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private prismService: PrismService,
+    private renderer: Renderer2
   ) {}
+  ngAfterViewChecked() {
+    if (this.highlighted) {
+      this.prismService.highlightAll();
+      this.highlighted = false;
+    }
+  }
+  ngAfterViewInit() {
+    this.prismService.highlightAll();
+  }
+  ngOnDestroy(): void {
+    throw new Error("Method not implemented.");
+  }
 
   fileName = "New_Query";
   tabs = [{ name: this.fileName, content: "" }];
