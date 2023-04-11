@@ -102,7 +102,6 @@ def is_join(json_file):  # pylint: disable=R1710
                         or element in "join"
                         or element in "right join"
                         or element in "outer join"
-                        or element in "natural join"
                     ):
                         is_join_var = True
                         join_type = element
