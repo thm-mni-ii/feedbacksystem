@@ -37,7 +37,7 @@ ID_JSON = "{id:'%s'}" % (  # pylint: disable=c0209 # pylint: disable=bad-option-
 )
 print(ID_JSON)
 TESTDIC = {
-    "submission": "SELECT PNr, Name FROM mitarbeiter natural join abteilung ;",
+    "submission": "SELECT M.PNr, M.Name FROM mitarbeiter M natural join abteilung A",
     "passed": False,  # True if submission produced the right return in SQL-Runner
     "resultText": "OK",
     "userId": 1,
@@ -50,6 +50,6 @@ TESTDIC = {
 parse_single_stat_upload_db(TESTDIC, CLIENT)
 
 #
-# doesnt work: SELECT M.PNr, M.Name FROM mitarbeiter M natural join abteilung A
+# works: SELECT M.PNr, M.Name FROM mitarbeiter M natural join abteilung A
 #
-#
+# SELECT PNr, Name FROM mitarbeiter natural join abteilung

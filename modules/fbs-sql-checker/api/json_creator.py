@@ -161,7 +161,7 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -376,7 +376,13 @@ def insert_tables(mydb, elem, my_uuid, client):
         mycollection.insert_one(record)
         if joins[0] != "Empty":
             try:
+                print("joins0....")
+                print(joins[0])
                 mycollection = mydb["Joins"]
+
+                print("mycollection....")
+                print(mycollection)
+
                 record = json_join_attribute(my_uuid, joins)
                 mycollection.insert_one(record)
             except Exception:
