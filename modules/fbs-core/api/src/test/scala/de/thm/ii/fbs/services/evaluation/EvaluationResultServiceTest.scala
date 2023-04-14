@@ -1,13 +1,13 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult,
-  EvaluationContainer, EvaluationContainerResult, EvaluationContainerWithTaskResults, Task, TaskResult}
+import de.thm.ii.fbs.model.{CourseResult, EvaluationContainer, EvaluationContainerResult,
+  EvaluationContainerWithTaskResults, EvaluationUserResult, Task, TaskResult}
 import org.junit.{Assert, Test}
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringRunner
 
 /**
@@ -18,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(classOf[SpringRunner])
 @SpringBootTest(classes = Array(classOf[RestTemplateAutoConfiguration]))
 @ContextConfiguration(classes = Array(classOf[EvaluationResultService], classOf[FormulaService]))
+@ActiveProfiles(Array("test"))
 class EvaluationResultServiceTest {
   @Autowired
   private val evaluationResultService: EvaluationResultService = null

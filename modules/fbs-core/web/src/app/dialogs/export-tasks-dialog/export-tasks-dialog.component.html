@@ -1,0 +1,35 @@
+<div matDialogTitle class="title">
+  Aufgaben exportieren
+  <button mat-icon-button [matMenuTriggerFor]="more">
+    <mat-icon>more_horiz</mat-icon>
+  </button>
+</div>
+<mat-menu #more="matMenu">
+  <button mat-menu-item (click)="selectAll()">
+    <span>Alle auswählen</span>
+  </button>
+  <button mat-menu-item (click)="unSelectAll()">
+    <span>Auswahl aufheben</span>
+  </button>
+</mat-menu>
+
+<div class="content">
+  <mat-card
+    [ngClass]="{
+      selected: task.selected
+    }"
+    class="task"
+    *ngFor="let task of tasks"
+    (click)="select(task.index)"
+    >{{ task.name }}</mat-card
+  >
+</div>
+
+<mat-dialog-actions class="actions">
+  <button mat-flat-button color="warn" (click)="closeDialog()">
+    Abbrechen
+  </button>
+  <button mat-flat-button color="accent" (click)="export()">
+    Auswahl exportieren
+  </button>
+</mat-dialog-actions>

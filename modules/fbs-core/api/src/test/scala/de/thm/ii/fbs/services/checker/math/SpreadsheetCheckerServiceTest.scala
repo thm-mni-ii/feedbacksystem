@@ -5,6 +5,7 @@ import org.junit.{Assert, Test}
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.{ActiveProfiles, TestPropertySource}
 import org.springframework.test.context.junit4.SpringRunner
 
 import scala.collection.immutable
@@ -12,6 +13,7 @@ import scala.jdk.CollectionConverters.MapHasAsJava
 
 @RunWith(classOf[SpringRunner])
 @SpringBootTest(classes = Array(classOf[TestApplication]))
+@ActiveProfiles(Array("test"))
 class SpreadsheetCheckerServiceTest {
   @Autowired
   private val spreadsheetCheckerService: SpreadsheetCheckerService = null

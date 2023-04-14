@@ -22,7 +22,8 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
                 @JsonProperty("id") id: Int = 0,
                 @JsonProperty("courseID") courseID: Int = 0,
-                @JsonProperty("attempts") attempts: Option[Int] = None
+                @JsonProperty("attempts") attempts: Option[Int] = None,
+                @JsonProperty("hideResult") hideResult: Boolean = false,
                )
 
 object Task {

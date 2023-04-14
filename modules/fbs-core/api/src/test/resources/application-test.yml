@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: ${MYSQL_URI:jdbc:mysql://localhost:3316}/fbs?autoReconnect=true&failOverReadOnly=false&maxReconnects=9&useSSL=false&allowMultiQueries=true
+minio:
+  port: ${MINIO_PORT:9010}
