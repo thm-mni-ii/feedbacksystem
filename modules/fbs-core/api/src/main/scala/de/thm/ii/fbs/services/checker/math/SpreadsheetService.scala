@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.checker.math
 
-import de.thm.ii.fbs.mathParser.MathParserHelper
+import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -94,7 +94,11 @@ class SpreadsheetService {
   private def colToInt(col: Char): Int =
     col.toInt - 64
 
-  private def parseValues(value: Seq[String]) = value.map(v => MathParserHelper.toMathJson(MathParserHelper.parse(v)))
+  private def parseValues(value: Seq[String]): Seq[String] = value.map(v =>
+    try { MathParserHelper.toMathJson(MathParserHelper.parse(v)) } catch { case _: MathParserException =>
+      s"{\"str\": \"${v.replace("\"", "\\\"")}\"}"
+    }
+  )
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
   germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)

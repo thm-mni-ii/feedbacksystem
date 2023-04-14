@@ -26,6 +26,7 @@ class MathJsonMarshal : Marshal {
         "Divide" to Operator.DIV,
         "Rational" to Operator.DIV,
         "Power" to Operator.EXP,
+        "Negate" to Operator.SUB
     )
 
     override fun marshal(input: Ast): String =
