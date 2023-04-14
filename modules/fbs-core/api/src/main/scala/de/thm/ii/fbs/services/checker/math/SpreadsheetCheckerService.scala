@@ -146,6 +146,7 @@ class SpreadsheetCheckerService extends CheckerService {
       .ignoreNeutralElements(true)
       .applyInverseElements(true)
       .applyCommutativeLaw(true)
+      .applyExponentLaws(true)
       .build()
       .compare(valueAst, enteredAst)
   }
