@@ -9,9 +9,8 @@ class SqlPlaygroundUsers(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Int? = null,
-        @Column(nullable = false)
+        @ManyToOne(optional = false)
         var user: User,
         @ManyToOne(optional = false)
-        @Column(nullable = false)
         var db: SqlPlaygroundDatabase,
 )

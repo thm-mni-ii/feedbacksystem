@@ -7,7 +7,6 @@ import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundDatabaseCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundQueryCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
-import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundUsersCreation
 import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
@@ -61,20 +60,20 @@ class PlaygroundController(
 
     @PostMapping("/dbusers")
     @ResponseBody
-    fun addUserToDB(@CurrentToken currentToken: LegacyToken, @RequestBody userCreation: SqlPlaygroundUsersCreation): SqlPlaygroundUsers {
-        val db = databaseRepository.findById(userCreation.dbId).get()
+    fun addUserToDB(@CurrentToken currentToken: LegacyToken, @RequestBody dbId: Int, @PathVariable uid: Int): SqlPlaygroundUsers {
+        val db = databaseRepository.findById(dbId).get()
         if (currentToken.id == db.owner.id) {
-            return sqlPlaygroundUsersRepository.save(SqlPlaygroundUsers(user = userRepository.findById(userCreation.userId).get(), db = db));
+            return sqlPlaygroundUsersRepository.save(SqlPlaygroundUsers(user = userRepository.findById(uid).get(), db = db));
         }
         throw UnauthorizedException()
     }
 
-    @DeleteMapping("/dbusers/{id}")
+    @DeleteMapping("/dbusers/{dbid}")
     @ResponseBody
-    fun removeUserFromDB(@CurrentToken currentToken: LegacyToken, @PathVariable id: Int, @RequestBody userCreation: SqlPlaygroundUsersCreation): Unit {
-        val db = databaseRepository.findById(userCreation.dbId).get()
+    fun removeUserFromDB(@CurrentToken currentToken: LegacyToken, @PathVariable dbid: Int, @PathVariable uid: Int/*SqlPlaygroundUsersCreation*/): Unit {
+        val db = databaseRepository.findById(dbid).get()
         if (currentToken.id == db.owner.id) {
-            return sqlPlaygroundUsersRepository.deleteById(id)
+            return sqlPlaygroundUsersRepository.deleteByUserIdAndDBId(uid, dbid)
         }
         throw UnauthorizedException()
     }
@@ -116,7 +115,8 @@ class PlaygroundController(
 
         val db = sqlPlaygroundUsersRepository.findSqlPlaygroundDatabasesByMemberIdAndDBId(currentToken.id, dbId)
                 ?: throw NotFoundException()
-        val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db, currentToken.id))
+        val user = userRepository.findById(currentToken.id).get()
+        val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db, user))
         sqlPlaygroundCheckerService.submit(query)
         return query
     }
@@ -124,12 +124,12 @@ class PlaygroundController(
     @GetMapping("/{dbId}/results")
     @ResponseBody
     fun getResults(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): List<SqlPlaygroundResult> =
-            queryRepository.findAllByCreatorIdAndDatabaseId(currentToken.id, dbId).mapNotNull { it.result }
+            queryRepository.findByRunInCreatorIdAndRunInId(currentToken.id, dbId).mapNotNull { it.result }
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
     fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
-            queryRepository.findByRunIn_Creator_IdAndRunIn_idAndId(currentToken.id, dbId, qId)?.result
+            queryRepository.findByRunInCreatorIdAndRunInIdAndId(currentToken.id, dbId, qId)?.result
                     ?: throw NotFoundException()
 
     @GetMapping("/{dbId}/tables")

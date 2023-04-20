@@ -9,4 +9,5 @@ interface SqlPlaygroundUsersRepository : JpaRepository<SqlPlaygroundUsers, Int> 
     //@Query(value = "SELECT db FROM fbs.", nativeQuery = true)
     fun findAllSqlPlaygroundDatabasesByUserId(userId: Int): List<SqlPlaygroundDatabase>
     fun findSqlPlaygroundDatabasesByMemberIdAndDBId(memberId: Int, dbId: Int): SqlPlaygroundDatabase?
+    fun deleteByUserIdAndDBId(memberId: Int, dbId: Int): Unit
 }
