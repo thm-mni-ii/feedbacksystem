@@ -130,7 +130,10 @@ export class SqlInputTabsComponent
 
   addTab() {
     this.tabs.push({ name: this.fileName, content: "" });
-    this.activeTabId.setValue(this.tabs.length - 1);
+    
+    setTimeout(() => {
+      this.activeTabId.setValue( this.tabs.length - 1);
+    }, 15);
   }
 
   openConfirmDialog(title: string, message: string) {
