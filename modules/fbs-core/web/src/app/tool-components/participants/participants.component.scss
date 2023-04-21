@@ -1,3 +1,14 @@
+:host ::ng-deep .mat-form-field-wrapper {
+  padding: auto;
+}
+
+:host ::ng-deep .mat-paginator {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}
+
+
 .mat-row:nth-child(even) {
   background-color: #f0f0fa;
 }
