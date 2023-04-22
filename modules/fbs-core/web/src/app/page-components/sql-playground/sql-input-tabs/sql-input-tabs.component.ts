@@ -128,11 +128,11 @@ export class SqlInputTabsComponent
     this.tabs[this.activeTabId.value].content = submissionContent;
   }
 
-  addTab() {
+  addTab(event: any) {
+    event.stopPropagation();
     this.tabs.push({ name: this.fileName, content: "" });
-    setTimeout(() => {
-      this.activeTabId.setValue(this.tabs.length - 1);
-    }, 15);
+    this.activeTabId.setValue(this.tabs.length - 1);
+    console.log("heh");
   }
 
   openConfirmDialog(title: string, message: string) {
