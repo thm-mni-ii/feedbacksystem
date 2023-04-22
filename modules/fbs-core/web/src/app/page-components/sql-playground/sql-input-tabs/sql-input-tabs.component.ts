@@ -131,7 +131,7 @@ export class SqlInputTabsComponent
   addTab() {
     this.tabs.push({ name: this.fileName, content: "" });
     setTimeout(() => {
-      this.activeTabId.setValue( this.tabs.length - 1);
+      this.activeTabId.setValue(this.tabs.length - 1);
     }, 15);
   }
 
