@@ -128,7 +128,7 @@ export class SqlInputTabsComponent
     this.tabs[this.activeTabId.value].content = submissionContent;
   }
 
-  addTab(event: any) {
+  addTab(event: MouseEvent) {
     event.stopPropagation();
     this.tabs.push({ name: this.fileName, content: "" });
     this.activeTabId.setValue(this.tabs.length - 1);
