@@ -132,7 +132,6 @@ export class SqlInputTabsComponent
     event.stopPropagation();
     this.tabs.push({ name: this.fileName, content: "" });
     this.activeTabId.setValue(this.tabs.length - 1);
-    console.log("heh");
   }
 
   openConfirmDialog(title: string, message: string) {
