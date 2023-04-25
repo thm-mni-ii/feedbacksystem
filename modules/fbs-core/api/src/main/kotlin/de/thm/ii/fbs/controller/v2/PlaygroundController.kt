@@ -73,15 +73,16 @@ class PlaygroundController(
     fun removeUserFromDB(@CurrentToken currentToken: LegacyToken, @PathVariable dbid: Int, @PathVariable uid: Int/*SqlPlaygroundUsersCreation*/): Unit {
         val db = databaseRepository.findById(dbid).get()
         if (currentToken.id == db.owner.id) {
-            return sqlPlaygroundUsersRepository.deleteByUserIdAndDBId(uid, dbid)
+            sqlPlaygroundUsersRepository.deleteByUserIdAndDBId(uid, dbid)
+        } else {
+            throw UnauthorizedException()
         }
-        throw UnauthorizedException()
     }
 
     @GetMapping("/dbusers/all")
     @ResponseBody
     fun getAllDBsOfUser(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> {
-        return sqlPlaygroundUsersRepository.findAllSqlPlaygroundDatabasesByUserId(currentToken.id)
+        return sqlPlaygroundUsersRepository.findAllSqlPlaygroundDatabasesByUser_Id(currentToken.id)
     }
 
     @GetMapping("/{dbId}")
