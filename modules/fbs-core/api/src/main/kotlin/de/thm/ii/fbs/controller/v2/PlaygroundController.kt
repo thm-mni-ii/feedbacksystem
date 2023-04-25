@@ -58,9 +58,9 @@ class PlaygroundController(
         throw UnauthorizedException()
     }
 
-    @PostMapping("/dbusers")
+    @PostMapping("/dbusers/{dbId}")
     @ResponseBody
-    fun addUserToDB(@CurrentToken currentToken: LegacyToken, @RequestBody dbId: Int, @PathVariable uid: Int): SqlPlaygroundUsers {
+    fun addUserToDB(@CurrentToken currentToken: LegacyToken, @PathVariable dbId: Int, @PathVariable uid: Int): SqlPlaygroundUsers {
         val db = databaseRepository.findById(dbId).get()
         if (currentToken.id == db.owner.id) {
             return sqlPlaygroundUsersRepository.save(SqlPlaygroundUsers(user = userRepository.findById(uid).get(), db = db));
@@ -124,12 +124,12 @@ class PlaygroundController(
     @GetMapping("/{dbId}/results")
     @ResponseBody
     fun getResults(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): List<SqlPlaygroundResult> =
-            queryRepository.findByRunInCreatorIdAndRunInId(currentToken.id, dbId).mapNotNull { it.result }
+            queryRepository.findByCreatorIdAndRunInid(currentToken.id, dbId).mapNotNull { it.result }
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
     fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
-            queryRepository.findByRunInCreatorIdAndRunInIdAndId(currentToken.id, dbId, qId)?.result
+            queryRepository.findByCreatorIdAndRunInidAndId(currentToken.id, dbId, qId)?.result
                     ?: throw NotFoundException()
 
     @GetMapping("/{dbId}/tables")
