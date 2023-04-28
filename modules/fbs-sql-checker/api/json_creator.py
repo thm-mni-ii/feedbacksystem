@@ -6,6 +6,7 @@ from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
+from datetime import datetime
 
 rightStatements = []
 rightTables = []
@@ -20,8 +21,9 @@ tables, selAttributes, proAttributes, strings = [], [], [], []
 def parse_single_stat_upload_db(data, client):
     # create DB-connection
     client = MongoClient(client, 27107)
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycollection = mydb["Queries"]
+    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     (
         tables2,
         pro_atts2,
@@ -121,6 +123,7 @@ def parse_single_stat_upload_db(data, client):
             joins2,
             having2,
             client,
+            time
         )
         # save JSON to DB
         mycollection.insert_one(record)
@@ -131,7 +134,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, user_data[3], task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
         mycollection.insert_one(record)
 
 
@@ -148,7 +151,7 @@ def check_solution_chars(
     group_by2,
     joins2,
     having2,
-    client,
+    client
 ):
     new_solution = True
     (
@@ -161,7 +164,7 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -279,7 +282,7 @@ def check_solution_chars(
 
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycollection = mydb["Solutions"]
     record = prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
@@ -301,6 +304,7 @@ def return_json(  # pylint: disable=R1710
     joins_right,
     having_right,
     client,
+    time
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -326,6 +330,7 @@ def return_json(  # pylint: disable=R1710
                 group_by_right,
                 joins_right,
                 having_right,
+                time
             )
             return record
         # produce a json if the sql-query is not parsable
@@ -351,9 +356,9 @@ def prod_json_not_parsable(_id, cid, task_nr):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
+        "time": ""
     }
     return value
-
 
 # Insert data of Tables, proAttributes, selAttributes and Strings to Database
 def insert_tables(mydb, elem, my_uuid, client):
@@ -480,6 +485,7 @@ def prod_json(
     group_by_right,
     joins_right,
     having_right,
+    time
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -504,6 +510,7 @@ def prod_json(
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
         "havingRight": having_right,
+        "time": time
     }
     user_data.clear()
     AWC.literal = []
@@ -511,7 +518,7 @@ def prod_json(
 
 
 def insert_not_parsable(my_uuid, submission, client):
-    mydb = client.get_default_database()
+    mydb = client["sql-checker"]
     mycollection = mydb["NotParsable"]
     record = json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
