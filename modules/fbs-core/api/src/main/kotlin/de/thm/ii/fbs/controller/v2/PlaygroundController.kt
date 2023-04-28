@@ -82,7 +82,9 @@ class PlaygroundController(
     @GetMapping("/dbusers/all")
     @ResponseBody
     fun getAllDBsOfUser(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> {
-        return sqlPlaygroundUsersRepository.findAllSqlPlaygroundDatabasesByUser_Id(currentToken.id)
+        // TODO this should return a list of dbs
+        val dbs = sqlPlaygroundUsersRepository.findAllSqlPlaygroundDatabasesByUser(currentToken.id)
+        return dbs.map { dbid -> databaseRepository.findById(dbid).get() }
     }
 
     @GetMapping("/{dbId}")
@@ -113,9 +115,10 @@ class PlaygroundController(
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun execute(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @RequestBody sqlQuery: SqlPlaygroundQueryCreation): SqlPlaygroundQuery {
-
-        val db = sqlPlaygroundUsersRepository.findSqlPlaygroundDatabasesByMemberIdAndDBId(currentToken.id, dbId)
+        // TODO this should return the db
+        val db_id = sqlPlaygroundUsersRepository.findSqlPlaygroundDatabasesByMemberIdAndDBId(currentToken.id, dbId)
                 ?: throw NotFoundException()
+        val db = databaseRepository.findById(db_id).get()
         val user = userRepository.findById(currentToken.id).get()
         val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db, user))
         sqlPlaygroundCheckerService.submit(query)
@@ -132,6 +135,8 @@ class PlaygroundController(
     fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
             queryRepository.findByCreatorIdAndRunInidAndId(currentToken.id, dbId, qId)?.result
                     ?: throw NotFoundException()
+
+
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody

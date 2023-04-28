@@ -5,7 +5,7 @@ alter table sql_users add constraint sql_users_db_fk foreign key (db_id) referen
 alter table sql_users add constraint sql_users_user_fk foreign key (user_user_id) references user (user_id) on delete cascade on update cascade;
 
 
-ALTER TABLE sql_playground_query ADD COLUMN creator_id integer not null;
+ALTER TABLE sql_playground_query ADD COLUMN creator_id_user_id integer not null;
 
 INSERT INTO migration (number) VALUES (17);
 
