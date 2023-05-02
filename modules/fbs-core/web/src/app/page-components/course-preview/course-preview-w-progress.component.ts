@@ -36,11 +36,11 @@ export class CoursePreviewWProgressComponent implements OnInit {
     if (allSubmissions.length != 0) {
       for (var submission of allSubmissions) {
         if (!failed) {
-          this.passed++;
           break;
         }
         for (var checker of submission.results) {
           if (checker.exitCode == 0) {
+            this.passed++;
             failed = false;
             break;
           }
