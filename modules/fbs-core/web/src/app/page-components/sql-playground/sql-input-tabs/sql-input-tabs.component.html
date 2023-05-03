@@ -112,6 +112,7 @@
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="task"
+        matTooltip="{{ selectedTaskName }}"
       >
         {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
       </button>
@@ -130,6 +131,7 @@
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="course"
+        matTooltip="{{ selectedCourseName }}"
       >
         {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
       </button>
