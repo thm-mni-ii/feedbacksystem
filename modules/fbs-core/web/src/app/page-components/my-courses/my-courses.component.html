@@ -9,7 +9,41 @@
     />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
+  <div *ngIf="totalTasks > 0">
+    <mat-progress-bar
+      mode="buffer"
+      showProgressValue="true;"
+      class="progress"
+      value="{{ (passed * 100) / totalTasks }}"
+      bufferValue="{{ ((failed + passed) * 100) / totalTasks }}"
+    >
+    </mat-progress-bar>
 
+    <div class="flex-container">
+      <div *ngFor="let legend of legends">
+        <div class="legend-color" [style.backgroundColor]="legend"></div>
+
+        <div class="legend-text" *ngIf="legend === 'green'">
+          korrekte Aufgaben: {{ passed }}
+        </div>
+
+        <div class="legend-text" *ngIf="legend === 'red'">
+          Falsche Aufgaben: {{ failed }}
+        </div>
+
+        <div
+          class="legend-text"
+          *ngIf="
+            legend === '#1E457C' && totalTasks > failed + passed;
+            else elseBlock
+          "
+        >
+          Offene Aufgaben: {{ offen }}
+        </div>
+       
+      </div>
+    </div>
+  </div>
   <app-course-preview-w-progress
     *ngFor="let course of filteredCourses | async"
     [data]="course"
