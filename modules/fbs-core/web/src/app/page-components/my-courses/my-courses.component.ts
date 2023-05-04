@@ -83,7 +83,7 @@ export class MyCoursesComponent implements OnInit {
   }
 
   countResults(allSubmissions: any[], failed: boolean) {
-    this.offen=0;
+    
     console.log("extern ",this.offen)
     let aufchecker:boolean=false;
     if (allSubmissions.length != 0) {
@@ -121,6 +121,7 @@ export class MyCoursesComponent implements OnInit {
   getTaskProgress() {
     
     this.courses.subscribe((courses) => {
+      this.offen=0;
       courses.forEach((course) => {
         this.getProgress(course.id);
         
