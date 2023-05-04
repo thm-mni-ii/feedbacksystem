@@ -47,10 +47,15 @@
 .courseBtn {
   background-color: rgba(219, 219, 219, 0.54);
   font-weight: normal;
-  border-radius: 0;
+  border-radius: 5px;
 }
 
 .description {
+  margin: 0px 15px 15px;
+  font-size: smaller;
+}
+
+.error-message {
   margin: 0px 15px 15px;
   font-size: smaller;
 }
@@ -63,14 +68,15 @@
 
 .submit-item {
   margin-left: 8px;
+  cursor: pointer;
 }
 
-.material-icons.color_green { 
-  color: #00db00 
+.material-icons.color_green {
+  color: #00db00
 }
 
-.material-icons.color_red { 
-  color: #e20000 
+.material-icons.color_red {
+  color: #e20000
 }
 
 .title {

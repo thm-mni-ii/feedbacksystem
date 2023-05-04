@@ -87,7 +87,10 @@ export class SqlInputTabsComponent
   }
 
   fileName = "New_Query";
-  tabs = [{ name: this.fileName, content: "" }];
+  isError: boolean = false;
+  errorMessage: String = null;
+  submitted: boolean = false;
+  tabs = [{ name: this.fileName, content: ""}];
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
@@ -102,7 +105,6 @@ export class SqlInputTabsComponent
   filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
   isSubCorr = false;
-  submitted = false;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -130,7 +132,9 @@ export class SqlInputTabsComponent
 
   addTab(event: MouseEvent) {
     event.stopPropagation();
-    this.tabs.push({ name: this.fileName, content: "" });
+    this.tabs.push({
+      name: this.fileName, content: ""
+    });
     this.activeTabId.setValue(this.tabs.length - 1);
   }
 
@@ -193,6 +197,8 @@ export class SqlInputTabsComponent
   changeCourse(course: Course) {
     this.selectedCourse = course;
     this.selectedCourseName = this.selectedCourse.name;
+    this.isError = false
+    this.submitted = false;
     //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
     this.getTasks();
     this.emptyTask();
@@ -202,6 +208,7 @@ export class SqlInputTabsComponent
     this.selectedTask = task;
     this.selectedTaskName = this.selectedTask.name;
     this.submitted = false;
+    this.isError = false
   }
 
   getTasks() {
@@ -230,8 +237,10 @@ export class SqlInputTabsComponent
   wasSubmissionCorrect(subResult: number) {
     if (subResult != 0) {
       this.isSubCorr = false;
+      this.isError = true;
     } else {
       this.isSubCorr = true;
+      this.isError = false;
     }
   }
 
@@ -251,8 +260,15 @@ export class SqlInputTabsComponent
       .subscribe(
         (res) => {
           if (res.done) {
-            this.wasSubmissionCorrect(res.results[0].exitCode);
-            this.pending = false;
+            if(res.results[0].exitCode == 0){
+              this.errorMessage = null;
+              this.wasSubmissionCorrect(res.results[0].exitCode);
+              this.pending = false;
+            } else {
+                this.wasSubmissionCorrect(res.results[0].exitCode)
+                this.errorMessage = res.results[0].resultText;
+                this.pending = false;
+              }
           }
         },
         () => {}, //handle error
@@ -299,6 +315,5 @@ export class SqlInputTabsComponent
       return;
     }
     this.submitToTask();
-    //this.submissionService.emitFileSubmission();
   }
 }
