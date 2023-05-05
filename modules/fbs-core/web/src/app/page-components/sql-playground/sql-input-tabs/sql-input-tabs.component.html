@@ -5,7 +5,7 @@
     [backgroundColor]=""
   >
     <ng-container>
-      <mat-tab *ngFor="let tab of tabs; let index = index">
+      <mat-tab [disabled]="pending" *ngFor="let tab of tabs; let index = index">
         <ng-template class="tab-label" [mat-tab-label]>
           <div class="col" style="margin-left: 20px">
             <input
@@ -39,11 +39,8 @@
             (update)="updateSubmissionContent($event)"
           ></app-highlighted-input>
         </div>
-        <p
-          class="error-message"
-          *ngIf="errorMessage !== null && isSubmitMode && isError"
-        >
-          <strong>Fehlermeldung:</strong> {{ errorMessage }}
+        <p class="error-message" *ngIf="activeTab.error && isSubmitMode">
+          <strong>Fehlermeldung:</strong> {{ activeTab.errorMsg }}
         </p>
       </mat-tab>
     </ng-container>
@@ -102,13 +99,13 @@
       <mat-icon
         class="submit-item material-icons color_red"
         matTooltip="Status der Abgabe: Deine Abgabge war leider nicht richtig."
-        *ngIf="submitted && !pending && !isSubCorr"
+        *ngIf="activeTab.isSubmitted && !pending && !activeTab.isCorrect"
         >cancel</mat-icon
       >
       <mat-icon
         class="submit-item material-icons color_green"
         matTooltip="Status der Abgabe: Deine Abgabe war korrekt."
-        *ngIf="submitted && !pending && isSubCorr"
+        *ngIf="activeTab.isSubmitted && !pending && activeTab.isCorrect"
         >check_circle</mat-icon
       >
       <mat-icon class="state submit-item" *ngIf="pending"

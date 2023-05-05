@@ -87,10 +87,7 @@ export class SqlInputTabsComponent
   }
 
   fileName = "New_Query";
-  isError: boolean = false;
-  errorMessage: String = null;
-  submitted: boolean = false;
-  tabs = [{ name: this.fileName, content: ""}];
+  tabs = [{ name: this.fileName,content: "", error: false, errorMsg: null, isCorrect: false, isSubmitted: false}];
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
@@ -104,7 +101,6 @@ export class SqlInputTabsComponent
   allTasksFromCourse: Task[];
   filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
-  isSubCorr = false;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -121,6 +117,7 @@ export class SqlInputTabsComponent
     ).subscribe((result) => {
       if (result == true) {
         this.tabs.splice(index, 1);
+        this.activeTabId.setValue(this.tabs.length -1);
       }
     });
   }
@@ -133,7 +130,12 @@ export class SqlInputTabsComponent
   addTab(event: MouseEvent) {
     event.stopPropagation();
     this.tabs.push({
-      name: this.fileName, content: ""
+      name: this.fileName,
+      content: "",
+      error: false,
+      errorMsg: null,
+      isCorrect: false,
+      isSubmitted: false
     });
     this.activeTabId.setValue(this.tabs.length - 1);
   }
@@ -197,9 +199,8 @@ export class SqlInputTabsComponent
   changeCourse(course: Course) {
     this.selectedCourse = course;
     this.selectedCourseName = this.selectedCourse.name;
-    this.isError = false
-    this.submitted = false;
-    //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
+    this.activeTab.error = false;
+    this.activeTab.isSubmitted = false;
     this.getTasks();
     this.emptyTask();
   }
@@ -207,8 +208,8 @@ export class SqlInputTabsComponent
   changeTask(task: Task) {
     this.selectedTask = task;
     this.selectedTaskName = this.selectedTask.name;
-    this.submitted = false;
-    this.isError = false
+    this.activeTab.error = false;
+    this.activeTab.isSubmitted = false;
   }
 
   getTasks() {
@@ -236,11 +237,11 @@ export class SqlInputTabsComponent
 
   wasSubmissionCorrect(subResult: number) {
     if (subResult != 0) {
-      this.isSubCorr = false;
-      this.isError = true;
+      this.activeTab.isCorrect = false;
+      this.activeTab.error = true;
     } else {
-      this.isSubCorr = true;
-      this.isError = false;
+      this.activeTab.isCorrect = true;
+      this.activeTab.error = false;
     }
   }
 
@@ -261,13 +262,16 @@ export class SqlInputTabsComponent
         (res) => {
           if (res.done) {
             if(res.results[0].exitCode == 0){
-              this.errorMessage = null;
+              this.activeTab.errorMsg = null;
               this.wasSubmissionCorrect(res.results[0].exitCode);
               this.pending = false;
+              this.activeTab.isSubmitted = true;
+
             } else {
                 this.wasSubmissionCorrect(res.results[0].exitCode)
-                this.errorMessage = res.results[0].resultText;
+                this.activeTab.errorMsg = res.results[0].resultText;
                 this.pending = false;
+                this.activeTab.isSubmitted = true;
               }
           }
         },
@@ -277,7 +281,6 @@ export class SqlInputTabsComponent
   }
 
   private submitToTask() {
-    this.submitted = true;
     this.pending = true;
     const token = this.authService.getToken();
     this.submissionService
