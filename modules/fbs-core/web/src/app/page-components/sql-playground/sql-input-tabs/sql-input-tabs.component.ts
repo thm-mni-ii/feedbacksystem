@@ -87,13 +87,16 @@ export class SqlInputTabsComponent
   }
 
   fileName = "New_Query";
-  tabs = [{
-    name: this.fileName,content: "",
-    error: false,
-    errorMsg: null,
-    isCorrect: false,
-    isSubmitted: false,
-  }];
+  tabs = [
+    {
+      name: this.fileName,
+      content: "",
+      error: false,
+      errorMsg: null,
+      isCorrect: false,
+      isSubmitted: false,
+    },
+  ];
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
@@ -273,11 +276,11 @@ export class SqlInputTabsComponent
               this.pending = false;
               this.activeTab.isSubmitted = true;
             } else {
-                this.wasSubmissionCorrect(res.results[0].exitCode);
-                this.activeTab.errorMsg = res.results[0].resultText;
-                this.pending = false;
-                this.activeTab.isSubmitted = true;
-              }
+              this.wasSubmissionCorrect(res.results[0].exitCode);
+              this.activeTab.errorMsg = res.results[0].resultText;
+              this.pending = false;
+              this.activeTab.isSubmitted = true;
+            }
           }
         },
         () => {}, //handle error
