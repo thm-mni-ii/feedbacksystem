@@ -84,7 +84,6 @@ export class MyCoursesComponent implements OnInit {
 
   countResults(allSubmissions: any[], failed: boolean) {
     
-    console.log("extern ",this.offen)
     let aufchecker:boolean=false;
     if (allSubmissions.length != 0) {
       for (var submission of allSubmissions) {
@@ -114,7 +113,6 @@ export class MyCoursesComponent implements OnInit {
     if(aufchecker==false){
       this.offen++;
     }
-    console.log("intern ",this.offen);
   }
 
 

@@ -156,4 +156,49 @@
       </app-task-preview>
     </div>
   </div>
+  <br />
+  <br />
+  <div
+    class="task-column"
+    *ngFor="let requirement of requirements | async; index as i"
+  >
+    <div class="task-container header">
+      <div class="task-result">
+        <span class="title title-hoverable"
+          >Kategorie {{ i + 1 }} &#9660;
+          <!--&dArr; --></span
+        ><span class="title">points: {{ requirement.toPass }}</span>
+
+        <span class="category-tasks" *ngFor="let task of requirement.tasks">
+          <span class="title"> -{{ task.name }}- </span>
+        </span>
+        <mat-progress-bar
+          mode="buffer"
+          showProgressValue="true;"
+          class="progress"
+          value="{{ (passed * 100) / totalTasks }}"
+          bufferValue="{{ ((failed + passed) * 100) / totalTasks }}"
+        >
+        </mat-progress-bar>
+
+        <div class="flex-container">
+          <div *ngFor="let legend of legends">
+            <div class="legend-color" [style.backgroundColor]="legend"></div>
+
+            <div class="legend-text" *ngIf="legend === 'green'">
+              Bestanden: {{ passed }}
+            </div>
+
+            <div class="legend-text" *ngIf="legend === 'red'">
+              Nicht-Bestanden: {{ failed }}
+            </div>
+
+            <div class="legend-text" *ngIf="legend === '#1E457C'">
+              Gesamtpunkte: {{ offen }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
