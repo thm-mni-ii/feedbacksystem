@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 @RestController
 @CrossOrigin
 @RequestMapping(path = ["/api/v2/semester"], produces = [MediaType.APPLICATION_JSON_VALUE])
-class SemesterV2Controller(
+class SemesterController(
         private val semesterRepository: SemesterRepository
 ) {
     /**
