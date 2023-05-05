@@ -87,7 +87,13 @@ export class SqlInputTabsComponent
   }
 
   fileName = "New_Query";
-  tabs = [{ name: this.fileName,content: "", error: false, errorMsg: null, isCorrect: false, isSubmitted: false}];
+  tabs = [{
+    name: this.fileName,content: "",
+    error: false,
+    errorMsg: null,
+    isCorrect: false,
+    isSubmitted: false,
+  }];
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
@@ -117,7 +123,7 @@ export class SqlInputTabsComponent
     ).subscribe((result) => {
       if (result == true) {
         this.tabs.splice(index, 1);
-        this.activeTabId.setValue(this.tabs.length -1);
+        this.activeTabId.setValue(this.tabs.length - 1);
       }
     });
   }
@@ -135,7 +141,7 @@ export class SqlInputTabsComponent
       error: false,
       errorMsg: null,
       isCorrect: false,
-      isSubmitted: false
+      isSubmitted: false,
     });
     this.activeTabId.setValue(this.tabs.length - 1);
   }
@@ -261,14 +267,13 @@ export class SqlInputTabsComponent
       .subscribe(
         (res) => {
           if (res.done) {
-            if(res.results[0].exitCode == 0){
+            if (res.results[0].exitCode == 0) {
               this.activeTab.errorMsg = null;
               this.wasSubmissionCorrect(res.results[0].exitCode);
               this.pending = false;
               this.activeTab.isSubmitted = true;
-
             } else {
-                this.wasSubmissionCorrect(res.results[0].exitCode)
+                this.wasSubmissionCorrect(res.results[0].exitCode);
                 this.activeTab.errorMsg = res.results[0].resultText;
                 this.pending = false;
                 this.activeTab.isSubmitted = true;
