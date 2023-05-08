@@ -154,8 +154,8 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
       val equal = actual.value.contentEquals(expected.value)
       if (!equal) {
         invalidFields :+= actual.reference
-        extInfo.result.rows.append(List(actual.reference, expected.value))
-        extInfo.expected.rows.append(List(actual.reference, actual.value))
+        extInfo.result.rows.append(List(actual.reference, actual.value))
+        extInfo.expected.rows.append(List(actual.reference, expected.value))
       }
       accumulator && equal
     })
