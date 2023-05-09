@@ -3,6 +3,7 @@ package de.thm.ii.fbs.services.persistence
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
 import de.thm.ii.fbs.model.{CheckResult, Submission, User}
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.UncategorizedSQLException
@@ -240,7 +241,7 @@ class SubmissionService {
 
   def getOrHidden(submission: Submission, hideResult: Boolean, adminPrivileged: Boolean): Submission = {
     if (hideResult && !adminPrivileged) {
-      Submission(submission.submissionTime, submission.done, submission.id, isHidden = true)
+      Submission(submission.submissionTime, submission.taskID, submission.done, submission.id, isHidden = true)
     } else {
       submission
     }

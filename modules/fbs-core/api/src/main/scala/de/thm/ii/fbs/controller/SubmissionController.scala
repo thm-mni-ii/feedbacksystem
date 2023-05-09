@@ -4,6 +4,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictExceptio
 import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission, User}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
 import de.thm.ii.fbs.services.persistence.{UserService, _}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Archiver
@@ -31,6 +32,8 @@ class SubmissionController {
   private val authService: AuthService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val minioStorageService: MinioStorageService = null
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -151,7 +154,7 @@ class SubmissionController {
           }
           if (true) { // TODO: Check media type compatibility
             val submission = submissionService.create(uid, tid)
-            storageService.storeSolutionFileInBucket(submission.id, file)
+            minioStorageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)
               checkerService.notify(tid, submission.id, cc, user)
