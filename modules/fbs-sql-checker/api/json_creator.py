@@ -1,12 +1,12 @@
 # JSONCreator.py
 
 from parser import parse_query
+from datetime import datetime
 from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
-from datetime import datetime
 
 rightStatements = []
 rightTables = []
@@ -23,7 +23,7 @@ def parse_single_stat_upload_db(data, client):
     client = MongoClient(client, 27107)
     mydb = client.get_default_database()
     mycollection = mydb["Queries"]
-    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     (
         tables2,
         pro_atts2,
@@ -123,7 +123,7 @@ def parse_single_stat_upload_db(data, client):
             joins2,
             having2,
             client,
-            time
+            time,
         )
         # save JSON to DB
         mycollection.insert_one(record)
@@ -151,7 +151,7 @@ def check_solution_chars(
     group_by2,
     joins2,
     having2,
-    client
+    client,
 ):
     new_solution = True
     (
@@ -304,7 +304,7 @@ def return_json(  # pylint: disable=R1710
     joins_right,
     having_right,
     client,
-    time
+    time,
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -330,7 +330,7 @@ def return_json(  # pylint: disable=R1710
                 group_by_right,
                 joins_right,
                 having_right,
-                time
+                time,
             )
             return record
         # produce a json if the sql-query is not parsable
@@ -356,9 +356,10 @@ def prod_json_not_parsable(_id, cid, task_nr, time):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
-        "time": time
+        "time": time,
     }
     return value
+
 
 # Insert data of Tables, proAttributes, selAttributes and Strings to Database
 def insert_tables(mydb, elem, my_uuid, client):
@@ -485,7 +486,7 @@ def prod_json(
     group_by_right,
     joins_right,
     having_right,
-    time
+    time,
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -510,7 +511,7 @@ def prod_json(
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
         "havingRight": having_right,
-        "time": time
+        "time": time,
     }
     user_data.clear()
     AWC.literal = []
