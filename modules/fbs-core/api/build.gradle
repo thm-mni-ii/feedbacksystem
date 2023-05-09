@@ -95,3 +95,6 @@ tasks.register('jacocoReport', JacocoReport) {
 
 // Allow To import Kotlin Classes into Scala
 compileScala.classpath += files(compileKotlin.outputs)
+
+// Remove if spring-boot 2.7.10 is released
+ext['spring-framework.version'] = '5.3.26'
