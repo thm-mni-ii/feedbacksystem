@@ -21,7 +21,7 @@ tables, selAttributes, proAttributes, strings = [], [], [], []
 def parse_single_stat_upload_db(data, client):
     # create DB-connection
     client = MongoClient(client, 27107)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Queries"]
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     (
@@ -134,7 +134,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         mycollection.insert_one(record)
 
 
@@ -164,7 +164,7 @@ def check_solution_chars(
         joins_right,
         having_right,
     ) = (False, False, False, False, False, False, False, False)
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -282,7 +282,7 @@ def check_solution_chars(
 
 # Parse a solution and upload it to DB
 def parse_single_stat_upload_solution(data, task_nr, my_uuid, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["Solutions"]
     record = prod_solution_json(data, my_uuid, task_nr)
     mycollection.insert_one(record)
@@ -334,12 +334,12 @@ def return_json(  # pylint: disable=R1710
             )
             return record
         # produce a json if the sql-query is not parsable
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         return record
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(_id, cid, task_nr):
+def prod_json_not_parsable(_id, cid, task_nr, time):
     # Create dictionary
     value = {
         "id": str(_id),
@@ -356,7 +356,7 @@ def prod_json_not_parsable(_id, cid, task_nr):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
-        "time": ""
+        "time": time
     }
     return value
 
@@ -518,7 +518,7 @@ def prod_json(
 
 
 def insert_not_parsable(my_uuid, submission, client):
-    mydb = client["sql-checker"]
+    mydb = client.get_default_database()
     mycollection = mydb["NotParsable"]
     record = json_not_parsable(my_uuid, submission)
     mycollection.insert_one(record)
