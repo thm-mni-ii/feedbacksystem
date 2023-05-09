@@ -190,10 +190,12 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     val json = new ObjectMapper().readValue(content, classOf[JsonNode])
     Option(json.get("sections").get(0).get("query")).map(query => query.asText()) match {
       case Some(query: String) => checkerConfiguration.checkerTypeInformation match {
-        case Some(sqlCheckerInformation: SqlCheckerInformation) =>
+        case Some(sqlCheckerInformation: SqlCheckerInformation) => {
+          val ci = sqlCheckerInformation.copy(solution = query)
           checkerService.setCheckerTypeInformation(cid, checkerConfiguration.taskId, checkerConfiguration.id,
-            Some(sqlCheckerInformation.copy(solution = query)))
-          onCheckerConfigurationChange(task, checkerConfiguration)
+            Some(ci))
+          onCheckerConfigurationChange(task, checkerConfiguration.copy(checkerTypeInformation = Some(ci)))
+        }
         case _ =>
       }
       case _ =>
