@@ -1,9 +1,9 @@
-import { Component, OnInit, Input   } from "@angular/core";
+import { Component, OnInit, Input,ChangeDetectorRef    } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TitlebarService } from "../../service/titlebar.service";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { mergeMap } from "rxjs/operators";
+import { mergeMap,take } from "rxjs/operators";
 import { of, Observable, forkJoin } from "rxjs";
 import { TaskNewDialogComponent } from "../../dialogs/task-new-dialog/task-new-dialog.component";
 import { CourseUpdateDialogComponent } from "../../dialogs/course-update-dialog/course-update-dialog.component";
@@ -50,6 +50,7 @@ export class CourseDetailComponent implements OnInit {
     private feedbackAppService: FeedbackAppService,
     private goToService: GoToService,
     private taskPointsService: TaskPointsService,
+    private cdr: ChangeDetectorRef
    
   ) { }
   punkte: number = 0;
@@ -226,8 +227,9 @@ export class CourseDetailComponent implements OnInit {
       });
       
     
-    
+      this.cdr.markForCheck();
     return points;
+    
   }
 
 
@@ -406,14 +408,19 @@ export class CourseDetailComponent implements OnInit {
           this.snackbar.open("Punktevergabe abgeschlossen");
         }
         
-        this.assignpoints();
+       
+        setTimeout(() => {
+          this.assignpoints();
+          
+        }, 1500); 
+        console.log("post assignpoints");
         this.requirements.subscribe((value) => {
-          console.log("req vqlue  :", value);
-          this.requirementsLength = value.length-1;
-          this.increment(value[this.requirementsLength])
-          console.log("the requirments at the end 2 :", this.requirementsLength);
-          console.log("the new one : ",value[this.requirementsLength]);
-        }); 
+          console.log("req value:", value);
+          this.requirementsLength = value.length - 1;
+          this.increment(value[this.requirementsLength]);
+          console.log("the requirements at the end:", this.requirementsLength);
+          console.log("the new one:", value[this.requirementsLength]);
+        });
         console.log("it entered the edit points");
       
       });

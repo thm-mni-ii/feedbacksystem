@@ -171,9 +171,6 @@
           >Gesamtpunkte: {{ requirement.tasks?.length }}</span
         >
 
-        <span class="category-tasks" *ngFor="let task of requirement.tasks">
-          <span class="title"> -{{ task.name }}- </span>
-        </span>
         <section class="example-section" style="position: relative">
           <mat-progress-bar
             mode="buffer"
@@ -186,13 +183,6 @@
                 100) /
                 requirement.tasks?.length
             }}"
-            [ngStyle]="{
-              ':host ::ng-deep .mat-progress-bar-fill::after{background-color: ;}':
-                (increment(requirement) * 100) / requirement.tasks?.length <
-                (requirement.toPass * 100) / requirement.tasks?.length
-                  ? 'red'
-                  : 'yellow'
-            }"
           >
           </mat-progress-bar>
           <div
@@ -218,10 +208,29 @@
               erzielte Punkte: {{ increment(requirement) }}
             </div>
 
-            <div class="legend-text" *ngIf="legend === 'red'">
+            <div
+              class="legend-text"
+              *ngIf="
+                legend === 'red' &&
+                  requirement.toPass >= increment(requirement);
+                else elseBlock
+              "
+            >
               Punkte zu erzielen:
               {{ requirement.toPass - increment(requirement) }}
             </div>
+
+            <ng-template #elseBlock>
+              <div
+                class="legend-text"
+                *ngIf="
+                  legend === 'red' &&
+                  requirement.toPass < increment(requirement)
+                "
+              >
+                Punkte zu erzielen: 0
+              </div>
+            </ng-template>
 
             <div class="legend-text" *ngIf="legend === '#1E457C'">
               verbleibende Punkte:
