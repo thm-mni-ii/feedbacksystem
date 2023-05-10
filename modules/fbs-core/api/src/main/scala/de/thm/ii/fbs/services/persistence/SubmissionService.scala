@@ -121,8 +121,8 @@ class SubmissionService {
     * @return The found task
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, task_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
+    s"SELECT submission_id, user_task_submission.task_id, submission_time, configuration_id, exit_code, result_text, " +
+      s"user_task_submission.is_in_block_storage, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
     (res, _) => parseResult(res), id, uid)).headOption
