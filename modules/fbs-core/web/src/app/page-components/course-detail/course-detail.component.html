@@ -167,34 +167,65 @@
         <span class="title title-hoverable"
           >Kategorie {{ i + 1 }} &#9660;
           <!--&dArr; --></span
-        ><span class="title">points: {{ requirement.toPass }}</span>
+        ><span class="title"
+          >Gesamtpunkte: {{ requirement.tasks?.length }}</span
+        >
 
         <span class="category-tasks" *ngFor="let task of requirement.tasks">
           <span class="title"> -{{ task.name }}- </span>
         </span>
-        <mat-progress-bar
-          mode="buffer"
-          showProgressValue="true;"
-          class="progress"
-          value="{{ (passed * 100) / totalTasks }}"
-          bufferValue="{{ ((failed + passed) * 100) / totalTasks }}"
-        >
-        </mat-progress-bar>
+        <section class="example-section" style="position: relative">
+          <mat-progress-bar
+            mode="buffer"
+            showProgressValue="true"
+            class="example-section"
+            [value]="(increment(requirement) * 100) / requirement.tasks?.length"
+            bufferValue="{{
+              ((increment(requirement) +
+                (requirement.toPass - increment(requirement))) *
+                100) /
+                requirement.tasks?.length
+            }}"
+            [ngStyle]="{
+              ':host ::ng-deep .mat-progress-bar-fill::after{background-color: ;}':
+                (increment(requirement) * 100) / requirement.tasks?.length <
+                (requirement.toPass * 100) / requirement.tasks?.length
+                  ? 'red'
+                  : 'yellow'
+            }"
+          >
+          </mat-progress-bar>
+          <div
+            *ngIf="increment(requirement) >= requirement.toPass"
+            id="num"
+            style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              color: black;
+            "
+          >
+            Bestanden
+          </div>
+        </section>
 
         <div class="flex-container">
           <div *ngFor="let legend of legends">
             <div class="legend-color" [style.backgroundColor]="legend"></div>
 
             <div class="legend-text" *ngIf="legend === 'green'">
-              Bestanden: {{ passed }}
+              erzielte Punkte: {{ increment(requirement) }}
             </div>
 
             <div class="legend-text" *ngIf="legend === 'red'">
-              Nicht-Bestanden: {{ failed }}
+              Punkte zu erzielen:
+              {{ requirement.toPass - increment(requirement) }}
             </div>
 
             <div class="legend-text" *ngIf="legend === '#1E457C'">
-              Gesamtpunkte: {{ offen }}
+              verbleibende Punkte:
+              {{ requirement.tasks?.length - increment(requirement) }}
             </div>
           </div>
         </div>

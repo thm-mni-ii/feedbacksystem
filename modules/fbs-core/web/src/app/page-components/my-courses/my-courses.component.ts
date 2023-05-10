@@ -37,7 +37,7 @@ export class MyCoursesComponent implements OnInit {
   myTasks: any[] = [];
   passed: number = 0;
   failed:number = 0; 
-  offen:number ;
+  open:number ;
   legends=["green","red","#1E457C"];
  
 
@@ -84,12 +84,12 @@ export class MyCoursesComponent implements OnInit {
 
   countResults(allSubmissions: any[], failed: boolean) {
     
-    let aufchecker:boolean=false;
+    let isopen:boolean=false;
     if (allSubmissions.length != 0) {
       for (var submission of allSubmissions) {
         if (!failed) {
           this.passed++;
-          aufchecker=true;
+          isopen=true;
           
           break;
         }
@@ -98,7 +98,7 @@ export class MyCoursesComponent implements OnInit {
             
             failed = false;
             this.passed++;
-            aufchecker=true;
+            isopen=true;
             break;
           }
         }
@@ -106,12 +106,12 @@ export class MyCoursesComponent implements OnInit {
       if (failed) {
         
         this.failed++;
-        aufchecker=true;
+        isopen=true;
         
       }
     }
-    if(aufchecker==false){
-      this.offen++;
+    if(isopen==false){
+      this.open++;
     }
   }
 
@@ -119,7 +119,7 @@ export class MyCoursesComponent implements OnInit {
   getTaskProgress() {
     
     this.courses.subscribe((courses) => {
-      this.offen=0;
+      this.open=0;
       courses.forEach((course) => {
         this.getProgress(course.id);
         

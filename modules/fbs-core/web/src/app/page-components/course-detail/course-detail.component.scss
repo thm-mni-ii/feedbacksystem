@@ -179,3 +179,20 @@
     padding: 20px;
     font-size: 30px;
   }
+  .progress-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: bold;
+  }
+ .example-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 60px;
+  bottom: 15px;
+  right: 10px;
+}
+  
