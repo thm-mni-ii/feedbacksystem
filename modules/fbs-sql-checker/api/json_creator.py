@@ -7,6 +7,7 @@ from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
+from mask_aliases import SQLAliasMasker
 
 rightStatements = []
 rightTables = []
@@ -40,6 +41,10 @@ def parse_single_stat_upload_db(data, client):
     ) = ([], [], [], [], [], [], [], [], [], [], [], [])
     try:
         if "submission" in data:
+            query = data["submission"]
+            masker = SQLAliasMasker(query)
+            masker.mask_aliases_()
+            data["submission"] = masker.get_masked_query()
             # Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
                 table_list = extract_tables(data["submission"], client)
