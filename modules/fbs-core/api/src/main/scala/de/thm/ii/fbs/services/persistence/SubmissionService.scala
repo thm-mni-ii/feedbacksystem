@@ -63,8 +63,8 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, task.id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
-      s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
+    s"SELECT submission_id, user_task_submission.task_id, submission_time, configuration_id, exit_code, result_text, " +
+      s"user_task_submission.is_in_block_storage, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
@@ -77,9 +77,9 @@ class SubmissionService {
     * @return List of submissions
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, task.id, user_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage," +
-      " checker_type FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
-      "LEFT JOIN checkrunner_configuration using (configuration_id) " +
+    "SELECT submission_id, user_task_submission.task_id, user_id, submission_time, configuration_id, exit_code, result_text, " +
+      "user_task_submission.is_in_block_storage, checker_type FROM user_task_submission JOIN task USING(task_id) " +
+      "LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
 
   /**
@@ -121,7 +121,7 @@ class SubmissionService {
     * @return The found task
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, task.id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
+    s"SELECT submission_id, task_id, submission_time, configuration_id, exit_code, result_text, user_task_submission.is_in_block_storage, " +
       s"checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ? AND user_id = ?",
