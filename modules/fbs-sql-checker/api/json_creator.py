@@ -1,6 +1,7 @@
 # JSONCreator.py
 
 from parser import parse_query
+from datetime import datetime
 from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
@@ -23,6 +24,7 @@ def parse_single_stat_upload_db(data, client):
     client = MongoClient(client, 27107)
     mydb = client.get_default_database()
     mycollection = mydb["Queries"]
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     (
         tables2,
         pro_atts2,
@@ -126,6 +128,7 @@ def parse_single_stat_upload_db(data, client):
             joins2,
             having2,
             client,
+            time,
         )
         # save JSON to DB
         mycollection.insert_one(record)
@@ -136,7 +139,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         mycollection.insert_one(record)
 
 
@@ -306,6 +309,7 @@ def return_json(  # pylint: disable=R1710
     joins_right,
     having_right,
     client,
+    time,
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -331,15 +335,16 @@ def return_json(  # pylint: disable=R1710
                 group_by_right,
                 joins_right,
                 having_right,
+                time,
             )
             return record
         # produce a json if the sql-query is not parsable
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         return record
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(_id, cid, task_nr):
+def prod_json_not_parsable(_id, cid, task_nr, time):
     # Create dictionary
     value = {
         "id": str(_id),
@@ -356,6 +361,7 @@ def prod_json_not_parsable(_id, cid, task_nr):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
+        "time": time,
     }
     return value
 
@@ -485,6 +491,7 @@ def prod_json(
     group_by_right,
     joins_right,
     having_right,
+    time,
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -509,6 +516,7 @@ def prod_json(
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
         "havingRight": having_right,
+        "time": time,
     }
     user_data.clear()
     AWC.literal = []
