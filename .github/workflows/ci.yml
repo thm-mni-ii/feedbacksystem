@@ -51,7 +51,7 @@ jobs:
       coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
       startMysqlService: true
       startMinioService: true
-      problemMatcher: java.json,koltin.json
+      problemMatcher: java.json,kotlin.json
 
   fbs-core-web:
     name: fbs-core.web
