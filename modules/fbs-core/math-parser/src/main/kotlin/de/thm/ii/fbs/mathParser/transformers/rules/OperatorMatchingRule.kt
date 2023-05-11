@@ -7,7 +7,7 @@ import de.thm.ii.fbs.mathParser.transformers.rules.transformers.OperationTransfo
 
 class OperatorMatchingRule(
     private val operator: Operator,
-    private val transformer: OperationTransformer,
+    private val transformer: OperationTransformer
 ) : OperationRule() {
     override fun matchesOperation(operation: Operation): Boolean = operation.operator == operator
     override fun applyOperation(operation: Operation): Expr = transformer.transform(operation)

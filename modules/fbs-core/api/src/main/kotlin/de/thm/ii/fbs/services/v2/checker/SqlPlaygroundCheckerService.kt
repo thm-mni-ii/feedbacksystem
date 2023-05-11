@@ -14,19 +14,21 @@ class SqlPlaygroundCheckerService(
     @Value("\${services.masterRunner.insecure}")
     insecure: Boolean,
     @Value("\${services.masterRunner.url}")
-    private val masterRunnerURL: String,
+    private val masterRunnerURL: String
 ) : RemoteCheckerV2Service(insecure, masterRunnerURL) {
 
     fun submit(query: SqlPlaygroundQuery) {
-        this.sendToRunner(SqlPlaygroundRunnerArguments(
-            query.id!!,
-            RunnerUser(query.runIn.owner.id!!, query.runIn.owner.username),
-            query.statement,
-            RunnerDatabase(
-                query.runIn.id!!,
-                query.runIn.name,
-            ),
-        ))
+        this.sendToRunner(
+            SqlPlaygroundRunnerArguments(
+                query.id!!,
+                RunnerUser(query.runIn.owner.id!!, query.runIn.owner.username),
+                query.statement,
+                RunnerDatabase(
+                    query.runIn.id!!,
+                    query.runIn.name
+                )
+            )
+        )
     }
 
     fun deleteDatabase(database: SqlPlaygroundDatabase, userId: Int, username: String) {
