@@ -49,7 +49,7 @@ jobs:
         if: ${{ inputs.problemMatcher }}
         run: |
           export IFS=","
-          $matcherList="${{ inputs.problemMatcher }}"
+          matcherList="${{ inputs.problemMatcher }}"
           for matcher in $matcherList; do
             echo "::add-matcher::.github/problem-matchers/$matcher"
           done
