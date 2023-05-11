@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.model.v2.playground
 
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -22,5 +24,5 @@ class SqlPlaygroundDatabase(
     var deleted: Boolean = false,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int? = null,
+    var id: Int? = null
 )
