@@ -2,11 +2,11 @@ package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundDatabaseCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundQueryCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
+import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
@@ -18,21 +18,31 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
 class PlaygroundController(
-        private val userRepository: UserRepository,
-        private val databaseRepository: SqlPlaygroundDatabaseRepository,
-        private val entityRepository: SqlPlaygroundEntityRepository,
-        private val queryRepository: SqlPlaygroundQueryRepository,
-        private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
-        private val sqlPlaygroundUsersRepository: SqlPlaygroundUsersRepository,
+    private val userRepository: UserRepository,
+    private val databaseRepository: SqlPlaygroundDatabaseRepository,
+    private val entityRepository: SqlPlaygroundEntityRepository,
+    private val queryRepository: SqlPlaygroundQueryRepository,
+    private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
+    private val sqlPlaygroundUsersRepository: SqlPlaygroundUsersRepository,
 ) {
     @GetMapping
     @ResponseBody
-    fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> = databaseRepository.findByOwner_IdAndDeleted(currentToken.id, false)
+    fun index(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> =
+        databaseRepository.findByOwnerIdOrMemberIdAndDeleted(currentToken.id, false)
 
     @PostMapping
     @ResponseBody
-    fun create(@CurrentToken currentToken: LegacyToken, @RequestBody database: SqlPlaygroundDatabaseCreation): SqlPlaygroundDatabase {
-        val db = SqlPlaygroundDatabase(database.name, "PostgreSQL 14", "PSQL", userRepository.findById(currentToken.id).get(), true)
+    fun create(
+        @CurrentToken currentToken: LegacyToken,
+        @RequestBody database: SqlPlaygroundDatabaseCreation
+    ): SqlPlaygroundDatabase {
+        val db = SqlPlaygroundDatabase(
+            database.name,
+            "PostgreSQL 14",
+            "PSQL",
+            userRepository.findById(currentToken.id).get(),
+            true
+        )
         val currentActiveDb = databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
         if (currentActiveDb !== null) {
             currentActiveDb.active = false
@@ -47,7 +57,7 @@ class PlaygroundController(
     @ResponseBody
     fun delete(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
         val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false)
-                ?: throw NotFoundException()
+            ?: throw NotFoundException()
         if (currentToken.id == db.owner.id) {
             sqlPlaygroundCheckerService.deleteDatabase(db, currentToken.id, currentToken.username)
             db.active = false
@@ -60,43 +70,45 @@ class PlaygroundController(
 
     @PostMapping("/dbusers/{dbId}")
     @ResponseBody
-    fun addUserToDB(@CurrentToken currentToken: LegacyToken, @PathVariable dbId: Int, @PathVariable uid: Int): SqlPlaygroundUsers {
-        val db = databaseRepository.findById(dbId).get()
-        if (currentToken.id == db.owner.id) {
-            return sqlPlaygroundUsersRepository.save(SqlPlaygroundUsers(user = userRepository.findById(uid).get(), db = db));
-        }
-        throw UnauthorizedException()
+    fun addUserToDB(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable dbId: Int,
+        @PathVariable uid: Int
+    ): SqlPlaygroundUsers {
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+
+        return sqlPlaygroundUsersRepository.save(
+            SqlPlaygroundUsers(
+                user = userRepository.findById(uid).get(),
+                db = db
+            )
+        )
     }
 
     @DeleteMapping("/dbusers/{dbid}")
     @ResponseBody
-    fun removeUserFromDB(@CurrentToken currentToken: LegacyToken, @PathVariable dbid: Int, @PathVariable uid: Int/*SqlPlaygroundUsersCreation*/): Unit {
-        val db = databaseRepository.findById(dbid).get()
-        if (currentToken.id == db.owner.id) {
-            sqlPlaygroundUsersRepository.deleteByUserIdAndDBId(uid, dbid)
-        } else {
-            throw UnauthorizedException()
-        }
-    }
-
-    @GetMapping("/dbusers/all")
-    @ResponseBody
-    fun getAllDBsOfUser(@CurrentToken currentToken: LegacyToken): List<SqlPlaygroundDatabase> {
-        // TODO this should return a list of dbs
-        val dbs = sqlPlaygroundUsersRepository.findAllSqlPlaygroundDatabasesByUser(currentToken.id)
-        return dbs.map { dbid -> databaseRepository.findById(dbid).get() }
+    fun removeUserFromDB(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable dbid: Int,
+        @PathVariable uid: Int/*SqlPlaygroundUsersCreation*/
+    ) {
+        val db =
+            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbid, false) ?: throw NotFoundException()
+        sqlPlaygroundUsersRepository.deleteByUserIdAndDBId(uid, db.id!!)
     }
 
     @GetMapping("/{dbId}")
     @ResponseBody
     fun get(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase =
-            databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        databaseRepository.findByOwnerIdOrMemberIdAndIdAndDeleted(currentToken.id, dbId, false)
+            ?: throw NotFoundException()
 
     @PostMapping("/{dbId}/activate")
     @ResponseBody
     fun activate(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundDatabase {
         val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false)
-                ?: throw NotFoundException()
+            ?: throw NotFoundException()
         db.active = true
         val currentActiveDb = databaseRepository.findByOwner_IdAndActiveAndDeleted(currentToken.id, true, false)
         if (currentActiveDb !== null) {
@@ -114,11 +126,13 @@ class PlaygroundController(
     @PostMapping("/{dbId}/execute")
     @ResponseBody
     @ResponseStatus(HttpStatus.ACCEPTED)
-    fun execute(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @RequestBody sqlQuery: SqlPlaygroundQueryCreation): SqlPlaygroundQuery {
-        // TODO this should return the db
-        val db_id = sqlPlaygroundUsersRepository.findSqlPlaygroundDatabasesByMemberIdAndDBId(currentToken.id, dbId)
-                ?: throw NotFoundException()
-        val db = databaseRepository.findById(db_id).get()
+    fun execute(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int,
+        @RequestBody sqlQuery: SqlPlaygroundQueryCreation
+    ): SqlPlaygroundQuery {
+        val db = databaseRepository.findByOwnerIdOrMemberIdAndIdAndDeleted(currentToken.id, dbId, false)
+            ?: throw NotFoundException()
         val user = userRepository.findById(currentToken.id).get()
         val query = queryRepository.save(SqlPlaygroundQuery(sqlQuery.statement, db, user))
         sqlPlaygroundCheckerService.submit(query)
@@ -127,47 +141,65 @@ class PlaygroundController(
 
     @GetMapping("/{dbId}/results")
     @ResponseBody
-    fun getResults(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): List<SqlPlaygroundResult> =
-            queryRepository.findByCreatorIdAndRunInid(currentToken.id, dbId).mapNotNull { it.result }
+    fun getResults(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int
+    ): List<SqlPlaygroundResult> =
+        queryRepository.findByRunIn_Owner_IdOrCreatorIdAndRunIn_id(currentToken.id, currentToken.id, dbId)
+            .mapNotNull { it.result }
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
-    fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
-            queryRepository.findByCreatorIdAndRunInidAndId(currentToken.id, dbId, qId)?.result
-                    ?: throw NotFoundException()
-
+    fun getResult(
+        @CurrentToken currentToken: LegacyToken,
+        @PathVariable("dbId") dbId: Int,
+        @PathVariable("qId") qId: Int
+    ) =
+        queryRepository.findByRunIn_Owner_IdOrCreatorIdAndRunIn_idAndId(
+            currentToken.id,
+            currentToken.id,
+            dbId,
+            qId
+        )?.result
+            ?: throw NotFoundException()
 
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody
     fun getTables(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-            getEntity(currentToken.id, dbId, "tables")
+        getEntity(currentToken.id, dbId, "tables")
 
     @GetMapping("/{dbId}/constraints")
     @ResponseBody
     fun getConstrains(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-            getEntity(currentToken.id, dbId, "constraints")
+        getEntity(currentToken.id, dbId, "constraints")
 
     @GetMapping("/{dbId}/views")
     @ResponseBody
     fun getViews(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-            getEntity(currentToken.id, dbId, "views")
+        getEntity(currentToken.id, dbId, "views")
 
     @GetMapping("/{dbId}/routines")
     @ResponseBody
     fun getRoutines(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-            getEntity(currentToken.id, dbId, "routines")
+        getEntity(currentToken.id, dbId, "routines")
 
     @GetMapping("/{dbId}/triggers")
     @ResponseBody
     fun getTriggers(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ArrayNode =
-            getEntity(currentToken.id, dbId, "triggers")
+        getEntity(currentToken.id, dbId, "triggers")
 
     private fun getEntity(userId: Int, databaseId: Int, type: String) =
-            entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(userId, databaseId, false, type)?.data
-                    ?: throw NotFoundException()
+        entityRepository.findByDatabaseOwnerOrMemberAndDatabaseIdAndDatabaseDeletedAndType(
+            userId,
+            databaseId,
+            false,
+            type
+        )?.data
+            ?: throw NotFoundException()
 
-    private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
-        entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
-    }
+    private fun createAllEntities(database: SqlPlaygroundDatabase) =
+        listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
+            entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
+        }
 }
