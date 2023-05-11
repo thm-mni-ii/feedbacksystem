@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.util
 
-import de.thm.ii.fbs.model.Task
+import de.thm.ii.fbs.model.{Task, User}
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
 import org.apache.commons.compress.utils.IOUtils
 
@@ -8,14 +8,36 @@ import java.io._
 import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
 
+import org.apache.tika.mime.MimeType
+import org.apache.tika.mime.MimeTypeException
+import org.apache.tika.mime.MimeTypes
+
 object Archiver {
   @throws[IOException]
-  def pack(name: File, files: ArchiveFile*): Unit = {
+  def packSubmissions(name: File, files: List[File], users: List[User], contTypes: List[String]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
-    for (archiveFile <- files) {
-      addToArchive(out, archiveFile.file, ".", archiveFile.filename.getOrElse(archiveFile.file.getName))
+    for ((file, index) <- files.zipWithIndex) {
+      addToArchive(out, file, ".", s"${users(index).getName}${fileExtensionFromContentType(contTypes(index))}")
     }
     out.close()
+  }
+
+  @throws[IOException]
+  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], contTypes: ListBuffer[List[String]]
+                           , listTaskId: List[Int]): Unit = {
+    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    files.zipWithIndex.foreach(listFiles => {
+      listFiles._1.zipWithIndex.foreach(f => {
+        val fileExt = fileExtensionFromContentType(contTypes(listFiles._2)(f._2))
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}$fileExt")
+      })
+    })
+    out.close()
+  }
+
+  private def fileExtensionFromContentType(contentType: String): String = {
+    val allTypes = MimeTypes.getDefaultMimeTypes
+    allTypes.forName(contentType).getExtension
   }
 
   @throws[IOException]

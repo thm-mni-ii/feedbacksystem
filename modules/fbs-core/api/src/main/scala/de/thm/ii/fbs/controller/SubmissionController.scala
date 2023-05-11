@@ -1,16 +1,25 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
+import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission, User}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
-import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
+import de.thm.ii.fbs.services.persistence.{UserService, _}
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.Archiver
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
+import java.io.File
+import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.collection.mutable.ListBuffer
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -24,6 +33,8 @@ class SubmissionController {
   @Autowired
   private val storageService: StorageService = null
   @Autowired
+  private val minioStorageService: MinioStorageService = null
+  @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
   private val taskService: TaskService = null
@@ -36,7 +47,12 @@ class SubmissionController {
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
   @Autowired
+  private val userService: UserService = null
+  @Autowired
+  private val courseService: CourseService = null
+  @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Get a list of all submissions for a task
@@ -138,7 +154,7 @@ class SubmissionController {
           }
           if (true) { // TODO: Check media type compatibility
             val submission = submissionService.create(uid, tid)
-            storageService.storeSolutionFileInBucket(submission.id, file)
+            minioStorageService.storeSolutionFileInBucket(submission.id, file)
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)
               checkerService.notify(tid, submission.id, cc, user)
@@ -254,6 +270,77 @@ class SubmissionController {
       }
     } else {
       throw new ForbiddenException()
+    }
+  }
+
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content"))
+  @ResponseBody
+  def getContent(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+                 req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      submissionService.getOne(sid, uid) match {
+        case Some(submission) => {
+          val file: File = storageService.getFileSolutionFile(submission)
+          ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentLength(file.length())
+            .header("Content-Disposition", s"attachment;filename=task_${task.id}.tar")
+            .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+        }
+        case None => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/courses/{cid}/tasks/submissions/content"))
+  @ResponseBody
+  def solutionsOfCourse(@PathVariable cid: Int,
+                        req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      val f = new File("tmp")
+      submissionService.writeSubmissionsOfCourseToFile(f, cid)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=course_$cid.tar")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/courses/{cid}/tasks/{tid}/submissions/content"))
+  @ResponseBody
+  def solutionsOfTask(@PathVariable cid: Int, @PathVariable tid: Int,
+                      req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      val f = new File("tmp")
+      submissionService.writeSubmissionsOfTaskToFile(f, cid, tid)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=task_$tid.tar")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+    } else {
+      throw new ResourceNotFoundException()
     }
   }
 }
