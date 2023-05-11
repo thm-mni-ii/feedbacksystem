@@ -13,7 +13,6 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-
 class ErrorAnalysisService(
     private val workbook: XSSFWorkbook,
     private val graph: ReferenceGraph,
@@ -24,7 +23,6 @@ class ErrorAnalysisService(
     private val errors = HashSet<Cell>()
     private val perrors = HashSet<Cell>()
     private val visited = HashSet<Cell>()
-
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)

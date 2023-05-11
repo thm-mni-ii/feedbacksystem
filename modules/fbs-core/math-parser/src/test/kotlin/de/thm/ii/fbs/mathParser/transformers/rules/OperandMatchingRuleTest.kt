@@ -1,11 +1,12 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser.transformers.rules
 
 import de.thm.ii.fbs.mathParser.ast.Num
 import de.thm.ii.fbs.mathParser.ast.Operation
 import de.thm.ii.fbs.mathParser.ast.Operator
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 internal class OperandMatchingRuleTest {
     private val rule = OperandMatchingRule(Operator.ADD, Num(0))
@@ -29,6 +30,6 @@ internal class OperandMatchingRuleTest {
 
     @Test
     fun nonApplyOperation() {
-        assertThrows(IllegalArgumentException::class.java) {rule.applyOperation(nonMatchingExpression)}
+        assertThrows(IllegalArgumentException::class.java) { rule.applyOperation(nonMatchingExpression) }
     }
 }

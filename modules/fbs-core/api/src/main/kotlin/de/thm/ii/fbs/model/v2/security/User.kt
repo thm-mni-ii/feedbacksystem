@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.model.v2.security
 
 import de.thm.ii.fbs.model.v2.Course
@@ -15,5 +17,5 @@ class User(
         var id: Int? = null,
 
         @OneToMany(mappedBy = "user")
-        val registration: Set<CourseRegisteration>,
+        val registration: Set<CourseRegisteration>
 )
