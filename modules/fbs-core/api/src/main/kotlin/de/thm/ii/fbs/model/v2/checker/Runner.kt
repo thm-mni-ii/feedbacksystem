@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Runner(
     @JsonProperty("type")
-    val type: RunnerType,
+    val type: RunnerType
 )

@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RunnerApiController(
-        private val queryRepository: SqlPlaygroundQueryRepository,
-        private val entityRepository: SqlPlaygroundEntityRepository,
+    private val queryRepository: SqlPlaygroundQueryRepository,
+    private val entityRepository: SqlPlaygroundEntityRepository
 ) {
     @PostMapping("/results/playground", "/api/v1/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -49,6 +49,6 @@ class RunnerApiController(
         }
 
     private fun getEntity(query: SqlPlaygroundQuery, type: String) =
-        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(query.runIn.owner.id!!, query.runIn.id!!, false, type) ?:
-            SqlPlaygroundEntity(query.runIn, type)
+        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(query.runIn.owner.id!!, query.runIn.id!!, false, type)
+            ?: SqlPlaygroundEntity(query.runIn, type)
 }
