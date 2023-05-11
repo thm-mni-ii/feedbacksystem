@@ -45,7 +45,7 @@ jobs:
     needs: [ "validate-gradle-warpper", "validate-migration" ]
     with:
       name: fbs-core.api
-      lintArguments: :fbs-core.api:scalastyleCheck
+      lintArguments: :fbs-core.api:scalastyleCheck :fbs-core.api:ktlintCheck :fbs-core.math-parser:ktlintCheck
       testArguments: :fbs-core.api:test :fbs-core.math-parser:test
       coverageArguments: :fbs-core.api:jacocoReport :fbs-core.math-parser:jacocoReport
       coverageFilesLocation: modules/fbs-core/api/build/reports/jacoco/jacocoReport/jacocoReport.xml,modules/fbs-core/math-parser/build/reports/jacoco/jacocoReport/jacocoReport.xml
