@@ -1,3 +1,90 @@
 .mat-table {
   width: 100%;
 }
+th,td{
+ text-align: center;
+}
+.icone{
+margin-left: 1cm;
+}
+
+.data-cell {
+  position: relative;
+}
+
+.points,
+.max-points {
+  font-weight: bold;
+}
+
+.points {
+  color: green;
+}
+
+.max-points {
+  color: gray;
+}
+
+.points::after,
+.max-points::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+ 
+}
+.red-text {
+  color: red;
+}
+.darker-text {
+  color: black;
+}
+
+
+.data-cell {
+  position: relative;
+}
+
+.icone {
+  font-size: 24px;
+  line-height: 24px;
+}
+
+.success {
+  color: green;
+}
+
+.failure {
+  color: red;
+}
+
+
+.title-text {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  background-color: #f7f7f7;
+  padding: 6px 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease-in-out;
+}
+
+.title-text:hover {
+  background-color: #ddd;
+}
+/* CSS */
+.mat-tooltip {
+  background-color: #333;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.mat-tooltip-arrow {
+  fill: #333;
+}

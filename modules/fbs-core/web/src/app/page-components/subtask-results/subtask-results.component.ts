@@ -20,6 +20,7 @@ export class SubtaskResultsComponent {
   display = false;
 
   @Input()
+  
   set displayedSubmission(submission: Submission) {
     if (submission === undefined) {
       return;
@@ -35,7 +36,9 @@ export class SubtaskResultsComponent {
         this.dataSource = new MatTableDataSource(stres);
       });
   }
-
+  getTooltipText(result: any): string {
+    return `Erreichte Punkte: ${result.points} / Maximale Punkte: ${result.maxPoints}`;
+  }
   get displayedSubmission() {
     return this._displayedSubmission;
   }
