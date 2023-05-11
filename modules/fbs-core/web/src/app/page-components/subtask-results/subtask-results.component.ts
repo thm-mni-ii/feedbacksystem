@@ -20,7 +20,6 @@ export class SubtaskResultsComponent {
   display = false;
 
   @Input()
-  
   set displayedSubmission(submission: Submission) {
     if (submission === undefined) {
       return;
