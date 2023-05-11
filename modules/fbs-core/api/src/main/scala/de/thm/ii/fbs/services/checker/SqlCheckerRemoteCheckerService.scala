@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
 
 object SqlCheckerRemoteCheckerService {
-  private val isCheckerRun = new ConcurrentHashMap[Int, Boolean]()
+  private val isCheckerRun = new ConcurrentHashMap[Int, String]()
 }
 
 @Service
@@ -51,16 +51,20 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param fu           the User model
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
-    if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, false)) {
-      val apiUrl = new URIBuilder(selfUrl)
-        .setPath(s"/api/v1/checker/submissions/$submissionID")
-        .setParameter("typ", "sql-checker")
-        .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
-        .build().toString
+    val oldExtInfo = Option(SqlCheckerRemoteCheckerService.isCheckerRun.get(submissionID))
+    oldExtInfo match {
+      case Some(value) => {
+        val apiUrl = new URIBuilder(selfUrl)
+          .setPath(s"/api/v1/checker/submissions/$submissionID")
+          .setParameter("typ", "sql-checker")
+          .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
+          .build().toString
 
-      super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
-    } else {
-      super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
+        super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
+      }
+      case None => {
+        super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
+      }
     }
   }
 
@@ -76,14 +80,20 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                       resultText: String, extInfo: String): Unit = {
-    if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, false)) {
-      SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
-      this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
-    } else if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
-      SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, true)
-      this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
-    } else {
-      super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+    val oldExtInfo = Option(SqlCheckerRemoteCheckerService.isCheckerRun.get(submission.id))
+    oldExtInfo match {
+      case Some(value) => {
+        SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
+        this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, value)
+      }
+      case None => {
+        if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
+          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, extInfo)
+          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
+        } else {
+          super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
+        }
+      }
     }
   }
 
