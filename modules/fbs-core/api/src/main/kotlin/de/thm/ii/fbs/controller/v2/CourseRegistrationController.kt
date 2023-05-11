@@ -13,8 +13,8 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping(path = ["/api/v2/"], produces = [MediaType.APPLICATION_JSON_VALUE])
-class CourseRegistrationControllerV2(
+@RequestMapping(path = ["/api/v1/"], produces = [MediaType.APPLICATION_JSON_VALUE])
+class CourseRegistrationController(
 // TODO rename
         private val courseRegistrationRepository: CourseRegistrationRepository,
 ) {
