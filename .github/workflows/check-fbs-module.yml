@@ -49,7 +49,8 @@ jobs:
         if: ${{ inputs.problemMatcher }}
         run: |
           export IFS=","
-          for matcher in "${{ inputs.problemMatcher }}"; do
+          $matcherList="${{ inputs.problemMatcher }}"
+          for matcher in $matcherList; do
             echo "::add-matcher::.github/problem-matchers/$matcher"
           done
       - name: Set up JDK 11
