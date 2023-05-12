@@ -26,7 +26,9 @@
         <p
           class="description"
           *ngIf="
-            activeTab.selectedTask !== null && isDescriptionMode && isSubmitMode
+            activeTab.selectedTask !== null &&
+            isDescriptionMode &&
+            activeTab.isSubmitMode
           "
         >
           <strong>Aufgabenbeschreibung:</strong>
@@ -42,7 +44,10 @@
             (update)="updateSubmissionContent($event)"
           ></app-highlighted-input>
         </div>
-        <p class="error-message" *ngIf="activeTab.error && isSubmitMode">
+        <p
+          class="error-message"
+          *ngIf="activeTab.error && activeTab.isSubmitMode"
+        >
           <strong>Fehlermeldung:</strong> {{ activeTab.errorMsg }}
         </p>
       </mat-tab>
@@ -70,14 +75,14 @@
     <button
       mat-flat-button
       class="submitBtn"
-      *ngIf="!isSubmitMode"
+      *ngIf="!activeTab.isSubmitMode"
       matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
       [matTooltipPosition]="'above'"
       (click)="updateMode(true)"
     >
       Abgeben<mat-icon>insert_drive_file</mat-icon>
     </button>
-    <div class="submit-container" *ngIf="isSubmitMode">
+    <div class="submit-container" *ngIf="activeTab.isSubmitMode">
       <button
         [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
         mat-flat-button

@@ -95,6 +95,7 @@ export class SqlInputTabsComponent
       errorMsg: null,
       isCorrect: false,
       isSubmitted: false,
+      isSubmitMode: false,
       selectedCourse: undefined,
       selectedTask: undefined,
       selectedCourseName: "Kurs",
@@ -106,7 +107,6 @@ export class SqlInputTabsComponent
   pending: boolean = false;
   courses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
-  isSubmitMode = false;
   allTasksFromCourse: Task[];
   filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
@@ -145,12 +145,12 @@ export class SqlInputTabsComponent
       errorMsg: null,
       isCorrect: false,
       isSubmitted: false,
+      isSubmitMode: false,
       selectedCourse: undefined,
       selectedTask: undefined,
       selectedCourseName: "Kurs",
       selectedTaskName: "Aufgabe",
     });
-    this.isSubmitMode = false;
     this.activeTabId.setValue(this.tabs.length - 1);
   }
 
@@ -194,7 +194,7 @@ export class SqlInputTabsComponent
   }
 
   updateMode(value: boolean) {
-    this.isSubmitMode = value;
+    this.activeTab.isSubmitMode = value;
   }
 
   hasDeadlinePassed(task: Task = this.activeTab.selectedTask): boolean {
