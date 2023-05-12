@@ -82,19 +82,18 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                       resultText: String, extInfo: String): Unit = {
     val oldExtInfo = SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, None)
     oldExtInfo match {
-      case Some(value) => {
+      case Some(value) =>
+        SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
         this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, value)
-      }
-      case None => {
+      case None =>
         if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, Option(extInfo))
           this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         } else {
+          SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
-      }
     }
-    SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
   }
 
   private def handleSelf(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
