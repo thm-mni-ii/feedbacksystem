@@ -83,7 +83,7 @@ export class SqlInputTabsComponent
     this.prismService.highlightAll();
   }
   ngOnDestroy(): void {
-    throw new Error("Method not implemented.");
+    console.log("");
   }
 
   fileName = "New_Query";
