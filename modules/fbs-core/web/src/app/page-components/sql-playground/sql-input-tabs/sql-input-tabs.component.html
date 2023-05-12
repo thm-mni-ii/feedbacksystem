@@ -25,9 +25,12 @@
         <br />
         <p
           class="description"
-          *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
+          *ngIf="
+            activeTab.selectedTask !== null && isDescriptionMode && isSubmitMode
+          "
         >
-          <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
+          <strong>Aufgabenbeschreibung:</strong>
+          {{ activeTab.selectedTask.description }}
         </p>
         <div class="inputField">
           <!-- <app-submission-text
@@ -113,12 +116,12 @@
       >
 
       <button
-        [disabled]="selectedCourse === undefined || pending"
+        [disabled]="activeTab.selectedCourse === undefined || pending"
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="task"
       >
-        {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
+        {{ activeTab.selectedTaskName }} <mat-icon>expand_more</mat-icon>
       </button>
       <mat-menu #task="matMenu">
         <button
@@ -136,7 +139,7 @@
         mat-button
         [matMenuTriggerFor]="course"
       >
-        {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
+        {{ activeTab.selectedCourseName }} <mat-icon>expand_more</mat-icon>
       </button>
       <mat-menu #course="matMenu">
         <button

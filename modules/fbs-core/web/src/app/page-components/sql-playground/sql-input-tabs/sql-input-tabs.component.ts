@@ -95,6 +95,10 @@ export class SqlInputTabsComponent
       errorMsg: null,
       isCorrect: false,
       isSubmitted: false,
+      selectedCourse: undefined,
+      selectedTask: undefined,
+      selectedCourseName: "Kurs",
+      selectedTaskName: "Aufgabe",
     },
   ];
   activeTabId = new UntypedFormControl(0);
@@ -103,10 +107,6 @@ export class SqlInputTabsComponent
   courses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
   isSubmitMode = false;
-  selectedCourseName: String = "Kurs";
-  selectedTaskName: String = "Aufgabe";
-  selectedCourse: Course;
-  selectedTask: Task;
   allTasksFromCourse: Task[];
   filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
@@ -145,6 +145,10 @@ export class SqlInputTabsComponent
       errorMsg: null,
       isCorrect: false,
       isSubmitted: false,
+      selectedCourse: undefined,
+      selectedTask: undefined,
+      selectedCourseName: "Kurs",
+      selectedTaskName: "Aufgabe",
     });
     this.activeTabId.setValue(this.tabs.length - 1);
   }
@@ -192,7 +196,7 @@ export class SqlInputTabsComponent
     this.isSubmitMode = value;
   }
 
-  hasDeadlinePassed(task: Task = this.selectedTask): boolean {
+  hasDeadlinePassed(task: Task = this.activeTab.selectedTask): boolean {
     if (task == null) {
       return true;
     }
@@ -200,14 +204,14 @@ export class SqlInputTabsComponent
   }
 
   emptyTask() {
-    this.selectedTask = null;
+    this.activeTab.selectedTask = null;
     this.filteredTasksFromCourse = [];
-    this.selectedTaskName = "Aufgabe";
+    this.activeTab.selectedTaskName = "Aufgabe";
   }
 
   changeCourse(course: Course) {
-    this.selectedCourse = course;
-    this.selectedCourseName = this.selectedCourse.name;
+    this.activeTab.selectedCourse = course;
+    this.activeTab.selectedCourseName = this.activeTab.selectedCourse.name;
     this.activeTab.error = false;
     this.activeTab.isSubmitted = false;
     this.getTasks();
@@ -215,14 +219,14 @@ export class SqlInputTabsComponent
   }
 
   changeTask(task: Task) {
-    this.selectedTask = task;
-    this.selectedTaskName = this.selectedTask.name;
+    this.activeTab.selectedTask = task;
+    this.activeTab.selectedTaskName = this.activeTab.selectedTask.name;
     this.activeTab.error = false;
     this.activeTab.isSubmitted = false;
   }
 
   getTasks() {
-    this.taskService.getAllTasks(this.selectedCourse.id).subscribe(
+    this.taskService.getAllTasks(this.activeTab.selectedCourse.id).subscribe(
       (allTasks) => {
         this.allTasksFromCourse = allTasks;
         this.filterTasks();
@@ -259,8 +263,8 @@ export class SqlInputTabsComponent
     this.submissionService
       .getSubmission(
         token.id,
-        this.selectedCourse.id,
-        this.selectedTask.id,
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id,
         sid
       )
       .pipe(
@@ -294,8 +298,8 @@ export class SqlInputTabsComponent
     this.submissionService
       .submitSolution(
         token.id,
-        this.selectedCourse.id,
-        this.selectedTask.id,
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id,
         this.activeTab.content
       )
       .subscribe(
