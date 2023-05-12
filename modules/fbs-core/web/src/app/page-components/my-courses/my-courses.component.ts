@@ -19,10 +19,8 @@ export class MyCoursesComponent implements OnInit {
   constructor(
     private titlebar: TitlebarService,
     private courseRegistrationService: CourseRegistrationService,
-    private authService: AuthService,
-
-  ) { }
-
+    private authService: AuthService
+  ) {}
 
   userID: number;
   totalTasks: any = 0;
@@ -30,13 +28,12 @@ export class MyCoursesComponent implements OnInit {
   filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
 
-
-
-
   ngOnInit() {
     this.titlebar.emitTitle("Meine Kurse");
     this.userID = this.authService.getToken().id;
-    this.courses = this.courseRegistrationService.getRegisteredCourses(this.userID);
+    this.courses = this.courseRegistrationService.getRegisteredCourses(
+      this.userID
+    );
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(""),
       mergeMap((value) => this._filter(value))
@@ -59,8 +56,6 @@ export class MyCoursesComponent implements OnInit {
       })
     );
   }
-
-
 
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, "");

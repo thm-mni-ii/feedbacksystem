@@ -1,9 +1,9 @@
-import { Component, OnInit, Input,ChangeDetectorRef    } from "@angular/core";
+import { Component, OnInit, Input, ChangeDetectorRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TitlebarService } from "../../service/titlebar.service";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { mergeMap,take } from "rxjs/operators";
+import { mergeMap } from "rxjs/operators";
 import { of, Observable, forkJoin } from "rxjs";
 import { TaskNewDialogComponent } from "../../dialogs/task-new-dialog/task-new-dialog.component";
 import { CourseUpdateDialogComponent } from "../../dialogs/course-update-dialog/course-update-dialog.component";
@@ -24,7 +24,6 @@ import { UserTaskResult } from "../../model/UserTaskResult";
 import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { Requirement } from "src/app/model/Requirement";
 
-
 import { TaskPointsService } from "../../service/task-points.service";
 @Component({
   selector: "app-course-detail",
@@ -33,7 +32,6 @@ import { TaskPointsService } from "../../service/task-points.service";
 })
 export class CourseDetailComponent implements OnInit {
   @Input() requirements: Observable<Requirement[]>;
-  
 
   constructor(
     private taskService: TaskService,
@@ -51,8 +49,7 @@ export class CourseDetailComponent implements OnInit {
     private goToService: GoToService,
     private taskPointsService: TaskPointsService,
     private cdr: ChangeDetectorRef
-   
-  ) { }
+  ) {}
   punkte: number = 0;
   listing: any[] = [];
   courseID: number;
@@ -67,63 +64,42 @@ export class CourseDetailComponent implements OnInit {
   pointlist: number[] = [];
   ngOnInit() {
     this.route.params.subscribe((param) => {
-      this.courseID = param.id; 
-      this.courseID = param.id; 
-      
-      
-   
+      this.courseID = param.id;
+      this.courseID = param.id;
 
       this.courseID = param.id;
-      
-      
-   
 
       this.reloadCourse();
       this.reloadTasks();
-
-
-
-
-    
-
-
     });
-  
+
     forkJoin([
       this.taskService.getTaskResults(this.courseID),
-      this.taskPointsService.getAllRequirements(this.courseID)
+      this.taskPointsService.getAllRequirements(this.courseID),
     ]).subscribe(([taskResults, req]) => {
       this.listing = Object.values(taskResults);
-     
-    
+
       this.requirements = of(req);
       this.assignpoints();
-    
-      req.forEach(element => {
-       
-    
+
+      req.forEach((element) => {
         this.increment(element);
-        
       });
-      
     });
-
-
-
-
-  
-
 
     this.role = this.auth.getToken().courseRoles[this.courseID];
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
-      this.courseRegistrationService.registerCourse(this.authService.getToken().id, this.courseID).subscribe(
-        () => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()),
-        (error) => console.error(error)
-      );
+      this.courseRegistrationService
+        .registerCourse(this.authService.getToken().id, this.courseID)
+        .subscribe(
+          () =>
+            this.courseService
+              .getCourse(this.courseID)
+              .subscribe(() => this.ngOnInit()),
+          (error) => console.error(error)
+        );
     }
   }
-
-
 
   public canEdit(): boolean {
     const globalRole = this.authService.getToken().globalRole;
@@ -163,12 +139,8 @@ export class CourseDetailComponent implements OnInit {
         .subscribe((taskResults) => {
           this.tasks = tasks;
 
-
-
           this.taskResults = taskResults.reduce((acc, res) => {
             acc[res.taskID] = res;
-
-
 
             return acc;
           }, {});
@@ -177,21 +149,22 @@ export class CourseDetailComponent implements OnInit {
   }
 
   assignpoints() {
-    
-  this.pointlist = [];
-    let points: number;
-   
+    this.pointlist = [];
 
     this.requirements.subscribe((value) => {
-      
-      this.listing.forEach((element, index) => {
-       
-
+      this.listing.forEach((element) => {
         for (let reqcounter = 0; reqcounter < value.length; reqcounter++) {
-          for (let taskcounter = 0; taskcounter < value[reqcounter].tasks.length; taskcounter++) {
-            if ((element.taskID == value[reqcounter].tasks[taskcounter].id) && (element.passed == true)) {
+          for (
+            let taskcounter = 0;
+            taskcounter < value[reqcounter].tasks.length;
+            taskcounter++
+          ) {
+            if (
+              element.taskID == value[reqcounter].tasks[taskcounter].id &&
+              element.passed == true
+            ) {
               element.points = 1;
-             /*
+              /*
               if (element.bonusFormula === undefined) {
                 element.bonusFormula = "0";
               
@@ -208,40 +181,31 @@ export class CourseDetailComponent implements OnInit {
               */
             }
           }
-
         }
-
       });
-      
-     
-
     });
-
   }
-  
+
   increment(requirementObservable: Requirement): void {
     let points: number = 0;
-   
 
-
-    this.listing.forEach((element, index) => {
-    
-      for (let taskcounter = 0; taskcounter < requirementObservable.tasks.length; taskcounter++) {
-        if ((element.taskID == requirementObservable.tasks[taskcounter].id) && (element.passed == true)) {
-         
+    this.listing.forEach((element) => {
+      for (
+        let taskcounter = 0;
+        taskcounter < requirementObservable.tasks.length;
+        taskcounter++
+      ) {
+        if (
+          element.taskID == requirementObservable.tasks[taskcounter].id &&
+          element.passed == true
+        ) {
           points += element.points;
-       
         }
       }
-    
-  
-     
     });
-  
-    this.pointlist.push(points);
-   
-  }
 
+    this.pointlist.push(points);
+  }
 
   updateCourse() {
     this.courseService
@@ -396,7 +360,7 @@ export class CourseDetailComponent implements OnInit {
   }
 
   goToFBA() {
-    this.feedbackAppService.open(this.courseID, true).subscribe(() => { });
+    this.feedbackAppService.open(this.courseID, true).subscribe(() => {});
   }
 
   editPoints() {
@@ -411,40 +375,25 @@ export class CourseDetailComponent implements OnInit {
       })
       .afterClosed()
       .subscribe((res) => {
-       
-        
-
         if (res) {
           this.snackbar.open("Punktevergabe abgeschlossen");
         }
 
-        setTimeout(() => {  
+        setTimeout(() => {
           forkJoin([
             this.taskService.getTaskResults(this.courseID),
-            this.taskPointsService.getAllRequirements(this.courseID)
+            this.taskPointsService.getAllRequirements(this.courseID),
           ]).subscribe(([taskResults, req]) => {
             this.listing = Object.values(taskResults);
-           
-          
+
             this.requirements = of(req);
             this.assignpoints();
-          
-            req.forEach(element => {
-             
-          
+
+            req.forEach((element) => {
               this.increment(element);
-             
             });
-           
           });
-        },1500);
-    
-       
-  
-      
+        }, 1500);
       });
-      
-       
-      
   }
 }
