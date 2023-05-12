@@ -6,9 +6,6 @@ import { AuthService } from "../../service/auth.service";
 import { mergeMap, startWith } from "rxjs/operators";
 import { UntypedFormControl } from "@angular/forms";
 import { CourseRegistrationService } from "../../service/course-registration.service";
-import { TaskService } from "src/app/service/task.service";
-import { SubmissionService } from "src/app/service/submission.service";
-
 /**
  * Show all registered courses
  */
@@ -22,8 +19,6 @@ export class MyCoursesComponent implements OnInit {
   constructor(
     private titlebar: TitlebarService,
     private courseRegistrationService: CourseRegistrationService,
-    private taskService: TaskService,
-    private submissionService: SubmissionService,
     private authService: AuthService,
 
   ) { }
@@ -34,29 +29,18 @@ export class MyCoursesComponent implements OnInit {
   courses: Observable<Course[]> = of();
   filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
-  myTasks: any[] = [];
-  passed: number = 0;
-  failed:number = 0; 
-  open:number ;
-  legends=["green","red","#1E457C"];
- 
 
 
 
 
   ngOnInit() {
-    
     this.titlebar.emitTitle("Meine Kurse");
     this.userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(this.userID);
-    
-    this.getTaskProgress();
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(""),
       mergeMap((value) => this._filter(value))
     );
-
-
   }
 
   private _filter(value: string): Observable<Course[]> {
@@ -81,91 +65,4 @@ export class MyCoursesComponent implements OnInit {
   private _normalizeValue(value: string): string {
     return value.toLowerCase().replace(/\s/g, "");
   }
-
-  countResults(allSubmissions: any[], failed: boolean) {
-    
-    let isopen:boolean=false;
-    if (allSubmissions.length != 0) {
-      for (var submission of allSubmissions) {
-        if (!failed) {
-          this.passed++;
-          isopen=true;
-          
-          break;
-        }
-        for (var checker of submission.results) {
-          if (checker.exitCode == 0) {
-            
-            failed = false;
-            this.passed++;
-            isopen=true;
-            break;
-          }
-        }
-      }
-      if (failed) {
-        
-        this.failed++;
-        isopen=true;
-        
-      }
-    }
-    if(isopen==false){
-      this.open++;
-    }
-  }
-
-
-  getTaskProgress() {
-    
-    this.courses.subscribe((courses) => {
-      this.open=0;
-      courses.forEach((course) => {
-        this.getProgress(course.id);
-        
-
-        
-        this.taskService.getAllTasks(course.id).subscribe((tasks) => {
-          tasks.forEach((task) => {
-            this.myTasks.push(task);
-          });
-          this.totalTasks = this.myTasks.length;
-          
-        
-        
-        });
-          
-      });
-          
-    
-      
-    
-
-      
-    });
-  }
-
-  getProgress(courseId: number) {
-    this.taskService.getAllTasks(courseId).subscribe(
-      (allTasks) => {
-        
-        if (allTasks.length > 0) {
-          
-          for (var task of allTasks) {
-            let failed = true;
-            this.submissionService
-              .getAllSubmissions(this.userID, courseId, task.id)
-              .subscribe((allSubmissions) => {
-                this.countResults(allSubmissions, failed);
-                
-              });
-          }
-        }
-      },
-      () => { }
-    );
-    }
-
-
-
 }

@@ -87,7 +87,7 @@
         <mat-icon class="logout-icon">edit</mat-icon
         ><span>Kurs bearbeiten</span>
       </button>
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()">
+      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints($event)">
         <mat-icon class="logout-icon">rule</mat-icon><span>Punkte</span>
       </button>
       <button mat-menu-item (click)="showGoLinks()">
@@ -176,26 +176,14 @@
             mode="buffer"
             showProgressValue="true"
             class="example-section"
-            [value]="(increment(requirement) * 100) / requirement.tasks?.length"
+            [value]="(pointlist[i] * 100) / requirement.tasks?.length"
             bufferValue="{{
-              ((increment(requirement) +
-                (requirement.toPass - increment(requirement))) *
-                100) /
+              ((pointlist[i] + (requirement.toPass - pointlist[i])) * 100) /
                 requirement.tasks?.length
             }}"
           >
           </mat-progress-bar>
-          <div
-            *ngIf="increment(requirement) >= requirement.toPass"
-            id="num"
-            style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              color: black;
-            "
-          >
+          <div *ngIf="pointlist[i] >= requirement.toPass" id="num">
             Bestanden
           </div>
         </section>
@@ -205,28 +193,24 @@
             <div class="legend-color" [style.backgroundColor]="legend"></div>
 
             <div class="legend-text" *ngIf="legend === 'green'">
-              erzielte Punkte: {{ increment(requirement) }}
+              erzielte Punkte: {{ pointlist[i] }}
             </div>
 
             <div
               class="legend-text"
               *ngIf="
-                legend === 'red' &&
-                  requirement.toPass >= increment(requirement);
+                legend === 'red' && requirement.toPass >= pointlist[i];
                 else elseBlock
               "
             >
               Punkte zu erzielen:
-              {{ requirement.toPass - increment(requirement) }}
+              {{ requirement.toPass - pointlist[i] }}
             </div>
 
             <ng-template #elseBlock>
               <div
                 class="legend-text"
-                *ngIf="
-                  legend === 'red' &&
-                  requirement.toPass < increment(requirement)
-                "
+                *ngIf="legend === 'red' && requirement.toPass < pointlist[i]"
               >
                 Punkte zu erzielen: 0
               </div>
@@ -234,7 +218,7 @@
 
             <div class="legend-text" *ngIf="legend === '#1E457C'">
               verbleibende Punkte:
-              {{ requirement.tasks?.length - increment(requirement) }}
+              {{ requirement.tasks?.length - pointlist[i] }}
             </div>
           </div>
         </div>

@@ -63,10 +63,17 @@ export class CourseDetailComponent implements OnInit {
   openConferences: Observable<string[]>;
   evaluationUserResults: any[];
   legends = ["green", "red", "#1E457C"];
-  requirementsLength: number;
+
+  pointlist: number[] = [];
   ngOnInit() {
     this.route.params.subscribe((param) => {
       this.courseID = param.id; 
+      this.courseID = param.id; 
+      
+      
+   
+
+      this.courseID = param.id;
       
       
    
@@ -76,26 +83,43 @@ export class CourseDetailComponent implements OnInit {
 
 
 
+
+    
+
+
     });
-    this.taskPointsService.getAllRequirements(this.courseID)
-    .subscribe((req) => {
-      this.requirements = of(req);
+  
+    forkJoin([
+      this.taskService.getTaskResults(this.courseID),
+      this.taskPointsService.getAllRequirements(this.courseID)
+    ]).subscribe(([taskResults, req]) => {
+      this.listing = Object.values(taskResults);
      
+    
+      this.requirements = of(req);
+      this.assignpoints();
+    
+      req.forEach(element => {
+       
+    
+        this.increment(element);
+        
+      });
+      
     });
 
+
+
+
+  
 
 
     this.role = this.auth.getToken().courseRoles[this.courseID];
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
-      this.courseRegistrationService
-        .registerCourse(this.authService.getToken().id, this.courseID)
-        .subscribe(
-          () =>
-            this.courseService
-              .getCourse(this.courseID)
-              .subscribe(() => this.ngOnInit()),
-          (error) => console.error(error)
-        );
+      this.courseRegistrationService.registerCourse(this.authService.getToken().id, this.courseID).subscribe(
+        () => this.courseService.getCourse(this.courseID).subscribe(() => this.ngOnInit()),
+        (error) => console.error(error)
+      );
     }
   }
 
@@ -139,10 +163,6 @@ export class CourseDetailComponent implements OnInit {
         .subscribe((taskResults) => {
           this.tasks = tasks;
 
-          this.listing = Object.entries(taskResults).map(([key, value]) => value);
-          console.log("requirements b4 :", this.requirements);
-
-          this.assignpoints();
 
 
           this.taskResults = taskResults.reduce((acc, res) => {
@@ -157,22 +177,15 @@ export class CourseDetailComponent implements OnInit {
   }
 
   assignpoints() {
-    this.taskPointsService.getAllRequirements(this.courseID)
-    .subscribe((req) => {
-      this.requirements = of(req);
-      
-      console.log("the requirmentlength at the end 1 :",this.requirementsLength);
-    });
+    
+  this.pointlist = [];
     let points: number;
-    console.log("listing inside :", this.listing);
-    console.log("list [0] :", this.listing[0].taskID);
+   
 
     this.requirements.subscribe((value) => {
-      console.log("req length :", value.length);
-      console.log("the requ :", value);
+      
       this.listing.forEach((element, index) => {
-        console.log("entered loop");
-        console.log("element.taskID 1o1 :", element);
+       
 
         for (let reqcounter = 0; reqcounter < value.length; reqcounter++) {
           for (let taskcounter = 0; taskcounter < value[reqcounter].tasks.length; taskcounter++) {
@@ -181,7 +194,7 @@ export class CourseDetailComponent implements OnInit {
              /*
               if (element.bonusFormula === undefined) {
                 element.bonusFormula = "0";
-                console.log("string ch :", element.bonusFormula);
+              
                 points = +element.bonusFormula;
               }
               else {
@@ -191,7 +204,7 @@ export class CourseDetailComponent implements OnInit {
               points = +element.bonusFormula;
               points += element.points;
               element.bonusFormula = points.toString();
-              console.log("it works", value[reqcounter].tasks[taskcounter].id, "points :", element.points, "the total :", element.bonusFormula);
+            
               */
             }
           }
@@ -199,37 +212,34 @@ export class CourseDetailComponent implements OnInit {
         }
 
       });
-      console.log("the requirments at the end 1 :", value);
+      
      
 
     });
 
   }
   
-  increment(requirement: Requirement): number{
-    
-    let points:number=0;
-    
-    
-      this.listing.forEach((element, index) => {
-        
+  increment(requirementObservable: Requirement): void {
+    let points: number = 0;
+   
 
-        
-          for (let taskcounter = 0; taskcounter < requirement.tasks.length; taskcounter++) {
-            if ((element.taskID == requirement.tasks[taskcounter].id) && (element.passed == true)) {
-              points+=element.points;
-            
-            }
-          }
 
-        
-
-      });
-      
+    this.listing.forEach((element, index) => {
     
-      this.cdr.markForCheck();
-    return points;
+      for (let taskcounter = 0; taskcounter < requirementObservable.tasks.length; taskcounter++) {
+        if ((element.taskID == requirementObservable.tasks[taskcounter].id) && (element.passed == true)) {
+         
+          points += element.points;
+       
+        }
+      }
     
+  
+     
+    });
+  
+    this.pointlist.push(points);
+   
   }
 
 
@@ -407,21 +417,30 @@ export class CourseDetailComponent implements OnInit {
         if (res) {
           this.snackbar.open("Punktevergabe abgeschlossen");
         }
-        
-       
-        setTimeout(() => {
-          this.assignpoints();
+
+        setTimeout(() => {  
+          forkJoin([
+            this.taskService.getTaskResults(this.courseID),
+            this.taskPointsService.getAllRequirements(this.courseID)
+          ]).subscribe(([taskResults, req]) => {
+            this.listing = Object.values(taskResults);
+           
           
-        }, 1500); 
-        console.log("post assignpoints");
-        this.requirements.subscribe((value) => {
-          console.log("req value:", value);
-          this.requirementsLength = value.length - 1;
-          this.increment(value[this.requirementsLength]);
-          console.log("the requirements at the end:", this.requirementsLength);
-          console.log("the new one:", value[this.requirementsLength]);
-        });
-        console.log("it entered the edit points");
+            this.requirements = of(req);
+            this.assignpoints();
+          
+            req.forEach(element => {
+             
+          
+              this.increment(element);
+             
+            });
+           
+          });
+        },1500);
+    
+       
+  
       
       });
       
