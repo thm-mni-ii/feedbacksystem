@@ -16,8 +16,8 @@ class TokenV2Service(
     @Value("\${jwt.secret}")
     private val jwtSecret: String
 ) {
-    fun issue(subject: String, expires: Int) {
-        Jwts.builder()
+    fun issue(subject: String, expires: Int): String {
+        return Jwts.builder()
             .setSubject(subject)
             .setIssuedAt(Date())
             .setExpiration(Date(Date().time + (1000 * expires)))
