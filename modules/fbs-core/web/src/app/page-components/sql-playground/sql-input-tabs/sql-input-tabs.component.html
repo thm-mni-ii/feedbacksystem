@@ -15,10 +15,15 @@
               [(ngModel)]="tabs[index].name"
             />
           </div>
-          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
+          <button
+            *ngIf="index !== 0"
+            mat-icon-button
+            [disabled]="pending"
+            (click)="closeTab(index)"
+          >
             <mat-icon>remove_circle_outline</mat-icon>
           </button>
-          <button mat-icon-button (click)="addTab($event)">
+          <button mat-icon-button [disabled]="pending" (click)="addTab($event)">
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>

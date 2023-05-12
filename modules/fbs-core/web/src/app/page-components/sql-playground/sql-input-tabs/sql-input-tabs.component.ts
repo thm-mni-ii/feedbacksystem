@@ -195,6 +195,7 @@ export class SqlInputTabsComponent
 
   updateMode(value: boolean) {
     this.activeTab.isSubmitMode = value;
+    this.pending = false;
   }
 
   hasDeadlinePassed(task: Task = this.activeTab.selectedTask): boolean {
