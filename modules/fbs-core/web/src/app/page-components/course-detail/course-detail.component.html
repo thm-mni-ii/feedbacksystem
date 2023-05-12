@@ -87,7 +87,7 @@
         <mat-icon class="logout-icon">edit</mat-icon
         ><span>Kurs bearbeiten</span>
       </button>
-      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints($event)">
+      <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()">
         <mat-icon class="logout-icon">rule</mat-icon><span>Punkte</span>
       </button>
       <button mat-menu-item (click)="showGoLinks()">
