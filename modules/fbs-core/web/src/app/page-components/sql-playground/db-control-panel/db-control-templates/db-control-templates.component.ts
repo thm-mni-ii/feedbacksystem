@@ -34,7 +34,7 @@ export class DbControlTemplatesComponent implements OnInit {
     {
       id: 2,
       name: "Übungsaufgaben",
-    },
+    },,
   ];
 
   templates: SqlTemplates[] = [
