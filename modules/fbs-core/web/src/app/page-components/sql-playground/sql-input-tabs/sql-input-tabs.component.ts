@@ -150,6 +150,7 @@ export class SqlInputTabsComponent
       selectedCourseName: "Kurs",
       selectedTaskName: "Aufgabe",
     });
+    this.isSubmitMode = false;
     this.activeTabId.setValue(this.tabs.length - 1);
   }
 
