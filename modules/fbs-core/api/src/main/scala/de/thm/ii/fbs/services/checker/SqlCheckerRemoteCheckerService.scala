@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.mutable
 
 object SqlCheckerRemoteCheckerService {
-  private val isCheckerRun = new ConcurrentHashMap[Int, String]()
+  private val isCheckerRun = new ConcurrentHashMap[Int, Option[String]]()
 }
 
 @Service
@@ -51,7 +51,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param fu           the User model
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
-    val oldExtInfo = Option(SqlCheckerRemoteCheckerService.isCheckerRun.get(submissionID))
+    val oldExtInfo = SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, None)
     oldExtInfo match {
       case Some(value) => {
         val apiUrl = new URIBuilder(selfUrl)
@@ -80,21 +80,21 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def handle(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
                       resultText: String, extInfo: String): Unit = {
-    val oldExtInfo = Option(SqlCheckerRemoteCheckerService.isCheckerRun.get(submission.id))
+    val oldExtInfo = SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submission.id, None)
     oldExtInfo match {
       case Some(value) => {
-        SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
         this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, value)
       }
       case None => {
         if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
-          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, extInfo)
+          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, Option(extInfo))
           this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
         } else {
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
       }
     }
+    SqlCheckerRemoteCheckerService.isCheckerRun.remove(submission.id)
   }
 
   private def handleSelf(submission: FBSSubmission, checkerConfiguration: CheckrunnerConfiguration, task: Task, exitCode: Int,
