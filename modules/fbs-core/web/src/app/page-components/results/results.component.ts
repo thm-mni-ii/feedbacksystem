@@ -2,6 +2,7 @@ import { Component, Input } from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
+import { SubmissionService } from "src/app/service/submission.service";
 
 @Component({
   selector: "app-results",
@@ -9,8 +10,10 @@ import { CheckResult } from "../../model/CheckResult";
   styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent {
+  constructor(private submissionService: SubmissionService) {}
+
   dataSource = new MatTableDataSource<CheckResult>();
-  columns = ["checkerType", "resultText", "exitCode"];
+  columns = ["checkerType", "query", "resultText", "exitCode"];
 
   allSubmissions: Submission[];
   displayedSubmission: Submission;
@@ -39,13 +42,25 @@ export class ResultsComponent {
 
   @Input() context: { uid: number; cid: number; tid: number };
 
+  queryText: String;
+
   subscription: any;
 
   handleSubmission(event): void {
     const submission = this.allSubmissions.find(
       (item) => this.allSubmissions.indexOf(item) == event.index
     );
+    this.getSubmissionContent(submission);
     this.display(submission);
+  }
+
+  getSubmissionContent(submission: Submission) {
+    if (this.context !== undefined) {
+      const { uid, cid, tid } = this.context;
+      this.submissionService
+        .getTaskSubmissionsContent(uid, cid, tid, submission.id)
+        .subscribe((text) => (this.queryText = text));
+    }
   }
 
   display(submission: Submission) {

@@ -56,3 +56,25 @@
 .pre {
   white-space: pre-wrap;
 }
+
+th:first-child,
+td:first-child {
+  text-align: left;
+  width: 80px;
+  padding: 10px;
+}
+
+th:last-child,
+td:last-child {
+  text-align: center;
+  width: 80px;
+  padding: 10px;
+}
+
+th:nth-child(2),
+th:nth-child(3),
+td:nth-child(2),
+td:nth-child(3) {
+  text-align: left;
+  width: 350px;
+}
