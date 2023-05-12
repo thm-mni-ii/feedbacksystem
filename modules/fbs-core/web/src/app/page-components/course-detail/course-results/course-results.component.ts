@@ -83,6 +83,7 @@ export class CourseResultsComponent implements OnInit {
         width: "100%",
         data: {
           submission: res,
+          context: { uid, cid, tid },
         },
       });
     });
