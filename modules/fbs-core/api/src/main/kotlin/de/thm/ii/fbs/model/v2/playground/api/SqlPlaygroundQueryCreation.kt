@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 class SqlPlaygroundQueryCreation(
     @JsonProperty("statement")
-    var statement: String,
+    var statement: String
 )
