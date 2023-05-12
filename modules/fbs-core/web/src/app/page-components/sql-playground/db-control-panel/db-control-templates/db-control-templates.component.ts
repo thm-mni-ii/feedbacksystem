@@ -34,7 +34,7 @@ export class DbControlTemplatesComponent implements OnInit {
     {
       id: 2,
       name: "Übungsaufgaben",
-    }
+    },
   ];
 
   templates: SqlTemplates[] = [
@@ -84,8 +84,9 @@ export class DbControlTemplatesComponent implements OnInit {
       id: 7,
       name: "ÜB1: Hotelbeispiel",
       category: this.categories[1],
-      templateQuery: "CREATE TABLE hotel ( HoNr INTEGER NOT NULL, HName CHAR(40), Ort CHAR(40), Straße CHAR(40), HausNr CHAR(5), PLZ CHAR(5), CONSTRAINT pk_hotel PRIMARY KEY(HoNr)); CREATE TABLE zimmer ( HoNr INTEGER NOT NULL, ZNr INTEGER NOT NULL, ZName CHAR(40), Kapazitaet INTEGER, Preis DECIMAL(8, 2), CONSTRAINT pk_zimmer PRIMARY KEY(HoNr, ZNr), CONSTRAINT fk_zimmer FOREIGN KEY(HoNr) REFERENCES hotel(HoNr)); CREATE TABLE ausstattung ( ANr INTEGER NOT NULL, Bezeichnung CHAR(40), Zusatzkosten DECIMAL(8, 2), CONSTRAINT pk_ausstattung PRIMARY KEY(ANr)); CREATE TABLE normal ( HoNr INTEGER NOT NULL, ZNr INTEGER NOT NULL, ANr INTEGER NOT NULL, CONSTRAINT pk_normal PRIMARY KEY(HoNr, ZNr, ANr), CONSTRAINT fk_normal_1 FOREIGN KEY(ANr) REFERENCES ausstattung(ANr), CONSTRAINT fk_normal_2 FOREIGN KEY(HoNr, ZNr) REFERENCES zimmer(HoNr, ZNr)); CREATE TABLE gast ( GNr INTEGER NOT NULL, Name CHAR(30), Vorname CHAR(40), Ort CHAR(50), PLZ CHAR(5), Strasse CHAR(50), HausNr CHAR(5), CONSTRAINT pk_gast PRIMARY KEY(GNr));",
-    }
+      templateQuery:
+        "CREATE TABLE hotel ( HoNr INTEGER NOT NULL, HName CHAR(40), Ort CHAR(40), Straße CHAR(40), HausNr CHAR(5), PLZ CHAR(5), CONSTRAINT pk_hotel PRIMARY KEY(HoNr)); CREATE TABLE zimmer ( HoNr INTEGER NOT NULL, ZNr INTEGER NOT NULL, ZName CHAR(40), Kapazitaet INTEGER, Preis DECIMAL(8, 2), CONSTRAINT pk_zimmer PRIMARY KEY(HoNr, ZNr), CONSTRAINT fk_zimmer FOREIGN KEY(HoNr) REFERENCES hotel(HoNr)); CREATE TABLE ausstattung ( ANr INTEGER NOT NULL, Bezeichnung CHAR(40), Zusatzkosten DECIMAL(8, 2), CONSTRAINT pk_ausstattung PRIMARY KEY(ANr)); CREATE TABLE normal ( HoNr INTEGER NOT NULL, ZNr INTEGER NOT NULL, ANr INTEGER NOT NULL, CONSTRAINT pk_normal PRIMARY KEY(HoNr, ZNr, ANr), CONSTRAINT fk_normal_1 FOREIGN KEY(ANr) REFERENCES ausstattung(ANr), CONSTRAINT fk_normal_2 FOREIGN KEY(HoNr, ZNr) REFERENCES zimmer(HoNr, ZNr)); CREATE TABLE gast ( GNr INTEGER NOT NULL, Name CHAR(30), Vorname CHAR(40), Ort CHAR(50), PLZ CHAR(5), Strasse CHAR(50), HausNr CHAR(5), CONSTRAINT pk_gast PRIMARY KEY(GNr)); INSERT INTO hotel VALUES(132,'Gruene Bogenschuetze','Geseke','An der Abtei','3','59590');  INSERT INTO zimmer VALUES(132, 115,'Waldruh', 2, 55.34); INSERT INTO zimmer VALUES(132, 134,'Hochsitz', 4, 89.47); INSERT INTO gast VALUES(95792,'Müller','Martin','Musterstadt','10000','Poststrasse','13-15'); INSERT INTO ausstattung VALUES(1,'Großleinwand mit Beamer','24.50'); INSERT INTO ausstattung VALUES(2,'Film Titanic','2.35');",
+    },
   ];
 
   templatesByCategory: any[] = this.getTemplatesByCategory();
