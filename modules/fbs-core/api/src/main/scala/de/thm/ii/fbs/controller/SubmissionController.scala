@@ -287,10 +287,14 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(submission) => {
           val file: File = storageService.getFileSolutionFile(submission)
+          val (ctype, ext) = task.mediaType match {
+            case "text/plain" => (MediaType.TEXT_PLAIN, "txt")
+            case _ => (MediaType.APPLICATION_OCTET_STREAM, "bin")
+          }
           ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(ctype)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=task_${task.id}.tar")
+            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}.${ext}")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         }
         case None => throw new ResourceNotFoundException()
@@ -310,7 +314,7 @@ class SubmissionController {
       List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
-      val f = new File("tmp")
+      val f = File.createTempFile("tmp", "")
       submissionService.writeSubmissionsOfCourseToFile(f, cid)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
