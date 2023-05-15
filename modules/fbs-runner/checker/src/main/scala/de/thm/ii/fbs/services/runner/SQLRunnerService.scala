@@ -81,13 +81,13 @@ object SQLRunnerService {
     * @param results The SQL Runner results
     * @return The Runner Results in a Map
     */
-  def transformResult(runArgs: RunArgs, success: Boolean, stdout: String, stderr: String, results: ExtResSql): JsonObject = {
+  def transformResult(runArgs: RunArgs, exitCode: Int, stdout: String, stderr: String, results: ExtResSql): JsonObject = {
     val res = new JsonObject()
     val extInfo = ExtendedResultsService.buildCompareTable(results)
 
     res.put("ccid", runArgs.runner.id)
       .put("sid", runArgs.submission.id)
-      .put("exitCode", if (success) 0 else 1)
+      .put("exitCode", exitCode)
       .put("stdout", stdout)
       .put("stderr", stderr)
 
