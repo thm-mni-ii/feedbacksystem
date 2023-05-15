@@ -117,6 +117,7 @@ export class SqlInputTabsComponent
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
+    this.loadFromLocalStorage();
   }
 
   closeTab(index: number) {
@@ -125,15 +126,37 @@ export class SqlInputTabsComponent
       "Achtung der Inhalt wird nicht gespeichert!"
     ).subscribe((result) => {
       if (result == true) {
+        this.deleteFromLocalStorage(index);
         this.tabs.splice(index, 1);
         this.activeTabId.setValue(this.tabs.length - 1);
       }
     });
   }
 
+  saveToLocalStorage() {
+    const data = { tabs: this.tabs };
+    localStorage.setItem("tabs", JSON.stringify(data));
+  }
+
+  loadFromLocalStorage() {
+    const loadedData = localStorage.getItem("tabs");
+    if (loadedData) {
+      this.tabs = JSON.parse(loadedData).tabs;
+      this.activeTabId.setValue(0);
+      this.activeTab = this.tabs[0];
+    }
+  }
+
+  deleteFromLocalStorage(index: number) {
+    const data = JSON.parse(localStorage.getItem("tabs"));
+    data.tabs.splice(index, 1);
+    localStorage.setItem("tabs", JSON.stringify(data));
+  }
+
   updateSubmissionContent(data: String) {
     let submissionContent = data["content"];
     this.tabs[this.activeTabId.value].content = submissionContent;
+    this.saveToLocalStorage();
   }
 
   addTab(event: MouseEvent) {
@@ -152,6 +175,7 @@ export class SqlInputTabsComponent
       selectedTaskName: "Aufgabe",
     });
     this.activeTabId.setValue(this.tabs.length - 1);
+    this.saveToLocalStorage();
   }
 
   openConfirmDialog(title: string, message: string) {
@@ -218,6 +242,7 @@ export class SqlInputTabsComponent
     this.activeTab.isSubmitted = false;
     this.getTasks();
     this.emptyTask();
+    this.saveToLocalStorage();
   }
 
   changeTask(task: Task) {
@@ -225,6 +250,7 @@ export class SqlInputTabsComponent
     this.activeTab.selectedTaskName = this.activeTab.selectedTask.name;
     this.activeTab.error = false;
     this.activeTab.isSubmitted = false;
+    this.saveToLocalStorage();
   }
 
   getTasks() {
@@ -332,5 +358,6 @@ export class SqlInputTabsComponent
       return;
     }
     this.submitToTask();
+    this.saveToLocalStorage();
   }
 }

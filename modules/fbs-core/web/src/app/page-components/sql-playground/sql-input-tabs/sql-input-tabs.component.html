@@ -12,6 +12,7 @@
               matInput
               type="text"
               placeholder="New_Query"
+              [disabled]="pending"
               [(ngModel)]="tabs[index].name"
             />
           </div>
@@ -46,6 +47,8 @@
           ></app-submission-text> -->
           <!-- <mat-label class="title">Eingabe SQL :</mat-label> -->
           <app-highlighted-input
+            [tabs]="tabs"
+            [selectedIndex]="activeTabId.value"
             (update)="updateSubmissionContent($event)"
           ></app-highlighted-input>
         </div>
@@ -60,7 +63,12 @@
   </mat-tab-group>
 
   <div class="bottom-container">
-    <button mat-button class="downloadBtn" (click)="downloadFile()">
+    <button
+      mat-button
+      class="downloadBtn"
+      [disabled]="pending"
+      (click)="downloadFile()"
+    >
       <mat-icon>download</mat-icon> Download
     </button>
 
