@@ -51,6 +51,7 @@ class SubmissionService {
       contTypes += tmp.map(submission => storageService.getContentTypeSolutionFile(submission))
     })
     Archiver.packSubmissionsInDir(f, listSubInDir, usersList, contTypes, t)
+    listSubInDir.foreach(files => files.foreach(file => file.delete()))
   }
 
   /**
