@@ -2,10 +2,11 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission, User}
+import de.thm.ii.fbs.model.{CheckResult, Submission, Task, User}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -27,6 +28,8 @@ class SubmissionService {
   @Autowired
   private val userService: UserService = null
   @Autowired
+  private val taskService: TaskService = null
+  @Autowired
   private implicit val jdbc: JdbcTemplate = null
   private val objectMapper: ObjectMapper = new ObjectMapper()
 
@@ -43,14 +46,15 @@ class SubmissionService {
     val usersList: ListBuffer[List[User]] = ListBuffer()
     val t = submissionList.map(s => s.taskID).distinct
     val listSubInDir: ListBuffer[List[File]] = ListBuffer()
-    val contTypes: ListBuffer[List[String]] = ListBuffer()
+    val fileExts: ListBuffer[List[String]] = ListBuffer()
     t.foreach(taskid => {
+      val task = taskService.getOne(taskid).get
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
       usersList += tmp.map(submission => userService.find(submission.userID.get).get)
-      contTypes += tmp.map(submission => storageService.getContentTypeSolutionFile(submission))
+      fileExts += tmp.map(_ => task.getMimeTypeAndExtension()._2)
     })
-    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, contTypes, t)
+    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, fileExts, t)
     listSubInDir.foreach(files => files.foreach(file => file.delete()))
   }
 

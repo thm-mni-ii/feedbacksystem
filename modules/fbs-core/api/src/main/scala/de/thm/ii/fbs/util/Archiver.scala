@@ -23,13 +23,13 @@ object Archiver {
   }
 
   @throws[IOException]
-  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], contTypes: ListBuffer[List[String]]
+  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], fileExts: ListBuffer[List[String]]
                            , listTaskId: List[Int]): Unit = {
     val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     files.zipWithIndex.foreach(listFiles => {
       listFiles._1.zipWithIndex.foreach(f => {
-        val fileExt = fileExtensionFromContentType(contTypes(listFiles._2)(f._2))
-        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}$fileExt")
+        val fileExt = fileExts(listFiles._2)(f._2)
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}.$fileExt")
       })
     })
     out.close()

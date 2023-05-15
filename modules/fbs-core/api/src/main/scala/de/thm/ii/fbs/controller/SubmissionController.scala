@@ -287,14 +287,11 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(submission) => {
           val file: File = storageService.getFileSolutionFile(submission)
-          val (ctype, ext) = task.mediaType match {
-            case "text/plain" => (MediaType.TEXT_PLAIN, "txt")
-            case _ => (MediaType.APPLICATION_OCTET_STREAM, "bin")
-          }
+          val (ctype, ext) = task.getMimeTypeAndExtension()
           ResponseEntity.ok()
             .contentType(ctype)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}.${ext}")
+            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}.$ext")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         }
         case None => throw new ResourceNotFoundException()
