@@ -16,7 +16,7 @@ import org.apache.tika.mime.MimeTypes
 object Archiver {
   @throws[IOException]
   def packSubmissions(name: File, files: List[File], users: List[User], contTypes: List[String]): Unit = {
-    val out = new TarArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
+    val out = new ZipArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for ((file, index) <- files.zipWithIndex) {
       addToArchive(out, file, ".", s"${users(index).getName}${fileExtensionFromContentType(contTypes(index))}")
     }
