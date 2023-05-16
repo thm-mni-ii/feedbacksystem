@@ -338,7 +338,7 @@ class SubmissionController {
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=task_$tid.tar")
+        .header("Content-Disposition", s"attachment;filename=task_$tid.zip")
         .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
