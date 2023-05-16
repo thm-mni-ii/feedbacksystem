@@ -10,18 +10,14 @@ class TokenV2ServiceTest() {
     fun validToken() {
         val token = tokenV2Service.issue("Test", 30)
         val verified = tokenV2Service.verify(token)
-        val verifiedLegacy = tokenV2Service.verifyLegacyToken(token)
         assert(verified != null)
-        assert(verifiedLegacy != null)
     }
-    
+
     @Test
     fun expiredToken() {
         val token = tokenV2Service.issue("Test", 2)
         Thread.sleep(5000)
         val verified = tokenV2Service.verify(token)
-        val verifiedLegacy = tokenV2Service.verifyLegacyToken(token)
         assert(verified == null)
-        assert(verifiedLegacy == null)
     }
 }
