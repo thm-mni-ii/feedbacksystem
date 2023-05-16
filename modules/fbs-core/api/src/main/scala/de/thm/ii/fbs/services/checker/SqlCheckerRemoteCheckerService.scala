@@ -82,7 +82,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       val extInfo = SqlCheckerRemoteCheckerService.extInfo.remove(submission.id)
       this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
     } else {
-        if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
+        if (exitCode == 2 && hintsEnabled(checkerConfiguration)) {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, true)
           if (extInfo != null) {
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
