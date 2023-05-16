@@ -119,7 +119,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
         val res = sqlRunner.compareResults(value)
         logger.info(s"Submission-${sqlRunArgs.submissionId} Finished\nSuccess: ${res._2} \nMsg: ${res._1}")
 
-        vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, res._2, res._1, "", res._3)))
+        vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, if (res._2) 0 else 2, res._1, "", res._3)))
         this.cleanup(runArgs)
 
       case Failure(ex: SQLTimeoutException) =>
@@ -135,7 +135,7 @@ class SqlRunnerVerticle extends ScalaVerticle {
 
   private def handleError(runArgs: RunArgs, msg: String, e: Throwable): Unit = {
     logger.info(s"Submission-${runArgs.submission.id} Finished\nSuccess: false \nMsg: $msg", e)
-    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, success = false, "", msg, new ExtResSql(None, None))))
+    vertx.eventBus().send(HttpVerticle.SEND_COMPLETION, Option(SQLRunnerService.transformResult(runArgs, 1, "", msg, new ExtResSql(None, None))))
     this.cleanup(runArgs)
   }
 
