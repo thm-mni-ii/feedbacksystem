@@ -8,21 +8,45 @@ from dash import html
 from dash import dash_table, callback
 from dash.dependencies import Input, Output
 import pandas as pd
+from datetime import datetime, timedelta
+from api.connect.connecttominio import data
 
-df = pd.read_csv("data/cleaned_data_with_names.csv")
+df = data(-1)
+df["Time"] = pd.to_datetime(df.Time)
 
+
+dff = df
 layout = html.Div(
     [
         html.H3("Table", style={"text-align": "left", "margin-left": "407px"}),
         dbc.Container(
             dbc.Card(
                 [
+                    dbc.Col(
+                        html.Div(
+                            [
+                                "Date/Time From",
+                                date_time_from := dcc.Input(
+                                    datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                    type="datetime-local",
+                                ),
+                                "Date/Time To",
+                                date_time_to := dcc.Input(
+                                    (
+                                        datetime.now()
+                                        + timedelta(hours=1, minutes=30)
+                                    ).strftime("%Y-%m-%dT%H:%M"),
+                                    type="datetime-local",
+                                ),
+                            ]
+                        ),
+                    ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
                         data=df.to_dict("records"),
                         columns=[{"id": c, "name": c, "hideable": True} for c in df.columns],
                         style_as_list_view=True,
-                        filter_action="native",  # Setze filter_action auf "native" oder "feather"
+                        filter_action="custom",
                         page_size=10,
                         editable=False,
                         sort_action="native",
@@ -44,7 +68,7 @@ layout = html.Div(
                                 """,
                             }
                         ],
-                        tooltip_data=[{"Statement": str(row["Statement"])} for _, row in df.iterrows()],
+                        tooltip_data=[{"Statement": str(row["Statement"])} for _, row in dff.iterrows()],
                         style_table={"overflow": "auto", "height": "auto"},
                         style_header={
                             "textAlign": "left",
@@ -78,14 +102,25 @@ layout = html.Div(
         ),
     ]
 )
-
+# Update date_time_to based on date_time_from
+@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
+def update_date_time_to(input_value):
+    try:
+        date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
+        return date_time + timedelta(hours=1, minutes=30)
+    except:
+        return input_value
 
 @callback(
     Output("filter-query-output", "children"),
+    Output("datatable-interactivity", "data"),
     Input("datatable-interactivity", "filter_query"),
+    Input(date_time_from, "value"),
+    Input(date_time_to, "value"),
+    Input("intermediate-value","data")
 )
 
-def read_query(query):
+def read_query(query,date_time_from,date_time_to,daten):
     """
     Reads the filter options of the previous Dash DataTable and creates a text out of it
 
@@ -95,9 +130,30 @@ def read_query(query):
     Returns:
         Printable String to show the user which filters are set. Also works for hided columns.
     """
-    if query is None:
-        return "No filter set"
+    try:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+
+    try:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+
+    date_time_from = date_time_from - timedelta(hours=2)
+    date_time_to = date_time_to - timedelta(hours=2)
+
+    df = pd.read_json(daten)
+    df["Time"] = pd.to_datetime(df.Time)
+    dff = df[
+        (df.Time >= date_time_from) & (df.Time < date_time_to)
+        ]
+    if query is None or len(query) == 0:
+        retString = []
+        retString.append("No filter set")
+        return retString, dff.to_dict("records")
     query = query.replace(" scontains ", " s= ")
+    query = query.replace(" icontains ", " s= ")
     values = {}
     parts = query.split(" && ")
     for part in parts:
@@ -109,8 +165,10 @@ def read_query(query):
             value = value.strip("'")
         values[name] = value
     output = []
+    dff = df
     for name, value in values.items():
+        dff = dff[dff[name] == value]
         output.append(f"{name} = {value}")
     result = ", ".join(output)
     result = "Filter: " + result
-    return dcc.Markdown(result)
+    return dcc.Markdown(result), dff.to_dict("records")

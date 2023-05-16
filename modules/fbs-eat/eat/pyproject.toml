@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "fbs-analytics-tool"
+version = "0.1.0"
+description = ""
+authors = ["Jonas Wölfer <jonas.woelfer@mnd.thm.de>"]
+readme = "README.md"
+packages = [{include = "api"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+plotly = "^5.13.1"
+pandas = "^1.5.3"
+pylint = "^2.17.0"
+black = "^23.1.0"
+dash = "^2.8.1"
+dash-bootstrap-components = "^1.4.1"
+gunicorn = "^20.1.0"
+minio = "^7.1.14"
+pymongo = "^4.3.3"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

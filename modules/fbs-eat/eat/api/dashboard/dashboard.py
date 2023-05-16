@@ -1,12 +1,23 @@
 import math
+from datetime import datetime, timedelta
 
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.graph_objs as go
-from dash import Input, Output, callback, dcc, html
+from dash import Dash, Input, Output, callback, dcc, html
 from plotly.subplots import make_subplots
+from api.connect.connecttominio import data
 
-df = pd.read_csv("data/cleaned_data_with_names.csv")
+
+# from api.connect.connecttominio import data
+# import io
+
+
+# databuffer = io.BytesIO(data)
+
+
+df = data(-1)
+df["Time"] = pd.to_datetime(df.Time)
 
 layout = html.Div(
     [
@@ -38,12 +49,12 @@ layout = html.Div(
                                         "Exercise",
                                         exercise := dcc.Dropdown(
                                             df.UniqueName.unique(),
-                                            [
-                                                df[
-                                                    df.CourseName == course
-                                                ].UniqueName.iloc[0]
-                                                for course in df.CourseName.unique()
-                                            ],
+                                            #[
+                                            #    df[
+                                            #        df.CourseName == course
+                                            #    ].UniqueName.iloc[0]
+                                            #    for course in df.CourseName.unique()
+                                            #],
                                             multi=True,
                                             placeholder="Select one or more exercise",
                                             style={"background-color": "#e9e7e9"},
@@ -63,12 +74,31 @@ layout = html.Div(
                                     ]
                                 ),
                             ),
+                            dbc.Col(
+                                html.Div(
+                                    [
+                                        "Date/Time From",
+                                        date_time_from := dcc.Input(
+                                            datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                            type="datetime-local",
+                                        ),
+                                        "Date/Time To",
+                                        date_time_to := dcc.Input(
+                                            (
+                                                datetime.now()
+                                                + timedelta(hours=1, minutes=30)
+                                            ).strftime("%Y-%m-%dT%H:%M"),
+                                            type="datetime-local",
+                                        ),
+                                    ]
+                                ),
+                            ),
                         ]
                     ),
                     dbc.Row(
                         html.Div(  ## Filter Checkboxes
                             checklist := dcc.Checklist(
-                                ["Attempts", "Date", "Semester Weeks"],
+                                ["Attempts", "Date"],
                                 ["Attempts"],
                                 inline=True,
                                 style={
@@ -124,13 +154,20 @@ def generate_empty_response():
 
     return fig
 
+@callback(Output(course,"options"), Output(course, "value"),Input("intermediate-value","data"))
+def update_exercise(daten):
+    emptyList = []
+    df = pd.read_json(daten)
+    return df.CourseName.unique(), emptyList
 
-@callback(Output(checklist_filter_components, "children"), Input(checklist, "value"))
-def checklist_filter_masks(checks):
+
+@callback(Output(checklist_filter_components, "children"), Input(checklist, "value"),Input("intermediate-value","data"))
+def checklist_filter_masks(checks,daten):
     """
     This callback creates all required filter masks based on the checklist variable
     """
     filters = []
+    df = pd.read_json(daten)
     for box in checks:
         if box == "Attempts":
             filters.append(
@@ -207,12 +244,23 @@ def checklist_filter_masks(checks):
 
 
 # Update dropdown menu for exercises
-@callback(Output(exercise, "options"), Input(course, "value"))
-def update_dropdown(input_value):
+@callback(Output(exercise, "options"), Input(course, "value"), Input("intermediate-value","data"))
+def update_dropdown(input_value,daten):
+    df = pd.read_json(daten)
     if not input_value:
         return df.UniqueName.unique()
     else:
         return df[df.CourseName.isin(input_value)].UniqueName.unique()
+
+
+# Update date_time_to based on date_time_from
+@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
+def update_date_time_to(input_value):
+    try:
+        date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
+        return date_time + timedelta(hours=1, minutes=30)
+    except:
+        return input_value
 
 
 # Update histogramm figure
@@ -223,10 +271,37 @@ def update_dropdown(input_value):
     Input(key_figure, "value"),
     Input(checklist, "value"),
     Input("slider", "value"),
+    Input(date_time_from, "value"),
+    Input(date_time_to, "value"),
+    Input("intermediate-value","data")
 )
 def update_histogram(
-    course_value, exercise_value, key_figure_value, checklist_value, slider_value
+    course_value,
+    exercise_value,
+    key_figure_value,
+    checklist_value,
+    slider_value,
+    date_time_from,
+    date_time_to,
+    daten
 ):
+
+    df = pd.read_json(daten)
+    df["Time"] = pd.to_datetime(df.Time)
+    # Convert datetime string to datetime object
+    try:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+
+    try:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+
+    date_time_from = date_time_from - timedelta(hours=2)
+    date_time_to = date_time_to - timedelta(hours=2)
+
     slider_value = slider_value or [df.Attempt.min(), df.Attempt.max()]
 
     if not exercise_value:
@@ -239,16 +314,17 @@ def update_histogram(
 
     # Filter dataframe
     filtered_df = df
-
     filtered_df = filtered_df[
         (filtered_df.Attempt.ge(slider_value[0]))
         & (filtered_df.Attempt.le(slider_value[1]))
     ]
-    filtered_df = filtered_df[filtered_df.CourseName.isin(course_value)]
-
+    if course_value:
+        filtered_df = filtered_df[filtered_df.CourseName.isin(course_value)]
     if exercise_value:
         filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
-
+    filtered_df = filtered_df[
+        (filtered_df.Time >= date_time_from) & (filtered_df.Time < date_time_to)
+    ]
     # Create figure which will be returned and contains all subfigures
     fig = make_subplots(
         rows=math.ceil(len(exercise_value) / 2),
@@ -262,7 +338,6 @@ def update_histogram(
     for row in range(1, math.ceil(len(exercise_value) / 2) + 1):
         for col in range(1, 2 + 1):
             fig.append_trace(go.Bar(x=[], y=[]), row=row, col=col)
-
     # Order columns
     hist_df = filtered_df[
         [
@@ -276,7 +351,6 @@ def update_histogram(
             "Tables",
         ]
     ].set_index("UniqueName")
-
     # No data
     if hist_df.empty:
         return generate_empty_response()
