@@ -11,10 +11,7 @@ import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.compone
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { MatDatepickerInputEvent } from "@angular/material/datepicker";
-import {
-  FormControl,
-  UntypedFormGroup,
-} from "@angular/forms";
+import { FormControl, UntypedFormGroup } from "@angular/forms";
 
 @Component({
   selector: "app-task-points-dialog",
