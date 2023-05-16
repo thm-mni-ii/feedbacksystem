@@ -129,6 +129,7 @@ export class SqlInputTabsComponent
         this.deleteFromLocalStorage(index);
         this.tabs.splice(index, 1);
         this.activeTabId.setValue(this.tabs.length - 1);
+        this.loadFromLocalStorage();
       }
     });
   }
@@ -142,8 +143,7 @@ export class SqlInputTabsComponent
     const loadedData = localStorage.getItem("tabs");
     if (loadedData) {
       this.tabs = JSON.parse(loadedData).tabs;
-      this.activeTabId.setValue(0);
-      this.activeTab = this.tabs[0];
+      this.activeTab = this.tabs[this.activeTabId.value];
     }
   }
 
