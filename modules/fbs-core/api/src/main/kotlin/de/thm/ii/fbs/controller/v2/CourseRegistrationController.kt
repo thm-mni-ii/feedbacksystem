@@ -77,11 +77,9 @@ class CourseRegistrationController(
 
         if (privileged) {
             courseRegistrationRepository.register(cid, uid, role.ordinal)
-        }
-        else if (uid == currentToken.id) {
+        } else if (uid == currentToken.id) {
             courseRegistrationRepository.register(cid, uid, CourseRole.STUDENT.ordinal)
-        }
-        else {
+        } else {
             throw ForbiddenException()
         }
     }
@@ -99,8 +97,7 @@ class CourseRegistrationController(
 
         if (privileged || uid == currentToken.id) {
             courseRegistrationRepository.deleteByCourseIdAndUserId(cid, uid)
-        }
-        else {
+        } else {
             throw ForbiddenException()
         }
     }
@@ -120,8 +117,7 @@ class CourseRegistrationController(
 
         if (privileged) {
             courseRegistrationRepository.deleteCourseRoleByCidAndCourseRole(cid, role.ordinal)
-        }
-        else {
+        } else {
             throw ForbiddenException()
         }
     }
@@ -138,8 +134,7 @@ class CourseRegistrationController(
 
         if (privileged) {
             courseRegistrationRepository.deleteAllUsersByCourseId(cid, currentToken.id)
-        }
-        else {
+        } else {
             throw ForbiddenException()
         }
     }
