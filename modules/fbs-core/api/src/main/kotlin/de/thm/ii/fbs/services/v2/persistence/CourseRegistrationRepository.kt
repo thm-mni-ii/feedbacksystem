@@ -61,9 +61,10 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
      * @param ignoreHidden True if hidden courses should be ignored
      * @return List of courses
      */
-    @Query("SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id)" +
-            " WHERE user_id = :uid AND visible = 1", nativeQuery = true)
+    @Query("SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = :uid AND visible = 1",
+        nativeQuery = true)
     fun findByUidAndVisibleTrue(@Param("uid") uid: Int): List<Course>
+
     /**
      * Get all course for that the user with the user id uid is registered
      *
@@ -71,7 +72,8 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
      * @param ignoreHidden True if hidden courses should be ignored
      * @return List of courses
      */
-    @Query("SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = :uid", nativeQuery = true)
+    @Query("SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) WHERE user_id = :uid",
+            nativeQuery = true)
     fun findAllCoursesByUid(@Param("uid") uid: Int): List<Course>
 
     /**
@@ -80,8 +82,8 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
      * @param cid The course id
      * @return List of courses
      */
-    @Query("SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user " +
-            "JOIN user_course using(user_id) where deleted = 0 and course_id = ?1", nativeQuery = true)
+    @Query("SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) " +
+            "where deleted = 0 and course_id = ?1", nativeQuery = true)
     fun findAllParticipantsByCourseId(cid: Int): List<Participant>
 
     /**

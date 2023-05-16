@@ -2,11 +2,18 @@ package de.thm.ii.fbs.model.v2
 
 import de.thm.ii.fbs.model.v2.security.User
 import java.io.Serializable
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Embeddable
+import javax.persistence.EmbeddedId
+import javax.persistence.Entity
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.MapsId
+import javax.persistence.Table
 
 @Entity
 @Table(name = "user_course")
-class CourseRegisteration (
+class CourseRegisteration(
     @EmbeddedId
     val id: CourseRegisterationKey,
 
@@ -20,7 +27,7 @@ class CourseRegisteration (
     @JoinColumn(name = "course_id")
     val course: Course,
 
-    val courseRole: CourseRole,
+    val courseRole: CourseRole
 )
 
 @Embeddable
