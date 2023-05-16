@@ -11,7 +11,12 @@ import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.compone
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
 import { MatDatepickerInputEvent } from "@angular/material/datepicker";
-import { FormControl, UntypedFormControl, UntypedFormGroup,Validators} from "@angular/forms";
+import {
+  FormControl,
+  UntypedFormControl,
+  UntypedFormGroup,
+  Validators,
+} from "@angular/forms";
 
 @Component({
   selector: "app-task-points-dialog",
@@ -24,11 +29,10 @@ export class TaskPointsDialogComponent implements OnInit {
     private taskPointsService: TaskPointsService,
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
-    public dialogRef: MatDialogRef<TaskPointsDialogComponent>,
-    
+    public dialogRef: MatDialogRef<TaskPointsDialogComponent>
   ) {}
-  
-  deadline:string;
+
+  deadline: string;
   datePickerDisabled: boolean = false;
   tasks: Task[];
   allRequirements: Requirement[];
@@ -47,13 +51,15 @@ export class TaskPointsDialogComponent implements OnInit {
     message: string;
     valid: boolean;
   } = { message: "", valid: true };
- 
 
   requirementForm = new UntypedFormGroup({
     expCheck: new FormControl(false),
-    deadline: new FormControl({ value: this.getDefaultDeadline(), disabled: false })
+    deadline: new FormControl({
+      value: this.getDefaultDeadline(),
+      disabled: false,
+    }),
   });
-  
+
   ngOnInit(): void {
     this.setValues();
     this.tasks = this.data.tasks;
@@ -70,7 +76,7 @@ export class TaskPointsDialogComponent implements OnInit {
         }
       });
     this.allRequirements = [];
- 
+
     this.requirementForm.controls["expCheck"].updateValueAndValidity();
     if (this.requirementForm.get("expCheck").value) {
       this.deadline = null;
@@ -239,12 +245,16 @@ export class TaskPointsDialogComponent implements OnInit {
   }
   setValues() {
     if (!this.deadline) {
-      this.requirementForm.controls["deadline"].setValue(this.getDefaultDeadline());
+      this.requirementForm.controls["deadline"].setValue(
+        this.getDefaultDeadline()
+      );
       this.deadline = this.getDefaultDeadline();
       this.requirementForm.controls["expCheck"].setValue(true);
       this.datePickerDisabled = true;
     } else {
-      this.requirementForm.controls["deadline"].setValue(new Date(this.deadline));
+      this.requirementForm.controls["deadline"].setValue(
+        new Date(this.deadline)
+      );
     }
   }
 }
