@@ -24,13 +24,17 @@ object Archiver {
   }
 
   @throws[IOException]
-  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], fileExts: ListBuffer[List[String]]
-                           , listTaskId: List[Int]): Unit = {
+  def packSubmissionsInDir(name: File, files: ListBuffer[List[File]], users: ListBuffer[List[User]], connTypes: ListBuffer[List[String]],
+                           fileExts: ListBuffer[List[String]], listTaskId: List[Int]): Unit = {
     val out = new ZipArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     files.zipWithIndex.foreach(listFiles => {
       listFiles._1.zipWithIndex.foreach(f => {
-        val fileExt = fileExts(listFiles._2)(f._2)
-        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}.$fileExt")
+        val fExt = fileExts(listFiles._2)(f._2)
+        val fileExt = fExt match {
+          case "bin" => fileExtensionFromContentType(connTypes(listFiles._2)(f._2))
+          case _ => "." + fExt
+        }
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}$fileExt")
       })
     })
     out.close()
