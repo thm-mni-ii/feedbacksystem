@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
@@ -9,8 +9,19 @@ import { SubmissionService } from "src/app/service/submission.service";
   templateUrl: "./results.component.html",
   styleUrls: ["./results.component.scss"],
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit {
   constructor(private submissionService: SubmissionService) {}
+
+  ngOnInit(): void {
+    const { uid, cid, tid } = this.context;
+    this.submissionService
+      .getAllSubmissions(uid, cid, tid)
+      .subscribe((AllSubmissions) =>
+        AllSubmissions.forEach((submission) =>
+          this.getSubmissionContent(submission)
+        )
+      );
+  }
 
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ["checkerType", "query", "resultText", "exitCode"];
@@ -46,12 +57,14 @@ export class ResultsComponent {
 
   subscription: any;
 
+  submission: Submission;
+
   handleSubmission(event): void {
-    const submission = this.allSubmissions.find(
+    this.submission = this.allSubmissions.find(
       (item) => this.allSubmissions.indexOf(item) == event.index
     );
-    this.getSubmissionContent(submission);
-    this.display(submission);
+    this.getSubmissionContent(this.submission);
+    this.display(this.submission);
   }
 
   getSubmissionContent(submission: Submission) {
