@@ -291,7 +291,7 @@ class SubmissionController {
           ResponseEntity.ok()
             .contentType(ctype)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}.$ext")
+            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}$ext")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         }
         case None => throw new ResourceNotFoundException()
