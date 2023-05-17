@@ -40,6 +40,7 @@ class SubmissionService {
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
     val fileExts = submissionList.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
     Archiver.packSubmissions(f, subFiles, usersList, fileExts)
+    subFiles.foreach(file => file.delete())
   }
 
   def writeSubmissionsOfCourseToFile(f: File, cid: Int): Unit = {
