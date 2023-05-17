@@ -44,6 +44,8 @@ startScripts {
 }
 
 dependencies {
+    implementation 'org.apache.tika:tika-core:2.1.0'
+    implementation 'org.apache.tika:tika-parsers:2.1.0'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     implementation group: 'io.minio', name: 'minio', version: '8.0.0'
