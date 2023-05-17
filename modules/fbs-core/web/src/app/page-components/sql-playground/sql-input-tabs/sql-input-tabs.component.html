@@ -22,6 +22,13 @@
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>
+        <br />
+        <p
+          class="description"
+          *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
+        >
+          <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
+        </p>
         <div class="inputField">
           <!-- <app-submission-text
             title="Eingabe SQL"
@@ -35,12 +42,6 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <p
-    class="description"
-    *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
-  >
-    <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
-  </p>
   <div class="bottom-container">
     <button mat-button class="downloadBtn" (click)="downloadFile()">
       <mat-icon>download</mat-icon> Download

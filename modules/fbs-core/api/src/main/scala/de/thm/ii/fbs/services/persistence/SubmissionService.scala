@@ -2,10 +2,11 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission, User}
+import de.thm.ii.fbs.model.{CheckResult, Submission, Task, User}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.jdbc.UncategorizedSQLException
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
@@ -27,15 +28,19 @@ class SubmissionService {
   @Autowired
   private val userService: UserService = null
   @Autowired
+  private val taskService: TaskService = null
+  @Autowired
   private implicit val jdbc: JdbcTemplate = null
   private val objectMapper: ObjectMapper = new ObjectMapper()
 
   def writeSubmissionsOfTaskToFile(f: File, cid: Int, tid: Int): Unit = {
+    val task = taskService.getOne(tid).get
     val submissionList = getLatestSubmissionByTask(cid, tid)
     val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-    val contTypes = submissionList.map(submission => storageService.getContentTypeSolutionFile(submission))
-    Archiver.packSubmissions(f, subFiles, usersList, contTypes)
+    val fileExts = submissionList.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
+    Archiver.packSubmissions(f, subFiles, usersList, fileExts)
+    subFiles.foreach(file => file.delete())
   }
 
   def writeSubmissionsOfCourseToFile(f: File, cid: Int): Unit = {
@@ -43,14 +48,16 @@ class SubmissionService {
     val usersList: ListBuffer[List[User]] = ListBuffer()
     val t = submissionList.map(s => s.taskID).distinct
     val listSubInDir: ListBuffer[List[File]] = ListBuffer()
-    val contTypes: ListBuffer[List[String]] = ListBuffer()
+    val fileExts: ListBuffer[List[String]] = ListBuffer()
     t.foreach(taskid => {
+      val task = taskService.getOne(taskid).get
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
       usersList += tmp.map(submission => userService.find(submission.userID.get).get)
-      contTypes += tmp.map(submission => storageService.getContentTypeSolutionFile(submission))
+      fileExts += tmp.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
     })
-    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, contTypes, t)
+    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, fileExts, t)
+    listSubInDir.foreach(files => files.foreach(file => file.delete()))
   }
 
   /**
@@ -135,7 +142,7 @@ class SubmissionService {
     * @return The found submission
     */
   def getOneWithoutUser(id: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
-    s"SELECT submission_id, user_task_submission.task_id, user_id, submission_time, configuration_id, exit_code, result_text, " +
+    s"SELECT submission_id, user_task_submission.task_id, user_id, submission_time, configuration_id, exit_code, result_text," +
       s"user_task_submission.is_in_block_storage, checker_type${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ?",

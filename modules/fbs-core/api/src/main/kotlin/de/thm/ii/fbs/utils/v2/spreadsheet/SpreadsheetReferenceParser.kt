@@ -19,7 +19,6 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
 
     val references: Map<Int, Map<String, Pair<String, Set<Cell>>>>
 
-
     init {
         val refs: MutableMap<Int, Map<String, Pair<String, Set<Cell>>>> = HashMap()
         for (sheet in workbook.sheetIterator()) {

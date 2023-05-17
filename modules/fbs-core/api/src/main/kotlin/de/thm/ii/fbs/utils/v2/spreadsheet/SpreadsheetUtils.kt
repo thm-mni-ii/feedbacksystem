@@ -48,6 +48,5 @@ class SpreadsheetUtils {
          */
         fun getCell(workbook: XSSFWorkbook, sheet: Int, row: Int, col: Int): XSSFCell =
             getRow(workbook, sheet, row).getCell(col, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
-
     }
 }

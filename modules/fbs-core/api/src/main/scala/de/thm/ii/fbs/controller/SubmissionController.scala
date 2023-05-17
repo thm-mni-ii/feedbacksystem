@@ -287,10 +287,11 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(submission) => {
           val file: File = storageService.getFileSolutionFile(submission)
+          val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))
           ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .contentType(ctype)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=task_${task.id}.tar")
+            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}$ext")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         }
         case None => throw new ResourceNotFoundException()
@@ -310,12 +311,12 @@ class SubmissionController {
       List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
-      val f = new File("tmp")
+      val f = File.createTempFile("tmp", "")
       submissionService.writeSubmissionsOfCourseToFile(f, cid)
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=course_$cid.tar")
+        .header("Content-Disposition", s"attachment;filename=course_$cid.zip")
         .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
@@ -337,7 +338,7 @@ class SubmissionController {
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
         .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=task_$tid.tar")
+        .header("Content-Disposition", s"attachment;filename=task_$tid.zip")
         .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
     } else {
       throw new ResourceNotFoundException()
