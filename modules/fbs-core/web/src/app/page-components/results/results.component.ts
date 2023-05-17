@@ -16,11 +16,9 @@ export class ResultsComponent implements OnInit {
     const { uid, cid, tid } = this.context;
     this.submissionService
       .getAllSubmissions(uid, cid, tid)
-      .subscribe((AllSubmissions) =>
-        AllSubmissions.forEach((submission) =>
-          this.getSubmissionContent(submission)
-        )
-      );
+      .subscribe((AllSubmissions) => {
+        this.allSubmissions = AllSubmissions;
+      });
   }
 
   dataSource = new MatTableDataSource<CheckResult>();
@@ -41,7 +39,6 @@ export class ResultsComponent implements OnInit {
 
   @Input() set submissions(submissions: Submission[]) {
     const lengthHasChanged = this.allSubmissions != submissions;
-
     this.allSubmissions = submissions;
     if (lengthHasChanged) {
       this.selectLast();
