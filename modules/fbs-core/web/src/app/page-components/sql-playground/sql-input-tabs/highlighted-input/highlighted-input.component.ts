@@ -79,7 +79,17 @@ export class HighlightedInputComponent
   }
 
   cleanUpTextAreaRegx(sqlInput: String) {
-    let temp = sqlInput.replace(/[\n\t]/g, "");
+    let modifiedStr:string = "";
+   // const regex = /\n/;
+   // const containsNewLine = regex.test(sqlInput.toString());
+   
+    for (let i = 0; i < sqlInput.length; i++) {
+     if(sqlInput.charAt(i) === '\n'){
+       modifiedStr = sqlInput.slice(0, i) + " " + sqlInput.slice(i + 1);
+     }
+    }
+    let temp = modifiedStr;
+   
     return temp;
   }
 
