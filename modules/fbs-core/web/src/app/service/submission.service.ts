@@ -107,6 +107,27 @@ export class SubmissionService {
     );
   }
 
+  /**
+   * Retrieves content of a submission
+   * GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content
+   * @param uid User id
+   * @param cid Course id
+   * @param tid Task id
+   * @param sid Submission id
+   * @return Observable that succeeds with the content of a submission made from user for a task
+   */
+  getTaskSubmissionsContent(
+    uid: number,
+    cid: number,
+    tid: number,
+    sid: number
+  ): Observable<any> {
+    return this.http.get(
+      `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,
+      { responseType: "text" }
+    );
+  }
+
   emitFileSubmission(): void {
     this.isFileSubmitted.emit(true);
   }
