@@ -43,6 +43,7 @@
             <mat-list-item>
               <mat-form-field class="mat-input-element">
                 <input
+                  style="width: 100%"
                   type="number"
                   placeholder="Anzahl Punkte zum Bestehen"
                   matInput
@@ -67,35 +68,35 @@
               </mat-form-field>
               <mat-icon
                 class="bonus-formula-info"
+                style="padding-right: 45px"
                 matTooltip="Verwende x für die Anzahl der Punkte in der Formel, z.B. 'abrunden(x/4)'"
                 >help</mat-icon
               >
             </mat-list-item>
+            <br />
             <form [formGroup]="requirementForm">
               <mat-list-item>
                 <mat-form-field class="mat-input-element">
-                  <div class="deadline-input">
-                    <mat-label>Deadline</mat-label>
-                    <input
-                      [readonly]="true"
-                      matInput
-                      [ngxMatDatetimePicker]="picker"
-                      [disabled]="datePickerDisabled"
-                      placeholder="Deadline"
-                      formControlName="deadline"
-                      (dateChange)="addDate($event)"
-                    />
-
-                    <mat-datepicker-toggle
-                      matSuffix
-                      [for]="picker"
-                    ></mat-datepicker-toggle>
-                    <ngx-mat-datetime-picker
-                      #picker
-                      [showSeconds]="true"
-                    ></ngx-mat-datetime-picker>
-                  </div>
+                  <mat-label>Deadline</mat-label>
+                  <input
+                    [readonly]="true"
+                    matInput
+                    [ngxMatDatetimePicker]="picker"
+                    [disabled]="datePickerDisabled"
+                    placeholder="Deadline"
+                    formControlName="deadline"
+                    (dateChange)="addDate($event)"
+                  />
                 </mat-form-field>
+                <mat-datepicker-toggle
+                  style="padding-right: 38px"
+                  matSuffix
+                  [for]="picker"
+                ></mat-datepicker-toggle>
+                <ngx-mat-datetime-picker
+                  #picker
+                  [showSeconds]="true"
+                ></ngx-mat-datetime-picker>
               </mat-list-item>
               <mat-list-item>
                 <mat-slide-toggle
