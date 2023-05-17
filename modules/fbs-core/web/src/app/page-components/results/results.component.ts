@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
@@ -8,7 +8,7 @@ import { CheckResult } from "../../model/CheckResult";
   templateUrl: "./results.component.html",
   styleUrls: ["./results.component.scss"],
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit {
   dataSource = new MatTableDataSource<CheckResult>();
   columns = ["checkerType", "resultText", "exitCode"];
 
@@ -24,6 +24,12 @@ export class ResultsComponent {
   tableViewAsGrid = false;
 
   index: number;
+
+  ngOnInit() {
+    if (this.dataSource.data.length < 2) {
+      this.columns = ["resultText", "exitCode"];
+    }
+  }
 
   @Input() set submissions(submissions: Submission[]) {
     const lengthHasChanged = this.allSubmissions != submissions;
