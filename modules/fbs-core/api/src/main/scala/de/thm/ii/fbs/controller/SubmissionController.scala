@@ -287,7 +287,7 @@ class SubmissionController {
       submissionService.getOne(sid, uid) match {
         case Some(submission) => {
           val file: File = storageService.getFileSolutionFile(submission)
-          val (ctype, ext) = task.getMimeTypeAndExtension()
+          val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))
           ResponseEntity.ok()
             .contentType(ctype)
             .contentLength(file.length())

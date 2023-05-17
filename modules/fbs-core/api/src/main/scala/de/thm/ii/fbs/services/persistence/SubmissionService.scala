@@ -34,11 +34,12 @@ class SubmissionService {
   private val objectMapper: ObjectMapper = new ObjectMapper()
 
   def writeSubmissionsOfTaskToFile(f: File, cid: Int, tid: Int): Unit = {
+    val task = taskService.getOne(tid).get
     val submissionList = getLatestSubmissionByTask(cid, tid)
     val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-    val contTypes = submissionList.map(submission => storageService.getContentTypeSolutionFile(submission))
-    Archiver.packSubmissions(f, subFiles, usersList, contTypes)
+    val fileExts = submissionList.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
+    Archiver.packSubmissions(f, subFiles, usersList, fileExts)
   }
 
   def writeSubmissionsOfCourseToFile(f: File, cid: Int): Unit = {
@@ -46,17 +47,15 @@ class SubmissionService {
     val usersList: ListBuffer[List[User]] = ListBuffer()
     val t = submissionList.map(s => s.taskID).distinct
     val listSubInDir: ListBuffer[List[File]] = ListBuffer()
-    val contTypes: ListBuffer[List[String]] = ListBuffer()
     val fileExts: ListBuffer[List[String]] = ListBuffer()
     t.foreach(taskid => {
       val task = taskService.getOne(taskid).get
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
       usersList += tmp.map(submission => userService.find(submission.userID.get).get)
-      contTypes += tmp.map(submission => storageService.getContentTypeSolutionFile(submission))
-      fileExts += tmp.map(_ => task.getMimeTypeAndExtension()._2)
+      fileExts += tmp.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
     })
-    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, contTypes, fileExts, t)
+    Archiver.packSubmissionsInDir(f, listSubInDir, usersList, fileExts, t)
     listSubInDir.foreach(files => files.foreach(file => file.delete()))
   }
 
