@@ -7,7 +7,6 @@ import java.util
 import javax.servlet.Filter
 import javax.servlet.http.HttpServletRequest
 
-
 @Configuration
 class SecurityConfig extends SecurityFilterChain {
   override def matches(request: HttpServletRequest): Boolean = true

@@ -6,7 +6,6 @@ import org.springframework.boot.actuate.health.{Health, ReactiveHealthIndicator}
 import org.springframework.jdbc.core.JdbcTemplate
 import reactor.core.publisher.Mono
 
-
 class DatabaseHealthService extends ReactiveHealthIndicator {
   @Autowired
   private implicit val jdbc: JdbcTemplate = null
