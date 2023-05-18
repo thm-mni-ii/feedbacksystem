@@ -11,10 +11,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileInputStream
 
-@SpringBootTest
 class MinioServiceTest {
-    @Autowired
-    lateinit var minioServiceV2: MinioServiceV2
+    private val minioServiceV2: MinioServiceV2 = MinioServiceV2()
     val str = "Hello World"
 
     @Before
