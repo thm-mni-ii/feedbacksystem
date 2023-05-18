@@ -79,7 +79,7 @@ export class HighlightedInputComponent
   }
 
   cleanUpTextAreaRegx(sqlInput: String) {
-    let temp = sqlInput.replace(/[\n\t]/g, "");
+    let temp = sqlInput.replace(/[\n\t]/g, " ");
     return temp;
   }
 
