@@ -6,6 +6,7 @@ import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerSubmission, User}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.TokenService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -82,7 +83,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
       val extInfo = SqlCheckerRemoteCheckerService.extInfo.remove(submission.id)
       this.handleSelf(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
     } else {
-        if (exitCode != 0 && hintsEnabled(checkerConfiguration)) {
+        if (exitCode == 2 && hintsEnabled(checkerConfiguration)) {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, true)
           if (extInfo != null) {
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
@@ -112,7 +113,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 }
                 if (!query.selAttributesRight.get) {
                   hints ++= "falsche Where-Attribute verwendet\n"
-                }
+                  }
                 if (!query.proAttributesRight.get) {
                   hints ++= "falsche Select-Attribute verwendet\n"
                 }
