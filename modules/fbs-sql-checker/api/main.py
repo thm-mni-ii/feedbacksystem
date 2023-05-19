@@ -25,7 +25,7 @@ else:
 # The following Code is for debugging purposes
 # CLIENT = (
 #     # Define MongoDB for debugging purposes
-#     "mongodb://admin:password@localhost:27017/"
+#     "mongodb://localhost:27017/sql-checker?authSource=admin"
 # )
 # for x in range(1):
 #     TEST_ID = "".join(
@@ -40,13 +40,13 @@ else:
 #     "submission": "SELECT Name, AVG( Quantity ) FROM Products GROUP BY Name "
 #     "HAVING AVG( Quantity ) > 3 * (SELECT AVG( Quantity ) "
 #     "FROM SalesOrderItems);",
-#     "passed": False,  # True if submission produced the right return in SQL-Runner
+#     "passed": True,  # True if submission produced the right return in SQL-Runner
 #     "resultText": "OK",
 #     "userId": 1,
 #     "attempt": 2,
-#     "tid": 10,
+#     "tid": 18,
 #     "sid": TEST_ID,
 #     "cid": 5,
-#     "isSol": False,  # True solution is from docent
+#     "isSol": True,  # True solution is from docent
 # }
 # parse_single_stat_upload_db(TESTDIC, CLIENT)

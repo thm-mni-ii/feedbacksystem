@@ -14,5 +14,5 @@ data class SqlPlaygroundRunnerArguments(
     @JsonProperty("runner")
     val runner: Runner = Runner(RunnerType.SQL_PLAYGROUND),
     @JsonProperty("mode")
-    val mode: RunnerMode = RunnerMode.EXECUTE,
+    val mode: RunnerMode = RunnerMode.EXECUTE
 ) : RunnerArguments()

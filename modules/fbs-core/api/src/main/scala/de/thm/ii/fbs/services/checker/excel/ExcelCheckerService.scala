@@ -130,6 +130,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     } catch {
       case e: NotImplementedFunctionException => generateCheckResultError("Die Excel-Funktion '%s' wird nicht unterstützt", e.getMessage)
       case _: NullPointerException => generateCheckResultError("Ungültige Konfiguration")
+      case e: ExcelCheckerException => generateCheckResultError(e.getMessage)
       case e: Throwable => generateCheckResultError("Bei der Überprüfung ist ein Fehler aufgetreten: '%s'", e.getMessage)
     }
   }
@@ -140,8 +141,12 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
                          excelMediaInformation: ExcelMediaInformation,
                          checkFields: ExcelMediaInformationCheck
                        ): CellsComparator = {
-    val userRes = this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
     val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
+    val userRes = try {
+      this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
+    } catch {
+      case _: NullPointerException => Seq.fill(expectedRes.length)(SpreadsheetCell("", ""))
+    }
 
     CellsComparator(userRes, expectedRes)
   }
@@ -154,8 +159,8 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
       val equal = actual.value.contentEquals(expected.value)
       if (!equal) {
         invalidFields :+= actual.reference
-        extInfo.result.rows.append(List(actual.reference, expected.value))
-        extInfo.expected.rows.append(List(actual.reference, actual.value))
+        extInfo.result.rows.append(List(actual.reference, actual.value))
+        extInfo.expected.rows.append(List(actual.reference, expected.value))
       }
       accumulator && equal
     })

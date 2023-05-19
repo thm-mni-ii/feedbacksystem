@@ -51,6 +51,7 @@ export class CourseDetailComponent implements OnInit {
   role: string = null;
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
+  userID: number;
 
   ngOnInit() {
     this.route.params.subscribe((param) => {
@@ -59,9 +60,10 @@ export class CourseDetailComponent implements OnInit {
       this.reloadTasks();
     });
     this.role = this.auth.getToken().courseRoles[this.courseID];
+    this.userID = this.authService.getToken().id;
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
       this.courseRegistrationService
-        .registerCourse(this.authService.getToken().id, this.courseID)
+        .registerCourse(this.userID, this.courseID)
         .subscribe(
           () =>
             this.courseService
