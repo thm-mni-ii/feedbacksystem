@@ -48,6 +48,9 @@
   background-color: rgba(219, 219, 219, 0.54);
   font-weight: normal;
   border-radius: 0;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .description {
@@ -65,12 +68,12 @@
   margin-left: 8px;
 }
 
-.material-icons.color_green { 
-  color: #00db00 
+.material-icons.color_green {
+  color: #00db00
 }
 
-.material-icons.color_red { 
-  color: #e20000 
+.material-icons.color_red {
+  color: #e20000
 }
 
 .title {
