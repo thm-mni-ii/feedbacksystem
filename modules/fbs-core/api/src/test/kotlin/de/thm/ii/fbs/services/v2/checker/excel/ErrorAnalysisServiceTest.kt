@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.services.v2.checker.excel
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
@@ -58,7 +60,8 @@ class ErrorAnalysisServiceTest {
                     SimpleTestCase.c4,
                     SimpleTestCase.c5
                 ),
-                SimpleTestCase.sGraph, SimpleTestCase.sMap
+                SimpleTestCase.sGraph,
+                SimpleTestCase.sMap
             )
         val res = service.findAllErrors(listOf(SimpleTestCase.c1))
 
@@ -92,7 +95,7 @@ class ErrorAnalysisServiceTest {
     @Test
     fun manyPropagatedErrorsTest2() {
         val c1 = Cell(0, "A1", formula = "B1 + C1 + 2")
-        val c2 = Cell(0, "B1", formula = "SUM(B2:B4)") //ComplexTestCase.c2
+        val c2 = Cell(0, "B1", formula = "SUM(B2:B4)") // ComplexTestCase.c2
         val c3 = Cell(0, "C1", formula = "D1 + E1 - 1")
         val c4 = ComplexTestCase.c4
         val c5 = ComplexTestCase.c5
@@ -144,7 +147,9 @@ class ErrorAnalysisServiceTest {
                 MultipleOutputTestCase.c7,
                 c8,
                 MultipleOutputTestCase.c9
-            ), MultipleOutputTestCase.sGraph, MultipleOutputTestCase.sMap
+            ),
+            MultipleOutputTestCase.sGraph,
+            MultipleOutputTestCase.sMap
         )
         val res = service.findAllErrors(listOf(MultipleOutputTestCase.c1, c8))
 
@@ -163,8 +168,6 @@ class ErrorAnalysisServiceTest {
         val res = service.findAllErrors(listOf(BasicTestCase.c1))
 
         assertEquals(setOf(c2), res)
-
-
     }
 
     @Test

@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{CourseResult, AnalysisCourseResult, TaskResult}
+import de.thm.ii.fbs.model.{AnalysisCourseResult, CourseResult, TaskResult}
+import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -21,7 +22,7 @@ class CourseResultService {
   @Autowired
   private val objectMapper: ObjectMapper = null
   @Autowired
-  private val storageService: StorageService = null
+  private val storageService: MinioStorageService = null
 
   /**
     * Get All Course Results

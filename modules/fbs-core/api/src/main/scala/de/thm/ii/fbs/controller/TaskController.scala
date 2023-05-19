@@ -5,6 +5,7 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper

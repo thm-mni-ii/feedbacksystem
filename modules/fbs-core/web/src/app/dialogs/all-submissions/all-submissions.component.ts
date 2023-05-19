@@ -9,7 +9,11 @@ import { Submission } from "../../model/Submission";
 })
 export class AllSubmissionsComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { submission: Submission[] },
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      submission: Submission[];
+      context: { uid: number; cid: number; tid: number };
+    },
     public dialogRef: MatDialogRef<AllSubmissionsComponent>
   ) {}
 
