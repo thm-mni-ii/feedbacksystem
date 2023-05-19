@@ -9,26 +9,26 @@
     <ng-container matColumnDef="cellName">
       <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
       <mat-cell *matCellDef="let data">
-      <table>
-        <ng-container *ngFor="let cell of data.errorCell">
-          <tr>
-            <td>{{ cell.cellName }}</td>
-            <td>{{ cell.errorHint }}</td>
-            <table>
-              <ng-container
-                *ngFor="let consequentCell of cell.consequentErrorCell"
-              >
-                <tr>
-                <br>
-                  <td>{{ consequentCell.cellName }}</td>
-                  <td>{{ consequentCell.errorHint }}</td>
-                </tr>
-              </ng-container>
-            </table>
-          </tr>
-        </ng-container>
-      </table>
-    </mat-cell>
+        <table>
+          <ng-container *ngFor="let cell of data.errorCell">
+            <tr>
+              <td>{{ cell.cellName }}</td>
+              <td>{{ cell.errorHint }}</td>
+              <table>
+                <ng-container
+                  *ngFor="let consequentCell of cell.consequentErrorCell"
+                >
+                  <tr>
+                    <br />
+                    <td>{{ consequentCell.cellName }}</td>
+                    <td>{{ consequentCell.errorHint }}</td>
+                  </tr>
+                </ng-container>
+              </table>
+            </tr>
+          </ng-container>
+        </table>
+      </mat-cell>
     </ng-container>
 
     <!-- Weight Column -->
@@ -50,3 +50,4 @@
     <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
   </mat-table>
+</div>

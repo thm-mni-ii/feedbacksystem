@@ -15,7 +15,6 @@
 //   isProperGated: boolean; // the propergated error
 // }
 
-
 export interface ExcelCheckResult {
   exercises: ExcelExercise[];
 }
