@@ -253,11 +253,11 @@ export class TaskDetailComponent implements OnInit {
    
     
         if (force || this.pending) {
-        this.refreshstate(); // load data contains the http request 
+          setInterval(() => {
+            this.refreshstate();
+        }, 5000); // load data contains the http request 
         }
-        setInterval(() => {
-          this.refreshstate();
-      }, 5000);
+      
     
    
   }
