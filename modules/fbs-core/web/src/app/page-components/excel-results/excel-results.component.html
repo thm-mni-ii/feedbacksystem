@@ -1,41 +1,52 @@
-<div class="results">
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-    <!-- column Aufgabe -->
+<div class="example-container mat-elevation-z8">
+  <mat-table #table [dataSource]="dataSource">
+    <!-- Name Column -->
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Aufgabe</th>
-      <td mat-cell *matCellDef="let name">{{ name.excercises.name }}</td>
+      <mat-header-cell *matHeaderCellDef> Aufgaben </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{ data.name }} </mat-cell>
+    </ng-container>
+    <!-- CellName Column -->
+    <ng-container matColumnDef="cellName">
+      <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
+      <mat-cell *matCellDef="let data">
+      <table>
+        <ng-container *ngFor="let cell of data.errorCell">
+          <tr>
+            <td>{{ cell.cellName }}</td>
+            <td>{{ cell.errorHint }}</td>
+            <table>
+              <ng-container
+                *ngFor="let consequentCell of cell.consequentErrorCell"
+              >
+                <tr>
+                <br>
+                  <td>{{ consequentCell.cellName }}</td>
+                  <td>{{ consequentCell.errorHint }}</td>
+                </tr>
+              </ng-container>
+            </table>
+          </tr>
+        </ng-container>
+      </table>
+    </mat-cell>
     </ng-container>
 
-    <ng-container matColumnDef="identifier">
-      <th mat-header-cell *matHeaderCellDef>Zelle</th>
-      <td mat-cell *matCellDef="let cell">
-        {{ cell.excercises.cells.identifier }}
-      </td>
-    </ng-container>
-
+    <!-- Weight Column -->
     <ng-container matColumnDef="errorHint">
-      <th mat-header-cell *matHeaderCellDef>Hinweis</th>
-      <td mat-cell *matCellDef="let checker">
-        {{ cell.excercises.cells.errorHint }}
-      </td>
+      <mat-header-cell *matHeaderCellDef> Hinweis </mat-header-cell>
+      <!-- <mat-cell *matCellDef="let data"> {{ data. }} </mat-cell> -->
     </ng-container>
 
     <ng-container matColumnDef="table">
-      <th mat-header-cell *matHeaderCellDef>Tabelle</th>
-      <td mat-cell *matCellDef="let checker">Table</td>
+      <mat-header-cell *matHeaderCellDef> Tabelle </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{ data.table }} </mat-cell>
     </ng-container>
 
-    <ng-container matColumnDef="succesfulAttempt">
-      <th mat-header-cell *matHeaderCellDef>Ergebnis</th>
-      <td mat-cell *matCellDef="let successfull">
-        <mat-icon class="done" *ngIf="successfull.excercises.succesfulAttempt === 0">done</mat-icon>
-        <mat-icon color="not-done" *ngIf="successfull.excercises.succesfulAttempt === 1"
-          >clear</mat-icon
-        >
-      </td>
+    <ng-container matColumnDef="result">
+      <mat-header-cell *matHeaderCellDef> Ergebnis </mat-header-cell>
+      <mat-cell *matCellDef="let data"> {{ data.result }} </mat-cell>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columns"></tr>
-    <tr mat-row *matRowDef="let row; columns: columns"></tr>
-  </table>
-</div>
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
