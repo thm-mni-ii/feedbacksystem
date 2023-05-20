@@ -26,20 +26,18 @@ def data(course):
         "Time": ["2023-05-15 10:00:00"],
     }
     if course != -1 and course:
-        if isinstance(course, str):
-            course = course.replace("/", "")
-        # print(course)
-        # course = int(course)
-        # query = {"Coursenumber": {"$eq": course}}
-        # CLIENT_tmp = (
-        #     "mongodb://myUserAdmin:abc123@localhost:27017/timestamps?authSource=admin"
-        # )
-        # client = MongoClient(CLIENT_tmp)
-        # db = client["timestamps"]
-        # cursor = db["data"]
+
+        #number = 162
+        #query = {"Coursenumber": {"$eq": number}}
+        #CLIENT_tmp = (
+        #    "mongodb://myUserAdmin:abc123@localhost:27017/timestamps?authSource=admin"
+        #)
+        #client = MongoClient(CLIENT_tmp)
+        #db = client["timestamps"]
+        #cursor = db["data"]
         # print(cursor)
         # print(pd.DataFrame(cursor.find(query)))
-        # dataframe = pd.DataFrame(cursor.find())
+        #dataframe = pd.DataFrame(cursor.find(query))
         return dumps(data)
     try:
         raise ValueError()

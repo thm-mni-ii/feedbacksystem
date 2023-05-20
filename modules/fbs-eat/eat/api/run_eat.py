@@ -6,23 +6,40 @@ from api.dataPreProcessing.chooseTaskType import layout as chooseTaskType_layout
 from api.dataTable.table import layout as table_layout
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
+from flask import request, session
+from flask_session import Session
+import flask
+import jwt
 
-# debug = False if os.environ["DASH_DEBUG_MODE"] == "False" else True
-debug = True
+#debug = False if os.environ["DASH_DEBUG_MODE"] == "False" else True
+debug = False
 external_stylesheets = [dbc.themes.BOOTSTRAP, "./assets/style.css"]
+server = flask.Flask(__name__)
 app = Dash(
     __name__,
     external_stylesheets=external_stylesheets,
     suppress_callback_exceptions=True,
+    server=server
 )
 
-server = app.server
 app.title = "Dashboard"
+SESSION_TYPE = 'redis'
+app.server.secret_key = 'your_secret_key_here'
+Session(app)
+secret_key = "your-secret-key"
 
+@app.server.before_request
+def pri():
+    #token =  request.headers['Authorization'].split(" ")[1]
+    #print(token)
+    #session['username'] = jwt.decode(token, secret_key, algorithms=["HS256"])
+    #print(decoded_token)
+    pass
 app.layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
         dcc.Store(id="intermediate-value"),
+        dcc.Store(id="save_courses"),
         html.Div(id="container"),
     ]
 )
@@ -32,9 +49,11 @@ app.layout = html.Div(
     Output("container", "children"),
     Output("intermediate-value", "data"),
     Input("url", "pathname"),
+    Input("save_courses","data")
 )
-def getDatas(url):
-    return addComponents(), data(url)
+def getDatas(url,daten):
+
+    return addComponents(), data(session.get('username'))
 
 
 def addComponents():
@@ -61,4 +80,4 @@ def addComponents():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="8050", debug=debug, dev_tools_props_check=False)
+    server.run(host="0.0.0.0", port="8050", debug=debug)

@@ -84,6 +84,7 @@ layout = html.Div(
                             "font_size": "16px",
                             "whiteSpace": "normal",
                             "height": "auto",
+                            'fontSize': '18px'
                         },
                         style_filter={
                             "color": "white",

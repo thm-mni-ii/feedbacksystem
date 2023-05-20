@@ -7,8 +7,6 @@ ENV DASH_DEBUG_MODE False
 WORKDIR /app
 COPY . .
 #RUN echo $(cat /app/pyproject.toml)
-COPY /api/data /app/data
-COPY /api/connect /app/connect
 
 
 # Installiere poetry

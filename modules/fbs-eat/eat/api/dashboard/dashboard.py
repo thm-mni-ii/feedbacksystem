@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 
 import dash_bootstrap_components as dbc
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objs as go
-from dash import Dash, Input, Output, callback, dcc, html
-from plotly.subplots import make_subplots
 from api.connect.connecttominio import data
-
+from dash import Input, Output, callback, dcc, html
+import dash
+from plotly.subplots import make_subplots
 
 # from api.connect.connecttominio import data
 # import io
@@ -17,7 +18,7 @@ from api.connect.connecttominio import data
 
 
 df = data(-1)
-df["Time"] = pd.to_datetime(df.Time)
+#df["Time"] = pd.to_datetime(df.Time)
 
 layout = html.Div(
     [
@@ -49,12 +50,6 @@ layout = html.Div(
                                         "Exercise",
                                         exercise := dcc.Dropdown(
                                             df.UniqueName.unique(),
-                                            #[
-                                            #    df[
-                                            #        df.CourseName == course
-                                            #    ].UniqueName.iloc[0]
-                                            #    for course in df.CourseName.unique()
-                                            #],
                                             multi=True,
                                             placeholder="Select one or more exercise",
                                             style={"background-color": "#e9e7e9"},
@@ -75,16 +70,18 @@ layout = html.Div(
                                 ),
                             ),
                             dbc.Col(
-                                html.Div(
+                                timerow := html.Div(
                                     [
                                         "Date/Time From",
-                                        date_time_from := dcc.Input(
-                                            datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                        dcc.Input(
+                                            id = "date_time_from",
+                                            value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
                                             type="datetime-local",
                                         ),
                                         "Date/Time To",
-                                        date_time_to := dcc.Input(
-                                            (
+                                        dcc.Input(
+                                            id = "date_time_to",
+                                            value = (
                                                 datetime.now()
                                                 + timedelta(hours=1, minutes=30)
                                             ).strftime("%Y-%m-%dT%H:%M"),
@@ -137,6 +134,49 @@ layout = html.Div(
         ),
     ],
 )
+@callback(Output(timerow,"children"),Input(checklist,"value"),Input(timerow,"children"))
+def hide_time(checkbox,reihe):
+    if "Date" in checkbox:
+        test =  html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id = "date_time_from",
+                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id = "date_time_to",
+                    value =  (
+                        datetime.now()
+                        + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        )
+        return test
+    else:
+        return html.Div(
+            children =
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id = "date_time_from",
+                    value = (datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id = "date_time_to",
+                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden", "height": "0"},
+
+        )
 
 
 def generate_empty_response():
@@ -245,22 +285,27 @@ def checklist_filter_masks(checks,daten):
 
 # Update dropdown menu for exercises
 @callback(Output(exercise, "options"), Input(course, "value"), Input("intermediate-value","data"))
-def update_dropdown(input_value,daten):
+def update_exercises_dropdown_course(input_value,daten):
     df = pd.read_json(daten)
+
     if not input_value:
-        return df.UniqueName.unique()
+        return list(df.UniqueName.unique())
     else:
-        return df[df.CourseName.isin(input_value)].UniqueName.unique()
+        return list(df[df.CourseName.isin(input_value)].UniqueName.unique()) + ["Übersicht"]
 
 
 # Update date_time_to based on date_time_from
-@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
-def update_date_time_to(input_value):
-    try:
-        date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
-        return date_time + timedelta(hours=1, minutes=30)
-    except:
-        return input_value
+@callback(Output("date_time_to", "value"), Input("date_time_from", "value"),Input(checklist,"value"))
+def update_date_time_to(input_value,check):
+    if "Date" in check:
+        try:
+            date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
+            return date_time + timedelta(hours=1, minutes=30)
+        except:
+            return input_value
+    else:
+        date_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
+        return date_time
 
 
 # Update histogramm figure
@@ -271,8 +316,8 @@ def update_date_time_to(input_value):
     Input(key_figure, "value"),
     Input(checklist, "value"),
     Input("slider", "value"),
-    Input(date_time_from, "value"),
-    Input(date_time_to, "value"),
+    Input("date_time_from", "value"),
+    Input("date_time_to", "value"),
     Input("intermediate-value","data")
 )
 def update_histogram(
@@ -304,6 +349,7 @@ def update_histogram(
 
     slider_value = slider_value or [df.Attempt.min(), df.Attempt.max()]
 
+    # if no excercise are choosen, use all excercises
     if not exercise_value:
         if course_value:
             exercise_value = list(
@@ -318,13 +364,79 @@ def update_histogram(
         (filtered_df.Attempt.ge(slider_value[0]))
         & (filtered_df.Attempt.le(slider_value[1]))
     ]
+
     if course_value:
         filtered_df = filtered_df[filtered_df.CourseName.isin(course_value)]
-    if exercise_value:
-        filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
+    
+    # We want all excercise values if Übersicht is checked 
+    if "Übersicht" not in exercise_value:
+        if exercise_value:
+            filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
+
     filtered_df = filtered_df[
         (filtered_df.Time >= date_time_from) & (filtered_df.Time < date_time_to)
     ]
+
+    if "Übersicht" in exercise_value:
+        hist_df = filtered_df[
+        [
+            "Joins",
+            "Projection_Attributes",
+            "Selection_Attributes",
+            "GroupBy",
+            "OrderBy",
+            "Strings",
+            "Tables",
+        ]]
+
+        if hist_df.empty:
+            return generate_empty_response()
+        result_dict = {}
+
+        for column in hist_df.columns:
+            value_counts = hist_df[column].value_counts()
+            total_counts = value_counts.sum()
+            percent_correct = (value_counts.get('correct', 0) / total_counts)
+            percent_incorrect = (value_counts.get('incorrect', 0) / total_counts)
+            result_dict[column] = {'Correct': percent_correct, 'Incorrect': percent_incorrect}
+
+        result_df = pd.DataFrame(result_dict)
+         # Colors for each bar
+        colors = [
+            "#60a7ba",
+            "#f0912d",
+            "#357025",
+            "#ba3622",
+            "#8f33d6",
+            "#6a4c4d",
+            "#cf8af3",
+        ]
+
+        # Label for each bar
+        labels = [
+            "Joins",
+            "Projection_Attributes",
+            "Selection_Attributes",
+            "GroupBy",
+            "OrderBy",
+            "Strings",
+            "Tables",
+        ]
+        values = []
+
+        for i, column in enumerate(result_df.columns):
+            values.append(result_df[column].Incorrect)
+
+        data = {'labels': labels, 'values': values}
+        df = pd.DataFrame(data)
+
+        fig = px.bar(df, x='labels', y='values', color='labels', color_discrete_sequence=colors,labels={
+                     "labels": "SQL-Attribute",
+                     "values": "PERCENT",
+                 },)
+        fig.update_layout(showlegend=False,height=600)
+        return fig
+
     # Create figure which will be returned and contains all subfigures
     fig = make_subplots(
         rows=math.ceil(len(exercise_value) / 2),
@@ -333,6 +445,7 @@ def update_histogram(
         shared_xaxes=True,
         shared_yaxes=True,
     )
+
 
     # Initialize subfigures
     for row in range(1, math.ceil(len(exercise_value) / 2) + 1):

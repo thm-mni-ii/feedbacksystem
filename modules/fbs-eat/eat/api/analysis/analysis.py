@@ -82,26 +82,21 @@ layout = html.Div(
                                                     )
                                                 ),
                                                 dbc.Col(
-                                                    html.Div(
+                                                    timerow := html.Div(
                                                         [
                                                             "Date/Time From",
-                                                            date_time_from := dcc.Input(
-                                                                datetime.now().strftime(
-                                                                    "%Y-%m-%dT%H:%M"
-                                                                ),
+                                                            dcc.Input(
+                                                                id="date_time_from2",
+                                                                value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
                                                                 type="datetime-local",
                                                             ),
                                                             "Date/Time To",
-                                                            date_time_to := dcc.Input(
-                                                                (
-                                                                    datetime.now()
-                                                                    + timedelta(
-                                                                        hours=1,
-                                                                        minutes=30,
-                                                                    )
-                                                                ).strftime(
-                                                                    "%Y-%m-%dT%H:%M"
-                                                                ),
+                                                            dcc.Input(
+                                                                id="date_time_to2",
+                                                                value=(
+                                                                        datetime.now()
+                                                                        + timedelta(hours=1, minutes=30)
+                                                                ).strftime("%Y-%m-%dT%H:%M"),
                                                                 type="datetime-local",
                                                             ),
                                                         ]
@@ -312,6 +307,49 @@ layout = html.Div(
     ]
 )
 
+@callback(Output(timerow,"children"),Input(checklist,"value"),Input(timerow,"children"))
+def hide_time(checkbox,reihe):
+    if "Date" in checkbox:
+        test =  html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id = "date_time_from2",
+                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id = "date_time_to2",
+                    value =  (
+                        datetime.now()
+                        + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        )
+        return test
+    else:
+        return html.Div(
+            children =
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id = "date_time_from2",
+                    value = (datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id = "date_time_to2",
+                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden", "height": "0"},
+
+        )
 
 @callback(
     Output(course, "options"),
@@ -339,13 +377,17 @@ def update_dropdown(input_value, daten):
 
 
 # Update date_time_to based on date_time_from
-@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
-def update_date_time_to(input_value):
-    try:
-        date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
-        return date_time + timedelta(hours=1, minutes=30)
-    except:
-        return input_value
+@callback(Output("date_time_to2", "value"), Input("date_time_from2", "value"),Input(checklist,"value"))
+def update_date_time_to(input_value,check):
+    if "Date" in check:
+        try:
+            date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
+            return date_time + timedelta(hours=1, minutes=30)
+        except:
+            return input_value
+    else:
+        date_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
+        return date_time
 
 
 @callback(
@@ -456,8 +498,8 @@ def checklist_filter_masks(checks, daten):
         Input(exercise, "options"),
         Input({"type": "delete-button-active", "index": ALL}, "n_clicks"),
         Input({"type": "delete-button-column", "index": ALL}, "n_clicks"),
-        Input(date_time_from, "value"),
-        Input(date_time_to, "value"),
+        Input("date_time_from2", "value"),
+        Input("date_time_to2", "value"),
         Input("intermediate-value", "data"),
     ],
 )
