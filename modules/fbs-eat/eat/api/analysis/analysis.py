@@ -9,9 +9,8 @@ from api.connect.connecttominio import data
 from dash import ALL, Input, Output, callback, dcc, html
 from dash.dependencies import Input, Output
 
-# databuffer = io.BytesIO(data)
 df = data(-1)
-df["Time"] = pd.to_datetime(df.Time)
+
 filter = [
     "Projection Attributes",
     "Selection Attributes",
@@ -501,6 +500,7 @@ def checklist_filter_masks(checks, daten):
         Input("date_time_from2", "value"),
         Input("date_time_to2", "value"),
         Input("intermediate-value", "data"),
+        Input(checklist,"value")
     ],
 )
 def update(
@@ -519,6 +519,7 @@ def update(
     date_time_from,
     date_time_to,
     daten,
+    check_list
 ):
     trigger = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     sliders = []
@@ -659,7 +660,8 @@ def update(
     # prepare the data to create a graph
     data = []
     names = []
-    dff = dff[(dff.Time >= date_time_from) & (dff.Time < date_time_to)]
+    if "Date" in check_list:
+        dff = dff[(dff.Time >= date_time_from) & (dff.Time < date_time_to)]
     if tmpdf is not None:
         for i in range(0, 2 ** (len(columns))):
             num = bin(i)
