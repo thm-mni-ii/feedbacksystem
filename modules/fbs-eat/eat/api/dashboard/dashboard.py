@@ -9,19 +9,8 @@ from api.connect.connecttominio import data
 from dash import Input, Output, callback, dcc, html
 import dash
 from plotly.subplots import make_subplots
-import logging
-
-logger = logging.getLogger("Test")
-
-# from api.connect.connecttominio import data
-# import io
-
-
-# databuffer = io.BytesIO(data)
-
 
 df = data(-1)
-#df["Time"] = pd.to_datetime(df.Time)
 
 layout = html.Div(
     [
@@ -139,7 +128,6 @@ layout = html.Div(
 )
 @callback(Output(timerow,"children"),Input(checklist,"value"),Input(timerow,"children"))
 def hide_time(checkbox,reihe):
-    logger.error(datetime.now().strftime("%Y-%m-%dT%H:%M"),)
     if "Date" in checkbox:
         test =  html.Div(
             [
@@ -338,7 +326,6 @@ def update_histogram(
 ):
     df = pd.read_json(daten)
     df["Time"] = pd.to_datetime(df.Time)
-    logger.error(df.to_dict())
     # Convert datetime string to datetime object
     try:
         date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")

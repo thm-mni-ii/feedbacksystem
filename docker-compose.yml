@@ -226,6 +226,10 @@ services:
       - 5000:8050
     networks:
       - fbs
+    environment:
+      - JWT_SECRET=8Dsupersecurekeydf0
+      - SERVER_SESSION_SECRET=sessiosecret
+      - MONGODB_URL=mongodb://mongodb:27017/sql-checker
 
 networks:
   classroom:

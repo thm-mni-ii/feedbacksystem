@@ -9,9 +9,8 @@ from api.connect.connecttominio import data
 from dash import ALL, Input, Output, callback, dcc, html
 from dash.dependencies import Input, Output
 
-# databuffer = io.BytesIO(data)
 df = data(-1)
-df["Time"] = pd.to_datetime(df.Time)
+
 filter = [
     "Projection Attributes",
     "Selection Attributes",

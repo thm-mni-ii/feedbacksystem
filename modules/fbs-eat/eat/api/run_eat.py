@@ -25,20 +25,9 @@ app = Dash(
 
 app.title = "Dashboard"
 SESSION_TYPE = 'redis'
-app.server.secret_key = 'your_secret_key_here'
+app.server.secret_key = os.getenv("SERVER_SESSION_SECRET")
 Session(app)
-secret_key = "8Dsupersecurekeydf0"
-
-@app.server.before_request
-def authorizeSession():
-    '''
-    alert("1");
-    console.log("1");
-    const id = localStorage.get('token');
-    console.log(id);
-    console.log("2222222222222222222222222222222222222222222222222222222222222222222222222222222222");
-    :return:
-    '''
+SECRET_KEY = os.getenv("JWT_SECRET")
 
 app.layout = html.Div(
     [
@@ -64,7 +53,7 @@ app.clientside_callback(
     Input("save_courses","data")
 )
 def getDatas(url,daten):
-    token = jwt.decode(daten, secret_key, algorithms=["HS256"])
+    token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
     courseAccess = []
     courseRoles = json.loads(token['courseRoles'])
     for course,role in courseRoles.items():
