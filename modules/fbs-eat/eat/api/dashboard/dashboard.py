@@ -322,7 +322,8 @@ def update_date_time_to(input_value,check):
     Input("slider", "value"),
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
-    Input("intermediate-value","data")
+    Input("intermediate-value","data"),
+    Input(checklist, "value")
 )
 def update_histogram(
     course_value,
@@ -332,7 +333,8 @@ def update_histogram(
     slider_value,
     date_time_from,
     date_time_to,
-    daten
+    daten,
+    check_list
 ):
     df = pd.read_json(daten)
     df["Time"] = pd.to_datetime(df.Time)
@@ -376,10 +378,10 @@ def update_histogram(
     if "Übersicht" not in exercise_value:
         if exercise_value:
             filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
-
-    filtered_df = filtered_df[
-        (filtered_df.Time >= date_time_from) & (filtered_df.Time < date_time_to)
-    ]
+    if "Date" in check_list:
+        filtered_df = filtered_df[
+            (filtered_df.Time >= date_time_from) & (filtered_df.Time < date_time_to)
+        ]
 
     if "Übersicht" in exercise_value:
         hist_df = filtered_df[
