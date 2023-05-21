@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 from api.analysis.analysis import layout as analysis_layout
-from api.connect.connecttominio import data
+from api.connect.data_service import data
 from api.dashboard.dashboard import layout as dashboard_layout
 from api.datapreprocessing.chooseTaskType import layout as chooseTaskType_layout
 from api.dataTable.table import layout as table_layout

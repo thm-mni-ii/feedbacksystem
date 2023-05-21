@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-from api.connect.connecttominio import data
+from api.connect.data_service import data
 from dash import Input, Output, callback, dcc, html
 import dash
 from plotly.subplots import make_subplots

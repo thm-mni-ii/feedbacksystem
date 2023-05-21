@@ -9,7 +9,7 @@ from dash import dash_table, callback
 from dash.dependencies import Input, Output
 import pandas as pd
 from datetime import datetime, timedelta
-from api.connect.connecttominio import data
+from api.connect.data_service import data
 
 df = data(-1)
 df["Time"] = pd.to_datetime(df.Time)
