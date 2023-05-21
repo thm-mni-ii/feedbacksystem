@@ -1,16 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
-  selector: 'app-analytics-tool',
-  templateUrl: './analytics-tool.component.html',
-  styleUrls: ['./analytics-tool.component.css']
+  selector: "app-analytics-tool",
+  templateUrl: "./analytics-tool.component.html",
+  styleUrls: ["./analytics-tool.component.scss"]
 })
-export class AnalyticsToolComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-
-  }
+export class AnalyticsToolComponent {
 
 }
