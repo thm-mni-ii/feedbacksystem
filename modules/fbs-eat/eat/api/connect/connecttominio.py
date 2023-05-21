@@ -39,9 +39,6 @@ def data(course):
         # print(pd.DataFrame(cursor.find(query)))
         #dataframe = pd.DataFrame(cursor.find(query))
         return dumps(data)
-    try:
-        raise ValueError()
-        #dataframe
-    except:
-        dataframe = pd.DataFrame(data)
+
+    dataframe = pd.DataFrame(data)
     return dataframe

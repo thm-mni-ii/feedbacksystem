@@ -53,7 +53,7 @@ app.layout = html.Div(
 )
 def getDatas(url,daten):
 
-    return addComponents(), data(session.get('username'))
+    return addComponents(), data(1)
 
 
 def addComponents():

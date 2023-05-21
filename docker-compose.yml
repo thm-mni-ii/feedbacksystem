@@ -224,7 +224,7 @@ services:
     container_name: eat
     restart: always
     ports:
-      - 5000:80
+      - 5000:8050
     networks:
       - fbs
 

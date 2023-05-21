@@ -17,6 +17,6 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
 
 # Starte die App mit Gunicorn
-CMD [ "gunicorn", "--workers=5", "--threads=1", "-b 0.0.0.0:80", "api.run_eat:server"]
+CMD [ "gunicorn", "--workers=5", "--threads=1", "-b 0.0.0.0:8050", "api.run_eat:server"]
 
 
