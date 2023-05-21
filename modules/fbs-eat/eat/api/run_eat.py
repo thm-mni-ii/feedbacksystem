@@ -59,14 +59,6 @@ def getDatas(url,daten):
 def addComponents():
     container = []
     container.append(html.Br())
-    container.append(
-        html.H1("E-Learning Analytics Tool", style={"text-align": "center"})
-    )
-    container.append(html.Br())
-    container.append(html.Br())
-    container.append(chooseTaskType_layout)
-    container.append(html.Br())
-    container.append(html.Br())
     container.append(dashboard_layout)
     container.append(html.Br())
     container.append(html.Br())
