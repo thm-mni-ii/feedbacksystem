@@ -3,7 +3,6 @@ name = "fbs-analytics-tool"
 version = "0.1.0"
 description = ""
 authors = ["Jonas Wölfer <jonas.woelfer@mnd.thm.de>"]
-readme = "README.md"
 packages = [{include = "api"}]
 
 [tool.poetry.dependencies]

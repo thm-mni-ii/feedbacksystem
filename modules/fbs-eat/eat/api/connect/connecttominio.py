@@ -1,6 +1,8 @@
 import pandas as pd
 from bson.json_util import dumps
 from pymongo import MongoClient
+from api.datapreprocessing.cleandataset import cleandata
+
 
 
 def data(course):
@@ -26,18 +28,15 @@ def data(course):
         "Time": ["2023-05-15 10:00:00"],
     }
     if course != -1 and course:
-
-        #number = 162
-        #query = {"Coursenumber": {"$eq": number}}
-        #CLIENT_tmp = (
-        #    "mongodb://myUserAdmin:abc123@localhost:27017/timestamps?authSource=admin"
-        #)
-        #client = MongoClient(CLIENT_tmp)
-        #db = client["timestamps"]
-        #cursor = db["data"]
-        # print(cursor)
-        # print(pd.DataFrame(cursor.find(query)))
-        #dataframe = pd.DataFrame(cursor.find(query))
+        CLIENT_tmp = (
+            "mongodb://mongodb:27017/sql-checker"
+        )
+        client = MongoClient(CLIENT_tmp)
+        query = {"courseId": {"$in": course}}
+        db = client.get_default_database()
+        cursor = db["Queries"]
+        data = cursor.find(query)
+        data = cleandata(pd.DataFrame(data))
         return dumps(data)
 
     dataframe = pd.DataFrame(data)
