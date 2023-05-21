@@ -57,6 +57,16 @@
           <mat-icon>extension</mat-icon>
           <p>SQL Playground</p>
         </a>
+
+        <a
+          mat-list-item
+          *ngIf="isModerator"
+          routerLink="/analytics"
+          routerLinkActive="selected"
+        >
+          <mat-icon>bar_chart</mat-icon>
+          <p>Analyseplattform</p>
+        </a>
       </mat-nav-list>
 
       <span class="filler"></span>
