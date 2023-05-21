@@ -60,7 +60,7 @@
 
         <a
           mat-list-item
-          *ngIf="isAdmin"
+          *ngIf="showAnalytics || isAdmin || isModerator"
           routerLink="/analytics"
           routerLinkActive="selected"
         >
