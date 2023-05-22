@@ -185,11 +185,17 @@ def generate_empty_response():
 
     return fig
 
-@callback(Output(course,"options"), Output(course, "value"),Input("intermediate-value","data"))
-def update_exercise(daten):
+@callback(
+    Output(course,"options"),
+    Output(course, "value"),
+    Input("intermediate-value","data"),
+    Input("courses_dict", "data"),
+)
+def update_exercise(daten, courses_dict):
     emptyList = []
     df = pd.read_json(daten)
-    return df.CourseName.unique(), emptyList
+    courses = [{"value": course_id, "label": courses_dict.get(str(course_id)) or course_id} for course_id in df.CourseName.unique()]
+    return courses, emptyList
 
 
 @callback(Output(checklist_filter_components, "children"), Input(checklist, "value"),Input("intermediate-value","data"))

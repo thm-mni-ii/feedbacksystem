@@ -354,11 +354,13 @@ def hide_time(checkbox,reihe):
     Output(course, "options"),
     Output(course, "value"),
     Input("intermediate-value", "data"),
+    Input("courses_dict", "data"),
 )
-def update_exercise(daten):
+def update_exercise(daten, courses_dict):
     emptyList = []
     df = pd.read_json(daten)
-    return df.CourseName.unique(), emptyList
+    courses = [{"value": course_id, "label": courses_dict.get(str(course_id)) or course_id} for course_id in df.CourseName.unique()]
+    return courses, emptyList
 
 
 # Update dropdown menu for exercises

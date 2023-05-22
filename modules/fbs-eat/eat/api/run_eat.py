@@ -12,11 +12,14 @@ import flask
 import jwt
 import json
 import os
+import requests
 debug = True if os.environ["DASH_DEBUG_MODE"] == "True" else False
 
 SESSION_TYPE = 'redis'
 URL_BASE_PATH = os.getenv("URL_BASE_PATH")
 SECRET_KEY = os.getenv("JWT_SECRET")
+FBS_BASE_URL = os.getenv("FBS_BASE_URL")
+FBS_TLS_NO_VERIFY = os.getenv("FBS_TLS_NO_VERIFY") == "true"
 
 
 external_stylesheets = [dbc.themes.BOOTSTRAP, "./assets/style.css"]
@@ -42,6 +45,7 @@ app.layout = html.Div(
         dcc.Location(id="url", refresh=False),
         dcc.Store(id="intermediate-value"),
         dcc.Store(id="save_courses"),
+        dcc.Store(id="courses_dict"),
         html.Div(id="container"),
     ]
 )
@@ -57,6 +61,7 @@ app.clientside_callback(
 @app.callback(
     Output("container", "children"),
     Output("intermediate-value", "data"),
+    Output("courses_dict", "data"),
     Input("url", "pathname"),
     Input("save_courses","data")
 )
@@ -75,7 +80,10 @@ def getDatas(url,daten):
     if not courseAccess:
         return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), []
 
-    return addComponents(), data(courseAccess)
+    courses = requests.get(f"{FBS_BASE_URL}/api/v1/users/1/courses", headers={"Authorization": f"Bearer {daten}"}, verify=not FBS_TLS_NO_VERIFY).json()
+    courses_dict = {course["id"]: course["name"] for course in courses}
+
+    return addComponents(), data(courseAccess), courses_dict
 
 
 def addComponents():
