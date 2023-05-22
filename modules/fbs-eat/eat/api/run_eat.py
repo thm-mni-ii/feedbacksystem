@@ -33,6 +33,10 @@ app.title = "Dashboard"
 app.server.secret_key = os.getenv("SERVER_SESSION_SECRET")
 Session(app)
 
+def create_error_screen(text):
+    error_label = html.Div(html.Label(text, style={'font-size': '36px'}))
+    return error_label
+
 app.layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
@@ -57,12 +61,20 @@ app.clientside_callback(
     Input("save_courses","data")
 )
 def getDatas(url,daten):
-    token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
+    try:
+        token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
+    except:
+        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), []
     courseAccess = []
     courseRoles = json.loads(token['courseRoles'])
+
     for course,role in courseRoles.items():
         if role == "DOCENT" or role == "TUTOR":
             courseAccess.append(int(course))
+
+    if not courseAccess:
+        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), []
+
     return addComponents(), data(courseAccess)
 
 
