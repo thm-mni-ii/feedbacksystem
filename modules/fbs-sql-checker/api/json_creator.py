@@ -38,7 +38,8 @@ def parse_single_stat_upload_db(data, client):
         group_by2,
         having2,
         joins2,
-    ) = ([], [], [], [], [], [], [], [], [], [], [], [])
+        wildcards2,
+    ) = ([], [], [], [], [], [], [], [], [], [], [], [], [])
     try:
         if "submission" in data:
             query = data["submission"]
@@ -98,6 +99,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
+            wildcards2,
         ) = check_solution_chars(
             data,
             task_nr,
@@ -110,6 +112,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
+            wildcards2,
             client,
         )
         # produce a JSON
@@ -127,6 +130,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
+            wildcards2,
             client,
             time,
         )
@@ -156,6 +160,7 @@ def check_solution_chars(
     group_by2,
     joins2,
     having2,
+    wildcards2,
     client,
 ):
     new_solution = True
@@ -168,7 +173,8 @@ def check_solution_chars(
         group_by_right,
         joins_right,
         having_right,
-    ) = (False, False, False, False, False, False, False, False)
+        wildcards,
+    ) = (False, False, False, False, False, False, False, False, False)
     mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
@@ -259,6 +265,15 @@ def check_solution_chars(
                 pro_attributes_right = True
             if set(strings) == set(strings2):
                 strings_right = True
+            if (
+                any("%" in s for s in strings)
+                and not any("%" in s for s in strings2)
+                or not any("%" in s for s in strings)
+                and any("%" in s for s in strings2)
+            ):
+                wildcards = False
+            else:
+                wildcards = True
             if order_by == order_by2:
                 order_by_right = True
             if group_by == group_by2:
@@ -271,7 +286,7 @@ def check_solution_chars(
         if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
-        return (True, True, True, True, True, True, True, True)
+        return (True, True, True, True, True, True, True, True, True)
     # return if characteristics are True or False
     return (
         tables_right,
@@ -282,6 +297,7 @@ def check_solution_chars(
         group_by_right,
         joins_right,
         having_right,
+        wildcards,
     )
 
 
@@ -308,6 +324,7 @@ def return_json(  # pylint: disable=R1710
     group_by_right,
     joins_right,
     having_right,
+    wildcards,
     client,
     time,
 ):
@@ -335,6 +352,7 @@ def return_json(  # pylint: disable=R1710
                 group_by_right,
                 joins_right,
                 having_right,
+                wildcards,
                 time,
             )
             return record
@@ -361,6 +379,7 @@ def prod_json_not_parsable(_id, cid, task_nr, time):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
+        "wildcards": None,
         "time": time,
     }
     return value
@@ -491,6 +510,7 @@ def prod_json(
     group_by_right,
     joins_right,
     having_right,
+    wildcards,
     time,
 ):
     # save data if it is a manual solution
@@ -516,6 +536,7 @@ def prod_json(
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
         "havingRight": having_right,
+        "wildcards": wildcards,
         "time": time,
     }
     user_data.clear()
