@@ -99,7 +99,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
-            wildcards2
+            wildcards2,
         ) = check_solution_chars(
             data,
             task_nr,
@@ -112,7 +112,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
-            client
+            client,
         )
         # produce a JSON
         record = return_json(
