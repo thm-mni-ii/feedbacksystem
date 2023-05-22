@@ -9,7 +9,7 @@ import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.*
 
 class AnalysisResultHandlerTest {
     private lateinit var result: AnalysisResult
@@ -35,8 +35,8 @@ class AnalysisResultHandlerTest {
         )
         service.findAllErrors(listOf(c1))
 
-        Assertions.assertEquals(setOf(c1), result.getErrorCells())
-        Assertions.assertEquals(setOf<Cell>(), result.getPropagatedErrorCells())
+        assertEquals(setOf(c1), result.getErrorCells())
+        assertEquals(setOf<Cell>(), result.getPropagatedErrorCells())
     }
 
     @Test

@@ -20,8 +20,8 @@ class ErrorAnalysisService(
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
-    private val errors = HashSet<Cell>()
-    private val perrors = HashSet<Cell>()
+    val errors = HashSet<Cell>()
+    val perrors = HashSet<Cell>()
     private val visited = HashSet<Cell>()
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
