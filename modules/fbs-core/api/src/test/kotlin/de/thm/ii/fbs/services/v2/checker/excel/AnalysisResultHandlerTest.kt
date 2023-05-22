@@ -40,29 +40,26 @@ class AnalysisResultHandlerTest {
     }
 
     @Test
-    fun manyPropagatedErrorsTest2() {
-        val c1 = ErrorAnalysisServiceTest.ComplexTestCase.c1
-        val c2 = ErrorAnalysisServiceTest.ComplexTestCase.c2
-        val c3 = ErrorAnalysisServiceTest.ComplexTestCase.c3
-        val c4 = Cell(0, "D1", "5")
-        val c5 = ErrorAnalysisServiceTest.ComplexTestCase.c5
-        val c6 = ErrorAnalysisServiceTest.ComplexTestCase.c6
-        val c7 = ErrorAnalysisServiceTest.ComplexTestCase.c7
-        val c8 = ErrorAnalysisServiceTest.ComplexTestCase.c8
-        val c9 = ErrorAnalysisServiceTest.ComplexTestCase.c9
-        val c10 = Cell(0, "D4", "6")
+    fun notPropagatedErrorsTest() {
+        val a1 = ErrorAnalysisServiceTest.SimpleTestCase2.a1
+        val b1 = ErrorAnalysisServiceTest.SimpleTestCase2.b1
+        val c1 = Cell(0, "C1", formula = "D1 + E1 - 1")
+        val d1 = ErrorAnalysisServiceTest.SimpleTestCase2.d1
+        val e1 = ErrorAnalysisServiceTest.SimpleTestCase2.e1
+        val b2 = ErrorAnalysisServiceTest.SimpleTestCase2.b2
+        val b3 = ErrorAnalysisServiceTest.SimpleTestCase2.b3
 
         val service =
             ErrorAnalysisService(
-                SpreadsheetTestUtils.workbook(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10),
-                ErrorAnalysisServiceTest.ComplexTestCase.sGraph,
-                ErrorAnalysisServiceTest.ComplexTestCase.sMap,
+                SpreadsheetTestUtils.workbook(a1, b1, c1, d1, e1, b2, b3),
+                ErrorAnalysisServiceTest.SimpleTestCase.sGraph,
+                ErrorAnalysisServiceTest.SimpleTestCase.sMap,
                 handlerService
             )
-        service.findAllErrors(listOf(c1))
+        service.findAllErrors(listOf(a1))
 
-        Assertions.assertEquals(setOf(c4, c10), result.getErrorCells())
-        Assertions.assertEquals(setOf(c1, c2, c3, c7), result.getPropagatedErrorCells())
-        Assertions.assertEquals(setOf(c1, c2, c3, c7, c4, c10), result.getAllErrorCells())
+        assertEquals(setOf(c1), result.getErrorCells())
+        assertEquals(setOf(a1), result.getPropagatedErrorCells())
+        assertEquals(setOf(c1, a1), result.getAllErrorCells())
     }
 }
