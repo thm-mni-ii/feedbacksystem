@@ -22,7 +22,7 @@ def cleandata(df):
     }
     df = df.rename(columns=column_mapping)
     df.loc[
-            lambda df: df["Correct"] == True,
+            lambda df: df["Solution"] == True,
         [
             "GroupBy",
             "Joins",
@@ -31,6 +31,7 @@ def cleandata(df):
             "Selection_Attributes",
             "Strings",
             "Tables",
+            "Correct"
         ],
     ] = True
 

@@ -12,8 +12,11 @@ from datetime import datetime, timedelta
 from api.connect.data_service import data
 
 df = data(-1)
-df["Time"] = pd.to_datetime(df.Time)
 
+def get_attributes_to_hide(list,excludes):
+    for ex in excludes:
+        list.remove(ex)
+    return list
 
 dff = df
 layout = html.Div(
@@ -41,6 +44,7 @@ layout = html.Div(
                             ]
                         ),
                     ),
+                    dcc.Checklist(id='toggle_hiding_queries', options=["Exclude equal queries"]),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
                         data=df.to_dict("records"),
@@ -56,6 +60,7 @@ layout = html.Div(
                         row_deletable=False,
                         page_action="native",
                         page_current=0,
+                        hidden_columns=get_attributes_to_hide(df.astype(str).columns.tolist(),["Statement", "UniqueName"]),
                         css=[
                             {
                                 "selector": ".dash-spreadsheet td div",
@@ -118,10 +123,11 @@ def update_date_time_to(input_value):
     Input("datatable-interactivity", "filter_query"),
     Input(date_time_from, "value"),
     Input(date_time_to, "value"),
-    Input("intermediate-value","data")
+    Input("intermediate-value","data"),
+    Input("toggle_hiding_queries","value")
 )
 
-def read_query(query,date_time_from,date_time_to,daten):
+def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
     """
     Reads the filter options of the previous Dash DataTable and creates a text out of it
 
@@ -144,7 +150,12 @@ def read_query(query,date_time_from,date_time_to,daten):
     date_time_from = date_time_from - timedelta(hours=2)
     date_time_to = date_time_to - timedelta(hours=2)
 
+
+
     df = pd.read_json(daten)
+    if toggle_queries:
+        if "Exclude equal queries" in toggle_queries:
+            df = df.drop_duplicates(subset='Statement')
     df["Time"] = pd.to_datetime(df.Time)
     dff = df[
         (df.Time >= date_time_from) & (df.Time < date_time_to)

@@ -10,23 +10,23 @@ def data(course):
     data = {
         "Attempt": [1],
         "Coursenumber": [1],
+        "Correct": [False],
+        "CourseName": ["placeholder_course"],
         "GroupBy": ["placeholder_groupby"],
         "Id": [1],
-        "Solution": [True],
         "Joins": ["placeholder_joins"],
         "OrderBy": ["placeholder_orderby"],
         "Projection_Attributes": ["placeholder_projection"],
-        "Correct": [False],
         "Selection_Attributes": ["placeholder_selection"],
+        "Solution": [True],
         "Statement": ["Statement"],
         "Strings": ["placeholder_strings"],
         "Tables": ["placeholder_tables"],
-        "Tasknumber": [1],
-        "UserId": [0],
-        "CourseName": ["placeholder_course"],
         "Taskname": ["placeholder_task"],
-        "UniqueName": ["placeholder_name"],
+        "Tasknumber": [1],
         "Time": ["2023-05-15 10:00:00"],
+        "UniqueName": ["placeholder_name"],
+        "UserId": [0]
     }
     if course != -1 and course:
         with MongoClient(MONGODB_URL) as client:
