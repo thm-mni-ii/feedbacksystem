@@ -39,7 +39,6 @@ class ErrorAnalysisService(
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
         val workbookCell = getCellFromWorkbook(cell)
 
-
         if (!cellEqualsSolution(cell, workbookCell)) {
             // found a value error
             perrors.add(cell)

@@ -228,7 +228,7 @@ class ErrorAnalysisServiceTest {
 
     @Test
     fun errorsInOneBranchTest() {
-        val a1 = SimpleTestCase2.a1 //propagated error
+        val a1 = SimpleTestCase2.a1 // propagated error
         val b1 = SimpleTestCase2.b1
         val c1 = Cell(0, "C1", formula = "D1 - E1") // error
         val d1 = SimpleTestCase2.d1
@@ -311,7 +311,7 @@ class ErrorAnalysisServiceTest {
                         d1.cell to Pair(d1.value!!, setOf()),
                         e1.cell to Pair(e1.value!!, setOf()),
                         b2.cell to Pair(b2.value!!, setOf()),
-                        b3.cell to Pair(b3.value!!, setOf()),
+                        b3.cell to Pair(b3.value!!, setOf())
                     )
                 )
             )
