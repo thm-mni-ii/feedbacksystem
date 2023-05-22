@@ -112,7 +112,7 @@ layout = html.Div(
                                                                 "display": "flex",
                                                             },
                                                             inputClassName="checkbox-labels",
-                                                            id="checkbox2",
+                                                            id="checkbox_analysis",
                                                         )
                                                     ),
                                                     style={"margin-top": "20px"},
@@ -130,7 +130,7 @@ layout = html.Div(
                                                             df.Attempt.max(),
                                                         ],
                                                         marks=None,
-                                                        id="slider2",
+                                                        id="slider_attempt_analysis",
                                                     ),
                                                 ),
                                             ]
@@ -264,7 +264,7 @@ layout = html.Div(
                                                         html.Td(
                                                             dcc.Slider(
                                                                 id={
-                                                                    "type": "slider3",
+                                                                    "type": "slider_background_filter",
                                                                     "index": row,
                                                                 },
                                                                 min=0,
@@ -423,7 +423,7 @@ def checklist_filter_masks(checks, daten):
                                         "placement": "bottom",
                                         "always_visible": True,
                                     },
-                                    id="slider2",
+                                    id="slider_attempt_analysis",
                                 ),
                             ]
                         ),
@@ -465,7 +465,7 @@ def checklist_filter_masks(checks, daten):
                         dcc.RangeSlider(
                             df.Attempt.min(),
                             df.Attempt.max(),
-                            id="slider2",
+                            id="slider_attempt_analysis",
                         ),
                         style={"visibility": "hidden", "height": "0"},
                     )
@@ -481,18 +481,18 @@ def checklist_filter_masks(checks, daten):
         Output("zeilen", "children"),
         Output("filter", "children"),
         Output("line-graph", "figure"),
-        Output({"type": "slider3", "index": ALL}, "marks"),
-        Output({"type": "slider3", "index": ALL}, "value"),
+        Output({"type": "slider_background_filter", "index": ALL}, "marks"),
+        Output({"type": "slider_background_filter", "index": ALL}, "value"),
     ],
     [
         Input("body", "children"),
         Input({"type": "name", "index": ALL}, "children"),
-        Input({"type": "slider3", "index": ALL}, "value"),
+        Input({"type": "slider_background_filter", "index": ALL}, "value"),
         Input({"type": "add-button", "index": ALL}, "children"),
         Input({"type": "add-button", "index": ALL}, "n_clicks"),
         Input("line-graph", "figure"),
         Input(exercise, "value"),
-        Input("slider2", "value"),
+        Input("slider_attempt_analysis", "value"),
         Input(course, "value"),
         Input(exercise, "options"),
         Input({"type": "delete-button-active", "index": ALL}, "n_clicks"),

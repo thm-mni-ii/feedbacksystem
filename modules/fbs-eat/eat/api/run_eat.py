@@ -14,20 +14,24 @@ import json
 import os
 debug = True if os.environ["DASH_DEBUG_MODE"] == "True" else False
 
+SESSION_TYPE = 'redis'
+URL_BASE_PATH = os.getenv("URL_BASE_PATH")
+SECRET_KEY = os.getenv("JWT_SECRET")
+
+
 external_stylesheets = [dbc.themes.BOOTSTRAP, "./assets/style.css"]
 server = flask.Flask(__name__)
 app = Dash(
     __name__,
     external_stylesheets=external_stylesheets,
     suppress_callback_exceptions=True,
-    server=server
+    server=server,
+    url_base_pathname=URL_BASE_PATH
 )
 
 app.title = "Dashboard"
-SESSION_TYPE = 'redis'
 app.server.secret_key = os.getenv("SERVER_SESSION_SECRET")
 Session(app)
-SECRET_KEY = os.getenv("JWT_SECRET")
 
 app.layout = html.Div(
     [

@@ -111,7 +111,7 @@ layout = html.Div(
                             1,
                             value=[df.Attempt.min(), df.Attempt.max()],
                             marks=None,
-                            id="slider",
+                            id="slider_dashboard",
                         ),
                     ),
                     dbc.Row(
@@ -223,7 +223,7 @@ def checklist_filter_masks(checks,daten):
                                         "placement": "bottom",
                                         "always_visible": True,
                                     },
-                                    id="slider",
+                                    id="slider_dashboard",
                                 ),
                             ]
                         ),
@@ -265,7 +265,7 @@ def checklist_filter_masks(checks,daten):
                         dcc.RangeSlider(
                             df.Attempt.min(),
                             df.Attempt.max(),
-                            id="slider",
+                            id="slider_dashboard",
                         ),
                         style={"visibility": "hidden", "height": "0"},
                     )
@@ -307,7 +307,7 @@ def update_date_time_to(input_value,check):
     Input(exercise, "value"),
     Input(key_figure, "value"),
     Input(checklist, "value"),
-    Input("slider", "value"),
+    Input("slider_dashboard", "value"),
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
     Input("intermediate-value","data"),
