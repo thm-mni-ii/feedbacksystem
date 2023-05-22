@@ -7,7 +7,6 @@ import plotly.express as px
 import plotly.graph_objs as go
 from api.connect.data_service import data
 from dash import Input, Output, callback, dcc, html
-import dash
 from plotly.subplots import make_subplots
 
 df = data(-1)
@@ -422,6 +421,9 @@ def update_histogram(
 
         data = {'labels': labels, 'values': values}
         df = pd.DataFrame(data)
+        
+        values = df["values"].astype(float)
+        df["values"] = (values * 100).astype(int)
 
         fig = px.bar(df, x='labels', y='values', color='labels', color_discrete_sequence=colors,labels={
                      "labels": "SQL-Attribute",
@@ -517,7 +519,7 @@ def update_histogram(
         for i, color in enumerate(colors):
             trace = go.Bar(
                 x=[task_subset_df.index.values[i]],
-                y=[task_subset_df.incorrect[i]],
+                y=[task_subset_df.incorrect[i]*100],
                 name=labels[i],
                 marker=dict(color=color),
                 showlegend=show_legend,
