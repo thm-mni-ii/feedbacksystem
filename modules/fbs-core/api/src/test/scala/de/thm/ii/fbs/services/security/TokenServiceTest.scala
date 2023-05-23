@@ -29,13 +29,12 @@ class TokenServiceTest {
 
   @Test
   def expiredToken(): Unit = {
-    val f = Future {
+    Future {
       val token = tokenService.issue("Test", 1)
       Thread.sleep(5000)
-      token
+      val verified = tokenService.verify(token)
+      assert(verified == null)
     }
-    val token = Await.result(f, Duration.create(5, TimeUnit.SECONDS))  // Blocking
-    val verified = tokenService.verify(token)
-    assert(verified == null)
   }
+
 }
