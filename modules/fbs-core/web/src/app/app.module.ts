@@ -103,7 +103,8 @@ import { DbControlDbOverviewComponent } from "./page-components/sql-playground/d
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
-
+import { JoyrideModule } from "ngx-joyride";
+import { RouterModule } from "@angular/router";
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
@@ -208,6 +209,8 @@ export const httpInterceptorProviders = [
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    JoyrideModule.forRoot(),
+    RouterModule.forRoot([]),
     MarkdownModule.forRoot(),
     MatDatepickerModule,
     MatTabsModule,

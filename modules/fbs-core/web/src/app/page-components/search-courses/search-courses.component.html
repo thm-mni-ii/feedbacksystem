@@ -1,6 +1,11 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Kurs suchen</mat-label>
+    <mat-label
+      joyrideStep="searchcourse"
+      title="Kurs suchen"
+      text="Mit dieser Suchleiste können Sie nach beliebigen Kursen suchen"
+      >Kurs suchen</mat-label
+    >
     <input
       type="text"
       aria-label="Kurs suchen"
@@ -17,6 +22,9 @@
       *ngIf="isAuthorized()"
       (click)="createCourse()"
       matTooltip="Kurs erstellen"
+      joyrideStep="createcourse"
+      title="Kurs erstellen"
+      text="Klicken Sie hier, um neue Kurse zu erstellen"
     >
       <mat-icon>add</mat-icon>&nbsp;Kurs erstellen
     </button>
