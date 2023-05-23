@@ -38,8 +38,8 @@ export class UserManagementComponent implements OnInit {
     this.titlebar.emitTitle("Benutzerverwaltung");
     this.refreshUserList();
   }
-  backtoserach(){
-    this.router.navigate(['/courses/search']);
+  backtoserach() {
+    this.router.navigate(["/courses/search"]);
   }
 
   private refreshUserList() {

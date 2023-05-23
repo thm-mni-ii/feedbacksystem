@@ -83,7 +83,7 @@ export class SqlInputTabsComponent
     this.prismService.highlightAll();
   }
   ngOnDestroy(): void {
-   console.log("")
+    console.log("");
   }
 
   fileName = "New_Query";

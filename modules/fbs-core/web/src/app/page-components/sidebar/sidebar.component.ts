@@ -1,4 +1,4 @@
-import { Component, OnInit,ViewChild  } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "../../service/auth.service";
 import { TitlebarService } from "../../service/titlebar.service";
@@ -8,8 +8,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
-import { JoyrideService }from 'ngx-joyride';
-import { MatMenuTrigger } from '@angular/material/menu';
+import { JoyrideService } from "ngx-joyride";
+import { MatMenuTrigger } from "@angular/material/menu";
 /**
  * Root component shows sidenav and titlebar
  */
@@ -93,31 +93,37 @@ export class SidebarComponent implements OnInit {
       window.open("/feedbackApp/");
     });
   }
-  tour(){
-    this.joyride.startTour(
-      { steps: ['settings','myCourses', 'allCourses','createcourse@/courses/search','searchcourse','createuser@/admin/user-management','playground@/sqlplayground'],
-      stepDefaultPosition: 'bottom',
-      
+  tour() {
+    this.joyride.startTour({
+      steps: [
+        "settings",
+        "myCourses",
+        "allCourses",
+        "createcourse@/courses/search",
+        "searchcourse",
+        "createuser@/admin/user-management",
+        "playground@/sqlplayground",
+      ],
+      stepDefaultPosition: "bottom",
+
       customTexts: {
-        next: '>>',
-        prev: '<<',
-        done: 'Ok'
-      }
-    }
-    )
+        next: ">>",
+        prev: "<<",
+        done: "Ok",
+      },
+    });
   }
-  onNext(){
+  onNext() {
     this.router.navigate(["/courses/search"]);
   }
-  onPrev(){
+  onPrev() {
     this.router.navigate(["/courses"]);
   }
- /* openMenu() {
+  /* openMenu() {
     this.menuTrigger.openMenu();
   }
    onNext(){
     
     this.openMenu();
   } */
-
 }
