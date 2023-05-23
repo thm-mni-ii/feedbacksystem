@@ -23,9 +23,23 @@
       </ng-container>
 
       <ng-container matColumnDef="query">
-        <th mat-header-cell *matHeaderCellDef>Abgabe Query</th>
+        <th mat-header-cell *matHeaderCellDef>Abgabe</th>
         <td mat-cell *matCellDef="">
-          <pre class="pre">{{ queryText }}</pre>
+          <div *ngIf="isText" class="submission-text">
+            <pre class="pre">{{ submissionContent }}</pre>
+            <button mat-icon-button (click)="copy()">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="!isText">
+            <button
+              mat-flat-button
+              color="accent"
+              (click)="downloadSubmission()"
+            >
+              Download
+            </button>
+          </div>
         </td>
       </ng-container>
 
