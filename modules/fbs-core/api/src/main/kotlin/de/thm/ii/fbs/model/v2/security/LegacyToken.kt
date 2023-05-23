@@ -8,18 +8,18 @@ class LegacyToken(
     val id: Int,
     val username: String,
     val globalRole: GlobalRole
-){
+) {
     @Throws(ForbiddenException::class)
-    fun hasRole(vararg roles: GlobalRole){
+    fun hasRole(vararg roles: GlobalRole) {
         if (roles.contains(globalRole)) {
             throw ForbiddenException()
         }
     }
+
     @Throws(ForbiddenException::class)
-    fun hasNotRole(vararg roles: GlobalRole){
+    fun hasNotRole(vararg roles: GlobalRole) {
         if (!roles.contains(globalRole)) {
             throw ForbiddenException()
         }
     }
 }
-
