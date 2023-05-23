@@ -50,7 +50,9 @@ export class ResultsComponent implements OnInit {
 
   @Input() context: { uid: number; cid: number; tid: number };
 
-  queryText: String;
+  @Input() isText: Boolean;
+
+  submissionContent: string;
 
   subscription: any;
 
