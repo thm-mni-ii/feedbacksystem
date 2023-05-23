@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -27,7 +27,8 @@ import {Subscription,interval} from 'rxjs';
   templateUrl: "./task-detail.component.html",
   styleUrls: ["./task-detail.component.scss"],
 })
-export class TaskDetailComponent implements OnInit {
+export class TaskDetailComponent implements OnInit, OnDestroy {
+  private refreshSubscription: Subscription | undefined;
   allTasks: Task[];
   currentTaskIndex: number;
   courseId: number;
@@ -61,7 +62,8 @@ export class TaskDetailComponent implements OnInit {
     private taskService: TaskService,
     private courseService: CourseService,
     private submissionService: SubmissionService,
-    private authService: AuthService
+    private authService: AuthService,
+   
   ) {
     // Check if task reached deadline TODO: this needs work
     // setInterval(() => {
@@ -253,9 +255,9 @@ export class TaskDetailComponent implements OnInit {
    
     
         if (force || this.pending) {
-          setInterval(() => {
+          this.refreshSubscription =  this.Interval.subscribe(() => {
             this.refreshstate();
-        }, 5000); // load data contains the http request 
+        });
         }
       
     
@@ -307,7 +309,7 @@ export class TaskDetailComponent implements OnInit {
     )
     .subscribe(
       () => {
-       
+       console.log("refreshed");
       },
       (error) => console.error(error)
     );
@@ -540,6 +542,12 @@ export class TaskDetailComponent implements OnInit {
 
   downloadTask() {
     this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
+  }
+  ngOnDestroy(): void {
+    if (this.refreshSubscription) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = undefined;
+    }
   }
  
 }
