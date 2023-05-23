@@ -26,6 +26,7 @@ import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
 import { PrismService } from "src/app/service/prism.service";
 import { Subscription } from "rxjs";
+import { CheckerService } from "src/app/service/checker.service";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -71,7 +72,8 @@ export class SqlInputTabsComponent
     private submissionService: SubmissionService,
     private taskService: TaskService,
     private prismService: PrismService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private checkerService: CheckerService
   ) {}
   ngAfterViewChecked() {
     if (this.highlighted) {
@@ -103,6 +105,7 @@ export class SqlInputTabsComponent
   isDescriptionMode: boolean = false;
   isSubCorr = false;
   submitted = false;
+  isCheckerEmpty: boolean;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -202,6 +205,7 @@ export class SqlInputTabsComponent
     this.selectedTask = task;
     this.selectedTaskName = this.selectedTask.name;
     this.submitted = false;
+    this.checkForCheckerConfig();
   }
 
   getTasks() {
@@ -300,5 +304,17 @@ export class SqlInputTabsComponent
     }
     this.submitToTask();
     //this.submissionService.emitFileSubmission();
+  }
+
+  private checkForCheckerConfig() {
+    this.checkerService
+      .getChecker(this.selectedCourse.id, this.selectedTask.id)
+      .subscribe((checkers) => {
+        if (checkers.length === 0) {
+          this.isCheckerEmpty = true;
+        } else {
+          this.isCheckerEmpty = false;
+        }
+      });
   }
 }

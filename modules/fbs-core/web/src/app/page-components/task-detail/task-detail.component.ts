@@ -18,6 +18,7 @@ import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
+import { CheckerService } from "src/app/service/checker.service";
 
 /**
  * Shows a task in detail
@@ -39,6 +40,7 @@ export class TaskDetailComponent implements OnInit {
   pending = false;
   ready = false;
   deadlinePassed = false;
+  isCheckerEmpty: boolean;
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -58,7 +60,8 @@ export class TaskDetailComponent implements OnInit {
     private taskService: TaskService,
     private courseService: CourseService,
     private submissionService: SubmissionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private checkerService: CheckerService
   ) {
     // Check if task reached deadline TODO: this needs work
     // setInterval(() => {
@@ -233,10 +236,23 @@ export class TaskDetailComponent implements OnInit {
       )
       .subscribe(
         () => {
+          this.checkForCheckerConfig();
           this.refreshByPolling();
         },
         (error) => console.error(error)
       );
+  }
+
+  private checkForCheckerConfig() {
+    this.checkerService
+      .getChecker(this.courseId, this.task.id)
+      .subscribe((checkers) => {
+        if (checkers.length === 0) {
+          this.isCheckerEmpty = true;
+        } else {
+          this.isCheckerEmpty = false;
+        }
+      });
   }
 
   private refreshByPolling(force = false) {

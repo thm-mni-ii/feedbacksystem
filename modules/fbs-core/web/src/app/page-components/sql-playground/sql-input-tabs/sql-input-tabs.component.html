@@ -72,7 +72,9 @@
     </button>
     <div class="submit-container" *ngIf="isSubmitMode">
       <button
-        [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
+        [disabled]="
+          isCheckerEmpty || isSubmissionEmpty() || hasDeadlinePassed()
+        "
         mat-flat-button
         color="accent"
         class="excuteBtn"
