@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { Component, Input, OnInit } from "@angular/core";
 import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
@@ -45,12 +44,6 @@ export class ResultsComponent implements OnInit {
 
   index: number;
 
-  ngOnInit() {
-    if (this.dataSource.data.length < 2) {
-      this.columns = ["resultText", "exitCode"];
-    }
-  }
-
   @Input() set submissions(submissions: Submission[]) {
     const lengthHasChanged = this.allSubmissions != submissions;
     this.allSubmissions = submissions;
@@ -77,9 +70,9 @@ export class ResultsComponent implements OnInit {
       (item) => this.allSubmissions.indexOf(item) == event.index
     );
     if (this.submission.results.length > 1) {
-      this.columns = ["checkerType", "resultText", "exitCode"];
-    } else {
       this.columns = ["checkerType", "query", "resultText", "exitCode"];
+    } else {
+      this.columns = ["query", "resultText", "exitCode"];
     }
     this.getSubmissionContent(this.submission);
     this.display(this.submission);
