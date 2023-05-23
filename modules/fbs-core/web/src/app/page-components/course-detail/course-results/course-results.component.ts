@@ -64,12 +64,11 @@ export class CourseResultsComponent implements OnInit {
         map(([evaluationResults, courseResult]) =>
           evaluationResults.filter(
             (_, i) =>
-              courseResult[i].results.find(({ attempts }) => attempts !== 0) !== undefined
+              courseResult[i].results.find(({ attempts }) => attempts !== 0) !==
+              undefined
           )
         )
       );
-      this.courseResults.subscribe((res) => console.log(res));
-      this.evaluationUserResults.subscribe((res) => console.log(res));
       this.tasks = this.courseResults.pipe(
         map((results) =>
           results.length === 0
