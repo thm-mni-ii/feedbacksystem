@@ -53,7 +53,7 @@ layout = html.Div(
                                     [
                                         "Key Figure",
                                         key_figure := dcc.Dropdown(
-                                            ["Typical Mistakes"],
+                                            ["Typical Mistakes", "Average Attempts"],
                                             "Typical Mistakes",
                                             style={"background-color": "#e9e7e9"},
                                         ),
@@ -114,11 +114,18 @@ layout = html.Div(
                         ),
                     ),
                     dbc.Row(
-                        dbc.Container(
-                            dbc.Card(histogram := dcc.Graph(), body=True),
+                        dbc.Container([
+                            histogram_card := dbc.Card(histogram := dcc.Graph(), body=True, style={"display": "none"}),
+                            histogram_avg_submissions_card := dbc.Card(histogram_avg_submissions := dcc.Graph(),body=True, style={"display": "none"})],
                             style={"margin-top": "20px"},
-                        )
+                        ),
                     ),
+                    # dbc.Row(
+                    #     dbc.Container(
+                    #         dbc.Card(, body=True),
+                    #         style={"margin-top": "20px"},
+                    #     )
+                    # ),
                 ],
                 style={"padding": "10px"},
             ),
@@ -304,10 +311,48 @@ def update_date_time_to(input_value,check):
         date_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
         return date_time
 
+# Update histogram_avg_submissions figure
+@callback(Output(histogram_avg_submissions, "figure"),Output(histogram_avg_submissions_card, "style"), Input(exercise, "value"), Input(course, "value"), Input(key_figure, "value"),Input("intermediate-value","data"))
+def update_histogram_avg_submissions(exercise_value, course_value, key_figure_value, data):
+    df = pd.read_json(data)
+    df["Time"] = pd.to_datetime(df.Time)
+
+    display_style = {}
+
+    if "Average Attempts" in key_figure_value:
+        display_style = {"display":"block"}
+    else:
+        display_style = {"display":"none"}
+
+    task_len = {}
+    filtered_df = None
+
+    if not course_value:
+        return generate_empty_response(), display_style
+
+    if exercise_value is None or "Übersicht" in exercise_value:
+        filtered_df = df
+    else:
+        filtered_df = df[df.UniqueName.isin(exercise_value)]
+    
+    for task in filtered_df.UniqueName.unique():
+        local_df = filtered_df[filtered_df.UniqueName == task]
+
+        avg_submissions = len(local_df) / len(local_df.UserId.unique())
+        task_len[f"{task}"] = avg_submissions
+
+    fig = px.bar(df, x=list(task_len.keys()), y=list(task_len.values()),labels={
+                     "x": "Excercise",
+                     "y": "Mean Submissions",
+                 })
+    fig.update_layout(showlegend=False,height=600)
+    
+    return fig, display_style
 
 # Update histogramm figure
 @callback(
     Output(histogram, "figure"),
+    Output(histogram_card, "style"),
     Input(course, "value"),
     Input(exercise, "value"),
     Input(key_figure, "value"),
@@ -329,6 +374,13 @@ def update_histogram(
     daten,
     check_list
 ):
+    display_style = {}
+
+    if "Typical Mistakes" in key_figure_value:
+        display_style = {"display":"block"}
+    else:
+        display_style = {"display":"none"}
+
     df = pd.read_json(daten)
     df["Time"] = pd.to_datetime(df.Time)
     # Convert datetime string to datetime object
@@ -354,7 +406,7 @@ def update_histogram(
                 df[df.CourseName.isin(course_value)].UniqueName.unique()
             )
         else:
-            return generate_empty_response()
+            return generate_empty_response(), display_style
 
     # Filter dataframe
     filtered_df = df
@@ -388,7 +440,7 @@ def update_histogram(
         ]]
 
         if hist_df.empty:
-            return generate_empty_response()
+            return generate_empty_response(), display_style
         result_dict = {}
 
         for column in hist_df.columns:
@@ -436,7 +488,7 @@ def update_histogram(
                      "values": "PERCENT",
                  },)
         fig.update_layout(showlegend=False,height=600)
-        return fig
+        return fig, display_style
 
     # Create figure which will be returned and contains all subfigures
     fig = make_subplots(
@@ -467,7 +519,7 @@ def update_histogram(
     ].set_index("UniqueName")
     # No data
     if hist_df.empty:
-        return generate_empty_response()
+        return generate_empty_response(), display_style
 
     # Colors for each bar
     colors = [
@@ -548,4 +600,4 @@ def update_histogram(
         for i in range(0, row + 1):
             fig.update_yaxes(title_text="PERCENT", row=i + 1, col=1)
 
-    return fig
+    return fig, display_style

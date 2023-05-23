@@ -10,9 +10,6 @@ from dash.dependencies import Input, Output
 import pandas as pd
 from datetime import datetime, timedelta
 from api.connect.data_service import data
-import logging
-
-logger = logging.getLogger("name")
 
 
 df = data(-1)
@@ -24,10 +21,6 @@ def get_attributes_to_hide(list,excludes):
     return list
 
 dff = df
-
-for _, row in dff.iterrows():
-    logger.error(_)
-    logger.error(row['Statement'])
 
 layout = html.Div(
     [
