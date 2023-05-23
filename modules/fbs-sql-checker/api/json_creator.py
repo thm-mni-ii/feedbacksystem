@@ -241,7 +241,7 @@ def check_solution_chars(
         if len(joins) == 0:
             joins.append("Empty")
         if data["passed"]:
-            # Compare them to tabels, proAttributes etc of a given sql-query
+            # Compare them to tables, proAttributes etc of a given sql-query
             if (
                 tables == tables2  # pylint: disable=R0916
                 and set(pro_attributes) == set(pro_atts2)
@@ -280,7 +280,7 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
-    if data["passed"]:
+    if data["isSol"]:
         if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
