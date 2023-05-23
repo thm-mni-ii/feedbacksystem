@@ -36,5 +36,4 @@ class TokenServiceTest {
       assert(verified == null)
     }
   }
-
 }
