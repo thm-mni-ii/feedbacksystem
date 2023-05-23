@@ -124,7 +124,11 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                   hints ++= "falsche Select-Attribute verwendet\n"
                 }
                 if (!query.stringsRight.get) {
-                  hints ++= "falsche Zeichenketten verwendet\n"
+                  if (!query.wildcards.get) {
+                    hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
+                  } else {
+                    hints ++= "falsche Zeichenketten verwendet\n"
+                  }
                 }
                 if (!query.orderByRight.get) {
                   hints ++= "falsche Order By verwendet\n"
@@ -151,9 +155,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
   def formatSubmission(submission: FBSSubmission, checker: CheckrunnerConfiguration, solution: String): Any = {
     val task = taskService.getOne(checker.taskId).get
     val attempts = submissionService.getAll(submission.userID.get, task.courseID, checker.taskId).length
+    val passed = submission.results.headOption.exists(result => result.exitCode == 0)
     new ObjectMapper().createObjectNode()
-      .put("passed", false)
-      .put("isSol", submission.results.headOption.exists(result => result.exitCode == 0))
+      .put("passed", passed)
+      .put("isSol", false)
       .put("userId", submission.userID.get)
       .put("cid", task.courseID)
       .put("tid", checker.taskId)
