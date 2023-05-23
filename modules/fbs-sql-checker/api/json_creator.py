@@ -241,6 +241,17 @@ def check_solution_chars(
         if len(joins) == 0:
             joins.append("Empty")
         if data["passed"]:
+            if not data["isSol"]:
+                tables_right = True
+                sel_attributes_right = True
+                pro_attributes_right = True
+                strings_right = True
+                wildcards = True
+                order_by_right = True
+                group_by_right = True
+                joins_right = True
+                having_right = True
+
             # Compare them to tables, proAttributes etc of a given sql-query
             if (
                 tables == tables2  # pylint: disable=R0916
