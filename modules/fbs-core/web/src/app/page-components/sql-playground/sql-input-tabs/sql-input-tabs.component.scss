@@ -48,6 +48,9 @@
   background-color: rgba(219, 219, 219, 0.54);
   font-weight: normal;
   border-radius: 5px;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .description {

@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.checker.excel
 
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ExcelMediaInformationTasks, Submission}
-import de.thm.ii.fbs.services.persistence.StorageService
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

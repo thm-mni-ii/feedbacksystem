@@ -61,7 +61,6 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-
   <div class="bottom-container">
     <button
       mat-button
@@ -138,6 +137,7 @@
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="task"
+        matTooltip="{{ selectedTaskName }}"
       >
         {{ activeTab.selectedTaskName }} <mat-icon>expand_more</mat-icon>
       </button>
@@ -156,6 +156,7 @@
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="course"
+        matTooltip="{{ selectedCourseName }}"
       >
         {{ activeTab.selectedCourseName }} <mat-icon>expand_more</mat-icon>
       </button>

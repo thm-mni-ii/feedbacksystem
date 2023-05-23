@@ -14,5 +14,5 @@ data class SqlPlaygroundRunnerDeleteArguments(
     @JsonProperty("executionId")
     val executionId: Int = 0,
     @JsonProperty("statement")
-    val statement: String = "",
+    val statement: String = ""
 ) : RunnerArguments()

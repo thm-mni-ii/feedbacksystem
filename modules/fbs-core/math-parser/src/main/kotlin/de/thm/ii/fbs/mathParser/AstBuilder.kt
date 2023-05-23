@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.*
@@ -43,7 +45,6 @@ class AstBuilder(val expr: MathParser.ExprContext) {
             else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 
-
     private fun buildMulFactor(mulFactor: MathParser.MulFactorContext): Expr =
         when {
             mulFactor.mulFactor() !== null -> Operation(Operator.MUL, buildMulFactor(mulFactor.mulFactor()), buildExpo(mulFactor.expo()))
@@ -53,7 +54,7 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildExpo(expo: MathParser.ExpoContext): Expr =
         when {
-            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor()))  else buildFactor(expo.factor()))
+            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor())) else buildFactor(expo.factor()))
             expo.factor() !== null -> buildFactor(expo.factor())
             else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
