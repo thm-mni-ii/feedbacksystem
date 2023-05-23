@@ -69,7 +69,7 @@ def getDatas(url,daten):
     try:
         token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
     except:
-        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), []
+        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), [], []
     courseAccess = []
     courseRoles = json.loads(token['courseRoles'])
 
@@ -78,7 +78,7 @@ def getDatas(url,daten):
             courseAccess.append(int(course))
 
     if not courseAccess:
-        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), []
+        return create_error_screen("Sie sind nicht berechtigt, auf diese Daten zuzugreifen."), [], []
 
     courses = requests.get(f"{FBS_BASE_URL}/api/v1/users/{token['id']}/courses", headers={"Authorization": f"Bearer {daten}"}, verify=not FBS_TLS_NO_VERIFY).json()
     courses_dict = {course["id"]: course["name"] for course in courses}
