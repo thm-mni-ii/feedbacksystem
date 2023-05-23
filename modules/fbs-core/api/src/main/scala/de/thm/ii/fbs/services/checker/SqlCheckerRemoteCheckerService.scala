@@ -124,7 +124,11 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                   hints ++= "falsche Select-Attribute verwendet\n"
                 }
                 if (!query.stringsRight.get) {
-                  hints ++= "falsche Zeichenketten verwendet\n"
+                  if (!query.wildcards.get) {
+                    hints ++= "falsche Zeichenketten verwendet, bitte auch die Wildcards prüfen\n"
+                  } else {
+                    hints ++= "falsche Zeichenketten verwendet\n"
+                  }
                 }
                 if (!query.orderByRight.get) {
                   hints ++= "falsche Order By verwendet\n"
