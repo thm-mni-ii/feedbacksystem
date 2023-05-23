@@ -64,7 +64,7 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
     @Query(
         "SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) " +
             "WHERE user_id = :uid AND visible = 1",
-            nativeQuery = true
+        nativeQuery = true
     )
     fun findByUidAndVisibleTrue(@Param("uid") uid: Int): List<Course>
 
@@ -78,7 +78,7 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
     @Query(
         "SELECT course_id, semester_id, name, description, visible FROM course JOIN user_course using(course_id) " +
             "WHERE user_id = :uid",
-            nativeQuery = true
+        nativeQuery = true
     )
     fun findAllCoursesByUid(@Param("uid") uid: Int): List<Course>
 
@@ -91,7 +91,7 @@ interface CourseRegistrationRepository : JpaRepository<CourseRegisteration, Int>
     @Query(
         "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN " +
             "user_course using(user_id) where deleted = 0 and course_id = ?1",
-            nativeQuery = true
+        nativeQuery = true
     )
     fun findAllParticipantsByCourseId(cid: Int): List<Participant>
 
