@@ -8,8 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
-
-@SpringBootTest
+@RunWith(classOf[SpringRunner])
+@SpringBootTest(classes = Array(classOf[TestApplication]))
+@ActiveProfiles(Array("test"))
 class TokenServiceTest {
   @Autowired
   private val tokenService: TokenService = null
