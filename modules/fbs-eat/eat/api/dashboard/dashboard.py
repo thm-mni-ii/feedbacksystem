@@ -386,7 +386,7 @@ def update_histogram_avg_submissions(exercise_value, course_value, key_figure_va
 
     fig = px.bar(df, x=list(task_len.keys()), y=list(task_len.values()),labels={
                      "x": "Excercise",
-                     "y": "Mean Submissions",
+                     "y": "Average Attempts",
                  })
     fig.update_layout(showlegend=False,height=600)
     
@@ -528,7 +528,7 @@ def update_histogram(
 
         fig = px.bar(df, x='labels', y='values', color='labels', color_discrete_sequence=colors,labels={
                      "labels": "SQL-Attribute",
-                     "values": "PERCENT",
+                     "values": "STUDENTS",
                  },)
         fig.update_layout(showlegend=False,height=600)
         return fig, display_style
@@ -641,6 +641,6 @@ def update_histogram(
         fig.update_xaxes(showticklabels=False)
 
         for i in range(0, row + 1):
-            fig.update_yaxes(title_text="PERCENT", row=i + 1, col=1)
+            fig.update_yaxes(title_text="Students", row=i + 1, col=1)
 
     return fig, display_style
