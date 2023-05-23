@@ -37,7 +37,7 @@ class DatabaseMigrationService {
      */
     fun migrate() {
         val migrationNumber = try {
-            val results = DB.query(jdbc, "SELECT MAX(number) FROM migration",  { rs, _ -> rs.getString(1) })
+            val results = DB.query(jdbc, "SELECT MAX(number) FROM migration", { rs, _ -> rs.getString(1) })
             if (results.isEmpty()) {
                 -1
             } else {
