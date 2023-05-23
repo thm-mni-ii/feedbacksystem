@@ -10,8 +10,13 @@ from dash.dependencies import Input, Output
 import pandas as pd
 from datetime import datetime, timedelta
 from api.connect.data_service import data
+import logging
+
+logger = logging.getLogger("name")
+
 
 df = data(-1)
+
 
 def get_attributes_to_hide(list,excludes):
     for ex in excludes:
@@ -19,6 +24,11 @@ def get_attributes_to_hide(list,excludes):
     return list
 
 dff = df
+
+for _, row in dff.iterrows():
+    logger.error(_)
+    logger.error(row['Statement'])
+
 layout = html.Div(
     [
         html.H3("Table", style={"text-align": "left", "margin-left": "407px"}),
@@ -44,7 +54,15 @@ layout = html.Div(
                             ]
                         ),
                     ),
-                    dcc.Checklist(id='toggle_hiding_queries', options=["Exclude equal queries"]),
+                    dcc.Checklist(
+                        id='toggle_hiding_queries',
+                        options=["Exclude equal queries","Exclude Date"],
+                        inline=True,
+                        style={
+                            "display": "flex",
+                        },
+                        inputClassName="checklist label",
+                    ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
                         data=df.to_dict("records"),
@@ -60,7 +78,8 @@ layout = html.Div(
                         row_deletable=False,
                         page_action="native",
                         page_current=0,
-                        hidden_columns=get_attributes_to_hide(df.astype(str).columns.tolist(),["Statement", "UniqueName"]),
+                        hidden_columns=get_attributes_to_hide(df.astype(str).columns.tolist(),
+                                                              ["Statement", "UniqueName"]),
                         css=[
                             {
                                 "selector": ".dash-spreadsheet td div",
@@ -120,6 +139,7 @@ def update_date_time_to(input_value):
 @callback(
     Output("filter-query-output", "children"),
     Output("datatable-interactivity", "data"),
+    Output("datatable-interactivity","tooltip_data"),
     Input("datatable-interactivity", "filter_query"),
     Input(date_time_from, "value"),
     Input(date_time_to, "value"),
@@ -153,17 +173,25 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
 
 
     df = pd.read_json(daten)
+    df["Time"] = pd.to_datetime(df.Time)
+
     if toggle_queries:
         if "Exclude equal queries" in toggle_queries:
             df = df.drop_duplicates(subset='Statement')
-    df["Time"] = pd.to_datetime(df.Time)
-    dff = df[
-        (df.Time >= date_time_from) & (df.Time < date_time_to)
-        ]
+        if "Exclude Date" not in toggle_queries:
+            df = df[
+                (df.Time >= date_time_from) & (df.Time < date_time_to)
+                ]
+    else:
+        df = df[
+            (df.Time >= date_time_from) & (df.Time < date_time_to)
+            ]
+    dff = df
+    tooltip_data = [{"Statement": str(row["Statement"])} for _, row in dff.iterrows()]
     if query is None or len(query) == 0:
         retString = []
         retString.append("No filter set")
-        return retString, dff.to_dict("records")
+        return retString, dff.to_dict("records"), tooltip_data
     query = query.replace(" scontains ", " s= ")
     query = query.replace(" icontains ", " s= ")
     values = {}
@@ -183,4 +211,4 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
         output.append(f"{name} = {value}")
     result = ", ".join(output)
     result = "Filter: " + result
-    return dcc.Markdown(result), dff.to_dict("records")
+    return dcc.Markdown(result), dff.to_dict("records"), tooltip_data
