@@ -18,7 +18,7 @@ import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
-import {Subscription,interval} from 'rxjs';
+import { Subscription, interval } from "rxjs";
 /**
  * Shows a task in detail
  */
@@ -41,8 +41,8 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   ready = false;
   deadlinePassed = false;
   Interval = interval(5000);
-  timerSubscription: Subscription; 
-  tsk:any[]=[];
+  timerSubscription: Subscription;
+  tsk: any[] = [];
 
   get latestResult() {
     if (this.submissions?.length > 0) {
@@ -62,8 +62,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
     private taskService: TaskService,
     private courseService: CourseService,
     private submissionService: SubmissionService,
-    private authService: AuthService,
-   
+    private authService: AuthService
   ) {
     // Check if task reached deadline TODO: this needs work
     // setInterval(() => {
@@ -196,7 +195,6 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-   
     this.route.params
       .pipe(
         mergeMap((params) => {
@@ -205,7 +203,6 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           this.getTasks();
           this.tsk[0] = this.taskService.getTask(this.courseId, taskId);
           this.tsk[0].subscribe((task) => {
-
             this.titlebar.emitTitle(task.name);
           });
           return this.taskService.getTask(this.courseId, taskId);
@@ -222,7 +219,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
           );
           this.taskResult = taskResult;
           this.uid = this.authService.getToken().id;
-          
+
           this.deadlinePassed = this.reachedDeadline(
             Date.now(),
             Date.parse(task.deadline)
@@ -251,69 +248,61 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   private refreshByPolling(force = false) {
-
-   
-    
-        if (force || this.pending) {
-          this.refreshSubscription =  this.Interval.subscribe(() => {
-            this.refreshstate();
-        });
-        }
-      
-    
-   
+    if (force || this.pending) {
+      this.refreshSubscription = this.Interval.subscribe(() => {
+        this.refreshstate();
+      });
+    }
   }
-
 
   private refreshstate() {
     this.route.params
-    .pipe(
-      mergeMap((params) => {
-        this.courseId = params.id;
-        const taskId = params.tid;
-        this.getTasks();
-      
-        return this.taskService.getTask(this.courseId, taskId);
-      }),
-      mergeMap((task) => {
-        return this.taskService
-          .getTaskResult(this.courseId, task.id)
-          .pipe(map((taskResult) => ({ task, taskResult })));
-      }),
-      mergeMap(({ task, taskResult }) => {
-        this.task = task;
-        this.currentTaskIndex = this.allTasks.findIndex(
-          (task) => task.id == this.task.id
-        );
-        this.taskResult = taskResult;
-        this.uid = this.authService.getToken().id;
-        
-        this.deadlinePassed = this.reachedDeadline(
-          Date.now(),
-          Date.parse(task.deadline)
-        );
-        this.ready = true;
-        return this.submissionService.getAllSubmissions(
-          this.uid,
-          this.courseId,
-          task.id
-        );
-      }),
-      tap((submissions) => {
-        this.submissions = submissions;
-        if (submissions.length !== 0) {
-          this.pending = submissions[submissions.length - 1].done;
-          this.lastSubmission = submissions[submissions.length - 1];
-        }
-      })
-    )
-    .subscribe(
-      () => {
-       console.log("refreshed");
-      },
-      (error) => console.error(error)
-    );
-   
+      .pipe(
+        mergeMap((params) => {
+          this.courseId = params.id;
+          const taskId = params.tid;
+          this.getTasks();
+
+          return this.taskService.getTask(this.courseId, taskId);
+        }),
+        mergeMap((task) => {
+          return this.taskService
+            .getTaskResult(this.courseId, task.id)
+            .pipe(map((taskResult) => ({ task, taskResult })));
+        }),
+        mergeMap(({ task, taskResult }) => {
+          this.task = task;
+          this.currentTaskIndex = this.allTasks.findIndex(
+            (task) => task.id == this.task.id
+          );
+          this.taskResult = taskResult;
+          this.uid = this.authService.getToken().id;
+
+          this.deadlinePassed = this.reachedDeadline(
+            Date.now(),
+            Date.parse(task.deadline)
+          );
+          this.ready = true;
+          return this.submissionService.getAllSubmissions(
+            this.uid,
+            this.courseId,
+            task.id
+          );
+        }),
+        tap((submissions) => {
+          this.submissions = submissions;
+          if (submissions.length !== 0) {
+            this.pending = submissions[submissions.length - 1].done;
+            this.lastSubmission = submissions[submissions.length - 1];
+          }
+        })
+      )
+      .subscribe(
+        () => {
+          console.log("refreshed");
+        },
+        (error) => console.error(error)
+      );
   }
 
   private reachedDeadline(now: number, deadline: number): boolean {
@@ -549,5 +538,4 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
       this.refreshSubscription = undefined;
     }
   }
- 
 }
