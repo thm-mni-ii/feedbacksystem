@@ -1,8 +1,8 @@
+import { HttpClient } from "@angular/common/http";
 import { EventEmitter, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Submission } from "../model/Submission";
-import { HttpClient } from "@angular/common/http";
 import { SubTaskResult } from "../model/SubTaskResult";
+import { Submission } from "../model/Submission";
 
 @Injectable({
   providedIn: "root",
@@ -150,8 +150,9 @@ export class SubmissionService {
           .get("content-disposition")
           .split(";")[1]
           .split("=")[1];
+        const type = response.headers.get("Content-Type") ?? "text/plain";
 
-        const blob = new Blob([response.body], { type: "text/plain" });
+        const blob = new Blob([response.body], { type });
         saveAs(blob, fileName);
       });
   }
