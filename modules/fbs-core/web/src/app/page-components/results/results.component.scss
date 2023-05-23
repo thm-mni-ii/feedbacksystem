@@ -78,3 +78,9 @@ td:nth-child(3) {
   text-align: left;
   width: 350px;
 }
+
+.submission-text {
+	display: grid;
+	align-items: center;
+	grid-template-columns: auto 80px;
+}
