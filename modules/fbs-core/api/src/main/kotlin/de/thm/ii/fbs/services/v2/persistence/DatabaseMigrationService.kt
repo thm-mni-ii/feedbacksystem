@@ -23,27 +23,28 @@ class DatabaseMigrationService {
     private val jdbc: JdbcTemplate = JdbcTemplate()
     private val resourceResolver = PathMatchingResourcePatternResolver()
 
-    private fun oldStyleInstallationFallback(): Unit {
-        DB.batchUpdate(jdbc,
-                "CREATE TABLE migration (number int, PRIMARY KEY (number))",
-                "INSERT INTO migration (number) VALUES (0)",
-                "INSERT INTO migration (number) VALUES (1)"
+    private fun oldStyleInstallationFallback() {
+        DB.batchUpdate(
+            jdbc,
+            "CREATE TABLE migration (number int, PRIMARY KEY (number))",
+            "INSERT INTO migration (number) VALUES (0)",
+            "INSERT INTO migration (number) VALUES (1)"
         )
     }
 
     /**
      * Run Migration
      */
-    fun migrate(): Unit {
+    fun migrate() {
         val migrationNumber = try {
-            val results = DB.query(jdbc, "SELECT MAX(number) FROM migration",  {rs, _ ->  rs.getString(1)})
+            val results = DB.query(jdbc, "SELECT MAX(number) FROM migration",  { rs, _ -> rs.getString(1) })
             if (results.isEmpty()) {
                 -1
             } else {
                 results.first().toInt()
             }
         } catch (e: BadSqlGrammarException) {
-            DB.query(jdbc, "SELECT * FROM `fbs`.`submission`",   {_, _ -> {} } )
+            DB.query(jdbc, "SELECT * FROM `fbs`.`submission`", { _, _ -> {} })
             oldStyleInstallationFallback()
             1
         } catch (e: Exception) {
@@ -52,28 +53,31 @@ class DatabaseMigrationService {
 
         val migrations = listMigrations().toList()
         migrations.filter { e -> e.filename.split("_")[0].toInt() > migrationNumber }
-                .map { migration ->
-                    {
-                        logger.info("Running migration " + migration.filename + "...")
-                        migration
-                    }
+            .map { migration ->
+                {
+                    logger.info("Running migration " + migration.filename + "...")
+                    migration
                 }
-                .map { m -> loadMigration(m()) }
-                .forEach { migration -> DB.batchUpdate(jdbc, migration) }
+            }
+            .map { m -> loadMigration(m()) }
+            .forEach { migration -> DB.batchUpdate(jdbc, migration) }
     }
 
-    fun resetDatabase(): Unit {
+    fun resetDatabase() {
         this.deleteAllTables()
         this.migrate()
     }
 
-    private fun deleteAllTables(): Unit {
-        val dropQueries = DB.query(jdbc,
-                """
-        |SELECT concat('DROP TABLE `', table_name, '`;')
-        |FROM information_schema.tables
-        |WHERE table_schema = DATABASE();
-        |""".trimMargin("|"), {rs, _ ->  rs.getString(1)} )
+    private fun deleteAllTables() {
+        val dropQueries = DB.query(
+            jdbc,
+            """
+            |SELECT concat('DROP TABLE `', table_name, '`;')
+            |FROM information_schema.tables
+            |WHERE table_schema = DATABASE();
+            |""".trimMargin("|"),
+            { rs, _ -> rs.getString(1) }
+        )
         val dropQueriesWithSet = "SET FOREIGN_KEY_CHECKS = 0;" + dropQueries + "SET FOREIGN_KEY_CHECKS = 0;"
         DB.batchUpdate(jdbc, dropQueriesWithSet)
     }
@@ -88,4 +92,3 @@ class DatabaseMigrationService {
         return FileCopyUtils.copyToString(InputStreamReader(resource.inputStream))
     }
 }
-

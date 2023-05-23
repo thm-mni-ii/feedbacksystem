@@ -10,7 +10,6 @@ import org.springframework.jdbc.support.KeyHolder
 import java.sql.Connection
 import java.sql.Statement
 
-
 /**
  * Wraps the evil java spring jdbc template api into a scala conform api.
  */
