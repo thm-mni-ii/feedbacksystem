@@ -29,18 +29,20 @@ layout = html.Div(
             dbc.Card(
                 [
                     dbc.Col(
-                        html.Div(
+                        timerow := html.Div(
                             [
                                 "Date/Time From",
-                                date_time_from := dcc.Input(
-                                    datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                dcc.Input(
+                                    id="date_time_from_table",
+                                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
                                     type="datetime-local",
                                 ),
                                 "Date/Time To",
-                                date_time_to := dcc.Input(
-                                    (
-                                        datetime.now()
-                                        + timedelta(hours=1, minutes=30)
+                                dcc.Input(
+                                    id="date_time_to_table",
+                                    value=(
+                                            datetime.now()
+                                            + timedelta(hours=1, minutes=30)
                                     ).strftime("%Y-%m-%dT%H:%M"),
                                     type="datetime-local",
                                 ),
@@ -52,9 +54,10 @@ layout = html.Div(
                         options=["Exclude equal queries","Exclude Date"],
                         inline=True,
                         style={
+                            "justify-content": "center",
                             "display": "flex",
                         },
-                        inputClassName="checklist label",
+                        inputClassName="checkbox",
                     ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
@@ -120,9 +123,53 @@ layout = html.Div(
         ),
     ]
 )
-# Update date_time_to based on date_time_from
-@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
-def update_date_time_to(input_value):
+
+@callback(Output(timerow,"children"),Input("toggle_hiding_queries", "value"))
+def hide_date(date_hider):
+    if "Exclude Date" not in date_hider:
+        return html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=(
+                            datetime.now()
+                            + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        )
+    else:
+        return html.Div(
+            children=
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=(datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden"},
+
+        )
+
+# Update date_time_to_table based on date_time_from_table
+@callback(Output("date_time_to_table", "value"), Input("date_time_from_table", "value"))
+def update_date_time_to_table(input_value):
     try:
         date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
         return date_time + timedelta(hours=1, minutes=30)
@@ -134,13 +181,12 @@ def update_date_time_to(input_value):
     Output("datatable-interactivity", "data"),
     Output("datatable-interactivity","tooltip_data"),
     Input("datatable-interactivity", "filter_query"),
-    Input(date_time_from, "value"),
-    Input(date_time_to, "value"),
+    Input("date_time_from_table", "value"),
+    Input("date_time_to_table", "value"),
     Input("intermediate-value","data"),
     Input("toggle_hiding_queries","value")
 )
-
-def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
+def read_query(query,date_time_from_table,date_time_to_table,daten,toggle_queries):
     """
     Reads the filter options of the previous Dash DataTable and creates a text out of it
 
@@ -151,17 +197,17 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
         Printable String to show the user which filters are set. Also works for hided columns.
     """
     try:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
+        date_time_from_table = datetime.strptime(date_time_from_table, "%Y-%m-%dT%H:%M")
     except:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+        date_time_from_table = datetime.strptime(date_time_from_table, "%Y-%m-%dT%H:%M:%S")
 
     try:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
+        date_time_to_table = datetime.strptime(date_time_to_table, "%Y-%m-%dT%H:%M")
     except:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+        date_time_to_table = datetime.strptime(date_time_to_table, "%Y-%m-%dT%H:%M:%S")
 
-    date_time_from = date_time_from - timedelta(hours=2)
-    date_time_to = date_time_to - timedelta(hours=2)
+    date_time_from_table = date_time_from_table - timedelta(hours=2)
+    date_time_to_table = date_time_to_table - timedelta(hours=2)
 
 
 
@@ -173,11 +219,11 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
             df = df.drop_duplicates(subset='Statement')
         if "Exclude Date" not in toggle_queries:
             df = df[
-                (df.Time >= date_time_from) & (df.Time < date_time_to)
+                (df.Time >= date_time_from_table) & (df.Time < date_time_to_table)
                 ]
     else:
         df = df[
-            (df.Time >= date_time_from) & (df.Time < date_time_to)
+            (df.Time >= date_time_from_table) & (df.Time < date_time_to_table)
             ]
     dff = df
     tooltip_data = [{"Statement": str(row["Statement"])} for _, row in dff.iterrows()]

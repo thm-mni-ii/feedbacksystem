@@ -111,7 +111,7 @@ layout = html.Div(
                                                                 "justify-content": "center",
                                                                 "display": "flex",
                                                             },
-                                                            inputClassName="checkbox-labels",
+                                                            inputClassName="checkbox",
                                                             id="checkbox_analysis",
                                                         )
                                                     ),
@@ -359,6 +359,7 @@ def hide_time(checkbox,reihe):
 def update_exercise(daten, courses_dict):
     emptyList = []
     df = pd.read_json(daten)
+    df = df[df['UserId'] != 0]
     courses = [{"value": course_id, "label": courses_dict.get(str(course_id)) or course_id} for course_id in df.CourseName.unique()]
     return courses, emptyList
 
@@ -371,6 +372,8 @@ def update_exercise(daten, courses_dict):
 )
 def update_dropdown(input_value, daten):
     df = pd.read_json(daten)
+    df = df[df['UserId'] != 0]
+
     if not input_value:
         return df.UniqueName.unique()
     else:
@@ -402,6 +405,8 @@ def checklist_filter_masks(checks, daten):
     """
     filters = []
     df = pd.read_json(daten)
+    df = df[df['UserId'] != 0]
+
     for box in checks:
         if box == "Attempts":
             filters.append(
@@ -527,6 +532,8 @@ def update(
     sliders = []
     df = pd.read_json(daten)
     df["Time"] = pd.to_datetime(df.Time)
+    df = df[df['UserId'] != 0]
+
     try:
         date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
     except:

@@ -10,23 +10,23 @@
     margin-right: 20px;
 }
 
-#checkbox2 label:nth-child(1) {
+#checkbox_analysis label:nth-child(1) {
     margin-right: 20px;
 }
 
-#checkbox2 label:nth-child(2) {
+#checkbox_analysis label:nth-child(2) {
     margin-right: 20px;
 }
 
-#checkbox2 label:nth-child(3) {
+#checkbox_analysis label:nth-child(3) {
     margin-right: 20px;
 }
 
-#checklist label:nth-child(1) {
-    margin-left: 20px;
+#toggle_hiding_queries label:nth-child(1) {
+    margin-right: 20px;
 }
-#checklist label:nth-child(2) {
-    margin-left: 20px;
+#toggle_hiding_queries label:nth-child(2) {
+    margin-right: 20px;
 }
 
 .delete-button-active {
