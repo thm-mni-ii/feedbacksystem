@@ -29,6 +29,8 @@ import { Subscription, interval } from "rxjs";
 })
 export class TaskDetailComponent implements OnInit, OnDestroy {
   private refreshSubscription: Subscription | undefined;
+  private routeSubscription: Subscription | undefined;
+
   allTasks: Task[];
   currentTaskIndex: number;
   courseId: number;
@@ -256,7 +258,7 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   }
 
   private refreshstate() {
-    this.route.params
+    this.routeSubscription = this.route.params
       .pipe(
         mergeMap((params) => {
           this.courseId = params.id;
@@ -532,10 +534,13 @@ export class TaskDetailComponent implements OnInit, OnDestroy {
   downloadTask() {
     this.taskService.downloadTask(this.courseId, this.task.id, this.task.name);
   }
-  ngOnDestroy(): void {
-    if (this.refreshSubscription) {
+  ngOnDestroy() {
+    if (this.refreshSubscription || this.routeSubscription) {
       this.refreshSubscription.unsubscribe();
+      this.routeSubscription.unsubscribe();
       this.refreshSubscription = undefined;
+      this.routeSubscription = undefined;
+      this.Interval = interval(0);
     }
   }
 }
