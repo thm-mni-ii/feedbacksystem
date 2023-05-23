@@ -126,6 +126,26 @@ layout = html.Div(
 
 @callback(Output(timerow,"children"),Input("toggle_hiding_queries", "value"))
 def hide_date(date_hider):
+    if not date_hider:
+        return html.Div(
+            children=
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=(datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden"},
+
+        )
     if "Exclude Date" not in date_hider:
         return html.Div(
             [

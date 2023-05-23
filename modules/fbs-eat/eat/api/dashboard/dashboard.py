@@ -329,11 +329,33 @@ def update_date_time_to(input_value,check):
         return date_time
 
 # Update histogram_avg_submissions figure
-@callback(Output(histogram_avg_submissions, "figure"), Output(histogram_avg_submissions_card, "style"), Input(exercise, "value"), Input(course, "value"), Input(key_figure, "value"), Input("intermediate-value","data"))
-def update_histogram_avg_submissions(exercise_value, course_value, key_figure_value, data):
+@callback(
+    Output(histogram_avg_submissions, "figure"),
+    Output(histogram_avg_submissions_card, "style"),
+    Input(exercise, "value"), Input(course, "value"),
+    Input(key_figure, "value"),
+    Input("intermediate-value","data"),
+    Input("date_time_from", "value"),
+    Input("date_time_to", "value"),
+    Input(checklist, "value")
+)
+def update_histogram_avg_submissions(exercise_value, course_value, key_figure_value, data,date_time_from,date_time_to, checklist_value):
     df = pd.read_json(data)
     df["Time"] = pd.to_datetime(df.Time)
     df = df[df['UserId'] != 0]
+
+    try:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+
+    try:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
+    except:
+        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+
+    date_time_from = date_time_from - timedelta(hours=2)
+    date_time_to = date_time_to - timedelta(hours=2)
 
     display_style = {}
 
@@ -344,8 +366,11 @@ def update_histogram_avg_submissions(exercise_value, course_value, key_figure_va
 
     task_len = {}
     filtered_df = None
-
-    if not course_value:
+    if "Date" in checklist_value:
+        df = df[
+            (df.Time >= date_time_from) & (df.Time < date_time_to)
+        ]
+    if not course_value or df.empty:
         return generate_empty_response(), display_style
 
     if exercise_value is None or "Übersicht" in exercise_value:
@@ -379,7 +404,6 @@ def update_histogram_avg_submissions(exercise_value, course_value, key_figure_va
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
     Input("intermediate-value","data"),
-    Input(checklist, "value")
 )
 def update_histogram(
     course_value,
@@ -390,7 +414,6 @@ def update_histogram(
     date_time_from,
     date_time_to,
     daten,
-    check_list
 ):
     display_style = {}
 
@@ -442,7 +465,7 @@ def update_histogram(
     if "Übersicht" not in exercise_value:
         if exercise_value:
             filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
-    if "Date" in check_list:
+    if "Date" in checklist_value:
         filtered_df = filtered_df[
             (filtered_df.Time >= date_time_from) & (filtered_df.Time < date_time_to)
         ]
