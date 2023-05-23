@@ -456,17 +456,6 @@ export class TaskDetailComponent implements OnInit {
       );
   }
 
-  allSubmissions() {
-    this.dialog.open(AllSubmissionsComponent, {
-      height: "80%",
-      width: "100%",
-      data: {
-        submission: this.submissions,
-        auth: false,
-      },
-    });
-  }
-
   checkersConfigurable() {
     return this.ready && this.submissionTypeOfTask() !== "spreadsheet";
   }
