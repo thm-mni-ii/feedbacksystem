@@ -13,6 +13,7 @@ export class AllSubmissionsComponent {
     public data: {
       submission: Submission[];
       context: { uid: number; cid: number; tid: number };
+      isText: Boolean;
     },
     public dialogRef: MatDialogRef<AllSubmissionsComponent>
   ) {}
