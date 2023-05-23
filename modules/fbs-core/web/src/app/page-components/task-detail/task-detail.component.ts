@@ -15,7 +15,6 @@ import { SubmissionService } from "../../service/submission.service";
 import { tap, map, mergeMap, concatMap, takeWhile } from "rxjs/operators";
 import { of, from } from "rxjs";
 import { Roles } from "../../model/Roles";
-import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
 
