@@ -12,7 +12,6 @@ import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
 import { TextConfirmDialogComponent } from "src/app/dialogs/text-confirm-dialog/text-confirm-dialog.component";
-import { CourseResultsService } from "src/app/service/course-results.service";
 
 @Component({
   selector: "app-participants",
@@ -30,15 +29,13 @@ export class ParticipantsComponent implements OnInit {
   participants: Participant[];
   allUser: User[];
   searchedUser: User[];
-  usersWithSubmissions: User[] = [];
 
   constructor(
     private snackBar: MatSnackBar,
     private userService: UserService,
     private dialog: MatDialog,
     private registrationService: CourseRegistrationService,
-    private route: ActivatedRoute,
-    private courseResultService: CourseResultsService
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -49,7 +46,6 @@ export class ParticipantsComponent implements OnInit {
         this.searchedUser = user;
         this.refreshUserList();
       });
-      this.getUsersWithSubmissions();
     });
   }
 
@@ -79,23 +75,6 @@ export class ParticipantsComponent implements OnInit {
     return this.participants.find(
       (participant) => participant.user.id === userID
     ).role.value;
-  }
-
-  getUsersWithSubmissions() {
-    this.refreshUserList();
-
-    this.courseResultService
-      .getStudentResults(this.courseID)
-      .subscribe((subs) => {
-        for (let sub of subs) {
-          for (let res of sub.results) {
-            if (res.attempts > 0) {
-              this.usersWithSubmissions.push(sub.user);
-            }
-          }
-        }
-      });
-    console.log(this.usersWithSubmissions);
   }
 
   /**
