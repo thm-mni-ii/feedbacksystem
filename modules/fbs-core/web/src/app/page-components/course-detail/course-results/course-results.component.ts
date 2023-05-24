@@ -12,6 +12,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
 import { EvaluationUserResults } from "../../../model/EvaluationUserResults";
+import { zip } from "rxjs";
+import { mergeAll, filter, toArray } from "rxjs/operators";
 
 /**
  * Matrix for every course docent a has
@@ -44,11 +46,29 @@ export class CourseResultsComponent implements OnInit {
     this.tb.emitTitle("Dashboard");
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
-      this.courseResults = this.courseResultService.getAllResults(
-        this.courseId
+      this.courseResults = this.courseResultService
+        .getAllResults(this.courseId)
+        .pipe(
+          mergeAll(),
+          filter(
+            (result) =>
+              result.results.find(({ attempts }) => attempts !== 0) !==
+              undefined
+          ),
+          toArray()
+        );
+      this.evaluationUserResults = zip(
+        this.courseResultService.getRequirementCourseResults(this.courseId),
+        this.courseResultService.getAllResults(this.courseId)
+      ).pipe(
+        map(([evaluationResults, courseResult]) =>
+          evaluationResults.filter(
+            (_, i) =>
+              courseResult[i].results.find(({ attempts }) => attempts !== 0) !==
+              undefined
+          )
+        )
       );
-      this.evaluationUserResults =
-        this.courseResultService.getRequirementCourseResults(this.courseId);
       this.tasks = this.courseResults.pipe(
         map((results) =>
           results.length === 0
@@ -78,13 +98,20 @@ export class CourseResultsComponent implements OnInit {
   }
 
   showResult(uid: number, cid: number, tid: number) {
+    const task = this.tasks.pipe(
+      mergeAll(),
+      filter((t) => t.id === tid)
+    );
     this.submissionService.getAllSubmissions(uid, cid, tid).subscribe((res) => {
-      this.dialog.open(AllSubmissionsComponent, {
-        width: "100%",
-        data: {
-          submission: res,
-          context: { uid, cid, tid },
-        },
+      task.subscribe((t) => {
+        this.dialog.open(AllSubmissionsComponent, {
+          width: "100%",
+          data: {
+            submission: res,
+            context: { uid, cid, tid },
+            isText: t.mediaType === "text/plain",
+          },
+        });
       });
     });
     // TODO: show results
