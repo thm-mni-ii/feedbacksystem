@@ -10,7 +10,7 @@ export class SpreadsheetDialogComponent {
   private lastSelection: string[] = null;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { spreadsheet: File },
+    @Inject(MAT_DIALOG_DATA) public data: { spreadsheet: File, spreadsheetName: string },
     public dialogRef: MatDialogRef<SpreadsheetDialogComponent>
   ) {}
 

@@ -10,10 +10,10 @@
     <span class="spacer"></span>
   </app-menu-bar>
 
-  <mat-card class="details">
+  <mat-card class="details-container">
     <mat-card-header><h4>Neue Überprüfung hinzufügen</h4></mat-card-header>
     <mat-card-content>
-      <div class="flex center">
+      <div class="flex center marg-b-16">
         <div class="flex">
           <div class="flex">
             <div [ngClass]="{ selected: step === 1 }" class="circleNr">1</div>
@@ -62,11 +62,18 @@
             </div>
           </div>
 
-          <div class="action">
-            <h4>Auswahl</h4>
-            <mat-form-field floatLabel="never" class="col">
+          <div class="action-container">
+            <h3>Auswahl</h3>
+            <mat-form-field
+              [formGroup]="checkerForm"
+              floatLabel="never"
+              class="col"
+            >
               <mat-label>Checkertyp</mat-label>
-              <mat-select>
+              <mat-select
+                formControlName="checkerType"
+                (selectionChange)="defineForm(checkerForm.value)"
+              >
                 <mat-option value="sql_runner">SQL Runner</mat-option>
                 <mat-option value="sql_checker">SQL Checker</mat-option>
                 <mat-option value="excel">Excel</mat-option>
@@ -77,86 +84,203 @@
         </div>
         <div *ngIf="step === 2">
           <div class="width-1000">
-            <app-dropzone class="pad"></app-dropzone>
-            <app-dropzone></app-dropzone>
+            <app-dropzone
+              class="pad-r"
+              [usage]="mainFileName"
+              (update)="updateMainFile($event)"
+              [submissionFile]="mainFile"
+            ></app-dropzone>
+            <app-dropzone
+              [usage]="secondaryFileName"
+              (update)="updateSecondaryFile($event)"
+            ></app-dropzone>
           </div>
         </div>
         <div *ngIf="step === 3" class="grid">
           <div class="box"></div>
-          <div class="action">
-            <h4>Aufgabe erstellen</h4>
-            <form>
-              <div>
-                <mat-form-field>
-                  <input type="text" placeholder="Name" matInput />
-                </mat-form-field>
-              </div>
-              <div>
-                <label>Sheet:</label><br />
-                <mat-form-field class="col">
-                  <mat-label>Checkertyp</mat-label>
-                  <mat-select>
-                    <mat-option value="sql_runner">SQL Runner</mat-option>
-                    <mat-option value="sql_checker">SQL Checker</mat-option>
-                    <mat-option value="excel">Excel</mat-option>
-                    <mat-option value="bash">Bash</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-
-              <div>
-                <label>Zellen verändern</label><br />
-                <div class="foo">
-                  <div>
-                    <label>Sheet:</label><br />
-                    <mat-form-field class="col">
-                      <mat-label>Checkertyp</mat-label>
-                      <mat-select>
-                        <mat-option value="sql_runner">SQL Runner</mat-option>
-                        <mat-option value="sql_checker">SQL Checker</mat-option>
-                        <mat-option value="excel">Excel</mat-option>
-                        <mat-option value="bash">Bash</mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div>
-                    <label>Zelle:</label><br />
-                    <button mat-flat-button color="accent">fff</button>
-                  </div>
-                  <div>
-                    <label>Wert:</label><br />
-                    <mat-form-field class="foo2">
-                      <input type="text" placeholder="Wert" matInput />
-                    </mat-form-field>
-                  </div>
+          <div class="action-container">
+            <h3>Aufgabe erstellen</h3>
+            <div>
+              <ng-form [formGroup]="createTaskForm">
+                <div class="information-container">
+                  <mat-form-field floatLabel="always" class="col">
+                    <mat-label>Name</mat-label>
+                    <input formControlName="taskName" matInput type="text" />
+                  </mat-form-field>
+                  <mat-form-field floatLabel="always" class="pad-l col" form>
+                    <mat-label>Sheet</mat-label>
+                    <mat-select formControlName="taskSheet">
+                      <mat-option
+                        *ngFor="let sheet of sheetnames"
+                        [value]="sheet"
+                        >{{ sheet }}</mat-option
+                      >
+                    </mat-select>
+                  </mat-form-field>
                 </div>
-                <button mat-button>
-                  <mat-icon>add</mat-icon>weitere Zelle verändern
-                </button>
-              </div>
-              <div>
-                <div class="foo">
-                  <div>
-                    <label>Bereich:</label><br />
-                    <button mat-flat-button color="accent">fff</button>
-                  </div>
-                  <div class="flex">
-                    <mat-checkbox
-                      >Fehlerhafte Zellen nicht anzeigen</mat-checkbox
+                <h4>Zellen überprüfen</h4>
+                <div formArrayName="checks">
+                  <div class="scroll-y">
+                    <div
+                      *ngFor="
+                        let cell of getCellsArray('checks').controls;
+                        let cellIndx = index
+                      "
                     >
+                      <div
+                        class="information-container space-between"
+                        [formGroupName]="cellIndx"
+                      >
+                        <div>
+                          <button
+                            mat-flat-button
+                            (click)="
+                              openDialog(
+                                createTaskForm.controls.taskSheet.value,
+                                cellIndx,
+                                'checks'
+                              )
+                            "
+                            color="accent"
+                            class="button-fixed-width"
+                          >
+                            {{
+                              getCellsArray("checks").at(cellIndx).controls.cell
+                                .value === ""
+                                ? "Zellen"
+                                : getCellsArray("checks").at(cellIndx).controls
+                                    .cell.value
+                            }}
+                          </button>
+                        </div>
+                        <div>
+                          <mat-checkbox formControlName="isShown"
+                            >Fehlerhafte Zellen anzeigen</mat-checkbox
+                          >
+                        </div>
+                        <div>
+                          <mat-form-field class="foo4" floatLabel="always">
+                            <mat-label>Fehlermeldung</mat-label>
+                            <input
+                              formControlName="errorMsg"
+                              matInput
+                              type="text"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div class="foo6">
+                          <button
+                            mat-icon-button
+                            (click)="removeCellFromArray(cellIndx, 'checks')"
+                            class="pad-no"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label>Wert:</label><br />
-                    <mat-form-field class="foo2">
-                      <input type="text" placeholder="Wert" matInput />
-                    </mat-form-field>
-                  </div>
+
+                  <button
+                    (click)="addCellToArray('checks')"
+                    mat-flat-button
+                    class="add-button"
+                  >
+                    <mat-icon>add</mat-icon>weitere Zelle überprüfen
+                  </button>
                 </div>
-                <button mat-button>
-                  <mat-icon>add</mat-icon>weitere Zelle verändern
-                </button>
-              </div>
-            </form>
+                <h4>Zellen verändern</h4>
+                <div formArrayName="changes">
+                  <div class="scroll-y">
+                    <div
+                      *ngFor="
+                        let cell of getCellsArray('changes').controls;
+                        let cellIndx = index
+                      "
+                    >
+                      <div
+                        class="information-container space-between"
+                        [formGroupName]="cellIndx"
+                      >
+                        <div>
+                          <mat-form-field floatLabel="always">
+                            <mat-label>Sheet</mat-label>
+                            <mat-select formControlName="sheetName">
+                              <mat-option
+                                *ngFor="let sheet of sheetnames"
+                                [value]="sheet"
+                                >{{ sheet }}</mat-option
+                              >
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                        <div>
+                          <button
+                            mat-flat-button
+                            (click)="
+                              openDialog(
+                                getCellsArray('changes').at(cellIndx).controls
+                                  .sheetName.value,
+                                cellIndx,
+                                'changes'
+                              )
+                            "
+                            color="accent"
+                            class="button-fixed-width"
+                          >
+                            {{
+                              getCellsArray("changes").at(cellIndx).controls
+                                .cell.value === ""
+                                ? "Zelle"
+                                : getCellsArray("changes").at(cellIndx).controls
+                                    .cell.value
+                            }}
+                          </button>
+                        </div>
+                        <div>
+                          <mat-form-field class="foo4" floatLabel="always">
+                            <mat-label>Wert</mat-label>
+                            <input
+                              formControlName="value"
+                              matInput
+                              type="text"
+                            />
+                          </mat-form-field>
+                        </div>
+                        <div class="foo6">
+                          <button
+                            mat-icon-button
+                            (click)="removeCellFromArray(cellIndx, 'changes')"
+                            class="pad-no"
+                          >
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    (click)="addCellToArray('changes')"
+                    mat-flat-button
+                    class="add-button"
+                  >
+                    <mat-icon>add</mat-icon>weitere Zelle verändern
+                  </button>
+                </div>
+                <div>
+                  <button
+                    *ngIf="step === 3"
+                    mat-flat-button
+                    color="accent"
+                    class="marg-r-12"
+                    (click)="createTask()"
+                  >
+                    Erstellen
+                  </button>
+                </div>
+              </ng-form>
+            </div>
           </div>
         </div>
       </div>
@@ -167,18 +291,26 @@
         (click)="decreaseStep()"
         mat-flat-button
         color="warn"
+        class="marg-r-12"
       >
         Zurück
       </button>
       <button
+        [disabled]="!checkerForm.controls['checkerType'].valid"
         *ngIf="step < 3"
         mat-flat-button
         (click)="increaseStep()"
         color="accent"
+        class="marg-r-12"
       >
         Weiter
       </button>
-      <button *ngIf="step === 3" mat-flat-button color="accent">
+      <button
+        *ngIf="step === 3"
+        mat-flat-button
+        (click)="readXlsx(mainFile)"
+        color="accent"
+      >
         Abschließen
       </button>
     </mat-card-actions>

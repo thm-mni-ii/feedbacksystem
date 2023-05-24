@@ -24,19 +24,19 @@ export class SpreadsheetComponent implements OnInit {
   }
 
   @Input()
-  set spreadsheet(spreadsheet: File) {
+  set spreadsheet(param) {    
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const sheet = workbook.Sheets[param.name];
       this.data = XLSX.utils.sheet_to_json(sheet, {
         header: "A",
         defval: "",
         blankrows: true,
       });
     };
-    reader.readAsArrayBuffer(spreadsheet);
+    reader.readAsArrayBuffer(param.spreadsheet[0]);
   }
 
   @Output()
