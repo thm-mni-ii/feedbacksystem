@@ -8,6 +8,13 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <span class="spacer"></span>
+    <mat-checkbox
+      [matTooltip]="
+        toggle ? 'Alle Benutzer anzeigen' : 'Nur Benutzer mit Abgaben anzeigen'
+      "
+      [(ngModel)]="toggle"
+      (change)="toggleResults()"
+    ></mat-checkbox>
     <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
   <mat-list role="list" class="legend">
@@ -62,7 +69,7 @@
             </div>
             <div
               class="name-container"
-              *ngFor="let result of evaluationUserResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span class="state passed" *ngIf="result.passed"
                 ><mat-icon>check_circle</mat-icon></span
@@ -83,7 +90,7 @@
             </div>
             <div
               class="task-container"
-              *ngFor="let result of courseResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span
                 class="task-result"
