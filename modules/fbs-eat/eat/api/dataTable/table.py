@@ -10,6 +10,8 @@ from dash.dependencies import Input, Output
 import pandas as pd
 from datetime import datetime, timedelta
 from api.connect.data_service import data
+import dash
+
 
 
 df = data(-1)
@@ -124,9 +126,10 @@ layout = html.Div(
     ]
 )
 
-@callback(Output(timerow,"children"),Input("toggle_hiding_queries", "value"))
-def hide_date(date_hider):
-    if not date_hider:
+@callback(Output(timerow,"children"), Output("is_date_on","data"),Input("toggle_hiding_queries", "value"), Input("is_date_on","data"))
+def hide_date(date_hider, is_date_on):
+    if "Exclude Date" in date_hider:
+        is_date_on = False
         return html.Div(
             children=
             [
@@ -145,7 +148,51 @@ def hide_date(date_hider):
             ],
             style={"visibility": "hidden"},
 
-        )
+        ), False
+    if not date_hider:
+        return html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=(
+                            datetime.now()
+                            + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        ), True
+    if  "Exclude equal queries" in dash.callback_context.triggered[0]["value"] and is_date_on\
+            and (len(date_hider) == 1 or not date_hider):
+        return dash.no_update
+    if "Exclude equal queries" in dash.callback_context.triggered[0]["value"] and not is_date_on \
+            and (len(date_hider) == 1 or not date_hider):
+        return html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=(
+                            datetime.now()
+                            + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        ), True
     if "Exclude Date" not in date_hider:
         return html.Div(
             [
@@ -165,27 +212,8 @@ def hide_date(date_hider):
                     type="datetime-local",
                 ),
             ]
-        )
-    else:
-        return html.Div(
-            children=
-            [
-                "Date/Time From",
-                dcc.Input(
-                    id="date_time_from_table",
-                    value=(datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-                "Date/Time To",
-                dcc.Input(
-                    id="date_time_to_table",
-                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-            ],
-            style={"visibility": "hidden"},
+        ), True
 
-        )
 
 # Update date_time_to_table based on date_time_from_table
 @callback(Output("date_time_to_table", "value"), Input("date_time_from_table", "value"))

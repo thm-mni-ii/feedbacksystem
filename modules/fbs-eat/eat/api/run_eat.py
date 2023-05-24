@@ -46,6 +46,7 @@ app.layout = html.Div(
         dcc.Store(id="intermediate-value"),
         dcc.Store(id="save_courses"),
         dcc.Store(id="courses_dict"),
+        dcc.Store("is_date_on", "data"),
         html.Div(id="container"),
     ]
 )
