@@ -11,7 +11,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 from api.connect.data_service import data
 
+
 df = data(-1)
+
 
 def get_attributes_to_hide(list,excludes):
     for ex in excludes:
@@ -19,6 +21,7 @@ def get_attributes_to_hide(list,excludes):
     return list
 
 dff = df
+
 layout = html.Div(
     [
         html.H3("Table", style={"text-align": "left", "margin-left": "407px"}),
@@ -26,25 +29,36 @@ layout = html.Div(
             dbc.Card(
                 [
                     dbc.Col(
-                        html.Div(
+                        timerow := html.Div(
                             [
                                 "Date/Time From",
-                                date_time_from := dcc.Input(
-                                    datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                dcc.Input(
+                                    id="date_time_from_table",
+                                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
                                     type="datetime-local",
                                 ),
                                 "Date/Time To",
-                                date_time_to := dcc.Input(
-                                    (
-                                        datetime.now()
-                                        + timedelta(hours=1, minutes=30)
+                                dcc.Input(
+                                    id="date_time_to_table",
+                                    value=(
+                                            datetime.now()
+                                            + timedelta(hours=1, minutes=30)
                                     ).strftime("%Y-%m-%dT%H:%M"),
                                     type="datetime-local",
                                 ),
                             ]
                         ),
                     ),
-                    dcc.Checklist(id='toggle_hiding_queries', options=["Exclude equal queries"]),
+                    dcc.Checklist(
+                        id='toggle_hiding_queries',
+                        options=["Exclude equal queries","Exclude Date"],
+                        inline=True,
+                        style={
+                            "justify-content": "center",
+                            "display": "flex",
+                        },
+                        inputClassName="checkbox",
+                    ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
                         data=df.to_dict("records"),
@@ -60,7 +74,8 @@ layout = html.Div(
                         row_deletable=False,
                         page_action="native",
                         page_current=0,
-                        hidden_columns=get_attributes_to_hide(df.astype(str).columns.tolist(),["Statement", "UniqueName"]),
+                        hidden_columns=get_attributes_to_hide(df.astype(str).columns.tolist(),
+                                                              ["Statement", "UniqueName"]),
                         css=[
                             {
                                 "selector": ".dash-spreadsheet td div",
@@ -108,9 +123,73 @@ layout = html.Div(
         ),
     ]
 )
-# Update date_time_to based on date_time_from
-@callback(Output(date_time_to, "value"), Input(date_time_from, "value"))
-def update_date_time_to(input_value):
+
+@callback(Output(timerow,"children"),Input("toggle_hiding_queries", "value"))
+def hide_date(date_hider):
+    if not date_hider:
+        return html.Div(
+            children=
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=(datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden"},
+
+        )
+    if "Exclude Date" not in date_hider:
+        return html.Div(
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=(
+                            datetime.now()
+                            + timedelta(hours=1, minutes=30)
+                    ).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ]
+        )
+    else:
+        return html.Div(
+            children=
+            [
+                "Date/Time From",
+                dcc.Input(
+                    id="date_time_from_table",
+                    value=(datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+                "Date/Time To",
+                dcc.Input(
+                    id="date_time_to_table",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    type="datetime-local",
+                ),
+            ],
+            style={"visibility": "hidden"},
+
+        )
+
+# Update date_time_to_table based on date_time_from_table
+@callback(Output("date_time_to_table", "value"), Input("date_time_from_table", "value"))
+def update_date_time_to_table(input_value):
     try:
         date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
         return date_time + timedelta(hours=1, minutes=30)
@@ -120,14 +199,14 @@ def update_date_time_to(input_value):
 @callback(
     Output("filter-query-output", "children"),
     Output("datatable-interactivity", "data"),
+    Output("datatable-interactivity","tooltip_data"),
     Input("datatable-interactivity", "filter_query"),
-    Input(date_time_from, "value"),
-    Input(date_time_to, "value"),
+    Input("date_time_from_table", "value"),
+    Input("date_time_to_table", "value"),
     Input("intermediate-value","data"),
     Input("toggle_hiding_queries","value")
 )
-
-def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
+def read_query(query,date_time_from_table,date_time_to_table,daten,toggle_queries):
     """
     Reads the filter options of the previous Dash DataTable and creates a text out of it
 
@@ -138,32 +217,40 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
         Printable String to show the user which filters are set. Also works for hided columns.
     """
     try:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
+        date_time_from_table = datetime.strptime(date_time_from_table, "%Y-%m-%dT%H:%M")
     except:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+        date_time_from_table = datetime.strptime(date_time_from_table, "%Y-%m-%dT%H:%M:%S")
 
     try:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
+        date_time_to_table = datetime.strptime(date_time_to_table, "%Y-%m-%dT%H:%M")
     except:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+        date_time_to_table = datetime.strptime(date_time_to_table, "%Y-%m-%dT%H:%M:%S")
 
-    date_time_from = date_time_from - timedelta(hours=2)
-    date_time_to = date_time_to - timedelta(hours=2)
+    date_time_from_table = date_time_from_table - timedelta(hours=2)
+    date_time_to_table = date_time_to_table - timedelta(hours=2)
 
 
 
     df = pd.read_json(daten)
+    df["Time"] = pd.to_datetime(df.Time)
+
     if toggle_queries:
         if "Exclude equal queries" in toggle_queries:
             df = df.drop_duplicates(subset='Statement')
-    df["Time"] = pd.to_datetime(df.Time)
-    dff = df[
-        (df.Time >= date_time_from) & (df.Time < date_time_to)
-        ]
+        if "Exclude Date" not in toggle_queries:
+            df = df[
+                (df.Time >= date_time_from_table) & (df.Time < date_time_to_table)
+                ]
+    else:
+        df = df[
+            (df.Time >= date_time_from_table) & (df.Time < date_time_to_table)
+            ]
+    dff = df
+    tooltip_data = [{"Statement": str(row["Statement"])} for _, row in dff.iterrows()]
     if query is None or len(query) == 0:
         retString = []
         retString.append("No filter set")
-        return retString, dff.to_dict("records")
+        return retString, dff.to_dict("records"), tooltip_data
     query = query.replace(" scontains ", " s= ")
     query = query.replace(" icontains ", " s= ")
     values = {}
@@ -183,4 +270,4 @@ def read_query(query,date_time_from,date_time_to,daten,toggle_queries):
         output.append(f"{name} = {value}")
     result = ", ".join(output)
     result = "Filter: " + result
-    return dcc.Markdown(result), dff.to_dict("records")
+    return dcc.Markdown(result), dff.to_dict("records"), tooltip_data

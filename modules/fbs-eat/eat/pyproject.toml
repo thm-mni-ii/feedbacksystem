@@ -18,6 +18,7 @@ minio = "^7.1.14"
 pymongo = "^4.3.3"
 PyJWT = "^2.6.0"
 flask_session = "^0.5.0"
+requests = "^2.31.0"
 
 
 [tool.poetry.group.dev.dependencies]
