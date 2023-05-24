@@ -39,9 +39,11 @@ def cleandata(df):
     df = df.replace(True, "correct")
     df = df.replace(False, "incorrect")
 
-    #logger.error(str(df["Coursenumber"]))
     df["CourseName"] = df['Coursenumber'].astype(str)
     df["Taskname"] = df['Tasknumber'].astype(str)
+
+    user_ids_to_remove = [854, 1173, 862]
+    df = df[~df['UserId'].isin(user_ids_to_remove)]
 
     if "Parsable" in df.columns:
         df.drop(columns=["Parsable"], inplace=True)
