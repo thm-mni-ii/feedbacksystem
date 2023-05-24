@@ -35,6 +35,20 @@ def cleandata(df):
         ],
     ] = True
 
+    df.loc[
+        lambda df: df["Correct"] == True,
+        [
+            "GroupBy",
+            "Joins",
+            "OrderBy",
+            "Projection_Attributes",
+            "Selection_Attributes",
+            "Strings",
+            "Tables",
+            "Correct"
+        ],
+    ] = True
+
 
     df = df.replace(True, "correct")
     df = df.replace(False, "incorrect")
