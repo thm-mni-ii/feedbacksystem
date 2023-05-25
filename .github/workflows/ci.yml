@@ -85,7 +85,7 @@ jobs:
     name: fbs-eat
     uses: ./.github/workflows/check-fbs-python-module.yml
     with:
-      working-directory: ./modules/fbs-eat
+      working-directory: ./modules/fbs-eat/eat
 
   build:
     name: Build Docker images
