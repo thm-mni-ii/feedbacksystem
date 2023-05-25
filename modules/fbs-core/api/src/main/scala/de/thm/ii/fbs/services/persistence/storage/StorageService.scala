@@ -151,6 +151,24 @@ class StorageService extends App {
   }
 
   /**
+    * returns a String which represents the content type of a checker configuration
+    *
+    * @param checkerConfig the Checker Configuration
+    * @return
+    */
+  def getContentTypeCheckerConfigFile(checkerConfig: CheckrunnerConfiguration, fileName: String): String = {
+    if (checkerConfig.isInBlockStorage) {
+      minioService.getStatsOfObject(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getFilePath(checkerConfig.id, fileName))
+    } else {
+      Files.probeContentType((fileName match {
+        case storageFileName.MAIN_FILE => fsStorageService.pathToMainFile(checkerConfig.id)
+        case storageFileName.SECONDARY_FILE => fsStorageService.pathToSecondaryFile(checkerConfig.id)
+      }).get.toFile.toPath)
+    }
+  }
+
+
+  /**
     * returns a input stream depending whether it is in the bucket or not
     *
     */
