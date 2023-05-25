@@ -81,6 +81,12 @@ jobs:
     with:
       working-directory: ./modules/fbs-sql-checker
 
+  fbs-eat:
+    name: fbs-eat
+    uses: ./.github/workflows/check-fbs-python-module.yml
+    with:
+      working-directory: ./modules/fbs-eat
+
   build:
     name: Build Docker images
     runs-on: ubuntu-latest
@@ -91,13 +97,3 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Docker images
         run: docker-compose build
-
-      # TODO: Move to modules
-      # - name: Coveralls
-      #   run: ./gradlew jacocoRootReport coveralls
-      #   env:
-      #     CI_NAME: github
-      #     COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     COVERALLS_SERVICE_NAME: "github"
-      #     CI_PULL_REQUEST: ${{ github.event.number }}
-      #     COVERALLS_SERVICE_JOB_ID: ${{ github.run_id }}
