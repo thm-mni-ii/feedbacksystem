@@ -114,7 +114,7 @@ class StorageService extends App {
     * @param config CheckrunnerConfiguration
     * @return
     */
-  def getFileScondaryFile(config: CheckrunnerConfiguration): File = {
+  def getFileSecondaryFile(config: CheckrunnerConfiguration): File = {
     if (config.isInBlockStorage) {
       minioStorageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(config.id))
     } else {
