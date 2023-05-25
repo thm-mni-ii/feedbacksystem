@@ -109,7 +109,7 @@ class StorageService extends App {
   }
 
   /**
-    * returns a main-file depending whether it is in the bucket or not
+    * returns a secondary-file depending whether it is in the bucket or not
     *
     * @param config CheckrunnerConfiguration
     * @return
