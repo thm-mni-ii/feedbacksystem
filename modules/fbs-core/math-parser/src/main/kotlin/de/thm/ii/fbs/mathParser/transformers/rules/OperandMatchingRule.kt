@@ -10,12 +10,12 @@ class OperandMatchingRule(
     private val operandEquals: Expr,
     private val matchLeftOperand: Boolean = true,
     private val matchRightOperand: Boolean = true,
-    private val exprTransformer: ExprTransformer = ExprTransformer {it}
+    private val exprTransformer: ExprTransformer = ExprTransformer { it }
 ) : OperationRule() {
     override fun matchesOperation(operation: Operation): Boolean = operator == operation.operator && (
         (matchLeftOperand && operandEquals == operation.left) ||
-        (matchRightOperand && operandEquals == operation.right)
-    )
+            (matchRightOperand && operandEquals == operation.right)
+        )
 
     override fun applyOperation(operation: Operation): Expr {
         if (matchLeftOperand && operation.left == operandEquals) {

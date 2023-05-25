@@ -5,7 +5,8 @@ import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenExcepti
 import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission}
-import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, StorageService, SubmissionService}
+import de.thm.ii.fbs.services.persistence.storage.StorageService
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SubmissionService}
 import de.thm.ii.fbs.services.security.TokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}

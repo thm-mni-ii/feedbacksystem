@@ -1,8 +1,8 @@
+import { HttpClient } from "@angular/common/http";
 import { EventEmitter, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Submission } from "../model/Submission";
-import { HttpClient } from "@angular/common/http";
 import { SubTaskResult } from "../model/SubTaskResult";
+import { Submission } from "../model/Submission";
 
 @Injectable({
   providedIn: "root",
@@ -114,11 +114,53 @@ export class SubmissionService {
     );
   }
 
+  /**
+   * Retrieves content of a submission
+   * GET /users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content
+   * @param uid User id
+   * @param cid Course id
+   * @param tid Task id
+   * @param sid Submission id
+   * @return Observable that succeeds with the content of a submission made from user for a task
+   */
+  getTaskSubmissionsContent(
+    uid: number,
+    cid: number,
+    tid: number,
+    sid: number
+  ): Observable<any> {
+    return this.http.get(
+      `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,
+      { responseType: "text" }
+    );
+  }
+
   emitFileSubmission(): void {
     this.isFileSubmitted.emit(true);
   }
 
   getFileSubmissionEmitter(): EventEmitter<boolean> {
     return this.isFileSubmitted;
+  }
+
+  downloadSubmission(uid: number, cid: number, tid: number, sid: number) {
+    return this.http
+      .get(
+        `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,
+        {
+          responseType: "arraybuffer",
+          observe: "response",
+        }
+      )
+      .subscribe((response) => {
+        const fileName = response.headers
+          .get("content-disposition")
+          .split(";")[1]
+          .split("=")[1];
+        const type = response.headers.get("Content-Type") ?? "text/plain";
+
+        const blob = new Blob([response.body], { type });
+        saveAs(blob, fileName);
+      });
   }
 }

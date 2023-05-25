@@ -12,6 +12,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
 import { EvaluationUserResults } from "../../../model/EvaluationUserResults";
+import { mergeAll, filter } from "rxjs/operators";
 
 /**
  * Matrix for every course docent a has
@@ -78,12 +79,20 @@ export class CourseResultsComponent implements OnInit {
   }
 
   showResult(uid: number, cid: number, tid: number) {
+    const task = this.tasks.pipe(
+      mergeAll(),
+      filter((t) => t.id === tid)
+    );
     this.submissionService.getAllSubmissions(uid, cid, tid).subscribe((res) => {
-      this.dialog.open(AllSubmissionsComponent, {
-        width: "100%",
-        data: {
-          submission: res,
-        },
+      task.subscribe((t) => {
+        this.dialog.open(AllSubmissionsComponent, {
+          width: "100%",
+          data: {
+            submission: res,
+            context: { uid, cid, tid },
+            isText: t.mediaType === "text/plain",
+          },
+        });
       });
     });
     // TODO: show results

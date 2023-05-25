@@ -6,5 +6,5 @@ import de.thm.ii.fbs.mathParser.ast.UnaryOperation
 import de.thm.ii.fbs.mathParser.transformers.rules.OperatorMatchingRule
 
 class SubReplacingTransformer : RuleBasedTransformer(
-    OperatorMatchingRule(Operator.SUB) {Operation(Operator.ADD, it.left, UnaryOperation(Operator.SUB, it.right))}
+    OperatorMatchingRule(Operator.SUB) { Operation(Operator.ADD, it.left, UnaryOperation(Operator.SUB, it.right)) }
 )

@@ -62,7 +62,7 @@ services:
       classroom:
       fbs:
     healthcheck:
-      test: curl -k https://localhost:443
+      test: curl -k https://localhost:443/actuator/health
       timeout: 10s
       interval: 10s
       start_period: 10s

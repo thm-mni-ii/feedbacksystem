@@ -32,7 +32,7 @@ class ReferenceGraphSerialisationTest {
     fun smallGraph() {
         val a2 = Cell(0, "A2", "1")
         val testMap = mapOf(
-            0 to mapOf("a1" to Pair("0", setOf(a2))),
+            0 to mapOf("a1" to Pair("0", setOf(a2)))
         )
 
         val expected = ReferenceGraph(testMap)
