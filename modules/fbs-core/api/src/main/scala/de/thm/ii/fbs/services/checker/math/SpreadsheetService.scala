@@ -101,6 +101,7 @@ class SpreadsheetService {
   )
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+  germanFormat.setGroupingUsed(false)
   germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)
 
   /**

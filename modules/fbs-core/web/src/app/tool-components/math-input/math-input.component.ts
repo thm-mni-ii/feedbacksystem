@@ -48,6 +48,12 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
   ngAfterViewInit(): void {
     if (!this.input) return;
     const el = this.input.nativeElement;
+    el.setOptions({
+      readOnly: this.disabled,
+      virtualKeyboardMode: !this.disabled ? "manual" : "off",
+      virtualKeyboards: "numeric roman greek",
+      decimalSeparator: ",",
+    });
     if (!this.touched && this.defaultValue) {
       if (this.defaultValue.latex) {
         el.value = this.defaultValue.latex;
@@ -55,11 +61,5 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
         el.expression = JSON.parse(this.defaultValue.mathJson);
       }
     }
-    el.setOptions({
-      readOnly: this.disabled,
-      virtualKeyboardMode: !this.disabled ? "manual" : "off",
-      virtualKeyboards: "numeric roman greek",
-      decimalSeparator: ",",
-    });
   }
 }
