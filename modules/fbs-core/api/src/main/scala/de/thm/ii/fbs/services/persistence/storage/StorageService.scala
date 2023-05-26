@@ -167,7 +167,6 @@ class StorageService extends App {
     }
   }
 
-
   /**
     * returns a input stream depending whether it is in the bucket or not
     *

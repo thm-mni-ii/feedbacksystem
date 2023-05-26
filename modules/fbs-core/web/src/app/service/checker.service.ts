@@ -3,7 +3,6 @@ import { Observable } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
-import { map } from "rxjs/operators";
 import { CheckerFileType } from "../enums/checkerFileType";
 
 @Injectable({
@@ -126,11 +125,10 @@ export class CheckerService {
     ccid: number,
     fType: CheckerFileType
   ): Observable<Blob> {
-    return this.http
-      .get(
-        `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
-        { responseType: "blob" }
-      );
+    return this.http.get(
+      `/api/v1/courses/${cid}/tasks/${tid}/checker-configurations/${ccid}/${fType}`,
+      { responseType: "blob" }
+    );
   }
 
   /**
