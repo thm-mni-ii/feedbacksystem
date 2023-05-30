@@ -5,12 +5,18 @@ import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-import java.io.IOException
+import java.io.{File, FileOutputStream, IOException}
 import java.nio.file.{Files, Path, StandardCopyOption}
 import scala.io.Source
 
 @Component
 class FsStorageService {
+  def openClone(path: Path): File = {
+    val tmpFile = File.createTempFile("fs-tmp-", null)
+    Files.copy(path, new FileOutputStream(tmpFile))
+    tmpFile
+  }
+
   @Value("${storage.uploadDir}")
   private val uploadDir: String = null
 
