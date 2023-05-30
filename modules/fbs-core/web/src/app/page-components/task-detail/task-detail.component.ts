@@ -15,7 +15,6 @@ import { SubmissionService } from "../../service/submission.service";
 import { tap, map, mergeMap, concatMap, takeWhile } from "rxjs/operators";
 import { of, from } from "rxjs";
 import { Roles } from "../../model/Roles";
-import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
 import { CheckerService } from "src/app/service/checker.service";
@@ -470,17 +469,6 @@ export class TaskDetailComponent implements OnInit {
           );
         }
       );
-  }
-
-  allSubmissions() {
-    this.dialog.open(AllSubmissionsComponent, {
-      height: "80%",
-      width: "100%",
-      data: {
-        submission: this.submissions,
-        auth: false,
-      },
-    });
   }
 
   checkersConfigurable() {
