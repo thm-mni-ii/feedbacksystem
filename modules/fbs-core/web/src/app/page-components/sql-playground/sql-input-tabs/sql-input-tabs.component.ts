@@ -328,7 +328,7 @@ export class SqlInputTabsComponent
         token.id,
         this.activeTab.selectedCourse.id,
         this.activeTab.selectedTask.id,
-        this.activeTab.content
+        this.cleanUpTextAreaRegx(this.activeTab.content)
       )
       .subscribe(
         (subResult) => {
@@ -359,5 +359,10 @@ export class SqlInputTabsComponent
     }
     this.submitToTask();
     this.saveToLocalStorage();
+  }
+
+  cleanUpTextAreaRegx(sqlInput: String) {
+    let temp = sqlInput.trim().replace(/\s+/g, " ");
+    return temp;
   }
 }
