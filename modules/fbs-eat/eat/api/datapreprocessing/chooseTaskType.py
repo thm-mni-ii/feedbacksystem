@@ -23,11 +23,8 @@ dropdown = dbc.Row(
 
 layout = dbc.Container(
     html.Div(
-        style = {
-            "align-items":"center",
-            "justify":"center"
-        },
-        children = [
+        style={"align-items": "center", "justify": "center"},
+        children=[
             html.Br(),
             html.Br(),
             html.Br(),
@@ -41,12 +38,14 @@ layout = dbc.Container(
             ),
             html.Br(),
             dbc.Row(
-                [
-                    dbc.Col(dropdown, style={"text-align": "left"})
-                ],
-                style={"display": "flex","margin-left": "45%","margin-right": "45%","align-items": "center"},
+                [dbc.Col(dropdown, style={"text-align": "left"})],
+                style={
+                    "display": "flex",
+                    "margin-left": "45%",
+                    "margin-right": "45%",
+                    "align-items": "center",
+                },
             ),
         ],
     )
 )
-

@@ -6,7 +6,8 @@ import os
 
 MONGODB_URL = os.getenv("MONGODB_URL")
 
-def data(course):
+
+def get_data(course):
     data = {
         "Attempt": [1],
         "Coursenumber": [1],
@@ -26,7 +27,7 @@ def data(course):
         "Tasknumber": [1],
         "Time": ["2023-05-15 10:00:00"],
         "UniqueName": ["placeholder_name"],
-        "UserId": [0]
+        "UserId": [0],
     }
     if course != -1 and course:
         with MongoClient(MONGODB_URL) as client:

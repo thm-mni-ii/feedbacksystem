@@ -5,11 +5,13 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-from api.connect.data_service import data
+from api.connect.data_service import get_data
 from dash import Input, Output, callback, dcc, html
 from plotly.subplots import make_subplots
+import dateutil.parser
 
-df = data(-1)
+
+tmp_df = get_data(-1)
 
 layout = html.Div(
     [
@@ -26,8 +28,8 @@ layout = html.Div(
                                     [
                                         "Course",
                                         course := dcc.Dropdown(
-                                            df.CourseName.unique(),
-                                            df.CourseName.unique(),
+                                            tmp_df.CourseName.unique(),
+                                            tmp_df.CourseName.unique(),
                                             multi=True,
                                             placeholder="Select one or more courses",
                                             style={"background-color": "#e9e7e9"},
@@ -40,7 +42,7 @@ layout = html.Div(
                                     [
                                         "Exercise",
                                         exercise := dcc.Dropdown(
-                                            df.UniqueName.unique(),
+                                            tmp_df.UniqueName.unique(),
                                             multi=True,
                                             placeholder="Select one or more exercise",
                                             style={"background-color": "#e9e7e9"},
@@ -65,14 +67,16 @@ layout = html.Div(
                                     [
                                         "Date/Time From",
                                         dcc.Input(
-                                            id = "date_time_from",
-                                            value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                            id="date_time_from",
+                                            value=datetime.now().strftime(
+                                                "%Y-%m-%dT%H:%M"
+                                            ),
                                             type="datetime-local",
                                         ),
                                         "Date/Time To",
                                         dcc.Input(
-                                            id = "date_time_to",
-                                            value = (
+                                            id="date_time_to",
+                                            value=(
                                                 datetime.now()
                                                 + timedelta(hours=1, minutes=30)
                                             ).strftime("%Y-%m-%dT%H:%M"),
@@ -105,18 +109,28 @@ layout = html.Div(
                         # still necessary to prevent:
                         # "A nonexistent object was used in an Input of a Dash callback"
                         dcc.RangeSlider(
-                            df.Attempt.min(),
-                            df.Attempt.max(),
+                            tmp_df.Attempt.min(),
+                            tmp_df.Attempt.max(),
                             1,
-                            value=[df.Attempt.min(), df.Attempt.max()],
+                            value=[tmp_df.Attempt.min(), tmp_df.Attempt.max()],
                             marks=None,
                             id="slider_dashboard",
                         ),
                     ),
                     dbc.Row(
-                        dbc.Container([
-                            histogram_card := dbc.Card(histogram := dcc.Graph(), body=True, style={"display": "none"}),
-                            histogram_avg_submissions_card := dbc.Card(histogram_avg_submissions := dcc.Graph(),body=True, style={"display": "none"})],
+                        dbc.Container(
+                            [
+                                histogram_card := dbc.Card(
+                                    histogram := dcc.Graph(),
+                                    body=True,
+                                    style={"display": "none"},
+                                ),
+                                histogram_avg_submissions_card := dbc.Card(
+                                    histogram_avg_submissions := dcc.Graph(),
+                                    body=True,
+                                    style={"display": "none"},
+                                ),
+                            ],
                             style={"margin-top": "20px"},
                         ),
                     ),
@@ -132,58 +146,72 @@ layout = html.Div(
         ),
     ],
 )
-@callback(Output(checklist,"options"), Output(checklist,"value"), Input(checklist,"value"), Input(key_figure, "value"))
-def hide_Attempts(checklist_elements,key_figure):
-    if "Average Attempts" in key_figure:
-        options = [{"label": "Attempts", "value": "Attempts", "disabled": True},{"label": "Date", "value": "Date", }]
+
+
+@callback(
+    Output(checklist, "options"),
+    Output(checklist, "value"),
+    Input(checklist, "value"),
+    Input(key_figure, "value"),
+)
+def hide_attempts(checklist_elements, key_figures):
+    if "Average Attempts" in key_figures:
+        options = [
+            {"label": "Attempts", "value": "Attempts", "disabled": True},
+            {
+                "label": "Date",
+                "value": "Date",
+            },
+        ]
         if "Attempts" in checklist_elements:
             checklist_elements.remove("Attempts")
     else:
         options = ["Attempts", "Date"]
     return options, checklist_elements
 
-@callback(Output(timerow,"children"),Input(checklist,"value"),Input(timerow,"children"))
-def hide_time(checkbox, reihe):
+
+@callback(
+    Output(timerow, "children"), Input(checklist, "value")
+)
+def hide_time(checkbox):
     if "Date" in checkbox:
         return html.Div(
             [
                 "Date/Time From",
                 dcc.Input(
-                    id = "date_time_from",
-                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    id="date_time_from",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
                     type="datetime-local",
                 ),
                 "Date/Time To",
                 dcc.Input(
-                    id = "date_time_to",
-                    value =  (
-                        datetime.now()
-                        + timedelta(hours=1, minutes=30)
-                    ).strftime("%Y-%m-%dT%H:%M"),
+                    id="date_time_to",
+                    value=(datetime.now() + timedelta(hours=1, minutes=30)).strftime(
+                        "%Y-%m-%dT%H:%M"
+                    ),
                     type="datetime-local",
                 ),
             ]
         )
-    else:
-        return html.Div(
-            children =
-            [
-                "Date/Time From",
-                dcc.Input(
-                    id = "date_time_from",
-                    value = (datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
+    return html.Div(
+        children=[
+            "Date/Time From",
+            dcc.Input(
+                id="date_time_from",
+                value=(datetime.now() - timedelta(hours=500000)).strftime(
+                    "%Y-%m-%dT%H:%M"
                 ),
-                "Date/Time To",
-                dcc.Input(
-                    id = "date_time_to",
-                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-            ],
-            style={"visibility": "hidden", "height": "0"},
-
-        )
+                type="datetime-local",
+            ),
+            "Date/Time To",
+            dcc.Input(
+                id="date_time_to",
+                value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                type="datetime-local",
+            ),
+        ],
+        style={"visibility": "hidden", "height": "0"},
+    )
 
 
 def generate_empty_response():
@@ -201,32 +229,41 @@ def generate_empty_response():
 
     return fig
 
+
 @callback(
-    Output(course,"options"),
+    Output(course, "options"),
     Output(course, "value"),
-    Input("intermediate-value","data"),
+    Input("intermediate-value", "data"),
     Input("courses_dict", "data"),
 )
 def update_exercise(daten, courses_dict):
-    emptyList = []
+    empty_list = []
     df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
+    df = df[df["UserId"] != 0]
 
-    courses = [{"value": course_id, "label": courses_dict.get(str(course_id)) or course_id} for course_id in df.CourseName.unique()]
-    return courses, emptyList
+    courses = [
+        {"value": course_id, "label": courses_dict.get(str(course_id)) or course_id}
+        for course_id in df.CourseName.unique()
+    ]
+    return courses, empty_list
 
 
-@callback(Output(checklist_filter_components, "children"), Input(checklist, "value"), Input("intermediate-value","data"), Input(key_figure, "value"))
-def checklist_filter_masks(checks,daten, key_figure):
+@callback(
+    Output(checklist_filter_components, "children"),
+    Input(checklist, "value"),
+    Input("intermediate-value", "data"),
+    Input(key_figure, "value"),
+)
+def checklist_filter_masks(checks, daten, key_figures):
     """
     This callback creates all required filter masks based on the checklist variable
     """
     filters = []
     df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
+    df = df[df["UserId"] != 0]
 
     if "Attempts" in checks:
-        if "Average Attempts" in key_figure:
+        if "Average Attempts" in key_figures:
             checks.remove("Attempts")
     for box in checks:
         if "Attempts" in box:
@@ -304,20 +341,29 @@ def checklist_filter_masks(checks,daten, key_figure):
 
 
 # Update dropdown menu for exercises
-@callback(Output(exercise, "options"), Input(course, "value"), Input("intermediate-value","data"))
-def update_exercises_dropdown_course(input_value,daten):
+@callback(
+    Output(exercise, "options"),
+    Input(course, "value"),
+    Input("intermediate-value", "data"),
+)
+def update_exercises_dropdown_course(input_value, daten):
     df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
+    df = df[df["UserId"] != 0]
 
     if not input_value:
         return list(df.UniqueName.unique())
-    else:
-        return list(df[df.CourseName.isin(input_value)].UniqueName.unique()) + ["Übersicht"]
+    return list(df[df.CourseName.isin(input_value)].UniqueName.unique()) + [
+        "Übersicht"
+    ]
 
 
 # Update date_time_to based on date_time_from
-@callback(Output("date_time_to", "value"), Input("date_time_from", "value"),Input(checklist,"value"))
-def update_date_time_to(input_value,check):
+@callback(
+    Output("date_time_to", "value"),
+    Input("date_time_from", "value"),
+    Input(checklist, "value"),
+)
+def update_date_time_to(input_value, check):
     if "Date" in check:
         try:
             date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
@@ -328,48 +374,47 @@ def update_date_time_to(input_value,check):
         date_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
         return date_time
 
+
 # Update histogram_avg_submissions figure
 @callback(
     Output(histogram_avg_submissions, "figure"),
     Output(histogram_avg_submissions_card, "style"),
-    Input(exercise, "value"), Input(course, "value"),
+    Input(exercise, "value"),
+    Input(course, "value"),
     Input(key_figure, "value"),
-    Input("intermediate-value","data"),
+    Input("intermediate-value", "data"),
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
-    Input(checklist, "value")
+    Input(checklist, "value"),
 )
-def update_histogram_avg_submissions(exercise_value, course_value, key_figure_value, data,date_time_from,date_time_to, checklist_value):
+def update_histogram_avg_submissions(
+    exercise_value,
+    course_value,
+    key_figure_value,
+    data,
+    date_time_from,
+    date_time_to,
+    checklist_value,
+):
     df = pd.read_json(data)
     df["Time"] = pd.to_datetime(df.Time)
-    df = df[df['UserId'] != 0]
+    df = df[df["UserId"] != 0]
 
-    try:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
-    except:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+    date_time_from = dateutil.parser.parse(date_time_from)
 
-    try:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
-    except:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
+    date_time_to = dateutil.parser.parse(date_time_to)
 
-    date_time_from = date_time_from - timedelta(hours=2)
-    date_time_to = date_time_to - timedelta(hours=2)
 
     display_style = {}
 
     if "Average Attempts" in key_figure_value:
-        display_style = {"display":"block"}
+        display_style = {"display": "block"}
     else:
-        display_style = {"display":"none"}
+        display_style = {"display": "none"}
 
     task_len = {}
-    filtered_df = None
     if "Date" in checklist_value:
-        df = df[
-            (df.Time >= date_time_from) & (df.Time < date_time_to)
-        ]
+        df = df[(df.Time >= date_time_from) & (df.Time < date_time_to)]
     if not course_value or df.empty:
         return generate_empty_response(), display_style
 
@@ -377,20 +422,26 @@ def update_histogram_avg_submissions(exercise_value, course_value, key_figure_va
         filtered_df = df
     else:
         filtered_df = df[df.UniqueName.isin(exercise_value)]
-    
+
     for task in filtered_df.UniqueName.unique():
         local_df = filtered_df[filtered_df.UniqueName == task]
 
         avg_submissions = len(local_df) / len(local_df.UserId.unique())
         task_len[f"{task}"] = avg_submissions
 
-    fig = px.bar(df, x=list(task_len.keys()), y=list(task_len.values()),labels={
-                     "x": "Excercise",
-                     "y": "Average Attempts",
-                 })
-    fig.update_layout(showlegend=False,height=600)
-    
+    fig = px.bar(
+        df,
+        x=list(task_len.keys()),
+        y=list(task_len.values()),
+        labels={
+            "x": "Excercise",
+            "y": "Average Attempts",
+        },
+    )
+    fig.update_layout(showlegend=False, height=600)
+
     return fig, display_style
+
 
 # Update histogramm figure
 @callback(
@@ -403,7 +454,7 @@ def update_histogram_avg_submissions(exercise_value, course_value, key_figure_va
     Input("slider_dashboard", "value"),
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
-    Input("intermediate-value","data"),
+    Input("intermediate-value", "data"),
 )
 def update_histogram(
     course_value,
@@ -418,13 +469,13 @@ def update_histogram(
     display_style = {}
 
     if "Typical Mistakes" in key_figure_value:
-        display_style = {"display":"block"}
+        display_style = {"display": "block"}
     else:
-        display_style = {"display":"none"}
+        display_style = {"display": "none"}
 
     df = pd.read_json(daten)
     df["Time"] = pd.to_datetime(df.Time)
-    df = df[df['UserId'] != 0]
+    df = df[df["UserId"] != 0]
 
     # Convert datetime string to datetime object
     try:
@@ -460,8 +511,8 @@ def update_histogram(
 
     if course_value:
         filtered_df = filtered_df[filtered_df.CourseName.isin(course_value)]
-    
-    # We want all excercise values if Übersicht is checked 
+
+    # We want all excercise values if Übersicht is checked
     if "Übersicht" not in exercise_value:
         if exercise_value:
             filtered_df = filtered_df[filtered_df.UniqueName.isin(exercise_value)]
@@ -472,15 +523,16 @@ def update_histogram(
 
     if "Übersicht" in exercise_value:
         hist_df = filtered_df[
-        [
-            "Joins",
-            "Projection_Attributes",
-            "Selection_Attributes",
-            "GroupBy",
-            "OrderBy",
-            "Strings",
-            "Tables",
-        ]]
+            [
+                "Joins",
+                "Projection_Attributes",
+                "Selection_Attributes",
+                "GroupBy",
+                "OrderBy",
+                "Strings",
+                "Tables",
+            ]
+        ]
 
         if hist_df.empty:
             return generate_empty_response(), display_style
@@ -489,12 +541,15 @@ def update_histogram(
         for column in hist_df.columns:
             value_counts = hist_df[column].value_counts()
             total_counts = value_counts.sum()
-            percent_correct = (value_counts.get('correct', 0) / total_counts)
-            percent_incorrect = (value_counts.get('incorrect', 0) / total_counts)
-            result_dict[column] = {'Correct': percent_correct, 'Incorrect': percent_incorrect}
+            percent_correct = value_counts.get("correct", 0) / total_counts
+            percent_incorrect = value_counts.get("incorrect", 0) / total_counts
+            result_dict[column] = {
+                "Correct": percent_correct,
+                "Incorrect": percent_incorrect,
+            }
 
         result_df = pd.DataFrame(result_dict)
-         # Colors for each bar
+        # Colors for each bar
         colors = [
             "#60a7ba",
             "#f0912d",
@@ -520,17 +575,24 @@ def update_histogram(
         for i, column in enumerate(result_df.columns):
             values.append(result_df[column].Incorrect)
 
-        data = {'labels': labels, 'values': values}
+        data = {"labels": labels, "values": values}
         df = pd.DataFrame(data)
-        
+
         values = df["values"].astype(float)
         df["values"] = (values * 100).astype(int)
 
-        fig = px.bar(df, x='labels', y='values', color='labels', color_discrete_sequence=colors,labels={
-                     "labels": "SQL-Attribute",
-                     "values": "STUDENTS",
-                 },)
-        fig.update_layout(showlegend=False,height=600)
+        fig = px.bar(
+            df,
+            x="labels",
+            y="values",
+            color="labels",
+            color_discrete_sequence=colors,
+            labels={
+                "labels": "SQL-Attribute",
+                "values": "STUDENTS",
+            },
+        )
+        fig.update_layout(showlegend=False, height=600)
         return fig, display_style
 
     # Create figure which will be returned and contains all subfigures
@@ -541,7 +603,6 @@ def update_histogram(
         shared_xaxes=True,
         shared_yaxes=True,
     )
-
 
     # Initialize subfigures
     for row in range(1, math.ceil(len(exercise_value) / 2) + 1):
@@ -620,7 +681,7 @@ def update_histogram(
         for i, color in enumerate(colors):
             trace = go.Bar(
                 x=[task_subset_df.index.values[i]],
-                y=[task_subset_df.incorrect[i]*100],
+                y=[task_subset_df.incorrect[i] * 100],
                 name=labels[i],
                 marker=dict(color=color),
                 showlegend=show_legend,

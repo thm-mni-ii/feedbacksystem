@@ -1,17 +1,24 @@
-# import io
+'''
+Display data while making it possible to filter in background
+'''
 from datetime import datetime, timedelta
 
 import dash
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-from api.connect.data_service import data
 from dash import ALL, Input, Output, callback, dcc, html
-from dash.dependencies import Input, Output
+from api.connect.data_service import get_data
+import logging
+import dateutil.parser
 
-df = data(-1)
 
-filter = [
+logger = logging.getLogger("name")
+
+
+tmp_df = get_data(-1)
+
+all_filters = [
     "Projection Attributes",
     "Selection Attributes",
     "Strings",
@@ -24,8 +31,7 @@ filter = [
 columns = []
 correctfilters = []
 incorrectfilters = []
-n_clicks = 0
-image_path = "assets/x.webp"
+IMAGE_PATH = "assets/x.webp"
 
 layout = html.Div(
     [
@@ -48,10 +54,11 @@ layout = html.Div(
                                                         [
                                                             "Course",
                                                             course := dcc.Dropdown(
-                                                                df.CourseName.unique(),
-                                                                df.CourseName.unique(),
+                                                                tmp_df.CourseName.unique(),
+                                                                tmp_df.CourseName.unique(),
                                                                 multi=True,
-                                                                placeholder="Select one or more courses",
+                                                                placeholder=
+                                                                "Select one or more courses",
                                                                 style={
                                                                     "background-color": "#e9e7e9"
                                                                 },
@@ -64,15 +71,10 @@ layout = html.Div(
                                                         [
                                                             "Exercise",
                                                             exercise := dcc.Dropdown(
-                                                                df.UniqueName.unique(),
-                                                                # [
-                                                                #    df[
-                                                                #        df.CourseName == course
-                                                                #        ].UniqueName.iloc[0]
-                                                                #    for course in df.CourseName.unique()
-                                                                # ],
+                                                                tmp_df.UniqueName.unique(),
                                                                 multi=True,
-                                                                placeholder="Select one or more exercise",
+                                                                placeholder=
+                                                                "Select one or more exercise",
                                                                 style={
                                                                     "background-color": "#e9e7e9"
                                                                 },
@@ -86,16 +88,23 @@ layout = html.Div(
                                                             "Date/Time From",
                                                             dcc.Input(
                                                                 id="date_time_from2",
-                                                                value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                                                                value=datetime.now().strftime(
+                                                                    "%Y-%m-%dT%H:%M"
+                                                                ),
                                                                 type="datetime-local",
                                                             ),
                                                             "Date/Time To",
                                                             dcc.Input(
                                                                 id="date_time_to2",
                                                                 value=(
-                                                                        datetime.now()
-                                                                        + timedelta(hours=1, minutes=30)
-                                                                ).strftime("%Y-%m-%dT%H:%M"),
+                                                                    datetime.now()
+                                                                    + timedelta(
+                                                                        hours=1,
+                                                                        minutes=30,
+                                                                    )
+                                                                ).strftime(
+                                                                    "%Y-%m-%dT%H:%M"
+                                                                ),
                                                                 type="datetime-local",
                                                             ),
                                                         ]
@@ -118,16 +127,18 @@ layout = html.Div(
                                                     style={"margin-top": "20px"},
                                                 ),
                                                 checklist_filter_components := html.Div(
-                                                    # default slider which will be overwritten by callback
+                                                    # default slider which will be
+                                                    # overwritten by callback
                                                     # still necessary to prevent:
-                                                    # "A nonexistent object was used in an Input of a Dash callback"
+                                                    # "A nonexistent object was used
+                                                    # in an Input of a Dash callback"
                                                     dcc.RangeSlider(
-                                                        df.Attempt.min(),
-                                                        df.Attempt.max(),
+                                                        tmp_df.Attempt.min(),
+                                                        tmp_df.Attempt.max(),
                                                         1,
                                                         value=[
-                                                            df.Attempt.min(),
-                                                            df.Attempt.max(),
+                                                            tmp_df.Attempt.min(),
+                                                            tmp_df.Attempt.max(),
                                                         ],
                                                         marks=None,
                                                         id="slider_attempt_analysis",
@@ -264,7 +275,8 @@ layout = html.Div(
                                                         html.Td(
                                                             dcc.Slider(
                                                                 id={
-                                                                    "type": "slider_background_filter",
+                                                                    "type":
+                                                                        "slider_background_filter",
                                                                     "index": row,
                                                                 },
                                                                 min=0,
@@ -292,7 +304,7 @@ layout = html.Div(
                                                         ),
                                                     ]
                                                 )
-                                                for row in filter
+                                                for row in all_filters
                                             ],
                                         ),
                                     ],
@@ -306,49 +318,56 @@ layout = html.Div(
     ]
 )
 
-@callback(Output(timerow,"children"),Input(checklist,"value"),Input(timerow,"children"))
-def hide_time(checkbox,reihe):
+
+@callback(
+    Output(timerow, "children"), Input(checklist, "value"),
+)
+def hide_time(checkbox):
+    '''
+    hide the time-input when the time checkbox is not selected
+    :param checkbox: all checkboxes
+    :return: the checkbox but with the inputs hidden
+    '''
     if "Date" in checkbox:
-        test =  html.Div(
+        test = html.Div(
             [
                 "Date/Time From",
                 dcc.Input(
-                    id = "date_time_from2",
-                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                    id="date_time_from2",
+                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
                     type="datetime-local",
                 ),
                 "Date/Time To",
                 dcc.Input(
-                    id = "date_time_to2",
-                    value =  (
-                        datetime.now()
-                        + timedelta(hours=1, minutes=30)
-                    ).strftime("%Y-%m-%dT%H:%M"),
+                    id="date_time_to2",
+                    value=(datetime.now() + timedelta(hours=1, minutes=30)).strftime(
+                        "%Y-%m-%dT%H:%M"
+                    ),
                     type="datetime-local",
                 ),
             ]
         )
         return test
-    else:
-        return html.Div(
-            children =
-            [
-                "Date/Time From",
-                dcc.Input(
-                    id = "date_time_from2",
-                    value = (datetime.now() - timedelta(hours=500000)).strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
+    return html.Div(
+        children=[
+            "Date/Time From",
+            dcc.Input(
+                id="date_time_from2",
+                value=(datetime.now() - timedelta(hours=500000)).strftime(
+                    "%Y-%m-%dT%H:%M"
                 ),
-                "Date/Time To",
-                dcc.Input(
-                    id = "date_time_to2",
-                    value = datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-            ],
-            style={"visibility": "hidden", "height": "0"},
+                type="datetime-local",
+            ),
+            "Date/Time To",
+            dcc.Input(
+                id="date_time_to2",
+                value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                type="datetime-local",
+            ),
+        ],
+        style={"visibility": "hidden", "height": "0"},
+    )
 
-        )
 
 @callback(
     Output(course, "options"),
@@ -357,41 +376,59 @@ def hide_time(checkbox,reihe):
     Input("courses_dict", "data"),
 )
 def update_exercise(daten, courses_dict):
-    emptyList = []
-    df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
-    courses = [{"value": course_id, "label": courses_dict.get(str(course_id)) or course_id} for course_id in df.CourseName.unique()]
-    return courses, emptyList
+    '''
+    replace the ids of the courses with their actual name when displayed
+    :param daten: all data to display
+    :param courses_dict: list of the real names of all courses
+    :return: all courses that are selecteable
+    '''
+    empty_list = []
+    local_df = pd.read_json(daten)
+    local_df = local_df[local_df["UserId"] != 0]
+    courses = [
+        {"value": course_id, "label": courses_dict.get(str(course_id)) or course_id}
+        for course_id in local_df.CourseName.unique()
+    ]
+    return courses, empty_list
 
 
-# Update dropdown menu for exercises
 @callback(
     Output(exercise, "options"),
     Input(course, "value"),
     Input("intermediate-value", "data"),
 )
 def update_dropdown(input_value, daten):
-    df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
+    '''
+    Update dropdown menu for exercises when course selection changes
+    :param input_value: selected courses
+    :param daten: all data
+    :return: all exercises that can be selected
+    '''
+    local_df = pd.read_json(daten)
+    local_df = local_df[local_df["UserId"] != 0]
 
     if not input_value:
-        return df.UniqueName.unique()
-    else:
-        return df[df.CourseName.isin(input_value)].UniqueName.unique()
+        return local_df.UniqueName.unique()
+    return local_df[local_df.CourseName.isin(input_value)].UniqueName.unique()
 
 
-# Update date_time_to based on date_time_from
-@callback(Output("date_time_to2", "value"), Input("date_time_from2", "value"),Input(checklist,"value"))
-def update_date_time_to(input_value,check):
+@callback(
+    Output("date_time_to2", "value"),
+    Input("date_time_from2", "value"),
+    Input(checklist, "value"),
+)
+def update_date_time_to(input_value, check):
+    '''
+    set the time of the to-input 1 hour and 30 minutes after the from date,
+    after the from date was changed
+    :param input_value: datetime to which 90 minutes need to be added
+    :param check: checklist to check if date was selected
+    :return: datetime with updated time
+    '''
+    date_time = dateutil.parser.parse(input_value)
     if "Date" in check:
-        try:
-            date_time = datetime.strptime(input_value, "%Y-%m-%dT%H:%M")
-            return date_time + timedelta(hours=1, minutes=30)
-        except:
-            return input_value
-    else:
-        date_time = datetime.now().strftime("%Y-%m-%dT%H:%M")
-        return date_time
+        return date_time + timedelta(hours=1, minutes=30)
+    return date_time
 
 
 @callback(
@@ -404,8 +441,8 @@ def checklist_filter_masks(checks, daten):
     This callback creates all required filter masks based on the checklist variable
     """
     filters = []
-    df = pd.read_json(daten)
-    df = df[df['UserId'] != 0]
+    local_df = pd.read_json(daten)
+    local_df = local_df[local_df["UserId"] != 0]
 
     for box in checks:
         if box == "Attempts":
@@ -414,17 +451,17 @@ def checklist_filter_masks(checks, daten):
                     [
                         # slider_label := html.Label("Attempts"),
                         dbc.Col(
-                            html.Label(df.Attempt.min()),
+                            html.Label(local_df.Attempt.min()),
                             width={"size": 1, "offset": 0},
                             style={"text-align": "right"},
                         ),
                         dbc.Col(
                             [
                                 dcc.RangeSlider(
-                                    df.Attempt.min(),
-                                    df.Attempt.max(),
+                                    local_df.Attempt.min(),
+                                    local_df.Attempt.max(),
                                     1,
-                                    value=[df.Attempt.min(), df.Attempt.max()],
+                                    value=[local_df.Attempt.min(), local_df.Attempt.max()],
                                     marks=None,
                                     tooltip={
                                         "placement": "bottom",
@@ -435,7 +472,7 @@ def checklist_filter_masks(checks, daten):
                             ]
                         ),
                         dbc.Col(
-                            html.Label(df.Attempt.max()),
+                            html.Label(local_df.Attempt.max()),
                             width={"size": 1, "offset": 0},
                             style={"text-align": "left"},
                         ),
@@ -470,8 +507,8 @@ def checklist_filter_masks(checks, daten):
                 dbc.Col(
                     html.Div(
                         dcc.RangeSlider(
-                            df.Attempt.min(),
-                            df.Attempt.max(),
+                            local_df.Attempt.min(),
+                            local_df.Attempt.max(),
                             id="slider_attempt_analysis",
                         ),
                         style={"visibility": "hidden", "height": "0"},
@@ -492,12 +529,9 @@ def checklist_filter_masks(checks, daten):
         Output({"type": "slider_background_filter", "index": ALL}, "value"),
     ],
     [
-        Input("body", "children"),
-        Input({"type": "name", "index": ALL}, "children"),
         Input({"type": "slider_background_filter", "index": ALL}, "value"),
         Input({"type": "add-button", "index": ALL}, "children"),
         Input({"type": "add-button", "index": ALL}, "n_clicks"),
-        Input("line-graph", "figure"),
         Input(exercise, "value"),
         Input("slider_attempt_analysis", "value"),
         Input(course, "value"),
@@ -507,196 +541,112 @@ def checklist_filter_masks(checks, daten):
         Input("date_time_from2", "value"),
         Input("date_time_to2", "value"),
         Input("intermediate-value", "data"),
-        Input(checklist,"value")
+        Input(checklist, "value"),
     ],
 )
 def update(
-    tabelle,
-    name,
     slider,
     button,
     clicks,
-    graph,
     exercises,
     limits,
     courses,
     exercise_options,
-    deletebuttons,
+    filterbuttons,
     columnbuttons,
     date_time_from,
     date_time_to,
     daten,
-    check_list
+    check_list,
 ):
+    '''
+    update the graph, the background filter slider, and the display that shows which
+    filters are selected aswell as columns that are displayed
+    :param slider: what background filters are selected
+    :param button: the value of all buttons (either "+" if they are not selected
+           or "-" if they are not selected
+    :param clicks: list of how often the buttons were pressed
+    :param exercises: all selected exercises
+    :param limits: the selected attempt limits in the slider
+    :param courses: all selected courses
+    :param exercise_options: all possible exercises that are selectable
+    :param filterbuttons: how often a filter button is clicked,
+           input value is irrelevant is only used to trigger
+           the callback
+    :param columnbuttons: how often a column button is clicked,
+           input value is irrelevant is only used to trigger
+           the callback
+    :param date_time_from: starttime that is selected in the date input
+    :param date_time_to: endtime that is selected in the date input
+    :param daten: all data
+    :param check_list: checklist to check whether date or attempts is selected
+    :return: "+" or "-" in attribute buttons, buttons to display
+            which columns are selcted also to deselected
+            this option, buttons to display which filters are selcted also to
+            deselected this option, an new graph, change the
+            marks of the background filter slider, change the value
+            of a background filter slider if it was selected in a column
+    '''
     trigger = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
-    sliders = []
-    df = pd.read_json(daten)
-    df["Time"] = pd.to_datetime(df.Time)
-    df = df[df['UserId'] != 0]
+    fig = {}
+    local_df = pd.read_json(daten)
+    local_df["Time"] = pd.to_datetime(local_df.Time)
+    local_df = local_df[local_df["UserId"] != 0]
 
-    try:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M")
-    except:
-        date_time_from = datetime.strptime(date_time_from, "%Y-%m-%dT%H:%M:%S")
+    date_time_from = dateutil.parser.parse(date_time_from)
 
-    try:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M")
-    except:
-        date_time_to = datetime.strptime(date_time_to, "%Y-%m-%dT%H:%M:%S")
-    date_time_from = date_time_from - timedelta(hours=2)
-    date_time_to = date_time_to - timedelta(hours=2)
+    date_time_to = dateutil.parser.parse(date_time_to)
+
     if not exercises:
         exercises = exercise_options
     # Reduce the data to the data of the selected exercises and the selected limits of attempts
-    dff = df[df.UniqueName.isin(exercises)]
-    limits = limits or [dff.Attempt.min(), dff.Attempt.max()]
-    dff = dff[(dff.Attempt.ge(limits[0])) & (dff.Attempt.le(limits[1]))]
+    local_df = local_df[local_df.UniqueName.isin(exercises)]
+    limits = limits or [local_df.Attempt.min(), local_df.Attempt.max()]
+    local_df = local_df[(local_df.Attempt.ge(limits[0])) & (local_df.Attempt.le(limits[1]))]
 
-    # calculate the numbers displayed in the slider
-    for row in filter:
-        tmprow = row.replace(" ", "_")
-        tmp = dff
-        tmpdf = tmp[tmp[tmprow] == "correct"]
-        tmp = dff
-        tmpdf2 = tmp[tmp[tmprow] == "incorrect"]
-        marks = {0: str(len(tmpdf.index)), 1: "", 2: str(len(tmpdf2.index))}
-        sliders.append(marks)
+    sliders = create_marks_for_slider(local_df)
     # abort rest of the function in the initial callback
     if trigger == "":
-        return button, columns, correctfilters, incorrectfilters, graph, sliders, slider
-    else:
-        # reset slider if the button belonging to it was changed
-        if "add-button" in trigger:
-            count = 0
-            for filtername in filter:
-                if filtername in trigger:
-                    slider[count] = 1
-                count = count + 1
+        return button, columns, correctfilters, incorrectfilters, fig, sliders, slider
+    # reset slider if the button belonging to it was changed
+    slider = update_slider(slider, trigger)
+    button = update_button(button,trigger)
 
-            # change the display of a button after it was pressed
-            for counter in range(0, len(filter)):
-                if filter[counter] in trigger:
-                    if button[counter] == "+":
-                        button[counter] = "-"
-                    else:
-                        button[counter] = "+"
+    # reset a button after the slider belonging to it was changed
+    columns.clear()
 
-        if "delete-button-column" in trigger:
-            for counter in range(0, len(filter)):
-                if filter[counter] in trigger:
-                    button[counter] = "+"
+    # save which columns were selected
+    for counter, _ in enumerate(clicks):
+        if button[counter] == "-":
+            columns.append(all_filters[counter])
 
-        if "delete-button-active" in trigger:
-            for counter in range(0, len(filter)):
-                if filter[counter] in trigger:
-                    slider[counter] = 1
-
-        # reset a button after the slider belonging to it was changed
-        counter = 0
-        columns.clear()
-        if "slider" in trigger:
-            count = 0
-            for filtername in filter:
-                if filtername in trigger:
-                    button[count] = "+"
-                count = count + 1
-
-        # save which columns were selected
-        for counter in range(0, len(clicks)):
-            if button[counter] == "-":
-                columns.append(filter[counter])
-
-        # save which filters were selected
-        correctfilters.clear()
-        incorrectfilters.clear()
-        counter = 0
-        for singleslider in slider:
-            if singleslider == 0:
-                correctfilters.append(filter[counter])
-                dff = dff[dff[filter[counter].replace(" ", "_")] == "correct"]
-            if singleslider == 2:
-                incorrectfilters.append(filter[counter])
-                dff = dff[dff[filter[counter].replace(" ", "_")] == "incorrect"]
-            counter = counter + 1
+    # save which filters were selected
+    correctfilters.clear()
+    incorrectfilters.clear()
+    for counter, singleslider in enumerate(slider):
+        if singleslider == 0:
+            correctfilters.append(all_filters[counter])
+            local_df = local_df[local_df[all_filters[counter].replace(" ", "_")] == "correct"]
+        if singleslider == 2:
+            incorrectfilters.append(all_filters[counter])
+            local_df = local_df[local_df[all_filters[counter].replace(" ", "_")] == "incorrect"]
 
     # get the data according to selected courses, columns and filters
-    tmpdf = dff[dff.CourseName.isin(courses)]
-    for i in range(0, len(correctfilters)):
-        tmpsave = correctfilters[i]
+    tmpdf = local_df[local_df.CourseName.isin(courses)]
+    for _, correct_filter in enumerate(correctfilters):
+        tmpsave = correct_filter
         tmpdf = tmpdf[tmpdf[tmpsave.replace(" ", "_")] == "correct"]
-    for i in range(0, len(incorrectfilters)):
-        tmpsave = incorrectfilters[i]
+    for _, incorrect_filter  in enumerate(incorrectfilters):
+        tmpsave = incorrect_filter
         tmpdf = tmpdf[tmpdf[tmpsave.replace(" ", "_")] == "incorrect"]
-    correctfiltersbuttons = []
-    columnbuttons = []
-    # create buttons to display which filters and which columns are shown and to disable said options
-    for i in range(0, len(correctfilters)):
-        newposbutton = html.Button(
-            id={"type": "delete-button-active", "index": correctfilters[i]},
-            className="delete-button-active",
-            children=[
-                correctfilters[i],
-                html.Img(
-                    src=image_path, width="12", height="12", style={"margin": "7px"}
-                ),
-            ],
-        )
-        correctfiltersbuttons.append(newposbutton)
-    for j in range(0, len(incorrectfilters)):
-        newnegbutton = html.Button(
-            id={"type": "delete-button-active", "index": incorrectfilters[j]},
-            className="delete-button-negative",
-            children=[
-                incorrectfilters[j],
-                html.Img(
-                    src=image_path, width="12", height="12", style={"margin": "7px"}
-                ),
-            ],
-        )
-        correctfiltersbuttons.append(newnegbutton)
-    for k in range(0, len(columns)):
-        newcolbutton = html.Button(
-            id={"type": "delete-button-column", "index": columns[k]},
-            className="delete-button-column",
-            children=[
-                columns[k],
-                html.Img(
-                    src=image_path, width="12", height="12", style={"margin": "7px"}
-                ),
-            ],
-        )
-        columnbuttons.append(newcolbutton)
-    # prepare the data to create a graph
-    data = []
-    names = []
-    if "Date" in check_list:
-        dff = dff[(dff.Time >= date_time_from) & (dff.Time < date_time_to)]
-    if tmpdf is not None:
-        for i in range(0, 2 ** (len(columns))):
-            num = bin(i)
-            text = ""
-            requirements = []
-            length = len(columns)
-            for j in range(0, length):
-                binary_string = num[2:]
-                if len(binary_string) < length - j:
-                    requirements.append("incorrect")
-                    text = text + " " + columns[j] + " " + "incorrect"
-                else:
-                    if binary_string[j - length] == "1":
-                        requirements.append("correct")
-                        text = text + " " + columns[j] + " " + "correct"
-                    else:
-                        requirements.append("incorrect")
-                        text = text + " " + columns[j] + " " + "incorrect"
-            names.append(text)
-            tmpdff = dff
-            for k in range(0, len(columns)):
-                tmpdff = tmpdff[
-                    tmpdff[columns[k].replace(" ", "_")] == requirements[(int)(k)]
-                ]
-            data.append(len(tmpdff.index))
 
+    columnbuttons = create_new_columns_buttons()
+    correctfiltersbuttons = create_new_filter_buttons()
+
+    if "Date" in check_list:
+        local_df = local_df[(local_df.Time >= date_time_from) & (local_df.Time < date_time_to)]
+    if tmpdf is not None:
+        data, names = prepare_data_for_graph(local_df)
     # create graph
     if not data or not names:
         return button, columnbuttons, correctfiltersbuttons, fig, sliders, slider
@@ -710,11 +660,150 @@ def update(
         color="names",
     )
     fig.update_layout(showlegend=False)
-    """
-    potentially to change orientation of the legend
-    fig.update_layout(
-        xaxis=go.layout.XAxis(
-            tickangle=90)
-    )
-    """
     return button, columnbuttons, correctfiltersbuttons, fig, sliders, slider
+
+def update_slider(slider, trigger):
+    '''
+    update the sliders if an attribute was selected
+    :param slider: current sliders
+    :param trigger: trigger for the callback
+    :return: new sliders
+    '''
+    if "add-button" in trigger:
+        for count, filtername in enumerate(all_filters):
+            if filtername in trigger:
+                slider[count] = 1
+
+    if "delete-button-active" in trigger:
+        for counter, active_columns  in enumerate(all_filters):
+            if active_columns in trigger:
+                slider[counter] = 1
+    return slider
+
+def update_button(button, trigger):
+    '''
+    update the buttons after they were selected or a slider was changed
+    :param button: current buttons
+    :param trigger: trigger for the callback
+    :return: new buttons
+    '''
+    if "add-button" in trigger:
+        for counter, all_buttons in enumerate(all_filters):
+            if all_buttons in trigger:
+                if button[counter] == "+":
+                    button[counter] = "-"
+                else:
+                    button[counter] = "+"
+
+    if "delete-button-column" in trigger:
+        for counter, active_filter  in enumerate(all_filters):
+            if active_filter in trigger:
+                button[counter] = "+"
+    if "slider" in trigger:
+        for count, filtername in enumerate(all_filters):
+            if filtername in trigger:
+                button[count] = "+"
+    return button
+
+def create_marks_for_slider(local_df):
+    '''
+    calculate how many attempts have all filters correct and incorrect
+    :param local_df: the filtered data
+    :return: the marks to add on the sliders
+    '''
+    sliders = []
+    for row in all_filters:
+        tmprow = row.replace(" ", "_")
+        tmp_local_df = local_df
+        tmpdf_correct = tmp_local_df[tmp_local_df[tmprow] == "correct"]
+        tmp_local_df = local_df
+        tmpdf_incorrect = tmp_local_df[tmp_local_df[tmprow] == "incorrect"]
+        marks = {0: str(len(tmpdf_correct.index)), 1: "", 2: str(len(tmpdf_incorrect.index))}
+        sliders.append(marks)
+    return sliders
+
+def create_new_filter_buttons():
+    '''
+    create the buttons that display which filters are active
+    :return: a list of all buttons
+    '''
+    correctfiltersbuttons = []
+    for _, correct_filter in enumerate(correctfilters):
+        newposbutton = html.Button(
+            id={"type": "delete-button-active", "index": correct_filter},
+            className="delete-button-active",
+            children=[
+                correct_filter,
+                html.Img(
+                    src=IMAGE_PATH, width="12", height="12", style={"margin": "7px"}
+                ),
+            ],
+        )
+        correctfiltersbuttons.append(newposbutton)
+    for _, incorrect_filter in enumerate(incorrectfilters):
+        newnegbutton = html.Button(
+            id={"type": "delete-button-active", "index": incorrect_filter},
+            className="delete-button-negative",
+            children=[
+                incorrect_filter,
+                html.Img(
+                    src=IMAGE_PATH, width="12", height="12", style={"margin": "7px"}
+                ),
+            ],
+        )
+        correctfiltersbuttons.append(newnegbutton)
+    return correctfiltersbuttons
+
+def create_new_columns_buttons():
+    '''
+    create the buttons that display which columns are displayed
+    :return: a list of all buttons
+    '''
+    columnbuttons = []
+    for _, column in enumerate(columns):
+        newcolbutton = html.Button(
+            id={"type": "delete-button-column", "index": column},
+            className="delete-button-column",
+            children=[
+                column,
+                html.Img(
+                    src=IMAGE_PATH, width="12", height="12", style={"margin": "7px"}
+                ),
+            ],
+        )
+        columnbuttons.append(newcolbutton)
+    return columnbuttons
+
+def prepare_data_for_graph(local_df):
+    '''
+    prepare the data to be used for making a graph
+    :param local_df: filtered data
+    :return: numbers for each attribute and their names
+    '''
+    data = []
+    names = []
+    for i in range(0, 2 ** (len(columns))):
+        num = bin(i)
+        text = ""
+        requirements = []
+        length = len(columns)
+        for j in range(0, length):
+            binary_string = num[2:]
+            if len(binary_string) < length - j:
+                requirements.append("incorrect")
+                text = text + " " + columns[j] + " " + "incorrect"
+            else:
+                if binary_string[j - length] == "1":
+                    requirements.append("correct")
+                    text = text + " " + columns[j] + " " + "correct"
+                else:
+                    requirements.append("incorrect")
+                    text = text + " " + columns[j] + " " + "incorrect"
+        names.append(text)
+        tmplocal_df = local_df
+        for k, single_column in enumerate(columns):
+            tmplocal_df = tmplocal_df[
+                tmplocal_df[single_column.replace(" ", "_")] == requirements[(int)(k)]
+                ]
+        data.append(len(tmplocal_df.index))
+    return data, names
