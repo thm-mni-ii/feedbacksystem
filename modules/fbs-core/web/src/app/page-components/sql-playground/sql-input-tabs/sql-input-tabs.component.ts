@@ -253,7 +253,13 @@ export class SqlInputTabsComponent
     this.activeTab.selectedTaskName = this.activeTab.selectedTask.name;
     this.activeTab.error = false;
     this.activeTab.isSubmitted = false;
-    this.checkForCheckerConfig();
+    //this.checkForCheckerConfig();
+    this.checkerService
+      .checkForCheckerConfig(
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id
+      )
+      .subscribe((res) => (this.isCheckerEmpty = res));
     this.saveToLocalStorage();
   }
 
@@ -363,17 +369,5 @@ export class SqlInputTabsComponent
     }
     this.submitToTask();
     this.saveToLocalStorage();
-  }
-
-  private checkForCheckerConfig() {
-    this.checkerService
-      .getChecker(this.selectedCourse.id, this.selectedTask.id)
-      .subscribe((checkers) => {
-        if (checkers.length === 0) {
-          this.isCheckerEmpty = true;
-        } else {
-          this.isCheckerEmpty = false;
-        }
-      });
   }
 }

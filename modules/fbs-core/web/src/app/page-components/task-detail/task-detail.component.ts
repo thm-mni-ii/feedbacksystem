@@ -235,23 +235,13 @@ export class TaskDetailComponent implements OnInit {
       )
       .subscribe(
         () => {
-          this.checkForCheckerConfig();
+          this.checkerService
+            .checkForCheckerConfig(this.courseId, this.task.id)
+            .subscribe((res) => (this.isCheckerEmpty = res));
           this.refreshByPolling();
         },
         (error) => console.error(error)
       );
-  }
-
-  private checkForCheckerConfig() {
-    this.checkerService
-      .getChecker(this.courseId, this.task.id)
-      .subscribe((checkers) => {
-        if (checkers.length === 0) {
-          this.isCheckerEmpty = true;
-        } else {
-          this.isCheckerEmpty = false;
-        }
-      });
   }
 
   private refreshByPolling(force = false) {
