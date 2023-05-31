@@ -11,7 +11,6 @@ import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impress
 import { FeedbackAppService } from "../../service/feedback-app.service";
 import { User } from "src/app/model/User";
 
-
 /**
  * Root component shows sidenav and titlebar
  */
@@ -33,7 +32,7 @@ export class SidebarComponent implements OnInit {
   title: Observable<string> = of("");
   opened: boolean;
   innerWidth: number;
-  userID: number; 
+  userID: number;
   isAdmin: boolean;
   isModerator: boolean;
   user: User;
@@ -41,8 +40,8 @@ export class SidebarComponent implements OnInit {
   ngOnInit() {
     this.userID = this.auth.getToken().id;
     this.userservice.getUser(this.userID).subscribe(
-      user => this.user = user,
-      error => console.log(error)
+      (user) => (this.user = user),
+      (error) => console.log(error)
     );
     const globalRole = this.auth.getToken().globalRole;
     this.opened = true;
