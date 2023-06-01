@@ -74,6 +74,7 @@ app.clientside_callback(
     Input("url", "pathname"),
 )
 
+
 # pylint: disable=unused-argument
 @app.callback(
     Output("container", "children"),

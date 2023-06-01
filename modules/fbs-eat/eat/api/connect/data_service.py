@@ -9,6 +9,7 @@ from api.datapreprocessing.cleandataset import cleandata
 
 MONGODB_URL = os.getenv("MONGODB_URL")
 
+
 # pylint disable-next=invalid-name
 def get_data(course):
     """

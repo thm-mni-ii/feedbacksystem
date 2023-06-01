@@ -302,6 +302,7 @@ def update_date_time_to(input_value):
 
 # pylint: disable=too-many-arguments
 
+
 # Update histogram_avg_submissions figure
 @callback(
     Output(histogram_avg_submissions, "figure"),
