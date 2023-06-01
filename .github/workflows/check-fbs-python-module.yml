@@ -26,7 +26,7 @@ jobs:
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
       - name: Install library
-        run: poetry install --no-interaction  --only dev
+        run: poetry install --no-interaction
       - run: |
           poetry run pylint api --msg-template='${{ inputs.working-directory }}/{path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
         name: Run Pylint
