@@ -320,10 +320,11 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     date_time_to_table = dateutil.parser.parse(date_time_to_table)
 
     local_df = pd.read_json(daten)
-    local_df["Time"] = pd.to_datetime(local_df.Time)
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
 
     if toggle_queries:
         if "Exclude equal queries" in toggle_queries:
+            # pylint: disable-next=no-member
             local_df = local_df.drop_duplicates(subset="Statement")
         if "Exclude Date" not in toggle_queries:
             local_df = local_df[
@@ -332,8 +333,8 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
             ]
     else:
         local_df = local_df[
-            (local_df.Time >= date_time_from_table)
-            & (local_df.Time < date_time_to_table)
+            (local_df["Time"] >= date_time_from_table)
+            & (local_df["Time"] < date_time_to_table)
         ]
     tooltip_data = [
         {"Statement": str(row["Statement"])} for _, row in local_df.iterrows()

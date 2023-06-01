@@ -336,7 +336,7 @@ def update_histogram_avg_submissions(
     :return: histogram with average attemtps of a task
     """
     local_df = pd.read_json(data)
-    local_df["Time"] = pd.to_datetime(local_df.Time)
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
     local_df = local_df[local_df["UserId"] != 0]
 
     date_time_from = dateutil.parser.parse(date_time_from)
@@ -426,7 +426,7 @@ def update_histogram(
         display_style = {"display": "none"}
 
     local_df = pd.read_json(daten)
-    local_df["Time"] = pd.to_datetime(local_df.Time)
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
     local_df = local_df[local_df["UserId"] != 0]
 
     # Convert datetime string to datetime object

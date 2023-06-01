@@ -481,7 +481,7 @@ def update(
     trigger = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     fig = {}
     local_df = pd.read_json(daten)
-    local_df["Time"] = pd.to_datetime(local_df.Time)
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
     local_df = local_df[local_df["UserId"] != 0]
 
     date_time_from = dateutil.parser.parse(date_time_from)
