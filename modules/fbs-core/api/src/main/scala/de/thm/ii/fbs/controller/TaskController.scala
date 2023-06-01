@@ -3,11 +3,12 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.task.TaskBatch
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.Hash
+import de.thm.ii.fbs.util.{Hash, ScalaObjectMapper}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -276,6 +277,28 @@ class TaskController {
             hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
+    * Batch update tasks
+    *
+    * @param cid  Course id
+    * @param req  http request
+    * @param res  http response
+    * @param body Request Body
+    */
+  @PutMapping(value = Array("/{cid}/tasks"), consumes = Array())
+  def updateBatch(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse,
+                  @RequestBody body: TaskBatch): Unit = {
+    val user = authService.authorize(req, res)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+      taskService.updateBatch(cid, body)
     } else {
       throw new ForbiddenException()
     }

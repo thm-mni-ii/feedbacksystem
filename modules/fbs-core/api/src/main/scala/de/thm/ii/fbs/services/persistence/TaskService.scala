@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.task.TaskBatch
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -10,6 +11,7 @@ import java.math.BigInteger
 import java.sql.{ResultSet, SQLException, Timestamp}
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.util.Collections
 
 /**
   * Handles the persistant task state
@@ -78,6 +80,20 @@ class TaskService {
         |""".stripMargin,
       task.name, task.isPrivate, task.mediaType, task.description, parseTimestamp(task.deadline).orNull,
       task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, task.requirementType, task.attempts.orNull, task.hideResult, tid, cid)
+
+  def updateBatch(courseId: Int, batch: TaskBatch): Boolean = {
+    val arguments = List[Any](
+      batch.task.name, batch.task.isPrivate, batch.task.mediaType, batch.task.description, parseTimestamp(batch.task.deadline).orNull,
+      batch.task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, batch.task.requirementType, batch.task.attempts.orNull,
+      batch.task.hideResult) ++ batch.taskIds :+ courseId
+
+    1 == DB.update(String.format(
+      """
+        |UPDATE task SET name = COALESCE(?, name), is_private = COALESCE(?, is_private), media_type = COALESCE(?, media_type), description = COALESCE(?, description), deadline = COALESCE(?, deadline),
+        |media_information = COALESCE(?, media_information), requirement_type = COALESCE(?, requirement_type), attempts = COALESCE(?, attempts), hide_result = COALESCE(?, hide_result)
+        |WHERE task_id IN (%s) AND course_id = ?
+        |""", String.join(",", Collections.nCopies(batch.taskIds.size, "?"))).stripMargin, arguments.toArray: _*)
+  }
 
   /**
     * Delete a task by id
