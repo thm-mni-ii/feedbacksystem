@@ -30,7 +30,6 @@ def get_attributes_to_hide(list_of_strings, excludes):
     return list_of_strings
 
 
-# pylint: disable=duplicate-code
 
 layout = html.Div(
     [
@@ -142,7 +141,6 @@ layout = html.Div(
 )
 
 
-# pylint: disable=too-many-return-statements
 @callback(
     Output(timerow, "children"),
     Output("is_date_on", "data"),
@@ -280,7 +278,6 @@ def hide_date(date_hider, is_date_on):
     return dash.no_update
 
 
-# pylint: enable=too-many-return-statements
 
 
 # Update date_time_to_table based on date_time_from_table
@@ -364,4 +361,3 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     return dcc.Markdown(result), local_df.to_dict("records"), tooltip_data
 
 
-# pylint: enable=duplicate-code

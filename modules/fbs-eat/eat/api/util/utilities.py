@@ -369,3 +369,41 @@ def create_time_row(timerow_id, date_from_id, date_to_id):
             ],
         ),
     )
+
+def add_exercise_dropdown(exercise_id, dropdown_name, option_list):
+    '''
+    creates a dropdown containing all exercises
+    :param tmp_df: data the user is allowed to see
+    :param exercise_id: id for the dropdown so callbacks can access it
+    :return: a dropdown with all exercises that are in the courses selected
+    '''
+    return html.Div(
+        [
+            dropdown_name,
+            dcc.Dropdown(
+                option_list,
+                multi=True,
+                placeholder="Select one or more exercise",
+                style={
+                    "background-color": "#e9e7e9"
+                },
+                id=exercise_id,
+            ),
+        ]
+    )
+'''
+    html.Div(
+        [
+            "Course",
+            course := dcc.Dropdown(
+                tmp_df.CourseName.unique(),
+                tmp_df.CourseName.unique(),
+                multi=True,
+                placeholder="Select one or more courses",
+                style={
+                    "background-color": "#e9e7e9"
+                },
+            ),
+        ]
+    )
+'''

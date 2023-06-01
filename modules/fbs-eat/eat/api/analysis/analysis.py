@@ -24,6 +24,7 @@ from api.util.utilities import (
     add_checklist,
     add_slider,
     create_time_row,
+    add_exercise_dropdown
 )
 
 
@@ -43,7 +44,6 @@ columns = []
 correctfilters = []
 incorrectfilters = []
 
-# pylint: disable=duplicate-code
 # pylint: disable=line-too-long
 
 layout = html.Div(
@@ -63,35 +63,12 @@ layout = html.Div(
                                         dbc.Row(  ## Dropdown menus
                                             [
                                                 dbc.Col(
-                                                    html.Div(
-                                                        [
-                                                            "Course",
-                                                            course := dcc.Dropdown(
-                                                                tmp_df.CourseName.unique(),
-                                                                tmp_df.CourseName.unique(),
-                                                                multi=True,
-                                                                placeholder="Select one or more courses",
-                                                                style={
-                                                                    "background-color": "#e9e7e9"
-                                                                },
-                                                            ),
-                                                        ]
-                                                    )
+                                                    add_exercise_dropdown("course_analysis", "Course",
+                                                                          tmp_df.CourseName.unique()),
                                                 ),
                                                 dbc.Col(
-                                                    html.Div(
-                                                        [
-                                                            "Exercise",
-                                                            exercise := dcc.Dropdown(
-                                                                tmp_df.UniqueName.unique(),
-                                                                multi=True,
-                                                                placeholder="Select one or more exercise",
-                                                                style={
-                                                                    "background-color": "#e9e7e9"
-                                                                },
-                                                            ),
-                                                        ]
-                                                    )
+                                                    add_exercise_dropdown("exercise_analysis", "Exercise",
+                                                                          tmp_df.UniqueName.unique()),
                                                 ),
                                                 dbc.Col(
                                                     create_time_row(
@@ -280,7 +257,7 @@ layout = html.Div(
     ]
 )
 
-# pylint: disable=line-too-long
+# pylint: enable=line-too-long
 
 
 @callback(
@@ -342,8 +319,8 @@ def hide_time(checkbox, is_date_on):
 
 
 @callback(
-    Output(course, "options"),
-    Output(course, "value"),
+    Output("course_analysis", "options"),
+    Output("course_analysis", "value"),
     Input("intermediate-value", "data"),
     Input("courses_dict", "data"),
 )
@@ -358,8 +335,8 @@ def update_exercise(daten, courses_dict):
 
 
 @callback(
-    Output(exercise, "options"),
-    Input(course, "value"),
+    Output("exercise_analysis", "options"),
+    Input("course_analysis", "value"),
     Input("intermediate-value", "data"),
 )
 def update_dropdown(input_value, daten):
@@ -420,10 +397,10 @@ def checklist_filter_masks(checks, daten):
         Input({"type": "slider_background_filter", "index": ALL}, "value"),
         Input({"type": "add-button", "index": ALL}, "children"),
         Input({"type": "add-button", "index": ALL}, "n_clicks"),
-        Input(exercise, "value"),
+        Input("exercise_analysis", "value"),
         Input("slider_attempt_analysis", "value"),
-        Input(course, "value"),
-        Input(exercise, "options"),
+        Input("course_analysis", "value"),
+        Input("exercise_analysis", "options"),
         Input({"type": "delete-button-active", "index": ALL}, "n_clicks"),
         Input({"type": "delete-button-column", "index": ALL}, "n_clicks"),
         Input("date_time_from2", "value"),
@@ -433,7 +410,6 @@ def checklist_filter_masks(checks, daten):
     ],
 )
 # pylint: disable=too-many-arguments
-# pylint: disable=too-many-locals
 # pylint: disable=unused-argument
 def update(
     slider,
@@ -564,6 +540,4 @@ def update(
 
 
 # pylint: enable=too-many-arguments
-# pylint: enable=too-many-locals
 # pylint: enable=unused-argument
-# pylint: enable=duplicate-code

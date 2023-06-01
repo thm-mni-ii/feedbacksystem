@@ -19,6 +19,7 @@ from api.util.utilities import (
     add_slider,
     add_checklist,
     create_time_row,
+    add_exercise_dropdown,
 )
 
 tmp_df = get_data(-1)
@@ -34,31 +35,12 @@ layout = html.Div(
                     dbc.Row(  ## Dropdown menus
                         [
                             dbc.Col(
-                                html.Div(
-                                    [
-                                        "Course",
-                                        course := dcc.Dropdown(
-                                            tmp_df.CourseName.unique(),
-                                            tmp_df.CourseName.unique(),
-                                            multi=True,
-                                            placeholder="Select one or more courses",
-                                            style={"background-color": "#e9e7e9"},
-                                        ),
-                                    ]
-                                )
+                                add_exercise_dropdown("course_dashboard", "Course",
+                                                      tmp_df.CourseName.unique())
                             ),
                             dbc.Col(
-                                html.Div(
-                                    [
-                                        "Exercise",
-                                        exercise := dcc.Dropdown(
-                                            tmp_df.UniqueName.unique(),
-                                            multi=True,
-                                            placeholder="Select one or more exercise",
-                                            style={"background-color": "#e9e7e9"},
-                                        ),
-                                    ]
-                                )
+                                add_exercise_dropdown("exercise_dashboard", "Exercise",
+                                                      tmp_df.UniqueName.unique()),
                             ),
                             dbc.Col(
                                 html.Div(
@@ -228,8 +210,8 @@ def generate_empty_response():
 
 
 @callback(
-    Output(course, "options"),
-    Output(course, "value"),
+    Output("course_dashboard", "options"),
+    Output("course_dashboard", "value"),
     Input("intermediate-value", "data"),
     Input("courses_dict", "data"),
 )
@@ -264,8 +246,8 @@ def checklist_filter_masks(checks, daten, key_figures):
 
 
 @callback(
-    Output(exercise, "options"),
-    Input(course, "value"),
+    Output("exercise_dashboard", "options"),
+    Input("course_dashboard", "value"),
     Input("intermediate-value", "data"),
 )
 def update_exercises_dropdown_course(input_value, daten):
@@ -307,8 +289,8 @@ def update_date_time_to(input_value):
 @callback(
     Output(histogram_avg_submissions, "figure"),
     Output(histogram_avg_submissions_card, "style"),
-    Input(exercise, "value"),
-    Input(course, "value"),
+    Input("exercise_dashboard", "value"),
+    Input("course_dashboard", "value"),
     Input(key_figure, "value"),
     Input("intermediate-value", "data"),
     Input("date_time_from", "value"),
@@ -379,17 +361,14 @@ def update_histogram_avg_submissions(
     return fig, display_style
 
 
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-branches
-# pylint: disable=too-many-statements
 
 
 # Update histogramm figure
 @callback(
     Output(histogram, "figure"),
     Output(histogram_card, "style"),
-    Input(course, "value"),
-    Input(exercise, "value"),
+    Input("course_dashboard", "value"),
+    Input("exercise_dashboard", "value"),
     Input(key_figure, "value"),
     Input("checkbox", "value"),
     Input("slider_dashboard", "value"),
@@ -653,7 +632,4 @@ def update_histogram(
     return fig, display_style
 
 
-# pylint: enable=too-many-locals
-# pylint: enable=too-many-branches
-# pylint: enable=too-many-statements
 # pylint: enable=too-many-arguments
