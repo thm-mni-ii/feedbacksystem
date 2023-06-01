@@ -285,20 +285,20 @@ class TaskController {
   /**
     * Batch update tasks
     *
-    * @param cid  Course id
+    * @param courseId  Course id
     * @param req  http request
     * @param res  http response
     * @param body Request Body
     */
-  @PutMapping(value = Array("/{cid}/tasks"), consumes = Array())
-  def updateBatch(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse,
+  @PutMapping(value = Array("/{courseId}/tasks"), consumes = Array())
+  def updateBatch(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse,
                   @RequestBody body: TaskBatch): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
+    val privilegedByCourse = courseRegistration.getParticipants(courseId).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      taskService.updateBatch(cid, body)
+      taskService.updateBatch(courseId, body)
     } else {
       throw new ForbiddenException()
     }

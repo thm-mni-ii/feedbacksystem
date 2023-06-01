@@ -89,8 +89,9 @@ class TaskService {
 
     1 == DB.update(String.format(
       """
-        |UPDATE task SET name = COALESCE(?, name), is_private = COALESCE(?, is_private), media_type = COALESCE(?, media_type), description = COALESCE(?, description), deadline = COALESCE(?, deadline),
-        |media_information = COALESCE(?, media_information), requirement_type = COALESCE(?, requirement_type), attempts = COALESCE(?, attempts), hide_result = COALESCE(?, hide_result)
+        |UPDATE task SET name = COALESCE(?, name), is_private = COALESCE(?, is_private), media_type = COALESCE(?, media_type),
+        |description = COALESCE(?, description), deadline = COALESCE(?, deadline), media_information = COALESCE(?, media_information),
+        |requirement_type = COALESCE(?, requirement_type), attempts = COALESCE(?, attempts), hide_result = COALESCE(?, hide_result)
         |WHERE task_id IN (%s) AND course_id = ?
         |""", String.join(",", Collections.nCopies(batch.taskIds.size, "?"))).stripMargin, arguments.toArray: _*)
   }
