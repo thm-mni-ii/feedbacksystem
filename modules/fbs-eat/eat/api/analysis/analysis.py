@@ -44,7 +44,7 @@ correctfilters = []
 incorrectfilters = []
 
 # pylint: disable=duplicate-code
-
+# pylint: disable=line-too-long
 
 layout = html.Div(
     [
@@ -70,8 +70,7 @@ layout = html.Div(
                                                                 tmp_df.CourseName.unique(),
                                                                 tmp_df.CourseName.unique(),
                                                                 multi=True,
-                                                                placeholder=
-                                                                "Select one or more courses",
+                                                                placeholder="Select one or more courses",
                                                                 style={
                                                                     "background-color": "#e9e7e9"
                                                                 },
@@ -86,8 +85,7 @@ layout = html.Div(
                                                             exercise := dcc.Dropdown(
                                                                 tmp_df.UniqueName.unique(),
                                                                 multi=True,
-                                                                placeholder=
-                                                                "Select one or more exercise",
+                                                                placeholder="Select one or more exercise",
                                                                 style={
                                                                     "background-color": "#e9e7e9"
                                                                 },
@@ -240,8 +238,7 @@ layout = html.Div(
                                                         html.Td(
                                                             dcc.Slider(
                                                                 id={
-                                                                    "type":
-                                                                        "slider_background_filter",
+                                                                    "type": "slider_background_filter",
                                                                     "index": row,
                                                                 },
                                                                 min=0,
@@ -282,6 +279,8 @@ layout = html.Div(
         ),
     ]
 )
+
+# pylint: disable=line-too-long
 
 
 @callback(
@@ -546,7 +545,6 @@ def update(
     columnbuttons = create_new_columns_buttons(columns)
     correctfiltersbuttons = create_new_filter_buttons(correctfilters, incorrectfilters)
 
-
     if tmpdf is not None:
         data, names = prepare_data_for_graph(local_df, columns)
     # create graph
@@ -563,6 +561,7 @@ def update(
     )
     fig.update_layout(showlegend=False)
     return button, columnbuttons, correctfiltersbuttons, fig, sliders, slider
+
 
 # pylint: enable=too-many-arguments
 # pylint: enable=too-many-locals

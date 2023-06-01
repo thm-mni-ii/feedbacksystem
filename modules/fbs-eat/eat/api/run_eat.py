@@ -92,7 +92,7 @@ def get_datas(url, daten):
     """
     try:
         token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
-    #pylint: disable-next=broad-exception-caught
+    # pylint: disable-next=broad-exception-caught
     except Exception:
         return (
             create_error_screen(
@@ -121,11 +121,12 @@ def get_datas(url, daten):
         f"{FBS_BASE_URL}/api/v1/users/{token['id']}/courses",
         headers={"Authorization": f"Bearer {daten}"},
         verify=not FBS_TLS_NO_VERIFY,
-        timeout=10
+        timeout=10,
     ).json()
     courses_dict = {course["id"]: course["name"] for course in courses}
 
     return add_components(), get_data(course_access), courses_dict
+
 
 # pylint: enable=unused-argument
 

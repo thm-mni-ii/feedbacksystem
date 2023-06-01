@@ -4,6 +4,7 @@ prepares the data to be displayed
 
 # pylint: disable=singleton-comparison
 
+
 def cleandata(data_frame):
     """
     prepares the data to be displayed
@@ -70,9 +71,11 @@ def cleandata(data_frame):
     if "Parsable" in data_frame.columns:
         data_frame.drop(columns=["Parsable"], inplace=True)
 
-    data_frame = data_frame.assign(UniqueName=data_frame["CourseName"] + "." +
-                                              data_frame["Taskname"])
+    data_frame = data_frame.assign(
+        UniqueName=data_frame["CourseName"] + "." + data_frame["Taskname"]
+    )
 
     return data_frame
+
 
 # pylint: enable=singleton-comparison

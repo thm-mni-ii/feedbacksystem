@@ -285,7 +285,6 @@ def update_exercises_dropdown_course(input_value, daten):
     ]
 
 
-
 @callback(
     Output("date_time_to", "value"),
     Input("date_time_from", "value"),
@@ -299,6 +298,7 @@ def update_date_time_to(input_value):
     :return: datetime with updated time
     """
     return update_date_time(input_value, 90)
+
 
 # pylint: disable=too-many-arguments
 
@@ -377,11 +377,10 @@ def update_histogram_avg_submissions(
 
     return fig, display_style
 
+
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
-
-
 
 
 # Update histogramm figure
@@ -651,6 +650,7 @@ def update_histogram(
             fig.update_yaxes(title_text="Students", row=i + 1, col=1)
 
     return fig, display_style
+
 
 # pylint: enable=too-many-locals
 # pylint: enable=too-many-branches
