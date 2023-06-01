@@ -83,9 +83,10 @@ class TaskService {
 
   def updateBatch(courseId: Int, batch: TaskBatch): Boolean = {
     val arguments = List[Any](
-      batch.task.name, batch.task.isPrivate, batch.task.mediaType, batch.task.description, parseTimestamp(batch.task.deadline).orNull,
-      batch.task.mediaInformation.map(mi => MediaInformation.toJSONString(mi)).orNull, batch.task.requirementType, batch.task.attempts.orNull,
-      batch.task.hideResult) ++ batch.taskIds :+ courseId
+      batch.task.name, batch.task.isPrivate.orNull, batch.task.mediaType, batch.task.description, parseTimestamp(Option(batch.task.deadline)).orNull,
+      if (batch.task.mediaInformation != null) MediaInformation.toJSONString(batch.task.mediaInformation) else null,
+      batch.task.requirementType, if (batch.task.updateAttempts) batch.task.attempts.getOrElse(0) else null,
+      batch.task.hideResult.orNull)++ batch.taskIds :+ courseId
 
     1 == DB.update(String.format(
       """
