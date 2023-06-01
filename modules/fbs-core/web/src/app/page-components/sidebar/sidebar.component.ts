@@ -33,6 +33,7 @@ export class SidebarComponent implements OnInit {
   opened: boolean;
   innerWidth: number;
   userID: number;
+  username: string;
   isAdmin: boolean;
   isModerator: boolean;
   user: User;
