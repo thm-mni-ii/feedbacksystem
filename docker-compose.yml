@@ -119,7 +119,6 @@ services:
       start_period: 10s
       retries: 3
 
-
   mongodb:
     image: mongo:5.0.6
     restart: unless-stopped
@@ -151,7 +150,13 @@ services:
     networks:
       fbs:
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:9000/minio/health/live"
+        ]
       timeout: 10s
       interval: 10s
       start_period: 10s
@@ -211,6 +216,23 @@ services:
       - CLASSROOM_JWT_EXPIRATION=900
     networks:
       classroom:
+
+
+  dashboard:
+    build:
+      context: modules/fbs-eat/eat
+    restart: always
+    ports:
+      - 5000:8050
+    networks:
+      - fbs
+    environment:
+      - JWT_SECRET=8Dsupersecurekeydf0
+      - SERVER_SESSION_SECRET=sessiosecret
+      - MONGODB_URL=mongodb://mongodb:27017/sql-checker
+      - URL_BASE_PATH=/eat/
+      - FBS_BASE_URL=https://core:443
+      - FBS_TLS_NO_VERIFY=true
 
 networks:
   classroom:
