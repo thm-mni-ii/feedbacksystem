@@ -1,13 +1,21 @@
+"""
+downloads that from the given mongodb
+"""
+import os
 import pandas as pd
 from bson.json_util import dumps
 from pymongo import MongoClient
 from api.datapreprocessing.cleandataset import cleandata
-import os
 
 MONGODB_URL = os.getenv("MONGODB_URL")
 
-
+#pylint disable-next=invalid-name
 def get_data(course):
+    """
+    downloads data that has the same courses as given
+    :param course: courses that are supposed to be downloaded
+    :return: the data in JSON Format or the placeholder data in a pandas dataframe
+    """
     data = {
         "Attempt": [1],
         "Coursenumber": [1],
@@ -32,8 +40,8 @@ def get_data(course):
     if course != -1 and course:
         with MongoClient(MONGODB_URL) as client:
             query = {"courseId": {"$in": course}}
-            db = client.get_default_database()
-            cursor = db["Queries"]
+            database = client.get_default_database()
+            cursor = database["Queries"]
             data = cursor.find(query)
             data = cleandata(pd.DataFrame(data))
             return dumps(data)

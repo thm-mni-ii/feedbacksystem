@@ -1,7 +1,15 @@
-import pandas as pd
+"""
+prepares the data to be displayed
+"""
 
+# pylint: disable=singleton-comparison
 
-def cleandata(df):
+def cleandata(data_frame):
+    """
+    prepares the data to be displayed
+    :param data_frame: data that is to be cleaned
+    :return: cleaned data
+    """
     column_mapping = {
         "groupByRight": "GroupBy",
         "joinsRight": "Joins",
@@ -21,9 +29,9 @@ def cleandata(df):
         "userId": "UserId",
         "time": "Time",
     }
-    df = df.rename(columns=column_mapping)
-    df.loc[
-        lambda df: df["Solution"] == True,
+    data_frame = data_frame.rename(columns=column_mapping)
+    data_frame.loc[
+        lambda data_frame: data_frame["Solution"] == True,
         [
             "GroupBy",
             "Joins",
@@ -36,8 +44,8 @@ def cleandata(df):
         ],
     ] = True
 
-    df.loc[
-        lambda df: df["Correct"] == True,
+    data_frame.loc[
+        lambda data_frame: data_frame["Correct"] == True,
         [
             "GroupBy",
             "Joins",
@@ -50,18 +58,21 @@ def cleandata(df):
         ],
     ] = True
 
-    df = df.replace(True, "correct")
-    df = df.replace(False, "incorrect")
+    data_frame = data_frame.replace(True, "correct")
+    data_frame = data_frame.replace(False, "incorrect")
 
-    df["CourseName"] = df["Coursenumber"].astype(str)
-    df["Taskname"] = df["Tasknumber"].astype(str)
+    data_frame["CourseName"] = data_frame["Coursenumber"].astype(str)
+    data_frame["Taskname"] = data_frame["Tasknumber"].astype(str)
 
     user_ids_to_remove = [854, 1173, 862]
-    df = df[~df["UserId"].isin(user_ids_to_remove)]
+    data_frame = data_frame[~data_frame["UserId"].isin(user_ids_to_remove)]
 
-    if "Parsable" in df.columns:
-        df.drop(columns=["Parsable"], inplace=True)
+    if "Parsable" in data_frame.columns:
+        data_frame.drop(columns=["Parsable"], inplace=True)
 
-    df = df.assign(UniqueName=df["CourseName"] + "." + df["Taskname"])
+    data_frame = data_frame.assign(UniqueName=data_frame["CourseName"] + "." +
+                                              data_frame["Taskname"])
 
-    return df
+    return data_frame
+
+# pylint: enable=singleton-comparison

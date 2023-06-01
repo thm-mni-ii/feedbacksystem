@@ -1,20 +1,23 @@
-import dash_bootstrap_components as dbc
-from api.analysis.analysis import layout as analysis_layout
-from api.connect.data_service import get_data
-from api.dashboard.dashboard import layout as dashboard_layout
-from api.datapreprocessing.chooseTaskType import layout as chooseTaskType_layout
-from api.dataTable.table import layout as table_layout
+"""
+runs the eat server and calls all other component builders
+"""
+import json
+import os
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
-from flask import request, session
 from flask_session import Session
 import flask
 import jwt
-import json
-import os
-import requests
 
-debug = True if os.environ["DASH_DEBUG_MODE"] == "True" else False
+import requests
+import dash_bootstrap_components as dbc
+
+from api.analysis.analysis import layout as analysis_layout
+from api.connect.data_service import get_data
+from api.dashboard.dashboard import layout as dashboard_layout
+from api.data_table.table import layout as table_layout
+
+DEBUG = os.environ["DASH_DEBUG_MODE"]
 
 SESSION_TYPE = "redis"
 URL_BASE_PATH = os.getenv("URL_BASE_PATH")
@@ -39,6 +42,11 @@ Session(app)
 
 
 def create_error_screen(text):
+    """
+    creates an error screen that is send to the user
+    :param text: text that is going to be displayed
+    :return: an html page with the given text in it
+    """
     error_label = html.Div(html.Label(text, style={"font-size": "36px"}))
     return error_label
 
@@ -50,6 +58,8 @@ app.layout = html.Div(
         dcc.Store(id="save_courses"),
         dcc.Store(id="courses_dict"),
         dcc.Store("is_date_on", "data"),
+        dcc.Store("is_date_on_analysis", "data"),
+        dcc.Store("is_date_on_dashboard", "data"),
         html.Div(id="container"),
     ]
 )
@@ -64,7 +74,7 @@ app.clientside_callback(
     Input("url", "pathname"),
 )
 
-
+# pylint: disable=unused-argument
 @app.callback(
     Output("container", "children"),
     Output("intermediate-value", "data"),
@@ -72,10 +82,18 @@ app.clientside_callback(
     Input("url", "pathname"),
     Input("save_courses", "data"),
 )
-def getDatas(url, daten):
+def get_datas(url, daten):
+    """
+    decodes the user token and gets the according data
+    :param url: used to trigger the callback when the page is loaded value does not matter
+    :param daten: the token send in the first request
+    :return: hhtml div containing all components of the page, the downloaded data,
+    the real names of the courses in a list
+    """
     try:
         token = jwt.decode(daten, SECRET_KEY, algorithms=["HS256"])
-    except:
+    #pylint: disable-next=broad-exception-caught
+    except Exception:
         return (
             create_error_screen(
                 "Sie sind nicht berechtigt, auf diese Daten zuzugreifen."
@@ -83,14 +101,14 @@ def getDatas(url, daten):
             [],
             [],
         )
-    courseAccess = []
-    courseRoles = json.loads(token["courseRoles"])
+    course_access = []
+    course_roles = json.loads(token["courseRoles"])
 
-    for course, role in courseRoles.items():
-        if role == "DOCENT" or role == "TUTOR":
-            courseAccess.append(int(course))
+    for course, role in course_roles.items():
+        if role in ("DOCENT", "TUTOR"):
+            course_access.append(int(course))
 
-    if not courseAccess:
+    if not course_access:
         return (
             create_error_screen(
                 "Sie sind nicht berechtigt, auf diese Daten zuzugreifen."
@@ -103,13 +121,20 @@ def getDatas(url, daten):
         f"{FBS_BASE_URL}/api/v1/users/{token['id']}/courses",
         headers={"Authorization": f"Bearer {daten}"},
         verify=not FBS_TLS_NO_VERIFY,
+        timeout=10
     ).json()
     courses_dict = {course["id"]: course["name"] for course in courses}
 
-    return addComponents(), get_data(courseAccess), courses_dict
+    return add_components(), get_data(course_access), courses_dict
+
+# pylint: enable=unused-argument
 
 
-def addComponents():
+def add_components():
+    """
+    gets all components of the page
+    :return: list of all components
+    """
     container = []
     container.append(html.Br())
     container.append(dashboard_layout)
@@ -125,4 +150,4 @@ def addComponents():
 
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", port="8050", debug=debug)
+    server.run(host="0.0.0.0", port="8050", DEBUG=DEBUG)

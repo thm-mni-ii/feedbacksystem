@@ -12,25 +12,24 @@ from dash import dash_table, callback
 from dash.dependencies import Input, Output
 
 from api.connect.data_service import get_data
-
-
+from api.util.utilities import update_date_time
 
 
 tmp_df = get_data(-1)
 
 
 def get_attributes_to_hide(list_of_strings, excludes):
-    '''
+    """
     remove certain values from a list
     :param list_of_strings: a list of items
     :param excludes: list of items to be removed from the other list
     :return: list without the removed values
-    '''
+    """
     for ex in excludes:
         list_of_strings.remove(ex)
     return list_of_strings
 
-
+# pylint: disable=duplicate-code
 
 layout = html.Div(
     [
@@ -72,7 +71,8 @@ layout = html.Div(
                         id="datatable-interactivity",
                         data=tmp_df.to_dict("records"),
                         columns=[
-                            {"id": c, "name": c, "hideable": True} for c in tmp_df.columns
+                            {"id": c, "name": c, "hideable": True}
+                            for c in tmp_df.columns
                         ],
                         style_as_list_view=True,
                         filter_action="custom",
@@ -86,7 +86,8 @@ layout = html.Div(
                         page_action="native",
                         page_current=0,
                         hidden_columns=get_attributes_to_hide(
-                            tmp_df.astype(str).columns.tolist(), ["Statement", "UniqueName"]
+                            tmp_df.astype(str).columns.tolist(),
+                            ["Statement", "UniqueName"],
                         ),
                         css=[
                             {
@@ -140,19 +141,22 @@ layout = html.Div(
 )
 
 
+
+# pylint: disable=too-many-return-statements
 @callback(
     Output(timerow, "children"),
     Output("is_date_on", "data"),
     Input("toggle_hiding_queries", "value"),
     Input("is_date_on", "data"),
 )
+
 def hide_date(date_hider, is_date_on):
-    '''
+    """
     hides date input if box is checked
     :param date_hider: checkbox with date in it
     :param is_date_on: information if the date input was previously active
     :return: html Element for date input or have the input hidden
-    '''
+    """
     if dash.callback_context.triggered[0]["value"] is None:
         return (
             html.Div(
@@ -167,7 +171,7 @@ def hide_date(date_hider, is_date_on):
                     dcc.Input(
                         id="date_time_to_table",
                         value=(
-                                datetime.now() + timedelta(hours=1, minutes=30)
+                            datetime.now() + timedelta(hours=1, minutes=30)
                         ).strftime("%Y-%m-%dT%H:%M"),
                         type="datetime-local",
                     ),
@@ -274,19 +278,21 @@ def hide_date(date_hider, is_date_on):
             ),
             True,
         )
+    return dash.no_update
+
+# pylint: enable=too-many-return-statements
 
 
 # Update date_time_to_table based on date_time_from_table
 @callback(Output("date_time_to_table", "value"), Input("date_time_from_table", "value"))
 def update_date_time_to_table(input_value):
-    '''
+    """
     set the time of the to-input 1 hour and 30 minutes after the from date,
     after the from date was changed
     :param input_value: datetime to which 90 minutes need to be added
     :return: datetime with updated time
-    '''
-    date_time = dateutil.parser.parse(input_value)
-    return date_time + timedelta(hours=1, minutes=30)
+    """
+    return update_date_time(input_value, 90)
 
 
 @callback(
@@ -320,12 +326,18 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
         if "Exclude equal queries" in toggle_queries:
             local_df = local_df.drop_duplicates(subset="Statement")
         if "Exclude Date" not in toggle_queries:
-            local_df = local_df[(local_df.Time >= date_time_from_table) &
-                                (local_df.Time < date_time_to_table)]
+            local_df = local_df[
+                (local_df.Time >= date_time_from_table)
+                & (local_df.Time < date_time_to_table)
+            ]
     else:
-        local_df = local_df[(local_df.Time >= date_time_from_table) &
-                            (local_df.Time < date_time_to_table)]
-    tooltip_data = [{"Statement": str(row["Statement"])} for _, row in local_df.iterrows()]
+        local_df = local_df[
+            (local_df.Time >= date_time_from_table)
+            & (local_df.Time < date_time_to_table)
+        ]
+    tooltip_data = [
+        {"Statement": str(row["Statement"])} for _, row in local_df.iterrows()
+    ]
     if query is None or len(query) == 0:
         ret_string = []
         ret_string.append("No filter set")
@@ -349,3 +361,5 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     result = ", ".join(output)
     result = "Filter: " + result
     return dcc.Markdown(result), local_df.to_dict("records"), tooltip_data
+
+# pylint: enable=duplicate-code
