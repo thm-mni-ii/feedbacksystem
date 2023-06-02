@@ -20,6 +20,9 @@ from api.util.utilities import (
     add_checklist,
     create_time_row,
     add_exercise_dropdown,
+    filter_data,
+    convert_time,
+    create_invisible_time_row,
 )
 
 tmp_df = get_data(-1)
@@ -35,12 +38,18 @@ layout = html.Div(
                     dbc.Row(  ## Dropdown menus
                         [
                             dbc.Col(
-                                add_exercise_dropdown("course_dashboard", "Course",
-                                                      tmp_df.CourseName.unique())
+                                add_exercise_dropdown(
+                                    "course_dashboard",
+                                    "Course",
+                                    tmp_df.CourseName.unique(),
+                                )
                             ),
                             dbc.Col(
-                                add_exercise_dropdown("exercise_dashboard", "Exercise",
-                                                      tmp_df.UniqueName.unique()),
+                                add_exercise_dropdown(
+                                    "exercise_dashboard",
+                                    "Exercise",
+                                    tmp_df.UniqueName.unique(),
+                                ),
                             ),
                             dbc.Col(
                                 html.Div(
@@ -63,7 +72,7 @@ layout = html.Div(
                             ),
                         ]
                     ),
-                    add_checklist("checkbox"),
+                    add_checklist("checkbox", ["Attempts", "Date"], ["Attempts"]),
                     add_slider(
                         tmp_df,
                         "slider_dashboard",
@@ -166,25 +175,7 @@ def hide_time(checkbox, is_date_on):
             True,
         )
     return (
-        html.Div(
-            children=[
-                "Date/Time From",
-                dcc.Input(
-                    id="date_time_from",
-                    value=(datetime.now() - timedelta(hours=500000)).strftime(
-                        "%Y-%m-%dT%H:%M"
-                    ),
-                    type="datetime-local",
-                ),
-                "Date/Time To",
-                dcc.Input(
-                    id="date_time_to",
-                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-            ],
-            style={"visibility": "hidden", "height": "0"},
-        ),
+        create_invisible_time_row("date_time_from", "date_time_to"),
         False,
     )
 
@@ -361,8 +352,6 @@ def update_histogram_avg_submissions(
     return fig, display_style
 
 
-
-
 # Update histogramm figure
 @callback(
     Output(histogram, "figure"),
@@ -404,13 +393,9 @@ def update_histogram(
     else:
         display_style = {"display": "none"}
 
-    local_df = pd.read_json(daten)
-    local_df["Time"] = pd.to_datetime(local_df["Time"])
-    local_df = local_df[local_df["UserId"] != 0]
-
+    local_df = filter_data(daten)
     # Convert datetime string to datetime object
-    date_time_from = dateutil.parser.parse(date_time_from)
-    date_time_to = dateutil.parser.parse(date_time_to)
+    date_time_from, date_time_to = convert_time(date_time_from, date_time_to)
 
     slider_value = slider_value or [local_df.Attempt.min(), local_df.Attempt.max()]
 

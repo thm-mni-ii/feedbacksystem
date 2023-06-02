@@ -8,7 +8,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 from dash import ALL, Input, Output, callback, dcc, html
-import dateutil.parser
+
 
 from api.connect.data_service import get_data
 from api.util.utilities import (
@@ -24,7 +24,10 @@ from api.util.utilities import (
     add_checklist,
     add_slider,
     create_time_row,
-    add_exercise_dropdown
+    add_exercise_dropdown,
+    filter_data,
+    convert_time,
+    create_invisible_time_row,
 )
 
 
@@ -63,12 +66,18 @@ layout = html.Div(
                                         dbc.Row(  ## Dropdown menus
                                             [
                                                 dbc.Col(
-                                                    add_exercise_dropdown("course_analysis", "Course",
-                                                                          tmp_df.CourseName.unique()),
+                                                    add_exercise_dropdown(
+                                                        "course_analysis",
+                                                        "Course",
+                                                        tmp_df.CourseName.unique(),
+                                                    ),
                                                 ),
                                                 dbc.Col(
-                                                    add_exercise_dropdown("exercise_analysis", "Exercise",
-                                                                          tmp_df.UniqueName.unique()),
+                                                    add_exercise_dropdown(
+                                                        "exercise_analysis",
+                                                        "Exercise",
+                                                        tmp_df.UniqueName.unique(),
+                                                    ),
                                                 ),
                                                 dbc.Col(
                                                     create_time_row(
@@ -77,7 +86,11 @@ layout = html.Div(
                                                         "date_time_to2",
                                                     ),
                                                 ),
-                                                add_checklist("checkbox_analysis"),
+                                                add_checklist(
+                                                    "checkbox_analysis",
+                                                    ["Attempts", "Date"],
+                                                    ["Attempts"],
+                                                ),
                                                 add_slider(
                                                     tmp_df,
                                                     "slider_attempt_analysis",
@@ -295,25 +308,7 @@ def hide_time(checkbox, is_date_on):
         )
         return test, True
     return (
-        html.Div(
-            children=[
-                "Date/Time From",
-                dcc.Input(
-                    id="date_time_from2",
-                    value=(datetime.now() - timedelta(hours=500000)).strftime(
-                        "%Y-%m-%dT%H:%M"
-                    ),
-                    type="datetime-local",
-                ),
-                "Date/Time To",
-                dcc.Input(
-                    id="date_time_to2",
-                    value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                    type="datetime-local",
-                ),
-            ],
-            style={"visibility": "hidden", "height": "0"},
-        ),
+        create_invisible_time_row("date_time_from2", "date_time_to2"),
         False,
     )
 
@@ -456,13 +451,10 @@ def update(
     """
     trigger = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     fig = {}
-    local_df = pd.read_json(daten)
-    local_df["Time"] = pd.to_datetime(local_df["Time"])
-    local_df = local_df[local_df["UserId"] != 0]
 
-    date_time_from = dateutil.parser.parse(date_time_from)
+    local_df = filter_data(daten)
 
-    date_time_to = dateutil.parser.parse(date_time_to)
+    date_time_from, date_time_to = convert_time(date_time_from, date_time_to)
 
     if not exercises:
         exercises = exercise_options

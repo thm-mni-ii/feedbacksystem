@@ -3,7 +3,6 @@ This module provides the Dash DataTable framework for building the E-Learning An
 """
 from datetime import datetime, timedelta
 import pandas as pd
-import dateutil.parser
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
@@ -12,7 +11,12 @@ from dash import dash_table, callback
 from dash.dependencies import Input, Output
 
 from api.connect.data_service import get_data
-from api.util.utilities import update_date_time
+from api.util.utilities import (
+    update_date_time,
+    add_checklist,
+    convert_time,
+    create_invisible_time_row,
+)
 
 
 tmp_df = get_data(-1)
@@ -28,7 +32,6 @@ def get_attributes_to_hide(list_of_strings, excludes):
     for ex in excludes:
         list_of_strings.remove(ex)
     return list_of_strings
-
 
 
 layout = html.Div(
@@ -57,15 +60,10 @@ layout = html.Div(
                             ]
                         ),
                     ),
-                    dcc.Checklist(
-                        id="toggle_hiding_queries",
-                        options=["Exclude equal queries", "Exclude Date"],
-                        inline=True,
-                        style={
-                            "justify-content": "center",
-                            "display": "flex",
-                        },
-                        inputClassName="checkbox",
+                    add_checklist(
+                        "toggle_hiding_queries",
+                        ["Exclude equal queries", "Exclude Date"],
+                        [],
                     ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
@@ -232,25 +230,7 @@ def hide_date(date_hider, is_date_on):
         )
     if "Exclude Date" in date_hider:
         return (
-            html.Div(
-                children=[
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=(datetime.now() - timedelta(hours=500000)).strftime(
-                            "%Y-%m-%dT%H:%M"
-                        ),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ],
-                style={"visibility": "hidden"},
-            ),
+            create_invisible_time_row("date_time_from_table", "date_time_to_table"),
             False,
         )
     if "Exclude Date" not in date_hider:
@@ -276,8 +256,6 @@ def hide_date(date_hider, is_date_on):
             True,
         )
     return dash.no_update
-
-
 
 
 # Update date_time_to_table based on date_time_from_table
@@ -312,9 +290,10 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     Returns:
         Printable String to show the user which filters are set. Also works for hided columns.
     """
-    date_time_from_table = dateutil.parser.parse(date_time_from_table)
 
-    date_time_to_table = dateutil.parser.parse(date_time_to_table)
+    date_time_from_table, date_time_to_table = convert_time(
+        date_time_from_table, date_time_to_table
+    )
 
     local_df = pd.read_json(daten)
     local_df["Time"] = pd.to_datetime(local_df["Time"])
@@ -359,5 +338,3 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     result = ", ".join(output)
     result = "Filter: " + result
     return dcc.Markdown(result), local_df.to_dict("records"), tooltip_data
-
-

@@ -286,7 +286,7 @@ def update_course(daten, courses_dict):
     return courses, empty_list
 
 
-def add_checklist(checklist_id):
+def add_checklist(checklist_id, all_options, values):
     """
     add list of checkboxes
     :param checklist_id: id the list is supposed to get so callbacks can access it
@@ -295,8 +295,8 @@ def add_checklist(checklist_id):
     return dbc.Row(
         html.Div(  ## Filter Checkboxes
             dcc.Checklist(
-                ["Attempts", "Date"],
-                ["Attempts"],
+                options=all_options,
+                value=values,
                 inline=True,
                 style={
                     "justify-content": "center",
@@ -370,13 +370,42 @@ def create_time_row(timerow_id, date_from_id, date_to_id):
         ),
     )
 
+
+def create_invisible_time_row(date_from_id, date_to_id):
+    """
+    creates two in invisible time inputs so they can still be accessed by callbacks
+    :param date_from_id: id the date_time_from attribute is supposed to get
+    :param date_to_id: id the date_time_to attribute is supposed to get
+    :return: two invisble time inputs
+    """
+    return html.Div(
+        children=[
+            "Date/Time From",
+            dcc.Input(
+                id=date_from_id,
+                value=(datetime.now() - timedelta(hours=500000)).strftime(
+                    "%Y-%m-%dT%H:%M"
+                ),
+                type="datetime-local",
+            ),
+            "Date/Time To",
+            dcc.Input(
+                id=date_to_id,
+                value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
+                type="datetime-local",
+            ),
+        ],
+        style={"visibility": "hidden", "height": "0"},
+    )
+
+
 def add_exercise_dropdown(exercise_id, dropdown_name, option_list):
-    '''
+    """
     creates a dropdown containing all exercises
     :param tmp_df: data the user is allowed to see
     :param exercise_id: id for the dropdown so callbacks can access it
     :return: a dropdown with all exercises that are in the courses selected
-    '''
+    """
     return html.Div(
         [
             dropdown_name,
@@ -384,26 +413,33 @@ def add_exercise_dropdown(exercise_id, dropdown_name, option_list):
                 option_list,
                 multi=True,
                 placeholder="Select one or more exercise",
-                style={
-                    "background-color": "#e9e7e9"
-                },
+                style={"background-color": "#e9e7e9"},
                 id=exercise_id,
             ),
         ]
     )
-'''
-    html.Div(
-        [
-            "Course",
-            course := dcc.Dropdown(
-                tmp_df.CourseName.unique(),
-                tmp_df.CourseName.unique(),
-                multi=True,
-                placeholder="Select one or more courses",
-                style={
-                    "background-color": "#e9e7e9"
-                },
-            ),
-        ]
-    )
-'''
+
+
+def filter_data(data):
+    """
+    transform the data from json to a pandas dataframe, changes timefromat and
+    removes the solution
+    :param data: all data in JSON format
+    :return: filtered list as a pandas dataframe
+    """
+    local_df = pd.read_json(data)
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
+    local_df = local_df[local_df["UserId"] != 0]
+    return local_df
+
+
+def convert_time(date_time_from, date_time_to):
+    """
+    converts the format of two given times
+    :param date_time_from: time to be converted
+    :param date_time_to: time to be converted
+    :return: times with converted format
+    """
+    date_time_from = dateutil.parser.parse(date_time_from)
+    date_time_to = dateutil.parser.parse(date_time_to)
+    return date_time_from, date_time_to
