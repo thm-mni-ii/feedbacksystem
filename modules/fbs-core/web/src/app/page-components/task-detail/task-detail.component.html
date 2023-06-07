@@ -38,11 +38,11 @@
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()">
         <mat-icon class="logout-icon">edit</mat-icon
-        ><span>Aufgabe bearbeiten</span>
+        ><span>{{ "edit-task" | transloco }}</span>
       </button>
       <button mat-menu-item *ngIf="canEdit()" (click)="deleteTask()">
         <mat-icon class="logout-icon">delete</mat-icon
-        ><span>Aufgabe löschen</span>
+        ><span>{{ "delete-task" | transloco }}</span>
       </button>
     </mat-menu>
   </app-menu-bar>
@@ -51,9 +51,9 @@
     <div class="task-container">
       <span>{{ task?.name }}</span>
       <span class="meta">
-        <span *ngIf="deadlinePassed" class="tiny failed"
-          >Abgabeende erreicht!</span
-        >
+        <span *ngIf="deadlinePassed" class="tiny failed">{{
+          "submission-deadline" | transloco
+        }}</span>
         <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
           >access_time</mat-icon
         >
@@ -61,7 +61,8 @@
           task?.deadline | date: "dd.MM.yyyy HH:mm"
         }}</span>
         <span class="state" *ngIf="taskResult.maxPoints !== 0"
-          >{{ taskResult.points }}/{{ taskResult.maxPoints }} Punkte</span
+          >{{ taskResult.points }}/{{ taskResult.maxPoints }}
+          {{ "settings-points" | transloco }}</span
         >
         <span class="state" *ngIf="taskResult.maxPoints === 0">
           <span class="state passed" *ngIf="taskResult.passed"
@@ -79,7 +80,8 @@
           >
         </span>
         <span class="state" *ngIf="pending"
-          ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span
+          ><mat-spinner [diameter]="24"></mat-spinner
+          >{{ "progress-spinner" | transloco }}</span
         >
       </span>
     </div>
@@ -135,7 +137,7 @@
             color="accent"
             (click)="submission()"
           >
-            Abgeben
+            {{ "task-submit" | transloco }}
           </button>
           <div class="center margin-left-right">
             <button

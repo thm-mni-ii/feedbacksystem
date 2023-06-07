@@ -10,7 +10,7 @@ import { Roles } from "../../model/Roles";
 import { AuthService } from "../../service/auth.service";
 import { CourseUpdateDialogComponent } from "../../dialogs/course-update-dialog/course-update-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
-
+import { TranslocoService } from '@ngneat/transloco';
 /**
  * Show all courses
  */
@@ -25,7 +25,8 @@ export class SearchCoursesComponent implements OnInit {
     private router: Router,
     private auth: AuthService,
     private dialog: MatDialog,
-    private titlebar: TitlebarService
+    private titlebar: TitlebarService,
+    private readonly translocoService: TranslocoService
   ) {}
 
   courses: Observable<Course[]> = of();
@@ -33,7 +34,10 @@ export class SearchCoursesComponent implements OnInit {
   control: UntypedFormControl = new UntypedFormControl();
 
   ngOnInit() {
-    this.titlebar.emitTitle("Kurs suchen");
+    this.translocoService.selectTranslate('search').subscribe(value => 
+      this.titlebar.emitTitle( value)
+      )
+    
     this.courses = this.courseService.getCourseList();
 
     this.filteredCourses = this.control.valueChanges.pipe(

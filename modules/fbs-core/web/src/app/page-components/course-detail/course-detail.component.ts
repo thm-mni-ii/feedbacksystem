@@ -22,6 +22,7 @@ import { TaskPointsDialogComponent } from "../../dialogs/task-points-dialog/task
 import { ExternalClassroomService } from "../../service/external-classroom.service";
 import { UserTaskResult } from "../../model/UserTaskResult";
 import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/export-tasks-dialog.component";
+import { TranslocoService } from "@ngneat/transloco";
 
 @Component({
   selector: "app-course-detail",
@@ -30,6 +31,7 @@ import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/
 })
 export class CourseDetailComponent implements OnInit {
   constructor(
+    private readonly translocoService: TranslocoService,
     private taskService: TaskService,
     private authService: AuthService,
     private route: ActivatedRoute,
@@ -174,8 +176,8 @@ export class CourseDetailComponent implements OnInit {
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: "Kurs beitreten?",
-          message: "Wollen Sie diesem Kurs beitreten?",
+          title:this.translocoService.translate('course-join-dialogue'),
+          message: this.translocoService.translate('course-join-message'),
         },
       })
       .afterClosed()
@@ -201,9 +203,10 @@ export class CourseDetailComponent implements OnInit {
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: "Kurs verlassen?",
+
+          title:  this.translocoService.translate('dialogue-leave'),
           message:
-            "Wollen Sie diesen Kurs verlassen? Alle ihre Abgaben könnten verloren gehen!",
+          this.translocoService.translate('dialogue-leave-message'),
         },
       })
       .afterClosed()
@@ -240,8 +243,8 @@ export class CourseDetailComponent implements OnInit {
       this.dialog
         .open(ConfirmDialogComponent, {
           data: {
-            title: "Kurs Löschen",
-            message: `Kurs ${course.name} wirklich löschen? (Alle zugehörigen Aufgaben werden damit auch gelöscht!)`,
+            title: this.translocoService.translate('course-delete-dialogue'),
+            message: ` ${course.name} `+this.translocoService.translate('course-delete-message'),
           },
         })
         .afterClosed()

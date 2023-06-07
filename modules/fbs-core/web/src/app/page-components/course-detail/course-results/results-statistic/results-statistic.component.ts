@@ -11,7 +11,7 @@ import { ChartDataSets, ChartOptions, ChartType } from "chart.js";
 import { Color, Label } from "ng2-charts";
 import { SubTaskStatistic } from "../../../../model/SubTaskStatistic";
 import { SubtaskStatisticService } from "../../../../service/subtask-statistic.service";
-
+import { TranslocoService } from "@ngneat/transloco";
 @Component({
   selector: "app-results-statistic",
   templateUrl: "./results-statistic.component.html",
@@ -19,6 +19,7 @@ import { SubtaskStatisticService } from "../../../../service/subtask-statistic.s
 })
 export class ResultsStatisticComponent implements OnInit {
   constructor(
+    private readonly translocoService: TranslocoService,
     private courseResultService: CourseResultsService,
     private tb: TitlebarService,
     private route: ActivatedRoute,
@@ -81,6 +82,7 @@ export class ResultsStatisticComponent implements OnInit {
   public barChartPlugins = [];
 
   // Line-chart Config
+  
   lineChartData: ChartDataSets[] = [{ data: [], label: "Bearbeitungsquote %" }];
 
   lineChartLabels: Label[] = [];
@@ -117,6 +119,9 @@ export class ResultsStatisticComponent implements OnInit {
   lineChartType: ChartType = "line";
 
   ngOnInit(): void {
+    this.translocoService.selectTranslate('work-rate').subscribe((translation) => {
+      this.lineChartData = [{ data: [], label: translation }];
+    });
     this.tb.emitTitle("Dashboard");
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
@@ -136,6 +141,7 @@ export class ResultsStatisticComponent implements OnInit {
     });
     this.standardEvent();
     this.showRate();
+    
   }
 
   public chartClicked(e: any): void {
@@ -158,8 +164,14 @@ export class ResultsStatisticComponent implements OnInit {
     this.isButtonVisible = true;
     this.isMissingSubTextVisible = true;
     this.checker = 1;
-    this.barChartData[0].label = "Maximale Punktzahl";
-    this.barChartData[1].label = "Durchschnittliche Punktzahl";
+    this.translocoService.selectTranslate('max-points').subscribe((translation) => {
+      this.barChartData[0].label = translation;
+    });
+    this.translocoService.selectTranslate('average-points').subscribe((translation) => {
+      this.barChartData[1].label = translation;
+    });
+    
+    
     this.barChartLabels = [];
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];
@@ -184,9 +196,12 @@ export class ResultsStatisticComponent implements OnInit {
     this.isMissingSubTextVisible = false;
     this.isTextVisible = true;
     this.checker = 0;
-    this.barChartData[0].label =
-      "Durchschnittliche Versuche zum vollständigen Bestehen aller (Unter-)Aufgaben";
-    this.barChartData[1].label = "Durchschnittliche Versuche einer Aufgabe";
+    this.translocoService.selectTranslate('average-tries-all').subscribe((translation) => {
+      this.barChartData[0].label = translation;
+    });
+      this.translocoService.selectTranslate('average-tries-one').subscribe(value =>
+        this.barChartData[1].label = value
+        )
     this.barChartLabels = [];
     this.barChartData[0].data = [];
     this.barChartData[1].data = [];

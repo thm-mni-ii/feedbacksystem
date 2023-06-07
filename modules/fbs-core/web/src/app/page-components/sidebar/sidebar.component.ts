@@ -10,6 +10,7 @@ import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impress
 import { FeedbackAppService } from "../../service/feedback-app.service";
 import { JoyrideService } from "ngx-joyride";
 import { MatMenuTrigger } from "@angular/material/menu";
+import {TranslocoService} from '@ngneat/transloco';
 /**
  * Root component shows sidenav and titlebar
  */
@@ -26,7 +27,8 @@ export class SidebarComponent implements OnInit {
     private titlebar: TitlebarService,
     private dialog: MatDialog,
     private feedbackAppService: FeedbackAppService,
-    private joyride: JoyrideService
+    private joyride: JoyrideService,
+    private readonly translocoService: TranslocoService
   ) {}
 
   title: Observable<string> = of("");
@@ -36,6 +38,28 @@ export class SidebarComponent implements OnInit {
   username: string;
   isAdmin: boolean;
   isModerator: boolean;
+  public languagesList: 
+    Array<Record<'imgUrl' | 'code' | 'name' | 'shorthand', string>> = [
+    {
+      imgUrl: '../../../assets/images/English.png',
+      code: 'en',
+      name: 'English',
+      shorthand: 'ENG',
+    },
+    {
+      imgUrl: './../../assets/images/Deutsch.png',
+      code: 'de',
+      name: 'Deutsch',
+      shorthand: 'GER',
+    },
+    {
+      imgUrl: './../../assets/images/France.png',
+      code: 'fr',
+      name: 'Français',
+      shorthand: 'FRA',
+    },
+
+  ];
 
   ngOnInit() {
     this.username = this.auth.getToken().username;
@@ -47,6 +71,11 @@ export class SidebarComponent implements OnInit {
 
     this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;
+    if (localStorage.getItem('lang')) {
+      this.translocoService.setActiveLang(localStorage.getItem('lang'))
+    
+    } 
+    
   }
 
   /**
@@ -119,6 +148,11 @@ export class SidebarComponent implements OnInit {
   onPrev() {
     this.router.navigate(["/courses"]);
   }
+   changeLanguage(languageCode: string): void {
+    this.translocoService.setActiveLang(languageCode);
+    localStorage.setItem("lang", languageCode);
+  }
+
   /* openMenu() {
     this.menuTrigger.openMenu();
   }

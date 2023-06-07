@@ -26,6 +26,7 @@ import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
 import { PrismService } from "src/app/service/prism.service";
 import { Subscription } from "rxjs";
+import { TranslocoService } from "@ngneat/transloco";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -64,6 +65,7 @@ export class SqlInputTabsComponent
   }
 
   constructor(
+    private readonly translocoService: TranslocoService,
     private dialog: MatDialog,
     private snackbar: MatSnackBar,
     private authService: AuthService,
@@ -113,9 +115,15 @@ export class SqlInputTabsComponent
   }
 
   closeTab(index: number) {
+    let message=""
+    let message2=""
+    let message3=""
+    this.translocoService.selectTranslate('delete-query-message1').subscribe(value =>message=value )
+    this.translocoService.selectTranslate('delete-query-message2').subscribe(value =>message2=value )
+    this.translocoService.selectTranslate('delete-query-message3').subscribe(value =>message3=value )
     this.openConfirmDialog(
-      "Möchtest du wirklich diesen " + this.tabs[index].name + "  schließen?",
-      "Achtung der Inhalt wird nicht gespeichert!"
+      message+" " + this.tabs[index].name +" "+ message2,
+      message3
     ).subscribe((result) => {
       if (result == true) {
         this.tabs.splice(index, 1);

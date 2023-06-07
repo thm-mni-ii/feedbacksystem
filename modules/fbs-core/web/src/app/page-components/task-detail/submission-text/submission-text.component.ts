@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-
+import { TranslocoService } from "@ngneat/transloco";
 @Component({
   selector: "app-submission-text",
   templateUrl: "./submission-text.component.html",
@@ -10,14 +10,17 @@ export class SubmissionTextComponent implements OnInit {
   @Input() title?: string;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor() {}
+  constructor(private readonly translocoService: TranslocoService) {}
 
-  titleText: string = "Abgabe Text:";
+  titleText: string ;
 
   ngOnInit() {
-    if (this.title != null) {
-      this.titleText = this.title;
-    }
+    
+      this.translocoService.selectTranslate('submission-text').subscribe(value => 
+        this.titleText = value
+        )
+     
+    
   }
 
   updateSubmission(event) {

@@ -18,6 +18,7 @@ import { Roles } from "../../model/Roles";
 import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
+import { TranslocoService } from "@ngneat/transloco";
 
 /**
  * Shows a task in detail
@@ -48,6 +49,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   constructor(
+    private readonly translocoService: TranslocoService,
     private route: ActivatedRoute,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
@@ -419,11 +421,17 @@ export class TaskDetailComponent implements OnInit {
    * this task
    */
   deleteTask() {
+    let title=""
+    let message=""
+    let message2=""
+    this.translocoService.selectTranslate('delete-exercice').subscribe(value =>title=value )
+    this.translocoService.selectTranslate('delete-exercice-message1').subscribe(value =>message=value )
+    this.translocoService.selectTranslate('delete-exercice-message2').subscribe(value =>message2=value )
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: "Aufgabe löschen",
-          message: `Aufgabe ${this.task.name} wirklich löschen? (Alle zugehörigen Abgaben werden damit auch gelöscht!)`,
+          title: title,
+          message:message+ " " + this.task.name+" " + message2,
         },
       })
       .afterClosed()

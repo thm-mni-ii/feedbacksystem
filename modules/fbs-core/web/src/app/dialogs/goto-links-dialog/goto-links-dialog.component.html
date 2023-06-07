@@ -1,10 +1,9 @@
 <mat-dialog-content>
   <p>
-    Kopiere den Link, um ihn in Moodle oder anderen externen Seiten einzubinden.
-    Er leitet Studierende zu der Kursseite bzw. der Feedback App weiter.
+    {{ "settings-shortlink-notice" | transloco }}
   </p>
   <mat-form-field class="max-width">
-    <mat-label>Kurs Link</mat-label>
+    <mat-label>{{ "settings-shortlink-course" | transloco }}</mat-label>
     <input matInput [value]="courseLink" readonly />
     <button
       mat-icon-button
@@ -17,7 +16,7 @@
   </mat-form-field>
   <br />
   <mat-form-field class="max-width">
-    <mat-label>App Link</mat-label>
+    <mat-label>{{ "settings-shortlink-app" | transloco }}</mat-label>
     <input matInput [value]="appLink" readonly />
     <button
       mat-icon-button
@@ -31,6 +30,8 @@
 </mat-dialog-content>
 <mat-dialog-actions class="dialog-actions">
   <div class="action-buttons">
-    <button mat-flat-button color="accent" (click)="close()">Schließen</button>
+    <button mat-flat-button color="accent" (click)="close()">
+      {{ "settings-shortlink-close" | transloco }}
+    </button>
   </div>
 </mat-dialog-actions>

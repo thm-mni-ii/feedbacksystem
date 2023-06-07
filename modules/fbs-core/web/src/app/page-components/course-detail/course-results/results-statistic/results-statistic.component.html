@@ -1,13 +1,13 @@
 <div class="info" *ngIf="this.isTextVisible">
-  <h4>Aufgabe anklicken, um Unteraufgaben anzuzeigen</h4>
+  <h4>{{ "show-subtasks" | transloco }}</h4>
 </div>
 <div class="info" *ngIf="this.isMissingSubTextVisible">
-  <h4>Die Aufgabe besitzt keine Unteraufgaben</h4>
+  <h4>{{ "no-subtasks" | transloco }}</h4>
 </div>
 <div class="info" *ngIf="this.isButtonVisible">
   <br />
   <button mat-button (click)="standardEvent()">
-    Zurück zur Aufgabenübersicht
+    {{ "back-to-exercice" | transloco }}
   </button>
 </div>
 <div class="statistic-container">

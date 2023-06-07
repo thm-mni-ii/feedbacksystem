@@ -1,13 +1,13 @@
 <div class="container">
   <p class="info-text" *ngIf="this.activeDb !== undefined">
-    Ausgewählte DB:
+    {{ "db-selection" | transloco }}
     <span class="highlight">
       {{ this.activeDb.name }}
     </span>
   </p>
 
   <mat-form-field appearance="fill">
-    <mat-label>Vorlagen</mat-label>
+    <mat-label>{{ "playground-templates" | transloco }}</mat-label>
     <mat-select [(value)]="selectedTemplateId">
       <mat-option>-- None --</mat-option>
       <mat-optgroup

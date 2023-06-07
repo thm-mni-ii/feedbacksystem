@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable, of,combineLatest   } from "rxjs";
 import { Task } from "../../../model/Task";
 import { UserTaskResult } from "../../../model/UserTaskResult";
 import { Course } from "../../../model/Course";
@@ -21,6 +21,7 @@ import { SingleDataSet, Label } from "ng2-charts";
 import { SqlCheckerService } from "../../../service/sql-checker.service";
 import { SumUp } from "../../../model/SumUp";
 import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
+import { TranslocoService } from "@ngneat/transloco";
 
 @Component({
   selector: "app-sql-checker-results",
@@ -29,6 +30,7 @@ import { SqlCheckerResult } from "../../../model/SqlCheckerResult";
 })
 export class SqlCheckerResultsComponent implements OnInit {
   constructor(
+    private readonly translocoService: TranslocoService,
     private taskService: TaskService,
     private authService: AuthService,
     private route: ActivatedRoute,
@@ -116,6 +118,24 @@ export class SqlCheckerResultsComponent implements OnInit {
   // Daten
   resultTableObs: Observable<SqlCheckerResult[]> = of();
   ngOnInit() {
+    combineLatest([
+      this.translocoService.selectTranslate('correct-tables'),
+      this.translocoService.selectTranslate('false-tables')
+    ]).subscribe(([correctTablesTranslation, falseTablesTranslation]) => {
+      // Use the translated values as needed
+      this.pieChartLabelsLeft = [[correctTablesTranslation], [falseTablesTranslation]];
+    });
+    combineLatest([
+      this.translocoService.selectTranslate('correct-attributes'),
+      this.translocoService.selectTranslate('false-attributes')
+    ]).subscribe(([correctattribute, falseattributes]) => {
+      // Use the translated values as needed
+      this.pieChartLabelsRight = [
+        [correctattribute],
+        [falseattributes],
+      ];
+    });
+  
     this.route.params.subscribe((param) => {
       this.courseID = param.id;
       this.taskID = param.tid;

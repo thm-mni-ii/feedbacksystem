@@ -1,5 +1,5 @@
 <div class="results">
-  <h3>Ergebnisse der Abgaben</h3>
+  <h3>{{ "submission-results" | transloco }}</h3>
   <div class="submission-list">
     <div class="scrolling-wrapper">
       <mat-tab-group
@@ -9,7 +9,9 @@
       >
         <mat-tab
           *ngFor="let submission of allSubmissions; let i = index"
-          label="{{ i + 1 }}. Abgabe (ID: {{ submission.id }})"
+          label="{{ i + 1 }}. {{ 'submission-id' | transloco }} (ID: {{
+            submission.id
+          }})"
         ></mat-tab>
       </mat-tab-group>
     </div>
@@ -18,26 +20,32 @@
   <div class="container">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <ng-container matColumnDef="checkerType">
-        <th mat-header-cell *matHeaderCellDef>Checker Typ</th>
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "checker-type" | transloco }}
+        </th>
         <td mat-cell *matCellDef="let checker">{{ checker.checkerType }}</td>
       </ng-container>
 
       <ng-container matColumnDef="query">
-        <th mat-header-cell *matHeaderCellDef>Abgabe Query</th>
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "submission-query" | transloco }}
+        </th>
         <td mat-cell *matCellDef="">
           <pre class="pre">{{ queryText }}</pre>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="resultText">
-        <th mat-header-cell *matHeaderCellDef>Antworttext</th>
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "response-text" | transloco }}
+        </th>
         <td mat-cell *matCellDef="let checker">
           <pre [innerHTML]="checker.resultText" class="pre"></pre>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="exitCode">
-        <th mat-header-cell *matHeaderCellDef>Ergebnis</th>
+        <th mat-header-cell *matHeaderCellDef>{{ "result" | transloco }}</th>
         <td mat-cell *matCellDef="let checker">
           <mat-icon class="done" *ngIf="checker.exitCode === 0">done</mat-icon>
           <mat-icon color="not-done" *ngIf="checker.exitCode !== 0"

@@ -27,8 +27,9 @@
             title="Meine Kurse"
             text="Auf dieser Seite können Sie alle Kurse sehen, an denen Sie teilnehmen"
             (next)="onNext()"
+            *transloco="let t"
           >
-            Meine Kurse
+            {{ t("side_menu_my_courses") }}
           </p>
         </a>
 
@@ -43,8 +44,9 @@
             title="Alle Kurse"
             text="Alle Kurse zeigt alle Kurse an, an denen der Nutzer teilnehmen kann"
             (prev)="onPrev()"
+            *transloco="let t"
           >
-            Alle Kurse
+            {{ t("side_menu_all_courses") }}
           </p>
         </a>
 
@@ -55,7 +57,7 @@
           routerLinkActive="selected"
         >
           <mat-icon>supervised_user_circle</mat-icon>
-          <p>Benutzer</p>
+          <p>{{ "side_menu_user" | transloco }}</p>
         </a>
 
         <a mat-list-item (click)="goToFBA()">
@@ -79,7 +81,7 @@
         </a>
         <a mat-list-item (click)="tour()">
           <mat-icon>rowing</mat-icon>
-          <p>Tour starten</p>
+          <p>{{ "side_menu_tour" | transloco }}</p>
         </a>
       </mat-nav-list>
 
@@ -101,6 +103,22 @@
       </button>
       <span class="mat-h1">{{ title | async }}</span>
       <span class="toolbar-spacer"></span>
+      <button mat-button [matMenuTriggerFor]="languagemenu">
+        <mat-icon>language</mat-icon>
+      </button>
+      <mat-menu #languagemenu="matMenu">
+        <button
+          mat-menu-item
+          *ngFor="let language of languagesList; index as i"
+          (click)="changeLanguage(language.code)"
+        >
+          <div class="box">
+            <img [src]="language.imgUrl" [alt]="language.name" />
+
+            <span id="langname"> {{ language.name }} </span>
+          </div>
+        </button>
+      </mat-menu>
       <button
         mat-icon-button
         [matMenuTriggerFor]="menu"

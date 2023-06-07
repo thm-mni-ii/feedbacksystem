@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { TranslocoService } from '@ngneat/transloco';
 import { Observable, of } from "rxjs";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Course } from "../../model/Course";
@@ -6,6 +7,7 @@ import { AuthService } from "../../service/auth.service";
 import { mergeMap, startWith } from "rxjs/operators";
 import { UntypedFormControl } from "@angular/forms";
 import { CourseRegistrationService } from "../../service/course-registration.service";
+
 
 /**
  * Show all registered courses
@@ -19,15 +21,22 @@ export class MyCoursesComponent implements OnInit {
   constructor(
     private titlebar: TitlebarService,
     private courseRegistrationService: CourseRegistrationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private readonly translocoService: TranslocoService
   ) {}
 
   courses: Observable<Course[]> = of();
   filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
-
+  
   ngOnInit() {
-    this.titlebar.emitTitle("Meine Kurse");
+    
+    
+    this.translocoService.selectTranslate('title').subscribe(value => 
+      this.titlebar.emitTitle( value)
+      )
+
+   
     const userID = this.authService.getToken().id;
     this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
 

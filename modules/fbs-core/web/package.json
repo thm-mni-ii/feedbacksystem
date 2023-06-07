@@ -28,6 +28,7 @@
     "@auth0/angular-jwt": "^5.0.2",
     "@fontsource/material-icons": "^4.5.4",
     "@fontsource/roboto": "^4.5.8",
+    "@ngneat/transloco": "^4.2.7",
     "canvas-datagrid": "^0.4.5",
     "chart.js": "^2.9.4",
     "file-saver": "^2.0.5",

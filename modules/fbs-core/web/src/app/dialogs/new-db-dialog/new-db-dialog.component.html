@@ -1,10 +1,12 @@
 <div class="container">
   <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
-  <div *ngIf="!isUpdateDialog" matDialogTitle>Datenbank erstellen</div>
+  <div *ngIf="!isUpdateDialog" matDialogTitle>
+    {{ "db-create" | transloco }}
+  </div>
   <mat-dialog-content style="max-height: 100%; overflow: hidden">
     <mat-card-content>
       <mat-form-field>
-        <mat-label>Datenbankname</mat-label>
+        <mat-label>{{ "db-name" | transloco }}</mat-label>
         <input
           [formControl]="name"
           name="newCourseName"

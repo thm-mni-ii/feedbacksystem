@@ -8,6 +8,7 @@ import { JWTToken } from "src/app/model/JWTToken";
 import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import { TranslocoService } from "@ngneat/transloco";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -20,6 +21,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   @Output() changeActiveDb = new EventEmitter<Database>();
 
   constructor(
+    private readonly translocoService: TranslocoService,
     private snackbar: MatSnackBar,
     private authService: AuthService,
     private sqlPlaygroundService: SqlPlaygroundService,
@@ -106,10 +108,9 @@ export class DbControlDbOverviewComponent implements OnInit {
 
   deleteDatabase() {
     const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
-
     this.openTextConfirmDialog(
-      "Datenbank löschen",
-      "Möchten Sie die Datenbank wirklich löschen?",
+     this.translocoService.translate('db-delete-message1'),
+     this.translocoService.translate('db-delete-message2'),
       `${selectedDb.name}`
     ).subscribe((result) => {
       if (result === true) {

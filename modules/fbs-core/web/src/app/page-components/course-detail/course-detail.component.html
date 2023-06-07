@@ -2,9 +2,9 @@
   <app-menu-bar *ngIf="role || isAuthorized()">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
-      <span *ngIf="role === 'DOCENT'">Dozent/in</span>
-      <span *ngIf="role === 'TUTOR'">Tutor/in</span>
-      <span *ngIf="role === 'STUDENT'">Student/in</span>
+      <span *ngIf="role === 'DOCENT'">{{ "professor-role" | transloco }}</span>
+      <span *ngIf="role === 'TUTOR'">{{ "tutor-role" | transloco }}</span>
+      <span *ngIf="role === 'STUDENT'">{{ "student-role" | transloco }}</span>
     </span>
 
     <span class="spacer"></span>
@@ -85,14 +85,15 @@
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="isAuthorized()" (click)="updateCourse()">
         <mat-icon class="logout-icon">edit</mat-icon
-        ><span>Kurs bearbeiten</span>
+        ><span>{{ "settings-edit-course" | transloco }}</span>
       </button>
       <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()">
-        <mat-icon class="logout-icon">rule</mat-icon><span>Punkte</span>
+        <mat-icon class="logout-icon">rule</mat-icon
+        ><span>{{ "settings-points" | transloco }}</span>
       </button>
       <button mat-menu-item (click)="showGoLinks()">
         <mat-icon class="logout-icon">link</mat-icon
-        ><span>Kurs Kurzlinks anzeigen</span>
+        ><span>{{ "settings-shortlink" | transloco }}</span>
       </button>
       <button
         mat-menu-item
@@ -101,21 +102,18 @@
         (click)="exitCourse()"
         matTooltip="Kurs verlassen"
       >
-        <mat-icon>exit_to_app</mat-icon>Kurs verlassen
+        <mat-icon>exit_to_app</mat-icon>{{ "course-leave" | transloco }}
       </button>
       <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteCourse()">
-        <mat-icon class="logout-icon">delete</mat-icon><span>Kurs löschen</span>
+        <mat-icon class="logout-icon">delete</mat-icon
+        ><span>{{ "course-delete" | transloco }}</span>
       </button>
     </mat-menu>
   </app-menu-bar>
 
   <app-info class="info" *ngIf="!role">
     <p class="mat-body">
-      Liebe/r Nutzer/in, Sie betrachten einen Kurs in dem Sie nicht als
-      Teilnehmer/in geführt werden. Sie können alle Inhalte einsehen und an
-      Übungen teilnehmen, jedoch wird keine Ihrer Abgaben gewertet und der
-      Dozent wird nicht über Ihre Teilnahme informiert. Falls Sie an diesem Kurs
-      teilnehmen wollen, dann melden Sie sich bitte an.
+      {{ "course-notice" | transloco }}
     </p>
     <div>
       <button
@@ -124,7 +122,7 @@
         (click)="joinCourse()"
         matTooltip="Kurs beitreten"
       >
-        Am Kurs teilnehmen
+        {{ "course-participate" | transloco }}
       </button>
     </div>
   </app-info>
@@ -141,7 +139,7 @@
       (click)="createTask()"
       matTooltip="Aufgabe erstellen"
     >
-      <mat-icon>add</mat-icon>&nbsp;Aufgabe erstellen
+      <mat-icon>add</mat-icon>&nbsp;{{ "create-exercice" | transloco }}
     </button>
   </div>
 

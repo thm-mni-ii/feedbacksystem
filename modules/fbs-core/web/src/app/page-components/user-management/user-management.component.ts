@@ -11,6 +11,7 @@ import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dia
 import { Roles } from "../../model/Roles";
 import { MatDialog } from "@angular/material/dialog";
 import { Router } from "@angular/router";
+import { TranslocoService } from '@ngneat/transloco';
 /**
  * This component is for admins managing users
  */
@@ -31,11 +32,16 @@ export class UserManagementComponent implements OnInit {
     private snackBar: MatSnackBar,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private readonly translocoService: TranslocoService
   ) {}
 
   ngOnInit() {
-    this.titlebar.emitTitle("Benutzerverwaltung");
+    this.translocoService.selectTranslate('user-management').subscribe(value => 
+      this.titlebar.emitTitle(value)
+      )
+
+   
     this.refreshUserList();
   }
   backtoserach() {

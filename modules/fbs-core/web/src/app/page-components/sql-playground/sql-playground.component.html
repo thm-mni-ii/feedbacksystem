@@ -3,7 +3,7 @@
     <app-bordered-container
       [xScrollable]="true"
       [yScrollable]="false"
-      [title]="'Ergebnisse'"
+      [title]="'playground-results' | transloco"
       ><app-dynamic-result-table
         [resultset]="resultset"
         [isQueryPending]="isQueryPending"
@@ -19,7 +19,7 @@
     </app-bordered-container>
   </div>
   <div class="db-grid">
-    <app-bordered-container [title]="'Steuerung'">
+    <app-bordered-container [title]="'playground-management' | transloco">
       <app-db-control-panel
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"

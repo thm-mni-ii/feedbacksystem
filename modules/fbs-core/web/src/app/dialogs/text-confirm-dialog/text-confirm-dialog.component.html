@@ -3,21 +3,22 @@
 <br />
 <div>
   <mat-dialog-content>
-    Geben Sie <strong>{{ data.textToRepeat }}</strong> ein.
+    {{ "db-delete-dialogue" | transloco
+    }}<strong>{{ data.textToRepeat }}</strong> .
   </mat-dialog-content>
   <mat-form-field>
     <input matInput required [formControl]="textMatcher" [(ngModel)]="text" />
     <mat-error *ngIf="textMatcher.hasError('notMatch')">
-      Die Eingabe stimmt nicht überein</mat-error
+      {{ "db-delete-error" | transloco }}</mat-error
     >
   </mat-form-field>
   <mat-dialog-actions>
     <button mat-flat-button color="accent" (click)="onCancel()">
-      {{ data.closeText || "Abbrechen" }}
+      {{ data.closeText || ("dialogue-cancel" | transloco) }}
     </button>
     &nbsp; &nbsp;
     <button mat-flat-button color="warn" (click)="confirm(true)">
-      {{ data.confirmText || "Ja" }}
+      {{ data.confirmText || ("dialogue-confirm" | transloco) }}
     </button>
   </mat-dialog-actions>
 </div>

@@ -5,9 +5,8 @@
     [matTooltip]="
       'Korrekt: ' + passed + '\nFalsch: ' + failed + '\nGesamt: ' + all
     "
-    >Fortschritt:<span class="passed"> {{ passed }} </span>/<span
-      class="failed"
-    >
+    >{{ "courses-progress" | transloco
+    }}<span class="passed"> {{ passed }} </span>/<span class="failed">
       {{ failed }} </span
     >/<span class="all"> {{ all }} </span></span
   >

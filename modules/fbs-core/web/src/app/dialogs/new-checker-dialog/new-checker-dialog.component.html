@@ -1,5 +1,5 @@
-<div matDialogTitle *ngIf="!isUpdate">Neue Überprüfung hinzufügen</div>
-<div matDialogTitle *ngIf="isUpdate">Überprüfung bearbeiten</div>
+<div matDialogTitle *ngIf="!isUpdate">{{ "new-review" | transloco }}</div>
+<div matDialogTitle *ngIf="isUpdate">{{ "edit-review" | transloco }}</div>
 <div class="newChecker">
   <form [formGroup]="checkerForm">
     <mat-select
@@ -17,7 +17,7 @@
     <mat-form-field>
       <input
         type="number"
-        placeholder="Reihenfolge"
+        placeholder="{{ 'review-order' | transloco }}"
         matInput
         formControlName="ord"
         required
@@ -42,12 +42,12 @@
           formControlName="showHints"
           value="true"
           (change)="showHintsEvent(checkerForm.value)"
-          >Hilfestellung anzeigen</mat-checkbox
+          >{{ "review-show-utility" | transloco }}</mat-checkbox
         >
       </div>
       <div *ngIf="showHintsConfig">
-        <h4>Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?</h4>
-        <mat-icon matTooltip="Studierende erfahren, wo ihre Fehler liegen."
+        <h4>{{ "review-attempts-count" | transloco }}</h4>
+        <mat-icon [matTooltip]="'review-utility-info' | transloco"
           >info</mat-icon
         >
         <mat-form-field>
@@ -64,15 +64,14 @@
             formControlName="showExtendedHints"
             value="true"
             (change)="showExtendedHintsEvent(checkerForm.value)"
-            >Hilfestellung geben</mat-checkbox
+            >{{ "review-assistance" | transloco }}</mat-checkbox
           >
         </div>
         <div *ngIf="showExtendedHintsConfig">
           <h4>
-            Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?
+            {{ "review-assistance-info" | transloco }}
           </h4>
-          <mat-icon
-            matTooltip="Studierende erhalten Informationen zu den korrekten Tabellen und Attributen"
+          <mat-icon matTooltip="{{ 'review-assistance-hint' | transloco }}"
             >info</mat-icon
           >
           <mat-form-field>
@@ -90,7 +89,7 @@
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialogue-cancel" | transloco }}
     </button>
     <button
       *ngIf="!isUpdate"
@@ -106,7 +105,7 @@
       "
       (click)="createChecker(checkerForm.value)"
     >
-      Erstellen
+      {{ "settings-points-create" | transloco }}
     </button>
     <button
       *ngIf="isUpdate"

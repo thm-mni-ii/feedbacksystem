@@ -1,6 +1,6 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Benutzer suchen</mat-label>
+    <mat-label>{{ "user-search" | transloco }}</mat-label>
     <input matInput (keyup)="applyFilter($event.target.value)" />
     <mat-icon matSuffix>search</mat-icon>
   </mat-form-field>
@@ -16,26 +16,32 @@
       text="Auf dieser Seite können Sie die Benutzer hinzufügen/verwalten"
       (prev)="backtoserach()"
     >
-      <mat-icon>person_add</mat-icon> Neuen Benutzer erstellen
+      <mat-icon>person_add</mat-icon> {{ "user-create" | transloco }}
     </button>
   </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
     <!-- Position Column -->
     <ng-container matColumnDef="username">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Benutzername</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "user-username" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.username }}</td>
     </ng-container>
 
     <!-- Name Column -->
     <ng-container matColumnDef="prename">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Vorname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-firstname" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.prename }}</td>
     </ng-container>
 
     <!-- Weight Column -->
     <ng-container matColumnDef="surname">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Nachname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-lastname" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.surname }}</td>
     </ng-container>
 
@@ -47,7 +53,9 @@
 
     <!-- Role id Column-->
     <ng-container matColumnDef="globalRole">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Rolle</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-role" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <mat-select
           value="{{ user.globalRole }}"
@@ -62,7 +70,9 @@
 
     <!-- Action buttons-->
     <ng-container matColumnDef="action">
-      <th mat-header-cell *matHeaderCellDef>Aktionen</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "participant-action" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <button
           mat-icon-button

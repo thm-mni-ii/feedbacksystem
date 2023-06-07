@@ -44,7 +44,7 @@
   </mat-tab-group>
   <div class="bottom-container">
     <button mat-button class="downloadBtn" (click)="downloadFile()">
-      <mat-icon>download</mat-icon> Download
+      <mat-icon>download</mat-icon> {{ "download-query" | transloco }}
     </button>
 
     <button
@@ -57,7 +57,7 @@
       <span class="spinner" *ngIf="isPending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!isPending">Ausführen</span>
+      <span *ngIf="!isPending">{{ "execute-query" | transloco }}</span>
     </button>
 
     <button
@@ -68,7 +68,7 @@
       [matTooltipPosition]="'above'"
       (click)="updateMode(true)"
     >
-      Abgeben<mat-icon>insert_drive_file</mat-icon>
+      {{ "submit-query" | transloco }}<mat-icon>insert_drive_file</mat-icon>
     </button>
     <div class="submit-container" *ngIf="isSubmitMode">
       <button

@@ -8,7 +8,7 @@
   </button>
 
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
+    <mat-label>{{ "participant-search" | transloco }}</mat-label>
     <input
       matInput
       (keyup)="applyFilter($event.target.value)"
@@ -33,7 +33,8 @@
       (click)="unregisterStudent()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle Studierenden entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "participant-remove-students" | transloco }}
     </button>
     <button
       mat-raised-button
@@ -41,7 +42,8 @@
       (click)="unregisterTutor()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle Tutoren entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "participant-remove-tutors" | transloco }}
     </button>
     <button
       mat-raised-button
@@ -49,20 +51,25 @@
       (click)="unregisterAll()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle teilnehmenden Personen entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "participant-remove-all" | transloco }}
     </button>
   </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
     <!-- Name Column -->
     <ng-container matColumnDef="prename">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Vorname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-firstname" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.prename }}</td>
     </ng-container>
 
     <!-- Weight Column -->
     <ng-container matColumnDef="surname">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Nachname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-lastname" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.surname }}</td>
     </ng-container>
 
@@ -74,22 +81,30 @@
 
     <!-- Role id Column-->
     <ng-container matColumnDef="globalRole">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Rolle</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "participant-role" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <mat-select
           value="{{ getRole(user.id) }}"
           (selectionChange)="roleChange(user.id, $event.value)"
         >
-          <mat-option value="STUDENT">Student</mat-option>
-          <mat-option value="DOCENT">Dozent</mat-option>
-          <mat-option value="TUTOR">Tutor</mat-option>
+          <mat-option value="STUDENT">{{
+            "student-role" | transloco
+          }}</mat-option>
+          <mat-option value="DOCENT">{{
+            "professor-role" | transloco
+          }}</mat-option>
+          <mat-option value="TUTOR">{{ "tutor-role" | transloco }}</mat-option>
         </mat-select>
       </td>
     </ng-container>
 
     <!-- Action buttons-->
     <ng-container matColumnDef="action">
-      <th mat-header-cell *matHeaderCellDef>Aktionen</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "participant-action" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <button
           mat-icon-button

@@ -12,36 +12,38 @@
   </app-menu-bar>
   <mat-list role="list" class="legend">
     <mat-list-item role="listitem">
-      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;<small
-        >Kurs bestanden</small
-      >
+      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;<small>{{
+        "course-passed" | transloco
+      }}</small>
     </mat-list-item>
     <mat-list-item role="listitem">
-      <mat-icon class="state failed">cancel</mat-icon>&nbsp;<small
-        >Kurs nicht bestanden</small
-      >
+      <mat-icon class="state failed">cancel</mat-icon>&nbsp;<small>{{
+        "course-not-passed" | transloco
+      }}</small>
     </mat-list-item>
     <mat-list-item role="listitem">
       <span class="task-result"><span class="task-result-example">n</span></span
-      >&nbsp;<small>Nicht bestanden</small>
+      >&nbsp;<small>{{ "failed" | transloco }}</small>
     </mat-list-item>
     <mat-list-item role="listitem"
-      ><small> - &nbsp;Nicht bearbeitet</small></mat-list-item
+      ><small> - &nbsp;{{ "unsolved" | transloco }}</small></mat-list-item
     >
     <mat-list-item role="listitem"
-      ><!-- &#060;Zahl&#062;-->n &nbsp;<small>Bestanden</small></mat-list-item
+      ><!-- &#060;Zahl&#062;-->n &nbsp;<small>{{
+        "solved" | transloco
+      }}</small></mat-list-item
     >
   </mat-list>
 
   <mat-tab-group>
     <ng-container *ngIf="requirements | async; let list">
-      <mat-tab label="Kategorien" *ngIf="list.length > 0">
+      <mat-tab [label]="'categories' | transloco" *ngIf="list.length > 0">
         <app-evaluation-results
           [requirements]="requirements"
         ></app-evaluation-results>
       </mat-tab>
     </ng-container>
-    <mat-tab label="Alle Aufgaben">
+    <mat-tab [label]="'all-exercices' | transloco">
       <mat-card class="content-container">
         <!--    <div class="card-options">-->
         <!--      <div class="actions">-->
@@ -121,7 +123,7 @@
         </div>
       </mat-card>
     </mat-tab>
-    <mat-tab label="Statistiken">
+    <mat-tab [label]="'statistics' | transloco">
       <mat-card class="content-container">
         <app-results-statistic></app-results-statistic>
       </mat-card>

@@ -1,19 +1,25 @@
 <div *ngIf="display">
-  <h4>Ergebnisse per Unteraufgabe</h4>
+  <h4>{{ "subtask-results" | transloco }}</h4>
 
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "subtask-name" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.name }}</td>
     </ng-container>
 
     <ng-container matColumnDef="maxPoints">
-      <th mat-header-cell *matHeaderCellDef>Maximal mögliche Punkte</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "subtask-points" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.maxPoints }}</td>
     </ng-container>
 
     <ng-container matColumnDef="points">
-      <th mat-header-cell *matHeaderCellDef>Erreichte Punkte</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "subtask-points-collected" | transloco }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.points }}</td>
     </ng-container>
 

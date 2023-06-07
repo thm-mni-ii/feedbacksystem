@@ -16,14 +16,14 @@
       class="align-right-child"
       [checked]="showPoints"
       (change)="showPoints = $event.checked"
-      >Punkte Anzeigen</mat-slide-toggle
+      >{{ "show-points" | transloco }}</mat-slide-toggle
     >
   </div>
   <div class="card">
     <div class="bonus-column">
       <div class="task-container header">
         <div class="task-result">
-          <span class="title">Kurs-Bonus</span>
+          <span class="title">{{ "course-bonus" | transloco }}</span>
         </div>
       </div>
       <div
@@ -49,8 +49,8 @@
     <div class="name-column">
       <div class="task-container header">
         <div class="task-result">
-          <span class="title">Kurs-Status</span>
-          <h2 class="title">Namen</h2>
+          <span class="title">{{ "course-status" | transloco }}</span>
+          <h2 class="title">{{ "names" | transloco }}</h2>
         </div>
       </div>
       <div
@@ -78,7 +78,7 @@
           <span
             class="title title-hoverable"
             (click)="toggleDetails(requirement.id)"
-            >Kategorie {{ i + 1 }} &#9660;
+            >{{ "category-list" | transloco }} {{ i + 1 }} &#9660;
             <!--&dArr; --></span
           >
           <span class="title">Bonus</span>

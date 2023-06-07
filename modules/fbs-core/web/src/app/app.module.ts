@@ -105,6 +105,7 @@ import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 import { JoyrideModule } from "ngx-joyride";
 import { RouterModule } from "@angular/router";
+import { TranslocoRootModule } from './transloco-root.module';
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
@@ -233,6 +234,7 @@ export const httpInterceptorProviders = [
     ChartsModule,
     MatTableModule,
     MatSortModule,
+    TranslocoRootModule,
   ],
   entryComponents: [
     DataprivacyDialogComponent,
