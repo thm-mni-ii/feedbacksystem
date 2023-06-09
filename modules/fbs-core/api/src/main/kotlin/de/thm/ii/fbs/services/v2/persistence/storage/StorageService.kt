@@ -4,6 +4,7 @@ import de.thm.ii.fbs.model.v2.CheckrunnerConfiguration
 import de.thm.ii.fbs.model.v2.storageBucketName
 import de.thm.ii.fbs.model.v2.storageFileName
 import de.thm.ii.fbs.services.checker.trait.CheckerServiceOnDelete
+import de.thm.ii.fbs.services.v2.persistence.TaskService
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -26,7 +27,7 @@ class StorageService {
     private val checkerService: CheckerServiceFactoryService = null
 
     @Autowired
-    private val taskService: TaskService = null
+    lateinit var taskService: TaskService
 
     @Autowired
     lateinit var fsStorageService: FsStorageService
