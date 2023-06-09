@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.v2.persistence.storage
 
 import de.thm.ii.fbs.model.v2.CheckrunnerConfiguration
+import de.thm.ii.fbs.model.v2.Submission
 import de.thm.ii.fbs.model.v2.storageBucketName
 import de.thm.ii.fbs.model.v2.storageFileName
 import de.thm.ii.fbs.services.checker.trait.CheckerServiceOnDelete
@@ -176,7 +177,7 @@ class StorageService {
     private fun notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration) {
         val checker = checkerService(cc.checkerType)
          return when(checker) {
-            is CheckerServiceOnDelete -> checker.onCheckerConfigurationDelete(taskService.getOne(tid).get, cc)
+            is CheckerServiceOnDelete -> checker.onCheckerConfigurationDelete(taskService.getOne(tid).get(), cc)
              else -> {}
          }
     }
