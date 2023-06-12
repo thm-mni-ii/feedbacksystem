@@ -49,7 +49,6 @@ class SpreadsheetValueParser {
 
             value.toDoubleOrNull()?.let {
                 cell.setCellValue(it)
-                println("$cell: ${cell.cellType}")
                 cell.cellType = CellType.NUMERIC
             } ?: value.toBooleanStrictOrNull()?.let {
                 cell.setCellValue(it)
