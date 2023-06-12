@@ -6,8 +6,8 @@ import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setVa
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueByCellRef
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class SpreadsheetValueParserTest {
 
@@ -25,7 +25,6 @@ class SpreadsheetValueParserTest {
         assertEquals("123", valueOfCell(workbook.getSheetAt(0).getRow(0).getCell(0)))
         assertEquals("124", valueOfCell(workbook.getSheetAt(0).getRow(0).getCell(1)))
         assertEquals("Test", valueOfCell(workbook.getSheetAt(0).getRow(0).getCell(2)))
-
     }
 
     @Test
