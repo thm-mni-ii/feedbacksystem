@@ -9,10 +9,10 @@ import de.thm.ii.fbs.model.MediaInformation
   * @param name             Name of the task
   * @param deadline         The deadline up to that a solution may be emitted
   * @param mediaType        The media type occording to RFC 4288
+  * @param isPrivate        Is the Task visible for students
   * @param description      The description of that task
   * @param mediaInformation The mediaInformation of that task
-  * @param id               The id of the task, if 0,  then no id was assigned
-  * @param isPrivate        Is the Task visible for students
+  * @param updateAttempts   If the property attempts should be updated
   */
 case class PartialTask(@JsonProperty("name") name: String,
                        @JsonProperty("deadline") deadline: String,
