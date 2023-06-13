@@ -292,7 +292,7 @@ class CheckerConfigurationController {
           ResponseEntity.ok()
             .contentType(ctype)
             .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=${task.name}_${fileName.split('-')(0)}$ext")
+            .header("Content-Disposition", s"attachment;filename=${task.name.replaceAll("\\s+", "_")}_${fileName.split('-')(0)}$ext")
             .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         case _ => throw new ResourceNotFoundException()
       }
