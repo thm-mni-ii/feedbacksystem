@@ -38,7 +38,7 @@ class SubmissionService {
     val submissionList = getLatestSubmissionByTask(cid, tid)
     val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
-    val fileExts = submissionList.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
+    val fileExts = submissionList.map(submission => task.getExtensionForSubmissions(storageService.getContentTypeSolutionFile(submission))._2)
     Archiver.packSubmissions(f, subFiles, usersList, fileExts)
     subFiles.foreach(file => file.delete())
   }
@@ -54,7 +54,7 @@ class SubmissionService {
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
       usersList += tmp.map(submission => userService.find(submission.userID.get).get)
-      fileExts += tmp.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
+      fileExts += tmp.map(submission => task.getExtensionForSubmissions(storageService.getContentTypeSolutionFile(submission))._2)
     })
     Archiver.packSubmissionsInDir(f, listSubInDir, usersList, fileExts, t)
     listSubInDir.foreach(files => files.foreach(file => file.delete()))

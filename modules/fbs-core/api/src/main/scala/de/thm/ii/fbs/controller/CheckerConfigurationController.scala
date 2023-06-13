@@ -8,6 +8,7 @@ import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.ExtensionUtils
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
@@ -287,7 +288,7 @@ class CheckerConfigurationController {
             case storageFileName.MAIN_FILE => storageService.getFileMainFile(checkerConfig)
             case storageFileName.SECONDARY_FILE => storageService.getFileSecondaryFile(checkerConfig)
           }
-          val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeCheckerConfigFile(checkerConfig, fileName))
+          val (ctype, ext) = ExtensionUtils.getExtensionFromMimeType(storageService.getContentTypeCheckerConfigFile(checkerConfig, fileName))
           ResponseEntity.ok()
             .contentType(ctype)
             .contentLength(file.length())

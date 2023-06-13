@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.apache.tika.mime.MimeTypes
+import de.thm.ii.fbs.util.ExtensionUtils
 import org.springframework.http.MediaType
 
 /**
@@ -27,10 +27,10 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("attempts") attempts: Option[Int] = None,
                 @JsonProperty("hideResult") hideResult: Boolean = false,
                ) {
-  def getExtensionFromMimeType(mimeType: String): (MediaType, String) = {
+  def getExtensionForSubmissions(mimeType: String): (MediaType, String) = {
     mediaType match {
       case "text/plain" => (MediaType.TEXT_PLAIN, ".txt")
-      case _ => (MediaType.valueOf(mimeType), MimeTypes.getDefaultMimeTypes.forName(mimeType).getExtension)
+      case _ => ExtensionUtils.getExtensionFromMimeType(mimeType)
     }
   }
 }
