@@ -13,12 +13,6 @@ from dash import ALL, Input, Output, callback, dcc, html
 from api.connect.data_service import get_data
 from api.util.utilities import (
     update_date_time,
-    create_new_columns_buttons,
-    create_new_filter_buttons,
-    prepare_data_for_graph,
-    create_marks_for_slider,
-    update_button,
-    update_slider,
     filter_checklist,
     update_course,
     add_checklist,
@@ -28,6 +22,19 @@ from api.util.utilities import (
     filter_data,
     convert_time,
     create_invisible_time_row,
+    filter_attempt_limits,
+    filter_time,
+)
+from api.util.analysis_util import (
+    filter_exercises,
+    set_new_filters,
+    save_selected_columns,
+    update_slider,
+    update_button,
+    create_marks_for_slider,
+    prepare_data_for_graph,
+    create_new_filter_buttons,
+    create_new_columns_buttons,
 )
 
 
@@ -43,9 +50,7 @@ all_filters = [
     "GroupBy",
     "OrderBy",
 ]
-columns = []
-correctfilters = []
-incorrectfilters = []
+
 
 # pylint: disable=line-too-long
 
@@ -379,6 +384,9 @@ def checklist_filter_masks(checks, daten):
     return filters
 
 
+# pylint: disable=too-many-locals
+
+
 @callback(
     [
         Output({"type": "add-button", "index": ALL}, "children"),
@@ -395,7 +403,6 @@ def checklist_filter_masks(checks, daten):
         Input("exercise_analysis", "value"),
         Input("slider_attempt_analysis", "value"),
         Input("course_analysis", "value"),
-        Input("exercise_analysis", "options"),
         Input({"type": "delete-button-active", "index": ALL}, "n_clicks"),
         Input({"type": "delete-button-column", "index": ALL}, "n_clicks"),
         Input("date_time_from2", "value"),
@@ -413,12 +420,11 @@ def update(
     exercises,
     limits,
     courses,
-    exercise_options,
     filterbuttons,
-    columnbuttons,
+    column_buttons,
     date_time_from,
     date_time_to,
-    daten,
+    local_df,
     check_list,
 ):
     """
@@ -435,12 +441,12 @@ def update(
     :param filterbuttons: how often a filter button is clicked,
            input value is irrelevant is only used to trigger
            the callback
-    :param columnbuttons: how often a column button is clicked,
+    :param column_buttons: how often a column button is clicked,
            input value is irrelevant is only used to trigger
            the callback
     :param date_time_from: starttime that is selected in the date input
     :param date_time_to: endtime that is selected in the date input
-    :param daten: all data
+    :param local_df: all data
     :param check_list: checklist to check whether date or attempts is selected
     :return: "+" or "-" in attribute buttons, buttons to display
             which columns are selcted also to deselected
@@ -451,85 +457,72 @@ def update(
     """
     trigger = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     fig = {}
+    local_df = filter_data(local_df)
 
-    local_df = filter_data(daten)
-
-    date_time_from, date_time_to = convert_time(date_time_from, date_time_to)
-
-    if not exercises:
-        exercises = exercise_options
-    # Reduce the data to the data of the selected exercises and the selected limits of attempts
-    local_df = local_df[local_df.UniqueName.isin(exercises)]
-    limits = limits or [local_df.Attempt.min(), local_df.Attempt.max()]
-    local_df = local_df[
-        (local_df.Attempt.ge(limits[0])) & (local_df.Attempt.le(limits[1]))
-    ]
-
+    local_df = filter_exercises(courses, local_df, exercises)
+    local_df = filter_attempt_limits(local_df, limits)
     if "Date" in check_list:
-        local_df = local_df[
-            (local_df.Time >= date_time_from) & (local_df.Time < date_time_to)
-        ]
-
+        local_df = filter_time(
+            local_df, convert_time(date_time_from), convert_time(date_time_to)
+        )
     sliders = create_marks_for_slider(local_df, all_filters)
+
     # abort rest of the function in the initial callback
     if trigger == "":
-        return button, columns, correctfilters, incorrectfilters, fig, sliders, slider
+        return (
+            button,
+            [],
+            [],
+            [],
+            fig,
+            sliders,
+            slider,
+        )
     # reset slider if the button belonging to it was changed
     slider = update_slider(slider, trigger, all_filters)
     button = update_button(button, trigger, all_filters)
 
-    # reset a button after the slider belonging to it was changed
-    columns.clear()
-
     # save which columns were selected
-    for counter, _ in enumerate(clicks):
-        if button[counter] == "-":
-            columns.append(all_filters[counter])
+    columns = save_selected_columns(button, all_filters)
 
-    # save which filters were selected
-    correctfilters.clear()
-    incorrectfilters.clear()
-    for counter, singleslider in enumerate(slider):
-        if singleslider == 0:
-            correctfilters.append(all_filters[counter])
-            local_df = local_df[
-                local_df[all_filters[counter].replace(" ", "_")] == "correct"
-            ]
-        if singleslider == 2:
-            incorrectfilters.append(all_filters[counter])
-            local_df = local_df[
-                local_df[all_filters[counter].replace(" ", "_")] == "incorrect"
-            ]
+    column_buttons = create_new_columns_buttons(columns)
+    correct_filters, incorrect_filters, local_df = set_new_filters(
+        local_df, slider, all_filters
+    )
+    correct_filtersbuttons = create_new_filter_buttons(
+        correct_filters, incorrect_filters
+    )
 
-    # get the data according to selected courses, columns and filters
-    tmpdf = local_df[local_df.CourseName.isin(courses)]
-    for _, correct_filter in enumerate(correctfilters):
-        tmpsave = correct_filter
-        tmpdf = tmpdf[tmpdf[tmpsave.replace(" ", "_")] == "correct"]
-    for _, incorrect_filter in enumerate(incorrectfilters):
-        tmpsave = incorrect_filter
-        tmpdf = tmpdf[tmpdf[tmpsave.replace(" ", "_")] == "incorrect"]
-
-    columnbuttons = create_new_columns_buttons(columns)
-    correctfiltersbuttons = create_new_filter_buttons(correctfilters, incorrectfilters)
-
-    if tmpdf is not None:
-        data, names = prepare_data_for_graph(local_df, columns)
+    local_df, names = prepare_data_for_graph(local_df, columns)
     # create graph
-    if not data or not names:
-        return button, columnbuttons, correctfiltersbuttons, fig, sliders, slider
-    figdf = pd.DataFrame(list(zip(names, data)), columns=["names", "data"])
+    if not local_df or not names:
+        return (
+            button,
+            column_buttons,
+            correct_filtersbuttons,
+            fig,
+            sliders,
+            slider,
+        )
     fig = px.bar(
-        figdf,
+        pd.DataFrame(list(zip(names, local_df)), columns=["names", "local_df"]),
         x="names",
-        y="data",
-        labels={"names": "", "data": "Count"},
-        text="data",
+        y="local_df",
+        labels={"names": "", "local_df": "Count"},
+        text="local_df",
         color="names",
     )
     fig.update_layout(showlegend=False)
-    return button, columnbuttons, correctfiltersbuttons, fig, sliders, slider
+    return (
+        button,
+        column_buttons,
+        correct_filtersbuttons,
+        fig,
+        sliders,
+        slider,
+    )
 
 
+# pylint: enable=too-many-locals
 # pylint: enable=too-many-arguments
 # pylint: enable=unused-argument
