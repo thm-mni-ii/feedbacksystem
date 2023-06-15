@@ -12,10 +12,9 @@ import { CourseService } from "../../service/course.service";
 import { AuthService } from "../../service/auth.service";
 import { Submission } from "../../model/Submission";
 import { SubmissionService } from "../../service/submission.service";
-import { tap, map, mergeMap } from "rxjs/operators";
-import { of } from "rxjs";
+import { tap, map, mergeMap, concatMap, takeWhile } from "rxjs/operators";
+import { of, from } from "rxjs";
 import { Roles } from "../../model/Roles";
-import { AllSubmissionsComponent } from "../../dialogs/all-submissions/all-submissions.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { UserTaskResult } from "../../model/UserTaskResult";
 
@@ -28,6 +27,8 @@ import { UserTaskResult } from "../../model/UserTaskResult";
   styleUrls: ["./task-detail.component.scss"],
 })
 export class TaskDetailComponent implements OnInit {
+  allTasks: Task[];
+  currentTaskIndex: number;
   courseId: number;
   task: Task;
   taskResult: UserTaskResult;
@@ -69,12 +70,132 @@ export class TaskDetailComponent implements OnInit {
 
   submissionData: string | File;
 
+  isLastTask() {
+    if (this.currentTaskIndex == this.allTasks.length - 1) {
+      return true;
+    }
+    return false;
+  }
+
+  isFirstTask() {
+    if (this.currentTaskIndex == 0) {
+      return true;
+    }
+    return false;
+  }
+
+  goToNextUnresolvedTask() {
+    let nextTasks = [];
+    let nextTaskId: number;
+    let isUnsolved = false;
+    for (
+      let index = this.currentTaskIndex + 1;
+      index < this.allTasks.length;
+      index++
+    ) {
+      nextTasks.push(this.allTasks[index]);
+    }
+    from(nextTasks)
+      .pipe(
+        concatMap((task) =>
+          this.taskService.getTaskResult(this.courseId, task.id)
+        ),
+        map((result) => result),
+        takeWhile(() => !isUnsolved)
+      )
+      .subscribe((result) => {
+        if (!result.passed) {
+          isUnsolved = true;
+          nextTaskId = result.taskID;
+          this.router
+            .navigateByUrl("/", { skipLocationChange: true })
+            .then(() => {
+              this.router.navigate([
+                "/courses",
+                this.courseId,
+                "task",
+                nextTaskId,
+              ]);
+            });
+        }
+      });
+  }
+
+  goToPreviousUnresolvedTask() {
+    let previousTasks = [];
+    let previousTaskId;
+    let isUnsolved = false;
+    for (let index = this.currentTaskIndex - 1; index >= 0; index--) {
+      previousTasks.push(this.allTasks[index]);
+    }
+    from(previousTasks)
+      .pipe(
+        concatMap((task) =>
+          this.taskService.getTaskResult(this.courseId, task.id)
+        ),
+        map((result) => result),
+        takeWhile(() => !isUnsolved)
+      )
+      .subscribe((result) => {
+        if (!result.passed) {
+          isUnsolved = true;
+          previousTaskId = result.taskID;
+          this.router
+            .navigateByUrl("/", { skipLocationChange: true })
+            .then(() => {
+              this.router.navigate([
+                "/courses",
+                this.courseId,
+                "task",
+                previousTaskId,
+              ]);
+            });
+        }
+      });
+  }
+
+  goToNextTask() {
+    if (this.currentTaskIndex + 1 < this.allTasks.length) {
+      this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
+        this.router.navigate([
+          "/courses",
+          this.courseId,
+          "task",
+          this.allTasks[this.currentTaskIndex + 1].id,
+        ]);
+      });
+    }
+  }
+
+  goToPreviousTask() {
+    if (this.currentTaskIndex - 1 >= 0) {
+      this.router.navigateByUrl("/", { skipLocationChange: true }).then(() => {
+        this.router.navigate([
+          "/courses",
+          this.courseId,
+          "task",
+          this.allTasks[this.currentTaskIndex - 1].id,
+        ]);
+      });
+    }
+  }
+
+  getTasks() {
+    this.taskService.getAllTasks(this.courseId).subscribe(
+      (allTasks) => {
+        this.allTasks = allTasks;
+      },
+      () => {}
+    );
+  }
+
   ngOnInit() {
     this.route.params
       .pipe(
         mergeMap((params) => {
           this.courseId = params.id;
           const taskId = params.tid;
+          this.getTasks();
           return this.taskService.getTask(this.courseId, taskId);
         }),
         mergeMap((task) => {
@@ -84,6 +205,9 @@ export class TaskDetailComponent implements OnInit {
         }),
         mergeMap(({ task, taskResult }) => {
           this.task = task;
+          this.currentTaskIndex = this.allTasks.findIndex(
+            (task) => task.id == this.task.id
+          );
           this.taskResult = taskResult;
           this.uid = this.authService.getToken().id;
           this.titlebar.emitTitle(this.task.name);
@@ -329,17 +453,6 @@ export class TaskDetailComponent implements OnInit {
           );
         }
       );
-  }
-
-  allSubmissions() {
-    this.dialog.open(AllSubmissionsComponent, {
-      height: "80%",
-      width: "100%",
-      data: {
-        submission: this.submissions,
-        auth: false,
-      },
-    });
   }
 
   checkersConfigurable() {

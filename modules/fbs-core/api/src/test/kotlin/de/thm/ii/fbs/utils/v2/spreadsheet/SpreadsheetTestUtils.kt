@@ -18,7 +18,7 @@ class SpreadsheetTestUtils {
             }
         }
 
-        fun workbookWithSheets(sheets: List<Collection<Cell>>): XSSFWorkbook {
+        fun workbookWithSheets(vararg sheets: Collection<Cell>): XSSFWorkbook {
             val book = XSSFWorkbook()
             sheets.forEachIndexed { i, cells -> sheet(book, cells, "test$i") }
             return book
@@ -30,7 +30,7 @@ class SpreadsheetTestUtils {
             return book
         }
 
-        fun solutionMap(cells: Collection<Cell>): Map<Cell, String> {
+        fun solutionMap(vararg cells: Cell): Map<Cell, String> {
             val sMap = HashMap<Cell, String>()
             cells.forEach { cell -> sMap[cell] = cell.value!! }
             return sMap

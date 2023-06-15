@@ -15,7 +15,7 @@ class CellResultTest {
         assertEquals(f1, cr.getFeedback().toString())
 
         cr.addFeedback(f2)
-        assertEquals(f1+f2, cr.getFeedback().toString())
+        assertEquals(f1 + f2, cr.getFeedback().toString())
     }
 
     @Test

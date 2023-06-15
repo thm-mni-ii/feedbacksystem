@@ -13,6 +13,7 @@ abstract sealed class MediaInformation
 object MediaInformation {
   /**
     * Gets a MediaInformation fromJSON
+    *
     * @param json the JSON
     * @return the MediaInformation
     */
@@ -30,6 +31,7 @@ object MediaInformation {
 
   /**
     * Converts a MediaInformation to JSON
+    *
     * @param obj The MediaInformation
     * @return The JSON
     */
@@ -56,23 +58,24 @@ object MediaInformation {
     }
 }
 
-case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation])
+case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation], enableExperimentalFeatures: Boolean = false)
+
 case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
                                  @deprecated("Use checkFields instead") outputFields: String, checkFields: List[ExcelMediaInformationCheck] = List(),
                                  name: String, hideInvalidFields: Boolean = false) extends MediaInformation
 
-case class  ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
+case class ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
 
 case class ExcelMediaInformationCheck(range: String, hideInvalidFields: Boolean = false, errorMsg: String = "")
 
 /**
   * The Spreadsheet Media Information
   *
-  * @param idField the idField
-  * @param inputFields the inputFields
+  * @param idField      the idField
+  * @param inputFields  the inputFields
   * @param outputFields the outputFields
-  * @param pointFields the pointFields
-  * @param decimals the amount of decimals to round to
+  * @param pointFields  the pointFields
+  * @param decimals     the amount of decimals to round to
   */
 case class SpreadsheetMediaInformation(idField: String,
                                        inputFields: String,
@@ -82,9 +85,10 @@ case class SpreadsheetMediaInformation(idField: String,
 
 /**
   * The Spreadsheet Media Information
-  * @param inputs the inputs
-  * @param outputs the outputs
-  * @param decimals the amount of decimals to round to
+  *
+  * @param inputs           the inputs
+  * @param outputs          the outputs
+  * @param decimals         the amount of decimals to round to
   * @param mediaInformation the mediaInformation
   */
 case class SpreadsheetResponseInformation(inputs: Seq[(String, String)], outputs: Seq[String], decimals: Int,

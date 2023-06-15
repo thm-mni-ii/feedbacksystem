@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import de.thm.ii.fbs.model.{Task, TaskExport, TaskImportFiles, storageFileName}
-import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
+import de.thm.ii.fbs.services.persistence.storage.StorageService
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

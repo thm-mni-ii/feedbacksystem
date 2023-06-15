@@ -4,6 +4,7 @@ plugins {
     id "com.github.alisiikh.scalastyle" version "3.4.1"
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
     id "org.jetbrains.kotlin.plugin.jpa" version "1.7.20"
+    id "org.jlleitschuh.gradle.ktlint" version "11.3.2"
 }
 
 apply plugin: 'scala'
@@ -43,6 +44,8 @@ startScripts {
 }
 
 dependencies {
+    implementation 'org.apache.tika:tika-core:2.1.0'
+    implementation 'org.apache.tika:tika-parsers:2.1.0'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
     implementation group: 'io.minio', name: 'minio', version: '8.0.0'
@@ -68,6 +71,8 @@ dependencies {
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'org.springframework.data:spring-data-mongodb'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.projectreactor:reactor-core:3.5.6'
     implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
     implementation project(':fbs-core.math-parser')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
@@ -91,3 +96,9 @@ tasks.register('jacocoReport', JacocoReport) {
         html.enabled true
     }
 }
+
+// Allow To import Kotlin Classes into Scala
+compileScala.classpath += files(compileKotlin.outputs)
+
+// Remove if spring-boot 2.7.10 is released
+ext['spring-framework.version'] = '5.3.26'

@@ -1,6 +1,8 @@
 package de.thm.ii.fbs.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.apache.tika.mime.MimeTypes
+import org.springframework.http.MediaType
 
 /**
   * A Task for a course
@@ -22,8 +24,16 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("requirementType") requirementType: String = Task.defaultRequirement,
                 @JsonProperty("id") id: Int = 0,
                 @JsonProperty("courseID") courseID: Int = 0,
-                @JsonProperty("attempts") attempts: Option[Int] = None
-               )
+                @JsonProperty("attempts") attempts: Option[Int] = None,
+                @JsonProperty("hideResult") hideResult: Boolean = false,
+               ) {
+  def getExtensionFromMimeType(mimeType: String): (MediaType, String) = {
+    mediaType match {
+      case "text/plain" => (MediaType.TEXT_PLAIN, ".txt")
+      case _ => (MediaType.valueOf(mimeType), MimeTypes.getDefaultMimeTypes.forName(mimeType).getExtension)
+    }
+  }
+}
 
 object Task {
   val requirementTypes: Array[String] = Array("mandatory", "optional", "practice")

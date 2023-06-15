@@ -33,6 +33,7 @@ export class SidebarComponent implements OnInit {
   username: string;
   isAdmin: boolean;
   isModerator: boolean;
+  showAnalytics: boolean;
 
   ngOnInit() {
     this.username = this.auth.getToken().username;
@@ -44,6 +45,10 @@ export class SidebarComponent implements OnInit {
 
     this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;
+
+    this.showAnalytics = Object.values(this.auth.getToken().courseRoles).some(
+      (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+    );
   }
 
   /**

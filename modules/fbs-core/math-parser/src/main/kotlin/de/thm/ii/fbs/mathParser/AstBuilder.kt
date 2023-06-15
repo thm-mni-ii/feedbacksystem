@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.*
@@ -20,18 +22,11 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildTerm(term: MathParser.TermContext): Expr =
         when {
-            term.MUL() !== null -> Operation(Operator.MUL, buildTerm(term.term()), buildExpo(term.expo()))
-            term.DIV() !== null -> Operation(Operator.DIV, buildTerm(term.term()), buildExpo(term.expo()))
-            term.MOD() !== null -> Operation(Operator.MOD, buildTerm(term.term()), buildExpo(term.expo()))
-            term.expo() !== null -> buildExpo(term.expo())
+            term.MUL() !== null -> Operation(Operator.MUL, buildTerm(term.term()), buildFunct(term.funct()))
+            term.DIV() !== null -> Operation(Operator.DIV, buildTerm(term.term()), buildFunct(term.funct()))
+            term.MOD() !== null -> Operation(Operator.MOD, buildTerm(term.term()), buildFunct(term.funct()))
+            term.funct() !== null -> buildFunct(term.funct())
             else -> throw IllegalArgumentException("not a legal term: ${term.text}")
-        }
-
-    private fun buildExpo(expo: MathParser.ExpoContext): Expr =
-        when {
-            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), buildFunct(expo.funct()))
-            expo.funct() !== null -> buildFunct(expo.funct())
-            else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
 
     private fun buildFunct(funct: MathParser.FunctContext): Expr =
@@ -50,12 +45,18 @@ class AstBuilder(val expr: MathParser.ExprContext) {
             else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 
-
     private fun buildMulFactor(mulFactor: MathParser.MulFactorContext): Expr =
         when {
-            mulFactor.mulFactor() !== null -> Operation(Operator.MUL, buildMulFactor(mulFactor.mulFactor()), buildFactor(mulFactor.factor()))
-            mulFactor.factor() !== null -> buildFactor(mulFactor.factor())
+            mulFactor.mulFactor() !== null -> Operation(Operator.MUL, buildMulFactor(mulFactor.mulFactor()), buildExpo(mulFactor.expo()))
+            mulFactor.expo() !== null -> buildExpo(mulFactor.expo())
             else -> throw IllegalArgumentException("not a legal mulFactor: ${mulFactor.text}")
+        }
+
+    private fun buildExpo(expo: MathParser.ExpoContext): Expr =
+        when {
+            expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor())) else buildFactor(expo.factor()))
+            expo.factor() !== null -> buildFactor(expo.factor())
+            else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
 
     private fun buildFactor(factor: MathParser.FactorContext): Expr =

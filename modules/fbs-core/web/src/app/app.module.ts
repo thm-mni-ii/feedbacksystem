@@ -88,6 +88,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
 import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
@@ -101,6 +102,8 @@ import { DbControlTemplatesComponent } from "./page-components/sql-playground/db
 import { DbControlCoWorkingComponent } from "./page-components/sql-playground/db-control-panel/db-control-co-working/db-control-co-working.component";
 import { DbControlDbOverviewComponent } from "./page-components/sql-playground/db-control-panel/db-control-db-overview/db-control-db-overview.component";
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
+import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
+import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -180,6 +183,7 @@ export const httpInterceptorProviders = [
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
     SqlPlaygroundComponent,
+    AnalyticsToolComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
     DbControlPanelComponent,
@@ -194,6 +198,8 @@ export const httpInterceptorProviders = [
     DbControlCoWorkingComponent,
     DbControlDbOverviewComponent,
     NewSqlTemplateComponent,
+    ExportTasksDialogComponent,
+    HighlightedInputComponent,
   ],
   imports: [
     BrowserModule,

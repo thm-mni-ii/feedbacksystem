@@ -16,5 +16,5 @@ data class SqlPlaygroundRunnerResult(
     @JsonProperty("errorMsg")
     val errorMsg: String,
     @JsonProperty("mode")
-    val mode: RunnerMode,
+    val mode: RunnerMode
 ) : RunnerResult()

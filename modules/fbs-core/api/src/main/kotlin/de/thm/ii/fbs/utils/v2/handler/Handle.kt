@@ -5,4 +5,3 @@ package de.thm.ii.fbs.utils.v2.handler
 @Repeatable
 @MustBeDocumented
 annotation class Handle(val execution: When)
-

@@ -55,7 +55,17 @@
           routerLinkActive="selected"
         >
           <mat-icon>extension</mat-icon>
-          <p>SQL Playground (Beta)</p>
+          <p>SQL Playground</p>
+        </a>
+
+        <a
+          mat-list-item
+          *ngIf="showAnalytics || isAdmin || isModerator"
+          routerLink="/analytics"
+          routerLinkActive="selected"
+        >
+          <mat-icon>bar_chart</mat-icon>
+          <p>Analyseplattform</p>
         </a>
       </mat-nav-list>
 
@@ -89,11 +99,7 @@
         <button mat-menu-item (click)="logout()">
           <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
         </button>
-        <button
-          mat-menu-item
-          routerLink="/users/password"
-          *ngIf="isAdmin || isModerator"
-        >
+        <button mat-menu-item routerLink="/users/password">
           <mat-icon>settings</mat-icon>Passwort ändern
         </button>
       </mat-menu>

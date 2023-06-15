@@ -1832,6 +1832,141 @@ paths:
           description: Forbidden
         "404":
           description: Not Found
+  "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content":
+    get:
+      operationId: getCourseTaskSubmissionsContent
+      tags:
+        - Submission
+      summary: Get the submission content for a task
+      parameters:
+        - name: uid
+          in: path
+          description: user id
+          required: true
+          schema:
+            type: integer
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - name: sid
+          in: path
+          description: submission id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: passed
+          description: Filters only the passed submissions
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/users/courses/{cid}/tasks/submissions/content":
+    get:
+      operationId: solutionsOfCourse
+      tags:
+        - Submission
+      summary: Get the submission content for a course
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: passed
+          description: Filters only the passed submissions
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+  "/users/courses/{cid}/tasks/{tid}/submissions/content":
+    get:
+      operationId: solutionsOfTask
+      tags:
+        - Submission
+      summary: Get the submission content for a task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+        - name: tid
+          in: path
+          description: task id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: passed
+          description: Filters only the passed submissions
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
   "/users/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults":
     get:
       operationId: getCourseTaskSubmissionSubresults

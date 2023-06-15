@@ -3,7 +3,8 @@ package de.thm.ii.fbs.services.`export`
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, ConfigExport, Task, TaskExport, storageFileName}
-import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, StorageService, TaskService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, TaskService}
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource

@@ -1,12 +1,21 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+import java.math.RoundingMode
 
 internal class SemanticAstComparatorTest {
-    private val semanticAstComparator = SemanticAstComparator(2)
-    
+    private val semanticAstComparator = SemanticAstComparator.Builder()
+        .decimals(2)
+        .roundingMode(RoundingMode.HALF_UP)
+        .ignoreNeutralElements(true)
+        .applyInverseElements(true)
+        .applyCommutativeLaw(true)
+        .applyExponentLaws(true)
+        .build()
+
     @Test
     fun compareSimple() {
         assertTrue(
@@ -108,6 +117,26 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
+    fun divisionAsFrac() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("(6a+8b)/x"),
+                MathParserHelper.parse("1/x*(6a+8b)")
+            )
+        )
+    }
+
+    @Test
+    fun divisionAsFracWithExp() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("(6a+8b)/x"),
+                MathParserHelper.parse("(6a+8b)*x^(-1)")
+            )
+        )
+    }
+
+    @Test
     fun multiplicationWithBracketsTest() {
         assertTrue(
             semanticAstComparator.compare(
@@ -115,5 +144,21 @@ internal class SemanticAstComparatorTest {
                 MathParserHelper.parse("5(x-1)")
             )
         )
+    }
+
+    @Test
+    fun multiplicationWithExponentTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a^(-4)b^4"),
+                MathParserHelper.parse("4*a^(-4)*b^4")
+            )
+        )
+    }
+
+    @Test
+    fun constructionTest() {
+        assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
+        assertNotNull(SemanticAstComparator())
     }
 }

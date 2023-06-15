@@ -1,13 +1,13 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueByCellRef
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.util.CellRangeAddress
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import kotlin.collections.HashMap
 import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
     companion object {
@@ -18,7 +18,6 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
     }
 
     val references: Map<Int, Map<String, Pair<String, Set<Cell>>>>
-
 
     init {
         val refs: MutableMap<Int, Map<String, Pair<String, Set<Cell>>>> = HashMap()
@@ -53,8 +52,9 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
 
     private fun refToCell(ref: String, sheet: String): Cell {
         val (sheetName, cellRef) = getRefAndSheet(ref, sheet)
+        val value = valueByCellRef(workbook.getSheet(sheetName), cellRef)
 
-        return Cell(workbook.getSheetIndex(sheetName), cellRef)
+        return Cell(workbook.getSheetIndex(sheetName), cellRef, value)
     }
 
     private fun getRefAndSheet(ref: String, defaultSheetName: String): Pair<String, String> {
