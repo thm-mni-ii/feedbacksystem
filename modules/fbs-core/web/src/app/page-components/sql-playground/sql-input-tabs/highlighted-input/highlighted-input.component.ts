@@ -69,7 +69,7 @@ export class HighlightedInputComponent
   ngAfterViewChecked() {
     if (this.highlighted) {
       this.prismService.highlightAll();
-      this.highlighted = false;
+      this.highlighted = true;
     }
   }
 
@@ -78,19 +78,12 @@ export class HighlightedInputComponent
   }
 
   updateSubmission(event) {
-    let cleanedText = this.cleanUpTextAreaRegx(event);
-
     //check if cleanedText is different from event -> prevent infinite loop
     //if different, update the text area
     //if (cleanedText !== event) {
     //this.groupForm.patchValue({ content: cleanedText });
     //}
-    this.update.emit({ content: cleanedText });
-  }
-
-  cleanUpTextAreaRegx(sqlInput: String) {
-    let temp = sqlInput.trim().replace(/\s+/g, " ");
-    return temp;
+    this.update.emit({ content: event });
   }
 
   listenForm() {

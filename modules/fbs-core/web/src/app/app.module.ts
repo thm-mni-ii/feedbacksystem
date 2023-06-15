@@ -88,6 +88,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
 import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
@@ -186,6 +187,7 @@ export const httpInterceptorProviders = [
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
     SqlPlaygroundComponent,
+    AnalyticsToolComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
     DbControlPanelComponent,
