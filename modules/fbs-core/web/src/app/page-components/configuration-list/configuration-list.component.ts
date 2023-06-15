@@ -160,8 +160,7 @@ export class ConfigurationListComponent implements OnInit {
           this.courseId,
           this.taskId,
           checker.id,
-          CheckerFileType.MainFile,
-          task.name
+          CheckerFileType.MainFile
         );
       });
     } else {
@@ -177,7 +176,6 @@ export class ConfigurationListComponent implements OnInit {
           this.taskId,
           checker.id,
           CheckerFileType.SecondaryFile,
-          task.name
         );
       });
     } else {
