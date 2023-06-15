@@ -1221,6 +1221,88 @@ paths:
           description: Forbidden
         "404":
           description: Not found
+  "/courses/{cid}/tasks/import":
+    post:
+      operationId: importTask
+      tags:
+        - Task
+      summary: imports a Tar-Archive of the Task which contains all Checker Configurations of the Task
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                formula:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+  "/courses/{cid}/tasks/import/download":
+    post:
+      operationId: downloadTask
+      tags:
+        - Task
+      summary: returns a list of all Tasks that can be imported
+      parameters:
+        - name: cid
+          in: path
+          description: course id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                formula:
+                  type: string
+      responses:
+        "200":
+          description: OK
+          headers:
+            Authorization:
+              description: Bearer
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: tar
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
   "/courses/evaluation/formula/validate":
     post:
       operationId: validateCourseEvaluationFormula

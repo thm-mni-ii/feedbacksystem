@@ -192,6 +192,10 @@ class StorageService extends App {
     }
   }
 
+  @throws[IOException]
+  def storeConfigurationFileInBucket(ccid: Int, file: InputStream, size: Long, contentType: String, fileName: String): Unit =
+    minioService.putObjectStream(file, size, contentType, storageFileName.getFilePath(ccid, fileName), storageBucketName.CHECKER_CONFIGURATION_BUCKET)
+
   def deleteSolution(sid: Int): Boolean = {
     minioStorageService.deleteSolutionFileFromBucket(sid) || fsStorageService.deleteSolutionFile(sid)
   }

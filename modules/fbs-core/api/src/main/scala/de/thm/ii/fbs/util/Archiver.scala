@@ -1,10 +1,14 @@
 package de.thm.ii.fbs.util
 
+import de.thm.ii.fbs.model.{ArchivIterator, Task, TaskImportFiles}
+import org.apache.commons.compress.archivers.ArchiveStreamFactory
+import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveInputStream, TarArchiveOutputStream}
 import de.thm.ii.fbs.model.{Task, User}
 import org.apache.commons.compress.archivers.ArchiveOutputStream
 import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
+import org.slf4j.LoggerFactory
 
 import java.io._
 import java.nio.file.Files
@@ -14,13 +18,59 @@ import org.apache.tika.mime.MimeTypeException
 import org.apache.tika.mime.MimeTypes
 
 object Archiver {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   @throws[IOException]
+  def unpack(files: InputStream): ListBuffer[TaskImportFiles] = {
+    val tmp = new ArchiveStreamFactory().createArchiveInputStream(ArchiveStreamFactory.TAR, files).asInstanceOf[TarArchiveInputStream]
+    var taskImportFiles: TaskImportFiles = TaskImportFiles("", ListBuffer())
+    val list: ListBuffer[TaskImportFiles] = ListBuffer()
+    var current = ""
+    var entry: TarArchiveEntry = null
+    while ({
+      entry = tmp.getNextTarEntry;
+      entry != null
+    }) {
+      //new ArchivIterator(tmp).foreach(entry => {
+      if (entry.isFile) {
+        val s = entry.getSize
+        val split = entry.getName.split("/")
+        val name = split(split.length - 1)
+        if (!current.matches(split(split.length - 2))) {
+          if (!current.isBlank) {
+            list += taskImportFiles
+            taskImportFiles = TaskImportFiles("", ListBuffer())
+          }
+          current = split(split.length - 2)
+        }
+        var c = 0
+        val fileWriter: BufferedWriter = setTaskImportFile(name, current, taskImportFiles)
+        for (size <- 1 until s.toInt + 1) {
+          c = tmp.read
+          fileWriter.write(c)
+        }
+        fileWriter.close()
+      }
+    }
+    list += taskImportFiles
+    list
+  }
+
+  private def setTaskImportFile(name: String, current: String, taskImportFiles: TaskImportFiles): BufferedWriter = {
+    if (name.endsWith(".json")) {
+      val tname = current + name
+      taskImportFiles.taskConfigPath = tname
+      new BufferedWriter(new FileWriter(tname))
+    } else {
+      taskImportFiles.configFiles += name
+      new BufferedWriter(new FileWriter(name))
+    }
+  }
+
   def packSubmissions(name: File, files: List[File], users: List[User], fileExts: List[String]): Unit = {
     val out = new ZipArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for ((file, index) <- files.zipWithIndex) {
       addToArchive(out, file, ".", s"${users(index).getName}${fileExts(index)}")
     }
-    out.close()
   }
 
   @throws[IOException]
