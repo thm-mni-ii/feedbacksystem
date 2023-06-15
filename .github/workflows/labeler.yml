@@ -10,3 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@9fcb2c2f5584144ca754f8bfe8c6f81e77753375
+        with:
+          sync-labels: true
+          dot: true
