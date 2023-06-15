@@ -36,7 +36,7 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
   constructor() {}
 
   updateSubmission(field: string, value: MathInputValue) {
-    this.results[field] = value.mathJson;
+    this.results[field] = value.latex;
     this.latex[field] = value.latex;
     this.results["complete"] = this.outputFields.length > 0;
     this.update.emit({

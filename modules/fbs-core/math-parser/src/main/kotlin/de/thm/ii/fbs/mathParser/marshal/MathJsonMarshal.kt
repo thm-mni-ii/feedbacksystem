@@ -113,6 +113,7 @@ class MathJsonMarshal : Marshal {
         return when (operatorName) {
             "Square" -> Operation(Operator.EXP, unmarshalNode(obj[1]), Num(2))
             "Sqrt" -> Operation(Operator.RAD, unmarshalNode(obj[1]), Num(2))
+            "Negate" -> UnaryOperation(Operator.SUB, unmarshalNode(obj[1]))
             else -> recursiveUnmarshal(unmarshalOperator(operatorName), obj, 1)
         }
     }

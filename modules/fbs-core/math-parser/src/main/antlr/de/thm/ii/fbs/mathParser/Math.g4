@@ -24,26 +24,29 @@ expo        : expo ' '* EXP ' '* SUB? factor
             | factor
             ;
 
-factor      : '(' ' '* expr ' '* ')'
+factor      : OPENING_BRACKET ' '* expr ' '* CLOSING_BRACKET
             |   (NUMBER|VAR)
             ;
 
 
 NUMBER: FULL DECIMAL?;
 FULL: [0-9]+;
-DECIMAL: ',' FULL;
+DECIMAL: DECIMAL_SEPARATOR FULL;
 
 VAR: [a-z];
 
 ADD: '+';
 SUB: '-';
-MUL: '*';
+MUL: '*'|'\\cdot';
 DIV: '/';
 MOD: '%';
 EXP: '^';
-SQR: 'sqrt';
-LB: 'lb'|'ld';
-LN: 'ln';
-LG: 'lg';
-RAD: 'rad';
-LOG: 'log';
+SQR: 'sqrt' | '\\sqrt';
+LB: 'lb'|'ld'|'\\lb'|'\\ld';
+LN: 'ln'|'\\ln';
+LG: 'lg'|'\\lg';
+RAD: 'rad'|'\\rad';
+LOG: 'log'|'\\log';
+DECIMAL_SEPARATOR: ','|'{,}';
+OPENING_BRACKET: '(' | '{';
+CLOSING_BRACKET: ')' | '}';
