@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import {HttpClient, HttpResponse} from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
 import { CheckerFileType } from "../enums/checkerFileType";
@@ -90,15 +90,17 @@ export class CheckerService {
     cid: number,
     tid: number,
     ccid: number,
-    checkerFileType: CheckerFileType,
+    checkerFileType: CheckerFileType
   ) {
-    this.fetchFileWithHeaders(cid, tid, ccid, checkerFileType).subscribe((response) => {
-      const fileName = response.headers
-        .get("content-disposition")
-        .split(";")[1]
-        .split("=")[1];
-      importedSaveAs(response.body, fileName);
-    });
+    this.fetchFileWithHeaders(cid, tid, ccid, checkerFileType).subscribe(
+      (response) => {
+        const fileName = response.headers
+          .get("content-disposition")
+          .split(";")[1]
+          .split("=")[1];
+        importedSaveAs(response.body, fileName);
+      }
+    );
   }
 
   /**
@@ -166,9 +168,6 @@ export class CheckerService {
   private uploadFile(file: File, url: string): Observable<void> {
     const formData: FormData = new FormData();
     formData.append("file", file);
-    // let headers = new HttpHeaders({
-    //   'Content-Type': ''
-    // });
     return this.http.put<void>(url, formData);
   }
 }
