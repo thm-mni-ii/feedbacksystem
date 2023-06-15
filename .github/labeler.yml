@@ -1,36 +1,35 @@
 'fbs-core: web':
-    - /modules/fbs-core/web/**
+    - modules/fbs-core/web/**
 
 'fbs-core: api':
-    - /modules/fbs-core/api/**
-    - /modules/fbs-core/math-parser/**
-    - /runtime-images/**
-    - /scripts/ci/**
-    - /docker-compose*.yml
+    - modules/fbs-core/api/**
+    - modules/fbs-core/math-parser/**
+    - runtime-images/**
+    - scripts/ci/**
+    - docker-compose*.yml
     - Dockerfile
 
 'fbs-eat':
-    - /modules/fbs-eat/**
+    - modules/fbs-eat/**
 
 'fbs-runner: checker':
-    - /modules/fbs-runner/**
+    - modules/fbs-runner/**
 
 'checker: excel':
-    - /modules/fbs-core/api/**/excel/**
+    - modules/fbs-core/api/**/excel/**
 
 'checker: math':
-    - /modules/fbs-core/math-parser/**
+    - modules/fbs-core/math-parser/**
 
 'checker: sql':
-    - /modules/fbs-sql-checker/**
-
+    - modules/fbs-sql-checker/**
 
 'Docker':
-    - /docker-compose*.yml
+    - docker-compose*.yml
     - Dockerfile
 
 'CI/CD':
-    - /.github/**
-    - /scripts/ci/**
+    - .github/**
+    - scripts/ci/**
 
 
