@@ -2,7 +2,7 @@ package de.thm.ii.fbs.model.v2.checker.excel
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val cell: String) {
+data class CellXYZ(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val cell: String) {
     @JsonProperty("value")
     var value: String? = null
 
