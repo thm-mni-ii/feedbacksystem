@@ -102,7 +102,7 @@ jobs:
         if: ${{ inputs.coverageArguments }}
         with:
           arguments: ${{ inputs.coverageArguments }}
-      - uses: ./github/actions/retry-codecov
+      - uses: ./.github/actions/retry-codecov
         if: ${{ inputs.coverageFilesLocation }}
         name: Upload Coverage Report
         with:
