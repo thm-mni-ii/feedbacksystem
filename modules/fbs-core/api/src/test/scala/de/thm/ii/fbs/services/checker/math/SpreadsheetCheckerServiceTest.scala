@@ -20,20 +20,18 @@ class SpreadsheetCheckerServiceTest {
   @Autowired
   val spreadsheetCheckerService: SpreadsheetCheckerService = null
 
-  private def toMathJson(inp: String): String = MathParserHelper.toMathJson(MathParserHelper.parse(inp))
-
   private def compareMock(enteredValue: String, value: String, decimals: Int): Boolean = spreadsheetCheckerService.compare(
-    toMathJson(enteredValue),
-  toMathJson(value),
+    enteredValue,
+    value,
     decimals
   )
 
   private def checkMock(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int):
     (Int, Seq[spreadsheetCheckerService.CheckResult]) =
     spreadsheetCheckerService.check(
-      fields.map(t => (t._1, toMathJson(t._2))),
+      fields.map(t => (t._1, t._2)),
       submittedFields.entrySet().toArray(Array[UtilMap.Entry[String, String]]())
-        .map((t: UtilMap.Entry[String, String]) => t.getKey -> toMathJson(t.getValue)).toMap.asJava,
+        .map((t: UtilMap.Entry[String, String]) => t.getKey -> t.getValue).toMap.asJava,
       decimals
     )
 

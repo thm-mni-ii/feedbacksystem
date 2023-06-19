@@ -96,7 +96,7 @@ class SpreadsheetService {
   private def colToInt(col: Char): Int =
     col.toInt - 64
 
-  private def parseValues(value: Seq[String]): Seq[String] = {
+  private def parseValues(value: Seq[String]): Seq[String] =
     value.map(v =>
       try {
         MathParserHelper.toMathJson(MathParserHelper.parse(v))
@@ -104,7 +104,6 @@ class SpreadsheetService {
         case _: MathParserException => "{\"str\": \"" + v.replace("\"", "\\\"") + "\"}"
       }
     )
-  }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
   germanFormat.setGroupingUsed(false)
