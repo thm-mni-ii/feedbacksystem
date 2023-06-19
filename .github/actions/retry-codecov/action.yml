@@ -19,7 +19,7 @@ runs:
         fail_ci_if_error: true
     - run: sleep 15s
       shell: bash
-      id: sleep-2
+      id: sleep-1
       if: always() && steps.codecov.conclusion == 'failure'
     - uses: codecov/codecov-action@v3
       name: Upload Coverage Report (Retry 1)
