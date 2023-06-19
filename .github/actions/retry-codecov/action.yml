@@ -17,7 +17,7 @@ runs:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
         fail_ci_if_error: true
-    - run: sleep 15s
+    - run: sleep 1m
       shell: bash
       id: sleep-1
       if: always() && steps.codecov.conclusion == 'failure'
@@ -29,7 +29,7 @@ runs:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
         fail_ci_if_error: true
-    - run: sleep 15s
+    - run: sleep 5m
       shell: bash
       id: sleep-2
       if: always() && steps.codecov-1.conclusion == 'failure'
