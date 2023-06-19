@@ -1,6 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
-import { ExcelCheckResult } from "src/app/model/ExcelCheckResult";
+import {
+  ExcelCheckResult,
+  ExcelExercise,
+} from "src/app/model/ExcelCheckResult";
 import { Submission } from "src/app/model/Submission";
 
 @Component({
@@ -10,11 +13,13 @@ import { Submission } from "src/app/model/Submission";
 })
 export class ExcelResultsComponent implements OnInit {
   displayedColumns = ["name", "cellName", "errorHint", "table", "result"];
-  dataSource = new MatTableDataSource<ExcelCheckResult>([EXCEL_DATA]);
+  dataSource = new MatTableDataSource<ExcelExercise>(EXCEL_DATA.exercises);
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log(this.dataSource);
+  }
 
   // toggleTableView() {
   //   this.tableViewAsGrid = !this.tableViewAsGrid;
@@ -28,15 +33,27 @@ export class ExcelResultsComponent implements OnInit {
 const EXCEL_DATA: ExcelCheckResult = {
   exercises: [
     {
-      name: "Aufgabe 1",
+      name: "Übung 1 Rechteck",
       errorCell: [
         {
-          cellName: "B1",
-          errorHint: "B1 ist Falsch!",
+          cellName: "B6",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+        },
+        {
+          cellName: "C3",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+        },
+        {
+          cellName: "D5",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
           consequentErrorCell: [
             {
-              cellName: "B2",
-              errorHint: "B2 ist Falsch!",
+              cellName: "D7",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+            },
+            {
+              cellName: "D8",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch",
             },
           ],
         },
@@ -45,7 +62,13 @@ const EXCEL_DATA: ExcelCheckResult = {
       result: false,
     },
     {
-      name: "Aufgabe 2",
+      name: "Übung 2  Kreis",
+      errorCell: [
+        {
+          cellName: "B6",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+        },
+      ],
       table: "Table1",
       result: true,
     },

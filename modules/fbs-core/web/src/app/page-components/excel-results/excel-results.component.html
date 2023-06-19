@@ -9,32 +9,36 @@
     <ng-container matColumnDef="cellName">
       <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
       <mat-cell *matCellDef="let data">
-        <table>
+        <mat-list>
           <ng-container *ngFor="let cell of data.errorCell">
-            <tr>
-              <td>{{ cell.cellName }}</td>
-              <td>{{ cell.errorHint }}</td>
-              <table>
-                <ng-container
-                  *ngFor="let consequentCell of cell.consequentErrorCell"
-                >
-                  <tr>
-                    <br />
-                    <td>{{ consequentCell.cellName }}</td>
-                    <td>{{ consequentCell.errorHint }}</td>
-                  </tr>
-                </ng-container>
-              </table>
-            </tr>
+            <mat-list-item>{{ cell.cellName }}</mat-list-item>
+            <mat-list>
+              <mat-list-item
+                *ngFor="let consequentCell of cell.consequentErrorCell"
+                >{{ consequentCell.cellName }}</mat-list-item
+              >
+            </mat-list>
           </ng-container>
-        </table>
+        </mat-list>
       </mat-cell>
     </ng-container>
 
     <!-- Weight Column -->
     <ng-container matColumnDef="errorHint">
-      <mat-header-cell *matHeaderCellDef> Hinweis </mat-header-cell>
-      <!-- <mat-cell *matCellDef="let data"> {{ data. }} </mat-cell> -->
+      <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
+      <mat-cell *matCellDef="let data">
+        <mat-list>
+          <ng-container *ngFor="let cell of data.errorCell">
+            <mat-list-item>{{ cell.errorHint }}</mat-list-item>
+            <mat-list>
+              <mat-list-item
+                *ngFor="let consequentCell of cell.consequentErrorCell"
+                >{{ consequentCell.errorHint }}</mat-list-item
+              >
+            </mat-list>
+          </ng-container>
+        </mat-list>
+      </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="table">
