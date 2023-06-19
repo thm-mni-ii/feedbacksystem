@@ -1,10 +1,36 @@
-.results {
-  display: flex;
-  flex-direction: column;
-  > * {
-    margin-bottom: 16px;
-  }
-}
 .mat-table {
   width: 100%;
+}
+.mat-row {
+  align-items: flex-start;
+}
+.done {
+  color: green;
+}
+.not-done {
+  color: red;
+}
+.mat-header-cell {
+  padding-left: 15px;
+}
+
+.mat-column-errorHint {
+  flex: 4;
+}
+
+.cellStyle {
+  font-style: bold;
+  background-color: #ff8787 ;
+  width: 60px;
+  border-radius: 5px;
+  height: 25px;
+}
+
+.cellStyleCons {
+  background-color: #ffb47e;
+  font-style: bold;
+  width: 60px;
+  border-radius: 5px;
+  height: 25px;
+  margin: 5px
 }
