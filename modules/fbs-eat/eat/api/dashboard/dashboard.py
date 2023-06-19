@@ -9,7 +9,6 @@ import plotly.express as px
 import plotly.graph_objs as go
 from dash import Input, Output, callback, dcc, html, dash
 from plotly.subplots import make_subplots
-import dateutil.parser
 
 from api.connect.data_service import get_data
 from api.util.utilities import (
@@ -329,13 +328,20 @@ def update_histogram_avg_submissions(
     else:
         display_style = {"display": "none"}
 
+    if not exercise_value:
+        if not course_value:
+            return generate_empty_response(), display_style
+        exercise_value = select_all_exercises_in_course(local_df, course_value)
+
     task_len = {}
     if "Date" in checklist_value:
-        local_df = filter_time(local_df, convert_time(date_time_from), convert_time(date_time_to))
+        local_df = filter_time(
+            local_df, convert_time(date_time_from), convert_time(date_time_to)
+        )
     if not course_value or local_df.empty:
         return generate_empty_response(), display_style
 
-    if exercise_value is None or "Übersicht" in exercise_value:
+    if "Übersicht" in exercise_value:
         filtered_df = local_df
     else:
         filtered_df = local_df[local_df.UniqueName.isin(exercise_value)]

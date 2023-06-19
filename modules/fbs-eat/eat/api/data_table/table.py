@@ -66,7 +66,7 @@ layout = html.Div(
                     add_checklist(
                         "toggle_hiding_queries",
                         ["Exclude equal queries", "Exclude Date"],
-                        [],
+                        ["Exclude Date"],
                     ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",

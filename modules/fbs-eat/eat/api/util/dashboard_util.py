@@ -39,8 +39,13 @@ def create_course_bars(hist_df, fig, labels):
         "#6a4c4d",
         "#cf8af3",
     ]
+    all_numbers = []
 
-    for row, idx in enumerate(hist_df.index.unique()):
+    for index, _ in enumerate(fig["layout"]["annotations"]):
+        all_numbers.append(float(fig["layout"]["annotations"][index]["text"]))
+
+    for _, idx in enumerate(hist_df.index.unique()):
+        row = all_numbers.index(idx)
         show_legend = row == 0
         traces = []
 
@@ -97,8 +102,8 @@ def create_course_bars(hist_df, fig, labels):
         )
         fig.update_xaxes(showticklabels=False)
 
-        for i in range(0, row + 1):
-            fig.update_yaxes(title_text="Students", row=i + 1, col=1)
+        # for i in range(0, row + 1):
+        fig.update_yaxes(title_text="Students", row=i + 1, col=1)
     return fig
 
 
