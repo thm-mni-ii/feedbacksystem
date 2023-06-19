@@ -1,15 +1,15 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
-import { MatTableDataSource } from "@angular/material/table";
-import { MatPaginator } from "@angular/material/paginator";
+import { MatLegacyTableDataSource as MatTableDataSource } from "@angular/material/legacy-table";
+import { MatLegacyPaginator as MatPaginator } from "@angular/material/legacy-paginator";
 import { MatSort } from "@angular/material/sort";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { TitlebarService } from "../../service/titlebar.service";
 import { UserService } from "../../service/user.service";
 import { User } from "../../model/User";
 import { CreateGuestUserDialogComponent } from "../../dialogs/create-guest-user-dialog/create-guest-user-dialog.component";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { Roles } from "../../model/Roles";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 
 /**
  * This component is for admins managing users

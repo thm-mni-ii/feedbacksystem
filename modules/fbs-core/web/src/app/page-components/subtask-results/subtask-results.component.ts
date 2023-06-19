@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { Submission } from "../../model/Submission";
-import { MatTableDataSource } from "@angular/material/table";
+import { MatLegacyTableDataSource as MatTableDataSource } from "@angular/material/legacy-table";
 import { SubTaskResult } from "../../model/SubTaskResult";
 import { SubmissionService } from "../../service/submission.service";
 

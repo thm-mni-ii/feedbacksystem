@@ -12,10 +12,10 @@ import {
   Renderer2,
   ViewChild,
 } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { ConfirmDialogComponent } from "src/app/dialogs/confirm-dialog/confirm-dialog.component";
 import { FormControl, FormGroup, UntypedFormControl } from "@angular/forms";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { Observable, of } from "rxjs";
 import { Course } from "src/app/model/Course";

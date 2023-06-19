@@ -9,7 +9,7 @@ import { Course } from "../../model/Course";
 import { Roles } from "../../model/Roles";
 import { AuthService } from "../../service/auth.service";
 import { CourseUpdateDialogComponent } from "../../dialogs/course-update-dialog/course-update-dialog.component";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 
 /**
  * Show all courses

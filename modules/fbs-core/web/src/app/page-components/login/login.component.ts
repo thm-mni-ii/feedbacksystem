@@ -1,8 +1,8 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { DOCUMENT } from "@angular/common";
-import { MatDialog } from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import { AuthService } from "../../service/auth.service";
 import { LegalService } from "../../service/legal.service";
 import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";

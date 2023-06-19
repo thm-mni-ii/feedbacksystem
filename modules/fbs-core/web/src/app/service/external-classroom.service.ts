@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 import { distinctUntilChanged } from "rxjs/operators";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { HttpClient } from "@angular/common/http";
 /**
  * Service that provides observables that asynchronacally updates tickets, users and privide Conferences to take

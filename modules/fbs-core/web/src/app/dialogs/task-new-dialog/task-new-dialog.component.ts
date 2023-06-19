@@ -1,10 +1,10 @@
 import { Component, Inject, OnInit } from "@angular/core";
 import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogRef,
-} from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
+  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
+  MatLegacyDialog as MatDialog,
+  MatLegacyDialogRef as MatDialogRef,
+} from "@angular/material/legacy-dialog";
+import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
 import {
   FormControl,
   UntypedFormControl,
@@ -21,7 +21,7 @@ import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
-import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { MatLegacySlideToggle as MatSlideToggle } from "@angular/material/legacy-slide-toggle";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";

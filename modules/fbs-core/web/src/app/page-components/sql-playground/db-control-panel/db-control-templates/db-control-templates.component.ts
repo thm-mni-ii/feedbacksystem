@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { NewSqlTemplateComponent } from "src/app/dialogs/new-sql-template/new-sql-template.component";
 import { JWTToken } from "src/app/model/JWTToken";
 import { Database } from "src/app/model/sql_playground/Database";

@@ -5,7 +5,7 @@ import { UserService } from "src/app/service/user.service";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Observable, of } from "rxjs";
 import { Roles } from "../../model/Roles";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
