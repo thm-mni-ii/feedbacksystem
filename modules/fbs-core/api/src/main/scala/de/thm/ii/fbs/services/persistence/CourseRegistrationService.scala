@@ -1,6 +1,9 @@
 package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.v2.course.Participant
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -24,8 +27,8 @@ class CourseRegistrationService {
     * @param role The role
     * @return True if successful
     */
-  def register(cid: Int, uid: Int, role: CourseRole.Value): Boolean =
-    1 == DB.update("REPLACE INTO user_course (course_id, user_id, course_role) VALUES (?,?,?);", cid, uid, role.id)
+  def register(cid: Int, uid: Int, role: CourseRole): Boolean =
+    1 == DB.update("REPLACE INTO user_course (course_id, user_id, course_role) VALUES (?,?,?);", cid, uid, role.getId)
 
   /**
     * Deregister a user from a course.
@@ -44,8 +47,8 @@ class CourseRegistrationService {
     * @param role The role
     * @return True if sucessfully deregistered
     */
-  def deregisterRole(cid: Int, role: CourseRole.Value): Boolean =
-    1 == DB.update("DELETE FROM user_course WHERE course_id = ? AND course_role = ?", cid, role.id)
+  def deregisterRole(cid: Int, role: CourseRole): Boolean =
+    1 == DB.update("DELETE FROM user_course WHERE course_id = ? AND course_role = ?", cid, role.getId)
 
   /**
     * Deregister all users except the current user.
@@ -86,7 +89,7 @@ class CourseRegistrationService {
   def getParticipants(cid: Int): List[Participant] = DB.query(
     "SELECT user_id, prename, surname, email, username, alias, global_role, course_role FROM user JOIN user_course using(user_id) where deleted = 0" +
       " and course_id = ?",
-    (res, _) => Participant(parseUserResult(res), CourseRole.parse(res.getInt("course_role"))), cid)
+    (res, _) => new Participant(parseUserResult(res), CourseRole.parse(res.getInt("course_role")), true), cid)
 
   /**
     * Parse SQL Query user result
@@ -95,13 +98,13 @@ class CourseRegistrationService {
     * @return User Object
     */
   def parseUserResult(res: ResultSet): User = new User(
-    prename = res.getString("prename"),
-    surname = res.getString("surname"),
-    email = res.getString("email"),
-    username = res.getString("username"),
-    globalRole = GlobalRole.parse(res.getInt("global_role")),
-    alias = Option(res.getString("alias")),
-    id = res.getInt("user_id")
+    res.getString("prename"),
+    res.getString("surname"),
+    res.getString("username"),
+    GlobalRole.parse(res.getInt("global_role")),
+    res.getString("email"),
+    res.getString("alias"),
+    res.getInt("user_id")
   )
 
   /**
@@ -110,14 +113,14 @@ class CourseRegistrationService {
     * @param uid The user id
     * @return Map of course id to its course role. Note that courses where the user is a student are not listed here.
     */
-  def getCoursePrivileges(uid: Int): Map[Int, CourseRole.Value] = {
+  def getCoursePrivileges(uid: Int): Map[Int, CourseRole] = {
     DB.query("SELECT course_id, course_role FROM user_course WHERE user_id = ?", (res, _) => {
       (res.getInt("course_id"), CourseRole.parse(res.getInt("course_role")))
     }, uid)
-      .foldLeft(Map[Int, CourseRole.Value]())((akku, value) => akku + value)
+      .foldLeft(Map[Int, CourseRole]())((akku, value) => akku + value)
   }
 
-  def getCourseRoleOfUser(cid: Int, uid: Int): Option[CourseRole.Value] = {
+  def getCourseRoleOfUser(cid: Int, uid: Int): Option[CourseRole] = {
     DB.query("SELECT course_role FROM user_course WHERE user_id = ? AND course_id = ?",
       (res, _) => CourseRole.parse(res.getInt("course_role")), uid, cid).headOption
   }

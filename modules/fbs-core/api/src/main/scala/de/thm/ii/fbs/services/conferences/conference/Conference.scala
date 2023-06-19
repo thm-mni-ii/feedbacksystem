@@ -1,8 +1,7 @@
 package de.thm.ii.fbs.services.conferences.conference
 
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import java.net.URI
-
-import de.thm.ii.fbs.model.User
 import org.json.JSONObject
 
 /**

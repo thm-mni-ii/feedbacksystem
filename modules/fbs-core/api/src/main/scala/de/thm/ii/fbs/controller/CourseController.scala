@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.Course
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.AuthService
@@ -49,8 +50,8 @@ class CourseController {
              req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     val user = authService.authorize(req, res)
     val courses = courseService.getAll(false)
-    val courseRights = courseRegistrationService.getCoursePrivileges(user.id)
-    user.globalRole match {
+    val courseRights = courseRegistrationService.getCoursePrivileges(user.getId)
+    user.getGlobalRole match {
       case GlobalRole.ADMIN | GlobalRole.MODERATOR => courses
       case _ => courses
         .filter(c => c.visible || courseRights.getOrElse(c.id, CourseRole.STUDENT) != CourseRole.STUDENT)
@@ -68,7 +69,7 @@ class CourseController {
   @PostMapping(value = Array(""), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Course = {
-    if (authService.authorize(req, res).globalRole == GlobalRole.USER) {
+    if (authService.authorize(req, res).getGlobalRole == GlobalRole.USER) {
       throw new ForbiddenException()
     }
     (
@@ -95,11 +96,11 @@ class CourseController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course = {
     val user = authService.authorize(req, res)
-    val isSubscribed = courseRegistrationService.getParticipants(cid).exists(_.user.id == user.id)
+    val isSubscribed = courseRegistrationService.getParticipants(cid).exists(_.getUser.getId == user.getId)
 
     courseService.find(cid) match {
       case Some(course) =>
-        if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isSubscribed || course.visible)) {
+        if (!(user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isSubscribed || course.visible)) {
           throw new ForbiddenException()
         } else {
           course
@@ -120,9 +121,9 @@ class CourseController {
   def update(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
+    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId).map(_.getRole)
 
-    (user.globalRole, someCourseRole) match {
+    (user.getGlobalRole, someCourseRole) match {
       case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
         (
           body.retrive("semesterId").asInt(),
@@ -148,9 +149,9 @@ class CourseController {
   @DeleteMapping(value = Array("/{cid}"))
   def delete(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id).map(_.role)
+    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId).map(_.getRole)
 
-    (user.globalRole, someCourseRole) match {
+    (user.getGlobalRole, someCourseRole) match {
       case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
         // Save submissions and configurations
         val tasks = taskService.getAll(cid).map(t => (submissionService.getAllByTask(cid, t.id), checkerConfigurationService.getAll(cid, t.id)))

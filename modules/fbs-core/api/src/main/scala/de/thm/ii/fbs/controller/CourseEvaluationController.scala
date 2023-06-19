@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, EvaluationContainer, GlobalRole}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.EvaluationContainer
 import de.thm.ii.fbs.services.evaluation.FormulaService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -32,7 +33,7 @@ class CourseEvaluationController {
   private def isAuthorized(cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val privileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT)))
 
     if (!privileged) throw new ForbiddenException()
   }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnMainFileUpload, CheckerServiceOnSecondaryFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.services.v2.checker.excel.{ErrorAnalysisSolutionService, ExcelCheckerServiceV2}
@@ -44,7 +45,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     try {
-      val submission = this.submissionService.getOne(submissionID, fu.id).get
+      val submission = this.submissionService.getOne(submissionID, fu.getId).get
       val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission)
       val mainFile = this.spreadsheetFileService.getMainFile(cc)
 

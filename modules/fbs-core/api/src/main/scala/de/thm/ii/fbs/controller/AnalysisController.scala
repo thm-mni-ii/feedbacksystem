@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, AnalysisCourseResult}
-import de.thm.ii.fbs.services.evaluation.EvaluationResultService
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.AnalysisCourseResult
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,10 +37,10 @@ class AnalysisController {
   def getCourseResultsByTask(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest, res: HttpServletResponse): List[AnalysisCourseResult] = {
     val user = authService.authorize(req, res)
 
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
       courseResultService.getAllByTask(cid, tid)
     } else {
       throw new ForbiddenException()

@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.services.security
 
-import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.util.Hash
 import org.springframework.security.crypto.bcrypt.BCrypt
@@ -63,7 +63,7 @@ class LocalLoginService {
     * @param newPassword the password to set
     */
   def upgradePassword(user: User, newPassword: String): Unit =
-    userService.updatePasswordFor(user.id, hash(newPassword))
+    userService.updatePasswordFor(user.getId, hash(newPassword))
 
   def hash(password: String): String =
     BCrypt.hashpw(password, BCrypt.gensalt())

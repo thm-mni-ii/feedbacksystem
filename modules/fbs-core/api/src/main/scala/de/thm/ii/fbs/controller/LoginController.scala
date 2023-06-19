@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
-import de.thm.ii.fbs.model.{GlobalRole, User}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
 import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -100,9 +101,10 @@ class LoginController extends CasClientConfigurerAdapter {
       .map(entry => new User(
       entry.getAttribute(nameAttributeName).getStringValue,
       entry.getAttribute(snAttributeName).getStringValue,
-      entry.getAttribute(mailAttributeName).getStringValue,
       entry.getAttribute(uidAttributeName).getStringValue,
-      GlobalRole.USER))
+      GlobalRole.USER,
+      entry.getAttribute(mailAttributeName).getStringValue,
+      null, null))
 
   /**
     * Login via LDAP
@@ -122,7 +124,7 @@ class LoginController extends CasClientConfigurerAdapter {
 
       login match {
         case Some((user, password)) =>
-          val localUser = userService.find(user.username).getOrElse(userService.create(user, password))
+          val localUser = userService.find(user.getUsername).getOrElse(userService.create(user, password))
           authService.renewAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
@@ -169,7 +171,7 @@ class LoginController extends CasClientConfigurerAdapter {
         loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
+              .map(user => userService.find(user.getUsername).getOrElse(userService.create(user, null)))
           } yield ldapUser} else {None})
     )
 

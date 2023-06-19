@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CourseResult, CourseRole, EvaluationUserResult, GlobalRole}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.{CourseResult, EvaluationUserResult}
 import de.thm.ii.fbs.services.evaluation.EvaluationResultService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -41,10 +42,10 @@ class CourseResultController {
   def getAll(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
     val user = authService.authorize(req, res)
 
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
       courseResultService.getAll(cid)
     } else {
       throw new ForbiddenException()
@@ -64,10 +65,10 @@ class CourseResultController {
   def getAllEvaluation(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[EvaluationUserResult] = {
     val user = authService.authorize(req, res)
 
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
       evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid))
     } else {
       throw new ForbiddenException()
@@ -87,10 +88,10 @@ class CourseResultController {
   def getStudentResult(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
     val user = authService.authorize(req, res)
 
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
       courseResultService.getAll(cid, 2, 2)
     } else {
       throw new ForbiddenException()

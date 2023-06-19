@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -38,8 +39,8 @@ class UserController {
   @ResponseBody
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] = {
     val user = authService.authorize(req, res)
-    val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent) {
+    val isDocent = courseRegistrationService.getCoursePrivileges(user.getId).exists(e => e._2 == CourseRole.DOCENT)
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isDocent) {
       userService.getAll()
     } else {
       throw new ForbiddenException()
@@ -57,9 +58,9 @@ class UserController {
   @ResponseBody
   def getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User = {
     val user = authService.authorize(req, res)
-    val selfRequest = user.id == uid
-    val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
+    val selfRequest = user.getId == uid
+    val isDocent = courseRegistrationService.getCoursePrivileges(user.getId).exists(e => e._2 == CourseRole.DOCENT)
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
       userService.find(uid) match {
         case Some(u) => u
         case _ => throw new ResourceNotFoundException()
@@ -86,7 +87,7 @@ class UserController {
       throw new BadRequestException("Malformed Request Body")
     }
 
-    (user.globalRole, user.id) match {
+    (user.getGlobalRole, user.getId.toInt) match {
       case (GlobalRole.ADMIN, _) | (_, `uid`) =>
         loginService.upgradePassword(user, password.get)
       case _ => throw new ForbiddenException()
@@ -105,7 +106,7 @@ class UserController {
     val user = authService.authorize(req, res)
     val someRoleName = body.retrive("roleName").asText()
 
-    (user.globalRole, someRoleName) match {
+    (user.getGlobalRole, someRoleName) match {
       case (GlobalRole.ADMIN, Some(roleName)) =>
         userService.updateGlobalRoleFor(uid, GlobalRole.parse(roleName))
       case (GlobalRole.ADMIN, None) => throw new BadRequestException("Malformed Request Body")
@@ -125,7 +126,7 @@ class UserController {
   @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User = {
     val user = authService.authorize(req, res)
-    if (user.globalRole != GlobalRole.ADMIN) {
+    if (user.getGlobalRole != GlobalRole.ADMIN) {
       throw new ForbiddenException()
     }
     ( body.retrive("prename").asText(),
@@ -137,7 +138,9 @@ class UserController {
       body.retrive("globalRole").asText()
     ) match {
       case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
-        loginService.createUser(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+        loginService.createUser(
+          new User(prename, surname, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), email, alias.orNull, null),
+          password)
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
@@ -150,7 +153,7 @@ class UserController {
     */
   @DeleteMapping(value = Array("users/{uid}"))
   def delete(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
-    authService.authorize(req, res).globalRole match {
+    authService.authorize(req, res).getGlobalRole match {
       case GlobalRole.ADMIN => userService.delete(uid)
       case _ => throw new ForbiddenException()
     }

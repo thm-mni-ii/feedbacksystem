@@ -2,7 +2,9 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{Course, CourseRole, GlobalRole, Participant}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.Course
+import de.thm.ii.fbs.model.v2.course.Participant
 import de.thm.ii.fbs.services.persistence.CourseRegistrationService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -34,9 +36,9 @@ class CourseRegistrationController {
   @ResponseBody
   def getRegisteredCourses(@PathVariable("uid") uid: Integer, req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
     val user = authService.authorize(req, res)
-    val globalRole = user.globalRole
+    val globalRole = user.getGlobalRole
 
-    if (globalRole == GlobalRole.ADMIN || globalRole == GlobalRole.MODERATOR || user.id == uid) {
+    if (globalRole == GlobalRole.ADMIN || globalRole == GlobalRole.MODERATOR || user.getId == uid) {
       courseRegistrationService.getRegisteredCourses(uid, ignoreHidden = false)
     } else {
       throw new ForbiddenException()
@@ -54,10 +56,10 @@ class CourseRegistrationController {
   @ResponseBody
   def getParticipants(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): List[Participant] = {
     val user = authService.authorize(req, res)
-    val globalRole = user.globalRole
+    val globalRole = user.getGlobalRole
     val participants = courseRegistrationService.getParticipants(cid)
 
-    val privilegedByCourse = participants.find(_.user.id == user.id).map(_.role).exists {
+    val privilegedByCourse = participants.find(_.getUser.getId == user.getId).map(_.getRole).exists {
       case CourseRole.DOCENT | CourseRole.TUTOR => true
       case _ => false
     }
@@ -83,9 +85,9 @@ class CourseRegistrationController {
     val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+      courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
-    (privileged, user.id) match {
+    (privileged, user.getId.toInt) match {
       case (true, _) => courseRegistrationService.register(cid, uid, role)
       case (false, `uid`) => courseRegistrationService.register(cid, uid, CourseRole.STUDENT)
       case _ => throw new ForbiddenException()
@@ -104,9 +106,9 @@ class CourseRegistrationController {
     val user = authService.authorize(req, res)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+      courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
-    (privileged, user.id) match {
+    (privileged, user.getId.toInt) match {
       case (true, _) | (_, `uid`) => courseRegistrationService.deregister(cid, uid)
       case _ => throw new ForbiddenException()
     }
@@ -126,9 +128,9 @@ class CourseRegistrationController {
       val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
 
       val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-        courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+        courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
-      (privileged, user.id) match {
+      (privileged, user.getId) match {
         case (true, _) => courseRegistrationService.deregisterRole(cid, role)
         case _ => throw new ForbiddenException()
       }
@@ -143,12 +145,12 @@ class CourseRegistrationController {
      @GetMapping(value = Array("/courses/{cid}/deregisterall"))
      def deregisterAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
        val user = authService.authorize(req, res)
-       val uid = user.id
+       val uid = user.getId
 
        val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-         courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
+         courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT) == CourseRole.DOCENT
 
-       (privileged, user.id) match {
+       (privileged, user.getId) match {
          case (true, _) => courseRegistrationService.deregisterAll(cid, uid)
          case _ => throw new ForbiddenException()
        }

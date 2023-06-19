@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.task.{Task, TaskBatch}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
@@ -51,8 +52,8 @@ class TaskController {
   @ResponseBody
   def getAll(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
     val auth = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.getGlobalRole != GlobalRole.ADMIN
 
     if (noPrivateAccess) {
       taskService.getAll(cid).filter(task => !task.isPrivate)
@@ -73,13 +74,13 @@ class TaskController {
   @ResponseBody
   def getTaskResults(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] = {
     val auth = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.getGlobalRole != GlobalRole.ADMIN
 
     if (noPrivateAccess) {
-      taskService.getTaskResults(cid, auth.id).filter(res => !res.isPrivate)
+      taskService.getTaskResults(cid, auth.getId).filter(res => !res.isPrivate)
     } else {
-      taskService.getTaskResults(cid, auth.id)
+      taskService.getTaskResults(cid, auth.getId)
     }
   }
 
@@ -96,9 +97,9 @@ class TaskController {
   def getSubtaskStatistics(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[SubtaskStatisticsTask] = {
     val auth = authService.authorize(req, res)
 
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == auth.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-    val privileged = privilegedByCourse || auth.globalRole == GlobalRole.ADMIN || auth.globalRole == GlobalRole.MODERATOR
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == auth.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
+    val privileged = privilegedByCourse || auth.getGlobalRole == GlobalRole.ADMIN || auth.getGlobalRole == GlobalRole.MODERATOR
 
     if (!privileged) {
       throw new ForbiddenException()
@@ -120,8 +121,8 @@ class TaskController {
   @ResponseBody
   def getOne(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Task = {
     val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.getGlobalRole != GlobalRole.ADMIN
 
     val task = taskService.getOne(tid) match {
       case Some(task) =>
@@ -130,7 +131,7 @@ class TaskController {
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
             val config = this.checkerConfigurationService.getAll(cid, tid).head
             val spreadsheetFile: File = storageService.getFileMainFile(config)
-            val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
+            val userID = Hash.decimalHash(user.getUsername).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
             spreadsheetFile.delete()
@@ -160,10 +161,10 @@ class TaskController {
   @ResponseBody
   def getTaskResult(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): UserTaskResult = {
     val auth = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, auth.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && auth.getGlobalRole != GlobalRole.ADMIN
 
-    val taskResult = taskService.getTaskResult(tid, auth.id).getOrElse(throw new ResourceNotFoundException())
+    val taskResult = taskService.getTaskResult(tid, auth.getId).getOrElse(throw new ResourceNotFoundException())
 
     if (noPrivateAccess && taskResult.isPrivate) {
       throw new ForbiddenException()
@@ -185,10 +186,10 @@ class TaskController {
   @ResponseBody
   def create(@PathVariable("cid") cid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Task = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("name").asText(),
         body.retrive("isPrivate").asBool(),
         body.retrive("deadline").asText(),
@@ -240,10 +241,10 @@ class TaskController {
   def update(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("name").asText(),
         body.retrive("deadline").asText(),
         body.retrive("mediaType").asText(),
@@ -294,10 +295,10 @@ class TaskController {
   def updateBatch(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse,
                   @RequestBody body: TaskBatch): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistration.getParticipants(courseId).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(courseId).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       taskService.updateBatch(courseId, body)
     } else {
       throw new ForbiddenException()
@@ -315,10 +316,10 @@ class TaskController {
   @DeleteMapping(value = Array("/{cid}/tasks/{tid}"))
   def delete(@PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       // Save submissions and configurations
       val submissions = submissionService.getAllByTask(cid, tid)
       val configurations = checkerConfigurationService.getAll(cid, tid)

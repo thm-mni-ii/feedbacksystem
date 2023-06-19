@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SQLCheckerQuery}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.SQLCheckerQuery
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, SQLCheckerService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
 import org.springframework.beans.factory.annotation.Autowired
@@ -99,12 +100,12 @@ class SQLCheckerController {
     val task = taskService.getOne(taskID)
 
     val privilegedByCourse = task match {
-      case Some(task) => courseRegistration.getParticipants(task.courseID).find(_.user.id == auth.id)
-        .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+      case Some(task) => courseRegistration.getParticipants(task.courseID).find(_.getUser.getId == auth.getId)
+        .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
       case _ => false
     }
 
-    val privileged = privilegedByCourse || auth.globalRole == GlobalRole.ADMIN || auth.globalRole == GlobalRole.MODERATOR
+    val privileged = privilegedByCourse || auth.getGlobalRole == GlobalRole.ADMIN || auth.getGlobalRole == GlobalRole.MODERATOR
 
     if (!privileged) {
       throw new ForbiddenException()

@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.task.SubTaskResult
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.Submission
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
@@ -70,8 +71,8 @@ class SubmissionController {
     val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = (user.getId == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
       submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
@@ -100,8 +101,8 @@ class SubmissionController {
     val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = (user.getId == uid && !task.isPrivate) || adminPrivileged
 
     if (!privileged) {
       throw new ForbiddenException()
@@ -134,10 +135,10 @@ class SubmissionController {
              @RequestParam file: MultipartFile,
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.getGlobalRole != GlobalRole.ADMIN
 
-    if (user.id == uid) {
+    if (user.getId == uid) {
       this.taskService.getOne(tid) match {
         case Some(task) =>
           // Not allow Students to Submit to Private Tasks
@@ -185,10 +186,10 @@ class SubmissionController {
                req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.getId)
+    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.getGlobalRole != GlobalRole.ADMIN
 
-    val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
+    val allowed = user.getId == uid && !(noPrivateAccess && task.isPrivate)
     if (allowed) {
       submissionService.getOne(sid, uid) match {
         case Some(submission) =>
@@ -223,7 +224,7 @@ class SubmissionController {
     val user = authService.authorize(req, res)
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT)))
 
     if (adminPrivileged) {
       submissionService.getAllByTask(cid, tid).filter(s => s.isInBlockStorage).foreach(submission => {
@@ -257,8 +258,8 @@ class SubmissionController {
     val task = taskService.getOne(tid).get
 
     val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
+      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT)))
+    val privileged = (user.getId == uid && !task.isPrivate) || adminPrivileged
 
     if (privileged) {
       submissionService.getOne(sid, uid, adminPrivileged) match {
@@ -278,8 +279,8 @@ class SubmissionController {
     val user = authService.authorize(req, res)
     val task = taskService.getOne(tid).get
 
-    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+    val privileged = user.getId == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
       submissionService.getOne(sid, uid) match {
@@ -306,7 +307,7 @@ class SubmissionController {
     val user = authService.authorize(req, res)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
       val f = File.createTempFile("tmp", "")
@@ -328,7 +329,7 @@ class SubmissionController {
     val user = authService.authorize(req, res)
 
     val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(cid, CourseRole.STUDENT))
 
     if (privileged) {
       val f = new File("tmp")

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
@@ -55,10 +56,10 @@ class CheckerConfigurationController {
   @ResponseBody
   def getAll(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CheckrunnerConfiguration] = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid)
     } else {
       throw new ForbiddenException()
@@ -81,10 +82,10 @@ class CheckerConfigurationController {
   def create(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest,
              res: HttpServletResponse, @RequestBody body: JsonNode): CheckrunnerConfiguration = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("checkerType").asText(),
         body.retrive("ord").asInt(),
         body.retrive("checkerTypeInformation").asObject(),
@@ -128,10 +129,10 @@ class CheckerConfigurationController {
   def update(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest,
              res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       (body.retrive("checkerType").asText(),
         body.retrive("ord").asInt(),
         body.retrive("checkerTypeInformation").asObject()
@@ -170,9 +171,9 @@ class CheckerConfigurationController {
   @DeleteMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}"))
   def delete(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       ccs.getOne(ccid) match {
         case Some(cc) =>
           if (ccs.delete(cid, tid, cc.id)) {
@@ -258,10 +259,10 @@ class CheckerConfigurationController {
   private def uploadFile(fileName: String, postHook: CheckrunnerConfiguration => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.find(cid, tid, ccid) match {
         case Some(checkerConfiguration) =>
           storageService.storeConfigurationFile(checkerConfiguration, file, fileName)
@@ -276,10 +277,10 @@ class CheckerConfigurationController {
   private def getFile(pathFn: Int => Option[Path])(fileName: String, cid: Int, tid: Int, ccid: Int,
                                                    req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = crs.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
         case Some(checkrunnerConfiguration) =>
           val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, fileName)

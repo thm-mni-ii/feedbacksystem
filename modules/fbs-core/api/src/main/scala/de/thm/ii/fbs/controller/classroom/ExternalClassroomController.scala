@@ -29,7 +29,7 @@ class ExternalClassroomController(private val authService: AuthService,
   @GetMapping(value = Array("/{courseId}/join"))
   def joinClassroom(req: HttpServletRequest, res: HttpServletResponse, @PathVariable courseId: Int): URI = {
     val user = authService.authorize(req, res)
-    logger.info("User {} joined classroom of course {}!", user.getName, courseId)
+    logger.info("User {} joined classroom of course {}!", user.getUsername, courseId)
     classroomService.joinUser(courseId, user)
   }
 
@@ -43,7 +43,7 @@ class ExternalClassroomController(private val authService: AuthService,
   @GetMapping(value = Array("/{courseId}/leave"))
   def leaveClassroom(req: HttpServletRequest, res: HttpServletResponse, @PathVariable courseId: Int): Boolean = {
     val user = authService.authorize(req, res)
-    logger.info("User {} left classroom of course {}!", user.getName, courseId)
+    logger.info("User {} left classroom of course {}!", user.getUsername, courseId)
     classroomService.leaveUser(courseId, user)
   }
 }

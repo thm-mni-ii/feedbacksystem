@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.util
 
-import de.thm.ii.fbs.model.User
 import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import org.apache.commons.compress.archivers.ArchiveOutputStream
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
@@ -17,7 +17,7 @@ object Archiver {
   def packSubmissions(name: File, files: List[File], users: List[User], fileExts: List[String]): Unit = {
     val out = new ZipArchiveOutputStream(new BufferedOutputStream(Files.newOutputStream(name.toPath)))
     for ((file, index) <- files.zipWithIndex) {
-      addToArchive(out, file, ".", s"${users(index).getName}${fileExts(index)}")
+      addToArchive(out, file, ".", s"${users(index).getUsername}${fileExts(index)}")
     }
     out.close()
   }
@@ -29,7 +29,7 @@ object Archiver {
     files.zipWithIndex.foreach(listFiles => {
       listFiles._1.zipWithIndex.foreach(f => {
         val fileExt = fileExts(listFiles._2)(f._2)
-        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getName}$fileExt")
+        addToArchive(out, f._1, s"./${listTaskId(listFiles._2)}", s"${users(listFiles._2)(f._2).getUsername}$fileExt")
       })
     })
     out.close()

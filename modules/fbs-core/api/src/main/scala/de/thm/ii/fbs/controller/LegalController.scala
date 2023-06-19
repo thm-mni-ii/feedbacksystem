@@ -57,8 +57,8 @@ class LegalController {
   @ResponseBody
   def getTermsOfUseAcceptanceStatus(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Map[String, Boolean] = {
     val user = authService.authorize(req)
-    user.id match {
-      case `uid` => Map("accepted" -> userService.getPrivacyStatusOf(user.id))
+    user.getId.toInt match {
+      case `uid` => Map("accepted" -> userService.getPrivacyStatusOf(user.getId))
       case _ => throw new ForbiddenException()
     }
   }
@@ -72,8 +72,8 @@ class LegalController {
   @PutMapping(value = Array("/termsofuse/{uid}"))
   def acceptTermsOfUse(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req)
-    user.id match {
-      case `uid` => userService.updateAgreementToPrivacyFor(user.id, agreed = true)
+    user.getId.toInt match {
+      case `uid` => userService.updateAgreementToPrivacyFor(user.getId, agreed = true)
       case _ => throw new ForbiddenException()
     }
   }

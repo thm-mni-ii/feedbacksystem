@@ -1,7 +1,9 @@
 package de.thm.ii.fbs.services.persistence;
 
 import de.thm.ii.fbs.TestApplication
-import de.thm.ii.fbs.model.{Course, GlobalRole, User}
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
+import de.thm.ii.fbs.model.Course
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.services.security.LocalLoginService
 import de.thm.ii.fbs.util.Hash
 import org.junit.{Assert, Before, Test}

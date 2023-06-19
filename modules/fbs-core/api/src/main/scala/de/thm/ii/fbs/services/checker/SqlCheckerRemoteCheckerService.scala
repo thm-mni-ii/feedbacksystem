@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerState, SqlCheckerSubmission, User}
 import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.v2.security.authentication
 import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
@@ -53,7 +54,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     * @param cc           the CheckrunnerConfiguration to use
     * @param fu           the User model
     */
-  override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
+  override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: authentication.User): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, SqlCheckerState.Runner) != SqlCheckerState.Runner) {
       val apiUrl = new URIBuilder(selfUrl)
         .setPath(s"/api/v1/checker/submissions/$submissionID")
@@ -61,7 +62,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
         .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
         .build().toString
 
-      super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
+      super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.getId, fu.getUsername), apiUrl, mongodbUrl), cc)
     } else {
       super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
     }

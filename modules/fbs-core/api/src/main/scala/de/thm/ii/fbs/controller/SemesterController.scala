@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{GlobalRole, Semester}
+import de.thm.ii.fbs.model.Semester
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
@@ -35,7 +36,7 @@ class SemesterController {
   @ResponseBody
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[Semester] = {
     val user = authService.authorize(req, res)
-    user.globalRole match {
+    user.getGlobalRole match {
       case GlobalRole.ADMIN | GlobalRole.MODERATOR =>
         val semesterList = semesterService.getAll
         semesterList
@@ -54,7 +55,7 @@ class SemesterController {
   @PostMapping(value = Array(""), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
   def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Semester = {
-    if (authService.authorize(req, res).globalRole != GlobalRole.ADMIN) {
+    if (authService.authorize(req, res).getGlobalRole != GlobalRole.ADMIN) {
       throw new ForbiddenException()
     }
 
@@ -78,7 +79,7 @@ class SemesterController {
     val user = authService.authorize(req, res)
 
     semesterService.find(sid) match {
-      case Some(semester) => if (!(user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR)) {
+      case Some(semester) => if (!(user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR)) {
         throw new ForbiddenException()
       } else {
         semester
@@ -100,7 +101,7 @@ class SemesterController {
              @RequestBody body: JsonNode): Unit = {
     val user = authService.authorize(req, res)
 
-    user.globalRole match {
+    user.getGlobalRole match {
       case GlobalRole.ADMIN =>
         (body.retrive("id").asInt(),
           body.retrive("name").asText())
@@ -123,7 +124,7 @@ class SemesterController {
   def delete(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
 
-    user.globalRole match {
+    user.getGlobalRole match {
       case GlobalRole.ADMIN => semesterService.delete(sid)
       case _ => throw new ForbiddenException()
     }

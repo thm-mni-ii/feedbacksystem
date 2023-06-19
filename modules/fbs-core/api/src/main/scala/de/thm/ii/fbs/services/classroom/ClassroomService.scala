@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.services.classroom
 
-import de.thm.ii.fbs.model.CourseRole.{DOCENT, STUDENT, TUTOR}
-import de.thm.ii.fbs.model.GlobalRole.{ADMIN, MODERATOR}
+import de.thm.ii.fbs.model.v2.security.authorization.CourseRole.{DOCENT, STUDENT, TUTOR}
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole.{ADMIN, MODERATOR}
 import de.thm.ii.fbs.model.classroom.JoinRoomBBBResponse
-import de.thm.ii.fbs.model.{CourseRole, User}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.CourseRole
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseService}
 import org.apache.commons.codec.digest.DigestUtils
 import org.springframework.beans.factory.annotation.Value
@@ -41,7 +42,7 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
   private val classrooms = mutable.HashMap[Int, DigitalClassroom]()
 
   def joinUser(courseId: Int, user: User): URI = {
-    val courseRole = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(courseId, STUDENT)
+    val courseRole = courseRegistrationService.getCoursePrivileges(user.getId).getOrElse(courseId, STUDENT)
     val classroom = classrooms.getOrElseUpdate(courseId, createClassroom(courseId))
     getBBBConferenceLink(user, classroom, courseRole)
   }
@@ -112,11 +113,11 @@ class ClassroomService(templateBuilder: RestTemplateBuilder,
     * @param courseRole       The role (Docent, Tutor, Student) of the user within the course.
     * @return The join URI for the specified user.
     */
-  def getBBBConferenceLink(user: User, digitalClassroom: DigitalClassroom, courseRole: CourseRole.Value): URI = {
+  def getBBBConferenceLink(user: User, digitalClassroom: DigitalClassroom, courseRole: CourseRole): URI = {
     val paramMap = Map(
-      "fullName" -> s"${user.prename} ${user.surname}",
+      "fullName" -> s"${user.getPrename} ${user.getSurname}",
       "meetingID" -> digitalClassroom.classroomId,
-      "password" -> ((courseRole, user.globalRole) match {
+      "password" -> ((courseRole, user.getGlobalRole) match {
         case (_, ADMIN) => digitalClassroom.teacherPassword
         case (DOCENT, _) => digitalClassroom.teacherPassword
         case (_, MODERATOR) => digitalClassroom.tutorPassword

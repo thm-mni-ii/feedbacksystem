@@ -3,7 +3,7 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
 import de.thm.ii.fbs.model.task.Task
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService
@@ -39,10 +39,10 @@ class ExportController {
                  @PathVariable(value = "cid", required = true) cid: Int,
                  req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       val task: Task = taskService.getOne(taskId).get
       val (contentLength, resource) = taskExportService.responseFromTaskId(List(task))
       ResponseEntity.ok()
@@ -60,10 +60,10 @@ class ExportController {
   def exportAllTasksFromList(@PathVariable(value = "cid", required = true) cid: Int, @RequestBody body: JsonNode,
                              req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       body.retrive("taskIds").asObject() match {
         case Some(taskIds) =>
           if (taskIds.isArray) {
@@ -91,10 +91,10 @@ class ExportController {
   def exportAllTasksOfCourse(@PathVariable(value = "cid", required = true) cid: Int,
                              req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId)
+      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
 
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+    if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || privilegedByCourse) {
       val (contentLength, resource) = taskExportService.responseFromTaskId(taskService.getAll(cid))
       ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_OCTET_STREAM)
