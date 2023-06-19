@@ -3,7 +3,7 @@
 package de.thm.ii.fbs.model.v2.playground
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.thm.ii.fbs.model.v2.security.User
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import javax.persistence.*
 
 @Entity

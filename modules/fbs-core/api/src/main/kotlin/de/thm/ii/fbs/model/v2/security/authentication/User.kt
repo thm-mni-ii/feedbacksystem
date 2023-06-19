@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:no-wildcard-imports")
 
-package de.thm.ii.fbs.model.v2.security
+package de.thm.ii.fbs.model.v2.security.authentication
 
 import javax.persistence.*
 
