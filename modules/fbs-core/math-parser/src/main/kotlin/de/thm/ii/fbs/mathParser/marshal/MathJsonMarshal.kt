@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser.marshal
 
 import com.fasterxml.jackson.databind.JsonNode
@@ -7,7 +9,6 @@ import de.thm.ii.fbs.mathParser.ast.*
 import java.io.Serializable
 import java.lang.ArithmeticException
 import java.math.BigDecimal
-import java.math.BigInteger
 
 class MathJsonMarshal : Marshal {
     private val objectMapper = ObjectMapper()
@@ -17,7 +18,7 @@ class MathJsonMarshal : Marshal {
         Operator.MUL to "Multiply",
         Operator.DIV to "Divide",
         Operator.EXP to "Power",
-        Operator.RAD to "Root",
+        Operator.RAD to "Root"
     )
     private val unmarshalOperatorMap = mapOf(
         "Add" to Operator.ADD,
@@ -45,10 +46,11 @@ class MathJsonMarshal : Marshal {
         try {
             input.content.intValueExact()
         } catch (_: ArithmeticException) {
-            if (input.content == BigDecimal(input.content.toDouble()))
+            if (input.content == BigDecimal(input.content.toDouble())) {
                 input.content.toDouble()
-            else
+            } else {
                 input.content.toString()
+            }
         }
 
     private fun marshalVar(input: Var): String =
@@ -122,10 +124,11 @@ class MathJsonMarshal : Marshal {
         Operation(
             operator,
             unmarshalNode(obj.get(i)),
-            if (i + 2 < obj.size())
-                recursiveUnmarshal(operator, obj, i+1)
-            else
-                unmarshalNode(obj.get(i+1))
+            if (i + 2 < obj.size()) {
+                recursiveUnmarshal(operator, obj, i + 1)
+            } else {
+                unmarshalNode(obj.get(i + 1))
+            }
         )
 
     private fun unmarshalOperator(operator: String): Operator =

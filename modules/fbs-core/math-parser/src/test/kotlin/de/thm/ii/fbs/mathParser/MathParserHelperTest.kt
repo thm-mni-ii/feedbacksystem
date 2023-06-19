@@ -375,9 +375,11 @@ internal class MathParserHelperTest {
     fun toJson() {
         assertEquals(
             """["Add",1,2]""",
-            MathParserHelper.toMathJson(Ast(
-                Operation(Operator.ADD, Num(1), Num(2))
-            ))
+            MathParserHelper.toMathJson(
+                Ast(
+                    Operation(Operator.ADD, Num(1), Num(2))
+                )
+            )
         )
     }
 

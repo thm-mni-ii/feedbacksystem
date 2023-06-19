@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser.marshal
 
 import de.thm.ii.fbs.mathParser.ast.*
@@ -39,18 +41,19 @@ class MathJsonMarshalTest {
         )
     }
 
-
     @Test
     fun alphabetMarshal() {
         Assertions.assertEquals(
             """["Multiply","a",["Multiply","b","c"]]""",
-            marshal.marshal(Ast(
-                Operation(
-                    Operator.MUL,
-                    Var("a"),
-                    Operation(Operator.MUL, Var("b"), Var("c"))
+            marshal.marshal(
+                Ast(
+                    Operation(
+                        Operator.MUL,
+                        Var("a"),
+                        Operation(Operator.MUL, Var("b"), Var("c"))
+                    )
                 )
-            ),)
+            )
         )
     }
 
@@ -58,7 +61,7 @@ class MathJsonMarshalTest {
     fun divisionMarshal() {
         Assertions.assertEquals(
             """["Divide",1,2]""",
-            marshal.marshal(Ast(Operation(Operator.DIV, Num(1), Num(2))),)
+            marshal.marshal(Ast(Operation(Operator.DIV, Num(1), Num(2))))
         )
     }
 
@@ -66,7 +69,7 @@ class MathJsonMarshalTest {
     fun expMarshal() {
         Assertions.assertEquals(
             """["Power","a","b"]""",
-            marshal.marshal(Ast(Operation(Operator.EXP, Var("a"), Var("b"))),)
+            marshal.marshal(Ast(Operation(Operator.EXP, Var("a"), Var("b"))))
         )
     }
 

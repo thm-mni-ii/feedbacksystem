@@ -1,9 +1,10 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser.marshal
 
 import de.thm.ii.fbs.mathParser.ast.*
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 internal class MathJsonUnmarshalTest {
     private val marshal = MathJsonMarshal()
