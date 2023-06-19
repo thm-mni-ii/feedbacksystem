@@ -1,7 +1,6 @@
 grammar Math;
 
-expr        : (RAD|LOG) ' '* expr ' '+ expr
-            | expr ' '* (ADD|SUB) ' '* term
+expr        : expr ' '* (ADD|SUB) ' '* term
             | term
             ;
 
@@ -9,7 +8,9 @@ term        : term ' '* (MUL|DIV|MOD) ' '* funct
             | funct
             ;
 
-funct       : (SQR|LB|LN|LG) ' '* funct
+funct       : (SQRT|LB|LN|LG) OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
+            | (FRAC|RAD|LOG) OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
+            | SQRT OPENING_SQUARE_BRACKET expr CLOSING_SQUARE_BRACKET OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
             | unary
             ;
 
@@ -20,12 +21,13 @@ mulFactor   : expo // higher presedence!
             | mulFactor ' '* expo
             ;
 
-expo        : expo ' '* EXP ' '* SUB? factor
+expo        : expo ' '* EXP ' '*  SUB? factor
             | factor
             ;
 
-factor      : OPENING_BRACKET ' '* expr ' '* CLOSING_BRACKET
-            |   (NUMBER|VAR)
+factor      : OPENING_ROUND_BRACKET ' '* expr ' '* CLOSING_ROUND_BRACKET
+            | OPENING_CURLY_BRACKET ' '* expr ' '* CLOSING_CURLY_BRACKET
+            | (NUMBER|VAR)
             ;
 
 
@@ -41,12 +43,17 @@ MUL: '*'|'\\cdot';
 DIV: '/';
 MOD: '%';
 EXP: '^';
-SQR: 'sqrt' | '\\sqrt';
-LB: 'lb'|'ld'|'\\lb'|'\\ld';
-LN: 'ln'|'\\ln';
-LG: 'lg'|'\\lg';
-RAD: 'rad'|'\\rad';
-LOG: 'log'|'\\log';
+SQRT: '\\sqrt';
+FRAC: '\\frac';
+LB: '\\lb'|'\\ld';
+LN: '\\ln';
+LG: '\\lg';
+RAD: '\\rad';
+LOG: '\\log';
 DECIMAL_SEPARATOR: ','|'{,}';
-OPENING_BRACKET: '(' | '{';
-CLOSING_BRACKET: ')' | '}';
+OPENING_ROUND_BRACKET: '(';
+CLOSING_ROUND_BRACKET: ')';
+OPENING_CURLY_BRACKET: '{';
+CLOSING_CURLY_BRACKET: '}';
+OPENING_SQUARE_BRACKET: '[';
+CLOSING_SQUARE_BRACKET: ']';
