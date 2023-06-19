@@ -6,7 +6,6 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   Renderer2,
@@ -33,7 +32,7 @@ import { Subscription } from "rxjs";
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
 export class SqlInputTabsComponent
-  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewChecked, AfterViewInit
 {
   @Input() isPending: boolean;
   @Output() submitStatement = new EventEmitter<string>();
@@ -81,9 +80,6 @@ export class SqlInputTabsComponent
   }
   ngAfterViewInit() {
     this.prismService.highlightAll();
-  }
-  ngOnDestroy(): void {
-    console.log("");
   }
 
   fileName = "New_Query";
