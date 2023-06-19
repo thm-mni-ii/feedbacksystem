@@ -102,12 +102,11 @@ jobs:
         if: ${{ inputs.coverageArguments }}
         with:
           arguments: ${{ inputs.coverageArguments }}
-      - uses: codecov/codecov-action@v3
+      - uses: ./github/actions/retry-codecov
         if: ${{ inputs.coverageFilesLocation }}
         with:
           files: ${{ inputs.coverageFilesLocation }}
           flags: ${{ inputs.name }}
-          fail_ci_if_error: true
       - name: Stop mysql service container
         if: ${{ inputs.startMysqlService }}
         run: docker stop mysql
