@@ -3,12 +3,12 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
-import de.thm.ii.fbs.model.task.TaskBatch
+import de.thm.ii.fbs.model.task.{Task, TaskBatch}
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.{Hash, ScalaObjectMapper}
+import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -285,10 +285,10 @@ class TaskController {
   /**
     * Batch update tasks
     *
-    * @param courseId  Course id
-    * @param req  http request
-    * @param res  http response
-    * @param body Request Body
+    * @param courseId Course id
+    * @param req      http request
+    * @param res      http response
+    * @param body     Request Body
     */
   @PutMapping(value = Array("/{courseId}/tasks"), consumes = Array())
   def updateBatch(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse,

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.model._
-import de.thm.ii.fbs.model.task.TaskBatch
+import de.thm.ii.fbs.model.task.{Task, TaskBatch}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -86,7 +86,7 @@ class TaskService {
       batch.task.name, batch.task.isPrivate.orNull, batch.task.mediaType, batch.task.description, parseTimestamp(Option(batch.task.deadline)).orNull,
       if (batch.task.mediaInformation != null) MediaInformation.toJSONString(batch.task.mediaInformation) else null,
       batch.task.requirementType, if (batch.task.updateAttempts) batch.task.attempts.getOrElse(0) else null,
-      batch.task.hideResult.orNull)++ batch.taskIds :+ courseId
+      batch.task.hideResult.orNull) ++ batch.taskIds :+ courseId
 
     1 == DB.update(String.format(
       """

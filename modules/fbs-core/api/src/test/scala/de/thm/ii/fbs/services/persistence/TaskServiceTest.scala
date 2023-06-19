@@ -1,8 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.TestApplication
-import de.thm.ii.fbs.model.Task
-import de.thm.ii.fbs.model.task.{TaskBatch, PartialTask}
+import de.thm.ii.fbs.model.task.{PartialTask, Task, TaskBatch}
 import org.junit.runner.RunWith
 import org.junit.{Assert, Before, Test}
 import org.springframework.beans.factory.annotation.Autowired

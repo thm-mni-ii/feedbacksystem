@@ -1,9 +1,10 @@
 package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.model.checker._
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Task, Submission => FBSSubmission, User => FBSUser}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
-import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, MinioStorageService, StorageService}
+import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, MinioStorageService}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}

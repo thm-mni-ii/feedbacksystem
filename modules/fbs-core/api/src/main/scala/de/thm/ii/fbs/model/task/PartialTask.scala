@@ -13,6 +13,9 @@ import de.thm.ii.fbs.model.MediaInformation
   * @param description      The description of that task
   * @param mediaInformation The mediaInformation of that task
   * @param updateAttempts   If the property attempts should be updated
+  * @param hideResult       Should the result be shown to the user
+  * @param attempts         Number of Attempts
+  * @param requirementType  The requirement type of the Task
   */
 case class PartialTask(@JsonProperty("name") name: String,
                        @JsonProperty("deadline") deadline: String,

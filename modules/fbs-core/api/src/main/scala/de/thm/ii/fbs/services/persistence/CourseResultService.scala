@@ -1,8 +1,9 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{AnalysisCourseResult, CourseResult, TaskResult}
-import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
+import de.thm.ii.fbs.model.task.TaskResult
+import de.thm.ii.fbs.model.{AnalysisCourseResult, CourseResult}
+import de.thm.ii.fbs.services.persistence.storage.MinioStorageService
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -26,65 +27,69 @@ class CourseResultService {
 
   /**
     * Get All Course Results
+    *
     * @param cid Course id
     * @return all Course Results
     */
-  def getAll(cid: Int, minRole: Int = 0, maxRole: Int = 2): List[CourseResult] = DB.query("""
-    |select u.user_id
-    |     ,u.prename
-    |     ,u.surname
-    |     ,u.email
-    |     ,u.username
-    |     ,u.global_role
-    |     ,u.alias
-    |     ,JSON_ARRAYAGG(JSON_OBJECT("task", JSON_OBJECT("id", t.task_id,
-    |                                                    "name", t.name,
-    |                                                    "deadline", t.deadline,
-    |                                                    "mediaType", t.media_type,
-    |                                                    "description", t.description),
-    |                                "attempts", coalesce(submissions.attempts, 0),
-    |                                "passed", coalesce(submissions.passed, 0),
-    |                                "points", coalesce(subtasks.points, 0)
-    |    )) as results
-    |     ,COALESCE(FLOOR(SUM(submissions.passed) / COUNT(DISTINCT t.task_id)), 0) as passed
-    |     ,COALESCE(SUM(subtasks.points), 0) as points
-    |from user u
-    |         left join user_course uc using (user_id)
-    |         left join task t using (course_id)
-    |         left join (
-    |             select temp.user_id
-    |                   ,temp.task_id
-    |                   ,count(distinct temp.submission_id) as attempts
-    |                   ,max(temp.passed) as passed
-    |                   ,max(temp.submission_id) as submission_id
-    |             from (
-    |                select uts.user_id
-    |                      ,uts.task_id
-    |                      ,uts.submission_id
-    |                      ,IF(SUM(cr.exit_code) = 0, 1, 0) as passed
-    |                from user_task_submission uts
-    |                left join checker_result cr using (submission_id)
-    |                group by uts.user_id, uts.task_id, uts.submission_id
-    |                order by uts.user_id
-    |             ) as temp
-    |             group by temp.user_id, temp.task_id
-    |         ) as submissions using (user_id, task_id)
-    |         left join (
-    |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
-    |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
-    |         ) as subtasks on submissions.submission_id = subtasks.submission_id
-    |where course_id = ? and uc.course_role between ? and ?
-    |group by u.user_id
-    |order by u.surname, u.user_id;
-    |""".stripMargin, (res, _) => parseResult(res), cid, minRole, maxRole)
+  def getAll(cid: Int, minRole: Int = 0, maxRole: Int = 2): List[CourseResult] = DB.query(
+    """
+      |select u.user_id
+      |     ,u.prename
+      |     ,u.surname
+      |     ,u.email
+      |     ,u.username
+      |     ,u.global_role
+      |     ,u.alias
+      |     ,JSON_ARRAYAGG(JSON_OBJECT("task", JSON_OBJECT("id", t.task_id,
+      |                                                    "name", t.name,
+      |                                                    "deadline", t.deadline,
+      |                                                    "mediaType", t.media_type,
+      |                                                    "description", t.description),
+      |                                "attempts", coalesce(submissions.attempts, 0),
+      |                                "passed", coalesce(submissions.passed, 0),
+      |                                "points", coalesce(subtasks.points, 0)
+      |    )) as results
+      |     ,COALESCE(FLOOR(SUM(submissions.passed) / COUNT(DISTINCT t.task_id)), 0) as passed
+      |     ,COALESCE(SUM(subtasks.points), 0) as points
+      |from user u
+      |         left join user_course uc using (user_id)
+      |         left join task t using (course_id)
+      |         left join (
+      |             select temp.user_id
+      |                   ,temp.task_id
+      |                   ,count(distinct temp.submission_id) as attempts
+      |                   ,max(temp.passed) as passed
+      |                   ,max(temp.submission_id) as submission_id
+      |             from (
+      |                select uts.user_id
+      |                      ,uts.task_id
+      |                      ,uts.submission_id
+      |                      ,IF(SUM(cr.exit_code) = 0, 1, 0) as passed
+      |                from user_task_submission uts
+      |                left join checker_result cr using (submission_id)
+      |                group by uts.user_id, uts.task_id, uts.submission_id
+      |                order by uts.user_id
+      |             ) as temp
+      |             group by temp.user_id, temp.task_id
+      |         ) as submissions using (user_id, task_id)
+      |         left join (
+      |           select str.submission_id, SUM(str.points) as points from checkrunner_sub_task_result str left join
+      |             checkrunner_sub_task cst on str.sub_task_id = cst.sub_task_id group by str.submission_id
+      |         ) as subtasks on submissions.submission_id = subtasks.submission_id
+      |where course_id = ? and uc.course_role between ? and ?
+      |group by u.user_id
+      |order by u.surname, u.user_id;
+      |""".stripMargin, (res, _) => parseResult(res), cid, minRole, maxRole)
 
   /**
     * Get All Course Results by a Task
+    *
     * @param cid Course id
     * @param tid Task id
     * @return all Course Results
     */
-  def getAllByTask(cid: Int, tid: Int): List[AnalysisCourseResult] = DB.query("""
+  def getAllByTask(cid: Int, tid: Int): List[AnalysisCourseResult] = DB.query(
+    """
       |select submission_id, task_id, DENSE_RANK() OVER(order by user_id) as user_id,
       |ROW_NUMBER() OVER(PARTITION BY user_id ORDER BY submission_time) as attempt,
       |not exit_code as passed, result_text from user_task_submission
