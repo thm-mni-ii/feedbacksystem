@@ -72,7 +72,7 @@ class SemanticAstComparator(
             )
         }
         if (applyExponentLaws) {
-            transformers += listOf(DebugTransformer::class, ExponentTransformer::class)
+            transformers += listOf(ExponentTransformer::class)
         }
         ChainTransformer(
             *(
