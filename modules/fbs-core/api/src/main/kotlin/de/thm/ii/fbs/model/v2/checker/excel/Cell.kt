@@ -10,7 +10,7 @@ data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val
     var formula: String? = null
 
     companion object {
-        const val SHEET_DELIMITER = "!"  // TODO implement delimiter for ODF
+        const val SHEET_DELIMITER = "!" // TODO implement delimiter for ODF
     }
 
     constructor(sheet: Int, cell: String, value: String? = null, formula: String? = null) : this(sheet, cell) {

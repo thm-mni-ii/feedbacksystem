@@ -122,15 +122,16 @@ class MinioService {
     * @throws IOException If the i/o operation fails
     */
   @throws[IOException]
-  def deleteFolder(bucketName: String, folderName: String): Unit = {
+  def deleteFolder(bucketName: String, folderName: String): Boolean = {
     val toDelete = minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).prefix(folderName).recursive(true).build())
     val objects = toDelete.map(o => new DeleteObject(o.get().objectName())).asJava
 
     val results = minioClient.removeObjects(RemoveObjectsArgs.builder().bucket(bucketName).objects(objects).build())
-    results.foreach(e => {
+    results.map((e) => {
       val error = e.get()
       logger.error(s"Error in deleting object ${error.objectName()}; ${error.message()}")
-    })
+      true
+    }).reduce((a, b) => a || b)
   }
 
   def bucketExists(bucketName: String): Boolean = {
@@ -161,5 +162,9 @@ class MinioService {
   def generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String = {
     minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
       .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+  }
+
+  def getStatsOfObject(bucketName: String, obj: String): String = {
+    minioClient.statObject(StatObjectArgs.builder().bucket(bucketName).`object`(obj).build()).contentType()
   }
 }

@@ -55,4 +55,23 @@
 
 .pre {
   white-space: pre-wrap;
+  margin-right: 8px;
+}
+
+.submission-text {
+	display: grid;
+	align-items: center;
+	grid-template-columns: auto 80px;
+}
+
+.checker-type {
+  width: 80px;
+}
+
+.result-text {
+  width: 450px;
+}
+
+.result {
+  width: 80px;
 }

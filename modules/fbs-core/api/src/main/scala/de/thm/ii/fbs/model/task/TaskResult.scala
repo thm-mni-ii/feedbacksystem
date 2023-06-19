@@ -1,16 +1,17 @@
-package de.thm.ii.fbs.model
+package de.thm.ii.fbs.model.task
 
 /**
   * A summarized result of a student for a task
   *
-  * @param task The task
+  * @param task     The task
   * @param attempts The attempts made to solve it
-  * @param passed True if task was passed
-  * @param points Points archived in last attempt
+  * @param passed   True if task was passed
+  * @param points   Points archived in last attempt
   */
 case class TaskResult(task: Task, attempts: Int, passed: Boolean, points: Int) extends Ordered[TaskResult] {
   /**
     * Compares TaskResults by Task Id.
+    *
     * @param that TaskResult to be compared with
     * @return comparing int
     */

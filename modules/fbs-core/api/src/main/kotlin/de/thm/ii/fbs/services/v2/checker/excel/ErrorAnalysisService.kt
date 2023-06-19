@@ -13,7 +13,6 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-
 class ErrorAnalysisService(
     private val workbook: XSSFWorkbook,
     private val graph: ReferenceGraph,
@@ -21,13 +20,13 @@ class ErrorAnalysisService(
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
     private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
-    private val errors = HashSet<Cell>()
-    private val perrors = HashSet<Cell>()
+    val errors = HashSet<Cell>()
+    val perrors = HashSet<Cell>()
     private val visited = HashSet<Cell>()
-
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)
+        evaluator.evaluateAll()
         for (outputCell in outputCells) {
             findErrors(outputCell)
         }
@@ -40,9 +39,12 @@ class ErrorAnalysisService(
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
         val workbookCell = getCellFromWorkbook(cell)
 
-        // Base Case
-        // return if cell is input and correct
-        if (graph.isInput(cell) && cellEqualsSolution(cell, workbookCell)) {
+        if (!cellEqualsSolution(cell, workbookCell)) {
+            // found a value error
+            perrors.add(cell)
+        } else if (graph.isInput(cell)) {
+            // Base Case
+            // return if cell is input and correct
             return
         }
 
@@ -56,14 +58,14 @@ class ErrorAnalysisService(
 
         // Graph Deconstruction
         // eval cell again and compare again with solution cell
-        evaluator.evaluateInCell(workbookCell)
+        evaluator.evaluateFormulaCell(workbookCell)
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
+            perrors.remove(cell) // remove from propagated errors
             handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONERROR)
             setValueOfCell(workbookCell, solution[cell]) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
-        } else {
-            perrors.add(cell)
+        } else if (perrors.contains(cell)) {
             handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONPERROR)
         }
     }
