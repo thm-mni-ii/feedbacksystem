@@ -22,9 +22,17 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/theme.scss", "src/styles.scss"],
-            "scripts": ["node_modules/marked/marked.min.js"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/theme.scss",
+              "src/styles.scss"
+            ],
+            "scripts": [
+              "node_modules/marked/marked.min.js"
+            ],
             "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,
@@ -32,7 +40,10 @@
             "sourceMap": true,
             "optimization": false,
             "namedChunks": true,
-            "allowedCommonJsDependencies": ["chart.js", "file-saver"]
+            "allowedCommonJsDependencies": [
+              "chart.js",
+              "file-saver"
+            ]
           },
           "configurations": {
             "production": {
@@ -91,7 +102,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }
@@ -100,6 +114,12 @@
   "schematics": {
     "@schematics/angular:component": {
       "style": "scss"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
     }
   },
   "cli": {
