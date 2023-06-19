@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.TestApplication
-import de.thm.ii.fbs.model.Task
+import de.thm.ii.fbs.model.task.{PartialTask, Task, TaskBatch}
 import org.junit.runner.RunWith
 import org.junit.{Assert, Before, Test}
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,6 +54,13 @@ class TaskServiceTest {
   def update(): Unit = {
     create()
     taskService.update(1, 1, Task("Test", None, "type", isPrivate = false, "A Task", None, "mandatory", 1, 1, None))
+    Assert.assertEquals(taskService.getAll(1).length, 1)
+  }
+
+  @Test
+  def updateBatch(): Unit = {
+    create()
+    taskService.updateBatch(1, TaskBatch(List(1), PartialTask("Test 123", null, null, Some(true), null, null, null, null, None)))
     Assert.assertEquals(taskService.getAll(1).length, 1)
   }
 

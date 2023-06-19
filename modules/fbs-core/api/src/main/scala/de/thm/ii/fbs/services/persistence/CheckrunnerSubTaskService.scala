@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.persistence
 
-import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult, SubTaskResult}
+import de.thm.ii.fbs.model.task.SubTaskResult
+import de.thm.ii.fbs.model.{CheckrunnerSubTask, CheckrunnerSubTaskResult}
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -19,6 +20,7 @@ class CheckrunnerSubTaskService {
 
   /**
     * Get all CheckrunnerSubTasks for a configuration
+    *
     * @param configurationId the configuration id for which to get the checkrunners
     * @return List of subtasks
     */
@@ -30,8 +32,9 @@ class CheckrunnerSubTaskService {
 
   /**
     * Get subtask by name
+    *
     * @param configurationId the configuration id for which to get the subtasks
-    * @param name the name of the subtasks
+    * @param name            the name of the subtasks
     * @return Option of subtasks
     */
   def get(configurationId: Int, name: String): Option[CheckrunnerSubTask] = DB.query(
@@ -42,9 +45,10 @@ class CheckrunnerSubTaskService {
 
   /**
     * Create a new subtask
+    *
     * @param configurationId the configuration id for which to get the subtasks
-    * @param name the name of the course
-    * @param points the max points
+    * @param name            the name of the course
+    * @param points          the max points
     * @return The new Checkrunner
     */
   def create(configurationId: Int, name: String, points: Int): CheckrunnerSubTask = DB.insert(
@@ -58,8 +62,9 @@ class CheckrunnerSubTaskService {
 
   /**
     * Get all results for a subission
+    *
     * @param configurationId The configuration id for which to get the results
-    * @param submissionId The id of the submission to get the subtasks results
+    * @param submissionId    The id of the submission to get the subtasks results
     * @return List of subtasks
     */
   def listResults(configurationId: Int, submissionId: Int): List[CheckrunnerSubTaskResult] = DB.query(
@@ -70,9 +75,10 @@ class CheckrunnerSubTaskService {
 
   /**
     * Get subtask by name
+    *
     * @param configurationId the configuration id for which to get the result
-    * @param subTaskId the id of the sub task to get result
-    * @param submissionId the submission id of the sub task to get result
+    * @param subTaskId       the id of the sub task to get result
+    * @param submissionId    the submission id of the sub task to get result
     * @return List of subTaskResults
     */
   def getResult(configurationId: Int, subTaskId: Int, submissionId: Int): Option[CheckrunnerSubTaskResult] = DB.query(
@@ -84,10 +90,11 @@ class CheckrunnerSubTaskService {
 
   /**
     * Create a new submission result
+    *
     * @param configurationId the configuration id
-    * @param subTaskId the id of the subTask
-    * @param submissionId the id of the submission
-    * @param points the max points
+    * @param subTaskId       the id of the subTask
+    * @param submissionId    the id of the submission
+    * @param points          the max points
     * @return The new Checkrunner
     */
   def createResult(configurationId: Int, subTaskId: Int, submissionId: Int, points: Int): Unit = DB.insert(
@@ -97,9 +104,10 @@ class CheckrunnerSubTaskService {
 
   /**
     * Gets or creates a subtask
+    *
     * @param configurationId the configuration id for which to get the checkrunners
-    * @param name the name of the course
-    * @param maxPoints the max points
+    * @param name            the name of the course
+    * @param maxPoints       the max points
     * @return The new Checkrunner
     */
   def getOrCrate(configurationId: Int, name: String, maxPoints: Int): CheckrunnerSubTask = get(configurationId, name)
@@ -107,8 +115,9 @@ class CheckrunnerSubTaskService {
 
   /**
     * Get a list of all subtask results with task information
+    *
     * @param configurationId The configuration id for which to get the results
-    * @param submissionId The id of the submission to get the subtasks results
+    * @param submissionId    The id of the submission to get the subtasks results
     * @return List of subtasks results with tasks
     */
   def listResultsWithTasks(userId: Int, configurationId: Int, submissionId: Int): List[SubTaskResult] = DB.query(
@@ -122,6 +131,7 @@ class CheckrunnerSubTaskService {
 
   /**
     * Parse SQL Query sub task results
+    *
     * @param res SQL Query result
     * @return CheckrunnerSubTask
     */
@@ -134,6 +144,7 @@ class CheckrunnerSubTaskService {
 
   /**
     * Parse SQL Query sub task results
+    *
     * @param res SQL Query result
     * @return CheckrunnerSubTask
     */
@@ -146,6 +157,7 @@ class CheckrunnerSubTaskService {
 
   /**
     * Parse SQL Query sub task result + sub task result
+    *
     * @param res SQL Query result
     * @return SubTaskResult
     */
