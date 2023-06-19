@@ -1,17 +1,16 @@
 package de.thm.ii.fbs.util
 
-import de.thm.ii.fbs.model.{Task, User}
+import de.thm.ii.fbs.model.User
+import de.thm.ii.fbs.model.task.Task
 import org.apache.commons.compress.archivers.ArchiveOutputStream
-import org.apache.commons.compress.archivers.tar.{TarArchiveEntry, TarArchiveOutputStream}
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.IOUtils
+import org.apache.tika.mime.MimeTypes
 
 import java.io._
 import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
-import org.apache.tika.mime.MimeType
-import org.apache.tika.mime.MimeTypeException
-import org.apache.tika.mime.MimeTypes
 
 object Archiver {
   @throws[IOException]
