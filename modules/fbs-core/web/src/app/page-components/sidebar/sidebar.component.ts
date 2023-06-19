@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "../../service/auth.service";
 import { TitlebarService } from "../../service/titlebar.service";
@@ -8,7 +8,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
-
+import { JoyrideService } from "ngx-joyride";
+import { MatMenuTrigger } from "@angular/material/menu";
 /**
  * Root component shows sidenav and titlebar
  */
@@ -18,12 +19,14 @@ import { FeedbackAppService } from "../../service/feedback-app.service";
   styleUrls: ["./sidebar.component.scss"],
 })
 export class SidebarComponent implements OnInit {
+  @ViewChild(MatMenuTrigger) menuTrigger!: MatMenuTrigger;
   constructor(
     private router: Router,
     private auth: AuthService,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
-    private feedbackAppService: FeedbackAppService
+    private feedbackAppService: FeedbackAppService,
+    private joyride: JoyrideService
   ) {}
 
   title: Observable<string> = of("");
@@ -95,4 +98,37 @@ export class SidebarComponent implements OnInit {
       window.open("/feedbackApp/");
     });
   }
+  tour() {
+    this.joyride.startTour({
+      steps: [
+        "settings",
+        "myCourses",
+        "allCourses",
+        "createcourse@/courses/search",
+        "searchcourse",
+        "createuser@/admin/user-management",
+        "playground@/sqlplayground",
+      ],
+      stepDefaultPosition: "bottom",
+
+      customTexts: {
+        next: ">>",
+        prev: "<<",
+        done: "Ok",
+      },
+    });
+  }
+  onNext() {
+    this.router.navigate(["/courses/search"]);
+  }
+  onPrev() {
+    this.router.navigate(["/courses"]);
+  }
+  /* openMenu() {
+    this.menuTrigger.openMenu();
+  }
+   onNext(){
+    
+    this.openMenu();
+  } */
 }

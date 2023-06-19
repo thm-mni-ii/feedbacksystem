@@ -10,7 +10,7 @@ import { CreateGuestUserDialogComponent } from "../../dialogs/create-guest-user-
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { Roles } from "../../model/Roles";
 import { MatDialog } from "@angular/material/dialog";
-
+import { Router } from "@angular/router";
 /**
  * This component is for admins managing users
  */
@@ -27,6 +27,7 @@ export class UserManagementComponent implements OnInit {
   dataSource = new MatTableDataSource<User>();
 
   constructor(
+    private router: Router,
     private snackBar: MatSnackBar,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
@@ -36,6 +37,9 @@ export class UserManagementComponent implements OnInit {
   ngOnInit() {
     this.titlebar.emitTitle("Benutzerverwaltung");
     this.refreshUserList();
+  }
+  backtoserach() {
+    this.router.navigate(["/courses/search"]);
   }
 
   private refreshUserList() {

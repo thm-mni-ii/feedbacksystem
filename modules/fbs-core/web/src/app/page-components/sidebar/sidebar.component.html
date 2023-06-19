@@ -22,7 +22,14 @@
       <mat-nav-list>
         <a mat-list-item routerLink="/courses" routerLinkActive="selected">
           <mat-icon>list</mat-icon>
-          <p>Meine Kurse</p>
+          <p
+            joyrideStep="myCourses"
+            title="Meine Kurse"
+            text="Auf dieser Seite können Sie alle Kurse sehen, an denen Sie teilnehmen"
+            (next)="onNext()"
+          >
+            Meine Kurse
+          </p>
         </a>
 
         <a
@@ -31,7 +38,14 @@
           routerLinkActive="selected"
         >
           <mat-icon>search</mat-icon>
-          <p>Alle Kurse</p>
+          <p
+            joyrideStep="allCourses"
+            title="Alle Kurse"
+            text="Alle Kurse zeigt alle Kurse an, an denen der Nutzer teilnehmen kann"
+            (prev)="onPrev()"
+          >
+            Alle Kurse
+          </p>
         </a>
 
         <a
@@ -55,7 +69,17 @@
           routerLinkActive="selected"
         >
           <mat-icon>extension</mat-icon>
-          <p>SQL Playground</p>
+          <p
+            joyrideStep="playground"
+            title="sqlplayground"
+            text="Auf dieser Seite können Sie Datenbanken erstellen und sie mit Quiries manipulieren"
+          >
+            SQL Playground
+          </p>
+        </a>
+        <a mat-list-item (click)="tour()">
+          <mat-icon>rowing</mat-icon>
+          <p>Tour starten</p>
         </a>
 
         <a
@@ -93,7 +117,12 @@
         class="toolbar-icon favorite-icon"
         aria-label="User Menu"
       >
-        <mat-icon>account_circle</mat-icon>
+        <mat-icon
+          joyrideStep="settings"
+          title="Einstellungen"
+          text="Im Einstellungsmenü kann sich der Benutzer abmelden und sein Passwort ändern"
+          >account_circle</mat-icon
+        >
       </button>
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="logout()">
