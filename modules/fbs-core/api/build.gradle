@@ -56,7 +56,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
-    implementation('org.json:json:20210307')
+    implementation('org.json:json:20230618')
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
