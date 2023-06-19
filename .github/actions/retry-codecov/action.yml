@@ -24,7 +24,7 @@ runs:
     - uses: codecov/codecov-action@v3
       name: Upload Coverage Report (Retry 1)
       id: codecov-1
-      if: always() && steps.test.conclusion == 'failure'
+      if: always() && steps.codecov.conclusion == 'failure'
       with:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
@@ -36,7 +36,7 @@ runs:
     - uses: codecov/codecov-action@v3
       name: Upload Coverage Report (Retry 2)
       id: codecov-2
-      if: always() && steps.test.conclusion == 'failure'
+      if: always() && steps.codecov-1.conclusion == 'failure'
       with:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
