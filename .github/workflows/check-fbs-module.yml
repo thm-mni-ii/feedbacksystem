@@ -104,6 +104,7 @@ jobs:
           arguments: ${{ inputs.coverageArguments }}
       - uses: ./github/actions/retry-codecov
         if: ${{ inputs.coverageFilesLocation }}
+        name: Upload Coverage Report
         with:
           files: ${{ inputs.coverageFilesLocation }}
           flags: ${{ inputs.name }}
