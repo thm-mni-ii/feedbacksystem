@@ -366,6 +366,7 @@ def update_histogram_avg_submissions(
 
 # pylint: disable=too-many-locals
 
+
 # Update histogramm figure
 @callback(
     Output(histogram, "figure"),
