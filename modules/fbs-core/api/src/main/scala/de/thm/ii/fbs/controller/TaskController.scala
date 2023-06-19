@@ -130,7 +130,7 @@ class TaskController {
             val config = this.checkerConfigurationService.getAll(cid, tid).head
             val spreadsheetFile: File = storageService.getFileMainFile(config)
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
-            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
+            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields, mathJson = true)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
             spreadsheetFile.delete()
             task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
