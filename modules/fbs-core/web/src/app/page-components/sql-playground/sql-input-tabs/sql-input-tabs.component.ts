@@ -253,7 +253,6 @@ export class SqlInputTabsComponent
     this.activeTab.selectedTaskName = this.activeTab.selectedTask.name;
     this.activeTab.error = false;
     this.activeTab.isSubmitted = false;
-    //this.checkForCheckerConfig();
     this.checkerService
       .checkForCheckerConfig(
         this.activeTab.selectedCourse.id,
