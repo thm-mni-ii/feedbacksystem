@@ -7,14 +7,6 @@
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span class="spacer"></span>
-    <mat-checkbox
-      [matTooltip]="
-        toggle ? 'Alle Benutzer anzeigen' : 'Nur Benutzer mit Abgaben anzeigen'
-      "
-      [(ngModel)]="toggle"
-      (change)="toggleResults()"
-    ></mat-checkbox>
     <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
   <mat-list role="list" class="legend">
@@ -62,6 +54,19 @@
         <!--                     (page)="pageEvent($event)">-->
         <!--      </mat-paginator>-->
         <!--    </div>-->
+        <div class="show-submissions">
+          <button mat-icon-button (click)="toggleOption()">
+            <mat-icon>filter_list</mat-icon>
+          </button>
+        </div>
+        <hr />
+        <div class="toggle-container" *ngIf="showOption === true">
+          <span class="toggle-text">Benutzer mit Abgaben</span>
+          <mat-slide-toggle
+            [(ngModel)]="toggle"
+            (change)="toggleResults()"
+          ></mat-slide-toggle>
+        </div>
         <div class="card">
           <div class="name-column">
             <div class="name-container header">
