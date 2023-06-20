@@ -4,12 +4,15 @@ package de.thm.ii.fbs.model.v2.security.authorization
  * The course roles of a user
  */
 abstract class CourseRole(val id: Int) /*: Role*/ { // FIXME course roles are not application-wide permissions instead use the project’s domain object security capabilities.
-    companion object { // TODO remove and use objects instead of subclasses once scala does not access the Roles in patterns
-        @JvmField val DOCENT = Docent()
+    companion object { // TODO remove fields in companion object once scala does not access the Roles in patterns
+        @JvmField
+        val DOCENT = DocentRole
 
-        @JvmField val TUTOR = Tutor()
+        @JvmField
+        val TUTOR = TutorRole
 
-        @JvmField val STUDENT = Student()
+        @JvmField
+        val STUDENT = StudentRole
 
         /**
          * Parse a String to a course role.
@@ -41,21 +44,21 @@ abstract class CourseRole(val id: Int) /*: Role*/ { // FIXME course roles are no
     /**
      * Admin of the course.
      */
-    class Docent : CourseRole(0) {
+    object DocentRole : CourseRole(0) {
         /*override*/ fun getAuthority(): String = "ROLE_DOCENT"
     }
 
     /**
      * Moderator of the course
      */
-    class Tutor : CourseRole(0) {
+    object TutorRole : CourseRole(0) {
         /*override*/ fun getAuthority(): String = "ROLE_TUTOR"
     }
 
     /**
      * Participant in the course.
      */
-    class Student : CourseRole(0) {
+    object StudentRole : CourseRole(0) {
         /*override*/ fun getAuthority(): String = "ROLE_STUDENT"
     }
 }
