@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { Submission } from "../../model/Submission";
-import { MatLegacyTableDataSource as MatTableDataSource } from "@angular/material/legacy-table";
+import { MatTableDataSource } from "@angular/material/table";
 import { CheckResult } from "../../model/CheckResult";
 import { SubmissionService } from "src/app/service/submission.service";
 import { Clipboard } from "@angular/cdk/clipboard";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-results",

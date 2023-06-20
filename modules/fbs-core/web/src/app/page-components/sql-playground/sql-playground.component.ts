@@ -8,7 +8,7 @@ import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { Table } from "src/app/model/sql_playground/Table";
 import { Constraint } from "src/app/model/sql_playground/Constraint";
 import { delay, retryWhen } from "rxjs/operators";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 /**
  * This component is for the sql playground

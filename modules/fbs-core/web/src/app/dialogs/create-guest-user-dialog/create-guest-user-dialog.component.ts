@@ -5,8 +5,8 @@ import {
   ValidationErrors,
   Validators,
 } from "@angular/forms";
-import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from "@angular/material/legacy-dialog";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { User } from "../../model/User";
 
 @Component({

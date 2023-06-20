@@ -13,6 +13,7 @@
       <div class="scroll-box">
         <div class="task-item" *ngFor="let task of tasks">
           <mat-card
+            appearance="outlined"
             class="card"
             [ngClass]="getClass(task)"
             (click)="select(task)"

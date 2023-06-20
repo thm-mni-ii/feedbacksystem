@@ -1,4 +1,4 @@
-.mat-dialog-content {
+.mat-mdc-dialog-content {
   overflow: visible;
 }
 
@@ -55,6 +55,7 @@
 }
 
 /***** MAT TAB GROUP *****/
+/*TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version.*/
 .mat-tab-label {
   align-content: baseline;
 }
@@ -71,13 +72,14 @@
   padding: 2rem 0;
 }
 
-.mat-input-element {
+.mat-mdc-input-element {
   width: 90%;
 }
-.mat-list-item {
+.mat-mdc-list-item {
   margin-bottom: 1rem;
 }
 
+/*TODO(mdc-migration): The following rule targets internal classes of list that may no longer apply for the MDC version.*/
 .mat-list-item-content {
   justify-content: space-between;
 }

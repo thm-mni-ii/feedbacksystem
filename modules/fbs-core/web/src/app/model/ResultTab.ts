@@ -1,4 +1,4 @@
-import { MatLegacyTableDataSource as MatTableDataSource } from "@angular/material/legacy-table";
+import { MatTableDataSource } from "@angular/material/table";
 
 export interface ResultTab {
   id: number;

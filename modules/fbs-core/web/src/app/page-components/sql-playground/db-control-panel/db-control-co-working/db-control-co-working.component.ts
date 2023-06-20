@@ -1,13 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { Observable } from "rxjs";
 import { Database } from "../../../../model/sql_playground/Database";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { AuthService } from "src/app/service/auth.service";
 import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 import { JWTToken } from "src/app/model/JWTToken";
 import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: "app-db-control-co-working",

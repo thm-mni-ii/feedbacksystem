@@ -3,14 +3,14 @@ import { CourseRegistrationService } from "../../service/course-registration.ser
 import { Participant } from "../../model/Participant";
 import { User } from "../../model/User";
 import { MatSort } from "@angular/material/sort";
-import { MatLegacyPaginator as MatPaginator } from "@angular/material/legacy-paginator";
-import { MatLegacyTableDataSource as MatTableDataSource } from "@angular/material/legacy-table";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatPaginator } from "@angular/material/paginator";
+import { MatTableDataSource } from "@angular/material/table";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { UserService } from "../../service/user.service";
 import { ActivatedRoute } from "@angular/router";
 import { Roles } from "../../model/Roles";
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { TextConfirmDialogComponent } from "src/app/dialogs/text-confirm-dialog/text-confirm-dialog.component";
 
 @Component({

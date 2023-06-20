@@ -8,7 +8,7 @@ import { CourseResult } from "../../../model/CourseResult";
 import { Task } from "../../../model/Task";
 import { SubmissionService } from "../../../service/submission.service";
 import { AllSubmissionsComponent } from "../../../dialogs/all-submissions/all-submissions.component";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
 import { EvaluationUserResults } from "../../../model/EvaluationUserResults";
