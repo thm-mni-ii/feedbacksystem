@@ -104,7 +104,8 @@ class CourseRegistrationService {
     GlobalRole.parse(res.getInt("global_role")),
     res.getString("email"),
     res.getString("alias"),
-    res.getInt("user_id")
+    res.getInt("user_id"),
+    false, false, null
   )
 
   /**

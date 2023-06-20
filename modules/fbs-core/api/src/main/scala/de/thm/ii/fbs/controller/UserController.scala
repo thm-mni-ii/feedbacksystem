@@ -129,7 +129,7 @@ class UserController {
     if (user.getGlobalRole != GlobalRole.ADMIN) {
       throw new ForbiddenException()
     }
-    ( body.retrive("prename").asText(),
+    (body.retrive("prename").asText(),
       body.retrive("surname").asText(),
       body.retrive("email").asText(),
       body.retrive("password").asText(),
@@ -139,7 +139,7 @@ class UserController {
     ) match {
       case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
         loginService.createUser(
-          new User(prename, surname, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), email, alias.orNull, null),
+          new User(prename, surname, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), email, alias.orNull, null, false, false, null),
           password)
       case _ => throw new BadRequestException("Malformed Request Body")
     }
@@ -147,6 +147,7 @@ class UserController {
 
   /**
     * Delete a user
+    *
     * @param uid which user has to be deleted
     * @param req http request
     * @param res http response

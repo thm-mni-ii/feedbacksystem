@@ -55,7 +55,7 @@ class LocalLoginService {
     * @return the create user
     */
   def createUser(user: User, password: String): User =
-    userService.create(user, hash(password))
+    userService.create(user, hash(password)) // TODO replace null password with hashed password
 
   /**
     * Updates the password of the given user

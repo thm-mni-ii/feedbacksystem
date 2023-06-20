@@ -17,6 +17,9 @@ import javax.persistence.*
  * @param email User's email
  * @param alias the DB password hash
  * @param id local DB's userid
+ * @param deleted if user is marked as deleted
+ * @param privacyChecked if user agrred to the privacy agreement
+ * @param password User's password
  */
 @Entity
 @Table(name = "user")
@@ -36,7 +39,13 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    var id: Int? = null
+    var id: Int? = null,
+    @Column
+    val deleted: Boolean = false,
+    @Column
+    val privacyChecked: Boolean = false,
+    @Column
+    val password: String? = null
 ) {
 
     fun toUserDetails(): UserDetails = User(username, null, setOf(globalRole)) // TODO save password in user?

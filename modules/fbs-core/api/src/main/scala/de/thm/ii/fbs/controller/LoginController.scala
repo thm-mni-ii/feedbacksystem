@@ -104,7 +104,7 @@ class LoginController extends CasClientConfigurerAdapter {
       entry.getAttribute(uidAttributeName).getStringValue,
       GlobalRole.USER,
       entry.getAttribute(mailAttributeName).getStringValue,
-      null, null))
+      null, null, false, false, null))
 
   /**
     * Login via LDAP
