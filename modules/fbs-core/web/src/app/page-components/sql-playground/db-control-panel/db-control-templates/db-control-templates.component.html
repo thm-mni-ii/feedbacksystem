@@ -29,7 +29,7 @@
     [disabled]="selectedTemplateId === 0 || selectedTemplateId === undefined"
     (click)="insertTemplate()"
   >
-    Einfügen
+    {{ "add-template" | transloco }}
   </button>
   <button
     *ngIf="isAdmin"
@@ -37,6 +37,6 @@
     class="orange-btn"
     (click)="editTemplates()"
   >
-    Bearbeiten
+    {{ "edit-template" | transloco }}
   </button>
 </div>

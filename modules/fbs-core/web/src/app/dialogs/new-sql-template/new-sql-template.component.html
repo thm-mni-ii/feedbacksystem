@@ -1,7 +1,7 @@
 <div class="container">
   <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
   <div *ngIf="!isUpdateDialog" matDialogTitle>
-    Template erstellen/bearbeiten
+    {{ "template-create" | transloco }}
   </div>
   <mat-dialog-content style="max-height: 80%; overflow: auto">
     <mat-card-content class="content">
@@ -9,7 +9,7 @@
         <mat-list role="list">
           <mat-list-item>
             <div class="list-item">
-              <span class="item-text">Neue Vorlage erstellen</span>
+              <span class="item-text">{{ "new-template" | transloco }}</span>
               <span></span>
               <button mat-icon-button (click)="closeDialog()">
                 <mat-icon class="list-icon grey">add-circle</mat-icon>
@@ -42,11 +42,11 @@
       </div>
       <mat-card class="edit-area">
         <mat-card-header>
-          <mat-card-title>Vorlage Erstellen/Bearbeiten</mat-card-title>
+          <mat-card-title>{{ "template-create" | transloco }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <mat-form-field>
-            <mat-label>Vorlagenname</mat-label>
+            <mat-label>{{ "template-name" | transloco }}</mat-label>
             <input
               [formControl]="templateName"
               name="newCourseName"
@@ -56,14 +56,13 @@
               minlength="3"
               maxlength="100"
             />
-            <mat-error *ngIf="templateName.errors"
-              >Der Vorlagenname ist erforderlich! Und muss mindestens 3 Zeichen
-              besitzen</mat-error
-            >
+            <mat-error *ngIf="templateName.errors">{{
+              "template-name-condition" | transloco
+            }}</mat-error>
           </mat-form-field>
           <div class="category-grid">
             <mat-form-field class="select" appearance="fill">
-              <mat-label>Kategorie</mat-label>
+              <mat-label>{{ "settings-category" | transloco }}</mat-label>
               <mat-select [(value)]="selectedCategory">
                 <mat-option>-- None --</mat-option>
                 <mat-option
@@ -76,15 +75,15 @@
             </mat-form-field>
             <button mat-button>
               <mat-icon outline>add_circle</mat-icon>
-              Kategorie hinzufügen
+              {{ "add-category" | transloco }}
             </button>
             <button mat-button>
               <mat-icon outline>do_not_disturb_on</mat-icon>
-              Kategorie entfernen
+              {{ "remove-category" | transloco }}
             </button>
           </div>
           <mat-form-field>
-            <mat-label>Vorlage</mat-label>
+            <mat-label>{{ "template" | transloco }}</mat-label>
             <textarea
               style="height: 130px"
               matInput
@@ -95,16 +94,18 @@
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button class="btn-green" (click)="closeDialog()">
-            Erstellen
+            {{ "settings-points-create" | transloco }}
           </button>
           <button mat-raised-button class="btn-green" (click)="closeDialog()">
-            Speichern
+            {{ "course-save" | transloco }}
           </button>
         </mat-card-actions>
       </mat-card>
     </mat-card-content>
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Zurück</button>
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      {{ "go-back" | transloco }}
+    </button>
   </mat-dialog-actions>
 </div>

@@ -1,41 +1,47 @@
-<h1 mat-dialog-title>Neuen Benutzer erstellen</h1>
+<h1 mat-dialog-title>{{ "new-user-dialogue" | transloco }}</h1>
 <div class="guest-account" mat-dialog-content>
   <p>
-    Note: All users of the Central Authentication Service (CAS) can log in into
-    the system. A local user is an ordinary user, but is restricted to use the
-    local login. This type of user account is meant to be used by external
-    persons only.
+    {{ "user-note" | transloco }}
   </p>
   <form class="guest-account" #guestUserForm="ngForm">
     <mat-form-field>
-      <mat-label>Vorname</mat-label>
+      <mat-label>{{ "participant-firstname" | transloco }}</mat-label>
       <input matInput required [(ngModel)]="data.prename" name="firstname" />
-      <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
+      <mat-error
+        >{{ "necessary-field1" | transloco }}
+        <strong>{{ "necessary-field2" | transloco }}</strong></mat-error
+      >
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Nachname</mat-label>
+      <mat-label>{{ "participant-lastname" | transloco }}</mat-label>
       <input matInput required [(ngModel)]="data.surname" name="surname" />
-      <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
+      <mat-error
+        >{{ "necessary-field1" | transloco
+        }}<strong>{{ "necessary-field2" | transloco }}</strong></mat-error
+      >
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>E-Mail</mat-label>
       <input matInput required email [(ngModel)]="data.email" name="email" />
       <mat-error
-        >Eine gültige E-Mail-Adresse ist
-        <strong>erforderlich!</strong></mat-error
+        >{{ "necessary-email" | transloco }}
+        <strong>{{ "necessary-field2" | transloco }}</strong></mat-error
       >
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Username</mat-label>
+      <mat-label>{{ "user-username" | transloco }}</mat-label>
       <input matInput required [(ngModel)]="data.username" name="username" />
-      <mat-error>Der Benutzername ist <strong>erforderlich!</strong></mat-error>
+      <mat-error
+        >Der Benutzername ist
+        <strong>{{ "necessary-field2" | transloco }}</strong></mat-error
+      >
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Passwort</mat-label>
+      <mat-label>{{ "user-password" | transloco }}</mat-label>
       <input
         type="password"
         required
@@ -43,11 +49,14 @@
         [(ngModel)]="data.password"
         name="pass"
       />
-      <mat-error>Das Passwort ist <strong>erforderlich!</strong></mat-error>
+      <mat-error
+        >{{ "necessary-password" | transloco
+        }}<strong>{{ "necessary-field2" | transloco }}</strong></mat-error
+      >
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Passwort wiederholen</mat-label>
+      <mat-label>{{ "repeat-password" | transloco }}</mat-label>
       <input
         type="password"
         required
@@ -57,15 +66,21 @@
         name="passRepeat"
       />
       <mat-error *ngIf="passwordMatcher.hasError('required')"
-        >Das Passwort ist <strong>erforderlich!</strong></mat-error
+        >{{ "necessary-password" | transloco }}
+        <strong>{{ "necessary-field2" | transloco }}</strong></mat-error
       >
       <mat-error *ngIf="passwordMatcher.hasError('notMatch')"
-        >Die Passwörter <strong>müssen übereinstimmen!</strong></mat-error
+        >{{ "passwords-not-match1" | transloco }}
+        <strong>{{ "passwords-not-match2" | transloco }}</strong></mat-error
       >
     </mat-form-field>
 
     <mat-form-field>
-      <mat-select [(value)]="data.globalRole" placeholder="Rolle" name="role">
+      <mat-select
+        [(value)]="data.globalRole"
+        placeholder="{{ 'participant-role' | transloco }}"
+        name="role"
+      >
         <mat-option value="ADMIN">Admin</mat-option>
         <mat-option value="MODERATOR">Moderator</mat-option>
         <mat-option value="USER">User</mat-option>
@@ -74,7 +89,7 @@
   </form>
   <mat-dialog-actions class="actions">
     <button mat-raised-button color="warn" (click)="onCancel()">
-      Abbrechen
+      {{ "dialogue-cancel" | transloco }}
     </button>
     <button
       mat-raised-button
@@ -82,7 +97,7 @@
       [disabled]="guestUserForm.form.invalid"
       (click)="onSubmit()"
     >
-      Hinzufügen
+      {{ "settings-points-create" | transloco }}
     </button>
   </mat-dialog-actions>
 </div>

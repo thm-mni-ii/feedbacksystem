@@ -134,10 +134,11 @@
       </button>
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="logout()">
-          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
+          <mat-icon class="logout-icon">power_settings_new</mat-icon>
+          {{ "Logout" | transloco }}
         </button>
         <button mat-menu-item routerLink="/users/password">
-          <mat-icon>settings</mat-icon>Passwort ändern
+          <mat-icon>settings</mat-icon>{{ "change-password" | transloco }}
         </button>
       </mat-menu>
     </mat-toolbar>

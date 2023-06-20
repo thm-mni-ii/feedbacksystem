@@ -17,7 +17,8 @@
   ></app-course-preview-w-progress>
 
   <span class="noElements" *ngIf="(courses | async)?.length === 0">
-    Tragen Sie sich in <a routerLink="/courses/search">Kurse</a> ein um diese
-    hier zu sehen.
+    {{ "course-enrollment1" | transloco }}
+    <a routerLink="/courses/search">{{ "course-enrollment2" | transloco }}</a>
+    {{ "course-enrollment3" | transloco }}
   </span>
 </div>

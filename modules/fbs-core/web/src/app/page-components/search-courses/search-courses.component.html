@@ -35,7 +35,7 @@
     [data]="course"
   ></app-course-preview>
 
-  <span class="noElements" *ngIf="(courses | async)?.length === 0"
-    >Es gibt noch keiner Kurse denen Sie beitreten können.</span
-  >
+  <span class="noElements" *ngIf="(courses | async)?.length === 0">{{
+    "no-courses-message" | transloco
+  }}</span>
 </div>

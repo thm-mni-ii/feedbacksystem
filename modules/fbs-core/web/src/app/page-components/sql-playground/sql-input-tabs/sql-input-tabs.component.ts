@@ -6,7 +6,6 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   Renderer2,
@@ -34,7 +33,7 @@ import { TranslocoService } from "@ngneat/transloco";
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
 export class SqlInputTabsComponent
-  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewChecked, AfterViewInit
 {
   @Input() isPending: boolean;
   @Output() submitStatement = new EventEmitter<string>();
@@ -84,9 +83,7 @@ export class SqlInputTabsComponent
   ngAfterViewInit() {
     this.prismService.highlightAll();
   }
-  ngOnDestroy(): void {
-    console.log("");
-  }
+
 
   fileName = "New_Query";
   tabs = [{ name: this.fileName, content: "" }];

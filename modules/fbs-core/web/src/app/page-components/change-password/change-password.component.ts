@@ -4,6 +4,7 @@ import { TitlebarService } from "../../service/titlebar.service";
 import { UntypedFormControl, Validators } from "@angular/forms";
 import { AuthService } from "../../service/auth.service";
 import { UserService } from "../../service/user.service";
+import { TranslocoService } from "@ngneat/transloco";
 
 @Component({
   selector: "app-change-password",
@@ -20,11 +21,14 @@ export class ChangePasswordComponent implements OnInit {
     private auth: AuthService,
     private userService: UserService,
     private snackbar: MatSnackBar,
-    private titlebar: TitlebarService
+    private titlebar: TitlebarService,
+    private readonly translocoService: TranslocoService
   ) {}
 
   ngOnInit() {
-    this.titlebar.emitTitle("Passwort ändern");
+    this.translocoService
+      .selectTranslate("change-password")
+      .subscribe((value) => this.titlebar.emitTitle(value));
   }
 
   showOK() {

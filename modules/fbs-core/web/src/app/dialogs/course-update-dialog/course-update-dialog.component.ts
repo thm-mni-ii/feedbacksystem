@@ -6,6 +6,7 @@ import { Course } from "../../model/Course";
 import { Semester } from "../../model/Semester";
 import { CourseService } from "../../service/course.service";
 import { SemesterService } from "../../service/semester.service";
+import { TranslocoService } from "@ngneat/transloco";
 
 /**
  * Updates course information in dialog
@@ -24,6 +25,7 @@ export class CourseUpdateDialogComponent implements OnInit {
   isUpdateDialog = false;
 
   constructor(
+    private translocoService: TranslocoService,
     private courseService: CourseService,
     private semesterService: SemesterService,
     private snackBar: MatSnackBar,
@@ -55,6 +57,10 @@ export class CourseUpdateDialogComponent implements OnInit {
    * Get data from form groups and create new course
    */
   saveCourse() {
+    let message = "";
+    this.translocoService
+      .selectTranslate("course-creation-error")
+      .subscribe((value) => (message = value));
     if (!this.isInputValid) {
       return;
     }
@@ -82,11 +88,7 @@ export class CourseUpdateDialogComponent implements OnInit {
         },
         (error) => {
           console.error(error);
-          this.snackBar.open(
-            "Es ist ein fehler beim erstellen des Kurses aufgetreten",
-            null,
-            { duration: 3000 }
-          );
+          this.snackBar.open(message, null, { duration: 3000 });
         }
       );
     }

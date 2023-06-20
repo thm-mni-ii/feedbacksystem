@@ -2,11 +2,11 @@
   <mat-grid-list cols="1" rowHeight="60px">
     <mat-grid-tile>
       <h2>
-        Entschuldigung, leider existiert die von Ihnen aufgerufenen Seite nicht.
+        {{ "page-not-found" | transloco }}
       </h2>
     </mat-grid-tile>
     <mat-grid-tile>
-      <a routerLink="/">Zurück zur Startseite</a>
+      <a routerLink="/">{{ "back-to-home" | transloco }}</a>
     </mat-grid-tile>
   </mat-grid-list>
 </div>

@@ -30,7 +30,7 @@
       (click)="deleteDatabase()"
       [disabled]="!collaborativeMode"
     >
-      Löschen
+      {{ "delete-db" | transloco }}
     </button>
     <button
       mat-raised-button
@@ -47,7 +47,7 @@
       (click)="addDb()"
       [disabled]="!collaborativeMode"
     >
-      Neue DB
+      {{ "cowork-new-db" | transloco }}
     </button>
   </div>
 </div>

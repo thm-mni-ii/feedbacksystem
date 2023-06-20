@@ -16,16 +16,15 @@
           minlength="3"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors"
-          >Der Datenbankname ist erforderlich! Und muss mindestens 3 Zeichen
-          besitzen</mat-error
-        >
+        <mat-error *ngIf="name.errors">{{
+          "db-create-condition" | transloco
+        }}</mat-error>
       </mat-form-field>
     </mat-card-content>
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialogue-cancel" | transloco }}
     </button>
     <button
       mat-flat-button
@@ -36,7 +35,7 @@
       <span class="spinner" *ngIf="pending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Erstellen</span>
+      <span *ngIf="!pending">{{ "settings-points-create" | transloco }}</span>
     </button>
   </mat-dialog-actions>
 </div>
