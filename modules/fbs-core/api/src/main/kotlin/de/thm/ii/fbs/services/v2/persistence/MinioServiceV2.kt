@@ -10,9 +10,9 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
 import io.minio.RemoveObjectsArgs
-import org.slf4j.LoggerFactory
 import io.minio.http.Method
 import io.minio.messages.DeleteObject
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.multipart.MultipartFile
@@ -27,16 +27,16 @@ class MinioServiceV2 {
     @Value("\${minio.password}") lateinit var minioPassword: String
     @Value("\${minio.port}") private var port: Int = 0
 
-    lateinit var minioClient: MinioClient
+    private lateinit var minioClient: MinioClient
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     /**
      * initialize Minio Client
      */
-    fun initialMinio(): Unit {
+    fun initialMinio() {
         minioClient = MinioClient.builder()
-                .endpoint(minioUrl, port, false)
-                .credentials(minioUser, minioPassword).build()
+            .endpoint(minioUrl, port, false)
+            .credentials(minioUser, minioPassword).build()
     }
 
     /**
@@ -44,7 +44,7 @@ class MinioServiceV2 {
      *
      * @param bucketName the Name of the Bucket
      */
-    fun createBucketIfNotExists(bucketName: String): Unit {
+    fun createBucketIfNotExists(bucketName: String) {
         if (!bucketExists(bucketName)) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
         }
@@ -57,10 +57,10 @@ class MinioServiceV2 {
      * @param objectName the Name of the Object
      * @param bucket     the Name of the Bucket
      */
-    fun putObject(file: MultipartFile, objectName: String, bucket: String): Unit {
+    fun putObject(file: MultipartFile, objectName: String, bucket: String) {
         val inputStream = file.inputStream
         minioClient.putObject(PutObjectArgs.builder().contentType(file.contentType)
-                .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build())
+            .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build())
         inputStream.close()
     }
 
@@ -117,7 +117,7 @@ class MinioServiceV2 {
      * @throws IOException If the i/o operation fails
      */
     @Throws(IOException::class)
-    fun deleteObject(bucketName: String, objectName: String): Unit {
+    fun deleteObject(bucketName: String, objectName: String) {
         minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).`object`(objectName).build())
     }
 
@@ -129,7 +129,7 @@ class MinioServiceV2 {
      * @throws IOException If the i/o operation fails
      */
     @Throws(IOException::class)
-    fun deleteFolder(bucketName: String, folderName: String): Unit {
+    fun deleteFolder(bucketName: String, folderName: String) {
         val toDelete = minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).prefix(folderName).recursive(true).build())
         val objects = toDelete.map { o -> DeleteObject(o.get().objectName()) }
 
@@ -156,7 +156,7 @@ class MinioServiceV2 {
      */
     fun generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
         return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET)
-                .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+            .bucket(bucketName).`object`(objectName).expiry(expiry).build())
     }
 
     /**
@@ -169,6 +169,6 @@ class MinioServiceV2 {
      */
     fun generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
         return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
-                .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+            .bucket(bucketName).`object`(objectName).expiry(expiry).build())
     }
 }
