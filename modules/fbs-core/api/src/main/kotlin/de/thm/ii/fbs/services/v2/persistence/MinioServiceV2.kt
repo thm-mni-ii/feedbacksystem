@@ -22,10 +22,14 @@ import kotlin.jvm.Throws
 
 @Component
 class MinioServiceV2 {
-    @Value("\${minio.url}") lateinit var minioUrl: String
-    @Value("\${minio.user}") lateinit var minioUser: String
-    @Value("\${minio.password}") lateinit var minioPassword: String
-    @Value("\${minio.port}") private var port: Int = 0
+    @Value("\${minio.url}")
+    lateinit var minioUrl: String
+    @Value("\${minio.user}")
+    lateinit var minioUser: String
+    @Value("\${minio.password}")
+    lateinit var minioPassword: String
+    @Value("\${minio.port}")
+    private var port: Int = 0
 
     private lateinit var minioClient: MinioClient
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -59,8 +63,10 @@ class MinioServiceV2 {
      */
     fun putObject(file: MultipartFile, objectName: String, bucket: String) {
         val inputStream = file.inputStream
-        minioClient.putObject(PutObjectArgs.builder().contentType(file.contentType)
-            .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build())
+        minioClient.putObject(
+            PutObjectArgs.builder().contentType(file.contentType)
+            .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build()
+        )
         inputStream.close()
     }
 
@@ -155,8 +161,10 @@ class MinioServiceV2 {
      * @return a presigned url for a get request
      */
     fun generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
-        return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.GET)
-            .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+        return minioClient.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder().method(Method.GET)
+            .bucket(bucketName).`object`(objectName).expiry(expiry).build()
+        )
     }
 
     /**
@@ -168,7 +176,9 @@ class MinioServiceV2 {
      * @return a presigned url for a put request
      */
     fun generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
-        return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder().method(Method.PUT)
-            .bucket(bucketName).`object`(objectName).expiry(expiry).build())
+        return minioClient.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder().method(Method.PUT)
+            .bucket(bucketName).`object`(objectName).expiry(expiry).build()
+        )
     }
 }
