@@ -380,6 +380,7 @@ def update_dropdown(input_value, daten):
 @callback(
     Output("date_time_to2", "value"),
     Input("date_time_from2", "value"),
+    prevent_initial_call=True,
 )
 def update_date_time_to(input_value):
     """
@@ -431,6 +432,7 @@ def checklist_filter_masks(checks, daten):
         Input("intermediate-value", "data"),
         Input("checkbox_analysis", "value"),
     ],
+    prevent_initial_call=True,
 )
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-locals

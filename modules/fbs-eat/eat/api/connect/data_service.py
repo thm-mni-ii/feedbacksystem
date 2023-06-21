@@ -3,7 +3,6 @@ downloads that from the given mongodb
 """
 import os
 import pandas as pd
-from bson.json_util import dumps
 from pymongo import MongoClient
 from api.datapreprocessing.cleandataset import cleandata
 
@@ -45,7 +44,7 @@ def get_data(course):
             cursor = database["Queries"]
             data = cursor.find(query)
             data = cleandata(pd.DataFrame(data))
-            return dumps(data)
+            return data.to_json(orient="columns", default_handler=str)
 
     dataframe = pd.DataFrame(data)
     return dataframe
