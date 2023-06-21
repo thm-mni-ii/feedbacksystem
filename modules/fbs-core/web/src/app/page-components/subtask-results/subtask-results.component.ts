@@ -35,7 +35,9 @@ export class SubtaskResultsComponent {
         this.dataSource = new MatTableDataSource(stres);
       });
   }
-
+  getTooltipText(result: any): string {
+    return `Erreichte Punkte: ${result.points} / Maximale Punkte: ${result.maxPoints}`;
+  }
   get displayedSubmission() {
     return this._displayedSubmission;
   }
