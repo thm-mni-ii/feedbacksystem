@@ -24,10 +24,13 @@ import kotlin.jvm.Throws
 class MinioServiceV2 {
     @Value("\${minio.url}")
     lateinit var minioUrl: String
+
     @Value("\${minio.user}")
     lateinit var minioUser: String
+
     @Value("\${minio.password}")
     lateinit var minioPassword: String
+
     @Value("\${minio.port}")
     private var port: Int = 0
 
@@ -65,7 +68,7 @@ class MinioServiceV2 {
         val inputStream = file.inputStream
         minioClient.putObject(
             PutObjectArgs.builder().contentType(file.contentType)
-            .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build()
+                .bucket(bucket).`object`(objectName).stream(inputStream, file.size, -1).build()
         )
         inputStream.close()
     }
@@ -163,7 +166,7 @@ class MinioServiceV2 {
     fun generatePresignedGetUrl(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
         return minioClient.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder().method(Method.GET)
-            .bucket(bucketName).`object`(objectName).expiry(expiry).build()
+                .bucket(bucketName).`object`(objectName).expiry(expiry).build()
         )
     }
 
@@ -178,7 +181,7 @@ class MinioServiceV2 {
     fun generatePresignedUrlPut(bucketName: String, objectName: String, expiry: Int = 24 * 60 * 60): String {
         return minioClient.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder().method(Method.PUT)
-            .bucket(bucketName).`object`(objectName).expiry(expiry).build()
+                .bucket(bucketName).`object`(objectName).expiry(expiry).build()
         )
     }
 }
