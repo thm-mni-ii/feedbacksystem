@@ -37,23 +37,31 @@ const EXCEL_DATA: ExcelCheckResult = {
       errorCell: [
         {
           cellName: "B6",
-          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch B6",
         },
         {
           cellName: "C3",
-          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch C3",
         },
         {
           cellName: "D5",
-          errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+          errorHint: "Feldbezeichnungen für Ergebnisse falsch D3",
           consequentErrorCell: [
             {
               cellName: "D7",
-              errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch D7",
             },
             {
               cellName: "D8",
-              errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch D8",
+            },
+            {
+              cellName: "D8",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch D9",
+            },
+            {
+              cellName: "D8",
+              errorHint: "Feldbezeichnungen für Ergebnisse falsch D10",
             },
           ],
         },

@@ -13,10 +13,13 @@
           <ng-container *ngFor="let cell of data.errorCell">
             <mat-list-item class="cellStyle">{{ cell.cellName }}</mat-list-item>
             <mat-list>
-              <mat-list-item class="cellStyleCons"
+              <mat-list-item
+                class="cellStyleCons"
+                style="margin-top: 4px"
                 *ngFor="let consequentCell of cell.consequentErrorCell"
-                >{{ consequentCell.cellName }} </mat-list-item
               >
+                {{ consequentCell.cellName }}
+              </mat-list-item>
             </mat-list>
           </ng-container>
         </mat-list>
@@ -25,16 +28,18 @@
 
     <!-- Weight Column -->
     <ng-container matColumnDef="errorHint">
-      <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
+      <mat-header-cell *matHeaderCellDef> Hinweis </mat-header-cell>
       <mat-cell *matCellDef="let data">
         <mat-list>
           <ng-container *ngFor="let cell of data.errorCell">
             <mat-list-item>{{ cell.errorHint }}</mat-list-item>
             <mat-list>
               <mat-list-item
+                style="margin-top: 4px"
+                class="consquentCells"
                 *ngFor="let consequentCell of cell.consequentErrorCell"
-                >{{ consequentCell.errorHint }}</mat-list-item
-              >
+                >{{ consequentCell.errorHint }} <br
+              /></mat-list-item>
             </mat-list>
           </ng-container>
         </mat-list>

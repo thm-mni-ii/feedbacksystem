@@ -11,7 +11,7 @@
   color: red;
 }
 .mat-header-cell {
-  padding-left: 15px;
+  padding-left: 25px;
 }
 
 .mat-column-errorHint {
@@ -19,18 +19,23 @@
 }
 
 .cellStyle {
-  font-style: bold;
-  background-color: #ff8787 ;
-  width: 60px;
+  font-weight: bold;
+  background-color: #ff8787;
   border-radius: 5px;
-  height: 25px;
+  align-items: center;
 }
 
 .cellStyleCons {
   background-color: #ffb47e;
-  font-style: bold;
-  width: 60px;
+  font-weight: bold;
   border-radius: 5px;
-  height: 25px;
-  margin: 5px
+}
+
+.mat-list-item {
+  height: 20px;
+  margin-left: 10px;
+}
+
+.consquentCells {
+  height: 20px;
 }
