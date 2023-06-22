@@ -1,13 +1,8 @@
 package de.thm.ii.fbs.config
 
-import java.util
-import com.fasterxml.jackson.databind.{MapperFeature, SerializationFeature}
-import de.thm.ii.fbs.security.AntiBruteForceInterceptor
-import de.thm.ii.fbs.util.ScalaObjectMapper
+import de.thm.ii.fbs.security.v2.AntiBruteForceInterceptor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.{Bean, Configuration}
-import org.springframework.http.converter.HttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation._
 
 /**
