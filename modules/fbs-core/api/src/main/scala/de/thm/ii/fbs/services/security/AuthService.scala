@@ -5,7 +5,8 @@ import java.util.Date
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
 import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.model.v2.security.authorization.CourseRole
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.CourseRegistrationService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -54,7 +55,7 @@ class AuthService {
     * @param res The http response (nullable)
     * @return The user.
     */
-  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.find) match {
+  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(id => Option(userService.find(id))) match {
       case Some(user) =>
         if (res != null) renewAuthentication(user, res)
         user
@@ -67,8 +68,8 @@ class AuthService {
     * @return The user.
     */
   def authorize(token: String): User = userService.find(authorizeToken(token)) match {
-      case Some(user) => user
-      case None => throw new UnauthorizedException
+      case user: User => user
+      case _ => throw new UnauthorizedException
     }
 
   private def authorizeRequest(request: HttpServletRequest): Option[Int] =

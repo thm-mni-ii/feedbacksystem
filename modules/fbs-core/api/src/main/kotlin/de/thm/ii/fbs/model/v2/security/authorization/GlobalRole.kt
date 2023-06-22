@@ -3,7 +3,7 @@ package de.thm.ii.fbs.model.v2.security.authorization
 /**
  * The global roles of users
  */
-abstract class GlobalRole(val id: Int) : Role {
+abstract class GlobalRole(val id: Int, val value: String) : Role {
     companion object { // TODO remove fields in companion object once scala does not access the Roles in patterns
         @JvmField
         val ADMIN = AdminRole
@@ -44,21 +44,21 @@ abstract class GlobalRole(val id: Int) : Role {
     /**
      * Admin manages everything.
      */
-    object AdminRole : GlobalRole(0) {
-        override fun getAuthority(): String = "ROLE_ADMIN"
-    }
+    object AdminRole : GlobalRole(0, "ADMIN")
 
     /**
      * Moderator manages courses, docents and tutors.
      */
-    object ModeratorRole : GlobalRole(1) {
-        override fun getAuthority(): String = "ROLE_MODERATOR"
-    }
+    object ModeratorRole : GlobalRole(1, "MODERATOR")
 
     /**
      * Usual user.
      */
-    object UserRole : GlobalRole(2) {
-        override fun getAuthority(): String = "ROLE_USER"
+    object UserRole : GlobalRole(2, "USER")
+
+    override fun getAuthority(): String = "ROLE_$value"
+
+    override fun toString(): String {
+        return value
     }
 }

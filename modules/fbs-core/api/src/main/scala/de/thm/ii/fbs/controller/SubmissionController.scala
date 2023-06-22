@@ -8,6 +8,7 @@ import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource

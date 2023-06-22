@@ -4,14 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.services.persistence.CourseRegistrationService
 import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
+
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 /**
   * UserController defines all routes for /users (insert, delete, update)
@@ -41,7 +44,7 @@ class UserController {
     val user = authService.authorize(req, res)
     val isDocent = courseRegistrationService.getCoursePrivileges(user.getId).exists(e => e._2 == CourseRole.DOCENT)
     if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isDocent) {
-      userService.getAll()
+      userService.getAll(true).asScala.toList
     } else {
       throw new ForbiddenException()
     }
@@ -62,7 +65,7 @@ class UserController {
     val isDocent = courseRegistrationService.getCoursePrivileges(user.getId).exists(e => e._2 == CourseRole.DOCENT)
     if (user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
       userService.find(uid) match {
-        case Some(u) => u
+        case u: User => u
         case _ => throw new ResourceNotFoundException()
       }
     } else {

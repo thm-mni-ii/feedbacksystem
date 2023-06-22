@@ -18,7 +18,7 @@ import javax.persistence.*
  * @param alias the DB password hash
  * @param id local DB's userid
  * @param deleted if user is marked as deleted
- * @param privacyChecked if user agrred to the privacy agreement
+ * @param privacyChecked if user agreed to the privacy agreement
  * @param password User's password
  */
 @Entity
@@ -30,8 +30,8 @@ class User(
     val surname: String,
     @Column(nullable = false)
     var username: String,
-    @Column(nullable = false)
-    val globalRole: GlobalRole,
+    @Column(name = "global_role", nullable = false)
+    val globalRoleInt: Int,
     @Column
     val email: String? = null,
     @Column
@@ -40,17 +40,34 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     var id: Int? = null,
-    @Column
+    @Column(nullable = false)
     val deleted: Boolean = false,
-    @Column
+    @Column(name = "privacy_checked", nullable = false)
     val privacyChecked: Boolean = false,
     @Column
-    val password: String? = null
+    var password: String? = null
 ) {
+
+    internal constructor(
+        prename: String,
+        surname: String,
+        username: String,
+        globalRole: GlobalRole,
+        email: String? = null,
+        alias: String? = null,
+        id: Int? = null,
+        deleted: Boolean = false,
+        privacyChecked: Boolean = false,
+        password: String? = null
+    ) : this(prename, surname, username, globalRole.id, email, alias, id, deleted, privacyChecked, password)
+
+    val globalRole: GlobalRole
+        get() = GlobalRole.parse(globalRoleInt)
 
     fun toUserDetails(): UserDetails = User(username, null, setOf(globalRole)) // TODO save password in user?
 
-    fun hasRole(role: GlobalRole, vararg roles: GlobalRole): Boolean = globalRole == role || roles.contains(globalRole) // TODO remove once authorization is moved to spring security
+    fun hasRole(role: GlobalRole, vararg roles: GlobalRole): Boolean =
+        globalRole == role || roles.contains(globalRole) // TODO remove once authorization is moved to spring security
 
     override fun equals(other: Any?): Boolean = when (other) {
         is User -> username == other.username

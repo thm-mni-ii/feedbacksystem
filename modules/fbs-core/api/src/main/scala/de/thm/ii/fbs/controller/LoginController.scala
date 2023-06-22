@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
 import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
-import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
@@ -69,8 +69,8 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = casUser.getName
       }
-      userService.find(name)
-        .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
+      Option(userService.find(name))
+        .orElse(loadUserFromLdap(name).map(u => userService.create(u)))
         .foreach(u => {
           val token = authService.createToken(u)
           val co = new Cookie("jwt", token)
@@ -120,11 +120,11 @@ class LoginController extends CasClientConfigurerAdapter {
         password <- jsonNode.retrive("password").asText()
         ldapUser <- ldapService.login(username, password)
         user <- loadUserFromLdap(ldapUser.getAttribute("uid").getStringValue)
-      } yield (user, password)
+      } yield user
 
       login match {
-        case Some((user, password)) =>
-          val localUser = userService.find(user.getUsername).getOrElse(userService.create(user, password))
+        case Some(user) =>
+          val localUser = Option(userService.find(user.getUsername)).getOrElse(userService.create(user))
           authService.renewAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
@@ -171,7 +171,7 @@ class LoginController extends CasClientConfigurerAdapter {
         loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.getUsername).getOrElse(userService.create(user, null)))
+              .map(user => Option(userService.find(user.getUsername)).getOrElse(userService.create(user)))
           } yield ldapUser} else {None})
     )
 

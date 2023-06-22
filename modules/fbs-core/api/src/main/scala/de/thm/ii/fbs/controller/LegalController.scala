@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.services.persistence.UserService
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
@@ -73,7 +73,7 @@ class LegalController {
   def acceptTermsOfUse(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req)
     user.getId.toInt match {
-      case `uid` => userService.updateAgreementToPrivacyFor(user.getId, agreed = true)
+      case `uid` => userService.updateAgreementToPrivacyFor(user.getId, true)
       case _ => throw new ForbiddenException()
     }
   }

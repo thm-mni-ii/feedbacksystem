@@ -10,6 +10,7 @@ import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.TokenService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import org.apache.http.client.utils.URIBuilder
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -87,10 +88,10 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
           if (extInfo != null) {
             SqlCheckerRemoteCheckerService.extInfo.put(submission.id, extInfo)
           }
-          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
+          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get))
         } else {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
-          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
+          this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get))
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
