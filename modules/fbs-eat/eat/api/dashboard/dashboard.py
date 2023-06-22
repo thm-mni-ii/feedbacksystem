@@ -272,6 +272,7 @@ def update_exercises_dropdown_course(input_value, daten):
 @callback(
     Output("date_time_to", "value"),
     Input("date_time_from", "value"),
+    prevent_initial_call=True,
 )
 def update_date_time_to(input_value):
     """
@@ -298,6 +299,7 @@ def update_date_time_to(input_value):
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
     Input("checkbox", "value"),
+    prevent_initial_call=True,
 )
 def update_histogram_avg_submissions(
     exercise_value,
@@ -379,6 +381,7 @@ def update_histogram_avg_submissions(
     Input("date_time_from", "value"),
     Input("date_time_to", "value"),
     Input("intermediate-value", "data"),
+    prevent_initial_call=True,
 )
 def update_histogram(
     course_value,
