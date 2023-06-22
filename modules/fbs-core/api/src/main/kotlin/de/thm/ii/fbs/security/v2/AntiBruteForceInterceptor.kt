@@ -1,6 +1,5 @@
 package de.thm.ii.fbs.security.v2
 
-import ch.qos.logback.classic.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
