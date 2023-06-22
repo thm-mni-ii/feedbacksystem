@@ -212,38 +212,25 @@ hr {
   color: rgb(235, 235, 235);
 }
 
-.toggle-container {
-	display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  position: relative;
-	max-width: 17%;
-  margin-left: auto;
-	background-color: #fff;
-	padding: 10px;
-  font-size: 0.80em;
-	border-radius: 5px;
+.mat-menu{
+  border-radius: 5px;
   box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
 }
 
-.toggle-container:before {
-	content: '';
-	position: absolute;
-	width: 0;
-	height: 0;
-	bottom: 100%;
-	right: 1.5em;
-	border: .75rem solid transparent;
-	border-top: none;
-	border-bottom-color: #fff;
-	filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1));
+.mat-menu-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  position: relative;
+  pointer-events: none;
 }
 
 .toggle-text {
-  margin-right: 20px;
+  margin-right: 15px;
+  font-size: small;
 }
 
 .mat-slide-toggle {
   transform: scale(0.8);
-  justify-self: end;
+  pointer-events: all;
 }

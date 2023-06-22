@@ -55,18 +55,20 @@
         <!--      </mat-paginator>-->
         <!--    </div>-->
         <div class="show-submissions">
-          <button mat-icon-button (click)="toggleOption()">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>filter_list</mat-icon>
           </button>
         </div>
         <hr />
-        <div class="toggle-container" *ngIf="showOption === true">
-          <span class="toggle-text">Benutzer mit Abgaben</span>
-          <mat-slide-toggle
-            [(ngModel)]="toggle"
-            (change)="toggleResults()"
-          ></mat-slide-toggle>
-        </div>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <span class="toggle-text">Benutzer mit Abgaben</span>
+            <mat-slide-toggle
+              [(ngModel)]="toggle"
+              (change)="toggleResults()"
+            ></mat-slide-toggle>
+          </button>
+        </mat-menu>
         <div class="card">
           <div class="name-column">
             <div class="name-container header">

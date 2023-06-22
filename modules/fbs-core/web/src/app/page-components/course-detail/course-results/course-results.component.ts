@@ -41,7 +41,6 @@ export class CourseResultsComponent implements OnInit {
   allCourseResults: Observable<CourseResult[]> = of();
   displayedCourseResults: Observable<CourseResult[]> = of();
   toggle: boolean = true;
-  showOption: boolean = false;
 
   ngOnInit(): void {
     this.tb.emitTitle("Dashboard");
@@ -82,10 +81,6 @@ export class CourseResultsComponent implements OnInit {
     } else {
       this.displayedCourseResults = this.allCourseResults;
     }
-  }
-
-  toggleOption() {
-    this.showOption = !this.showOption;
   }
 
   downloadResults() {
