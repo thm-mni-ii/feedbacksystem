@@ -3,9 +3,6 @@
 @import "~@fontsource/roboto/300.css";
 @import "~@fontsource/roboto/400.css";
 @import "~@fontsource/roboto/500.css";
-@import "~@fontsource/material-icons";
-@import "~prismjs/themes/prism";
-
 
 html,
 body {
@@ -18,19 +15,17 @@ body {
 }
 
 app-db-control-panel {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
   .mat-tab-label {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-  /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+
   .mat-form-field-wrapper {
     margin-bottom: -1.25em;
   }
 }
 
 app-sql-input-tabs {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
   .mat-tab-label {
     min-width: 230px !important;
   }
@@ -53,19 +48,17 @@ app-db-scheme-table {
 }
 
 app-db-control-panel {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
   .mat-tab-label {
     min-width: 25px !important; // In addition to mat-strech-tabs allowing tabs to fill remaining space in parent container
     padding: 5px;
   }
-  /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
+
   .mat-form-field-wrapper {
     margin-bottom: -1.25em;
   }
 }
 
 app-sql-input-tabs {
-  /* TODO(mdc-migration): The following rule targets internal classes of tabs that may no longer apply for the MDC version. */
   .mat-tab-label {
     min-width: 230px !important;
   }
