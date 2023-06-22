@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import { HttpClient, HttpResponse } from "@angular/common/http";
 import { CheckerConfig } from "../model/CheckerConfig";
 import { saveAs as importedSaveAs } from "file-saver";
+import { map } from "rxjs/operators";
 import { CheckerFileType } from "../enums/checkerFileType";
 
 @Injectable({
