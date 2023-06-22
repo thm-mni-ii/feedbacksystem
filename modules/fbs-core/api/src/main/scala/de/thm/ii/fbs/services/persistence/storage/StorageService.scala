@@ -104,7 +104,7 @@ class StorageService extends App {
     if (config.isInBlockStorage) {
       minioStorageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getMainFilePath(config.id))
     } else {
-      fsStorageService.pathToMainFile(config.id).get.toFile
+      fsStorageService.openClone(fsStorageService.pathToMainFile(config.id).get)
     }
   }
 
@@ -118,7 +118,7 @@ class StorageService extends App {
     if (config.isInBlockStorage) {
       minioStorageService.getFileFromBucket(storageBucketName.CHECKER_CONFIGURATION_BUCKET, storageFileName.getSecondaryFilePath(config.id))
     } else {
-      fsStorageService.pathToSecondaryFile(config.id).get.toFile
+      fsStorageService.openClone(fsStorageService.pathToSecondaryFile(config.id).get)
     }
   }
 
@@ -132,7 +132,7 @@ class StorageService extends App {
     if (submission.isInBlockStorage) {
       minioStorageService.getFileFromBucket(storageBucketName.SUBMISSIONS_BUCKET, storageFileName.getSolutionFilePath(submission.id))
     } else {
-      fsStorageService.pathToSolutionFile(submission.id).get.toFile
+      fsStorageService.openClone(fsStorageService.pathToSolutionFile(submission.id).get)
     }
   }
 

@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult, EvaluationContainer,
-  EvaluationContainerResult, EvaluationContainerWithTaskResults, Task, TaskResult}
+import de.thm.ii.fbs.model.task.{Task, TaskResult}
+import de.thm.ii.fbs.model._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -17,8 +17,9 @@ class EvaluationResultService {
 
   /**
     * Evaluate Course results
+    *
     * @param container Evaluation Container
-    * @param results the Course Results
+    * @param results   the Course Results
     * @return Evaluation Course results for a User
     */
   def evaluate(container: List[EvaluationContainer], results: List[CourseResult]): List[EvaluationUserResult] = {

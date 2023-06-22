@@ -70,9 +70,9 @@ export class ResultsComponent implements OnInit {
       (item) => this.allSubmissions.indexOf(item) == event.index
     );
     if (this.submission.results.length > 1) {
-      this.columns = ["checkerType", "resultText", "exitCode"];
-    } else {
       this.columns = ["checkerType", "query", "resultText", "exitCode"];
+    } else {
+      this.columns = ["query", "resultText", "exitCode"];
     }
     this.getSubmissionContent(this.submission);
     this.display(this.submission);

@@ -61,9 +61,6 @@ mat-toolbar {
     text-rendering: optimizeLegibility;
     font-family: RobotoDraft, Roboto, "Helvetica Neue", sans-serif;
   }
-  .logout-icon {
-    color: darkred;
-  }
 }
 
 .sidenav-group {
@@ -108,4 +105,11 @@ mat-toolbar {
 
 .sidenav {
   width: 250px;
+}
+.userinfos{
+padding: 8px;
+
+}
+.logout-icon {
+  color: darkred;
 }

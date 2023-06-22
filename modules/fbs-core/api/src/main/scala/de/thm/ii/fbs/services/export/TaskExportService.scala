@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.`export`
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, Submission, Task, storageFileName}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, CheckrunnerSubTask, storageFileName}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, CheckrunnerSubTaskService, TaskService}
 import de.thm.ii.fbs.util.{Archiver, ScalaObjectMapper}
