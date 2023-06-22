@@ -130,7 +130,7 @@
             </button>
           </div>
           <button
-            [disabled]="deadlinePassed || isSubmissionEmpty()"
+            [disabled]="isCheckerEmpty || deadlinePassed || isSubmissionEmpty()"
             mat-flat-button
             color="accent"
             (click)="submission()"

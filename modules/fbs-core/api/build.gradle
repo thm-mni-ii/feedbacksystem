@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "2.7.8"
+    id "org.springframework.boot" version "2.7.12"
     id 'jacoco'
     id "com.github.alisiikh.scalastyle" version "3.4.1"
     id "org.jetbrains.kotlin.jvm" version "1.7.20"
@@ -44,11 +44,11 @@ startScripts {
 }
 
 dependencies {
-    implementation 'org.apache.tika:tika-core:2.1.0'
-    implementation 'org.apache.tika:tika-parsers:2.1.0'
+    implementation 'org.apache.tika:tika-core:2.8.0'
+    implementation 'org.apache.tika:tika-parsers:2.8.0'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.7.21'
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.7.0'
-    implementation group: 'io.minio', name: 'minio', version: '8.0.0'
+    implementation group: 'io.minio', name: 'minio', version: '8.5.3'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.10'
     implementation 'mysql:mysql-connector-java:8.0.32'
@@ -56,7 +56,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation('net.unicon.cas:cas-client-autoconfig-support:2.1.0-GA')
-    implementation('org.json:json:20210307')
+    implementation('org.json:json:20230618')
     implementation 'org.apache.poi:poi:5.2.3'
     implementation 'org.apache.poi:poi-ooxml:5.2.3'
     implementation group: 'org.ldaptive', name: 'ldaptive', version: '2.1.1'
@@ -98,6 +98,3 @@ tasks.register('jacocoReport', JacocoReport) {
 
 // Allow To import Kotlin Classes into Scala
 compileScala.classpath += files(compileKotlin.outputs)
-
-// Remove if spring-boot 2.7.10 is released
-ext['spring-framework.version'] = '5.3.26'

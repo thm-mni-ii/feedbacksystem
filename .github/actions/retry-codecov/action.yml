@@ -17,6 +17,7 @@ runs:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
         fail_ci_if_error: true
+      continue-on-error: true
     - run: sleep 1m
       shell: bash
       id: sleep-1
@@ -29,6 +30,7 @@ runs:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
         fail_ci_if_error: true
+      continue-on-error: true
     - run: sleep 5m
       shell: bash
       id: sleep-2
