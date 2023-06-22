@@ -1,5 +1,5 @@
 <mat-card-actions>
-  <mat-card appearance="outlined" *ngIf="tabs.length === 0" class="info-card">
+  <mat-card *ngIf="tabs.length === 0" class="info-card">
     <mat-card-header>
       <mat-card-title>
         Erstelle deine erste Query im unteren Eingabefeld
@@ -25,7 +25,7 @@
           </div>
           <div class="container" *ngIf="tab !== undefined && !isQueryPending">
             <div *ngIf="tab.error === true">
-              <mat-card appearance="outlined">
+              <mat-card>
                 <mat-card-header>
                   <mat-card-title>
                     <mat-icon class="error-icon">close</mat-icon>

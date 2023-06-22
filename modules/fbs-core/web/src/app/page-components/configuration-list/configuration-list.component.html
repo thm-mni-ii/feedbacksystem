@@ -22,7 +22,7 @@
     </button>
   </div>
 
-  <mat-card appearance="outlined" class="card" *ngFor="let configuration of configurations | async">
+  <mat-card class="card" *ngFor="let configuration of configurations | async">
     <span>{{ configuration.checkerType }}</span>
 
     <span class="spacer"></span>

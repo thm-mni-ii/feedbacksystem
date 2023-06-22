@@ -13,7 +13,6 @@
   <div class="task-list">
     <div *ngFor="let task of tasks">
       <mat-card
-        appearance="outlined"
         class="task-container"
         id="{{ task.id }}"
         [routerLink]="[
