@@ -53,6 +53,7 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
       virtualKeyboardMode: !this.disabled ? "manual" : "off",
       virtualKeyboards: "numeric roman greek",
       decimalSeparator: ",",
+      keypressSound: null,
     });
     if (!this.touched && this.defaultValue) {
       if (this.defaultValue.latex) {
