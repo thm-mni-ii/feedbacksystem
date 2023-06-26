@@ -34,6 +34,9 @@ from api.util.dashboard_util import (
     create_average_bar,
     get_values_from_data,
 )
+import logging
+
+logger = logging.getLogger("name")
 
 tmp_df = get_data(-1)
 
@@ -101,6 +104,11 @@ layout = html.Div(
                                     histogram_avg_submissions := dcc.Graph(),
                                     body=True,
                                     style={"display": "none"},
+                                ),
+                                histogram_avg_time_card := dbc.Card(
+                                    histogram_avg_time := dcc.Graph(),
+                                    body=True,
+                                    style={"display": "block"},
                                 ),
                             ],
                             style={"margin-top": "20px"},
@@ -476,6 +484,49 @@ def update_histogram(
     fig = create_course_bars(hist_df, fig, labels)
     return fig, display_style
 
+@callback(
+    Output(histogram_avg_time, "figure"),
+    Input("intermediate-value", "data"),
+    Input("exercise_dashboard", "value"),
+)
+def track_time(daten, exercise_value):
+    local_df = filter_data(daten)
+    local_df = local_df[local_df["UserId"] != 0]
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
+
+    times = []
+    traces = []
+    if not exercise_value:
+        return dash.no_update
+    for task in exercise_value:
+        task_times = []
+        task_data = local_df[local_df["UniqueName"] == task]
+        for user in task_data["UserId"].unique():
+            user_task_data = task_data[task_data["UserId"] == user]
+            lowest_value = user_task_data["Attempt"].min()
+            first_attempt = user_task_data[user_task_data["Attempt"] == lowest_value]
+            highest_value = user_task_data["Attempt"].max()
+            last_attempt = user_task_data[user_task_data["Attempt"] == highest_value]
+            first_attempt_date = first_attempt["Time"]
+            last_attempt_date = last_attempt["Time"]
+
+            duration = list(last_attempt_date)[0] - list(first_attempt_date)[0]
+            task_times.append(duration)
+        times.append(task_times)
+    df = pd.DataFrame(times)
+    logger.error(df)
+    for info in times:
+        fig = px.box(
+            data_frame=info,
+            labels={'variable': 'Data Sets', 'value': 'Values'},
+            title='Box Plot'
+        )
+        traces.append(fig)
+    fig = make_subplots(rows=1, cols=1)
+    for trace in traces:
+        fig.append_trace(trace,row=1, col=1)
+    logger.error(times)
+    return fig
 
 # pylint: enable=too-many-locals
 # pylint: enable=too-many-arguments
