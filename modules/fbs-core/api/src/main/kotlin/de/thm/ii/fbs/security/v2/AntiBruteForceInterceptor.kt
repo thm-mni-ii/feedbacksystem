@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.collections.HashMap
 
 @Component
 class AntiBruteForceInterceptor(
@@ -26,7 +26,7 @@ class AntiBruteForceInterceptor(
     private data class LoginAttempts(val attempts: Int = 0, val lastAttempt: Date? = null)
 
     private val logger = LoggerFactory.getLogger(AntiBruteForceInterceptor::class.java)
-    private val logins = ConcurrentHashMap<String, LoginAttempts>()
+    private val logins = HashMap<String, LoginAttempts>() // Can be a non-concurrent map because it is guarded by lock
     private val lock = ReentrantLock(true)
     private var lastClean = Date()
 
@@ -45,12 +45,33 @@ class AntiBruteForceInterceptor(
 
         val forwardForHeader = request.getHeader("X-FORWARDED-FOR") ?: ""
         val proxies = forwardForHeader.split(", ") + request.remoteAddr
+
+        val ip = getRealIp(proxies)
+        if (ip == null) {
+            logger.warn("Blocked request: Failed to determine ip")
+            response.sendError(400, "Failed to determine client ip")
+            return false
+        }
+
+        val result = check(ip)
+        if (!result) {
+            logger.warn("Blocked request from $ip: Too Many Requests")
+            response.sendError(429, "Too Many Requests")
+        }
+        return result
+    }
+
+    internal fun getRealIp(proxies: List<String>): String? {
         val filteredProxies = proxies
             .slice(0 until proxies.size - trustedProxyCount)
             .filter { !allowList.contains(it) }
-        val ip = filteredProxies.last()
-        if (ip.isNullOrBlank()) return true
+        val ip = filteredProxies.lastOrNull()
+        if (ip.isNullOrBlank()) return null
 
+        return ip
+    }
+
+    private fun check(ip: String): Boolean {
         lock.lock()
         var lastLoginAttempt = logins[ip] ?: LoginAttempts()
         if (lastLoginAttempt.lastAttempt !== null && (Date().time - lastLoginAttempt.lastAttempt!!.time) / 1000 > interval) {
@@ -58,8 +79,6 @@ class AntiBruteForceInterceptor(
         }
 
         if (lastLoginAttempt.attempts >= maxAttempts) {
-            logger.warn("Blocked request from $ip: Too Many Requests")
-            response.sendError(429, "Too Many Requests")
             lock.unlock()
             return false
         }
