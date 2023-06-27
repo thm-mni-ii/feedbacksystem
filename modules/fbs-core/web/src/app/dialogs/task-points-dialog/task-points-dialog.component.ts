@@ -9,6 +9,9 @@ import { TaskPointsService } from "../../service/task-points.service";
 import { Requirement } from "../../model/Requirement";
 import { ConfirmDialogComponent } from "../confirm-dialog/confirm-dialog.component";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { MatDatepickerInputEvent } from "@angular/material/datepicker";
+import { FormControl, UntypedFormGroup } from "@angular/forms";
 
 @Component({
   selector: "app-task-points-dialog",
@@ -24,6 +27,8 @@ export class TaskPointsDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<TaskPointsDialogComponent>
   ) {}
 
+  deadline: string;
+  datePickerDisabled: boolean = false;
   tasks: Task[];
   allRequirements: Requirement[];
   selected: Requirement;
@@ -42,7 +47,16 @@ export class TaskPointsDialogComponent implements OnInit {
     valid: boolean;
   } = { message: "", valid: true };
 
+  requirementForm = new UntypedFormGroup({
+    expCheck: new FormControl(false),
+    deadline: new FormControl({
+      value: this.getDefaultDeadline(),
+      disabled: false,
+    }),
+  });
+
   ngOnInit(): void {
+    this.setValues();
     this.tasks = this.data.tasks;
     this.taskPointsService
       .getAllRequirements(this.data.courseID)
@@ -57,6 +71,11 @@ export class TaskPointsDialogComponent implements OnInit {
         }
       });
     this.allRequirements = [];
+
+    this.requirementForm.controls["expCheck"].updateValueAndValidity();
+    if (this.requirementForm.get("expCheck").value) {
+      this.deadline = null;
+    }
   }
 
   addTab() {
@@ -203,6 +222,34 @@ export class TaskPointsDialogComponent implements OnInit {
       this.checked = false;
     } else {
       this.selected.tasks.push(task);
+    }
+  }
+  setMaxExpirationDate(event: MatSlideToggle) {
+    this.datePickerDisabled = event.checked;
+  }
+
+  addDate(event: MatDatepickerInputEvent<Date>) {
+    this.deadline = event.value.toISOString();
+  }
+  getDefaultDeadline() {
+    const currentDateAndOneMonthLater = new Date();
+    currentDateAndOneMonthLater.setMonth(
+      currentDateAndOneMonthLater.getMonth() + 1
+    );
+    return currentDateAndOneMonthLater.toISOString();
+  }
+  setValues() {
+    if (!this.deadline) {
+      this.requirementForm.controls["deadline"].setValue(
+        this.getDefaultDeadline()
+      );
+      this.deadline = this.getDefaultDeadline();
+      this.requirementForm.controls["expCheck"].setValue(true);
+      this.datePickerDisabled = true;
+    } else {
+      this.requirementForm.controls["deadline"].setValue(
+        new Date(this.deadline)
+      );
     }
   }
 }
