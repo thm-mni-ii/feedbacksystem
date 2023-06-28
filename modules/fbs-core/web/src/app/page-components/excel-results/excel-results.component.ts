@@ -1,33 +1,33 @@
-import { Component, OnInit } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import {
+  ExcelCell,
   ExcelCheckResult,
   ExcelExercise,
 } from "src/app/model/ExcelCheckResult";
-import { Submission } from "src/app/model/Submission";
+import { NestedTreeControl } from "@angular/cdk/tree";
+import { MatTreeNestedDataSource } from "@angular/material/tree";
 
 @Component({
   selector: "app-excel-results",
   templateUrl: "./excel-results.component.html",
   styleUrls: ["./excel-results.component.scss"],
 })
-export class ExcelResultsComponent implements OnInit {
+export class ExcelResultsComponent {
   displayedColumns = ["name", "cellName", "errorHint", "table", "result"];
   dataSource = new MatTableDataSource<ExcelExercise>(EXCEL_DATA.exercises);
 
-  constructor() {}
+  treeControl = new NestedTreeControl<ExcelCell>(
+    (node) => node.consequentErrorCell
+  );
+  treeDataSource = new MatTreeNestedDataSource<ExcelCell>();
 
-  ngOnInit(): void {
-    console.log(this.dataSource);
+  constructor() {
+    this.treeDataSource.data = EXCEL_DATA.exercises[0].errorCell;
   }
 
-  // toggleTableView() {
-  //   this.tableViewAsGrid = !this.tableViewAsGrid;
-  // }
-
-  // selectLast() {
-  //   setTimeout(() => (this.index = this.allSubmissions.length), 1);
-  // }
+  hasChild = (_: number, node: ExcelCell) =>
+    !!node.consequentErrorCell && node.consequentErrorCell.length > 0;
 }
 
 const EXCEL_DATA: ExcelCheckResult = {
@@ -50,18 +50,12 @@ const EXCEL_DATA: ExcelCheckResult = {
             {
               cellName: "D7",
               errorHint: "Feldbezeichnungen für Ergebnisse falsch D7",
+              isConsequent: true,
             },
             {
               cellName: "D8",
               errorHint: "Feldbezeichnungen für Ergebnisse falsch D8",
-            },
-            {
-              cellName: "D8",
-              errorHint: "Feldbezeichnungen für Ergebnisse falsch D9",
-            },
-            {
-              cellName: "D8",
-              errorHint: "Feldbezeichnungen für Ergebnisse falsch D10",
+              isConsequent: true,
             },
           ],
         },
@@ -75,6 +69,7 @@ const EXCEL_DATA: ExcelCheckResult = {
         {
           cellName: "B6",
           errorHint: "Feldbezeichnungen für Ergebnisse falsch",
+          consequentErrorCell: [],
         },
       ],
       table: "Table1",

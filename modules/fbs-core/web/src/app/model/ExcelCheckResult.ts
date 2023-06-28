@@ -30,4 +30,5 @@ export interface ExcelCell {
   cellName: string;
   errorHint: string;
   consequentErrorCell?: ExcelCell[];
+  isConsequent?: boolean;
 }
