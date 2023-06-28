@@ -13,6 +13,7 @@ import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
 import { zip } from "rxjs";
 import { mergeAll, filter, toArray } from "rxjs/operators";
+import { EvaluationUserResults } from "src/app/model/EvaluationUserResults";
 
 /**
  * Matrix for every course docent a has
@@ -35,6 +36,7 @@ export class CourseResultsComponent implements OnInit {
   courseResults: Observable<CourseResult[]> = of();
   tasks: Observable<Task[]> = of();
   requirements: Observable<Requirement[]> = of();
+  evaluationUserResults: Observable<EvaluationUserResults[]> = of();
   requirementTaskNames: void;
   allBonusPoints: Observable<Number[]>;
   courseBonusPoints = 0;
@@ -47,7 +49,7 @@ export class CourseResultsComponent implements OnInit {
     this.tb.emitTitle("Dashboard");
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
-      this.courseResults = this.courseResultService
+      this.allCourseResults = this.courseResultService
         .getAllResults(this.courseId)
         .pipe(
           mergeAll(),
