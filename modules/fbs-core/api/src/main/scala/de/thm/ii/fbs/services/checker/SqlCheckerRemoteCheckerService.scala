@@ -3,7 +3,8 @@ package de.thm.ii.fbs.services.checker
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import de.thm.ii.fbs.model
 import de.thm.ii.fbs.model.checker.{RunnerRequest, SqlCheckerState, SqlCheckerSubmission, User}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Task, Submission => FBSSubmission}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SqlCheckerInformation, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
@@ -54,16 +55,16 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
     */
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: model.User): Unit = {
     if (SqlCheckerRemoteCheckerService.isCheckerRun.getOrDefault(submissionID, SqlCheckerState.Runner) != SqlCheckerState.Runner) {
-        val apiUrl = new URIBuilder(selfUrl)
-          .setPath(s"/api/v1/checker/submissions/$submissionID")
-          .setParameter("typ", "sql-checker")
-          .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
-          .build().toString
+      val apiUrl = new URIBuilder(selfUrl)
+        .setPath(s"/api/v1/checker/submissions/$submissionID")
+        .setParameter("typ", "sql-checker")
+        .setParameter("token", tokenService.issue(s"submissions/$submissionID", 60))
+        .build().toString
 
-        super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
-      } else {
-        super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
-      }
+      super.sendNotificationToRemote(taskID, SqlCheckerSubmission(submissionID, User(fu.id, fu.username), apiUrl, mongodbUrl), cc)
+    } else {
+      super.notify(taskID, submissionID, cc.copy(checkerType = "sql"), fu)
+    }
   }
 
   /**
@@ -89,7 +90,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
         } else {
           SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
           this.notify(task.id, submission.id, checkerConfiguration, userService.find(submission.userID.get).get)
-            SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
+          SqlCheckerRemoteCheckerService.isCheckerRun.put(submission.id, SqlCheckerState.Ignore)
           super.handle(submission, checkerConfiguration, task, exitCode, resultText, extInfo)
         }
       case SqlCheckerState.Checker =>
@@ -119,7 +120,7 @@ class SqlCheckerRemoteCheckerService(@Value("${services.masterRunner.insecure}")
                 }
                 if (!query.selAttributesRight.get) {
                   hints ++= "falsche Where-Attribute verwendet\n"
-                  }
+                }
                 if (!query.proAttributesRight.get) {
                   hints ++= "falsche Select-Attribute verwendet\n"
                 }

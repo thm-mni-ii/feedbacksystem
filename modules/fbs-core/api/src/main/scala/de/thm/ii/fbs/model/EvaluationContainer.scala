@@ -1,5 +1,7 @@
 package de.thm.ii.fbs.model
 
+import de.thm.ii.fbs.model.task.Task
+
 /**
   * Evaluation Container object
   *

@@ -226,6 +226,28 @@ class ErrorAnalysisServiceTest {
         assertEquals(setOf(c3, c4), res)
     }
 
+    @Test
+    fun errorsInOneBranchTest() {
+        val a1 = SimpleTestCase2.a1 // propagated error
+        val b1 = SimpleTestCase2.b1
+        val c1 = Cell(0, "C1", formula = "D1 - E1") // error
+        val d1 = SimpleTestCase2.d1
+        val e1 = SimpleTestCase2.e1
+        val b2 = SimpleTestCase2.b2
+        val b3 = SimpleTestCase2.b3
+
+        val service =
+            ErrorAnalysisService(
+                workbook(a1, b1, c1, d1, e1, b2, b3),
+                SimpleTestCase2.sGraph,
+                SimpleTestCase2.sMap
+            )
+        service.findAllErrors(listOf(a1))
+
+        assertEquals(setOf(c1), service.errors)
+        assertEquals(setOf(a1), service.perrors)
+    }
+
     class BasicTestCase {
         companion object {
             val c1 = Cell(0, "A1", "3", "B1 + C1")
@@ -267,6 +289,34 @@ class ErrorAnalysisServiceTest {
             )
 
             val sMap = solutionMap(c1, c2, c3, c4, c5)
+        }
+    }
+
+    class SimpleTestCase2 {
+        companion object {
+            val a1 = Cell(0, "A1", "3", "B1 + C1")
+            val b1 = Cell(0, "B1", "1", "B2 + B3")
+            val c1 = Cell(0, "C1", "2", "D1 + E1")
+            val d1 = Cell(0, "D1", "1")
+            val e1 = Cell(0, "E1", "1")
+            val b2 = Cell(0, "B2", "-1")
+            val b3 = Cell(0, "B3", "2")
+
+            val sGraph = ReferenceGraph(
+                mapOf(
+                    0 to mapOf(
+                        a1.cell to Pair(a1.value!!, setOf(b1, c1)),
+                        b1.cell to Pair(b1.value!!, setOf(b2, b3)),
+                        c1.cell to Pair(c1.value!!, setOf(d1, e1)),
+                        d1.cell to Pair(d1.value!!, setOf()),
+                        e1.cell to Pair(e1.value!!, setOf()),
+                        b2.cell to Pair(b2.value!!, setOf()),
+                        b3.cell to Pair(b3.value!!, setOf())
+                    )
+                )
+            )
+
+            val sMap = solutionMap(a1, b1, c1, d1, e1, b2, b3)
         }
     }
 

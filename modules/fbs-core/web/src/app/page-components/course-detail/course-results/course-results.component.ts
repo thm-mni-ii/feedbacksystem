@@ -11,7 +11,8 @@ import { AllSubmissionsComponent } from "../../../dialogs/all-submissions/all-su
 import { MatDialog } from "@angular/material/dialog";
 import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
-import { mergeAll, filter } from "rxjs/operators";
+import { zip } from "rxjs";
+import { mergeAll, filter, toArray } from "rxjs/operators";
 
 /**
  * Matrix for every course docent a has
@@ -46,8 +47,28 @@ export class CourseResultsComponent implements OnInit {
     this.tb.emitTitle("Dashboard");
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
-      this.allCourseResults = this.courseResultService.getAllResults(
-        this.courseId
+      this.courseResults = this.courseResultService
+        .getAllResults(this.courseId)
+        .pipe(
+          mergeAll(),
+          filter(
+            (result) =>
+              result.results.find(({ attempts }) => attempts !== 0) !==
+              undefined
+          ),
+          toArray()
+        );
+      this.evaluationUserResults = zip(
+        this.courseResultService.getRequirementCourseResults(this.courseId),
+        this.courseResultService.getAllResults(this.courseId)
+      ).pipe(
+        map(([evaluationResults, courseResult]) =>
+          evaluationResults.filter(
+            (_, i) =>
+              courseResult[i].results.find(({ attempts }) => attempts !== 0) !==
+              undefined
+          )
+        )
       );
       this.courseResults = this.courseResultService
         .getAllResults(this.courseId)

@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { AuthService } from "../../service/auth.service";
+import { UserService } from "src/app/service/user.service";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Observable, of } from "rxjs";
 import { Roles } from "../../model/Roles";
@@ -8,6 +9,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { DataprivacyDialogComponent } from "../../dialogs/dataprivacy-dialog/dataprivacy-dialog.component";
 import { ImpressumDialogComponent } from "../../dialogs/impressum-dialog/impressum-dialog.component";
 import { FeedbackAppService } from "../../service/feedback-app.service";
+import { User } from "src/app/model/User";
 
 /**
  * Root component shows sidenav and titlebar
@@ -23,19 +25,26 @@ export class SidebarComponent implements OnInit {
     private auth: AuthService,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
-    private feedbackAppService: FeedbackAppService
+    private feedbackAppService: FeedbackAppService,
+    private userservice: UserService
   ) {}
 
   title: Observable<string> = of("");
   opened: boolean;
   innerWidth: number;
-
+  userID: number;
   username: string;
   isAdmin: boolean;
   isModerator: boolean;
+  showAnalytics: boolean;
+  user: User;
 
   ngOnInit() {
-    this.username = this.auth.getToken().username;
+    this.userID = this.auth.getToken().id;
+    this.userservice.getUser(this.userID).subscribe(
+      (user) => (this.user = user),
+      (error) => console.log(error)
+    );
     const globalRole = this.auth.getToken().globalRole;
     this.opened = true;
 
@@ -44,6 +53,10 @@ export class SidebarComponent implements OnInit {
 
     this.title = this.titlebar.getTitle();
     this.innerWidth = window.innerWidth;
+
+    this.showAnalytics = Object.values(this.auth.getToken().courseRoles).some(
+      (e) => Roles.CourseRole.isDocent(e) || Roles.CourseRole.isTutor(e)
+    );
   }
 
   /**
