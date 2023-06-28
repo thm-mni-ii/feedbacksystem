@@ -51,15 +51,7 @@ export class CourseResultsComponent implements OnInit {
       this.courseId = param.id;
       this.allCourseResults = this.courseResultService
         .getAllResults(this.courseId)
-        .pipe(
-          mergeAll(),
-          filter(
-            (result) =>
-              result.results.find(({ attempts }) => attempts !== 0) !==
-              undefined
-          ),
-          toArray()
-        );
+        .pipe(mergeAll(), toArray());
       this.evaluationUserResults = zip(
         this.courseResultService.getRequirementCourseResults(this.courseId),
         this.courseResultService.getAllResults(this.courseId)
