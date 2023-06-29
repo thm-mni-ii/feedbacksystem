@@ -34,7 +34,8 @@ class UserService(private val userRepository: UserRepository) : UserDetailsServi
      * @param ignoreDeleted Ignores deleted users
      * @return List of users
      */
-    fun getAll(ignoreDeleted: Boolean = true): List<User> = userRepository.findAllByDeleted(ignoreDeleted)
+    fun getAll(ignoreDeleted: Boolean = true): List<User> =
+        if (ignoreDeleted) userRepository.findAllByDeleted() else userRepository.findAll()
 
     /**
      * Create a new user.

@@ -9,7 +9,7 @@ import javax.transaction.Transactional
 interface UserRepository : JpaRepository<User, Int> {
     fun findByUsername(username: String): User?
 
-    fun findAllByDeleted(deleted: Boolean = true): List<User>
+    fun findAllByDeleted(deleted: Boolean = false): List<User>
 
     @Transactional
     @Modifying
