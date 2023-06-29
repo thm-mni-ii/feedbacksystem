@@ -11,7 +11,10 @@
     <ng-container matColumnDef="cellName">
       <mat-header-cell *matHeaderCellDef> Zelle </mat-header-cell>
       <mat-cell *matCellDef="let data">
-        <mat-tree [dataSource]="treeDataSource" [treeControl]="treeControl">
+        <mat-tree
+          [dataSource]="treeDataSources[data.name]"
+          [treeControl]="treeControl"
+        >
           <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
             <div
               class="cellTreeNode"
@@ -53,7 +56,10 @@
     <ng-container matColumnDef="errorHint">
       <mat-header-cell *matHeaderCellDef> Hinweis </mat-header-cell>
       <mat-cell *matCellDef="let data">
-        <mat-tree [dataSource]="treeDataSource" [treeControl]="treeControl">
+        <mat-tree
+          [dataSource]="treeDataSources[data.name]"
+          [treeControl]="treeControl"
+        >
           <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
             {{ node.errorHint }}
           </mat-tree-node>

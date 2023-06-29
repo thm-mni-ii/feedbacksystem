@@ -16,14 +16,17 @@ import { MatTreeNestedDataSource } from "@angular/material/tree";
 export class ExcelResultsComponent {
   displayedColumns = ["name", "cellName", "errorHint", "table", "result"];
   dataSource = new MatTableDataSource<ExcelExercise>(EXCEL_DATA.exercises);
+  treeDataSources: Record<string, MatTreeNestedDataSource<ExcelCell>> = {};
 
   treeControl = new NestedTreeControl<ExcelCell>(
     (node) => node.consequentErrorCell
   );
-  treeDataSource = new MatTreeNestedDataSource<ExcelCell>();
 
   constructor() {
-    this.treeDataSource.data = EXCEL_DATA.exercises[0].errorCell;
+    EXCEL_DATA.exercises.forEach((e) => {
+      this.treeDataSources[e.name] = new MatTreeNestedDataSource<ExcelCell>();
+      this.treeDataSources[e.name].data = e.errorCell;
+    });
   }
 
   hasChild = (_: number, node: ExcelCell) =>
