@@ -1,20 +1,22 @@
+
+/* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
 :host ::ng-deep .mat-form-field-wrapper {
   padding: auto;
 }
 
-:host ::ng-deep .mat-paginator {
+:host ::ng-deep .mat-mdc-paginator {
   display: flex;
   flex-direction: row;
   justify-content: right;
 }
 
 
-.mat-row:nth-child(even) {
+.mat-mdc-row:nth-child(even) {
   background-color: #f0f0fa;
 }
 
 .search,
-.mat-table {
+.mat-mdc-table {
   width: 100%;
 }
 

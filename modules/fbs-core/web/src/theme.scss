@@ -1,15 +1,26 @@
 @use "@angular/material" as mat;
 
+/* TODO(mdc-migration): The following rule targets internal classes of checkbox that may no longer apply for the MDC version.*/
 .mat-checkbox-layout {
   white-space: normal !important;
 }
 
+@include mat.all-component-typographies();
 @include mat.core();
 
 $primary: mat.define-palette(mat.$blue-grey-palette, 600, 500, 700);
 $accent: mat.define-palette(mat.$indigo-palette, 300, 200, 400);
 $warn: mat.define-palette(mat.$red-palette);
 
-$light-theme: mat.define-light-theme($primary, $accent, $warn);
+$light-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $primary,
+      accent: $accent,
+      warn: $warn,
+    ),
+  )
+);
+
 
 @include mat.all-component-themes($light-theme);
