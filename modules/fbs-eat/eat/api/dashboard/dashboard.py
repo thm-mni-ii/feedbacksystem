@@ -25,6 +25,7 @@ from api.util.utilities import (
     filter_attempt_limits,
     select_all_exercises_in_course,
     filter_time,
+    select_all_courses
 )
 from api.util.dashboard_util import (
     hide_histogram,
@@ -33,6 +34,7 @@ from api.util.dashboard_util import (
     reduce_data_to_necessary_columns,
     create_average_bar,
     get_values_from_data,
+    get_avg_att_time,
 )
 import logging
 
@@ -69,7 +71,11 @@ layout = html.Div(
                                     [
                                         "Key Figure",
                                         key_figure := dcc.Dropdown(
-                                            ["Typical Mistakes", "Average Attempts"],
+                                            [
+                                                "Typical Mistakes",
+                                                "Average Attempts",
+                                                "Average Time",
+                                            ],
                                             "Typical Mistakes",
                                             style={"background-color": "#e9e7e9"},
                                             clearable=False,
@@ -484,49 +490,69 @@ def update_histogram(
     fig = create_course_bars(hist_df, fig, labels)
     return fig, display_style
 
+
 @callback(
     Output(histogram_avg_time, "figure"),
+    Output(histogram_avg_time_card, "style"),
     Input("intermediate-value", "data"),
+    Input("course_dashboard", "value"),
     Input("exercise_dashboard", "value"),
+    Input(key_figure, "value"),
+    Input("slider_dashboard", "value"),
+    Input("checkbox", "value"),
+    Input("date_time_from", "value"),
+    Input("date_time_to", "value"),
 )
-def track_time(daten, exercise_value):
+def track_time(
+    daten,
+    course_value,
+    exercise_value,
+    key_figure_value,
+    slider_value,
+    checklist_value,
+    date_time_from,
+    date_time_to,
+):
     local_df = filter_data(daten)
     local_df = local_df[local_df["UserId"] != 0]
     local_df["Time"] = pd.to_datetime(local_df["Time"])
+    fig = go.Figure()
 
-    times = []
-    traces = []
-    if not exercise_value:
-        return dash.no_update
-    for task in exercise_value:
-        task_times = []
-        task_data = local_df[local_df["UniqueName"] == task]
-        for user in task_data["UserId"].unique():
-            user_task_data = task_data[task_data["UserId"] == user]
-            lowest_value = user_task_data["Attempt"].min()
-            first_attempt = user_task_data[user_task_data["Attempt"] == lowest_value]
-            highest_value = user_task_data["Attempt"].max()
-            last_attempt = user_task_data[user_task_data["Attempt"] == highest_value]
-            first_attempt_date = first_attempt["Time"]
-            last_attempt_date = last_attempt["Time"]
+    if "Average Time" in key_figure_value:
+        display_style = {"display": "block"}
+    else:
+        display_style = {"display": "none"}
+        # abort if Average Time not selected
+        return fig, display_style
 
-            duration = list(last_attempt_date)[0] - list(first_attempt_date)[0]
-            task_times.append(duration)
-        times.append(task_times)
-    df = pd.DataFrame(times)
-    logger.error(df)
-    for info in times:
-        fig = px.box(
-            data_frame=info,
-            labels={'variable': 'Data Sets', 'value': 'Values'},
-            title='Box Plot'
+    local_df = filter_attempt_limits(local_df, slider_value)
+    if "Date" in checklist_value:
+        local_df = filter_time(
+            local_df, convert_time(date_time_from), convert_time(date_time_to)
         )
-        traces.append(fig)
-    fig = make_subplots(rows=1, cols=1)
-    for trace in traces:
-        fig.append_trace(trace,row=1, col=1)
-    logger.error(times)
-    return fig
+    if not course_value:
+        course_value = select_all_courses(local_df)
+    if not exercise_value:
+        # abort if no exercise is selected
+        exercise_value = select_all_exercises_in_course(local_df, course_value)
+    # calculates all times for each task
+    times = get_avg_att_time(local_df, exercise_value)
+    df = pd.DataFrame(times)
+    if not times:
+        return fig, display_style
+    fig.add_trace(
+        go.Box(
+            y=df[1],
+            x=df[0],
+        )
+    )
+    fig.update_layout(
+        xaxis=dict(type="category", showgrid=True, zeroline=True),
+        yaxis=dict(title="Average Time"),
+        showlegend=False,
+    )
+    return fig, display_style
+
 
 # pylint: enable=too-many-locals
 # pylint: enable=too-many-arguments
