@@ -199,3 +199,38 @@
   align-items: center;
   justify-content: center;
 }
+
+.show-submissions {
+  position: flex;
+  margin-left: auto;
+  padding-right: 11.5px;
+}
+
+hr {
+  margin-top: -3px;
+  width: 100%;
+  color: rgb(235, 235, 235);
+}
+
+.mat-menu{
+  border-radius: 5px;
+  box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+.mat-menu-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  position: relative;
+  pointer-events: none;
+}
+
+.toggle-text {
+  margin-right: 15px;
+  font-size: small;
+}
+
+.mat-slide-toggle {
+  transform: scale(0.8);
+  pointer-events: all;
+}
