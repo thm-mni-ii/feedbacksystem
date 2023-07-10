@@ -225,22 +225,14 @@ def get_avg_att_time(local_df, exercise_value):
                     short_duration = (
                         list(datum["Time"])[0] - last_date
                     ).total_seconds()
-                    if short_duration < 1800:
+                    if 1800 > short_duration >= 0:
                         total_duration += short_duration
                     last_date = list(datum["Time"])[0]
-            logger.error(total_duration)
-            lowest_value = user_task_data["Attempt"].min()
-            first_attempt = user_task_data[user_task_data["Attempt"] == lowest_value]
-            if list(first_attempt["Correct"])[0] == "correct":
-                continue
-            highest_value = user_task_data["Attempt"].max()
-            last_attempt = user_task_data[user_task_data["Attempt"] == highest_value]
-            if list(last_attempt["Correct"])[0] == "incorrect":
-                continue
-            first_attempt_date = first_attempt["Time"]
-            last_attempt_date = last_attempt["Time"]
-            duration = list(last_attempt_date)[0] - list(first_attempt_date)[0]
+                if list(user_task_data[user_task_data["Attempt"] == i]["Correct"])[0] == "correct":
+                    break
             single_info.append(task)
-            single_info.append(duration.total_seconds())
+            single_info.append(total_duration)
             times.append(single_info)
+    for a in range(len(times)):
+        logger.error(times[a])
     return times

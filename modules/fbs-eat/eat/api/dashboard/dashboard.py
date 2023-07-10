@@ -548,7 +548,7 @@ def track_time(
     )
     fig.update_layout(
         xaxis=dict(type="category", showgrid=True, zeroline=True),
-        yaxis=dict(title="Average Time"),
+        yaxis=dict(title="Average Time in s"),
         showlegend=False,
     )
     return fig, display_style
