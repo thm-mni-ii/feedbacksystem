@@ -75,15 +75,38 @@
 }
 
 .material-icons.color_green {
-  color: #00db00
+  color: #00db00;
 }
 
 .material-icons.color_red {
-  color: #e20000
+  color: #e20000;
 }
 
 .title {
   font-family: sans-serif;
   font-size: medium;
   font-style: oblique;
+}
+
+.close-all-btn {
+  float: right;
+
+  button {
+    color: rgba(0, 0, 0, 0.54);
+
+    margin: 6px 2px 2px 10px;
+    min-width: 0 !important;
+    padding: 0;
+
+    mat-icon {
+      //outline
+      border: rgba(0, 0, 0, 0.55) 2px solid;
+      border-radius: 10%;
+      padding: 1px 2px 2px 2px;
+    }
+  }
+
+  // margin-left: 10px;
+  // margin-right: 10px;
+  // cursor: pointer;
 }

@@ -26,6 +26,7 @@ import { SubmissionService } from "../../../service/submission.service";
 import { PrismService } from "src/app/service/prism.service";
 import { Subscription } from "rxjs";
 import { CheckerService } from "src/app/service/checker.service";
+import { QueryTab } from "src/app/model/sql_playground/QueryTab";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -84,24 +85,9 @@ export class SqlInputTabsComponent
     this.prismService.highlightAll();
   }
 
-  fileName = "New_Query";
-  tabs = [
-    {
-      name: this.fileName,
-      content: "",
-      error: false,
-      errorMsg: null,
-      isCorrect: false,
-      isSubmitted: false,
-      isSubmitMode: false,
-      selectedCourse: undefined,
-      selectedTask: undefined,
-      selectedCourseName: "Kurs",
-      selectedTaskName: "Aufgabe",
-    },
-  ];
+  tabs: QueryTab[] = [];
   activeTabId = new UntypedFormControl(0);
-  activeTab = this.tabs[this.activeTabId.value];
+  activeTab: QueryTab;
   pending: boolean = false;
   courses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
@@ -140,9 +126,13 @@ export class SqlInputTabsComponent
 
   loadFromLocalStorage() {
     const loadedData = localStorage.getItem("tabs");
-    if (loadedData) {
+    console.log(loadedData);
+
+    if (loadedData && JSON.parse(loadedData).tabs.length > 0) {
       this.tabs = JSON.parse(loadedData).tabs;
       this.activeTab = this.tabs[this.activeTabId.value];
+    } else {
+      this.addTab();
     }
   }
 
@@ -158,10 +148,12 @@ export class SqlInputTabsComponent
     this.saveToLocalStorage();
   }
 
-  addTab(event: MouseEvent) {
-    event.stopPropagation();
+  addTab(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.tabs.push({
-      name: this.fileName,
+      name: "New Query",
       content: "",
       error: false,
       errorMsg: null,
@@ -175,6 +167,22 @@ export class SqlInputTabsComponent
     });
     this.activeTabId.setValue(this.tabs.length - 1);
     this.saveToLocalStorage();
+  }
+
+  closeAllTabs(event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.openConfirmDialog(
+      "Möchtest du wirklich alle Tabs schließen?",
+      "Achtung der Inhalt wird nicht gespeichert!"
+    ).subscribe((result) => {
+      if (result == true) {
+        this.tabs = [];
+        this.addTab();
+        this.saveToLocalStorage();
+      }
+    });
   }
 
   openConfirmDialog(title: string, message: string) {
@@ -202,7 +210,11 @@ export class SqlInputTabsComponent
   }
 
   isSubmissionEmpty(): boolean {
-    if (this.activeTab.content != "" && this.pending == false) {
+    if (
+      this.activeTab != undefined &&
+      this.activeTab.content != "" &&
+      this.pending == false
+    ) {
       return false;
     }
     return true;
