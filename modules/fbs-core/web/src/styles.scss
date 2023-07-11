@@ -6,7 +6,6 @@
 @import "~@fontsource/material-icons";
 @import "~prismjs/themes/prism";
 
-
 html,
 body {
   height: 100%;
@@ -63,7 +62,8 @@ app-db-control-panel {
 
 app-sql-input-tabs {
   .mat-tab-label {
-    min-width: 230px !important;
+    min-width: 200px !important;
+    height: 35px !important;
   }
 
   .mat-expansion-panel-body {
@@ -83,7 +83,6 @@ app-db-scheme-table {
   }
 }
 
-
 // Prism.js line numbers plugin
 .line-numbers .line-numbers-rows {
   position: absolute;
@@ -95,13 +94,12 @@ app-db-scheme-table {
   letter-spacing: -1px;
   border-right: 1px solid rgb(87, 87, 87);
   user-select: none;
-  background-color: rgb(245,245,245);
+  background-color: rgb(245, 245, 245);
 }
 
 .line-numbers-rows > span {
   display: block;
   counter-increment: linenumber;
-  
 }
 
 .line-numbers-rows > span:before {
@@ -110,15 +108,14 @@ app-db-scheme-table {
   display: block;
   padding-right: 0.8em;
   text-align: right;
- 
 }
 
 :not(pre) > code[class*="language-"],
 pre[class*="language-"] {
-	background: #ffffff;
+  background: #ffffff;
 }
 
 code[class*="language-"],
 pre[class*="language-"] {
-	color: #000000;
+  color: #000000;
 }

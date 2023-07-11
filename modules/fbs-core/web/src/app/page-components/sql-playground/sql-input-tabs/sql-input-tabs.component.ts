@@ -105,7 +105,9 @@ export class SqlInputTabsComponent
     this.loadFromLocalStorage();
   }
 
-  closeTab(index: number) {
+  closeTab() {
+    let index: number = this.activeTabId.value;
+
     this.openConfirmDialog(
       "Möchtest du wirklich diesen " + this.tabs[index].name + "  schließen?",
       "Achtung der Inhalt wird nicht gespeichert!"
