@@ -215,7 +215,7 @@ def get_avg_att_time(local_df, exercise_value):
             single_info = []
             total_duration = 0
             last_date = 0
-            for i in range(1, user_task_data["Attempt"].max()):
+            for i in range(user_task_data["Attempt"].min(), user_task_data["Attempt"].max()):
                 datum = user_task_data[user_task_data["Attempt"] == i]
                 if datum.empty:
                     continue
@@ -225,7 +225,7 @@ def get_avg_att_time(local_df, exercise_value):
                     short_duration = (
                         list(datum["Time"])[0] - last_date
                     ).total_seconds()
-                    if 1800 > short_duration >= 0:
+                    if 1200 > short_duration >= 0:
                         total_duration += short_duration
                     last_date = list(datum["Time"])[0]
                 if list(user_task_data[user_task_data["Attempt"] == i]["Correct"])[0] == "correct":
@@ -233,6 +233,4 @@ def get_avg_att_time(local_df, exercise_value):
             single_info.append(task)
             single_info.append(total_duration)
             times.append(single_info)
-    for a in range(len(times)):
-        logger.error(times[a])
     return times
