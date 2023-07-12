@@ -88,13 +88,15 @@
   font-style: oblique;
 }
 
-.action-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.close-all-btn {
+  float: right;
 
   button {
     color: rgba(0, 0, 0, 0.54);
+
+    margin: 6px 2px 2px 10px;
+    min-width: 0 !important;
+    padding: 0;
 
     mat-icon {
       //outline
@@ -103,4 +105,8 @@
       padding: 1px 2px 2px 2px;
     }
   }
+
+  // margin-left: 10px;
+  // margin-right: 10px;
+  // cursor: pointer;
 }
