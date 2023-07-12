@@ -209,6 +209,29 @@ export class SqlInputTabsComponent
     }, 0);
   }
 
+  downloadAllFiles() {
+    this.openConfirmDialog(
+      "Möchtest du wirklich alle Dateien herunterladen?",
+      ""
+    ).subscribe((result) => {
+      if (result == true) {
+        for (let i = 0; i < this.tabs.length; i++) {
+          var file = new Blob([this.tabs[i].content], { type: ".txt" });
+          var a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+          a.href = url;
+          a.download = this.tabs[i].name + ".sql";
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(function () {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+          }, 200);
+        }
+      }
+    });
+  }
+
   isSubmissionEmpty(): boolean {
     if (
       this.activeTab != undefined &&

@@ -1,10 +1,29 @@
-<div class="close-all-btn">
+<div class="actions-container">
   <button
     mat-flat-button
-    matTooltip="Schließe alle Tabs"
+    matTooltip="Close all Tabs"
+    matTooltipPosition="right"
     (click)="closeAllTabs()"
   >
     <mat-icon>playlist_remove</mat-icon>
+  </button>
+  <button
+    mat-button
+    matTooltip="Download Tab"
+    matTooltipPosition="right"
+    [disabled]="pending"
+    (click)="downloadFile()"
+  >
+    <mat-icon>download</mat-icon>
+  </button>
+  <button
+    mat-button
+    matTooltip="Download all Tabs"
+    matTooltipPosition="right"
+    [disabled]="pending"
+    (click)="downloadAllFiles()"
+  >
+    <mat-icon>folder</mat-icon>
   </button>
 </div>
 <mat-tab-group
@@ -66,15 +85,6 @@
 </mat-tab-group>
 <div class="bottom-container">
   <button
-    mat-button
-    class="downloadBtn"
-    [disabled]="pending"
-    (click)="downloadFile()"
-  >
-    <mat-icon>download</mat-icon> Download
-  </button>
-
-  <button
     [disabled]="isSubmissionEmpty() || isPending"
     mat-flat-button
     color="accent"
@@ -89,6 +99,7 @@
 
   <button
     mat-flat-button
+    color="grey"
     class="submitBtn"
     *ngIf="!activeTab.isSubmitMode"
     matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
@@ -173,13 +184,13 @@
       </button>
     </mat-menu>
 
-    <button
-      class="submit-item"
+    <mat-icon
+      matTooltip="Schließen"
+      matTooltipPosition="right"
       class="closeBtn"
       mat-flat-button
       (click)="updateMode(false)"
+      >closeTab</mat-icon
     >
-      <mat-icon>closeTab</mat-icon>
-    </button>
   </div>
 </div>
