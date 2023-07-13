@@ -14,7 +14,7 @@ import { Task } from "../../model/Task";
   styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent implements OnInit {
-  task: any;
+  task: Task;
   hideToggle = true;
   toggleValue: boolean = false;
   constructor(
@@ -153,5 +153,4 @@ export class ResultsComponent implements OnInit {
       duration: 3000,
     });
   }
-
 }
