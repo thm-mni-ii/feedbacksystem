@@ -1,4 +1,5 @@
 package de.thm.ii.fbs.services.checker.excel
+import scala.collection.JavaConverters._
 
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck, ExcelMediaInformationTasks}
@@ -6,7 +7,9 @@ import org.apache.poi.ss.usermodel.{Cell, CellType, FormulaEvaluator, WorkbookFa
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
 import org.apache.poi.ss.formula.WorkbookEvaluator
+import org.apache.poi.ss.formula.eval.FunctionEval
 
+import scala.collection.mutable.ArrayBuffer
 import java.io.{File, FileInputStream}
 import java.text.NumberFormat
 import java.util.Locale
@@ -18,6 +21,8 @@ import org.matheclipse.core.interfaces.IExpr
 import org.matheclipse.core.interfaces.ISymbol
 import org.matheclipse.parser.client.SyntaxError
 import org.matheclipse.parser.client.math.MathException
+
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 /**
   * A Spreadsheet Service
   */
@@ -79,6 +84,7 @@ class ExcelService {
 
 
       for ((cell1, cell2) <- seq1.zip(seq2)) {
+        //normalize the formulas using the eval function
         var result1 = util.eval(cell1.formula)
         var result2 = util.eval(cell2.formula)
         print(f"result1 := ${result1} --- result2 := ${result2} ====>the cell1 := ${cell1.formula} --- the cell2 := ${cell2.formula} \n")
@@ -97,6 +103,10 @@ class ExcelService {
         stringBuilder.append(s"Value in seq1: ${cell1.value}\n")
         stringBuilder.append(s"Value in seq2: ${cell2.value}\n")
 */
+            /*
+            if  cell1.getNumericCellValue.toString==cell2.getNumericCellValue.toString && category of token2 contains "function"
+            then consider this correct and don t add it to the string builder
+             */
         val diff = findTokenDifferences(tokens1, tokens2)
         if(diff.length>0) stringBuilder.append(s"+Zelle: ${cell1.reference} ==>[ ${diff} ] \n")
 
@@ -123,6 +133,14 @@ class ExcelService {
       if (category1 != category2 || token1 != token2) {
        // diffBuilder.append(s"Position $i: $category1='$token1' vs $category2='$token2'\n")
         diffBuilder.append(s"Ein $category2='$token2' ist nicht korrekt ")
+
+       /* if(category2=="function"){
+          if (!functionNames.contains(token2)) {
+            val closestKeyword = findMostSimilarKeyword(token2, functionNames)
+            print(s"Did you mean $closestKeyword? \n")
+          }
+        }*/
+
       }
     }
 
@@ -187,7 +205,7 @@ class ExcelService {
   }
 
 
-
+/*
   private def findDifference(value1: String, value2: String): String = {
     val diffBuilder = new StringBuilder()
 
@@ -213,7 +231,7 @@ class ExcelService {
 
     diffBuilder.toString()
   }
-
+*/
 
   /**
    * Compares the formulas in the same cell reference between two Seq[SpreadsheetCell]
@@ -254,11 +272,13 @@ class ExcelService {
     formulasMatch
   }
 */
+
+      /*
   private def normalizeFormula(formula: String): String = {
     // Normalize the formula by removing leading and trailing whitespaces and converting to uppercase
     formula.trim.toUpperCase
   }
-
+*/
   def initWorkBook(spreadsheet: File, excelMediaInformation: ExcelMediaInformationTasks): XSSFWorkbook = {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
@@ -360,41 +380,59 @@ class ExcelService {
   }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
-  val keywords = List("AVG", "SUM", "MUL", "OPER", "APPEND", "DELETE")
-
-  def findMostSimilarKeyword(input: String): String = {
-    val distances = keywords.map(keyword => (keyword, levenshteinDistance(input, keyword)))
-    val (closestKeyword, _) = distances.minBy(_._2)
-    closestKeyword
-  }
-
-  /*The Lavenshtein distance algorithm is used to find the function with the greatest
-  resemblance  to the user input in case of a misspelled keyword.*/
+  //val keywords = List("AVG", "SUM", "MUL", "OPER", "APPEND", "DELETE")
   def levenshteinDistance(s1: String, s2: String): Int = {
-    val dp = Array.tabulate(s1.length + 1, s2.length + 1)((_, _) => 0)
+    val m = s1.length
+    val n = s2.length
+    val dp = Array.ofDim[Int](m + 1, n + 1)
 
-    for (i <- 1 to s1.length; j <- 1 to s2.length) {
+    for (i <- 0 to m) {
+      dp(i)(0) = i
+    }
+    for (j <- 0 to n) {
+      dp(0)(j) = j
+    }
+
+    for (i <- 1 to m; j <- 1 to n) {
       val substitutionCost = if (s1(i - 1) == s2(j - 1)) 0 else 1
-      dp(i)(j) = List(
-        dp(i - 1)(j) + 1, // deletion
-        dp(i)(j - 1) + 1, // insertion
-        dp(i - 1)(j - 1) + substitutionCost // substitution
+      dp(i)(j) = Seq(
+        dp(i - 1)(j) + 1,     // deletion
+        dp(i)(j - 1) + 1,     // insertion
+        dp(i - 1)(j - 1) + substitutionCost   // substitution
       ).min
     }
 
-    dp(s1.length)(s2.length)
+    dp(m)(n)
   }
 
-  def checkSyntax(input: String): Unit = {
-    if (!keywords.contains(input)) {
-      val closestKeyword = findMostSimilarKeyword(input)
-      println(s"Probieren Sie  $closestKeyword?")
+  def findMostSimilarKeyword(input: String, keywordList: List[String]): String = {
+    val exactMatch = keywordList.find(keyword => keyword.equalsIgnoreCase(input))
+    if (exactMatch.isDefined) {
+      exactMatch.get
     } else {
-      print("Syntax is nicht korrekt.\n")
+      val distances = keywordList.map(keyword => (keyword, levenshteinDistance(input, keyword)))
+      val (closestKeyword, _) = distances.minBy(_._2)
+      closestKeyword
     }
   }
-    val testInputs = List("AVG", "SUN", "DELTE", "OPERATOR")
-    testInputs.foreach(checkSyntax)
+
+
+
+  // List of all Excel supported functions
+  val functionNames = FunctionEval.getSupportedFunctionNames.asScala.toList
+  print(s"The list of keys: $functionNames \n")
+
+  val testInputs = List("AVER", "SIN", "DELTE", "DA", "POW", "ABS", "DAT", "NOW", "sum")
+
+  testInputs.foreach { input =>
+    print(f"the test_input b4: ${input} ")
+    if (!functionNames.contains(input)) {
+      val closestKeyword = findMostSimilarKeyword(input, functionNames)
+      print(f"the test_input after: ${input} ")
+      print(s"Did you mean $closestKeyword? \n")
+    }
+  }
+
 
   /**
     * @param row     the row where the errror occured

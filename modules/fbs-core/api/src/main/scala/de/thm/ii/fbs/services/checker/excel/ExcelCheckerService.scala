@@ -170,9 +170,6 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     }
     val expectedFormula = this.excelService.getFormula(submissionFile, excelMediaInformation, checkFields)
     val userFormula = this.excelService.getFormula(mainFile, excelMediaInformation, checkFields)
-
-    print("this is the submission :", this.excelService.getFormula(submissionFile, excelMediaInformation, checkFields), " \n")
-    print("this is the solution :", this.excelService.getFormula(mainFile, excelMediaInformation, checkFields), " \n")
     val(storedFormulas, updatedInvalidFields) = this.excelService.compareForm(expectedFormula, userFormula, invalidCells)
    // invalidCells = updatedInvalidFields
     uniqueList++=updatedInvalidFields
@@ -286,7 +283,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   }
 
   def tableLine(): String = {
-    "-" * 57  // Adjust the line length as needed
+    "-" * 57
   }
 
   private def shouldBuildCheckResult(c: (CheckResult, ExcelMediaInformationCheck)) = {
