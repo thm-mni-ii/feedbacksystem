@@ -64,7 +64,7 @@ dependencies {
     implementation 'com.udojava:EvalEx:2.7'
     implementation 'org.mongodb:bson:4.10.1'
     implementation 'org.mongodb:mongodb-driver-core:4.10.1'
-    implementation 'org.mongodb:mongodb-driver-sync:4.10.1'
+    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
     implementation 'org.springframework.data:spring-data-bom:2021.2.5'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.data:spring-data-commons'
