@@ -22,6 +22,32 @@
         <td mat-cell *matCellDef="let checker">{{ checker.checkerType }}</td>
       </ng-container>
 
+      <ng-container matColumnDef="query">
+        <th mat-header-cell *matHeaderCellDef>Abgabe</th>
+        <td mat-cell *matCellDef="">
+          <div *ngIf="isText" class="submission-text">
+            <pre class="pre">{{ submissionContent }}</pre>
+            <button
+              mat-icon-button
+              (click)="copy()"
+              matTooltip="Abgabe kopieren"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="!isText">
+            <button
+              mat-flat-button
+              color="accent"
+              (click)="downloadSubmission()"
+              matTooltip="Abgabe herunterladen"
+            >
+              Download
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="resultText">
         <th mat-header-cell *matHeaderCellDef>Antworttext</th>
         <td mat-cell *matCellDef="let checker">
@@ -33,7 +59,7 @@
         <th mat-header-cell *matHeaderCellDef>Ergebnis</th>
         <td mat-cell *matCellDef="let checker">
           <mat-icon class="done" *ngIf="checker.exitCode === 0">done</mat-icon>
-          <mat-icon color="not-done" *ngIf="checker.exitCode === 1"
+          <mat-icon color="not-done" *ngIf="checker.exitCode !== 0"
             >clear</mat-icon
           >
         </td>

@@ -4,6 +4,8 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
@@ -20,12 +22,14 @@ import { PrismService } from "src/app/service/prism.service";
   styleUrls: ["./highlighted-input.component.scss"],
 })
 export class HighlightedInputComponent
-  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy, OnChanges
 {
   @ViewChild("textArea", { static: true }) textArea!: ElementRef;
   @ViewChild("codeContent", { static: true }) codeContent!: ElementRef;
   @ViewChild("pre", { static: true }) pre!: ElementRef;
   @Output() update: EventEmitter<any> = new EventEmitter<any>();
+  @Input() tabs: any[];
+  @Input() selectedIndex: number;
 
   sub!: Subscription;
   highlighted = false;
@@ -46,6 +50,12 @@ export class HighlightedInputComponent
     private fb: FormBuilder,
     private renderer: Renderer2
   ) {}
+
+  ngOnChanges(changes): void {
+    if (changes.selectedIndex) {
+      this.listenForm();
+    }
+  }
 
   ngOnInit(): void {
     this.listenForm();
@@ -79,11 +89,16 @@ export class HighlightedInputComponent
   }
 
   cleanUpTextAreaRegx(sqlInput: String) {
-    let temp = sqlInput.replace(/[\n\t]/g, "");
+    let temp = sqlInput.trim().replace(/\s+/g, " ");
     return temp;
   }
 
   listenForm() {
+    if (this.tabs[this.selectedIndex].content !== null) {
+      this.groupForm.setValue({
+        content: this.tabs[this.selectedIndex].content,
+      });
+    }
     this.sub = this.groupForm.valueChanges.subscribe((val: any) => {
       const modifiedContent = this.prismService.convertHtmlIntoString(
         val.content
