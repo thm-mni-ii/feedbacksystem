@@ -104,6 +104,7 @@ import { DbControlDbOverviewComponent } from "./page-components/sql-playground/d
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
+import { SpreadsheetResultDialogComponent } from "./dialogs/spreadsheet-result-dialog/spreadsheet-result-dialog.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -200,6 +201,7 @@ export const httpInterceptorProviders = [
     NewSqlTemplateComponent,
     ExportTasksDialogComponent,
     HighlightedInputComponent,
+    SpreadsheetResultDialogComponent,
   ],
   imports: [
     BrowserModule,
