@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser.transformer
 
 import de.thm.ii.fbs.mathParser.transformers.TransformerConfig
@@ -10,7 +12,7 @@ internal class TransformerConfigTest {
     fun testConstruct() {
         assertEquals(
             TransformerConfig(2, RoundingMode.HALF_UP),
-            TransformerConfig(2),
+            TransformerConfig(2)
         )
     }
 }

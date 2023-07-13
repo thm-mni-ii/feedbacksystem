@@ -1,12 +1,14 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundDatabaseCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundQueryCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
+import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
@@ -17,11 +19,11 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
 class PlaygroundController(
-        private val userRepository: UserRepository,
-        private val databaseRepository: SqlPlaygroundDatabaseRepository,
-        private val entityRepository: SqlPlaygroundEntityRepository,
-        private val queryRepository: SqlPlaygroundQueryRepository,
-        private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
+    private val userRepository: UserRepository,
+    private val databaseRepository: SqlPlaygroundDatabaseRepository,
+    private val entityRepository: SqlPlaygroundEntityRepository,
+    private val queryRepository: SqlPlaygroundQueryRepository,
+    private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService
 ) {
     @GetMapping
     @ResponseBody
@@ -88,12 +90,12 @@ class PlaygroundController(
     @GetMapping("/{dbId}/results")
     @ResponseBody
     fun getResults(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): List<SqlPlaygroundResult> =
-            queryRepository.findByRunIn_Owner_IdAndRunIn_id(currentToken.id, dbId).mapNotNull { it.result }
+        queryRepository.findByRunIn_Owner_IdAndRunIn_id(currentToken.id, dbId).mapNotNull { it.result }
 
     @GetMapping("/{dbId}/results/{qId}")
     @ResponseBody
     fun getResult(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int, @PathVariable("qId") qId: Int): SqlPlaygroundResult =
-            queryRepository.findByRunIn_Owner_IdAndRunIn_idAndId(currentToken.id, dbId, qId)?.result  ?: throw NotFoundException()
+        queryRepository.findByRunIn_Owner_IdAndRunIn_idAndId(currentToken.id, dbId, qId)?.result ?: throw NotFoundException()
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody
@@ -123,7 +125,7 @@ class PlaygroundController(
     private fun getEntity(userId: Int, databaseId: Int, type: String) =
         entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(userId, databaseId, false, type)?.data ?: throw NotFoundException()
 
-    private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach {type ->
+    private fun createAllEntities(database: SqlPlaygroundDatabase) = listOf("tables", "constraints", "views", "routines", "triggers").forEach { type ->
         entityRepository.save(SqlPlaygroundEntity(database, type, ArrayNode(JsonNodeFactory(false))))
     }
 }

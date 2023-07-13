@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.model.v2.checker.storage
 
 import com.fasterxml.jackson.databind.JsonNode
@@ -14,5 +16,5 @@ class CheckerStorageEntity(
     var storageKey: String,
     @Column(nullable = false)
     @Convert(converter = JpaJsonNodeConverter::class)
-    var value: JsonNode,
+    var value: JsonNode
 )

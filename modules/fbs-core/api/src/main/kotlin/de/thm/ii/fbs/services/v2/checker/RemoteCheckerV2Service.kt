@@ -13,7 +13,7 @@ abstract class RemoteCheckerV2Service(
     @Value("\${services.masterRunner.insecure}")
     insecure: Boolean,
     @Value("\${services.masterRunner.url}")
-    private val masterRunnerURL: String,
+    private val masterRunnerURL: String
 ) {
     private val restTemplate: RestTemplate
     private val objectMapper = ObjectMapper()

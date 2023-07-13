@@ -1,11 +1,13 @@
 # JSONCreator.py
 
 from parser import parse_query
+from datetime import datetime
 from table_checker import extract_tables
 from pro_attribute_checker import extract_pro_attributes
 import sel_attribute_checker as AWC
 from pymongo import MongoClient  # pylint: disable=E0401
 from model import *  # pylint: disable=W0401
+from mask_aliases import SQLAliasMasker
 
 rightStatements = []
 rightTables = []
@@ -22,6 +24,7 @@ def parse_single_stat_upload_db(data, client):
     client = MongoClient(client, 27107)
     mydb = client["sql-checker"]
     mycollection = mydb["Queries"]
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     (
         tables2,
         pro_atts2,
@@ -35,9 +38,14 @@ def parse_single_stat_upload_db(data, client):
         group_by2,
         having2,
         joins2,
-    ) = ([], [], [], [], [], [], [], [], [], [], [], [])
+        wildcards2,
+    ) = ([], [], [], [], [], [], [], [], [], [], [], [], [])
     try:
         if "submission" in data:
+            query = data["submission"]
+            masker = SQLAliasMasker(query)
+            masker.mask_aliases_()
+            data["submission"] = masker.get_masked_query()
             # Extract tables, selAttributes, proAttributes and strings
             if extract_tables(data["submission"], client) != "Unknown":
                 table_list = extract_tables(data["submission"], client)
@@ -91,6 +99,7 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
+            wildcards2,
         ) = check_solution_chars(
             data,
             task_nr,
@@ -120,7 +129,9 @@ def parse_single_stat_upload_db(data, client):
             group_by2,
             joins2,
             having2,
+            wildcards2,
             client,
+            time,
         )
         # save JSON to DB
         mycollection.insert_one(record)
@@ -131,7 +142,7 @@ def parse_single_stat_upload_db(data, client):
         course_id = data["cid"]
         user_data = return_json_not_parsable(data)  # pylint: disable=W0621
         insert_not_parsable(my_uuid, user_data[3], client)
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         mycollection.insert_one(record)
 
 
@@ -160,8 +171,9 @@ def check_solution_chars(
         group_by_right,
         joins_right,
         having_right,
-    ) = (False, False, False, False, False, False, False, False)
-    mydb = client["sql-checker"]
+        wildcards,
+    ) = (False, False, False, False, False, False, False, False, False)
+    mydb = client.get_default_database()
     mycol = mydb["Solutions"]
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
@@ -229,7 +241,18 @@ def check_solution_chars(
         if len(joins) == 0:
             joins.append("Empty")
         if data["passed"]:
-            # Compare them to tabels, proAttributes etc of a given sql-query
+            if not data["isSol"]:
+                tables_right = True
+                sel_attributes_right = True
+                pro_attributes_right = True
+                strings_right = True
+                wildcards = True
+                order_by_right = True
+                group_by_right = True
+                joins_right = True
+                having_right = True
+
+            # Compare them to tables, proAttributes etc of a given sql-query
             if (
                 tables == tables2  # pylint: disable=R0916
                 and set(pro_attributes) == set(pro_atts2)
@@ -251,6 +274,15 @@ def check_solution_chars(
                 pro_attributes_right = True
             if set(strings) == set(strings2):
                 strings_right = True
+            if (
+                any("%" in s for s in strings)
+                and not any("%" in s for s in strings2)
+                or not any("%" in s for s in strings)
+                and any("%" in s for s in strings2)
+            ):
+                wildcards = False
+            else:
+                wildcards = True
             if order_by == order_by2:
                 order_by_right = True
             if group_by == group_by2:
@@ -259,11 +291,11 @@ def check_solution_chars(
                 joins_right = True
             if having == having2:
                 having_right = True
-    if data["passed"]:
+    if data["isSol"]:
         if new_solution is True:
             # Upload as a new Solution to DB
             parse_single_stat_upload_solution(data, task_nr, my_uuid, client)
-        return (True, True, True, True, True, True, True, True)
+        return (True, True, True, True, True, True, True, True, True)
     # return if characteristics are True or False
     return (
         tables_right,
@@ -274,6 +306,7 @@ def check_solution_chars(
         group_by_right,
         joins_right,
         having_right,
+        wildcards,
     )
 
 
@@ -300,7 +333,9 @@ def return_json(  # pylint: disable=R1710
     group_by_right,
     joins_right,
     having_right,
+    wildcards,
     client,
+    time,
 ):
     # Extract informations from a sql-query-json
     if "passed" in elem:
@@ -326,15 +361,17 @@ def return_json(  # pylint: disable=R1710
                 group_by_right,
                 joins_right,
                 having_right,
+                wildcards,
+                time,
             )
             return record
         # produce a json if the sql-query is not parsable
-        record = prod_json_not_parsable(my_uuid, course_id, task_nr)
+        record = prod_json_not_parsable(my_uuid, course_id, task_nr, time)
         return record
 
 
 # Returns a json file which extracts Tables and Attributes
-def prod_json_not_parsable(_id, cid, task_nr):
+def prod_json_not_parsable(_id, cid, task_nr, time):
     # Create dictionary
     value = {
         "id": str(_id),
@@ -351,6 +388,8 @@ def prod_json_not_parsable(_id, cid, task_nr):
         "attempt": user_data[2],
         "orderbyRight": None,
         "havingRight": None,
+        "wildcards": None,
+        "time": time,
     }
     return value
 
@@ -486,6 +525,8 @@ def prod_json(
     group_by_right,
     joins_right,
     having_right,
+    wildcards,
+    time,
 ):
     # save data if it is a manual solution
     if is_sol is True:
@@ -510,6 +551,8 @@ def prod_json(
         "groupByRight": group_by_right,
         "joinsRight": joins_right,
         "havingRight": having_right,
+        "wildcards": wildcards,
+        "time": time,
     }
     user_data.clear()
     AWC.literal = []

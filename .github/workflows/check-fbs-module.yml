@@ -48,13 +48,17 @@ jobs:
       - name: Add Problem Matcher
         if: ${{ inputs.problemMatcher }}
         run: |
-          echo "::add-matcher::.github/problem-matchers/${{ inputs.problemMatcher }}"
+          export IFS=","
+          matcherList="${{ inputs.problemMatcher }}"
+          for matcher in $matcherList; do
+            echo "::add-matcher::.github/problem-matchers/$matcher"
+          done
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-      - uses: actions/setup-node@v3.5.1
+      - uses: actions/setup-node@v3.7.0
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
@@ -85,7 +89,7 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-      - uses: actions/setup-node@v3.5.1
+      - uses: actions/setup-node@v3.7.0
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
@@ -98,12 +102,12 @@ jobs:
         if: ${{ inputs.coverageArguments }}
         with:
           arguments: ${{ inputs.coverageArguments }}
-      - uses: codecov/codecov-action@v3
+      - uses: ./.github/actions/retry-codecov
         if: ${{ inputs.coverageFilesLocation }}
+        name: Upload Coverage Report
         with:
           files: ${{ inputs.coverageFilesLocation }}
           flags: ${{ inputs.name }}
-          fail_ci_if_error: true
       - name: Stop mysql service container
         if: ${{ inputs.startMysqlService }}
         run: docker stop mysql

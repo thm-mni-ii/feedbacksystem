@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonValue
 
 enum class RunnerMode(@JsonValue val label: String) {
     EXECUTE("execute"),
-    DELETE_DB("deleteDb"),
+    DELETE_DB("deleteDb")
 }
