@@ -89,7 +89,9 @@ def is_join(json_file):  # pylint: disable=R1710
                     if element == "value":
                         list_tables.append(val[element].lower())
                     if isinstance(val[element], str) and (
-                        (element not in "name") and (element not in "using") and element != "value"
+                        (element not in "name")
+                        and (element not in "using")
+                        and element != "value"
                     ):
                         list_tables.append(val[element].lower())
                     if is_join_var is True:
