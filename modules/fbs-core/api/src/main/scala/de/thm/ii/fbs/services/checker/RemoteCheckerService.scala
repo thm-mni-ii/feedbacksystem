@@ -1,9 +1,11 @@
 package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.model.checker._
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Task, Submission => FBSSubmission, User => FBSUser}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission => FBSSubmission, User => FBSUser}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
-import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, StorageService, SubmissionService}
+import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, MinioStorageService}
+import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.util.RestTemplateFactory
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.context.annotation.Primary
@@ -24,7 +26,9 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   protected val restTemplate: RestTemplate = RestTemplateFactory.makeRestTemplate(insecure)
 
   @Autowired
-  private val storageService: StorageService = null
+  private val fsStorageService: FsStorageService = null
+  @Autowired
+  private val minioStorageService: MinioStorageService = null
   @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
@@ -47,7 +51,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     * @param fu           the User model
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
-    val solUrl = storageService.urlToSolutionFile(submissionID)
+    val solUrl = minioStorageService.urlToSolutionFile(submissionID)
     val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username), solUrl)
 
     sendNotificationToRemote(taskID, submission, cc)
@@ -79,13 +83,13 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
   protected def generateRunnerConfiguration(cc: CheckrunnerConfiguration): RunnerConfiguration = {
     val files =
       if (cc.isInBlockStorage) {
-        val mainFileUrl = storageService.urlToMainFile(cc)
-        val secFileUrl = storageService.urlToSecondaryFile(cc)
+        val mainFileUrl = minioStorageService.urlToMainFile(cc)
+        val secFileUrl = minioStorageService.urlToSecondaryFile(cc)
 
         RunnerConfigurationFiles(RunnerConfigurationFilesType.URL, mainFileUrl, secFileUrl)
       } else {
-        val mainFilePath = storageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString)
-        val secFilePath = storageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
+        val mainFilePath = fsStorageService.pathToMainFile(cc.id).map(relativeToUploadDir).map(_.toString)
+        val secFilePath = fsStorageService.pathToSecondaryFile(cc.id).map(relativeToUploadDir).map(_.toString)
 
         RunnerConfigurationFiles(RunnerConfigurationFilesType.PATH, mainFilePath, secFilePath)
       }

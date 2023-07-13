@@ -1,0 +1,70 @@
+#checkbox label:nth-child(1) {
+    margin-right: 20px;
+}
+
+#checkbox label:nth-child(2) {
+    margin-right: 20px;
+}
+
+#checkbox label:nth-child(3) {
+    margin-right: 20px;
+}
+
+#checkbox_analysis label:nth-child(1) {
+    margin-right: 20px;
+}
+
+#checkbox_analysis label:nth-child(2) {
+    margin-right: 20px;
+}
+
+#checkbox_analysis label:nth-child(3) {
+    margin-right: 20px;
+}
+
+#toggle_hiding_queries label:nth-child(1) {
+    margin-right: 20px;
+}
+#toggle_hiding_queries label:nth-child(2) {
+    margin-right: 20px;
+}
+
+.delete-button-active {
+    margin-right: 14px;
+    background-color: lightgreen;
+    border: lightgreen;
+    color: white;
+    border-radius: 14px;
+    font-size: 18px;
+    padding-left: 12px;
+}
+
+.delete-button-negative {
+    margin-right: 14px;
+    background-color: #EC5555;
+    border: #EC5555;
+    color: white;
+    border-radius: 14px;
+    font-size: 18px;
+    padding-left: 12px;
+    padding-right: 5px;
+}
+
+.delete-button-column {
+    margin-right: 14px;
+    border-radius: 14px;
+    border: #797974;
+    background-color: #797974;
+    color: white;
+    font-size: 18px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    padding-left: 12px;
+    padding-right: 5px;
+}
+
+.add-button {
+    border: 1px red;
+    width: 11%;
+    border-radius: 2px;
+}

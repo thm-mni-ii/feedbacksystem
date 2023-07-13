@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.controller.v2
 
 import com.fasterxml.jackson.databind.node.ArrayNode
@@ -23,7 +25,7 @@ class PlaygroundController(
     private val entityRepository: SqlPlaygroundEntityRepository,
     private val queryRepository: SqlPlaygroundQueryRepository,
     private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
-    private val sqlPlaygroundUsersRepository: SqlPlaygroundUsersRepository,
+    private val sqlPlaygroundUsersRepository: SqlPlaygroundUsersRepository
 ) {
     @GetMapping
     @ResponseBody
@@ -162,7 +164,6 @@ class PlaygroundController(
             qId
         )?.result
             ?: throw NotFoundException()
-
 
     @GetMapping("/{dbId}/tables")
     @ResponseBody

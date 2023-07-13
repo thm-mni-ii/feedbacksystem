@@ -3,9 +3,11 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +33,8 @@ class CheckerConfigurationController {
   private val ccs: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
+  @Autowired
+  private val fsStorageService: FsStorageService = null
   @Autowired
   private val taskService: TaskService = null
   @Autowired
@@ -214,7 +218,7 @@ class CheckerConfigurationController {
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def getMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                   req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(storageService.pathToMainFile)(storageFileName.MAIN_FILE, cid, tid, ccid, req, res)
+    getFile(fsStorageService.pathToMainFile)(storageFileName.MAIN_FILE, cid, tid, ccid, req, res)
 
   /**
     * Upload a the secondary file for a task configuration
@@ -249,7 +253,7 @@ class CheckerConfigurationController {
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def getSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
                        req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(storageService.pathToSecondaryFile)(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
+    getFile(fsStorageService.pathToSecondaryFile)(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
 
   private def uploadFile(fileName: String, postHook: CheckrunnerConfiguration => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {

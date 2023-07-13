@@ -9,7 +9,6 @@ import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphDeserializer
 import de.thm.ii.fbs.utils.v2.converters.ReferenceGraphSerializer
 import org.springframework.stereotype.Service
 
-
 @Service
 class CheckerStorageService(val checkerStorageRepository: CheckerStorageRepository) {
     val objectMapper = ObjectMapper()
@@ -49,7 +48,6 @@ class CheckerStorageService(val checkerStorageRepository: CheckerStorageReposito
         value = generateValue()
         this.storeValue(configurationId, storageKey, value)
         return value
-
     }
 
     fun deleteValue(configurationId: Int, storageKey: String) {
