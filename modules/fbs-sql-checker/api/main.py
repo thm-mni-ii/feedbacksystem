@@ -19,3 +19,4 @@ else:
     answer = requests.get(URL_ANSWER, verify=False, timeout=25)
     print(answer.json())
     parse_single_stat_upload_db(answer.json(), CLIENT)
+>>>>>>>>> Temporary merge branch 2

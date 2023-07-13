@@ -11,8 +11,9 @@ import { AllSubmissionsComponent } from "../../../dialogs/all-submissions/all-su
 import { MatDialog } from "@angular/material/dialog";
 import { TaskPointsService } from "../../../service/task-points.service";
 import { Requirement } from "../../../model/Requirement";
-import { EvaluationUserResults } from "../../../model/EvaluationUserResults";
-import { mergeAll, filter } from "rxjs/operators";
+import { zip } from "rxjs";
+import { mergeAll, filter, toArray } from "rxjs/operators";
+import { EvaluationUserResults } from "src/app/model/EvaluationUserResults";
 
 /**
  * Matrix for every course docent a has
@@ -40,16 +41,40 @@ export class CourseResultsComponent implements OnInit {
   allBonusPoints: Observable<Number[]>;
   courseBonusPoints = 0;
   results;
+  allCourseResults: Observable<CourseResult[]> = of();
+  displayedCourseResults: Observable<CourseResult[]> = of();
+  toggle: boolean = true;
 
   ngOnInit(): void {
     this.tb.emitTitle("Dashboard");
     this.route.params.subscribe((param) => {
       this.courseId = param.id;
-      this.courseResults = this.courseResultService.getAllResults(
-        this.courseId
+      this.allCourseResults = this.courseResultService
+        .getAllResults(this.courseId)
+        .pipe(mergeAll(), toArray());
+      this.evaluationUserResults = zip(
+        this.courseResultService.getRequirementCourseResults(this.courseId),
+        this.courseResultService.getAllResults(this.courseId)
+      ).pipe(
+        map(([evaluationResults, courseResult]) =>
+          evaluationResults.filter(
+            (_, i) =>
+              courseResult[i].results.find(({ attempts }) => attempts !== 0) !==
+              undefined
+          )
+        )
       );
-      this.evaluationUserResults =
-        this.courseResultService.getRequirementCourseResults(this.courseId);
+      this.courseResults = this.courseResultService
+        .getAllResults(this.courseId)
+        .pipe(
+          map((courseResults) =>
+            courseResults.filter((result) =>
+              result.results.some((res) => res.attempts !== 0)
+            )
+          )
+        );
+
+      this.displayedCourseResults = this.courseResults;
       this.tasks = this.courseResults.pipe(
         map((results) =>
           results.length === 0
@@ -63,6 +88,14 @@ export class CourseResultsComponent implements OnInit {
       // this.requirementTaskNames = this.requirements.pipe(map(bp => bp[0].tasks.map(task => task.name)));
     });
     // TODO: material progress spinner (cause the page might load for a while)
+  }
+
+  toggleResults() {
+    if (this.toggle) {
+      this.displayedCourseResults = this.courseResults;
+    } else {
+      this.displayedCourseResults = this.allCourseResults;
+    }
   }
 
   downloadResults() {
