@@ -5,5 +5,5 @@ import de.thm.ii.fbs.mathParser.ast.Operator
 import de.thm.ii.fbs.mathParser.transformers.rules.OperatorMatchingRule
 
 class DivisionReplacingTransformer(config: TransformerConfig) : RuleBasedTransformer(
-    OperatorMatchingRule(Operator.DIV) { Operation(Operator.MUL, it.left, Operation(Operator.DIV, config.exprFromInt(1), it.right)) },
+    OperatorMatchingRule(Operator.DIV) { Operation(Operator.MUL, it.left, Operation(Operator.DIV, config.exprFromInt(1), it.right)) }
 )

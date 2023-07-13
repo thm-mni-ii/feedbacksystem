@@ -60,6 +60,7 @@ export class CourseDetailComponent implements OnInit {
   openConferences: Observable<string[]>;
   evaluationUserResults: any[];
   legends = ["green", "red", "#1E457C"];
+  userID: number;
 
   pointlist: number[] = [];
   ngOnInit() {
@@ -88,9 +89,10 @@ export class CourseDetailComponent implements OnInit {
     });
 
     this.role = this.auth.getToken().courseRoles[this.courseID];
+    this.userID = this.authService.getToken().id;
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
       this.courseRegistrationService
-        .registerCourse(this.authService.getToken().id, this.courseID)
+        .registerCourse(this.userID, this.courseID)
         .subscribe(
           () =>
             this.courseService

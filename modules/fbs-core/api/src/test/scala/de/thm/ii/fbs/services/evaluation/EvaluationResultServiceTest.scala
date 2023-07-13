@@ -1,14 +1,14 @@
 package de.thm.ii.fbs.services.evaluation
 
-import de.thm.ii.fbs.model.{CourseResult, EvaluationContainer, EvaluationContainerResult,
-  EvaluationContainerWithTaskResults, EvaluationUserResult, Task, TaskResult}
-import org.junit.{Assert, Test}
+import de.thm.ii.fbs.model.task.{Task, TaskResult}
+import de.thm.ii.fbs.model._
 import org.junit.runner.RunWith
+import org.junit.{Assert, Test}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 
 /**
   * Tests EvaluationResultService
@@ -32,7 +32,8 @@ class EvaluationResultServiceTest {
 
   private def buildContainer(tasks: List[Task] = List.empty[Task], bonusFormula: String = null, toPass: Int = 1, id: Int = 1) =
     EvaluationContainer(id, tasks, toPass, bonusFormula, hidePoints = true)
-  private def buildCourseRes( passed: Boolean = true, tasksRes: List[TaskResult] = List.empty) =
+
+  private def buildCourseRes(passed: Boolean = true, tasksRes: List[TaskResult] = List.empty) =
     CourseResult(null, passed, tasksRes)
 
   /**
@@ -83,7 +84,7 @@ class EvaluationResultServiceTest {
     */
   @Test
   def containerWithOnTask(): Unit = {
-    val (task, taskResult) = buildTask( res = true)
+    val (task, taskResult) = buildTask(res = true)
     val container = buildContainer(List(task))
     val courseResult = buildCourseRes(tasksRes = List(taskResult))
 
@@ -102,7 +103,7 @@ class EvaluationResultServiceTest {
     */
   @Test
   def containerWithOnTaskAndSubTasks(): Unit = {
-    val (task, taskResult) = buildTask( res = true, passedSubTasks = 2)
+    val (task, taskResult) = buildTask(res = true, passedSubTasks = 2)
     val container = buildContainer(List(task))
     val courseResult = buildCourseRes(tasksRes = List(taskResult))
 

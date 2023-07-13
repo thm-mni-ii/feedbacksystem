@@ -7,7 +7,6 @@
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span class="spacer"></span>
     <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
   <mat-list role="list" class="legend">
@@ -55,6 +54,21 @@
         <!--                     (page)="pageEvent($event)">-->
         <!--      </mat-paginator>-->
         <!--    </div>-->
+        <div class="show-submissions">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>filter_list</mat-icon>
+          </button>
+        </div>
+        <hr />
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <span class="toggle-text">Benutzer mit Abgaben</span>
+            <mat-slide-toggle
+              [(ngModel)]="toggle"
+              (change)="toggleResults()"
+            ></mat-slide-toggle>
+          </button>
+        </mat-menu>
         <div class="card">
           <div class="name-column">
             <div class="name-container header">
@@ -62,7 +76,7 @@
             </div>
             <div
               class="name-container"
-              *ngFor="let result of evaluationUserResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span class="state passed" *ngIf="result.passed"
                 ><mat-icon>check_circle</mat-icon></span
@@ -83,7 +97,7 @@
             </div>
             <div
               class="task-container"
-              *ngFor="let result of courseResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span
                 class="task-result"

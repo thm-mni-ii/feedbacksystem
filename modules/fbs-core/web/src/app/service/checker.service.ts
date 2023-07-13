@@ -24,6 +24,14 @@ export class CheckerService {
     );
   }
 
+  public checkForCheckerConfig(cid: number, tid: number): Observable<boolean> {
+    return this.getChecker(cid, tid).pipe(
+      map((checker) => {
+        return checker.length === 0;
+      })
+    );
+  }
+
   /**
    * Create a new checker configuration
    * @param cid Course id

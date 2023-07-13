@@ -64,6 +64,19 @@ export class NewCheckerDialogComponent implements OnInit {
         this.checker.checkerType
       );
       this.checkerForm.controls["ord"].setValue(this.checker.ord);
+
+      this.checkerForm.controls["showExtendedHints"].setValue(
+        this.checker.checkerTypeInformation.showExtendedHints
+      );
+      this.checkerForm.controls["showExtendedHintsAt"].setValue(
+        this.checker.checkerTypeInformation.showExtendedHintsAt
+      );
+      this.checkerForm.controls["showHints"].setValue(
+        this.checker.checkerTypeInformation.showHints
+      );
+      this.checkerForm.controls["showHintsAt"].setValue(
+        this.checker.checkerTypeInformation.showHintsAt
+      );
     }
 
     if (this.checker.mainFileUploaded || this.checker.secondaryFileUploaded) {

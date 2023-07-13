@@ -5,23 +5,41 @@
     [backgroundColor]=""
   >
     <ng-container>
-      <mat-tab *ngFor="let tab of tabs; let index = index">
+      <mat-tab [disabled]="pending" *ngFor="let tab of tabs; let index = index">
         <ng-template class="tab-label" [mat-tab-label]>
           <div class="col" style="margin-left: 20px">
             <input
               matInput
               type="text"
               placeholder="New_Query"
+              [disabled]="pending"
               [(ngModel)]="tabs[index].name"
             />
           </div>
-          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
+          <button
+            *ngIf="index !== 0"
+            mat-icon-button
+            [disabled]="pending"
+            (click)="closeTab(index)"
+          >
             <mat-icon>remove_circle_outline</mat-icon>
           </button>
-          <button mat-icon-button (click)="addTab($event)">
+          <button mat-icon-button [disabled]="pending" (click)="addTab($event)">
             <mat-icon>add_circle_outline</mat-icon>
           </button>
         </ng-template>
+        <br />
+        <p
+          class="description"
+          *ngIf="
+            activeTab.selectedTask !== null &&
+            isDescriptionMode &&
+            activeTab.isSubmitMode
+          "
+        >
+          <strong>Aufgabenbeschreibung:</strong>
+          {{ activeTab.selectedTask.description }}
+        </p>
         <div class="inputField">
           <!-- <app-submission-text
             title="Eingabe SQL"
@@ -29,20 +47,27 @@
           ></app-submission-text> -->
           <!-- <mat-label class="title">Eingabe SQL :</mat-label> -->
           <app-highlighted-input
+            [tabs]="tabs"
+            [selectedIndex]="activeTabId.value"
             (update)="updateSubmissionContent($event)"
           ></app-highlighted-input>
         </div>
+        <p
+          class="error-message"
+          *ngIf="activeTab.error && activeTab.isSubmitMode"
+        >
+          <strong>Fehlermeldung:</strong> {{ activeTab.errorMsg }}
+        </p>
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-  <p
-    class="description"
-    *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
-  >
-    <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
-  </p>
   <div class="bottom-container">
-    <button mat-button class="downloadBtn" (click)="downloadFile()">
+    <button
+      mat-button
+      class="downloadBtn"
+      [disabled]="pending"
+      (click)="downloadFile()"
+    >
       <mat-icon>download</mat-icon> Download
     </button>
 
@@ -62,16 +87,18 @@
     <button
       mat-flat-button
       class="submitBtn"
-      *ngIf="!isSubmitMode"
+      *ngIf="!activeTab.isSubmitMode"
       matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
       [matTooltipPosition]="'above'"
       (click)="updateMode(true)"
     >
       Abgeben<mat-icon>insert_drive_file</mat-icon>
     </button>
-    <div class="submit-container" *ngIf="isSubmitMode">
+    <div class="submit-container" *ngIf="activeTab.isSubmitMode">
       <button
-        [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
+        [disabled]="
+          isCheckerEmpty || isSubmissionEmpty() || hasDeadlinePassed()
+        "
         mat-flat-button
         color="accent"
         class="excuteBtn"
@@ -94,13 +121,13 @@
       <mat-icon
         class="submit-item material-icons color_red"
         matTooltip="Status der Abgabe: Deine Abgabge war leider nicht richtig."
-        *ngIf="submitted && !pending && !isSubCorr"
+        *ngIf="activeTab.isSubmitted && !pending && !activeTab.isCorrect"
         >cancel</mat-icon
       >
       <mat-icon
         class="submit-item material-icons color_green"
         matTooltip="Status der Abgabe: Deine Abgabe war korrekt."
-        *ngIf="submitted && !pending && isSubCorr"
+        *ngIf="activeTab.isSubmitted && !pending && activeTab.isCorrect"
         >check_circle</mat-icon
       >
       <mat-icon class="state submit-item" *ngIf="pending"
@@ -108,12 +135,13 @@
       >
 
       <button
-        [disabled]="selectedCourse === undefined || pending"
+        [disabled]="activeTab.selectedCourse === undefined || pending"
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="task"
+        matTooltip="{{ selectedTaskName }}"
       >
-        {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
+        {{ activeTab.selectedTaskName }} <mat-icon>expand_more</mat-icon>
       </button>
       <mat-menu #task="matMenu">
         <button
@@ -130,8 +158,9 @@
         class="courseBtn submit-item"
         mat-button
         [matMenuTriggerFor]="course"
+        matTooltip="{{ selectedCourseName }}"
       >
-        {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
+        {{ activeTab.selectedCourseName }} <mat-icon>expand_more</mat-icon>
       </button>
       <mat-menu #course="matMenu">
         <button

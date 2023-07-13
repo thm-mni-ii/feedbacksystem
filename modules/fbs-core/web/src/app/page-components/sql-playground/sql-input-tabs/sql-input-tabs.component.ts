@@ -6,7 +6,6 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   Renderer2,
@@ -26,6 +25,7 @@ import { Task } from "src/app/model/Task";
 import { SubmissionService } from "../../../service/submission.service";
 import { PrismService } from "src/app/service/prism.service";
 import { Subscription } from "rxjs";
+import { CheckerService } from "src/app/service/checker.service";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -33,7 +33,7 @@ import { Subscription } from "rxjs";
   styleUrls: ["./sql-input-tabs.component.scss"],
 })
 export class SqlInputTabsComponent
-  implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy
+  implements OnInit, AfterViewChecked, AfterViewInit
 {
   @Input() isPending: boolean;
   @Output() submitStatement = new EventEmitter<string>();
@@ -71,7 +71,8 @@ export class SqlInputTabsComponent
     private submissionService: SubmissionService,
     private taskService: TaskService,
     private prismService: PrismService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private checkerService: CheckerService
   ) {}
   ngAfterViewChecked() {
     if (this.highlighted) {
@@ -82,27 +83,32 @@ export class SqlInputTabsComponent
   ngAfterViewInit() {
     this.prismService.highlightAll();
   }
-  ngOnDestroy(): void {
-    throw new Error("Method not implemented.");
-  }
 
   fileName = "New_Query";
-  tabs = [{ name: this.fileName, content: "" }];
+  tabs = [
+    {
+      name: this.fileName,
+      content: "",
+      error: false,
+      errorMsg: null,
+      isCorrect: false,
+      isSubmitted: false,
+      isSubmitMode: false,
+      selectedCourse: undefined,
+      selectedTask: undefined,
+      selectedCourseName: "Kurs",
+      selectedTaskName: "Aufgabe",
+    },
+  ];
   activeTabId = new UntypedFormControl(0);
   activeTab = this.tabs[this.activeTabId.value];
   pending: boolean = false;
   courses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();
-  isSubmitMode = false;
-  selectedCourseName: String = "Kurs";
-  selectedTaskName: String = "Aufgabe";
-  selectedCourse: Course;
-  selectedTask: Task;
   allTasksFromCourse: Task[];
   filteredTasksFromCourse: Task[] = [];
   isDescriptionMode: boolean = false;
-  isSubCorr = false;
-  submitted = false;
+  isCheckerEmpty: boolean;
 
   ngOnInit(): void {
     const userID = this.authService.getToken().id;
@@ -110,6 +116,7 @@ export class SqlInputTabsComponent
     this.activeTabId.valueChanges.subscribe((value) => {
       this.activeTab = this.tabs[value];
     });
+    this.loadFromLocalStorage();
   }
 
   closeTab(index: number) {
@@ -118,20 +125,56 @@ export class SqlInputTabsComponent
       "Achtung der Inhalt wird nicht gespeichert!"
     ).subscribe((result) => {
       if (result == true) {
+        this.deleteFromLocalStorage(index);
         this.tabs.splice(index, 1);
+        this.activeTabId.setValue(this.tabs.length - 1);
+        this.loadFromLocalStorage();
       }
     });
+  }
+
+  saveToLocalStorage() {
+    const data = { tabs: this.tabs };
+    localStorage.setItem("tabs", JSON.stringify(data));
+  }
+
+  loadFromLocalStorage() {
+    const loadedData = localStorage.getItem("tabs");
+    if (loadedData) {
+      this.tabs = JSON.parse(loadedData).tabs;
+      this.activeTab = this.tabs[this.activeTabId.value];
+    }
+  }
+
+  deleteFromLocalStorage(index: number) {
+    const data = JSON.parse(localStorage.getItem("tabs"));
+    data.tabs.splice(index, 1);
+    localStorage.setItem("tabs", JSON.stringify(data));
   }
 
   updateSubmissionContent(data: String) {
     let submissionContent = data["content"];
     this.tabs[this.activeTabId.value].content = submissionContent;
+    this.saveToLocalStorage();
   }
 
   addTab(event: MouseEvent) {
     event.stopPropagation();
-    this.tabs.push({ name: this.fileName, content: "" });
+    this.tabs.push({
+      name: this.fileName,
+      content: "",
+      error: false,
+      errorMsg: null,
+      isCorrect: false,
+      isSubmitted: false,
+      isSubmitMode: false,
+      selectedCourse: undefined,
+      selectedTask: undefined,
+      selectedCourseName: "Kurs",
+      selectedTaskName: "Aufgabe",
+    });
     this.activeTabId.setValue(this.tabs.length - 1);
+    this.saveToLocalStorage();
   }
 
   openConfirmDialog(title: string, message: string) {
@@ -174,10 +217,11 @@ export class SqlInputTabsComponent
   }
 
   updateMode(value: boolean) {
-    this.isSubmitMode = value;
+    this.activeTab.isSubmitMode = value;
+    this.pending = false;
   }
 
-  hasDeadlinePassed(task: Task = this.selectedTask): boolean {
+  hasDeadlinePassed(task: Task = this.activeTab.selectedTask): boolean {
     if (task == null) {
       return true;
     }
@@ -185,27 +229,37 @@ export class SqlInputTabsComponent
   }
 
   emptyTask() {
-    this.selectedTask = null;
+    this.activeTab.selectedTask = null;
     this.filteredTasksFromCourse = [];
-    this.selectedTaskName = "Aufgabe";
+    this.activeTab.selectedTaskName = "Aufgabe";
   }
 
   changeCourse(course: Course) {
-    this.selectedCourse = course;
-    this.selectedCourseName = this.selectedCourse.name;
-    //this.tasks = this.taskService.getAllTasks(this.selectedCourse.id);
+    this.activeTab.selectedCourse = course;
+    this.activeTab.selectedCourseName = this.activeTab.selectedCourse.name;
+    this.activeTab.error = false;
+    this.activeTab.isSubmitted = false;
     this.getTasks();
     this.emptyTask();
+    this.saveToLocalStorage();
   }
 
   changeTask(task: Task) {
-    this.selectedTask = task;
-    this.selectedTaskName = this.selectedTask.name;
-    this.submitted = false;
+    this.activeTab.selectedTask = task;
+    this.activeTab.selectedTaskName = this.activeTab.selectedTask.name;
+    this.activeTab.error = false;
+    this.activeTab.isSubmitted = false;
+    this.checkerService
+      .checkForCheckerConfig(
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id
+      )
+      .subscribe((res) => (this.isCheckerEmpty = res));
+    this.saveToLocalStorage();
   }
 
   getTasks() {
-    this.taskService.getAllTasks(this.selectedCourse.id).subscribe(
+    this.taskService.getAllTasks(this.activeTab.selectedCourse.id).subscribe(
       (allTasks) => {
         this.allTasksFromCourse = allTasks;
         this.filterTasks();
@@ -229,9 +283,11 @@ export class SqlInputTabsComponent
 
   wasSubmissionCorrect(subResult: number) {
     if (subResult != 0) {
-      this.isSubCorr = false;
+      this.activeTab.isCorrect = false;
+      this.activeTab.error = true;
     } else {
-      this.isSubCorr = true;
+      this.activeTab.isCorrect = true;
+      this.activeTab.error = false;
     }
   }
 
@@ -240,8 +296,8 @@ export class SqlInputTabsComponent
     this.submissionService
       .getSubmission(
         token.id,
-        this.selectedCourse.id,
-        this.selectedTask.id,
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id,
         sid
       )
       .pipe(
@@ -251,8 +307,17 @@ export class SqlInputTabsComponent
       .subscribe(
         (res) => {
           if (res.done) {
-            this.wasSubmissionCorrect(res.results[0].exitCode);
-            this.pending = false;
+            if (res.results[0].exitCode == 0) {
+              this.activeTab.errorMsg = null;
+              this.wasSubmissionCorrect(res.results[0].exitCode);
+              this.pending = false;
+              this.activeTab.isSubmitted = true;
+            } else {
+              this.wasSubmissionCorrect(res.results[0].exitCode);
+              this.activeTab.errorMsg = res.results[0].resultText;
+              this.pending = false;
+              this.activeTab.isSubmitted = true;
+            }
           }
         },
         () => {}, //handle error
@@ -261,15 +326,14 @@ export class SqlInputTabsComponent
   }
 
   private submitToTask() {
-    this.submitted = true;
     this.pending = true;
     const token = this.authService.getToken();
     this.submissionService
       .submitSolution(
         token.id,
-        this.selectedCourse.id,
-        this.selectedTask.id,
-        this.activeTab.content
+        this.activeTab.selectedCourse.id,
+        this.activeTab.selectedTask.id,
+        this.cleanUpTextAreaRegx(this.activeTab.content)
       )
       .subscribe(
         (subResult) => {
@@ -299,6 +363,11 @@ export class SqlInputTabsComponent
       return;
     }
     this.submitToTask();
-    //this.submissionService.emitFileSubmission();
+    this.saveToLocalStorage();
+  }
+
+  cleanUpTextAreaRegx(sqlInput: String) {
+    let temp = sqlInput.trim().replace(/\s+/g, " ");
+    return temp;
   }
 }
