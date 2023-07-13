@@ -5,6 +5,10 @@ import { CheckResult } from "../../model/CheckResult";
 import { SubmissionService } from "src/app/service/submission.service";
 import { Clipboard } from "@angular/cdk/clipboard";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import {
+  MatDialog,
+} from "@angular/material/dialog";
+import { SpreadsheetResultDialogComponent } from "src/app/dialogs/spreadsheet-result-dialog/spreadsheet-result-dialog.component";
 
 @Component({
   selector: "app-results",
@@ -12,11 +16,21 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent implements OnInit {
+  spreadsheet1 = [
+    { col1: "foo", col2: 0, col3: "a" },
+    { col1: "bar", col2: 1, col3: "b" },
+    { col1: "baz", col2: 2, col3: "c" },
+  ];
   constructor(
     private submissionService: SubmissionService,
     private clipboard: Clipboard,
-    private snackbar: MatSnackBar
-  ) {}
+    private snackbar: MatSnackBar,
+    public dialog: MatDialog
+  ) {
+    this.dialog.open(SpreadsheetResultDialogComponent, {
+      data: this.spreadsheet1,
+    });
+  }
 
   columns = ["checkerType", "query", "resultText", "exitCode"];
 
