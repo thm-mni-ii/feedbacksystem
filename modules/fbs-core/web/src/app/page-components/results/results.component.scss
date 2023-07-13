@@ -75,3 +75,12 @@
 .result {
   width: 80px;
 }
+#head {
+  display: flex;
+  justify-content: space-between;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+}

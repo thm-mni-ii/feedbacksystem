@@ -1,5 +1,16 @@
 <div class="results">
-  <h3>Ergebnisse der Abgaben</h3>
+  <div id="head">
+    <h3>Ergebnisse der Abgaben</h3>
+    <mat-slide-toggle
+      id="show_results"
+      [(ngModel)]="toggleValue"
+      *ngIf="!hideToggle"
+    >
+      <div class="feedback-title">
+        <h3>Feedback anzeigen</h3>
+      </div>
+    </mat-slide-toggle>
+  </div>
   <div class="submission-list">
     <div class="scrolling-wrapper">
       <mat-tab-group
@@ -57,7 +68,14 @@
           Antworttext
         </th>
         <td mat-cell *matCellDef="let checker" class="result-text">
-          <pre [innerHTML]="checker.resultText" class="pre"></pre>
+          <pre
+            *ngIf="toggleValue; else iconBlock"
+            [innerHTML]="checker.resultText"
+            class="pre"
+          ></pre>
+          <ng-template #iconBlock>
+            <mat-icon>visibility_off</mat-icon>
+          </ng-template>
         </td>
       </ng-container>
 
