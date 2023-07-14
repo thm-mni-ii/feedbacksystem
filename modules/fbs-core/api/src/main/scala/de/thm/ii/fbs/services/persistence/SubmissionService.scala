@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission, Task, User}
+import de.thm.ii.fbs.model.{CheckResult, Submission, User}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired

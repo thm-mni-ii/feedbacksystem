@@ -96,11 +96,15 @@
         <mat-icon>account_circle</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <button mat-menu-item (click)="logout()">
-          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
-        </button>
+        <div class="userinfos">
+          <strong>{{ user?.prename }} {{ user?.surname }}</strong>
+          <br /><i>{{ user?.email }}</i>
+        </div>
         <button mat-menu-item routerLink="/users/password">
           <mat-icon>settings</mat-icon>Passwort ändern
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
         </button>
       </mat-menu>
     </mat-toolbar>

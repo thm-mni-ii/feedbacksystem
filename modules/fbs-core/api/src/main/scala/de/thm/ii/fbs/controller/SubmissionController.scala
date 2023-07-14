@@ -2,13 +2,12 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.storageBucketName.SUBMISSIONS_BUCKET
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission, User}
+import de.thm.ii.fbs.model.task.SubTaskResult
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
+import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
-import de.thm.ii.fbs.services.persistence.{UserService, _}
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.Archiver
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
@@ -22,7 +21,6 @@ import java.time.Instant
 import java.util
 import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import scala.collection.mutable.ListBuffer
 
 /**
   * Submission controller implement routes for submitting task and receive results

@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.TestApplication
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission, Task}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CheckResult, Submission}
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.junit.{Assert, Before, Test}

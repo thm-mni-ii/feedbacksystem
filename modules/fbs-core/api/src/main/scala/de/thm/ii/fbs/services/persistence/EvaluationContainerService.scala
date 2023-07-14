@@ -1,7 +1,8 @@
 package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.model.{EvaluationContainer, Task}
+import de.thm.ii.fbs.model.EvaluationContainer
+import de.thm.ii.fbs.model.task.Task
 import de.thm.ii.fbs.util.DB
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -57,7 +58,8 @@ class EvaluationContainerService {
 
   /**
     * Add a Task to an Evaluation Container
-    * @param cid Course id
+    *
+    * @param cid  Course id
     * @param ctid Evaluation container id
     * @param tid  Task id
     * @return the new Task
@@ -73,8 +75,9 @@ class EvaluationContainerService {
 
   /**
     * Delete a Task from an Evaluation Container
+    *
     * @param ctid Evaluation Container id
-    * @param tid Evaluation container id
+    * @param tid  Evaluation container id
     * @return if the Task was Removed
     */
   def removeTask(ctid: Integer, tid: Integer): Boolean =
@@ -82,7 +85,8 @@ class EvaluationContainerService {
 
   /**
     * Create an Evaluation Container
-    * @param cid Course id
+    *
+    * @param cid       Course id
     * @param container Container to Create
     * @return the created Container
     */
@@ -97,15 +101,16 @@ class EvaluationContainerService {
 
   /**
     * Update an Evaluation Container
-    * @param cid Course id
-    * @param ctid Evaluation Container id
+    *
+    * @param cid       Course id
+    * @param ctid      Evaluation Container id
     * @param container Container update
     * @return was the Container Updated
     */
   def updateContainer(cid: Integer, ctid: Integer, container: EvaluationContainer): EvaluationContainer = {
     val updated =
       1 == DB.update("UPDATE evaluation_container SET to_pass = ?, bonus_formula = ?, hide_points = ? WHERE course_id = ? and evaluation_container_id = ?",
-      container.toPass, container.bonusFormula, container.hidePoints, cid, ctid)
+        container.toPass, container.bonusFormula, container.hidePoints, cid, ctid)
 
     if (!updated) throw new SQLException("Evaluation Container could not be updated")
 
@@ -114,7 +119,8 @@ class EvaluationContainerService {
 
   /**
     * Delete an Evaluation Container
-    * @param cid Course id
+    *
+    * @param cid  Course id
     * @param ctid Course id
     * @return if the Task was Removed
     */

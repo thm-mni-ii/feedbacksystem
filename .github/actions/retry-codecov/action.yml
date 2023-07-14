@@ -1,0 +1,45 @@
+name: "Retry codecov"
+description: "Run codecov and retry on failure"
+inputs:
+  files:
+    description: "Files to upload"
+    required: true
+  flags:
+    description: "Flags to upload"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: codecov/codecov-action@v3
+      name: Upload Coverage Report
+      id: codecov
+      with:
+        files: ${{ inputs.files }}
+        flags: ${{ inputs.flags }}
+        fail_ci_if_error: true
+      continue-on-error: true
+    - run: sleep 1m
+      shell: bash
+      id: sleep-1
+      if: always() && steps.codecov.conclusion == 'failure'
+    - uses: codecov/codecov-action@v3
+      name: Upload Coverage Report (Retry 1)
+      id: codecov-1
+      if: always() && steps.codecov.conclusion == 'failure'
+      with:
+        files: ${{ inputs.files }}
+        flags: ${{ inputs.flags }}
+        fail_ci_if_error: true
+      continue-on-error: true
+    - run: sleep 5m
+      shell: bash
+      id: sleep-2
+      if: always() && steps.codecov-1.conclusion == 'failure'
+    - uses: codecov/codecov-action@v3
+      name: Upload Coverage Report (Retry 2)
+      id: codecov-2
+      if: always() && steps.codecov-1.conclusion == 'failure'
+      with:
+        files: ${{ inputs.files }}
+        flags: ${{ inputs.flags }}
+        fail_ci_if_error: true
