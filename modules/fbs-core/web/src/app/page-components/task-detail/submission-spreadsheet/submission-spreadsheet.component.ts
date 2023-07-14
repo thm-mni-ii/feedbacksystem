@@ -20,7 +20,6 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
 
   @Input()
   inputFields: string[][] = [];
-
   @Input()
   outputFields: string[] = [];
   @Input()

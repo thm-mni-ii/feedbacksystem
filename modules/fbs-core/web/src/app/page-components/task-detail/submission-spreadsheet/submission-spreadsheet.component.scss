@@ -1,9 +1,21 @@
 .flex-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 32px;
 }
 
 .flex-container > * {
   width: 30%;
   margin-left: 10px;
+}
+
+.math-task-container {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: max-content auto;
+  gap: 8px;
+}
+
+.math-task-label {
+  margin-top: 14px;
 }

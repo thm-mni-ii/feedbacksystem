@@ -1,24 +1,27 @@
 <div>
   <div class="flex-container">
-    <app-math-input
-      *ngFor="let inputField of inputFields"
-      [label]="inputField[0]"
-      [defaultValue]="{ mathJson: inputField[1] }"
-      (update)="updateSubmission(inputField[0], $event)"
-      [disabled]="true"
-    ></app-math-input>
-  </div>
-  <hr />
-  <form>
-    <div class="flex-container">
-      <app-math-input
-        *ngFor="let outputField of outputFields"
-        [label]="outputField"
-        [defaultValue]="{ latex: latex[outputField] }"
-        (update)="updateSubmission(outputField, $event)"
-      ></app-math-input>
+    <div
+      *ngFor="let inputField of inputFields; index as i"
+      class="math-task-container"
+    >
+      <b class="math-task-label">{{ inputField[0] }}</b>
+      <div>
+        <app-math-input
+          [label]="'Aufgabe:'"
+          [defaultValue]="{ mathJson: inputField[1] }"
+          (update)="updateSubmission(inputField[0], $event)"
+          [disabled]="true"
+        ></app-math-input>
+        <form>
+          <app-math-input
+            [label]="'Ergebnis:'"
+            [defaultValue]="{ latex: latex[outputFields[i]] }"
+            (update)="updateSubmission(outputFields[i], $event)"
+          ></app-math-input>
+        </form>
+      </div>
     </div>
-  </form>
+  </div>
   <small
     >Alle Eingaben werden auf {{ decimals }} Nachkommastellen gerundet.</small
   >

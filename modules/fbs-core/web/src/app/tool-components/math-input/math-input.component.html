@@ -1,9 +1,13 @@
 <div>
-  <b>{{ label }}</b>
-  <math-field
-    (change)="handleChange($event)"
-    #mathInput
-    style="overflow: unset"
-  >
-  </math-field>
+  <div class="mathInputContainer">
+    <p>{{ label }}</p>
+    <div class="math-input-field" [ngClass]="{ 'math-field-input': !disabled }">
+      <math-field
+        (change)="handleChange($event)"
+        #mathInput
+        style="overflow: unset"
+      >
+      </math-field>
+    </div>
+  </div>
 </div>
