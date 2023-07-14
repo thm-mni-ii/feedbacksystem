@@ -103,3 +103,33 @@ button {
 #cas-login:hover {
   cursor: pointer;
 }
+
+.github-link {
+  position: absolute;
+  display: grid;
+  grid-auto-flow: column;
+  bottom: 24px;
+  right: 24px;
+}
+
+.github-link-text {
+  color: #405e9a;
+  font-family: Indie Flower;
+  font-size: 2rem;
+  text-shadow: 4px 4px 12px white;
+}
+
+.github-button {
+  width: 48px;
+  height: 48px;  
+  align-self: end;
+}
+
+::ng-deep .mat-fab .mat-button-wrapper{
+  padding: 0 !important;
+}
+
+.arrow {
+  -webkit-filter: drop-shadow(4px 4px 4px white);
+  filter: drop-shadow(4px 4px 4px white);
+}
