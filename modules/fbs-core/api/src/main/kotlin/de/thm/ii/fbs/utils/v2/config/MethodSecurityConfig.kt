@@ -24,4 +24,6 @@ open class MethodSecurityConfig : GlobalMethodSecurityConfiguration() {
             return handler
         }
     }
+
+    override fun customMethodSecurityMetadataSource(): MethodSecurityMetadataSource = DenyMethodSecurityMetadataSource()
 }

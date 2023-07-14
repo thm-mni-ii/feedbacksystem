@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(path = ["/api/v2/playground/{uid}/databases"])
-class PlaygroundController(
+open class PlaygroundController(
     private val userRepository: UserRepository,
     private val databaseRepository: SqlPlaygroundDatabaseRepository,
     private val entityRepository: SqlPlaygroundEntityRepository,
