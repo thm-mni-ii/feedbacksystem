@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -13,6 +14,7 @@ class HomeController {
     * Return home page index page.
     * @return index page.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(Array ("/"))
   def homePage: String = "index.html"
 
@@ -20,6 +22,7 @@ class HomeController {
     * Return login index page.
     * @return index page.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(Array ("/login"))
   def loginPage: String = "forward:/"
 
@@ -27,6 +30,7 @@ class HomeController {
     * Return go index page.
     * @return index page.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(Array ("/go/**"))
   def goPage: String = "forward:/"
 
@@ -34,6 +38,7 @@ class HomeController {
     * Handles rest api access.
     * @return Rest ressource.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(value = Array("/api/**"))
   def handleRestRequests(): String = throw new ResourceNotFoundException
 
@@ -41,6 +46,7 @@ class HomeController {
     * Forward every access that is not defined to the index page.
     * @return Forward undefined access to index.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(value = Array("/courses", "/sqlplayground", "/analytics")) // TODO: Remove as soon as possible
   def redirectRoot: String = "forward:/"
 
@@ -48,6 +54,7 @@ class HomeController {
     * Forward every access that is not defined to the index page.
     * @return Forward undefined access to index.
     */
+  @PreAuthorize("permitAll()")
   @RequestMapping(value = Array("/{head:[^w][^e][^b].*}/**/{tail:[^\\.]*}"))
   def redirect: String = "forward:/"
 }
