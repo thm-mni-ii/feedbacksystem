@@ -101,6 +101,7 @@ class SpreadsheetService {
       try {
         MathParserHelper.toMathJson(MathParserHelper.parse(v))
       } catch {
+        // Explicitly mark the value as a string to prevent parsing exceptions on the client
         case _: MathParserException => "{\"str\": \"" + v.replace("\"", "\\\"") + "\"}"
       }
     )
