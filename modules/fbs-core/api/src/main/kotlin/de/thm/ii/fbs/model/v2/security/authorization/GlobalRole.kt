@@ -1,5 +1,9 @@
 package de.thm.ii.fbs.model.v2.security.authorization
 
+import org.springframework.context.annotation.Bean
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
+
 /**
  * The global roles of users
  */
@@ -38,6 +42,14 @@ abstract class GlobalRole(val id: Int, val value: String) : Role {
             0 -> ADMIN
             1 -> MODERATOR
             else -> USER
+        }
+
+        @Bean
+        fun roleHierarchy(): RoleHierarchy {
+            println("Hierarchy set!")
+            val hierarchy = RoleHierarchyImpl()
+            hierarchy.setHierarchy("${ADMIN.authority} > ${MODERATOR.authority} \n ${MODERATOR.authority} > ${USER.authority}")
+            return hierarchy
         }
     }
 
