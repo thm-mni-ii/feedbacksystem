@@ -64,7 +64,7 @@ class User(
     val globalRole: GlobalRole
         get() = GlobalRole.parse(globalRoleInt)
 
-    fun toUserDetails(): UserDetails = User(username, null, setOf(globalRole)) // TODO save password in user?
+    fun toUserDetails(): UserDetails = User(username, password, setOf(globalRole)) // TODO save password in user?
 
     fun hasRole(role: GlobalRole, vararg roles: GlobalRole): Boolean =
         globalRole == role || roles.contains(globalRole) // TODO remove once authorization is moved to spring security
