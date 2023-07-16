@@ -1,4 +1,10 @@
 <div>
+  <div class="math-info-text">
+    <mat-icon class="info-icon">info</mat-icon>
+    <small>
+      Alle Eingaben werden auf {{ decimals }} Nachkommastellen gerundet.
+    </small>
+  </div>
   <div class="flex-container">
     <div
       *ngFor="let inputField of inputFields; index as i"
@@ -22,7 +28,4 @@
       </div>
     </div>
   </div>
-  <small
-    >Alle Eingaben werden auf {{ decimals }} Nachkommastellen gerundet.</small
-  >
 </div>
