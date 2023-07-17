@@ -63,19 +63,31 @@ export class CourseDetailComponent implements OnInit {
   userID: number;
   pointlist: number[] = [];
 
-  //courseProgress object with done int and bonus int
+  calculatedBonusPoints: number = 0;
   courseProgressBar: any = {
     mandatory: {
       done: 0,
+      failed: 0,
+      submitted: 0,
       sum: 0,
+      done_percent: 0,
+      failed_percent: 0,
     },
     optional: {
       done: 0,
+      failed: 0,
+      submitted: 0,
       sum: 0,
+      done_percent: 0,
+      failed_percent: 0,
     },
     practice: {
       done: 0,
+      failed: 0,
+      submitted: 0,
       sum: 0,
+      done_percent: 0,
+      failed_percent: 0,
     },
   };
 
@@ -122,13 +134,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   calculateCourseProgressBar() {
-    let taskSum: number = 0;
-    let done = 0;
-    let bonus = 0;
-
-    this.courseProgressBar.done = 0;
-    this.courseProgressBar.bonus = 0;
-
     forkJoin([
       this.taskService.getTaskResults(this.courseID),
       this.taskService.getAllTasks(this.courseID),
@@ -145,31 +150,48 @@ export class CourseDetailComponent implements OnInit {
         // ignore private tasks
         let visibleTasks = allTasks.filter((task) => !task.isPrivate);
 
-        console.log(visibleTasks);
+        // calculate progress
+        this.getStatsFromTasksType(
+          visibleTasks,
+          this.courseProgressBar.mandatory,
+          "mandatory"
+        );
+        this.getStatsFromTasksType(
+          visibleTasks,
+          this.courseProgressBar.optional,
+          "optional"
+        );
+        this.getStatsFromTasksType(
+          visibleTasks,
+          this.courseProgressBar.practice,
+          "practice"
+        );
 
-        this.courseProgressBar.mandatory.sum = visibleTasks.filter(
-          (task) => task.requirementType == "mandatory"
-        ).length;
-        this.courseProgressBar.mandatory.done = visibleTasks.filter(
-          (task) => task.requirementType == "mandatory" && task.passed == true
-        ).length;
+        // calculate bonus points based on requirements
+        // this.calculatedBonusPoints = 0;
+        // this.requirements.subscribe({
+        //   next(reqs) {
 
-        this.courseProgressBar.mandatory.this.courseProgressBar.optional.sum =
-          visibleTasks.filter(
-            (task) => task.requirementType == "optional"
-          ).length;
-        this.courseProgressBar.optional.done = visibleTasks.filter(
-          (task) => task.requirementType == "optional" && task.passed == true
-        ).length;
-
-        this.courseProgressBar.practice.sum = visibleTasks.filter(
-          (task) => task.requirementType == "practice"
-        ).length;
-        this.courseProgressBar.practice.done = visibleTasks.filter(
-          (task) => task.requirementType == "practice" && task.passed == true
-        ).length;
+        //     let passedTasks = reqs.tasks.filter((task) => task.passed);
+        //     reqs.tasks.forEach((task) => {
+        //   },
+        // });
       },
     });
+  }
+
+  getStatsFromTasksType(tasks: any[], stats: any, type: string) {
+    let tasksOfType = tasks.filter((task) => task.requirementType == type);
+    stats.sum = tasksOfType.length;
+    // not the actual number of failed tasks, but the number of possible failed submissions for the buffer length
+    // will be vizually overwritten by stats.done
+    stats.submitted = tasksOfType.filter((task) => task.submission).length;
+    stats.failed = tasksOfType.filter((task) => !task.passed).length;
+    stats.done = tasksOfType.filter((task) => task.passed).length;
+
+    // calculate percentages
+    stats.done_percent = (stats.done / stats.sum) * 100;
+    stats.failed_percent = (stats.failed / stats.sum) * 100;
   }
 
   public canEdit(): boolean {
