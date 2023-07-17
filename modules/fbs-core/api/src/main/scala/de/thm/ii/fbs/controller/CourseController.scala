@@ -1,18 +1,20 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.Course
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
-import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
+import de.thm.ii.fbs.utils.v2.security.authorization.{IsModerator, IsUser}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.{PostAuthorize, PostFilter, PreAuthorize}
 import org.springframework.web.bind.annotation._
 
+import java.util
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.jdk.CollectionConverters.SeqHasAsJava
 
 /**
   * Controller to manage rest api calls for a course resource.
@@ -23,10 +25,6 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 class CourseController {
   @Autowired
   private val courseService: CourseService = null
-  @Autowired
-  private val courseRegistrationService: CourseRegistrationService = null
-  @Autowired
-  private val authService: AuthService = null
   @Autowired
   private val taskService: TaskService = null
   @Autowired
@@ -46,17 +44,12 @@ class CourseController {
     */
   @GetMapping(value = Array(""))
   @ResponseBody
+  @IsUser
+  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @coursePermissions.hasRole(filterObject.id, 'TUTOR')")
   def getAll(@RequestParam(value = "visible", required = false) ignoreHidden: Boolean,
-             req: HttpServletRequest, res: HttpServletResponse): List[Course] = {
-    val user = authService.authorize(req, res)
-    val courses = courseService.getAll(false)
-    val courseRights = courseRegistrationService.getCoursePrivileges(user.getId)
-    user.getGlobalRole match {
-      case GlobalRole.ADMIN | GlobalRole.MODERATOR => courses
-      case _ => courses
-        .filter(c => c.visible || courseRights.getOrElse(c.id, CourseRole.STUDENT) != CourseRole.STUDENT)
-    }
-  }
+             req: HttpServletRequest, res: HttpServletResponse): java.util.List[Course] =
+    new util.ArrayList[Course](courseService.getAll(false).asJava)
+
 
   /**
     * Create a new course
@@ -68,10 +61,8 @@ class CourseController {
     */
   @PostMapping(value = Array(""), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
-  def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Course = {
-    if (authService.authorize(req, res).getGlobalRole == GlobalRole.USER) {
-      throw new ForbiddenException()
-    }
+  @IsModerator
+  def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Course =
     (
       body.retrive("semesterId").asInt(),
       body.retrive("name").asText(),
@@ -82,7 +73,6 @@ class CourseController {
         courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
-  }
 
   /**
     * Get a single course
@@ -94,20 +84,13 @@ class CourseController {
     */
   @GetMapping(value = Array("/{cid}"))
   @ResponseBody
-  def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course = {
-    val user = authService.authorize(req, res)
-    val isSubscribed = courseRegistrationService.getParticipants(cid).exists(_.getUser.getId == user.getId)
-
+  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.subscribed(#cid)")
+  @PostAuthorize("returnObject.visible") // TODO filter visibility at db layer
+  def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
     courseService.find(cid) match {
-      case Some(course) =>
-        if (!(user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR || isSubscribed || course.visible)) {
-          throw new ForbiddenException()
-        } else {
-          course
-        }
+      case Some(course) => course
       case _ => throw new ResourceNotFoundException()
     }
-  }
 
   /**
     * Update course
@@ -118,26 +101,19 @@ class CourseController {
     * @param body Request Body
     */
   @PutMapping(value = Array("/{cid}"))
+  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#cid, 'DOCENT')")
   def update(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
-             @RequestBody body: JsonNode): Unit = {
-    val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId).map(_.getRole)
-
-    (user.getGlobalRole, someCourseRole) match {
-      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
-        (
-          body.retrive("semesterId").asInt(),
-          body.retrive("name").asText(),
-          body.retrive("description").asText(),
-          body.retrive("visible").asBool()
-        ) match {
-          case (semesterId, Some(name), desc, visible) =>
-            courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
-          case _ => throw new BadRequestException("Malformed Request Body")
-        }
-      case _ => throw new ForbiddenException()
+             @RequestBody body: JsonNode): Unit =
+    (
+      body.retrive("semesterId").asInt(),
+      body.retrive("name").asText(),
+      body.retrive("description").asText(),
+      body.retrive("visible").asBool()
+    ) match {
+      case (semesterId, Some(name), desc, visible) =>
+        courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
+      case _ => throw new BadRequestException("Malformed Request Body")
     }
-  }
 
   /**
     * Delete course
@@ -147,22 +123,16 @@ class CourseController {
     * @param res http response
     */
   @DeleteMapping(value = Array("/{cid}"))
+  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#cid, 'DOCENT')")
   def delete(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistrationService.getParticipants(cid).find(_.getUser.getId == user.getId).map(_.getRole)
+    // Save submissions and configurations
+    val tasks = taskService.getAll(cid).map(t => (submissionService.getAllByTask(cid, t.id), checkerConfigurationService.getAll(cid, t.id)))
 
-    (user.getGlobalRole, someCourseRole) match {
-      case (GlobalRole.ADMIN | GlobalRole.MODERATOR, _) | (_, Some(CourseRole.DOCENT)) =>
-        // Save submissions and configurations
-        val tasks = taskService.getAll(cid).map(t => (submissionService.getAllByTask(cid, t.id), checkerConfigurationService.getAll(cid, t.id)))
+    val success = courseService.delete(cid)
 
-        val success = courseService.delete(cid)
-
-        // If the Course was deleted in the database -> delete all files TODO1
-        success && tasks.forall(t => t._1
-          .forall(s => storageService.deleteSolution(s.id)) && t._2
-          .forall(cc => storageService.deleteAllConfigurations(cc.taskId, cid, cc)))
-      case _ => throw new ForbiddenException()
-    }
+    // If the Course was deleted in the database -> delete all files TODO1
+    success && tasks.forall(t => t._1
+      .forall(s => storageService.deleteSolution(s.id)) && t._2
+      .forall(cc => storageService.deleteAllConfigurations(cc.taskId, cid, cc)))
   }
 }
