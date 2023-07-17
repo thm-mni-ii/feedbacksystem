@@ -3,6 +3,10 @@ math-field {
   font-size: large;
 }
 
+:host ::ng-deep .ML__content {
+  overflow: unset;
+}
+
 .math-field-input {
   border-bottom: solid black 1px;
 }
@@ -20,4 +24,5 @@ math-field:focus-within {
   align-self: center;
   width: 100%;
 }
+
 

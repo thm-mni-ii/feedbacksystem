@@ -62,5 +62,10 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
         el.expression = JSON.parse(this.defaultValue.mathJson);
       }
     }
+    if (this.disabled) {
+      var style = document.createElement("style");
+      style.innerHTML = ".ML__content { overflow: unset; }";
+      this.input.nativeElement.shadowRoot.appendChild(style);
+    }
   }
 }
