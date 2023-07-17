@@ -21,11 +21,11 @@ runs:
     - run: sleep 1m
       shell: bash
       id: sleep-1
-      if: always() && steps.codecov.conclusion == 'failure'
+      if: always() && steps.codecov.outcome == 'failure'
     - uses: codecov/codecov-action@v3
       name: Upload Coverage Report (Retry 1)
       id: codecov-1
-      if: always() && steps.codecov.conclusion == 'failure'
+      if: always() && steps.codecov.outcome == 'failure'
       with:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
@@ -34,11 +34,11 @@ runs:
     - run: sleep 5m
       shell: bash
       id: sleep-2
-      if: always() && steps.codecov-1.conclusion == 'failure'
+      if: always() && steps.codecov-1.outcome == 'failure'
     - uses: codecov/codecov-action@v3
       name: Upload Coverage Report (Retry 2)
       id: codecov-2
-      if: always() && steps.codecov-1.conclusion == 'failure'
+      if: always() && steps.codecov-1.outcome == 'failure'
       with:
         files: ${{ inputs.files }}
         flags: ${{ inputs.flags }}
