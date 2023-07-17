@@ -1,7 +1,7 @@
 <div class="actions-container">
   <button
     mat-flat-button
-    matTooltip="Close all Tabs"
+    matTooltip="Schließe alle Tabs"
     matTooltipPosition="right"
     (click)="closeAllTabs()"
   >
@@ -9,7 +9,7 @@
   </button>
   <button
     mat-button
-    matTooltip="Download Tab"
+    matTooltip="Tab herunterladen"
     matTooltipPosition="right"
     [disabled]="pending"
     (click)="downloadFile()"
@@ -18,7 +18,7 @@
   </button>
   <button
     mat-button
-    matTooltip="Download all Tabs"
+    matTooltip="Alle Tabs herunterladen"
     matTooltipPosition="right"
     [disabled]="pending"
     (click)="downloadAllFiles()"

@@ -153,7 +153,7 @@ export class SqlInputTabsComponent
       event.stopPropagation();
     }
     this.tabs.push({
-      name: "New Query",
+      name: "Neuer Query",
       content: "",
       error: false,
       errorMsg: null,
