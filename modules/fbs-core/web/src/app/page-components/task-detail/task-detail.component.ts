@@ -72,6 +72,7 @@ export class TaskDetailComponent implements OnInit {
   }
 
   submissionData: string | File;
+  submissionAdditionalInformation: Record<string, any>;
 
   isLastTask() {
     if (this.currentTaskIndex == this.allTasks.length - 1) {
@@ -309,7 +310,8 @@ export class TaskDetailComponent implements OnInit {
         token.id,
         this.courseId,
         this.task.id,
-        this.submissionData
+        this.submissionData,
+        this.submissionAdditionalInformation
       )
       .subscribe(
         () => {
@@ -354,6 +356,7 @@ export class TaskDetailComponent implements OnInit {
     }
 
     this.submissionData = submissionData;
+    this.submissionAdditionalInformation = data["additionalInformation"];
   }
 
   // TODO: there is no route for this

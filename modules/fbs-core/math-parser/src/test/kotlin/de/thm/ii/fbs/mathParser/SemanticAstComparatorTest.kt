@@ -157,6 +157,16 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
+    fun multiplicationWithNegativesTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a-3b"),
+                MathParserHelper.parse("4a+(-3b)")
+            )
+        )
+    }
+
+    @Test
     fun constructionTest() {
         assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
         assertNotNull(SemanticAstComparator())

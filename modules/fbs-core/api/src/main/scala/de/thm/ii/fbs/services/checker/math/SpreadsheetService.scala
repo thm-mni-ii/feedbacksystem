@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.checker.math
 
+import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -24,12 +25,14 @@ class SpreadsheetService {
     * @param fields      the field for which to get the values
     * @return the values
     */
-  def getFields(spreadsheet: File, userIDField: String, userID: String, fields: String): Seq[(String, String)] = {
+  def getFields(spreadsheet: File, userIDField: String, userID: String, fields: String, mathJson: Boolean = false): Seq[(String, String)] = {
     val sheet = this.initSheet(spreadsheet, userIDField, userID)
     val (start, end) = this.parseCellRange(fields)
     val labels = this.getInCol(sheet, start.col, start.row, end.row)
     val values = this.getInCol(sheet, end.col, start.row, end.row)
-    labels.zip(values)
+    val parsedValues = if (mathJson) this.parseValues(values) else values
+
+    labels.zip(parsedValues)
   }
 
   private def initSheet(spreadsheet: File, userIDField: String, userID: String): XSSFSheet = {
@@ -93,7 +96,18 @@ class SpreadsheetService {
   private def colToInt(col: Char): Int =
     col.toInt - 64
 
+  private def parseValues(value: Seq[String]): Seq[String] =
+    value.map(v =>
+      try {
+        MathParserHelper.toMathJson(MathParserHelper.parse(v))
+      } catch {
+        // Explicitly mark the value as a string to prevent parsing exceptions on the client
+        case _: MathParserException => "{\"str\": \"" + v.replace("\"", "\\\"") + "\"}"
+      }
+    )
+
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+  germanFormat.setGroupingUsed(false)
   germanFormat.setMaximumFractionDigits(germanFormat.getMaximumIntegerDigits)
 
   /**
