@@ -23,8 +23,8 @@ import { ExternalClassroomService } from "../../service/external-classroom.servi
 import { UserTaskResult } from "../../model/UserTaskResult";
 import { ExportTasksDialogComponent } from "src/app/dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { Requirement } from "src/app/model/Requirement";
-
 import { TaskPointsService } from "../../service/task-points.service";
+
 @Component({
   selector: "app-course-detail",
   templateUrl: "./course-detail.component.html",
@@ -61,8 +61,24 @@ export class CourseDetailComponent implements OnInit {
   evaluationUserResults: any[];
   legends = ["green", "red", "#1E457C"];
   userID: number;
-
   pointlist: number[] = [];
+
+  //courseProgress object with done int and bonus int
+  courseProgressBar: any = {
+    mandatory: {
+      done: 0,
+      sum: 0,
+    },
+    optional: {
+      done: 0,
+      sum: 0,
+    },
+    practice: {
+      done: 0,
+      sum: 0,
+    },
+  };
+
   ngOnInit() {
     this.route.params.subscribe((param) => {
       this.courseID = param.id;
@@ -88,6 +104,8 @@ export class CourseDetailComponent implements OnInit {
       });
     });
 
+    this.calculateCourseProgressBar();
+
     this.role = this.auth.getToken().courseRoles[this.courseID];
     this.userID = this.authService.getToken().id;
     if (this.goToService.getAndClearAutoJoin() && !this.role) {
@@ -101,6 +119,57 @@ export class CourseDetailComponent implements OnInit {
           (error) => console.error(error)
         );
     }
+  }
+
+  calculateCourseProgressBar() {
+    let taskSum: number = 0;
+    let done = 0;
+    let bonus = 0;
+
+    this.courseProgressBar.done = 0;
+    this.courseProgressBar.bonus = 0;
+
+    forkJoin([
+      this.taskService.getTaskResults(this.courseID),
+      this.taskService.getAllTasks(this.courseID),
+      //this.taskPointsService.getAllRequirements(this.courseID),
+    ]).subscribe({
+      next: ([taskResults, tasks]) => {
+        // merge taskResults and tasks by id
+        let allTasks = taskResults.map((taskResult) => {
+          return {
+            ...taskResult,
+            ...tasks.find((task) => task.id == taskResult.taskID),
+          };
+        });
+        // ignore private tasks
+        let visibleTasks = allTasks.filter((task) => !task.isPrivate);
+
+        console.log(visibleTasks);
+
+        this.courseProgressBar.mandatory.sum = visibleTasks.filter(
+          (task) => task.requirementType == "mandatory"
+        ).length;
+        this.courseProgressBar.mandatory.done = visibleTasks.filter(
+          (task) => task.requirementType == "mandatory" && task.passed == true
+        ).length;
+
+        this.courseProgressBar.mandatory.this.courseProgressBar.optional.sum =
+          visibleTasks.filter(
+            (task) => task.requirementType == "optional"
+          ).length;
+        this.courseProgressBar.optional.done = visibleTasks.filter(
+          (task) => task.requirementType == "optional" && task.passed == true
+        ).length;
+
+        this.courseProgressBar.practice.sum = visibleTasks.filter(
+          (task) => task.requirementType == "practice"
+        ).length;
+        this.courseProgressBar.practice.done = visibleTasks.filter(
+          (task) => task.requirementType == "practice" && task.passed == true
+        ).length;
+      },
+    });
   }
 
   public canEdit(): boolean {

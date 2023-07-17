@@ -145,6 +145,53 @@
     </button>
   </div>
 
+  <!-- Johannes approach for progres bar -->
+  <mat-card class="progress-card">
+    <mat-card-content>
+      <h2>Kurs Fortschritt</h2>
+
+      <!-- little widgets -->
+      <!-- Bearbeitete Pflichtaufgaben / Bearbeitetet Bonusaufgaben / Bearbeitete Übungsaufgaben -->
+      <div class="progress-widget">
+        <div class="progress-widget-item">
+          <mat-icon>priority_high</mat-icon>
+          <span>{{ courseProgressBar.done }}</span>
+        </div>
+        <div class="progress-widget-item">
+          <mat-icon>star</mat-icon>
+          <span>{{ courseProgressBar.bonus }}</span>
+        </div>
+        <div class="progress-widget-item">
+          <mat-icon>school</mat-icon>
+          <span>{{ courseProgressBar.exercise }}</span>
+        </div>
+      </div>
+
+
+      <section class="progress-section">
+        <mat-progress-bar
+          mode="buffer"
+          [value]="courseProgressBar.done"
+          [bufferValue]="courseProgressBar.bonus"
+        >
+        </mat-progress-bar>
+        <mat-progress-bar
+          mode="buffer"
+          [value]="courseProgressBar.done"
+          [bufferValue]="courseProgressBar.bonus"
+        >
+        </mat-progress-bar>
+        <mat-progress-bar
+          mode="buffer"
+          [value]="courseProgressBar.done"
+          [bufferValue]="courseProgressBar.bonus"
+        >
+        </mat-progress-bar>
+      </section>
+
+    </mat-card-content>
+  </mat-card>
+
   <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
   <div class="task-list">
     <div *ngFor="let task of tasks">
