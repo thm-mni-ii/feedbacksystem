@@ -46,7 +46,6 @@ abstract class GlobalRole(val id: Int, val value: String) : Role {
 
         @Bean
         fun roleHierarchy(): RoleHierarchy {
-            println("Hierarchy set!")
             val hierarchy = RoleHierarchyImpl()
             hierarchy.setHierarchy("${ADMIN.authority} > ${MODERATOR.authority} \n ${MODERATOR.authority} > ${USER.authority}")
             return hierarchy

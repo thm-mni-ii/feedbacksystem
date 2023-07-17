@@ -18,7 +18,6 @@ open class MethodSecurityConfig : GlobalMethodSecurityConfiguration() {
     companion object {
         @Bean
         fun methodSecurityExpressionHandler(): MethodSecurityExpressionHandler {
-            print("Expression Handler set!")
             val handler = DefaultMethodSecurityExpressionHandler()
             handler.setRoleHierarchy(GlobalRole.roleHierarchy())
             return handler
