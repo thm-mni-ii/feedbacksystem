@@ -63,9 +63,9 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
       }
     }
     if (this.disabled) {
-      var style = document.createElement("style");
-      style.innerHTML = ".ML__content { overflow: unset; }";
-      this.input.nativeElement.shadowRoot.appendChild(style);
+      var sheet = new CSSStyleSheet();
+      sheet.insertRule(".ML__content { overflow: unset; }");
+      this.input.nativeElement.shadowRoot.adoptedStyleSheets = [sheet];
     }
   }
 }
