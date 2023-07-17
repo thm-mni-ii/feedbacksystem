@@ -1,9 +1,13 @@
 package de.thm.ii.fbs.model.v2.security.authorization
 
+import org.springframework.context.annotation.Bean
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
+
 /**
  * The course roles of a user
  */
-abstract class CourseRole(val id: Int, val value: String) {
+abstract class CourseRole(val id: Int, val value: String): Role {
     companion object { // TODO remove fields in companion object once scala does not access the Roles in patterns
         @JvmField
         val DOCENT = DocentRole
@@ -39,6 +43,14 @@ abstract class CourseRole(val id: Int, val value: String) {
             1 -> TUTOR
             else -> STUDENT
         }
+
+        @Bean
+        @JvmStatic
+        fun roleHierarchy(): RoleHierarchy {
+            val hierarchy = RoleHierarchyImpl()
+            hierarchy.setHierarchy("${DOCENT.authority} > ${TUTOR.authority} \n ${TUTOR.authority} > ${STUDENT.authority}")
+            return hierarchy
+        }
     }
 
     /**
@@ -56,7 +68,7 @@ abstract class CourseRole(val id: Int, val value: String) {
      */
     object StudentRole : CourseRole(2, "STUDENT")
 
-    fun getAuthority(): String = "ROLE_$value"
+    override fun getAuthority(): String = "ROLE_$value"
 
     override fun toString(): String {
         return value
