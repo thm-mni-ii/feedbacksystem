@@ -103,6 +103,7 @@
           [outputFields]="task?.mediaInformation.outputs || []"
           [decimals]="task?.mediaInformation.decimals || 2"
           [content]="latestResult?.extInfo || {}"
+          [lastSubmission]="lastSubmission"
         ></app-submission-spreadsheet>
       </div>
 

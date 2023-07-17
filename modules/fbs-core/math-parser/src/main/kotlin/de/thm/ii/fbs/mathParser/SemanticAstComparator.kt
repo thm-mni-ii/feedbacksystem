@@ -64,6 +64,8 @@ class SemanticAstComparator(
         val transformers: MutableList<KClass<*>> = mutableListOf(NumberScalingTransformer::class)
         if (applyCommutativeLaw) {
             transformers += listOf(
+                NegativeNumberTransformer::class,
+                MultiplicationSubTransformer::class,
                 SubReplacingTransformer::class,
                 DivisionReplacingTransformer::class,
                 CommutativeLawTransformer::class
