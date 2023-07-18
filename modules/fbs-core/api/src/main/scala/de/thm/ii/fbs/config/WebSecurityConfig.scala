@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.{UserDetails, UserDetailsService}
 import org.springframework.security.web.SecurityFilterChain
 
-
 @EnableWebSecurity
 @Configuration
 class WebSecurityConfig(@Autowired private val userRepository: UserRepository) {

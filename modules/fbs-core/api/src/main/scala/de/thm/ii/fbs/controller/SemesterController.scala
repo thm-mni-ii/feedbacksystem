@@ -37,7 +37,6 @@ class SemesterController {
   @IsModerator
   def getAll(req: HttpServletRequest, res: HttpServletResponse): List[Semester] = semesterService.getAll
 
-
   /**
     * Create a new semester
     *
@@ -72,7 +71,6 @@ class SemesterController {
       case _ => throw new ResourceNotFoundException()
     }
 
-
   /**
     * Update semester
     *
@@ -101,5 +99,4 @@ class SemesterController {
   @DeleteMapping(value = Array("/{sid}"))
   @IsAdmin
   def delete(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = semesterService.delete(sid)
-
 }

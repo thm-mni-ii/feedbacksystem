@@ -50,7 +50,6 @@ class CourseController {
              req: HttpServletRequest, res: HttpServletResponse): java.util.List[Course] =
     new util.ArrayList[Course](courseService.getAll(false).asJava)
 
-
   /**
     * Create a new course
     *
