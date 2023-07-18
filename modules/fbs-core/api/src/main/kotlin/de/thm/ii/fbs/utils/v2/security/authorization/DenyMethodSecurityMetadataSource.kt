@@ -16,7 +16,8 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
     }
 
     override fun findAttributes(method: Method, targetClass: Class<*>?): Collection<ConfigAttribute>? {
-        val annotations = MergedAnnotations.from(method)
+        val methodAnnotations = MergedAnnotations.from(method)
+        val classAnnotations = targetClass?.let { MergedAnnotations.from(it) } ?: MergedAnnotations.of(listOf())
         val attributes: MutableList<ConfigAttribute> = ArrayList()
 
         // if the class is annotated as @Controller we should by default deny access to every method
@@ -29,8 +30,8 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
         ) {
             attributes.add(Jsr250SecurityConfig.DENY_ALL_ATTRIBUTE)
         }
-        // but not if the method has at least a PreAuthorize or PostAuthorize annotation
-        if (annotations.isPresent(PreAuthorize::class.java) || annotations.isPresent(PostAuthorize::class.java)) {
+        // but not if the method or the target class has at least a PreAuthorize or PostAuthorize annotation
+        if (hasPreOrPost(methodAnnotations) || hasPreOrPost(classAnnotations)) {
             return null
         }
         return attributes
@@ -43,4 +44,7 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
     private fun onlyLocal(targetClass: Class<*>): Boolean =
         targetClass.packageName.startsWith("de.thm.ii.fbs") &&
             targetClass.simpleName != "LoginController"
+
+    private fun hasPreOrPost(annotations: MergedAnnotations): Boolean =
+        annotations.isPresent(PreAuthorize::class.java) || annotations.isPresent(PostAuthorize::class.java)
 }
