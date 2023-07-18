@@ -6,8 +6,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 @PreAuthorize("permitAll")
 annotation class PermitAll
 
-
-
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @PreAuthorize("hasRole('ADMIN')")
@@ -23,9 +21,13 @@ annotation class IsModerator
 @PreAuthorize("hasRole('USER')")
 annotation class IsUser
 
-
+/**
+ * Annotation to check weather the current user has the same id as [userId] of the annotated function.
+ *
+ * Note: The annotated function needs a parameter `userId: Int` otherwise an internal server error occurs.
+ */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @IsUser
-@PreAuthorize("@globalPermissions.isSelf(#userId)")
+@PreAuthorize("@permissions.isSelf(#userId)")
 annotation class IsSelf

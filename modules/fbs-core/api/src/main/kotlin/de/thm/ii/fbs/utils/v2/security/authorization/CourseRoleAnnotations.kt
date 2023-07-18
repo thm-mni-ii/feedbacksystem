@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#courseId, 'DOCENT')")
+@PreAuthorize("hasRole('MODERATOR') || @permissions.hasRole(#courseId, 'DOCENT')")
 annotation class IsModeratorOrCourseDocent
 
 /**
@@ -21,5 +21,5 @@ annotation class IsModeratorOrCourseDocent
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#courseId, 'TUTOR')")
+@PreAuthorize("hasRole('MODERATOR') || @permissions.hasRole(#courseId, 'TUTOR')")
 annotation class IsModeratorOrCourseTutor

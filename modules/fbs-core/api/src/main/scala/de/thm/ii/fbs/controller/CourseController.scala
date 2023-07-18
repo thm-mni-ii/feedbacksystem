@@ -45,7 +45,7 @@ class CourseController {
   @GetMapping(value = Array(""))
   @ResponseBody
   @IsUser
-  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @coursePermissions.hasRole(filterObject.id, 'TUTOR')") // TODO filter at db layer
+  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @permissions.hasRole(filterObject.id, 'TUTOR')") // TODO filter at db layer
   def getAll(@RequestParam(value = "visible", required = false) ignoreHidden: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): java.util.List[Course] =
     new util.ArrayList[Course](courseService.getAll(false).asJava)
@@ -84,7 +84,7 @@ class CourseController {
     */
   @GetMapping(value = Array("/{courseId}"))
   @ResponseBody
-  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.subscribed(#cid)")
+  @PreAuthorize("hasRole('MODERATOR') || @permissions.subscribed(#cid)")
   @PostAuthorize("returnObject.visible") // TODO filter visibility at db layer
   def getOne(@PathVariable courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
     courseService.find(courseId) match {
