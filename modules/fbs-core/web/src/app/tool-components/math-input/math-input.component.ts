@@ -8,6 +8,7 @@ import {
   Output,
   ViewChild,
 } from "@angular/core";
+import { insertShadowRootStyle } from "src/app/util/css";
 
 export interface MathInputValue {
   mathJson?: string;
@@ -63,9 +64,7 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
       }
     }
     if (this.disabled) {
-      var sheet = new CSSStyleSheet();
-      sheet.insertRule(".ML__content { overflow: unset; }");
-      this.input.nativeElement.shadowRoot.adoptedStyleSheets = [sheet];
+      insertShadowRootStyle(this.input, [".ML__content { overflow: unset; }"]);
     }
   }
 }
