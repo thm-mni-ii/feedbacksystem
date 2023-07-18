@@ -1,7 +1,8 @@
 .flex-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, 49%);
-  gap: 2%;
+  column-gap: 2%;
+  row-gap: 16px;
 }
 
 .math-task-container {
