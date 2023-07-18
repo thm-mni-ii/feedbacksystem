@@ -1,19 +1,15 @@
 .flex-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-}
-
-.flex-container > * {
-  width: 30%;
-  margin-left: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 49%);
+  column-gap: 2%;
+  row-gap: 16px;
 }
 
 .math-task-container {
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: max-content auto;
-  gap: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 8px;
 }
 
 .math-task-label {
@@ -29,4 +25,11 @@
 
 .info-icon {
   color:#405e9a;
+}
+
+@media screen and (max-width: 850px) {
+  .flex-container {
+    grid-template-columns: repeat(auto-fill, 100%);
+    gap: 0;
+  }
 }

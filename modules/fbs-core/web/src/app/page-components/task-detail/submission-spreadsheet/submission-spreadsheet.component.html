@@ -6,12 +6,9 @@
     </small>
   </div>
   <div class="flex-container">
-    <div
-      *ngFor="let inputField of inputFields; index as i"
-      class="math-task-container"
-    >
+    <div *ngFor="let inputField of inputFields; index as i">
       <b class="math-task-label">{{ inputField[0] }}</b>
-      <div>
+      <div class="math-task-container">
         <app-math-input
           [label]="'Aufgabe:'"
           [defaultValue]="{ mathJson: inputField[1] }"
