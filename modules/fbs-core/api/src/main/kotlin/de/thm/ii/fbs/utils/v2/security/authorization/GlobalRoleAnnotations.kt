@@ -22,3 +22,10 @@ annotation class IsModerator
 @Retention(AnnotationRetention.RUNTIME)
 @PreAuthorize("hasRole('USER')")
 annotation class IsUser
+
+
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@IsUser
+@PreAuthorize("@globalPermissions.isSelf(#userId)")
+annotation class IsSelf
