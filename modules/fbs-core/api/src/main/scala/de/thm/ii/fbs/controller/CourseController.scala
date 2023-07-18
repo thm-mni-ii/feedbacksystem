@@ -86,7 +86,7 @@ class CourseController {
   @ResponseBody
   @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.subscribed(#cid)")
   @PostAuthorize("returnObject.visible") // TODO filter visibility at db layer
-  def getOne(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
+  def getOne(@PathVariable courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
     courseService.find(courseId) match {
       case Some(course) => course
       case _ => throw new ResourceNotFoundException()
@@ -102,7 +102,7 @@ class CourseController {
     */
   @PutMapping(value = Array("/{courseId}"))
   @IsModeratorOrCourseDocent
-  def update(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse,
+  def update(@PathVariable courseId: Integer, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit =
     (
       body.retrive("semesterId").asInt(),
@@ -124,7 +124,7 @@ class CourseController {
     */
   @DeleteMapping(value = Array("/{courseId}"))
   @IsModeratorOrCourseDocent
-  def delete(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  def delete(@PathVariable courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     // Save submissions and configurations
     val tasks = taskService.getAll(courseId).map(t => (submissionService.getAllByTask(courseId, t.id), checkerConfigurationService.getAll(courseId, t.id)))
 
