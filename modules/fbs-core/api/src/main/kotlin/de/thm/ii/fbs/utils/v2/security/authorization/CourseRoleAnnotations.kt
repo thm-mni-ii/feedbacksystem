@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@PreAuthorize("hasRole('MODERATOR') || @permissions.hasRole(#courseId, 'DOCENT')")
+@PreAuthorize("hasRole('MODERATOR') || @permissions.hasCourseRole(#courseId, 'DOCENT')")
 annotation class IsModeratorOrCourseDocent
 
 /**
@@ -21,5 +21,16 @@ annotation class IsModeratorOrCourseDocent
  */
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-@PreAuthorize("hasRole('MODERATOR') || @permissions.hasRole(#courseId, 'TUTOR')")
+@PreAuthorize("hasRole('MODERATOR') || @permissions.hasCourseRole(#courseId, 'TUTOR')")
 annotation class IsModeratorOrCourseTutor
+
+/**
+ * Annotation to check weather the current user is a moderator (global role)
+ * or a docent in the course with the [courseID] or the current user has the same id as [userId] of the annotated function.
+ *
+ * Note: The annotated function needs the parameters `courseId: Int` and `userId: Int` otherwise an internal server error occurs.
+ */
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("hasRole('MODERATOR') || @permissions.hasCourseRole(#courseId, 'DOCENT') || @permissions.isSelf(#userId)")
+annotation class IsModeratorOrCourseDocentOrSelf

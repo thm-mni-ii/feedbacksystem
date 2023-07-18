@@ -45,7 +45,7 @@ class CourseController {
   @GetMapping(value = Array(""))
   @ResponseBody
   @IsUser
-  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @permissions.hasRole(filterObject.id, 'TUTOR')") // TODO filter at db layer
+  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @permissions.hasCourseRole(filterObject.id, 'TUTOR')") // TODO filter at db layer
   def getAll(@RequestParam(value = "visible", required = false) ignoreHidden: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): java.util.List[Course] =
     new util.ArrayList[Course](courseService.getAll(false).asJava)
