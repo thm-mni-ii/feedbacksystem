@@ -126,7 +126,6 @@ export class SqlInputTabsComponent
 
   loadFromLocalStorage() {
     const loadedData = localStorage.getItem("tabs");
-    console.log(loadedData);
 
     if (loadedData && JSON.parse(loadedData).tabs.length > 0) {
       this.tabs = JSON.parse(loadedData).tabs;
