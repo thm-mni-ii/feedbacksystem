@@ -7,7 +7,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl
 /**
  * The course roles of a user
  */
-abstract class CourseRole(val id: Int, val value: String): Role {
+abstract class CourseRole(val id: Int, val value: String) : Role {
     companion object { // TODO remove fields in companion object once scala does not access the Roles in patterns
         @JvmField
         val DOCENT = DocentRole

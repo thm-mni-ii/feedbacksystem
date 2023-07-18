@@ -10,7 +10,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import java.lang.reflect.Method
 
-
 class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataSource() {
     override fun findAttributes(clazz: Class<*>?): Collection<ConfigAttribute>? {
         return null
@@ -22,11 +21,11 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
 
         // if the class is annotated as @Controller we should by default deny access to every method
         if (targetClass?.let {
-                AnnotationUtils.findAnnotation(
+            AnnotationUtils.findAnnotation(
                     it,
                     Controller::class.java
                 )
-            } != null && onlyLocal(targetClass)
+        } != null && onlyLocal(targetClass)
         ) {
             attributes.add(Jsr250SecurityConfig.DENY_ALL_ATTRIBUTE)
         }
@@ -42,6 +41,6 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
     }
 
     private fun onlyLocal(targetClass: Class<*>): Boolean =
-        targetClass.packageName.startsWith("de.thm.ii.fbs")
-                && targetClass.simpleName != "LoginController"
+        targetClass.packageName.startsWith("de.thm.ii.fbs") &&
+            targetClass.simpleName != "LoginController"
 }

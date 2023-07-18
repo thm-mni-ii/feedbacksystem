@@ -10,7 +10,6 @@ import org.springframework.security.access.method.MethodSecurityMetadataSource
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration
 
-
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 open class MethodSecurityConfig : GlobalMethodSecurityConfiguration() {
