@@ -18,6 +18,7 @@ math-field:focus-within {
 
 .math-input-field {
   align-self: center;
-  width: 100%;
+  width: calc(100% - 64px);
 }
+
 
