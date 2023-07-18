@@ -6,7 +6,7 @@ import de.thm.ii.fbs.model.Course
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.util.JsonWrapper._
-import de.thm.ii.fbs.utils.v2.security.authorization.{IsModerator, IsUser}
+import de.thm.ii.fbs.utils.v2.security.authorization.{IsModerator, IsModeratorOrCourseDocent, IsUser}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.{PostAuthorize, PostFilter, PreAuthorize}
@@ -45,7 +45,7 @@ class CourseController {
   @GetMapping(value = Array(""))
   @ResponseBody
   @IsUser
-  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @coursePermissions.hasRole(filterObject.id, 'TUTOR')")
+  @PostFilter("hasRole('MODERATOR') || filterObject.visible || @coursePermissions.hasRole(filterObject.id, 'TUTOR')") // TODO filter at db layer
   def getAll(@RequestParam(value = "visible", required = false) ignoreHidden: Boolean,
              req: HttpServletRequest, res: HttpServletResponse): java.util.List[Course] =
     new util.ArrayList[Course](courseService.getAll(false).asJava)
@@ -77,17 +77,17 @@ class CourseController {
   /**
     * Get a single course
     *
-    * @param cid Course id
+    * @param courseId Course id
     * @param req http request
     * @param res http response
     * @return A course
     */
-  @GetMapping(value = Array("/{cid}"))
+  @GetMapping(value = Array("/{courseId}"))
   @ResponseBody
   @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.subscribed(#cid)")
   @PostAuthorize("returnObject.visible") // TODO filter visibility at db layer
-  def getOne(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
-    courseService.find(cid) match {
+  def getOne(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
+    courseService.find(courseId) match {
       case Some(course) => course
       case _ => throw new ResourceNotFoundException()
     }
@@ -95,14 +95,14 @@ class CourseController {
   /**
     * Update course
     *
-    * @param cid  Course id
+    * @param courseId  Course id
     * @param req  http request
     * @param res  http response
     * @param body Request Body
     */
-  @PutMapping(value = Array("/{cid}"))
-  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#cid, 'DOCENT')")
-  def update(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse,
+  @PutMapping(value = Array("/{courseId}"))
+  @IsModeratorOrCourseDocent
+  def update(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit =
     (
       body.retrive("semesterId").asInt(),
@@ -111,28 +111,28 @@ class CourseController {
       body.retrive("visible").asBool()
     ) match {
       case (semesterId, Some(name), desc, visible) =>
-        courseService.update(cid, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
+        courseService.update(courseId, Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
 
   /**
     * Delete course
     *
-    * @param cid Course id
+    * @param courseId Course id
     * @param req http request
     * @param res http response
     */
-  @DeleteMapping(value = Array("/{cid}"))
-  @PreAuthorize("hasRole('MODERATOR') || @coursePermissions.hasRole(#cid, 'DOCENT')")
-  def delete(@PathVariable("cid") cid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  @DeleteMapping(value = Array("/{courseId}"))
+  @IsModeratorOrCourseDocent
+  def delete(@PathVariable("courseId") courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     // Save submissions and configurations
-    val tasks = taskService.getAll(cid).map(t => (submissionService.getAllByTask(cid, t.id), checkerConfigurationService.getAll(cid, t.id)))
+    val tasks = taskService.getAll(courseId).map(t => (submissionService.getAllByTask(courseId, t.id), checkerConfigurationService.getAll(courseId, t.id)))
 
-    val success = courseService.delete(cid)
+    val success = courseService.delete(courseId)
 
     // If the Course was deleted in the database -> delete all files TODO1
     success && tasks.forall(t => t._1
       .forall(s => storageService.deleteSolution(s.id)) && t._2
-      .forall(cc => storageService.deleteAllConfigurations(cc.taskId, cid, cc)))
+      .forall(cc => storageService.deleteAllConfigurations(cc.taskId, courseId, cc)))
   }
 }
