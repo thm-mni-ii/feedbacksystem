@@ -168,7 +168,7 @@ def create_average_bar(local_df):
         color_discrete_sequence=colors,
         labels={
             "labels": "SQL-Attribute",
-            "values": "STUDENTS",
+            "values": "Students",
         },
     )
     return fig
