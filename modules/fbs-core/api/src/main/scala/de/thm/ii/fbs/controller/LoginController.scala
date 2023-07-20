@@ -175,7 +175,9 @@ class LoginController extends CasClientConfigurerAdapter {
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
               .map(user => Option(userService.find(user.getUsername)).getOrElse(userService.create(user)))
           } yield ldapUser
-        } else None)
+        } else {
+          None
+        })
     )
 
     user match {
