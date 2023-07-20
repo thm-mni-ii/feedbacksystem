@@ -13,7 +13,7 @@ import javax.persistence.*
  * @param prename User's prename
  * @param surname User's surname
  * @param username User's username
- * @param globalRole User's global role
+ * @param globalRoleInt User's global role
  * @param email User's email
  * @param alias the DB password hash
  * @param id local DB's userid
@@ -65,9 +65,6 @@ class User(
         get() = GlobalRole.parse(globalRoleInt)
 
     fun toUserDetails(): UserDetails = User(username, password, setOf(globalRole)) // TODO save password in user?
-
-    fun hasRole(role: GlobalRole, vararg roles: GlobalRole): Boolean =
-        globalRole == role || roles.contains(globalRole) // TODO remove once authorization is moved to spring security
 
     override fun equals(other: Any?): Boolean = when (other) {
         is User -> username == other.username

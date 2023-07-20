@@ -87,7 +87,6 @@ class CourseRegistrationController {
     * @param res      http response
     */
   @DeleteMapping(value = Array("/users/{userId}/courses/{courseId}"))
-  @PreAuthorize
   @IsModeratorOrCourseDocentOrSelf
   def deregister(@PathVariable("userId") userId: Int, @PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
     courseRegistrationService.deregister(courseId, userId)

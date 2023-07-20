@@ -66,4 +66,3 @@ annotation class IsModeratorOrCourseTutorOrSelf
 @Retention(AnnotationRetention.RUNTIME)
 @PreAuthorize("hasRole('MODERATOR') || @permissions.hasCourseRoleOfTask(#taskId, 'TUTOR')")
 annotation class IsModeratorOrCourseTutorOfTask
-
