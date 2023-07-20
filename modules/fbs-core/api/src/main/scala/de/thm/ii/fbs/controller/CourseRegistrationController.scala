@@ -25,6 +25,8 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 class CourseRegistrationController {
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null
+  @Autowired
+  private val permissionEvaluator: PermissionEvaluator = null
 
   /**
     * Get registered courses
@@ -69,9 +71,9 @@ class CourseRegistrationController {
                @RequestBody body: JsonNode): Unit = {
     val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
 
-    if (PermissionEvaluator.hasCourseRole(courseId, CourseRole.TUTOR)) {
+    if (permissionEvaluator.hasCourseRole(courseId, CourseRole.TUTOR)) {
       courseRegistrationService.register(courseId, userId, role)
-    } else if (PermissionEvaluator.isSelf(userId)) {
+    } else if (permissionEvaluator.isSelf(userId)) {
       courseRegistrationService.register(courseId, userId, CourseRole.STUDENT)
     } else {
       new ForbiddenException()
@@ -117,5 +119,5 @@ class CourseRegistrationController {
   @GetMapping(value = Array("/courses/{courseId}/deregisterall"))
   @IsModeratorOrCourseDocent
   def deregisterAll(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
-    courseRegistrationService.deregisterAll(courseId, PermissionEvaluator.getUser.getId)
+    courseRegistrationService.deregisterAll(courseId, permissionEvaluator.getUser.getId)
 }

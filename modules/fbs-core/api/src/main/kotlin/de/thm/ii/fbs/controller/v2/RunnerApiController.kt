@@ -9,6 +9,7 @@ import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
 import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundEntityRepository
 import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundQueryRepository
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
+import de.thm.ii.fbs.utils.v2.security.authorization.PermitAll
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,13 +18,14 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@PermitAll
 open class RunnerApiController(
     private val queryRepository: SqlPlaygroundQueryRepository,
     private val entityRepository: SqlPlaygroundEntityRepository
 ) {
     @PostMapping("/results/playground", "/api/v1/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
+    open fun handlePlaygroundResult(@RequestBody result: SqlPlaygroundRunnerResult) {
         if (result.mode != RunnerMode.EXECUTE) return
         val query = queryRepository.findByIdOrNull(result.executionId) ?: throw NotFoundException()
         updateAllEntity(query, result)
@@ -49,6 +51,11 @@ open class RunnerApiController(
         }
 
     private fun getEntity(query: SqlPlaygroundQuery, type: String) =
-        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(query.runIn.owner.id!!, query.runIn.id!!, false, type)
+        entityRepository.findByDatabase_Owner_IdAndDatabase_idAndDatabase_DeletedAndType(
+            query.runIn.owner.id!!,
+            query.runIn.id!!,
+            false,
+            type
+        )
             ?: SqlPlaygroundEntity(query.runIn, type)
 }

@@ -28,6 +28,8 @@ class UserController {
   private val userService: UserService = null
   @Autowired
   private val loginService: LocalLoginService = null
+  @Autowired
+  private val permissionEvaluator: PermissionEvaluator = null
 
   /**
     * Get all users of the system
@@ -76,7 +78,7 @@ class UserController {
     if (password.isEmpty || password.get.isBlank || password != passwordRepeat) {
       throw new BadRequestException("Malformed Request Body")
     }
-    loginService.upgradePassword(PermissionEvaluator.getUser, password.get)
+    loginService.upgradePassword(permissionEvaluator.getUser, password.get)
   }
 
   /**

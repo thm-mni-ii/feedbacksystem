@@ -19,7 +19,7 @@ import scala.jdk.CollectionConverters.SeqHasAsJava
   */
 @Component("permissions")
 @unused
-object PermissionEvaluator {
+class PermissionEvaluator {
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null // TODO get course permissions from jwt token
   @Autowired

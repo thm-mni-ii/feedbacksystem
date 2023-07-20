@@ -1,15 +1,13 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.task.{Task, TaskBatch}
-import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.security.PermissionEvaluator
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.StorageService
-import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import de.thm.ii.fbs.utils.v2.security.authorization.{IsModeratorOrCourseTutor, IsUser}
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation._
 
 import java.io.File
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.jdk.CollectionConverters.SeqHasAsJava
 
 /**
   * TaskController implement routes for submitting task and receive results
@@ -38,6 +37,8 @@ class TaskController {
   private val storageService: StorageService = null
   @Autowired
   private val spreadsheetService: SpreadsheetService = null
+  @Autowired
+  private val permissionEvaluator: PermissionEvaluator = null
 
   /**
     * Get a task list
@@ -52,8 +53,8 @@ class TaskController {
   @IsUser
   @PostFilter("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR')" +
     " || (@permissions.hasCourseRole(#courseId, 'STUDENT') && !filterObject.isPrivate)")
-  def getAll(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): List[Task] = {
-    taskService.getAll(courseId)
+  def getAll(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): java.util.List[Task] = {
+    new java.util.ArrayList[Task](taskService.getAll(courseId).asJava)
   }
 
   /**
@@ -69,8 +70,8 @@ class TaskController {
   @IsUser
   @PostFilter("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR')" +
     " || (@permissions.hasCourseRole(#courseId, 'STUDENT') && !filterObject.isPrivate)")
-  def getTaskResults(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Seq[UserTaskResult] =
-    taskService.getTaskResults(courseId, PermissionEvaluator.getUser.getId)
+  def getTaskResults(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): java.util.List[UserTaskResult] =
+    new java.util.ArrayList[UserTaskResult](taskService.getTaskResults(courseId, permissionEvaluator.getUser.getId).asJava)
 
   /**
     * Get subtask statistics
@@ -108,7 +109,7 @@ class TaskController {
             val SpreadsheetMediaInformation(idField, inputFields, outputFields, pointFields, decimals) = smi
             val config = this.checkerConfigurationService.getAll(courseId, taskId).head
             val spreadsheetFile: File = storageService.getFileMainFile(config)
-            val userID = Hash.decimalHash(PermissionEvaluator.getUser.getUsername).abs().toString().slice(0, 7)
+            val userID = Hash.decimalHash(permissionEvaluator.getUser.getUsername).abs().toString().slice(0, 7)
             val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
             spreadsheetFile.delete()
@@ -133,7 +134,7 @@ class TaskController {
   @PostAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR')" +
     " || (@permissions.hasCourseRole(#courseId, 'STUDENT') && !returnObject.isPrivate)")
   def getTaskResult(@PathVariable courseId: Int, @PathVariable taskId: Int, req: HttpServletRequest, res: HttpServletResponse): UserTaskResult =
-    taskService.getTaskResult(taskId, PermissionEvaluator.getUser.getId).getOrElse(throw new ResourceNotFoundException())
+    taskService.getTaskResult(taskId, permissionEvaluator.getUser.getId).getOrElse(throw new ResourceNotFoundException())
 
   /**
     * Create a new task
