@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.Semester
 import de.thm.ii.fbs.services.persistence._
-import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.JsonWrapper._
 import de.thm.ii.fbs.utils.v2.security.authorization.{IsAdmin, IsModerator}
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,8 +19,6 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @CrossOrigin
 @RequestMapping(path = Array("/api/v1/semester"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
 class SemesterController {
-  @Autowired
-  private val authService: AuthService = null
   @Autowired
   private val semesterService: SemesterService = null
 
@@ -57,16 +54,16 @@ class SemesterController {
   /**
     * Get a single semester
     *
-    * @param sid semester id
-    * @param req http request
-    * @param res http response
+    * @param semesterId semester id
+    * @param req        http request
+    * @param res        http response
     * @return A course
     */
-  @GetMapping(value = Array("/{sid}"))
+  @GetMapping(value = Array("/{semesterId}"))
   @ResponseBody
   @IsModerator
-  def getOne(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse): Any =
-    semesterService.find(sid) match {
+  def getOne(@PathVariable semesterId: Integer, req: HttpServletRequest, res: HttpServletResponse): Any =
+    semesterService.find(semesterId) match {
       case Some(semester) => semester
       case _ => throw new ResourceNotFoundException()
     }
@@ -74,29 +71,29 @@ class SemesterController {
   /**
     * Update semester
     *
-    * @param sid  Semester id
-    * @param req  http request
-    * @param res  http response
-    * @param body Request Body
+    * @param semesterId Semester id
+    * @param req        http request
+    * @param res        http response
+    * @param body       Request Body
     */
-  @PutMapping(value = Array("/{sid}"))
+  @PutMapping(value = Array("/{semesterId}"))
   @IsAdmin
-  def update(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse,
+  def update(@PathVariable semesterId: Integer, req: HttpServletRequest, res: HttpServletResponse,
              @RequestBody body: JsonNode): Unit =
     (body.retrive("id").asInt(), body.retrive("name").asText())
     match {
-      case (Some(id), Some(name)) => semesterService.update(sid, Semester(id, name))
+      case (Some(id), Some(name)) => semesterService.update(semesterId, Semester(id, name))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
 
   /**
     * Delete Semester
     *
-    * @param sid Semester id
-    * @param req http request
-    * @param res http response
+    * @param semesterId Semester id
+    * @param req        http request
+    * @param res        http response
     */
-  @DeleteMapping(value = Array("/{sid}"))
+  @DeleteMapping(value = Array("/{semesterId}"))
   @IsAdmin
-  def delete(@PathVariable("sid") sid: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = semesterService.delete(sid)
+  def delete(@PathVariable semesterId: Integer, req: HttpServletRequest, res: HttpServletResponse): Unit = semesterService.delete(semesterId)
 }

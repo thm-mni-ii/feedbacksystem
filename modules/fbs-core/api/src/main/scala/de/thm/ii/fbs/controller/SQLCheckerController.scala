@@ -1,11 +1,9 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.node.{ArrayNode, ObjectNode}
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
-import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
-import de.thm.ii.fbs.model.SQLCheckerQuery
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, SQLCheckerService, TaskService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.controller.exception.BadRequestException
+import de.thm.ii.fbs.services.persistence.SQLCheckerService
+import de.thm.ii.fbs.utils.v2.security.authorization.IsModeratorOrCourseTutorOfTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}
 
@@ -19,96 +17,63 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @RequestMapping(path = Array("/api/v1/sqlChecker"))
 class SQLCheckerController {
   @Autowired
-  private val authService: AuthService = null
-  @Autowired
-  private val courseRegistration: CourseRegistrationService = null
-  @Autowired
-  private val taskService: TaskService = null
-  @Autowired
   private val sqlCheckerService: SQLCheckerService = null
 
   /**
     * Get Queries
     */
-  @GetMapping(value = Array("/{taskID}/queries/sumUpCorrect"))
+  @GetMapping(value = Array("/{taskId}/queries/sumUpCorrect"))
   @ResponseBody
-  def sumUpCorrect(@PathVariable("taskID") taskID: Int, @RequestParam returns: String, req: HttpServletRequest, res: HttpServletResponse): ObjectNode = {
+  @IsModeratorOrCourseTutorOfTask
+  def sumUpCorrect(@PathVariable taskId: Int, @RequestParam returns: String,
+                   req: HttpServletRequest, res: HttpServletResponse): ObjectNode = {
     returns match {
       case "tables" | "attributes" => {}
-      case _ => {
-        throw new BadRequestException("returns must be tables or attributes")
-      }
+      case _ => throw new BadRequestException("returns must be tables or attributes")
     }
 
-    this.authorize(taskID, req, res)
-
-    sqlCheckerService.sumUpCorrect(taskID, returns)
+    sqlCheckerService.sumUpCorrect(taskId, returns)
   }
 
   /**
     * Get Queries
     */
-  @GetMapping(value = Array("/{taskID}/queries/sumUpCorrectCombined"))
+  @GetMapping(value = Array("/{taskId}/queries/sumUpCorrectCombined"))
   @ResponseBody
-  def sumUpCorrectCombined(@PathVariable("taskID") taskID: Int, @RequestParam returns: String,
+  @IsModeratorOrCourseTutorOfTask
+  def sumUpCorrectCombined(@PathVariable taskId: Int, @RequestParam returns: String,
                            req: HttpServletRequest, res: HttpServletResponse): ObjectNode = {
     returns match {
       case "tables" | "attributes" => {}
-      case _ => {
-        throw new BadRequestException("returns must be tables or attributes")
-      }
+      case _ => throw new BadRequestException("returns must be tables or attributes")
     }
 
-    this.authorize(taskID, req, res)
-
-    sqlCheckerService.sumUpCorrectCombined(taskID, returns)
+    sqlCheckerService.sumUpCorrectCombined(taskId, returns)
   }
 
   /**
     * Get Queries
     */
-  @GetMapping(value = Array("/{taskID}/queries/listByType"))
+  @GetMapping(value = Array("/{taskId}/queries/listByType"))
   @ResponseBody
-  def listByType(@PathVariable("taskID") taskID: Int, @RequestParam returns: String, req: HttpServletRequest, res: HttpServletResponse): ArrayNode = {
+  @IsModeratorOrCourseTutorOfTask
+  def listByType(@PathVariable taskId: Int, @RequestParam returns: String,
+                 req: HttpServletRequest, res: HttpServletResponse): ArrayNode = {
     returns match {
       case "tables" | "attributes" => {}
-      case _ => {
-        throw new BadRequestException("returns must be tables or attributes")
-      }
+      case _ => throw new BadRequestException("returns must be tables or attributes")
     }
 
-    this.authorize(taskID, req, res)
-
-    sqlCheckerService.listByType(taskID, returns)
+    sqlCheckerService.listByType(taskId, returns)
   }
 
   /**
     * Get Queries
     */
-  @GetMapping(value = Array("/{taskID}/queries/listByTypes"))
+  @GetMapping(value = Array("/{taskId}/queries/listByTypes"))
   @ResponseBody
-  def listByTypes(@PathVariable("taskID") taskID: Int, @RequestParam tables: Boolean, @RequestParam attributes: Boolean,
-                  req: HttpServletRequest, res: HttpServletResponse): ArrayNode = {
-    this.authorize(taskID, req, res)
-
-    sqlCheckerService.listByTypes(taskID, tables, attributes)
-  }
-
-  private def authorize(taskID: Int, req: HttpServletRequest, res: HttpServletResponse) = {
-    val auth = authService.authorize(req, res)
-
-    val task = taskService.getOne(taskID)
-
-    val privilegedByCourse = task match {
-      case Some(task) => courseRegistration.getParticipants(task.courseID).find(_.getUser.getId == auth.getId)
-        .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
-      case _ => false
-    }
-
-    val privileged = privilegedByCourse || auth.getGlobalRole == GlobalRole.ADMIN || auth.getGlobalRole == GlobalRole.MODERATOR
-
-    if (!privileged) {
-      throw new ForbiddenException()
-    }
-  }
+  @IsModeratorOrCourseTutorOfTask
+  def listByTypes(@PathVariable taskId: Int, @RequestParam tables: Boolean, @RequestParam attributes: Boolean,
+                  req: HttpServletRequest, res: HttpServletResponse): ArrayNode =
+    sqlCheckerService.listByTypes(taskId, tables, attributes)
 }

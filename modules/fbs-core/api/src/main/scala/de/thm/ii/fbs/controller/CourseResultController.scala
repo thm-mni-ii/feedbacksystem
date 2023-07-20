@@ -1,11 +1,9 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.model.{CourseResult, EvaluationUserResult}
 import de.thm.ii.fbs.services.evaluation.EvaluationResultService
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.services.persistence.{CourseResultService, EvaluationContainerService}
+import de.thm.ii.fbs.utils.v2.security.authorization.IsModeratorOrCourseTutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
 
@@ -19,11 +17,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @RequestMapping(path = Array("/api/v1/courses"))
 class CourseResultController {
   @Autowired
-  private val authService: AuthService = null
-  @Autowired
   private val courseResultService: CourseResultService = null
-  @Autowired
-  private val courseRegistration: CourseRegistrationService = null
   @Autowired
   private val evaluationResultService: EvaluationResultService = null
   @Autowired
@@ -32,69 +26,42 @@ class CourseResultController {
   /**
     * Returns the course results of all participants of a course.
     *
-    * @param cid Course id
-    * @param req request
-    * @param res response
+    * @param courseId Course id
+    * @param req      request
+    * @param res      response
     * @return A list of course results
     */
-  @GetMapping(value = Array("/{cid}/results"))
+  @GetMapping(value = Array("/{courseId}/results"))
   @ResponseBody
-  def getAll(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
-    val user = authService.authorize(req, res)
-
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
-      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
-
-    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid)
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  @IsModeratorOrCourseTutor
+  def getAll(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] =
+    courseResultService.getAll(courseId)
 
   /**
     * Returns the course evaluation results of all participants of a course.
     *
-    * @param cid Course id
-    * @param req request
-    * @param res response
+    * @param courseId Course id
+    * @param req      request
+    * @param res      response
     * @return A list of course results
     */
-  @GetMapping(value = Array("/{cid}/evaluation/results"))
+  @GetMapping(value = Array("/{courseId}/evaluation/results"))
   @ResponseBody
-  def getAllEvaluation(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[EvaluationUserResult] = {
-    val user = authService.authorize(req, res)
-
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
-      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
-
-    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
-      evaluationResultService.evaluate(evaluationContainerService.getAll(cid), courseResultService.getAll(cid))
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  @IsModeratorOrCourseTutor
+  def getAllEvaluation(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): List[EvaluationUserResult] =
+    evaluationResultService.evaluate(evaluationContainerService.getAll(courseId), courseResultService.getAll(courseId))
 
   /**
     * Returns the course results exlude tutor and docent.
     *
-    * @param cid Course id
-    * @param req request
-    * @param res response
+    * @param courseId Course id
+    * @param req      request
+    * @param res      response
     * @return A list of course results
     */
-  @GetMapping(value = Array("/{cid}/results/student"))
+  @GetMapping(value = Array("/{courseId}/results/student"))
   @ResponseBody
-  def getStudentResult(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
-    val user = authService.authorize(req, res)
-
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.getUser.getId == user.getId)
-      .exists(p => p.getRole == CourseRole.DOCENT || p.getRole == CourseRole.TUTOR)
-
-    if (privilegedByCourse || user.getGlobalRole == GlobalRole.ADMIN || user.getGlobalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAll(cid, 2, 2)
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  @IsModeratorOrCourseTutor
+  def getStudentResult(@PathVariable courseId: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] =
+    courseResultService.getAll(courseId, 2, 2)
 }

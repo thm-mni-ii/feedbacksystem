@@ -1,8 +1,6 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
