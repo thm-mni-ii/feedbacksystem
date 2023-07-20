@@ -42,8 +42,7 @@ class DenyMethodSecurityMetadataSource : AbstractFallbackMethodSecurityMetadataS
     }
 
     private fun onlyLocal(targetClass: Class<*>): Boolean =
-        targetClass.packageName.startsWith("de.thm.ii.fbs") &&
-            targetClass.simpleName != "LoginController"
+        targetClass.packageName.startsWith("de.thm.ii.fbs")
 
     private fun hasPreOrPost(annotations: MergedAnnotations): Boolean =
         annotations.isPresent(PreAuthorize::class.java) || annotations.isPresent(PostAuthorize::class.java)
