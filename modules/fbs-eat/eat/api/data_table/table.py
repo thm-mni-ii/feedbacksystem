@@ -3,7 +3,6 @@ This module provides the Dash DataTable framework for building the E-Learning An
 """
 from datetime import datetime, timedelta
 import pandas as pd
-import dateutil.parser
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
@@ -12,7 +11,14 @@ from dash import dash_table, callback
 from dash.dependencies import Input, Output
 
 from api.connect.data_service import get_data
-from api.util.utilities import update_date_time
+from api.util.utilities import (
+    update_date_time,
+    add_checklist,
+    convert_time,
+    create_invisible_time_row,
+    create_time_row,
+    filter_time,
+)
 
 
 tmp_df = get_data(-1)
@@ -30,8 +36,6 @@ def get_attributes_to_hide(list_of_strings, excludes):
     return list_of_strings
 
 
-# pylint: disable=duplicate-code
-
 layout = html.Div(
     [
         html.H3("Table", style={"text-align": "left", "margin-left": "407px"}),
@@ -39,8 +43,9 @@ layout = html.Div(
             dbc.Card(
                 [
                     dbc.Col(
-                        timerow := html.Div(
-                            [
+                        html.Div(
+                            id="timerow_table",
+                            children=[
                                 "Date/Time From",
                                 dcc.Input(
                                     id="date_time_from_table",
@@ -55,18 +60,13 @@ layout = html.Div(
                                     ).strftime("%Y-%m-%dT%H:%M"),
                                     type="datetime-local",
                                 ),
-                            ]
+                            ],
                         ),
                     ),
-                    dcc.Checklist(
-                        id="toggle_hiding_queries",
-                        options=["Exclude equal queries", "Exclude Date"],
-                        inline=True,
-                        style={
-                            "justify-content": "center",
-                            "display": "flex",
-                        },
-                        inputClassName="checkbox",
+                    add_checklist(
+                        "toggle_hiding_queries",
+                        ["Exclude equal queries", "Exclude Date"],
+                        ["Exclude Date"],
                     ),
                     table := dash_table.DataTable(
                         id="datatable-interactivity",
@@ -142,9 +142,8 @@ layout = html.Div(
 )
 
 
-# pylint: disable=too-many-return-statements
 @callback(
-    Output(timerow, "children"),
+    Output("timerow_table", "children"),
     Output("is_date_on", "data"),
     Input("toggle_hiding_queries", "value"),
     Input("is_date_on", "data"),
@@ -156,131 +155,19 @@ def hide_date(date_hider, is_date_on):
     :param is_date_on: information if the date input was previously active
     :return: html Element for date input or have the input hidden
     """
-    if dash.callback_context.triggered[0]["value"] is None:
-        return (
-            html.Div(
-                [
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=(
-                            datetime.now() + timedelta(hours=1, minutes=30)
-                        ).strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ]
-            ),
-            True,
-        )
-    if (
-        "Exclude Date" not in dash.callback_context.triggered[0]["value"]
-        and is_date_on
-        and (len(date_hider) == 1 or not date_hider)
-    ):
-        return dash.no_update
-    if (
-        "Exclude equal queries" in dash.callback_context.triggered[0]["value"]
-        and not is_date_on
-        and (len(date_hider) == 1 or not date_hider)
-    ):
-        return (
-            html.Div(
-                [
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=(
-                            datetime.now() + timedelta(hours=1, minutes=30)
-                        ).strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ]
-            ),
-            True,
-        )
-    if not date_hider:
-        return (
-            html.Div(
-                [
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=(
-                            datetime.now() + timedelta(hours=1, minutes=30)
-                        ).strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ]
-            ),
-            True,
-        )
     if "Exclude Date" in date_hider:
         return (
-            html.Div(
-                children=[
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=(datetime.now() - timedelta(hours=500000)).strftime(
-                            "%Y-%m-%dT%H:%M"
-                        ),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ],
-                style={"visibility": "hidden"},
-            ),
+            create_invisible_time_row("date_time_from_table", "date_time_to_table"),
             False,
         )
-    if "Exclude Date" not in date_hider:
-        return (
-            html.Div(
-                [
-                    "Date/Time From",
-                    dcc.Input(
-                        id="date_time_from_table",
-                        value=datetime.now().strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                    "Date/Time To",
-                    dcc.Input(
-                        id="date_time_to_table",
-                        value=(
-                            datetime.now() + timedelta(hours=1, minutes=30)
-                        ).strftime("%Y-%m-%dT%H:%M"),
-                        type="datetime-local",
-                    ),
-                ]
-            ),
-            True,
-        )
-    return dash.no_update
 
+    if "Exclude Date" not in date_hider and is_date_on:
+        return dash.no_update
 
-# pylint: enable=too-many-return-statements
+    return (
+        create_time_row("timerow_table", "date_time_from_table", "date_time_to_table"),
+        True,
+    )
 
 
 # Update date_time_to_table based on date_time_from_table
@@ -315,27 +202,27 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     Returns:
         Printable String to show the user which filters are set. Also works for hided columns.
     """
-    date_time_from_table = dateutil.parser.parse(date_time_from_table)
-
-    date_time_to_table = dateutil.parser.parse(date_time_to_table)
 
     local_df = pd.read_json(daten)
     local_df["Time"] = pd.to_datetime(local_df["Time"])
 
     if toggle_queries:
+        if "Exclude Date" not in toggle_queries:
+            local_df = filter_time(
+                local_df,
+                convert_time(date_time_from_table),
+                convert_time(date_time_to_table),
+            )
         if "Exclude equal queries" in toggle_queries:
             # pylint: disable-next=no-member
             local_df = local_df.drop_duplicates(subset="Statement")
-        if "Exclude Date" not in toggle_queries:
-            local_df = local_df[
-                (local_df.Time >= date_time_from_table)
-                & (local_df.Time < date_time_to_table)
-            ]
     else:
-        local_df = local_df[
-            (local_df["Time"] >= date_time_from_table)
-            & (local_df["Time"] < date_time_to_table)
-        ]
+        local_df = filter_time(
+            local_df,
+            convert_time(date_time_from_table),
+            convert_time(date_time_to_table),
+        )
+
     tooltip_data = [
         {"Statement": str(row["Statement"])} for _, row in local_df.iterrows()
     ]
@@ -362,6 +249,3 @@ def read_query(query, date_time_from_table, date_time_to_table, daten, toggle_qu
     result = ", ".join(output)
     result = "Filter: " + result
     return dcc.Markdown(result), local_df.to_dict("records"), tooltip_data
-
-
-# pylint: enable=duplicate-code

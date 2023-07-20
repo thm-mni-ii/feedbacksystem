@@ -40,6 +40,7 @@ security:
     interval: ${BRUTEFORCE_INTERVAL:600}
     maxAttempts: ${BRUTEFORCE_ATTEMPTS:10}
     protectedPaths: "/api/v1/login/ldap,/api/v1/login/local,/api/v1/login/unified"
+    allowList: ${BRUTEFORCE_ALLOW_LIST:""}
 server:
   host: ${SERVER_HOST:https://localhost}
   port: ${SERVER_PORT:443}

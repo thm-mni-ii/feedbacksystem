@@ -97,7 +97,7 @@ class MinioService {
   def getObjectAsFile(bucketName: String, objectName: String): File = {
     val tmpPrefix = s"${bucketName}_${objectName.replaceAll("/", "_")}"
     val tmpFile = File.createTempFile(tmpPrefix, null)
-    minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objectName).filename(tmpFile.toString).build)
+    minioClient.downloadObject(DownloadObjectArgs.builder.bucket(bucketName).`object`(objectName).filename(tmpFile.toString).overwrite(true).build)
     tmpFile
   }
 

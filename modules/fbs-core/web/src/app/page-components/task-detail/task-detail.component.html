@@ -103,6 +103,7 @@
           [outputFields]="task?.mediaInformation.outputs || []"
           [decimals]="task?.mediaInformation.decimals || 2"
           [content]="latestResult?.extInfo || {}"
+          [lastSubmission]="lastSubmission"
         ></app-submission-spreadsheet>
       </div>
 
@@ -130,7 +131,7 @@
             </button>
           </div>
           <button
-            [disabled]="deadlinePassed || isSubmissionEmpty()"
+            [disabled]="isCheckerEmpty || deadlinePassed || isSubmissionEmpty()"
             mat-flat-button
             color="accent"
             (click)="submission()"

@@ -93,15 +93,15 @@
         <input
           matInput
           type="text"
-          placeholder="Exel-Datei"
-          formControlName="exelFile"
+          placeholder="Excel-Datei"
+          formControlName="excelFile"
           readonly
         />
         <input
           hidden
           #fileInput
           type="file"
-          (change)="uploadExel($event)"
+          (change)="uploadExcel($event)"
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         />
         <mat-icon matSuffix class="clickable">folder</mat-icon>

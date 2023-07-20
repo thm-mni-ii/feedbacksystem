@@ -6,7 +6,8 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
-import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { MathInputValue } from "../../../tool-components/math-input/math-input.component";
+import { Submission } from "../../../model/Submission";
 
 @Component({
   selector: "app-submission-spreadsheet",
@@ -19,33 +20,51 @@ export class SubmissionSpreadsheetComponent implements OnChanges {
 
   @Input()
   inputFields: string[][] = [];
-
   @Input()
   outputFields: string[] = [];
   @Input()
   decimals: number = 2;
   @Input()
   content: object = {};
+  @Input()
+  lastSubmission?: Submission | undefined = undefined;
 
-  resultForm = new UntypedFormGroup({});
+  results: Record<string, any> = {};
+  latex: Record<string, any> = {};
 
   constructor() {}
 
-  updateSubmission() {
-    const content = this.resultForm.value;
-    content["complete"] = this.outputFields.length > 0;
-    this.update.emit({ content });
+  updateSubmission(field: string, value: MathInputValue) {
+    this.results[field] = value.latex;
+    this.latex[field] = value.latex;
+    this.results["complete"] = this.outputFields.length > 0;
+    this.update.emit({
+      content: this.results,
+      additionalInformation: { latex: this.latex },
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (!this.lastSubmission) return;
+    const latex = this.lastSubmission.additionalInformation["latex"];
+    if (!latex) return;
+
     for (const propName in changes) {
-      if (propName === "outputFields" || propName === "content") {
-        this.resultForm = new UntypedFormGroup(
-          this.outputFields.reduce((acc, val) => {
-            acc[val] = new UntypedFormControl(this.content[val] ?? "");
-            return acc;
-          }, {})
-        );
+      if (
+        propName === "outputFields" ||
+        propName === "lastSubmission" ||
+        propName === "content"
+      ) {
+        this.results = this.outputFields.reduce((acc, val) => {
+          acc[val] = this.content[val] ?? "";
+          return acc;
+        }, {});
+
+        this.latex = this.outputFields.reduce((acc, val) => {
+          acc[val] = latex[val] ?? "";
+          return acc;
+        }, {});
+        break;
       }
     }
   }

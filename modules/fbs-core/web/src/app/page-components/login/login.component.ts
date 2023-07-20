@@ -74,6 +74,17 @@ export class LoginComponent implements OnInit {
   }
 
   /**
+   * Open Github Repository in new Tab
+   */
+  openGithub() {
+    window.open(
+      "https://github.com/thm-mni-ii/feedbacksystem",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+
+  /**
    * Redirect to cas login
    */
   casLogin() {

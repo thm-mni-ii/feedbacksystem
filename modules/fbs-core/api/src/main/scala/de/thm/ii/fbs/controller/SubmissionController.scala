@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.Submission
 import de.thm.ii.fbs.model.task.SubTaskResult
@@ -20,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
+import java.util
+import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import scala.jdk.CollectionConverters.SeqHasAsJava
 
@@ -52,6 +55,7 @@ class SubmissionController {
   private val courseService: CourseService = null
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  private val objectMapper = new ObjectMapper();
   @Autowired
   private val permissionEvaluator: PermissionEvaluator = null
 
@@ -118,7 +122,7 @@ class SubmissionController {
   // Do not allow Students to Submit to Private Tasks
   @PreAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskIsPrivate(#taskId)")
   def submit(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int,
-             @RequestParam file: MultipartFile,
+             @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
              req: HttpServletRequest, res: HttpServletResponse): Submission =
     this.taskService.getOne(taskId) match {
       case Some(task) =>
@@ -126,8 +130,10 @@ class SubmissionController {
           throw new BadRequestException("Deadline Before Now")
         }
         // TODO: Check media type compatibility
-        val submission = submissionService.create(userId, taskId)
+        val submission = submissionService.create(userId, taskId,
+          Option(additionalInformation.orElse(null)).map(ai => objectMapper.readValue(ai, classOf[util.HashMap[String, Any]])))
         minioStorageService.storeSolutionFileInBucket(submission.id, file)
+
         checkerConfigurationService.getAll(courseId, taskId).foreach(cc => {
           val checkerService = checkerServiceFactoryService(cc.checkerType)
           checkerService.notify(taskId, submission.id, cc, permissionEvaluator.getUser)

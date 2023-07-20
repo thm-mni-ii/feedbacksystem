@@ -124,7 +124,7 @@ class LoginController extends CasClientConfigurerAdapter {
       } yield user
 
       login match {
-        case Some(user) =>
+        case Some((user)) =>
           val localUser = Option(userService.find(user.getUsername)).getOrElse(userService.create(user))
           authService.renewAuthentication(localUser, response)
         case None => throw new UnauthorizedException()

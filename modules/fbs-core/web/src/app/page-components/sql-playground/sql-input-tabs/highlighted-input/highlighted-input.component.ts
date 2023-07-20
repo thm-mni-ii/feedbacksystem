@@ -69,7 +69,7 @@ export class HighlightedInputComponent
   ngAfterViewChecked() {
     if (this.highlighted) {
       this.prismService.highlightAll();
-      this.highlighted = true;
+      this.highlighted = false;
     }
   }
 

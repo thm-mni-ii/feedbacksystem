@@ -72,7 +72,9 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithoutHidden(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0, results = List(CheckResult(1, "Test", "test", 1, null)).toArray)
+    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+      results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
+      additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = false, adminPrivileged = false)
 
     Assert.assertFalse(submission.isHidden)
@@ -82,7 +84,9 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithHidden(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0, results = List(CheckResult(1, "Test", "test", 1, null)).toArray)
+    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+      results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
+      additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = true, adminPrivileged = false)
 
     Assert.assertTrue(res.isHidden)
@@ -92,7 +96,9 @@ class SubmissionServiceTest {
   @Test
   def testGetOrHiddenWithHiddenAdmin(): Unit = {
     val task = createTask(None)
-    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0, results = List(CheckResult(1, "Test", "test", 1, null)).toArray)
+    val submission = Submission(DateTime.now().toDate, task.id, done = true, 0,
+      results = List(CheckResult(1, "Test", "test", 1, null)).toArray,
+      additionalInformation = None)
     val res = submissionService.getOrHidden(submission, hideResult = true, adminPrivileged = true)
 
     Assert.assertFalse(submission.isHidden)
