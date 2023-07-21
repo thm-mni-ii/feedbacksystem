@@ -268,7 +268,7 @@ internal class MathParserHelperTest {
                         Operator.SUB,
                         Num(2),
                         Operation(Operator.MUL, Num(3), Var("b"))
-                    ),
+                    )
                 )
             ),
             MathParserHelper.parse("7a\\left(2-3b\\right)")
