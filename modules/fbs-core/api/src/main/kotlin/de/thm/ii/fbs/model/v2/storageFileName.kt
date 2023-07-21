@@ -1,10 +1,10 @@
 package de.thm.ii.fbs.model.v2
 
 object storageFileName {
-    final val MAIN_FILE = "main-file"
-    final val SECONDARY_FILE = "secondary-file"
-    final val SUBTASK_FILE = "subtask-file"
-    final val SOLUTION_FILE = "solution-file"
+    const val MAIN_FILE = "main-file"
+    const val SECONDARY_FILE = "secondary-file"
+    const val SUBTASK_FILE = "subtask-file"
+    const val SOLUTION_FILE = "solution-file"
 
     /**
      * Get a File Path for Minio.

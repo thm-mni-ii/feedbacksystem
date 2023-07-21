@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.v2.persistence.storage
 
+import de.thm.ii.fbs.model.v2.CheckrunnerConfiguration
 import de.thm.ii.fbs.model.v2.storageBucketName
 import de.thm.ii.fbs.model.v2.storageFileName
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +31,7 @@ class MinioStorageService {
             minioService.putObject(file, storageFileName.getFilePath(ccid, fileName), storageBucketName.CHECKER_CONFIGURATION_BUCKET)
 
     fun getFileContentBucket(bucketName: String, id: Int, fileName: String): String {
-        minioService.getObjectAsString(bucketName, "$id/$fileName")
+        return minioService.getObjectAsString(bucketName, "$id/$fileName")
     }
 
     fun getFileFromBucket(bucketName: String, objName: String): File =

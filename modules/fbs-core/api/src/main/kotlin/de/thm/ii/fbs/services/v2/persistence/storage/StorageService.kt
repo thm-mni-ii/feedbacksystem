@@ -5,6 +5,7 @@ import de.thm.ii.fbs.model.v2.Submission
 import de.thm.ii.fbs.model.v2.storageBucketName
 import de.thm.ii.fbs.model.v2.storageFileName
 import de.thm.ii.fbs.services.checker.trait.CheckerServiceOnDelete
+import de.thm.ii.fbs.services.v2.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.v2.persistence.TaskService
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +26,7 @@ class StorageService {
     private val minioService: MinioService = null
 
     @Autowired
-    private val checkerService: CheckerServiceFactoryService = null
+    lateinit var checkerService: CheckerServiceFactoryService
 
     @Autowired
     lateinit var taskService: TaskService
@@ -175,9 +176,10 @@ class StorageService {
     }
 
     private fun notifyCheckerDelete(tid: Int, cc: CheckrunnerConfiguration) {
-        val checker = checkerService(cc.checkerType)
+        val checker = checkerService.apply(cc.checkerType)
+        if (checker is CheckerServiceOnDelete)
          return when(checker) {
-            is CheckerServiceOnDelete -> checker.onCheckerConfigurationDelete(taskService.getOne(tid).get(), cc)
+            is CheckerServiceOnDelete -> checker.onCheckerConfigurationDelete(taskService.getOne(tid), cc)
              else -> {}
          }
     }

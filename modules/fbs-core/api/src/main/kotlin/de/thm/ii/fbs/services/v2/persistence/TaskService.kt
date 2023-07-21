@@ -1,6 +1,8 @@
 package de.thm.ii.fbs.services.v2.persistence
 
+import de.thm.ii.fbs.model.v2.MediaInformation
 import de.thm.ii.fbs.model.v2.Task
+import de.thm.ii.fbs.model.v2.UserTaskResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
