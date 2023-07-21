@@ -254,6 +254,28 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseComplexWithLeftRightBraces() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.MUL,
+                    Operation(
+                        Operator.MUL,
+                        Num(7),
+                        Var("a")
+                    ),
+                    Operation(
+                        Operator.SUB,
+                        Num(2),
+                        Operation(Operator.MUL, Num(3), Var("b"))
+                    ),
+                )
+            ),
+            MathParserHelper.parse("7a\\left(2-3b\\right)")
+        )
+    }
+
+    @Test
     fun parseVariables() {
         assertEquals(
             Ast(
