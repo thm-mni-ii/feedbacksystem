@@ -4,9 +4,9 @@ package de.thm.ii.fbs.model.v2.security.authentication
 
 import de.thm.ii.fbs.model.v2.course.Participant
 import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import javax.persistence.*
+import org.springframework.security.core.userdetails.User as UserDetailsImpl
 
 /**
  * User object
@@ -64,7 +64,7 @@ class User(
     val globalRole: GlobalRole
         get() = GlobalRole.parse(globalRoleInt)
 
-    fun toUserDetails(): UserDetails = User(username, password, setOf(globalRole)) // TODO save password in user?
+    fun toUserDetails(): UserDetails = UserDetailsImpl(username, password, setOf(globalRole)) // TODO save password in user?
 
     override fun equals(other: Any?): Boolean = when (other) {
         is User -> username == other.username
