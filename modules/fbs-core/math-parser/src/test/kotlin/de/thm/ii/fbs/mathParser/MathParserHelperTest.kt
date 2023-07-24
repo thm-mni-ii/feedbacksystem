@@ -306,6 +306,24 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseEquation() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.EQ,
+                    Operation(
+                        Operator.ADD,
+                        Operation(Operator.EXP, Var("a"), Num(2)),
+                        Operation(Operator.EXP, Var("b"), Num(2))
+                    ),
+                    Operation(Operator.EXP, Var("c"), Num(2))
+                )
+            ),
+            MathParserHelper.parse("a^2 + b^2 = c^2")
+        )
+    }
+
+    @Test
     fun parseMixed() {
         assertEquals(
             Ast(

@@ -1,5 +1,9 @@
 grammar Math;
 
+eq          : eq ' '* EQUAL ' '* expr
+            | expr
+            ;
+
 expr        : expr ' '* (ADD|SUB) ' '* term
             | term
             ;
@@ -37,6 +41,7 @@ DECIMAL: DECIMAL_SEPARATOR FULL;
 
 VAR: [a-z];
 
+EQUAL: '=';
 ADD: '+';
 SUB: '-';
 MUL: '*'|'\\cdot';
