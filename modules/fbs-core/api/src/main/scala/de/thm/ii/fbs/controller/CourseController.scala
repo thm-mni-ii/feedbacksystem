@@ -83,7 +83,7 @@ class CourseController {
     */
   @GetMapping(value = Array("/{courseId}"))
   @ResponseBody
-  @PreAuthorize("hasRole('MODERATOR') || @permissions.subscribed(#cid)")
+  @PreAuthorize("hasRole('MODERATOR') || @permissions.subscribed(#courseId)")
   @PostAuthorize("returnObject.visible") // TODO filter visibility at db layer
   def getOne(@PathVariable courseId: Integer, req: HttpServletRequest, res: HttpServletResponse): Course =
     courseService.find(courseId) match {
