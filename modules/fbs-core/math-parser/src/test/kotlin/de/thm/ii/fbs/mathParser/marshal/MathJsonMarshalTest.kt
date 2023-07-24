@@ -88,4 +88,12 @@ class MathJsonMarshalTest {
             marshal.marshal(Ast(Operation(Operator.MUL, Num(25.28), Var("k"))))
         )
     }
+
+    @Test
+    fun equationMarshal() {
+        Assertions.assertEquals(
+            """["Equal","a","b"]""",
+            marshal.marshal(Ast(Operation(Operator.EQ, Var("a"), Var("b"))))
+        )
+    }
 }
