@@ -3,12 +3,10 @@ package de.thm.ii.fbs.security
 import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
-import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import jakarta.ws.rs.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 
 import scala.annotation.unused
@@ -22,9 +20,6 @@ import scala.jdk.CollectionConverters.SeqHasAsJava
 class PermissionEvaluator {
   @Autowired
   private val courseRegistrationService: CourseRegistrationService = null // TODO get course permissions from jwt token
-  @Autowired
-  private val userService: UserService = null // TODO get user information from jwt token
-
   @Autowired
   private val taskService: TaskService = null
 
@@ -101,13 +96,11 @@ class PermissionEvaluator {
     * Get the current logged in user.
     */
   @unused
-  def getUser: User = {
-    val userDetails = SecurityContextHolder.getContext.getAuthentication match {
+  def getUser: User =
+    SecurityContextHolder.getContext.getAuthentication match {
       case null => throw new ForbiddenException()
-      case authentication: Authentication => authentication.getPrincipal.asInstanceOf[UserDetails] // TODO User as UserDetails
+      case authentication: Authentication => authentication.getPrincipal.asInstanceOf[User]
     }
-    userService.find(userDetails.getUsername)
-  }
 
   /**
     * Get the current logged in user.

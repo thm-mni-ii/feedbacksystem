@@ -12,7 +12,7 @@ class PreAuthenticatedFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     override def getPreAuthenticatedPrincipal(request: HttpServletRequest): AnyRef = {
         val res = try {
-            authService.authorize(request, null).toUserDetails
+            authService.authorize(request, null)
         } catch {
             case _: UnauthorizedException => null
         }

@@ -55,7 +55,7 @@ class LocalLoginService {
     * @return the create user
     */
   def createUser(user: User, password: String): User = {
-    user.setPassword(hash(password))
+    user.setPassword$fbs_core_api(hash(password))
     userService.create(user)
   }
 

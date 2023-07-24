@@ -4,9 +4,10 @@ package de.thm.ii.fbs.model.v2.security.authentication
 
 import de.thm.ii.fbs.model.v2.course.Participant
 import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import javax.persistence.*
-import org.springframework.security.core.userdetails.User as UserDetailsImpl
 
 /**
  * User object
@@ -29,7 +30,7 @@ class User(
     @Column(nullable = false)
     val surname: String,
     @Column(nullable = false)
-    var username: String,
+    internal var username: String,
     @Column(name = "global_role", nullable = false)
     val globalRoleInt: Int,
     @Column
@@ -45,8 +46,8 @@ class User(
     @Column(name = "privacy_checked", nullable = false)
     val privacyChecked: Boolean = false,
     @Column
-    var password: String? = null
-) {
+    internal var password: String? = null
+) : UserDetails {
 
     internal constructor(
         prename: String,
@@ -64,8 +65,6 @@ class User(
     val globalRole: GlobalRole
         get() = GlobalRole.parse(globalRoleInt)
 
-    fun toUserDetails(): UserDetails = UserDetailsImpl(username, password, setOf(globalRole)) // TODO save password in user?
-
     override fun equals(other: Any?): Boolean = when (other) {
         is User -> username == other.username
         is Participant -> username == other.user.username
@@ -73,4 +72,12 @@ class User(
     }
 
     override fun hashCode(): Int = username.hashCode()
+
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = mutableSetOf(globalRole)
+    override fun getPassword(): String? = null
+    override fun getUsername(): String = username
+    override fun isAccountNonExpired(): Boolean = true
+    override fun isAccountNonLocked(): Boolean = true
+    override fun isCredentialsNonExpired(): Boolean = true
+    override fun isEnabled(): Boolean = !deleted
 }

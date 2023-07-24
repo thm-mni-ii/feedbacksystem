@@ -12,7 +12,7 @@ import kotlin.jvm.optionals.getOrNull
 class UserService(private val userRepository: UserRepository) : UserDetailsService {
 
     override fun loadUserByUsername(username: String?): UserDetails =
-        username?.let { find(it) }?.toUserDetails() ?: throw Exception() // TODO throw NotFoundException
+        username?.let { find(it) } ?: throw Exception() // TODO throw NotFoundException
 
     /**
      * Find the first user by username
