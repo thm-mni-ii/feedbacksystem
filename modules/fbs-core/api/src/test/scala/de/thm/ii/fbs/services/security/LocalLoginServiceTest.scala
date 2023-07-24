@@ -37,12 +37,12 @@ class LocalLoginServiceTest {
   private def passwordHash = localLoginService.hash(examplePassword)
 
   private def createTestUserWithOutdatedPasswordHash() = {
-    exampleUser.setPassword(outdatedPasswordHash)
+    exampleUser.setPassword$fbs_core_api(outdatedPasswordHash)
     userService.create(exampleUser)
   }
 
   private def createTestUser() = {
-    exampleUser.setPassword(passwordHash)
+    exampleUser.setPassword$fbs_core_api(passwordHash)
     userService.create(exampleUser)
   }
 
