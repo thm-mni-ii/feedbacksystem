@@ -5,7 +5,6 @@ package de.thm.ii.fbs.model.v2.security.authentication
 import de.thm.ii.fbs.model.v2.course.Participant
 import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import javax.persistence.*
 
