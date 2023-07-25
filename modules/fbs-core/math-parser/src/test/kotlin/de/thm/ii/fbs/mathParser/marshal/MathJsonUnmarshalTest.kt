@@ -106,4 +106,12 @@ internal class MathJsonUnmarshalTest {
             marshal.unmarshal("""{"fn": [{"sym": "Add"}, {"num": "1"}, {"sym": "x"}]}""")
         )
     }
+
+    @Test
+    fun equationUnmarshal() {
+        assertEquals(
+            Ast(Operation(Operator.EQ, Var("a"), Var("b"))),
+            marshal.unmarshal("""["Equal","a","b"]""")
+        )
+    }
 }

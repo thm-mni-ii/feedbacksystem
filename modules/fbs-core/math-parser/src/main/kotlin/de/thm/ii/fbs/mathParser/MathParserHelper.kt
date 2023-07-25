@@ -16,7 +16,7 @@ object MathParserHelper {
         parser.errorHandler = BailErrorStrategy()
 
         try {
-            return AstBuilder(parser.expr()).build()
+            return AstBuilder(parser.eq()).build()
         } catch (e: ParseCancellationException) {
             throw MathParserException(expr, "invalid expr", e)
         }

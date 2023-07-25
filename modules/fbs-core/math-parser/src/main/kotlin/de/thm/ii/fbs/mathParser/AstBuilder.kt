@@ -6,9 +6,16 @@ import de.thm.ii.fbs.mathParser.ast.*
 import java.text.NumberFormat
 import java.util.*
 
-class AstBuilder(val expr: MathParser.ExprContext) {
+class AstBuilder(val eq: MathParser.EqContext) {
     fun build(): Ast =
-        Ast(buildExpr(expr))
+        Ast(buildEquation(eq))
+
+    private fun buildEquation(eq: MathParser.EqContext): Expr =
+        when {
+            eq.eq() !== null -> Operation(Operator.EQ, buildEquation(eq.eq()), buildExpr(eq.expr()))
+            eq.expr() !== null -> buildExpr(eq.expr())
+            else -> throw IllegalArgumentException("not a legal equation: ${eq.text}")
+        }
 
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         when {

@@ -13,6 +13,7 @@ import java.math.BigDecimal
 class MathJsonMarshal : Marshal {
     private val objectMapper = ObjectMapper()
     private val marshalOperatorMap = mapOf(
+        Operator.EQ to "Equal",
         Operator.ADD to "Add",
         Operator.SUB to "Subtract",
         Operator.MUL to "Multiply",
@@ -21,6 +22,7 @@ class MathJsonMarshal : Marshal {
         Operator.RAD to "Root"
     )
     private val unmarshalOperatorMap = mapOf(
+        "Equal" to Operator.EQ,
         "Add" to Operator.ADD,
         "Subtract" to Operator.SUB,
         "Multiply" to Operator.MUL,

@@ -10,7 +10,8 @@ enum class Operator {
     MOD,
     EXP,
     RAD,
-    LOG;
+    LOG,
+    EQ;
 
     fun toDot(sb: StringBuilder, i: Int): Int {
         val j = i + 1
