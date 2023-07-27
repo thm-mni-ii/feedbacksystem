@@ -1,12 +1,12 @@
+import { NestedTreeControl } from "@angular/cdk/tree";
 import { Component } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
+import { MatTreeNestedDataSource } from "@angular/material/tree";
 import {
   ExcelCell,
   ExcelCheckResult,
   ExcelExercise,
 } from "src/app/model/ExcelCheckResult";
-import { NestedTreeControl } from "@angular/cdk/tree";
-import { MatTreeNestedDataSource } from "@angular/material/tree";
 
 @Component({
   selector: "app-excel-results",
@@ -19,7 +19,7 @@ export class ExcelResultsComponent {
   treeDataSources: Record<string, MatTreeNestedDataSource<ExcelCell>> = {};
 
   treeControl = new NestedTreeControl<ExcelCell>(
-    (node) => node.consequentErrorCell
+    (node) => node.propagatedErrorCell
   );
 
   constructor() {
@@ -30,7 +30,7 @@ export class ExcelResultsComponent {
   }
 
   hasChild = (_: number, node: ExcelCell) =>
-    !!node.consequentErrorCell && node.consequentErrorCell.length > 0;
+    !!node.propagatedErrorCell && node.propagatedErrorCell.length > 0;
 }
 
 const EXCEL_DATA: ExcelCheckResult = {
@@ -49,22 +49,22 @@ const EXCEL_DATA: ExcelCheckResult = {
         {
           cellName: "D5",
           errorHint: "Feldbezeichnungen für Ergebnisse falsch D3",
-          consequentErrorCell: [
+          propagatedErrorCell: [
             {
               cellName: "D7",
               errorHint: "Feldbezeichnungen für Ergebnisse falsch D7",
-              isConsequent: true,
+              isPropagated: true,
             },
             {
               cellName: "D8",
               errorHint: "Feldbezeichnungen für Ergebnisse falsch D8",
-              isConsequent: true,
+              isPropagated: true,
             },
           ],
         },
       ],
-      table: "Table1",
-      result: false,
+      sheet: "Table1",
+      passed: false,
     },
     {
       name: "Übung 2  Kreis",
@@ -72,11 +72,11 @@ const EXCEL_DATA: ExcelCheckResult = {
         {
           cellName: "B6",
           errorHint: "Feldbezeichnungen für Ergebnisse falsch",
-          consequentErrorCell: [],
+          propagatedErrorCell: [],
         },
       ],
-      table: "Table1",
-      result: true,
+      sheet: "Table1",
+      passed: true,
     },
   ],
 };

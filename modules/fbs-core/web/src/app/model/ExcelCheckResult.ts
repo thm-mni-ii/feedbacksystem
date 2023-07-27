@@ -5,13 +5,13 @@ export interface ExcelCheckResult {
 export interface ExcelExercise {
   name: string;
   errorCell?: ExcelCell[];
-  table: string;
-  result: boolean;
+  sheet: string;
+  passed: boolean;
 }
 
 export interface ExcelCell {
   cellName: string;
   errorHint: string;
-  consequentErrorCell?: ExcelCell[];
-  isConsequent?: boolean;
+  propagatedErrorCell?: ExcelCell[];
+  isPropagated?: boolean;
 }
