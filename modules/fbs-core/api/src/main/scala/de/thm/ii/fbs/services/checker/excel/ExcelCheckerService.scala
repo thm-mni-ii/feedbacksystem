@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.v2.checker.excel.ExcelCheckerResultData
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnMainFileUpload, CheckerServiceOnSecondaryFileUpload}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.services.v2.checker.excel.{ErrorAnalysisSolutionService, ExcelCheckerServiceV2}
@@ -15,7 +16,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
 
 import java.io.File
-import scala.jdk.CollectionConverters.CollectionHasAsScala
+import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 @Service
 class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUpload with CheckerServiceOnSecondaryFileUpload {
@@ -74,11 +75,22 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
       val submissionResult = checkSubmission(cc: CheckrunnerConfiguration, excelMediaInformation, submissionFile, mainFile)
-      val resultText = this.buildResultText(submissionResult.exitCode == 0, submissionResult.results, excelMediaInformation)
-      submissionService.storeResult(submission.id, cc.id, submissionResult.exitCode, resultText,
-        objectMapper.writeValueAsString(this.buildExtendedRes(submissionResult.mergedResults, excelMediaInformation))
-      )
-      this.submitSubTasks(cc.id, submission.id, submissionResult.mergedResults, excelMediaInformation)
+      submissionResult match {
+        case res: SubmissionResultV1 => {
+          val resultText = this.buildResultText(res.exitCode == 0, res.results, excelMediaInformation)
+          submissionService.storeResult(submission.id, cc.id, res.exitCode, resultText,
+            objectMapper.writeValueAsString(this.buildExtendedRes(res.mergedResults, excelMediaInformation))
+          )
+          this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
+        }
+        case res: SubmissionResultV2 => {
+          submissionService.storeResult(submission.id, cc.id, res.exitCode, "See Result Data",
+            objectMapper.writeValueAsString(this.buildExtendedRes(res)), Option(res.results)
+          )
+          // TODO: Sub Tasks this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
+        }
+      }
+
     } catch {
       case e: Throwable =>
         logger.error("Bei der Überprüfung des Excel-Checkers ist ein Fehler aufgetreten", e)
@@ -97,20 +109,19 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     } else {
       val results = excelMediaInformation.tasks.map(t => this.checkTask(solutionFile, submissionFile, t))
       val mergedResults = results.map(r => r.checkResult.reduce(mergeCheckResult))
-      SubmissionResult(if (results.forall(r => r.success)) 0 else 1, results, mergedResults)
+      SubmissionResultV1(if (results.forall(r => r.success)) 0 else 1, results, mergedResults)
     }
   }
 
   private def checkSubmissionExperimental(cc: CheckrunnerConfiguration,
                                           excelMediaInformation: ExcelMediaInformationTasks,
                                           submissionFile: File,
-                                          solutionFile: File): SubmissionResult = {
+                                          solutionFile: File): SubmissionResultV2 = {
     val solution = excelService.initWorkBook(solutionFile, excelMediaInformation) // TODO: do only if needed
     val submission = excelService.initWorkBook(submissionFile, excelMediaInformation)
     val result = excelCheckerServiceV2.check(cc.id, solution, submission)
-    val checkResult = CheckResult(result.getErrorCells.isEmpty, result.getErrorCells.asScala.map(c => c.getCell).toList)
 
-    SubmissionResult(if (result.getErrorCells.isEmpty) 0 else 1, List(CheckResultTask(result.getErrorCells.isEmpty, List(checkResult))), List(checkResult))
+    SubmissionResultV2(if (result.getPassed) 0 else 1, result)
   }
 
   private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {
@@ -248,6 +259,19 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     })
   }
 
+  private def buildExtendedRes(result: SubmissionResultV2): ExtendedInfoExcel = {
+    result.results.getExercises.foldLeft(ExtendedInfoExcel())((r, t) => {
+      r.result.rows.append(List(f"Unteraufgabe ${t.getName}", "-"))
+      // TODO: Error msgs? if (t._1.errorMsg.nonEmpty) r.result.rows.append(List("⚠️ Fehler", t._1.errorMsg))
+      r.result.rows.appendAll(t.getErrorCell.map(c => List(c.getCellName, c.getErrorHint, c.isPropagated.toString))) // TODO: add cell value
+
+      /*TODO: get expted resultr.expected.rows.append(List(f"Unteraufgabe ${t._2.name}", "-"))
+      if (t._1.errorMsg.nonEmpty) r.expected.rows.append(List("⚠️ Fehler", t._1.errorMsg))
+      r.expected.rows.appendAll(t._1.extendedInfoExcel.expected.rows) // TODO: add cell value*/
+      r
+    })
+  }
+
   private def submitSubTasks(configurationId: Int, submissionId: Int, results: List[CheckResult],
                              excelMediaInformation: ExcelMediaInformationTasks): Unit = {
     results.zip(excelMediaInformation.tasks).foreach({ case (r, ex) =>
@@ -281,7 +305,11 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
                          extendedInfoExcel: ExtendedInfoExcel = ExtendedInfoExcel(),
                          errorMsg: String = "")
 
-  case class SubmissionResult(exitCode: Int, results: List[CheckResultTask], mergedResults: List[CheckResult])
+  abstract class SubmissionResult
+
+  case class SubmissionResultV1(exitCode: Int, results: List[CheckResultTask], mergedResults: List[CheckResult]) extends SubmissionResult
+
+  case class SubmissionResultV2(exitCode: Int, results: ExcelCheckerResultData) extends SubmissionResult
 
   case class CellsComparator(expectedCells: Seq[SpreadsheetCell], actualCell: Seq[SpreadsheetCell])
 }

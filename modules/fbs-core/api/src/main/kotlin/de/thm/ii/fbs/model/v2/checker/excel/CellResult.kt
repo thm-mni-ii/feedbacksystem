@@ -10,4 +10,12 @@ data class CellResult(val isPropagated: Boolean = false) {
     fun getFeedback(): StringBuilder {
         return feedback
     }
+
+    fun getFeedbackString(): String {
+        if (feedback.isEmpty()) {
+            return "Invalid Value!" // TODO: Define actual default msg
+        }
+
+        return feedback.toString()
+    }
 }
