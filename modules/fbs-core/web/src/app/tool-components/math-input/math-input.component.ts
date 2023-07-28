@@ -64,7 +64,9 @@ export class MathInputComponent implements OnChanges, AfterViewInit {
       }
     }
     if (this.disabled) {
-      insertShadowRootStyle(this.input, [".ML__content { overflow: unset; }"]);
+      insertShadowRootStyle(this.input, [
+        ".ML__content { overflow: unset; overflow-y: hidden; }",
+      ]);
     }
   }
 }
