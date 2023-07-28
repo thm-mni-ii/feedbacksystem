@@ -53,7 +53,9 @@ class AstBuilder(val eq: MathParser.EqContext) {
 
     private fun buildUnary(unary: MathParser.UnaryContext): Expr =
         when {
-            unary.mulFactor() !== null -> if (unary.SUB() !== null) UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor())) else buildMulFactor(unary.mulFactor())
+            unary.mulFactor() !== null ->
+                if (unary.SUB() !== null) UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor()))
+                else buildMulFactor(unary.mulFactor())
             else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 

@@ -424,6 +424,18 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun toLatex() {
+        assertEquals(
+            "1 + 2",
+            MathParserHelper.toLatex(
+                Ast(
+                    Operation(Operator.ADD, Num(1), Num(2))
+                )
+            )
+        )
+    }
+
+    @Test
     fun parseLatexMul() {
         assertEquals(
             Ast(

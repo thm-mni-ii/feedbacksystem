@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.Ast
+import de.thm.ii.fbs.mathParser.marshal.LatexMarshal
 import de.thm.ii.fbs.mathParser.marshal.MathJsonMarshal
 import org.antlr.v4.runtime.BailErrorStrategy
 import org.antlr.v4.runtime.CommonTokenStream
@@ -29,4 +30,8 @@ object MathParserHelper {
     @JvmStatic
     fun fromMathJson(json: String): Ast =
         MathJsonMarshal().unmarshal(json)
+
+    @JvmStatic
+    fun toLatex(ast: Ast): String =
+        LatexMarshal().marshal(ast)
 }
