@@ -33,7 +33,7 @@ class LatexMarshal : Marshal {
 
     private fun marshalUnaryOperation(input: UnaryOperation): String =
         when (input.operator) {
-            Operator.SUB -> if (input.target is Operation) "-(${marshalExpr(input.target)})" else "-${marshalExpr(input.target)}"
+            Operator.SUB -> if (input.target is Operation) "-(${marshalExpr(input.target)})" else "-{${marshalExpr(input.target)}}"
             Operator.TEXT -> "\\text{${escapeForLatex((input.target as Text).content)}}"
             else -> throw IllegalArgumentException("$input Operator is not marshalable")
         }
@@ -42,6 +42,7 @@ class LatexMarshal : Marshal {
         when (input.operator) {
             Operator.DIV -> "\\frac{${marshalExpr(input.left)}}{${marshalExpr(input.right)}}"
             Operator.RAD -> "\\sqrt[${marshalExpr(input.left)}]{${marshalExpr(input.right)}}"
+            Operator.EXP -> "{${marshalExpr(input.left)}}^{${marshalExpr(input.right)}}"
             else -> buildOperationString(input)
         }
 

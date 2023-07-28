@@ -44,7 +44,7 @@ class LatexMarshalTest {
     @Test
     fun simpleUnaryMarshal() {
         Assertions.assertEquals(
-            "-a",
+            "-{a}",
             marshal.marshal(Ast(UnaryOperation(Operator.SUB, Var("a"))))
         )
     }
@@ -76,7 +76,7 @@ class LatexMarshalTest {
     @Test
     fun expMarshal() {
         Assertions.assertEquals(
-            "a ^ b",
+            "{a}^{b}",
             marshal.marshal(Ast(Operation(Operator.EXP, Var("a"), Var("b"))))
         )
     }
@@ -145,6 +145,30 @@ class LatexMarshalTest {
                                 Operator.SUB,
                                 Num(3),
                                 Num(4),
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun singleTypeBracketTestExp() {
+        Assertions.assertEquals(
+            "{2}^{{2}^{{2}^{2}}}",
+            marshal.marshal(
+                Ast(
+                    Operation(
+                        Operator.EXP,
+                        Num(2),
+                        Operation(
+                            Operator.EXP,
+                            Num(2),
+                            Operation(
+                                Operator.EXP,
+                                Num(2),
+                                Num(2),
                             )
                         )
                     )
