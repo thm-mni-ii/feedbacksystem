@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -48,5 +49,7 @@ class SpreadsheetUtils {
          */
         fun getCell(workbook: XSSFWorkbook, sheet: Int, row: Int, col: Int): XSSFCell =
             getRow(workbook, sheet, row).getCell(col, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
+
+        fun rangeToCells(range: String): CellRangeAddress = CellRangeAddress.valueOf(range)
     }
 }

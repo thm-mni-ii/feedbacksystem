@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.rangeToCells
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueByCellRef
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
@@ -47,7 +47,7 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
 
     private fun getRangeCells(range: String, cellRefs: MutableSet<Cell>, sheet: Sheet) {
         val (sheetName, _) = getRefAndSheet(cellRefsRegex.find(range)!!.value, sheet.sheetName)
-        CellRangeAddress.valueOf(range).forEach { cell -> cellRefs.add(refToCell(cell.toString(), sheetName)) }
+        rangeToCells(range).forEach { cell -> cellRefs.add(refToCell(cell.toString(), sheetName)) }
     }
 
     private fun refToCell(ref: String, sheet: String): Cell {

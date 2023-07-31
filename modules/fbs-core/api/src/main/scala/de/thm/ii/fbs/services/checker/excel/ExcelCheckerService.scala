@@ -76,19 +76,17 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
       val submissionResult = checkSubmission(cc: CheckrunnerConfiguration, excelMediaInformation, submissionFile, mainFile)
       submissionResult match {
-        case res: SubmissionResultV1 => {
+        case res: SubmissionResultV1 =>
           val resultText = this.buildResultText(res.exitCode == 0, res.results, excelMediaInformation)
           submissionService.storeResult(submission.id, cc.id, res.exitCode, resultText,
             objectMapper.writeValueAsString(this.buildExtendedRes(res.mergedResults, excelMediaInformation))
           )
           this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
-        }
-        case res: SubmissionResultV2 => {
+        case res: SubmissionResultV2 =>
           submissionService.storeResult(submission.id, cc.id, res.exitCode, "See Result Data",
             objectMapper.writeValueAsString(this.buildExtendedRes(res)), Option(res.results)
           )
-          // TODO: Sub Tasks this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
-        }
+        // TODO: Sub Tasks this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
       }
 
     } catch {
@@ -119,7 +117,8 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
                                           solutionFile: File): SubmissionResultV2 = {
     val solution = excelService.initWorkBook(solutionFile, excelMediaInformation) // TODO: do only if needed
     val submission = excelService.initWorkBook(submissionFile, excelMediaInformation)
-    val result = excelCheckerServiceV2.check(cc.id, solution, submission)
+    val config = excelMediaInformation.toExcelCheckerConfiguration
+    val result = excelCheckerServiceV2.check(cc.id, config, solution, submission)
 
     SubmissionResultV2(if (result.getPassed) 0 else 1, result)
   }
