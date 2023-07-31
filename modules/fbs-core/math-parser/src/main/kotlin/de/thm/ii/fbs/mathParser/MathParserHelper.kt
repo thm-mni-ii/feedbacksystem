@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException
 object MathParserHelper {
     @JvmStatic
     fun parse(expr: String): Ast {
-        val lexer = BailingMathLexer(expr)
+        val lexer = BailingMathLexer(expr.trim())
         val tokens = CommonTokenStream(lexer)
 
         val parser = MathParser(tokens)
