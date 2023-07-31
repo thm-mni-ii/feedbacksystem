@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model.v2.checker.excel
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.apache.poi.ss.util.CellAddress
 
 data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val cell: String) {
     @JsonProperty("value")
@@ -21,4 +22,7 @@ data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val
     fun toMapKey(): String {
         return "${this.cell}@${this.sheet}"
     }
+
+    fun cellAddress(): CellAddress =
+        CellAddress(cell)
 }
