@@ -87,7 +87,6 @@ class SpreadsheetCheckerService extends CheckerService {
   }
 
   def check(fields: Seq[(String, String)], submittedFields: UtilMap[String, String], decimals: Int): (Int, Seq[CheckResult]) = {
-    println("check")
     var result = mutable.ListBuffer[CheckResult]()
     var correctCount = 0
 
@@ -140,8 +139,6 @@ class SpreadsheetCheckerService extends CheckerService {
   def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
     val enteredAst = MathParserHelper.parse(enteredValue)
     val valueAst = MathParserHelper.parse(value)
-    println(enteredAst)
-    println(valueAst)
 
     new SemanticAstComparator.Builder()
       .decimals(decimals)
