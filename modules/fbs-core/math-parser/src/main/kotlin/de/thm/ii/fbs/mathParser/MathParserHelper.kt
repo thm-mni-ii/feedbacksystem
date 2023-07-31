@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.Ast
+import de.thm.ii.fbs.mathParser.marshal.LatexMarshal
 import de.thm.ii.fbs.mathParser.marshal.MathJsonMarshal
 import org.antlr.v4.runtime.BailErrorStrategy
 import org.antlr.v4.runtime.CommonTokenStream
@@ -9,7 +10,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException
 object MathParserHelper {
     @JvmStatic
     fun parse(expr: String): Ast {
-        val lexer = BailingMathLexer(expr)
+        val lexer = BailingMathLexer(expr.trim())
         val tokens = CommonTokenStream(lexer)
 
         val parser = MathParser(tokens)
@@ -29,4 +30,8 @@ object MathParserHelper {
     @JvmStatic
     fun fromMathJson(json: String): Ast =
         MathJsonMarshal().unmarshal(json)
+
+    @JvmStatic
+    fun toLatex(ast: Ast): String =
+        LatexMarshal().marshal(ast)
 }

@@ -48,6 +48,7 @@ class SemanticAstComparator(
     fun compare(base: Ast, other: Ast): Boolean {
         val l = normalize(base)
         val r = normalize(other)
+
         return l == r
     }
     private fun normalize(ast: Ast): Ast = transformer.transform(ast)

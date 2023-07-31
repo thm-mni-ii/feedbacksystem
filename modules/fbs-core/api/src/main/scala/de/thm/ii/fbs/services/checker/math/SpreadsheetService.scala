@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.checker.math
 
 import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper}
+import de.thm.ii.fbs.mathParser.ast.{Ast, Operator, Text, UnaryOperation}
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
@@ -99,10 +100,10 @@ class SpreadsheetService {
   private def parseValues(value: Seq[String]): Seq[String] =
     value.map(v =>
       try {
-        MathParserHelper.toMathJson(MathParserHelper.parse(v))
+        MathParserHelper.toLatex(MathParserHelper.parse(v))
       } catch {
         // Explicitly mark the value as a string to prevent parsing exceptions on the client
-        case _: MathParserException => "{\"str\": \"" + v.replace("\"", "\\\"") + "\"}"
+        case _: MathParserException => MathParserHelper.toLatex(new Ast(new UnaryOperation(Operator.TEXT, new Text(v))))
       }
     )
 
