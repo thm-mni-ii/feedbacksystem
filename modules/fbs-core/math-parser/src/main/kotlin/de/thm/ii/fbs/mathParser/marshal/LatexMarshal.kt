@@ -9,7 +9,7 @@ class LatexMarshal : Marshal {
         Operator.EQ to "=",
         Operator.ADD to "+",
         Operator.SUB to "-",
-        Operator.MUL to " ",
+        Operator.MUL to "\\cdot",
         Operator.EXP to "^"
     )
 

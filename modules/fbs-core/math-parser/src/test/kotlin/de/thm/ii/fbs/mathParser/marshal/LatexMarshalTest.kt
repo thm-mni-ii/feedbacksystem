@@ -66,6 +66,22 @@ class LatexMarshalTest {
     }
 
     @Test
+    fun countingMarshal() {
+        Assertions.assertEquals(
+            "1 \\cdot 2 \\cdot 3",
+            marshal.marshal(
+                Ast(
+                    Operation(
+                        Operator.MUL,
+                        Var("1"),
+                        Operation(Operator.MUL, Var("2"), Var("3"))
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun divisionMarshal() {
         Assertions.assertEquals(
             "\\frac{1}{2}",
