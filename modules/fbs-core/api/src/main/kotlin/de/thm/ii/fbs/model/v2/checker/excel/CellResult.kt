@@ -13,7 +13,7 @@ data class CellResult(val isPropagated: Boolean = false) {
 
     fun getFeedbackString(): String {
         if (feedback.isEmpty()) {
-            return "Invalid Value!" // TODO: Define actual default msg
+            return "Diese Celle enthält nicht das korrekte Ergebnis" // TODO: Define actual default msg
         }
 
         return feedback.toString()
