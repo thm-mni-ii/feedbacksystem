@@ -18,7 +18,7 @@
           <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
             <div
               class="cellTreeNode"
-              [ngClass]="{ cellTreeNodeConsequent: node.isConsequent }"
+              [ngClass]="{ cellTreeNodeConsequent: node.isPropagated }"
             >
               {{ node.cellName }}
             </div>
@@ -87,11 +87,11 @@
       </mat-cell>
     </ng-container>
 
-    <ng-container matColumnDef="result">
+    <ng-container matColumnDef="passed">
       <mat-header-cell *matHeaderCellDef> Ergebnis </mat-header-cell>
       <mat-cell *matCellDef="let data">
-        <mat-icon class="done" *ngIf="data.result === true">done</mat-icon>
-        <mat-icon class="not-done" *ngIf="data.result === false"
+        <mat-icon class="done" *ngIf="data.passed === true">done</mat-icon>
+        <mat-icon class="not-done" *ngIf="data.passed === false"
           >clear</mat-icon
         >
       </mat-cell>

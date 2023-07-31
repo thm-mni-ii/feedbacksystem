@@ -14,7 +14,7 @@ import {
   styleUrls: ["./excel-results.component.scss"],
 })
 export class ExcelResultsComponent {
-  displayedColumns = ["name", "cellName", "errorHint", "table", "result"];
+  displayedColumns = ["name", "cellName", "errorHint", "table", "passed"];
   dataSource = new MatTableDataSource<ExcelExercise>(EXCEL_DATA.exercises);
   treeDataSources: Record<string, MatTreeNestedDataSource<ExcelCell>> = {};
 
