@@ -98,6 +98,8 @@ class UserController {
       case Some(roleName) => userService.updateGlobalRoleFor(userId, GlobalRole.parse(roleName))
       case None => throw new BadRequestException("Malformed Request Body")
     }
+
+    permissionEvaluator.updateAuthToken(res)
   }
 
   /**
@@ -137,6 +139,8 @@ class UserController {
     */
   @DeleteMapping(value = Array("users/{userId}"))
   @IsAdmin
-  def delete(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
+  def delete(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     userService.delete(userId)
+    permissionEvaluator.updateAuthToken(res)
+  }
 }

@@ -3,12 +3,14 @@ package de.thm.ii.fbs.security
 import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
+import de.thm.ii.fbs.services.security.AuthService
 import jakarta.ws.rs.ForbiddenException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
+import javax.servlet.http.HttpServletResponse
 import scala.annotation.unused
 import scala.jdk.CollectionConverters.SeqHasAsJava
 
@@ -22,6 +24,8 @@ class PermissionEvaluator {
   private val courseRegistrationService: CourseRegistrationService = null // TODO get course permissions from jwt token
   @Autowired
   private val taskService: TaskService = null
+  @Autowired
+  private val authService: AuthService = null // TODO remove once roles are not encoded in the jwt token anymore
 
   /**
     * Returns true if the current user has at least the `role` in the course with `courseId`, false otherwise.
@@ -125,4 +129,7 @@ class PermissionEvaluator {
       case None => false
     }
   }
+
+  def updateAuthToken(res: HttpServletResponse): Unit =
+    authService.renewAuthentication(getUser, res)
 }

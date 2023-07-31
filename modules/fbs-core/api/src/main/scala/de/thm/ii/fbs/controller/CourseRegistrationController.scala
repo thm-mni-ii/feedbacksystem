@@ -78,6 +78,8 @@ class CourseRegistrationController {
     } else {
       new ForbiddenException()
     }
+
+    permissionEvaluator.updateAuthToken(res)
   }
 
   /**
@@ -90,8 +92,10 @@ class CourseRegistrationController {
     */
   @DeleteMapping(value = Array("/users/{userId}/courses/{courseId}"))
   @IsModeratorOrCourseDocentOrSelf
-  def deregister(@PathVariable("userId") userId: Int, @PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
+  def deregister(@PathVariable("userId") userId: Int, @PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     courseRegistrationService.deregister(courseId, userId)
+    permissionEvaluator.updateAuthToken(res)
+  }
 
   /**
     * Deregister all users with a specific role from a course
@@ -107,6 +111,8 @@ class CourseRegistrationController {
                      @RequestBody body: JsonNode): Unit = {
     val role = Option(body).flatMap(_.retrive("roleName").asText()).map(CourseRole.parse).getOrElse(CourseRole.STUDENT)
     courseRegistrationService.deregisterRole(courseId, role)
+
+    permissionEvaluator.updateAuthToken(res)
   }
 
   /**
@@ -118,6 +124,8 @@ class CourseRegistrationController {
     */
   @GetMapping(value = Array("/courses/{courseId}/deregisterall"))
   @IsModeratorOrCourseDocent
-  def deregisterAll(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
+  def deregisterAll(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
     courseRegistrationService.deregisterAll(courseId, permissionEvaluator.getUser.getId)
+    permissionEvaluator.updateAuthToken(res)
+  }
 }
