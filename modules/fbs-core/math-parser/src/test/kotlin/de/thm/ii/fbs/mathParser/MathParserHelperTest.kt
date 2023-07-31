@@ -254,6 +254,28 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseComplexWithLeftRightBraces() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.MUL,
+                    Operation(
+                        Operator.MUL,
+                        Num(7),
+                        Var("a")
+                    ),
+                    Operation(
+                        Operator.SUB,
+                        Num(2),
+                        Operation(Operator.MUL, Num(3), Var("b"))
+                    )
+                )
+            ),
+            MathParserHelper.parse("7a\\left(2-3b\\right)")
+        )
+    }
+
+    @Test
     fun parseVariables() {
         assertEquals(
             Ast(
@@ -280,6 +302,24 @@ internal class MathParserHelperTest {
                 Operation(Operator.MUL, Var("a"), Var("b"))
             ),
             MathParserHelper.parse("ab")
+        )
+    }
+
+    @Test
+    fun parseEquation() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.EQ,
+                    Operation(
+                        Operator.ADD,
+                        Operation(Operator.EXP, Var("a"), Num(2)),
+                        Operation(Operator.EXP, Var("b"), Num(2))
+                    ),
+                    Operation(Operator.EXP, Var("c"), Num(2))
+                )
+            ),
+            MathParserHelper.parse("a^2 + b^2 = c^2")
         )
     }
 
@@ -376,6 +416,18 @@ internal class MathParserHelperTest {
         assertEquals(
             """["Add",1,2]""",
             MathParserHelper.toMathJson(
+                Ast(
+                    Operation(Operator.ADD, Num(1), Num(2))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun toLatex() {
+        assertEquals(
+            "1 + 2",
+            MathParserHelper.toLatex(
                 Ast(
                     Operation(Operator.ADD, Num(1), Num(2))
                 )

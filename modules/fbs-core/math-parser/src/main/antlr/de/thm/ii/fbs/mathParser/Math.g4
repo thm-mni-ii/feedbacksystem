@@ -1,5 +1,9 @@
 grammar Math;
 
+eq          : eq ' '* EQUAL ' '* expr
+            | expr
+            ;
+
 expr        : expr ' '* (ADD|SUB) ' '* term
             | term
             ;
@@ -25,7 +29,7 @@ expo        : expo ' '* EXP ' '*  SUB? factor
             | factor
             ;
 
-factor      : OPENING_ROUND_BRACKET ' '* expr ' '* CLOSING_ROUND_BRACKET
+factor      : LEFT? OPENING_ROUND_BRACKET ' '* expr ' '* RIGHT? CLOSING_ROUND_BRACKET
             | OPENING_CURLY_BRACKET ' '* expr ' '* CLOSING_CURLY_BRACKET
             | (NUMBER|VAR)
             ;
@@ -37,6 +41,7 @@ DECIMAL: DECIMAL_SEPARATOR FULL;
 
 VAR: [a-z];
 
+EQUAL: '=';
 ADD: '+';
 SUB: '-';
 MUL: '*'|'\\cdot';
@@ -57,3 +62,5 @@ OPENING_CURLY_BRACKET: '{';
 CLOSING_CURLY_BRACKET: '}';
 OPENING_SQUARE_BRACKET: '[';
 CLOSING_SQUARE_BRACKET: ']';
+LEFT: '\\left';
+RIGHT: '\\right';

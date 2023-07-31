@@ -167,6 +167,16 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
+    fun equationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a^2 + b^2 = c^2"),
+                MathParserHelper.parse("c^2 = a^2 + b^2")
+            )
+        )
+    }
+
+    @Test
     fun constructionTest() {
         assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
         assertNotNull(SemanticAstComparator())

@@ -6,9 +6,16 @@ import de.thm.ii.fbs.mathParser.ast.*
 import java.text.NumberFormat
 import java.util.*
 
-class AstBuilder(val expr: MathParser.ExprContext) {
+class AstBuilder(val eq: MathParser.EqContext) {
     fun build(): Ast =
-        Ast(buildExpr(expr))
+        Ast(buildEquation(eq))
+
+    private fun buildEquation(eq: MathParser.EqContext): Expr =
+        when {
+            eq.eq() !== null -> Operation(Operator.EQ, buildEquation(eq.eq()), buildExpr(eq.expr()))
+            eq.expr() !== null -> buildExpr(eq.expr())
+            else -> throw IllegalArgumentException("not a legal equation: ${eq.text}")
+        }
 
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         when {
@@ -46,7 +53,12 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildUnary(unary: MathParser.UnaryContext): Expr =
         when {
-            unary.mulFactor() !== null -> if (unary.SUB() !== null) UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor())) else buildMulFactor(unary.mulFactor())
+            unary.mulFactor() !== null ->
+                if (unary.SUB() !== null) {
+                    UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor()))
+                } else {
+                    buildMulFactor(unary.mulFactor())
+                }
             else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 

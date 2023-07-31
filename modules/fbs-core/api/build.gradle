@@ -51,7 +51,7 @@ dependencies {
     implementation group: 'io.minio', name: 'minio', version: '8.5.4'
     implementation group: 'org.scala-lang.modules', name: 'scala-xml_2.13', version: '2.0.0'
     compileOnly 'org.scala-lang:scala-library:2.13.10'
-    implementation 'mysql:mysql-connector-java:8.0.32'
+    implementation 'mysql:mysql-connector-java:8.0.33'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.14.2'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -77,7 +77,7 @@ dependencies {
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.23.0'
-    implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.1'
+    implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
 }
 
 jacoco {

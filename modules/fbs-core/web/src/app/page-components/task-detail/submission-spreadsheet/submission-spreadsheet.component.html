@@ -11,7 +11,7 @@
       <div class="math-task-container">
         <app-math-input
           [label]="'Aufgabe:'"
-          [defaultValue]="{ mathJson: inputField[1] }"
+          [defaultValue]="{ latex: inputField[1] }"
           (update)="updateSubmission(inputField[0], $event)"
           [disabled]="true"
         ></app-math-input>
