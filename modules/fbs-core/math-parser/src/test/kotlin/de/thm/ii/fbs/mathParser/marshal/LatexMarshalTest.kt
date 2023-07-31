@@ -136,7 +136,7 @@ class LatexMarshalTest {
                             Operation(
                                 Operator.ADD,
                                 Num(3),
-                                Num(4),
+                                Num(4)
                             )
                         )
                     )
@@ -160,7 +160,7 @@ class LatexMarshalTest {
                             Operation(
                                 Operator.SUB,
                                 Num(3),
-                                Num(4),
+                                Num(4)
                             )
                         )
                     )
@@ -184,7 +184,7 @@ class LatexMarshalTest {
                             Operation(
                                 Operator.EXP,
                                 Num(2),
-                                Num(2),
+                                Num(2)
                             )
                         )
                     )
@@ -208,7 +208,7 @@ class LatexMarshalTest {
                             Operation(
                                 Operator.ADD,
                                 Num(3),
-                                Num(4),
+                                Num(4)
                             )
                         )
                     )

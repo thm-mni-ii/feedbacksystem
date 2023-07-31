@@ -71,7 +71,7 @@ class LatexMarshal : Marshal {
         "^" to "\\^{}",
         "\\" to "\\textbackslash{}",
         "{" to "\\{",
-        "}" to "\\}",
+        "}" to "\\}"
     )
     private fun escapeForLatex(input: String): String =
         input.replace(Regex("([\\^%~\\\\#\$&_{}])")) { latexEscapeMap[it.value] ?: "" }
