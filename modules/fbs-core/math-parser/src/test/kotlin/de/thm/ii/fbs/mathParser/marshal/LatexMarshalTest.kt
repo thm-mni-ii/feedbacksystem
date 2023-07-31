@@ -20,7 +20,7 @@ class LatexMarshalTest {
     @Test
     fun simpleDecimalMarshal() {
         Assertions.assertEquals(
-            "1.5 + 2",
+            "1{,}5 + 2",
             marshal.marshal(Ast(Operation(Operator.ADD, Num(1.5), Num(2))))
         )
     }
@@ -108,7 +108,7 @@ class LatexMarshalTest {
     @Test
     fun decimalMulMarshal() {
         Assertions.assertEquals(
-            "25.28 \\cdot k",
+            "25{,}28 \\cdot k",
             marshal.marshal(Ast(Operation(Operator.MUL, Num(25.28), Var("k"))))
         )
     }

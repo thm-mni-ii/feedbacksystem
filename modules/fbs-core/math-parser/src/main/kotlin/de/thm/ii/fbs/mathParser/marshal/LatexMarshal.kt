@@ -26,7 +26,7 @@ class LatexMarshal : Marshal {
         }
 
     private fun marshalNum(input: Num): String =
-        input.content.toString()
+        input.content.toString().replace(".", "{,}")
 
     private fun marshalVar(input: Var): String =
         input.content
