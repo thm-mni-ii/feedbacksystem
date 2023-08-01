@@ -42,7 +42,6 @@ class LatexMarshal : Marshal {
         when (input.operator) {
             Operator.DIV -> "\\frac{${marshalExpr(input.left)}}{${marshalExpr(input.right)}}"
             Operator.RAD -> "\\sqrt[${marshalExpr(input.left)}]{${marshalExpr(input.right)}}"
-            Operator.EXP -> "{${marshalExpr(input.left)}}^{${marshalExpr(input.right)}}"
             else -> buildOperationString(input)
         }
 
@@ -50,11 +49,11 @@ class LatexMarshal : Marshal {
         if (input.left is Operation && input.operator > input.left.operator) {
             "(${marshalExpr(input.left)})"
         } else {
-            marshalExpr(input.left)
+            "{${marshalExpr(input.left)}}"
         } + " ${marshalOperator(input.operator)} " + if (input.right is Operation && input.operator > input.right.operator) {
             "(${marshalExpr(input.right)})"
         } else {
-            marshalExpr(input.right)
+            "{${marshalExpr(input.right)}}"
         }
 
     private fun marshalOperator(operator: Operator): String =
