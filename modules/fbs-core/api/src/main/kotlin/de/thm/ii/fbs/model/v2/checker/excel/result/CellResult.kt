@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.result
 
 data class CellResult(val isPropagated: Boolean = false) {
     private val feedback: StringBuilder = StringBuilder()

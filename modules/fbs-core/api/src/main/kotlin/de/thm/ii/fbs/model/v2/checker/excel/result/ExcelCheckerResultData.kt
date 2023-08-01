@@ -1,5 +1,8 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.result
 
+import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelCheckerConfiguration
+import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelTaskConfiguration
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.rangeToCells
 
 class ExcelCheckerResultData(private val result: AnalysisResult, configuration: ExcelCheckerConfiguration) {
@@ -22,14 +25,17 @@ class ExcelCheckerResultData(private val result: AnalysisResult, configuration: 
     }
 
     private fun getCellResults(config: ExcelTaskConfiguration, errorCells: Set<Cell>) =
-        if (config.hideInvalidFields) emptyList()
-        else errorCells.filter { cell ->
-            // Only cells specified in a config sheet and range
-            cell.sheet == config.sheetIdx && config.checkFields.filterNot { it.hideInvalidFields }
-                .map { rangeToCells(it.range) }
-                .any { it.contains(cell.cellAddress()) }
-        }.map {
-            CellResultData(it, result.getCellResult(it))
+        if (config.hideInvalidFields) {
+            emptyList()
+        } else {
+            errorCells.filter { cell ->
+                // Only cells specified in a config sheet and range
+                cell.sheet == config.sheetIdx && config.checkFields.filterNot { it.hideInvalidFields }
+                    .map { rangeToCells(it.range) }
+                    .any { it.contains(cell.cellAddress()) }
+            }.map {
+                CellResultData(it, result.getCellResult(it))
+            }
         }
 }
 

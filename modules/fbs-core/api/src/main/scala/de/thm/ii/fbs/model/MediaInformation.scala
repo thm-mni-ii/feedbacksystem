@@ -1,6 +1,6 @@
 package de.thm.ii.fbs.model
 
-import de.thm.ii.fbs.model.v2.checker.excel.{ExcelCheckerConfiguration, ExcelTaskConfiguration, ExcelTaskConfigurationChange, ExcelTaskConfigurationCheck}
+import de.thm.ii.fbs.model.v2.checker.excel.configuration.{ExcelCheckerConfiguration, ExcelTaskConfiguration, ExcelTaskConfigurationChange, ExcelTaskConfigurationCheck}
 import org.json.{JSONException, JSONObject}
 
 import scala.jdk.CollectionConverters.SeqHasAsJava

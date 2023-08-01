@@ -1,5 +1,6 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.graph
 
+import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import org.jgrapht.Graph
 import org.jgrapht.Graphs
 import org.jgrapht.graph.DefaultDirectedGraph
@@ -47,9 +48,7 @@ class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>)
 
         other as ReferenceGraph
 
-        if (data != other.data) return false
-
-        return true
+        return data == other.data
     }
 
     override fun hashCode(): Int {
