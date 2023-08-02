@@ -32,7 +32,7 @@ from api.util.dashboard_util import (
     create_course_bars,
     create_figure_with_subfigure,
     reduce_data_to_necessary_columns,
-    create_average_bar,
+    create_overview_bar,
     get_values_from_data,
     get_avg_att_time,
 )
@@ -466,10 +466,9 @@ def update_histogram(
             }
 
         result_df = pd.DataFrame(result_dict)
-
         local_df = get_values_from_data(result_df, labels)
 
-        fig = create_average_bar(local_df)
+        fig = create_overview_bar(local_df)
         fig.update_layout(showlegend=False, height=600)
         return fig, display_style
 

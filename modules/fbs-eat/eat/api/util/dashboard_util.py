@@ -148,7 +148,7 @@ def reduce_data_to_necessary_columns(filtered_df):
     return hist_df
 
 
-def create_average_bar(local_df):
+def create_overview_bar(local_df):
     """
     create bars for the average attempt histogram
     :param local_df: data which the graphs are based on
@@ -193,8 +193,8 @@ def get_values_from_data(result_df, labels):
     data = {"labels": labels, "values": values}
     local_df = pd.DataFrame(data)
 
-    values = local_df["values"].astype(float)
-    local_df["values"] = (values * 100).astype(int)
+    #values = local_df["values"].astype(float)
+    #local_df["values"] = (values * 100).astype(int)
     return local_df
 
 
