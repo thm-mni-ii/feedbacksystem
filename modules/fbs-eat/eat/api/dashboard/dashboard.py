@@ -1,6 +1,8 @@
 """
 this generates a dashboard with multiple key figures to display the data
 """
+
+
 import math
 from datetime import datetime, timedelta
 import dash_bootstrap_components as dbc
@@ -25,7 +27,7 @@ from api.util.utilities import (
     filter_attempt_limits,
     select_all_exercises_in_course,
     filter_time,
-    select_all_courses
+    select_all_courses,
 )
 from api.util.dashboard_util import (
     hide_histogram,
@@ -36,9 +38,6 @@ from api.util.dashboard_util import (
     get_values_from_data,
     get_avg_att_time,
 )
-import logging
-
-logger = logging.getLogger("name")
 
 tmp_df = get_data(-1)
 
@@ -512,6 +511,18 @@ def track_time(
     date_time_from,
     date_time_to,
 ):
+    '''
+    creates a diagram that shows the average time it took a student to solve a task
+    :param daten: all data
+    :param course_value: selected courses
+    :param exercise_value: selected exercises
+    :param key_figure_value: selected key figure
+    :param slider_value: selected attempts limit
+    :param checklist_value: checkboxes value
+    :param date_time_from: timeframe startpoint
+    :param date_time_to: timeframe endpoint
+    :return: diagramm with the average time it took for a task
+    '''
     local_df = filter_data(daten)
     local_df = local_df[local_df["UserId"] != 0]
     local_df["Time"] = pd.to_datetime(local_df["Time"])
@@ -536,18 +547,18 @@ def track_time(
         exercise_value = select_all_exercises_in_course(local_df, course_value)
     # calculates all times for each task
     times = get_avg_att_time(local_df, exercise_value)
-    df = pd.DataFrame(times)
+    local_df = pd.DataFrame(times)
     if not times:
         return fig, display_style
     fig.add_trace(
         go.Box(
-            y=df[1],
-            x=df[0],
+            y=local_df[1],
+            x=local_df[0],
         )
     )
     fig.update_layout(
-        xaxis={"type": 'category', "showgrid": True, "zeroline": True},
-        yaxis={"title": 'Average Time in s'},
+        xaxis={"type": "category", "showgrid": True, "zeroline": True},
+        yaxis={"title": "Average Time in s"},
         showlegend=False,
     )
     return fig, display_style

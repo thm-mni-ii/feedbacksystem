@@ -8,10 +8,6 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 
-import logging
-
-logger = logging.getLogger("name")
-
 
 def hide_histogram(key_figure_value):
     """
@@ -193,20 +189,20 @@ def get_values_from_data(result_df, labels):
     data = {"labels": labels, "values": values}
     local_df = pd.DataFrame(data)
 
-    #values = local_df["values"].astype(float)
-    #local_df["values"] = (values * 100).astype(int)
+    # values = local_df["values"].astype(float)
+    # local_df["values"] = (values * 100).astype(int)
     return local_df
 
 
 def get_avg_att_time(local_df, exercise_value):
-    '''
+    """
     gets all times students takes for every task, that is the user is allowed to see and which are
     selected , and every
     student
     :param local_df: data
     :param exercise_value: exercises
     :return: list with times for each task
-    '''
+    """
     times = []
     for task in exercise_value:
         task_data = local_df[local_df["UniqueName"] == task]
@@ -215,7 +211,9 @@ def get_avg_att_time(local_df, exercise_value):
             single_info = []
             total_duration = 0
             last_date = 0
-            for i in range(user_task_data["Attempt"].min(), user_task_data["Attempt"].max()):
+            for i in range(
+                user_task_data["Attempt"].min(), user_task_data["Attempt"].max()
+            ):
                 datum = user_task_data[user_task_data["Attempt"] == i]
                 if datum.empty:
                     continue
@@ -228,7 +226,10 @@ def get_avg_att_time(local_df, exercise_value):
                     if 1200 > short_duration >= 0:
                         total_duration += short_duration
                     last_date = list(datum["Time"])[0]
-                if list(user_task_data[user_task_data["Attempt"] == i]["Correct"])[0] == "correct":
+                if (
+                    list(user_task_data[user_task_data["Attempt"] == i]["Correct"])[0]
+                    == "correct"
+                ):
                     break
             single_info.append(task)
             single_info.append(total_duration)

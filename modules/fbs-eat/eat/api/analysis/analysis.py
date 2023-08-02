@@ -1,6 +1,8 @@
 """
 Display data while making it possible to filter in background
 """
+# pylint: disable=import-error
+
 from datetime import datetime, timedelta
 
 import dash
