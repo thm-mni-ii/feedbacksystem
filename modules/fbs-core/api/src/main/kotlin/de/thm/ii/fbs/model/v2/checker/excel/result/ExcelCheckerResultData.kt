@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model.v2.checker.excel.result
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelCheckerConfiguration
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelTaskConfiguration
@@ -51,12 +52,21 @@ data class CellResultData(
     val cellName: String,
     val errorHint: String,
     val propagatedErrorCell: List<CellResultData>,
-    val isPropagated: Boolean
+    val isPropagated: Boolean,
+    @get:JsonIgnore // Not return this information to the user
+    val value: String?,
+    @get:JsonIgnore // Not return this information to the user
+    val formula: String?,
+    @get:JsonIgnore // Not return this information to the user
+    val solution: Cell?,
 ) {
     constructor(cell: Cell, cellResult: CellResult?) : this(
         cell.cell,
         cellResult?.getFeedbackString() ?: "",
         emptyList(),
-        cellResult?.isPropagated ?: false
+        cellResult?.isPropagated ?: false,
+        cell.value,
+        cell.formula,
+        cellResult?.solutionCell
     )
 }
