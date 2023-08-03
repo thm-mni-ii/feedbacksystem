@@ -5,20 +5,17 @@ import org.jgrapht.Graph
 import org.jgrapht.Graphs
 import org.jgrapht.graph.DefaultDirectedGraph
 
-class ReferenceGraph(references: Map<Int, Map<String, Pair<String, Set<Cell>>>>) {
+class ReferenceGraph(references: Map<Int, Map<Cell, Set<Cell>>>) {
     var data: Graph<Cell, ReferenceEdge> = DefaultDirectedGraph(ReferenceEdge::class.java)
     var outputFields: List<Cell> = emptyList()
 
     init {
-        references.forEach { (index, sheet) ->
-            sheet.forEach { (cell, valueAndRefs) ->
-                val value = valueAndRefs.first
-                val refs = valueAndRefs.second
-                val cellVertex = Cell(index, cell, value)
-                data.addVertex(cellVertex) // inserts vertex if it not already exists
+        references.forEach { (_, sheet) ->
+            sheet.forEach { (cell, refs) ->
+                data.addVertex(cell) // inserts vertex if it not already exists
                 refs.forEach { ref ->
                     data.addVertex(ref) // inserts vertex if it not already exists
-                    data.addEdge(cellVertex, ref) // inserts edge if it not already exists (no multiple edges)
+                    data.addEdge(cell, ref) // inserts edge if it not already exists (no multiple edges)
                 }
             }
         }
