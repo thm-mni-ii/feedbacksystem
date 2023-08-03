@@ -1,6 +1,8 @@
 package de.thm.ii.fbs.model.v2.checker.excel.result
 
-data class CellResult(val isPropagated: Boolean = false) {
+import de.thm.ii.fbs.model.v2.checker.excel.Cell
+
+data class CellResult(val solutionCell: Cell, val isPropagated: Boolean = false) {
     private val feedback: StringBuilder = StringBuilder()
 
     fun addFeedback(value: String) {

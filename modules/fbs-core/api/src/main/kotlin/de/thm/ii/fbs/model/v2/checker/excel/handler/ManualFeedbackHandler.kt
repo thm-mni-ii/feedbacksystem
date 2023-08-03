@@ -23,10 +23,10 @@ class ManualFeedbackHandler(result: AnalysisResult, val config: ExcelCheckerConf
     }
 
     override fun handle(input: ErrorAnalysisContext) {
-        val feedback = cellToFeedback[input.currentCell?.cell]
+        val feedback = cellToFeedback[input.submissionCell?.cell]
 
         if (!feedback.isNullOrBlank()) {
-            result.getCellResult(input.currentCell!!)?.addFeedback(feedback)
+            result.getCellResult(input.submissionCell!!)?.addFeedback(feedback)
         }
     }
 }

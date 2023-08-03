@@ -8,6 +8,6 @@ import de.thm.ii.fbs.utils.v2.handler.When
 @Handle(When.ONPERROR)
 class PropagatedErrorHandler(result: AnalysisResult) : ResultHandler(result) {
     override fun handle(input: ErrorAnalysisContext) {
-        result.addCellResult(input.currentCell!!, true)
+        result.addCellResult(input.submissionCell!!, input.solutionCell!!, true)
     }
 }

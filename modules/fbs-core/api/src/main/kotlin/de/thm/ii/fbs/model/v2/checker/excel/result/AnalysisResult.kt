@@ -7,8 +7,8 @@ data class AnalysisResult(
 ) {
 
     // should only be once if it shall be consistent
-    fun addCellResult(cell: Cell, isPropagated: Boolean = false) {
-        errorCellResults[cell] = CellResult(isPropagated)
+    fun addCellResult(cell: Cell, solutionCell: Cell, isPropagated: Boolean = false) {
+        errorCellResults[cell] = CellResult(solutionCell, isPropagated)
     }
 
     fun getCellResult(cell: Cell): CellResult? {
