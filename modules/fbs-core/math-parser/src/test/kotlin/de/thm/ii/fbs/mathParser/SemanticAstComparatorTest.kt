@@ -177,6 +177,16 @@ internal class SemanticAstComparatorTest {
     }
 
     @Test
+    fun fracEquationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("x=-(1/24)"),
+                MathParserHelper.parse("x=-\\frac{1}{24}")
+            )
+        )
+    }
+
+    @Test
     fun constructionTest() {
         assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
         assertNotNull(SemanticAstComparator())
