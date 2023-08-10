@@ -3,6 +3,7 @@ import { EventEmitter, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { SubTaskResult } from "../model/SubTaskResult";
 import { Submission } from "../model/Submission";
+import { map } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -155,5 +156,33 @@ export class SubmissionService {
         const blob = new Blob([response.body], { type });
         saveAs(blob, fileName);
       });
+  }
+
+  previewSubmissionFile(
+    uid: number,
+    cid: number,
+    tid: number,
+    sid: number
+  ): Observable<Blob> {
+    return this.http
+      .get(
+        `/api/v1/users/${uid}/courses/${cid}/tasks/${tid}/submissions/${sid}/content`,
+        {
+          responseType: "arraybuffer",
+          observe: "response",
+        }
+      )
+      .pipe(
+        map((response) => {
+          const fileName = response.headers
+            .get("content-disposition")
+            .split(";")[1]
+            .split("=")[1];
+          const type = response.headers.get("Content-Type") ?? "text/plain";
+
+          const blob = new Blob([response.body], { type });
+          return blob;
+        })
+      );
   }
 }

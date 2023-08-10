@@ -5,10 +5,9 @@ import { CheckResult } from "../../model/CheckResult";
 import { SubmissionService } from "src/app/service/submission.service";
 import { Clipboard } from "@angular/cdk/clipboard";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import {
-  MatDialog,
-} from "@angular/material/dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { SpreadsheetResultDialogComponent } from "src/app/dialogs/spreadsheet-result-dialog/spreadsheet-result-dialog.component";
+import * as XLSX from "xlsx";
 
 @Component({
   selector: "app-results",
@@ -16,21 +15,12 @@ import { SpreadsheetResultDialogComponent } from "src/app/dialogs/spreadsheet-re
   styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent implements OnInit {
-  spreadsheet1 = [
-    { col1: "foo", col2: 0, col3: "a" },
-    { col1: "bar", col2: 1, col3: "b" },
-    { col1: "baz", col2: 2, col3: "c" },
-  ];
   constructor(
     private submissionService: SubmissionService,
     private clipboard: Clipboard,
     private snackbar: MatSnackBar,
     public dialog: MatDialog
-  ) {
-    this.dialog.open(SpreadsheetResultDialogComponent, {
-      data: this.spreadsheet1,
-    });
-  }
+  ) {}
 
   columns = ["checkerType", "query", "resultText", "exitCode"];
 
@@ -147,6 +137,37 @@ export class ResultsComponent implements OnInit {
     );
   }
 
+  previewSubmittedFile() {
+    const { uid, cid, tid } = this.context;
+    this.submissionService
+      .previewSubmissionFile(uid, cid, tid, this.submission.id)
+      .subscribe((data) => {
+        const blob: Blob = data;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result as ArrayBuffer;
+          const dataView = new DataView(arrayBuffer);
+          const workbook = XLSX.read(dataView, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const sheetData = XLSX.utils.sheet_to_json(sheet, {
+            header: "A",
+            defval: "",
+            blankrows: true,
+          });
+
+          // Open the dialog and pass the data to the dialog component
+          this.dialog.open(SpreadsheetResultDialogComponent, {
+            data: sheetData,
+            width: "100%",
+            height: "100%",
+          });
+        };
+
+        reader.readAsArrayBuffer(blob);
+      });
+  }
   copy() {
     this.clipboard.copy(this.submissionContent);
     this.snackbar.open(`Abgabetext in die Zwischenablage kopiert`, "OK", {
