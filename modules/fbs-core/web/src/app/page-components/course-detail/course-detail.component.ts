@@ -58,11 +58,11 @@ export class CourseDetailComponent implements OnInit {
   role: string = null;
   course: Observable<Course> = of();
   openConferences: Observable<string[]>;
-  evaluationUserResults: any[];
   legends = ["green", "red", "#1E457C"];
   userID: number;
   pointlist: number[] = [];
 
+  coursePassed: boolean = false;
   calculatedBonusPoints: number = 0;
   courseProgressBar: any = {
     mandatory: {
@@ -102,21 +102,8 @@ export class CourseDetailComponent implements OnInit {
       this.reloadTasks();
     });
 
-    forkJoin([
-      this.taskService.getTaskResults(this.courseID),
-      this.taskPointsService.getAllRequirements(this.courseID),
-    ]).subscribe(([taskResults, req]) => {
-      this.listing = Object.values(taskResults);
-
-      this.requirements = of(req);
-      this.assignpoints();
-
-      req.forEach((element) => {
-        this.increment(element);
-      });
-    });
-
     this.calculateCourseProgressBar();
+    this.calculateBonusPoints();
 
     this.role = this.auth.getToken().courseRoles[this.courseID];
     this.userID = this.authService.getToken().id;
@@ -166,25 +153,65 @@ export class CourseDetailComponent implements OnInit {
           this.courseProgressBar.practice,
           "practice"
         );
-
-        // calculate bonus points based on requirements
-        // this.calculatedBonusPoints = 0;
-        // this.requirements.subscribe({
-        //   next(reqs) {
-
-        //     let passedTasks = reqs.tasks.filter((task) => task.passed);
-        //     reqs.tasks.forEach((task) => {
-        //   },
-        // });
       },
+    });
+  }
+
+  calculateBonusPoints() {
+    forkJoin([
+      this.taskService.getTaskResults(this.courseID),
+      this.taskPointsService.getAllRequirements(this.courseID),
+    ]).subscribe(([taskResults, req]) => {
+      this.listing = Object.values(taskResults);
+      this.requirements = of(req);
+
+      // calculate total bonus points based on succeded requirements
+      this.calculatedBonusPoints = 0;
+
+      console.log(taskResults);
+
+      req.forEach((element) => {
+        console.log(element);
+      });
+
+      // check in requirements if tasks are passed based on taskResults, match via id
+      this.coursePassed = true;
+      req.forEach((requirement) => {
+        let passedTasks = requirement.tasks.filter((task) => {
+          return taskResults.find(
+            (taskResult) => taskResult.taskID == task.id && taskResult.passed
+          );
+        });
+
+        if (passedTasks.length >= requirement.toPass) {
+          const regex = /x/g;
+          // if the bonusFormula contains an x
+          if (requirement.bonusFormula.includes("x")) {
+            let bonusFormula = requirement.bonusFormula.replace(
+              regex,
+              passedTasks.length.toString()
+            );
+            this.calculatedBonusPoints += eval(bonusFormula);
+          } else if (Number.parseFloat(requirement.bonusFormula) > 0) {
+            this.calculatedBonusPoints +=
+              passedTasks.length * Number.parseFloat(requirement.bonusFormula);
+          }
+        } else {
+          this.coursePassed = false;
+        }
+      });
+
+      // old code
+      this.assignpoints();
+      req.forEach((element) => {
+        this.increment(element);
+      });
+      // old code
     });
   }
 
   getStatsFromTasksType(tasks: any[], stats: any, type: string) {
     let tasksOfType = tasks.filter((task) => task.requirementType == type);
-
-    console.log(tasksOfType);
-
     stats.sum = tasksOfType.length;
     // not the actual number of failed tasks, but the number of possible failed submissions for the buffer length
     // will be vizually overwritten by stats.done
@@ -196,9 +223,8 @@ export class CourseDetailComponent implements OnInit {
 
     // calculate percentages
     stats.done_percent = (stats.done / stats.sum) * 100;
-    stats.failed_percent = (stats.failed / stats.sum) * 100 + stats.done_percent;
-
-    console.log(stats);
+    stats.failed_percent =
+      (stats.failed / stats.sum) * 100 + stats.done_percent;
   }
 
   public canEdit(): boolean {

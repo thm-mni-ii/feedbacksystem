@@ -213,6 +213,12 @@
 }
 
 .progress-card {
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
   .progress-widget {
     display: flex;
     flex-direction: row;

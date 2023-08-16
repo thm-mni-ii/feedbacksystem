@@ -148,7 +148,15 @@
   <!-- Johannes approach for progres bar -->
   <mat-card class="progress-card">
     <mat-card-content>
-      <h2>Mein Kurs Fortschritt</h2>
+      <div class="title">
+        <h2>Mein Kurs Fortschritt</h2>
+        <!-- if coursePassed show badge -->
+        <mat-chip-list *ngIf="coursePassed">
+          <mat-chip>
+            <mat-icon>military_tech</mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+      </div>
 
       <!-- little widgets -->
       <!-- Bearbeitete Pflichtaufgaben / Bearbeitetet Bonusaufgaben / Bearbeitete Übungsaufgaben -->
@@ -161,6 +169,7 @@
         </div>
         <div class="progress-widget-item">
           <mat-icon>star</mat-icon>
+          &nbsp;
           <span>{{ courseProgressBar.optional.done }}</span>
           <span>/</span>
           <span>{{ courseProgressBar.optional.sum }}</span>
@@ -168,6 +177,7 @@
         </div>
         <div class="progress-widget-item">
           <mat-icon>school</mat-icon>
+          &nbsp;&nbsp;
           <span>{{ courseProgressBar.practice.done }}</span>
           <span>/</span>
           <span>{{ courseProgressBar.practice.sum }}</span>
