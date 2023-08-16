@@ -182,16 +182,23 @@ export class CourseDetailComponent implements OnInit {
 
   getStatsFromTasksType(tasks: any[], stats: any, type: string) {
     let tasksOfType = tasks.filter((task) => task.requirementType == type);
+
+    console.log(tasksOfType);
+
     stats.sum = tasksOfType.length;
     // not the actual number of failed tasks, but the number of possible failed submissions for the buffer length
     // will be vizually overwritten by stats.done
     stats.submitted = tasksOfType.filter((task) => task.submission).length;
-    stats.failed = tasksOfType.filter((task) => !task.passed).length;
+    stats.failed = tasksOfType.filter(
+      (task) => !task.passed && task.submission
+    ).length;
     stats.done = tasksOfType.filter((task) => task.passed).length;
 
     // calculate percentages
     stats.done_percent = (stats.done / stats.sum) * 100;
-    stats.failed_percent = (stats.failed / stats.sum) * 100;
+    stats.failed_percent = (stats.failed / stats.sum) * 100 + stats.done_percent;
+
+    console.log(stats);
   }
 
   public canEdit(): boolean {
