@@ -48,6 +48,7 @@ class SemanticAstComparator(
     fun compare(base: Ast, other: Ast): Boolean {
         val l = normalize(base)
         val r = normalize(other)
+
         return l == r
     }
     private fun normalize(ast: Ast): Ast = transformer.transform(ast)
@@ -64,6 +65,8 @@ class SemanticAstComparator(
         val transformers: MutableList<KClass<*>> = mutableListOf(NumberScalingTransformer::class)
         if (applyCommutativeLaw) {
             transformers += listOf(
+                NegativeNumberTransformer::class,
+                MultiplicationSubTransformer::class,
                 SubReplacingTransformer::class,
                 DivisionReplacingTransformer::class,
                 CommutativeLawTransformer::class

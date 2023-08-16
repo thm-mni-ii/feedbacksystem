@@ -6,16 +6,21 @@ import de.thm.ii.fbs.mathParser.ast.*
 import java.text.NumberFormat
 import java.util.*
 
-class AstBuilder(val expr: MathParser.ExprContext) {
+class AstBuilder(val eq: MathParser.EqContext) {
     fun build(): Ast =
-        Ast(buildExpr(expr))
+        Ast(buildEquation(eq))
+
+    private fun buildEquation(eq: MathParser.EqContext): Expr =
+        when {
+            eq.eq() !== null -> Operation(Operator.EQ, buildEquation(eq.eq()), buildExpr(eq.expr()))
+            eq.expr() !== null -> buildExpr(eq.expr())
+            else -> throw IllegalArgumentException("not a legal equation: ${eq.text}")
+        }
 
     private fun buildExpr(expr: MathParser.ExprContext): Expr =
         when {
-            expr.ADD() !== null -> Operation(Operator.ADD, buildExpr(expr.expr(0)), buildTerm(expr.term()))
-            expr.SUB() !== null -> Operation(Operator.SUB, buildExpr(expr.expr(0)), buildTerm(expr.term()))
-            expr.RAD() !== null -> Operation(Operator.RAD, buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
-            expr.LOG() !== null -> Operation(Operator.LOG, buildExpr(expr.expr(0)), buildExpr(expr.expr(1)))
+            expr.ADD() !== null -> Operation(Operator.ADD, buildExpr(expr.expr()), buildTerm(expr.term()))
+            expr.SUB() !== null -> Operation(Operator.SUB, buildExpr(expr.expr()), buildTerm(expr.term()))
             expr.term() !== null -> buildTerm(expr.term())
             else -> throw IllegalArgumentException("not a legal expression: ${expr.text}")
         }
@@ -31,17 +36,29 @@ class AstBuilder(val expr: MathParser.ExprContext) {
 
     private fun buildFunct(funct: MathParser.FunctContext): Expr =
         when {
-            funct.SQR() !== null -> Operation(Operator.RAD, Num(2), buildFunct(funct.funct()))
-            funct.LB() !== null -> Operation(Operator.LOG, Num(2), buildFunct(funct.funct()))
-            funct.LN() !== null -> Operation(Operator.LOG, Num(Math.E), buildFunct(funct.funct()))
-            funct.LG() !== null -> Operation(Operator.LOG, Num(10), buildFunct(funct.funct()))
+            funct.LB() !== null -> Operation(Operator.LOG, Num(2), buildExpr(funct.expr(0)))
+            funct.LN() !== null -> Operation(Operator.LOG, Num(Math.E), buildExpr(funct.expr(0)))
+            funct.LG() !== null -> Operation(Operator.LOG, Num(10), buildExpr(funct.expr(0)))
+            funct.FRAC() !== null -> Operation(Operator.DIV, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
+            funct.SQRT() !== null -> if (funct.expr().size <= 1) {
+                Operation(Operator.RAD, Num(2), buildExpr(funct.expr(0)))
+            } else {
+                Operation(Operator.RAD, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
+            }
+            funct.RAD() !== null -> Operation(Operator.RAD, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
+            funct.LOG() !== null -> Operation(Operator.LOG, buildExpr(funct.expr(0)), buildExpr(funct.expr(1)))
             funct.unary() !== null -> buildUnary(funct.unary())
             else -> throw IllegalArgumentException("not a legal function: ${funct.text}")
         }
 
     private fun buildUnary(unary: MathParser.UnaryContext): Expr =
         when {
-            unary.mulFactor() !== null -> if (unary.SUB() !== null) UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor())) else buildMulFactor(unary.mulFactor())
+            unary.mulFactor() !== null ->
+                if (unary.SUB() !== null) {
+                    UnaryOperation(Operator.SUB, buildMulFactor(unary.mulFactor()))
+                } else {
+                    buildMulFactor(unary.mulFactor())
+                }
             else -> throw IllegalArgumentException("not a legal unary: ${unary.text}")
         }
 
@@ -62,7 +79,7 @@ class AstBuilder(val expr: MathParser.ExprContext) {
     private fun buildFactor(factor: MathParser.FactorContext): Expr =
         when {
             factor.expr() !== null -> buildExpr(factor.expr())
-            factor.NUMBER() !== null -> Num(germanFormat.parse(factor.NUMBER().text))
+            factor.NUMBER() !== null -> Num(germanFormat.parse(factor.NUMBER().text.replace("{,}", ",")))
             factor.VAR() !== null -> Var(factor.VAR().text)
             else -> throw IllegalArgumentException("not a legal factor: ${factor.text}")
         }
