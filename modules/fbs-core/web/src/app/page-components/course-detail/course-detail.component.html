@@ -151,9 +151,39 @@
       <div class="title">
         <h2>Mein Kurs Fortschritt</h2>
         <!-- if coursePassed show badge -->
-        <mat-chip-list *ngIf="coursePassed">
-          <mat-chip>
-            <mat-icon>military_tech</mat-icon>
+        <mat-chip-list>
+          <mat-chip class="badget-chip">
+            <mat-icon
+              [ngClass]="{
+                'badget-icon-passed': coursePassed,
+                'badget-icon-gray': !coursePassed
+              }"
+              [matTooltip]="
+                coursePassed
+                  ? 'Du hast den Kurs erfolgreich abgeschlossen'
+                  : 'Du hast den Kurs noch nicht erfolgreich abgeschlossen'
+              "
+            >
+              military_tech
+            </mat-icon>
+          </mat-chip>
+
+          <mat-chip class="badget-chip">
+            <mat-icon
+              [ngClass]="{
+                'badget-icon-passed': calculatedBonusPoints > 0,
+                'badget-icon-gray': calculatedBonusPoints <= 0
+              }"
+              [matTooltip]="
+                calculatedBonusPoints > 0
+                  ? 'Du hast ' +
+                    calculatedBonusPoints +
+                    ' Bonuspunkt(e) gesammelt'
+                  : 'Du hast noch keine Bonuspunkte gesammelt'
+              "
+            >
+              stars
+            </mat-icon>
           </mat-chip>
         </mat-chip-list>
       </div>
@@ -173,7 +203,7 @@
           <span>{{ courseProgressBar.optional.done }}</span>
           <span>/</span>
           <span>{{ courseProgressBar.optional.sum }}</span>
-          <span>&nbsp;&nbsp;Bonuspunkte: {{ calculatedBonusPoints }}</span>
+          <!-- <span>&nbsp;&nbsp;Bonuspunkte: {{ calculatedBonusPoints }}</span> -->
         </div>
         <div class="progress-widget-item">
           <mat-icon>school</mat-icon>

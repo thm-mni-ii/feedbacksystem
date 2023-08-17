@@ -130,6 +130,7 @@
 
 .mat-progress-bar {
   height: 15px;
+  border-radius: 5px;
 }
 
 :host ::ng-deep .mat-progress-bar-fill::after {
@@ -214,9 +215,32 @@
 
 .progress-card {
   .title {
+    margin-top: -15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    .badget-icon-passed {
+      width: auto;
+      height: auto;
+      font-size: 30px;
+      color:orange;
+    }
+
+    .badget-icon-gray {
+      color: lightslategrey;
+    }
+
+    .badget-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ghostwhite;
+    }
+
+    .mat-standard-chip {    
+      height: auto !important;
+    }
   }
 
   .progress-widget {
@@ -259,5 +283,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 20px;
+
+    // round progress bar
+    
+
+    
   }
 }
