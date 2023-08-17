@@ -175,31 +175,37 @@ export class CourseDetailComponent implements OnInit {
       });
 
       // check in requirements if tasks are passed based on taskResults, match via id
-      this.coursePassed = true;
-      req.forEach((requirement) => {
-        let passedTasks = requirement.tasks.filter((task) => {
-          return taskResults.find(
-            (taskResult) => taskResult.taskID == task.id && taskResult.passed
-          );
-        });
-
-        if (passedTasks.length >= requirement.toPass) {
-          const regex = /x/g;
-          // if the bonusFormula contains an x
-          if (requirement.bonusFormula.includes("x")) {
-            let bonusFormula = requirement.bonusFormula.replace(
-              regex,
-              passedTasks.length.toString()
+      if (req.length > 0) {
+        this.coursePassed = true;
+        req.forEach((requirement) => {
+          let passedTasks = requirement.tasks.filter((task) => {
+            return taskResults.find(
+              (taskResult) => taskResult.taskID == task.id && taskResult.passed
             );
-            this.calculatedBonusPoints += eval(bonusFormula);
-          } else if (Number.parseFloat(requirement.bonusFormula) > 0) {
-            this.calculatedBonusPoints +=
-              passedTasks.length * Number.parseFloat(requirement.bonusFormula);
+          });
+
+          if (passedTasks.length >= requirement.toPass) {
+            const regex = /x/g;
+            // if the bonusFormula contains an x
+            if (requirement.bonusFormula.includes("x")) {
+              let bonusFormula = requirement.bonusFormula.replace(
+                regex,
+                passedTasks.length.toString()
+              );
+              this.calculatedBonusPoints += eval(bonusFormula);
+            } else if (Number.parseFloat(requirement.bonusFormula) > 0) {
+              this.calculatedBonusPoints +=
+                passedTasks.length *
+                Number.parseFloat(requirement.bonusFormula);
+            }
+          } else {
+            this.coursePassed = false;
           }
-        } else {
-          this.coursePassed = false;
-        }
-      });
+        });
+      } else {
+        this.calculatedBonusPoints = 0;
+        this.coursePassed = false;
+      }
 
       // old code
       this.assignpoints();
