@@ -5,6 +5,8 @@ import { CheckResult } from "../../model/CheckResult";
 import { SubmissionService } from "src/app/service/submission.service";
 import { Clipboard } from "@angular/cdk/clipboard";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { TaskService } from "../../service/task.service";
+import { Task } from "../../model/Task";
 
 @Component({
   selector: "app-results",
@@ -12,21 +14,33 @@ import { MatSnackBar } from "@angular/material/snack-bar";
   styleUrls: ["./results.component.scss"],
 })
 export class ResultsComponent implements OnInit {
+  task: Task;
+  hideToggle = true;
+  toggleValue: boolean = false;
   constructor(
     private submissionService: SubmissionService,
     private clipboard: Clipboard,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private taskService: TaskService
   ) {}
 
   columns = ["checkerType", "query", "resultText", "exitCode"];
 
   ngOnInit(): void {
     const { uid, cid, tid } = this.context;
-    this.submissionService
-      .getAllSubmissions(uid, cid, tid)
-      .subscribe((AllSubmissions) => {
-        this.allSubmissions = AllSubmissions;
-      });
+    this.taskService.getTask(cid, tid).subscribe((task) => {
+      this.task = task;
+
+      if (this.task.mediaType == "application/octet-stream") {
+        this.hideToggle = false;
+      }
+      // Perform other operations or logics that depend on the task here
+      this.submissionService
+        .getAllSubmissions(uid, cid, tid)
+        .subscribe((AllSubmissions) => {
+          this.allSubmissions = AllSubmissions;
+        });
+    });
   }
 
   dataSource = new MatTableDataSource<CheckResult>();
@@ -102,7 +116,7 @@ export class ResultsComponent implements OnInit {
     submission.results.forEach((res) => {
       const extInfo: any = res.extInfo;
       if (extInfo && extInfo.type === "compareTable") {
-        this.resultColumns.push(extInfo.result.head);
+        this.resultColumns.push("extInfo.result.head");
         const resultSource = new MatTableDataSource<any>();
         resultSource.data = extInfo.result.rows;
         this.resultDataSource.push(resultSource);
