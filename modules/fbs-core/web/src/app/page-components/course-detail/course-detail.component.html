@@ -151,7 +151,14 @@
       <div class="title">
         <h2>Mein Kurs Fortschritt</h2>
         <!-- if coursePassed show badge -->
-        <mat-chip-list>
+        <mat-chip-list *ngIf="(requirements | async).length === 0">
+          <mat-chip class="badget-chip">
+            <mat-icon matTooltip="Dieser Kurs hat keine Voraussetzungen">
+              question_mark
+            </mat-icon>
+          </mat-chip>
+        </mat-chip-list>
+        <mat-chip-list *ngIf="(requirements | async).length > 0">
           <mat-chip class="badget-chip">
             <mat-icon
               [ngClass]="{
