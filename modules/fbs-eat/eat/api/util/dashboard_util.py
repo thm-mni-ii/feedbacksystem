@@ -40,7 +40,6 @@ def create_course_bars(hist_df, fig, labels):
         "#cf8af3",
     ]
     all_numbers = []
-
     for index, _ in enumerate(fig["layout"]["annotations"]):
         all_numbers.append(float(fig["layout"]["annotations"][index]["text"]))
 
@@ -58,7 +57,6 @@ def create_course_bars(hist_df, fig, labels):
         task_subset_df = hist_df.loc[idx]
         task_subset_df = task_subset_df.apply(pd.value_counts).T
         task_subset_df = task_subset_df.div(task_subset_df.sum(axis=1), axis=0)
-
         # Handle case if there are only correct answers
         if task_subset_df.shape != (
             7,

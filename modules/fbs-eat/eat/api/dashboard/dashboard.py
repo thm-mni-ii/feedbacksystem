@@ -343,7 +343,7 @@ def update_histogram_avg_submissions(
     else:
         display_style = {"display": "none"}
 
-    if not exercise_value:
+    if not exercise_value or "Übersicht" in exercise_value:
         if not course_value:
             return generate_empty_response(), display_style
         exercise_value = select_all_exercises_in_course(local_df, course_value)
@@ -356,10 +356,7 @@ def update_histogram_avg_submissions(
     if not course_value or local_df.empty:
         return generate_empty_response(), display_style
 
-    if "Übersicht" in exercise_value:
-        filtered_df = local_df
-    else:
-        filtered_df = local_df[local_df.UniqueName.isin(exercise_value)]
+    filtered_df = local_df[local_df.UniqueName.isin(exercise_value)]
     for task in filtered_df.UniqueName.unique():
         local_df = filtered_df[filtered_df.UniqueName == task]
 
@@ -448,8 +445,12 @@ def update_histogram(
         )
 
     if "Übersicht" in exercise_value:
+        filtered_df = filtered_df[
+            filtered_df.UniqueName.isin(
+                select_all_exercises_in_course(local_df, course_value)
+            )
+        ]
         hist_df = filtered_df[labels]
-
         if hist_df.empty:
             return generate_empty_response(), display_style
         result_dict = {}
@@ -457,8 +458,8 @@ def update_histogram(
         for column in hist_df.columns:
             value_counts = hist_df[column].value_counts()
             total_counts = value_counts.sum()
-            percent_correct = value_counts.get("correct", 0) / total_counts
-            percent_incorrect = value_counts.get("incorrect", 0) / total_counts
+            percent_correct = value_counts.get("correct", 0) / total_counts * 100
+            percent_incorrect = value_counts.get("incorrect", 0) / total_counts * 100
             result_dict[column] = {
                 "Correct": percent_correct,
                 "Incorrect": percent_incorrect,
@@ -511,7 +512,7 @@ def track_time(
     date_time_from,
     date_time_to,
 ):
-    '''
+    """
     creates a diagram that shows the average time it took a student to solve a task
     :param daten: all data
     :param course_value: selected courses
@@ -522,7 +523,7 @@ def track_time(
     :param date_time_from: timeframe startpoint
     :param date_time_to: timeframe endpoint
     :return: diagramm with the average time it took for a task
-    '''
+    """
     local_df = filter_data(daten)
     local_df = local_df[local_df["UserId"] != 0]
     local_df["Time"] = pd.to_datetime(local_df["Time"])
@@ -542,7 +543,7 @@ def track_time(
         )
     if not course_value:
         course_value = select_all_courses(local_df)
-    if not exercise_value:
+    if not exercise_value or "Übersicht" in exercise_value:
         # abort if no exercise is selected
         exercise_value = select_all_exercises_in_course(local_df, course_value)
     # calculates all times for each task
