@@ -53,6 +53,9 @@ export class CourseDetailComponent implements OnInit {
   openConferences: Observable<string[]>;
   userID: number;
 
+  editTasks: boolean = false;
+  selectedTasks: Task[] = [];
+
   ngOnInit() {
     this.route.params.subscribe((param) => {
       this.courseID = param.id;
@@ -291,5 +294,35 @@ export class CourseDetailComponent implements OnInit {
           this.snackbar.open("Punktevergabe abgeschlossen");
         }
       });
+  }
+
+  enableEditTasks() {
+    this.editTasks = !this.editTasks;
+  }
+
+  toggleSelection(event, task: Task) {
+    if (event) {
+      this.selectedTasks.push(task);
+    } else {
+      // delete only the task with the same id
+      this.selectedTasks = this.selectedTasks.filter((t) => t.id !== task.id);
+    }
+  }
+
+  isInSelectedTasks(task: Task): boolean {
+    return this.selectedTasks.some((t) => t.id === task.id);
+  }
+
+  changeAllSelections() {
+    if (this.isAllSelected()) {
+      this.selectedTasks = [];
+    } else {
+      console.log("not all selected");
+      this.selectedTasks = this.tasks;
+    }
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedTasks.length == this.tasks.length;
   }
 }

@@ -74,6 +74,17 @@
     >
       <mat-icon>check</mat-icon>
     </button>
+
+    <button
+      mat-icon-button
+      *ngIf="isAuthorized()"
+      (click)="enableEditTasks()"
+      matTooltip="Kursinhalt bearbeiten"
+    >
+      <mat-icon *ngIf="!editTasks" class="icon-off">toggle_off</mat-icon>
+      <mat-icon *ngIf="editTasks" class="icon-on">toggle_on</mat-icon>
+    </button>
+
     <button
       mat-icon-button
       *ngIf="isAuthorized() || role"
@@ -145,6 +156,17 @@
     </button>
   </div>
 
+  <!-- Checkbox: Alles Auswählen -->
+  <section *ngIf="editTasks">
+    <mat-checkbox
+      [ngModel]="isAllSelected()"
+      (ngModelChange)="changeAllSelections()"
+    >
+      <span *ngIf="!isAllSelected()">Alles auswählen</span>
+      <span *ngIf="isAllSelected()">Alles abwählen</span>
+    </mat-checkbox>
+  </section>
+
   <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
   <div class="task-list">
     <div *ngFor="let task of tasks">
@@ -152,6 +174,9 @@
         [courseId]="courseID"
         [task]="task"
         [taskResult]="taskResults[task.id]"
+        [isSelectable]="editTasks"
+        (selectionChanged)="toggleSelection($event, task)"
+        [isSelected]="isInSelectedTasks(task)"
       >
       </app-task-preview>
     </div>
