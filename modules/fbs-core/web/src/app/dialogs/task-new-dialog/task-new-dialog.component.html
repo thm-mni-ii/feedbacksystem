@@ -1,14 +1,55 @@
-<div matDialogTitle *ngIf="!isUpdate">Neue Aufgabe erstellen</div>
-<div matDialogTitle *ngIf="isUpdate">Aufgabe bearbeiten</div>
+<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.CREATE">
+  Neue Aufgabe erstellen
+</div>
+<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.UPDATE">
+  Aufgabe bearbeiten
+</div>
+<div
+  matDialogTitle
+  *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+>
+  Ausgewählte Aufgaben bearbeiten
+</div>
+
+<div *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE">
+  Ausgewählte Aufgaben:
+  <span *ngFor="let task of data.tasks"> {{ task.name }}; </span>
+
+  <section
+    *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+    class="checkboxes"
+  >
+    <div>
+      Deadline
+      <mat-checkbox [(ngModel)]="datePickerSelected"></mat-checkbox>
+    </div>
+    <div>
+      Mediatype
+      <mat-checkbox [(ngModel)]="mediaTypeSelected"></mat-checkbox>
+    </div>
+    <div>
+      Verbindlichkeit
+      <mat-checkbox [(ngModel)]="requirementTypeSelected"></mat-checkbox>
+    </div>
+    <div>
+      Sichtbarkeit
+      <mat-checkbox [(ngModel)]="isPrivateSelected"></mat-checkbox>
+    </div>
+  </section>
+</div>
+
 <div class="newTask">
   <form [formGroup]="taskForm">
     <!-- Task name -->
-    <mat-form-field>
+    <mat-form-field
+      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
+    >
       <input type="text" placeholder="Name" matInput formControlName="name" />
     </mat-form-field>
-
     <!-- Task Description -->
-    <mat-form-field>
+    <mat-form-field
+      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
+    >
       <mat-label>Beschreibung</mat-label>
       <textarea
         matInput
@@ -33,15 +74,17 @@
         [readonly]="true"
         matInput
         [ngxMatDatetimePicker]="picker"
-        [disabled]="datePickerDisabled"
+        [disabled]="datePickerDisabled || !datePickerSelected"
         placeholder="Deadline"
         formControlName="deadline"
         (dateChange)="addDate($event)"
       />
+
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <ngx-mat-datetime-picker
         #picker
         [showSeconds]="true"
+        [disabled]="!datePickerSelected"
       ></ngx-mat-datetime-picker>
     </mat-form-field>
 
@@ -50,6 +93,7 @@
       formControlName="expCheck"
       class="noDeadline"
       (change)="setMaxExpirationDate($event)"
+      [disabled]="!datePickerSelected"
     >
       Ohne Deadline
     </mat-slide-toggle>
@@ -59,7 +103,7 @@
       <mat-label>Medientyp</mat-label>
       <mat-select
         formControlName="mediaType"
-        [disabled]="disableTypeChange"
+        [disabled]="disableTypeChange || !mediaTypeSelected"
         (selectionChange)="changedMediaType()"
       >
         <mat-option value="text/plain">Text</mat-option>
@@ -71,7 +115,10 @@
     <!-- Task Mediatype -->
     <mat-form-field class="col pad">
       <mat-label>Verbindlichkeit</mat-label>
-      <mat-select formControlName="requirementType">
+      <mat-select
+        formControlName="requirementType"
+        [disabled]="!requirementTypeSelected"
+      >
         <mat-option value="mandatory">Pflicht</mat-option>
         <mat-option value="optional">Bonus</mat-option>
         <mat-option value="practice">Übung</mat-option>
@@ -82,7 +129,7 @@
 
     <mat-form-field class="col">
       <mat-label>Sichtbarkeit</mat-label>
-      <mat-select formControlName="isPrivate">
+      <mat-select formControlName="isPrivate" [disabled]="!isPrivateSelected">
         <mat-option value="Studenten">Studenten</mat-option>
         <mat-option value="Tutoren">Tutoren</mat-option>
       </mat-select>
@@ -178,7 +225,7 @@
       Abbrechen
     </button>
     <button
-      *ngIf="!isUpdate"
+      *ngIf="updateCondition === allUpdateConditions.CREATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
@@ -187,13 +234,22 @@
       Erstellen
     </button>
     <button
-      *ngIf="isUpdate"
+      *ngIf="updateCondition === allUpdateConditions.UPDATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
       (click)="updateTask(taskForm.value)"
     >
       Update
+    </button>
+    <button
+      *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+      mat-flat-button
+      color="accent"
+      [disabled]="!taskForm.valid"
+      (click)="updateMultipleTaskDetails(selectedTasks)"
+    >
+      Ausgewählte Aufgaben bearbeiten
     </button>
   </mat-dialog-actions>
 </div>

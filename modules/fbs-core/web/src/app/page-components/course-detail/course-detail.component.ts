@@ -170,6 +170,22 @@ export class CourseDetailComponent implements OnInit {
       );
   }
 
+  updateMultipleTaskDetails(tasks: Task[]) {
+    console.log(tasks);
+
+    // for (let task in tasks) {
+    //   console.log(task);
+    // }
+
+    this.dialog
+      .open(TaskNewDialogComponent, {
+        height: "auto",
+        width: "50%",
+        data: { courseId: this.courseID, tasks: tasks },
+      })
+      .afterClosed();
+  }
+
   /**
    * Join a course by registering into it.
    */

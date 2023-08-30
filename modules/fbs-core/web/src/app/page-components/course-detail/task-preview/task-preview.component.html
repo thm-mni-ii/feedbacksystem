@@ -4,7 +4,6 @@
   class="task-container"
   id="{{ task.id }}"
 >
-  {{ test | json }}
   <div class="task-title">
     <section *ngIf="isSelectable" (click)="$event.stopPropagation()">
       <mat-checkbox

@@ -22,6 +22,7 @@ import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { TaskUpdateConditions } from "src/app/enums/taskUpdateConditions";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
@@ -50,8 +51,16 @@ export class TaskNewDialogComponent implements OnInit {
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
     expCheck: new FormControl<Boolean>(false),
+    datePickerSelected: new FormControl<Boolean>(false),
   });
-  isUpdate: boolean;
+  updateCondition: TaskUpdateConditions = TaskUpdateConditions.CREATE;
+  allUpdateConditions = TaskUpdateConditions;
+
+  datePickerSelected = false;
+  mediaTypeSelected = false;
+  requirementTypeSelected = false;
+  isPrivateSelected = false;
+
   courseId: number;
   datePickerDisabled: boolean = false;
   task: Task = {
@@ -110,9 +119,11 @@ export class TaskNewDialogComponent implements OnInit {
     this.courseId = this.data.courseId;
     //this.datePickerDisabled = true;
     if (this.data.task) {
-      this.isUpdate = true;
+      this.updateCondition = TaskUpdateConditions.UPDATE;
       this.task = this.data.task;
       this.setValues();
+    } else if (this.data.tasks) {
+      this.updateCondition = TaskUpdateConditions.UPDATE_MULTIPLE;
     }
   }
 
@@ -343,5 +354,9 @@ export class TaskNewDialogComponent implements OnInit {
 
   setMaxExpirationDate(event: MatSlideToggle) {
     this.datePickerDisabled = event.checked;
+  }
+
+  updateMultipleTaskDetails(tasks: Task[]) {
+    this.taskService.updateMultipleTasks(this.courseId, tasks, this.task);
   }
 }

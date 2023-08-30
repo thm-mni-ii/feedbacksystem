@@ -75,6 +75,24 @@ export class TaskService {
   }
 
   /**
+   * Update multiple existing tasks
+   * @param cid Course id
+   * @param taskIds The ids of the tasks to update
+   * @param task The new task state
+   * @return Observable that succeeds if updated successfully
+   */
+  updateMultipleTasks(cid: number, tasks: Task[], referenceTask: Task) {
+    tasks.forEach((task) => {
+      if (task.deadline !== null) task.deadline = referenceTask.deadline;
+      if (task.isPrivate !== null) task.isPrivate = referenceTask.isPrivate;
+      if (task.mediaType !== null) task.mediaType = referenceTask.mediaType;
+      // if (task. !== null) task.name = referenceTask.name;
+
+      // this.updateTask(cid, id, task);
+    });
+  }
+
+  /**
    * Delete a task
    * @param cid Course id
    * @param tid Task id

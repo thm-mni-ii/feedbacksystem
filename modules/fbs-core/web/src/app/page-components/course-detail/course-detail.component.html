@@ -156,16 +156,25 @@
     </button>
   </div>
 
-  <!-- Checkbox: Alles Auswählen -->
-  <section *ngIf="editTasks">
-    <mat-checkbox
-      [ngModel]="isAllSelected()"
-      (ngModelChange)="changeAllSelections()"
+  <div class="select-all-container">
+    <!-- Checkbox: Alles Auswählen -->
+    <section *ngIf="editTasks">
+      <mat-checkbox
+        [ngModel]="isAllSelected()"
+        (ngModelChange)="changeAllSelections()"
+      >
+        <span *ngIf="!isAllSelected()">Alles auswählen</span>
+        <span *ngIf="isAllSelected()">Alles abwählen</span>
+      </mat-checkbox>
+    </section>
+
+    <mat-icon
+      *ngIf="editTasks"
+      (click)="updateMultipleTaskDetails(selectedTasks)"
+      matTooltip="Aufgabe(n) bearbeiten"
+      >sync</mat-icon
     >
-      <span *ngIf="!isAllSelected()">Alles auswählen</span>
-      <span *ngIf="isAllSelected()">Alles abwählen</span>
-    </mat-checkbox>
-  </section>
+  </div>
 
   <!--  <markdown ngPreserveWhitespaces [data]="courseDetail?.course_description"></markdown>-->
   <div class="task-list">
