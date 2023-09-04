@@ -4,9 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelCheckerConfiguration
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelTaskConfiguration
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getSheet
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.rangeToCells
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-class ExcelCheckerResultData(private val result: AnalysisResult, configuration: ExcelCheckerConfiguration) {
+class ExcelCheckerResultData(
+    private val result: AnalysisResult,
+    configuration: ExcelCheckerConfiguration,
+    private val submissionSheet: XSSFWorkbook
+) {
     val exercises: List<ExcelExercise>
     val passed: Boolean
 
@@ -18,12 +24,16 @@ class ExcelCheckerResultData(private val result: AnalysisResult, configuration: 
             ExcelExercise(
                 config.name,
                 cellResults,
-                config.sheetIdx.toString() /*TODO get name?*/,
+                config.sheetIdx,
+                getSheetName(config.sheetIdx),
                 cellResults.isEmpty()
             )
         }
         passed = exercises.all { it.passed }
     }
+
+    private fun getSheetName(sheet: Int): String =
+        "${getSheet(submissionSheet, sheet).sheetName} ($sheet)"
 
     private fun getCellResults(config: ExcelTaskConfiguration, errorCells: Set<Cell>) =
         if (config.hideInvalidFields) {
@@ -43,8 +53,8 @@ class ExcelCheckerResultData(private val result: AnalysisResult, configuration: 
 data class ExcelExercise(
     val name: String,
     val errorCell: List<CellResultData>,
+    val sheetIndex: Int,
     val sheet: String,
-    /**TODO: also store index?**/
     val passed: Boolean
 )
 

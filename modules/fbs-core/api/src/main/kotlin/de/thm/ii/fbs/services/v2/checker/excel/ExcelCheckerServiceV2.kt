@@ -36,7 +36,7 @@ class ExcelCheckerServiceV2(private val errorAnalysisSolutionService: ErrorAnaly
         )
         errorAnalysisService.findAllErrors(solution.graph.outputFields) // TODO: only check sheets that are used in the configuration
 
-        return ExcelCheckerResultData(result, configuration)
+        return ExcelCheckerResultData(result, configuration, submissionSheet)
     }
 
     private fun getSolutionMap(solution: ErrorAnalysisSolution): Map<Cell, String?> {
