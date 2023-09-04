@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model.v2.checker.excel.result
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelCheckerConfiguration
 import de.thm.ii.fbs.model.v2.checker.excel.configuration.ExcelTaskConfiguration
@@ -8,6 +9,7 @@ import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getSheet
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.rangeToCells
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 class ExcelCheckerResultData(
     private val result: AnalysisResult,
     configuration: ExcelCheckerConfiguration,
