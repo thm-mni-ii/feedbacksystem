@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3.8.1
         if: ${{ inputs.setupNode }}
         with:
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4
   validate-migration:
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check Migration files
         run: bash ./scripts/ci/validate-migrations.sh modules/fbs-core/api/src/main/resources/migrations
 
@@ -94,6 +94,6 @@ jobs:
     needs: [ "validate-gradle-wrapper", "validate-migration" ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build Docker images
         run: docker-compose build
