@@ -176,8 +176,6 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
 
     storedFormulasMatch = storedFormulas
 
-    //storedFormulasMatch = this.excelService.compareForm(expectedFormula, userFormula, invalidCells)
-
     print("the store :", storedFormulasMatch, "\n")
 
     CellsComparator(userRes, expectedRes)

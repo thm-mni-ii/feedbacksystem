@@ -1,6 +1,5 @@
 package de.thm.ii.fbs.services.checker.excel
 import scala.collection.JavaConverters._
-
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck, ExcelMediaInformationTasks}
 import org.apache.poi.ss.usermodel.{Cell, CellType, FormulaEvaluator, WorkbookFactory}
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Service
 import org.apache.poi.ss.formula.WorkbookEvaluator
 import org.apache.poi.ss.formula.eval.FunctionEval
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import java.io.{File, FileInputStream}
 import java.text.NumberFormat
 import java.util.Locale
@@ -54,6 +53,7 @@ class ExcelService {
 
     values
   }
+
   private def hasFormula(sheet: XSSFSheet, startRow: Int, endRow: Int, startCol: Int, endCol: Int): Seq[sheetCell] = {
     (startRow to endRow).flatMap(rowIdx => {
       val row = sheet.getRow(rowIdx)
@@ -74,36 +74,126 @@ class ExcelService {
     })
   }
 
+  def printCellsInRange(rangeReference: String): List[String] = {
+    val (start, end) = this.parseCellRange(rangeReference)
+
+    val cellReferences = ListBuffer.empty[String]
+
+    for (rowIdx <- start.row to end.row) {
+      for (colIdx <- start.col to end.col) {
+        val cellRef = getCellReference(colIdx) + (rowIdx + 1)
+        cellReferences += cellRef
+      }
+    }
+
+    cellReferences.toList
+  }
+
+  //  method to convert column index to column letter (e.g., 0 -> A, 1 -> B, etc.)
+  private def getCellReference(colIdx: Int): String = {
+    val quotient = colIdx / 26
+    val remainder = colIdx % 26
+    if (quotient > 0) {
+      ('A' + quotient - 1).toChar.toString + ('A' + remainder).toChar.toString
+    } else {
+      ('A' + colIdx).toChar.toString
+    }
+  }
 
   def compareForm(seq1: Seq[sheetCell], seq2: Seq[sheetCell], invalidFields: List[String]): (String, List[String]) = {
     val util = new ExprEvaluator(false, 100)
-
-
+    var isFunc = false
     val stringBuilder = new StringBuilder()
     var updatedInvalidFields = invalidFields
+    var differentVals = List[String]()
 
 
-      for ((cell1, cell2) <- seq1.zip(seq2)) {
+
+    for ((cell1, cell2) <- seq1.zip(seq2)) {
         //normalize the formulas using the eval function
-        var result1 = util.eval(cell1.formula)
-        var result2 = util.eval(cell2.formula)
+        val result1 = util.eval(cell1.formula)
+        val result2 = util.eval(cell2.formula)
+        if(cell1.value != cell2.value){
+          differentVals = differentVals :+ cell1.reference
+        }
+      print(s"the list of unmatching values ---> ${differentVals} \n")
         print(f"result1 := ${result1} --- result2 := ${result2} ====>the cell1 := ${cell1.formula} --- the cell2 := ${cell2.formula} \n")
         print(f"the test of results : ", result1 == result2, "\n")
-        val tokens1 = tokenizeFormula(result1.toString)
-      val tokens2 = tokenizeFormula(result2.toString)
+        var tokens1 = tokenizeFormula(cell1.formula)
+        var tokens2 = tokenizeFormula(cell2.formula)
+        print(f"token2 here :${tokens2} \n")
+        if (tokens2.exists { case ("function", _) => true; case _ => false }) {
+          isFunc = true
+          print(s"${cell2.reference} this token contains a func \n")
+          print(f"if func: was entered ${cell2.reference}===> its tokens : {${tokens2}}\n ")
+          if (containsReferenceWithColon(tokens2).isDefined) {
+            containsReferenceWithColon(tokens2) match {
+              case Some((ref1, ref2)) => print(s"containsRef References found: $ref1 : $ref2 \n")
+              val refs = printCellsInRange(f"${ref1}:${ref2}")
+                print(s"this is the extended refs ${refs} \n")
+                // Check if any of the strings in refs exist in updatedInvalidFields
+                val commonRefs = refs.filter(updatedInvalidFields.contains)
+               //test unmatching refs
+                print(s"the tokens1 check : ${tokens1} \n")
+                // Extract references from tokens1 and refs
+                val refsInTokens1 = tokens1.collect { case ("reference", ref) => ref }
+                val refsInRefs = refs
 
-      if (tokens1 == tokens2) {
-     /**   stringBuilder.append("Values match:\n")
-        stringBuilder.append(s"Cell Reference: ${cell1.reference}\n")
-        stringBuilder.append(s"Value in seq1: ${cell1.value}\n")
-        stringBuilder.append(s"Value in seq2: ${cell2.value}\n")*/
-      } else {
+                // Find missing and excessive references
+                val missingRefs = refsInTokens1.diff(refsInRefs)
+                val excessiveRefs = refsInRefs.diff(refsInTokens1)
+                var differences =""
+                // Print missing references
+                if (missingRefs.nonEmpty) {
+                  println("Missing references in refs:")
+                  missingRefs.foreach { ref =>
+                    differences = differences + ref
+
+                  }
+                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
+                  stringBuilder.append(s"+Zelle: ${cell1.reference} Fehlende Referenz(en) ==>[ ${differences} ] \n")
+
+                  println(s"Missing reference: $differences in refs")
+                }
+
+                // Print excessive references
+                if (excessiveRefs.nonEmpty) {
+                  println("Excessive references in refs:")
+                  excessiveRefs.foreach { ref =>
+                    differences = differences + ref
+
+                  }
+                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
+                  stringBuilder.append(s"+Zelle: ${cell1.reference} Exzessive Referenz(en) ==>[ ${differences} ] \n")
+                }
+                if (commonRefs.nonEmpty) {
+                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
+                  // Do something with commonRefs if needed
+                  print("Common references found in updatedInvalidFields:\n")
+                  stringBuilder.append(s"+Zelle: ${cell1.reference} Bitte korrigieren Sie zuerst die falschen Zellen  ==>[ ${commonRefs.mkString(", ")} ] \n")
+                }
+              case None => print("Pattern not found.\n")
+            }
+          } else {
+            print("Pattern not found.\n")
+          }
+        }
+        else {
+          print(f"else not func: was entered ${cell2.reference}\n")
+          tokens1 = tokenizeFormula(result1.toString)
+          tokens2 = tokenizeFormula(result2.toString)
+        }
+
+
+      if (tokens1 != tokens2 && isFunc == false) {
+
         /**stringBuilder.append("Values do not match:\n")
         stringBuilder.append(s"Cell Reference: ${cell1.reference}\n")
         stringBuilder.append(s"Value in seq1: ${cell1.value}\n")
         stringBuilder.append(s"Value in seq2: ${cell2.value}\n")
-*/
-            /*
+*/          print(f"else not equal: was entered ${cell2.reference}\n")
+
+        /*
             if  cell1.getNumericCellValue.toString==cell2.getNumericCellValue.toString && category of token2 contains "function"
             then consider this correct and don t add it to the string builder
              */
@@ -115,12 +205,50 @@ class ExcelService {
         // Append cell1.reference to updatedInvalidFields
         updatedInvalidFields = updatedInvalidFields :+ cell1.reference
       }
+
       //stringBuilder.append("\n")
-    }
+        if (cell1.value != cell2.value) {
+          print("there are unmatching values \n")
+        }
+
+        if (tokens2 == tokens1){
+          print("there are matching cases \n")
+        }
+
+        if (cell1.value != cell2.value && tokens1 == tokens2) {
+          print("true case here  \n")
+        }
+        print(s"#tokens2 at the end ${tokens2} \n  #tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
+
+         if (tokens2 == tokens1  ){
+           if(cell1.value != cell2.value ){
+          print(s"the last if was entered ===> ${tokens2} and \t ${cell2.value}")
+        val matchingTuples: Seq[(String, String)] = tokens2.filter { case (_, value) =>
+          updatedInvalidFields.contains(value)
+        }
+        print(s"this is the matching tuples ${matchingTuples} \n")
+        if(matchingTuples.nonEmpty){
+          stringBuilder.append(s"+Zelle: ${cell1.reference} ==> please correct the previous cells first ( ${matchingTuples} )\n")
+        }
+        else{
+        stringBuilder.append(s"+Zelle: ${cell1.reference} ==> hat nicht den richtigen Wert \n")
+        }
+
+      }
+         }
+       // print(s"tokens2 at the end ${tokens2} \n  tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
+        isFunc = false
+      }
 
 
     (stringBuilder.toString(), updatedInvalidFields)
   }
+  def containsReferenceWithColon(tokens: Seq[(String, String)]): Option[(String, String)] = {
+    tokens.sliding(3).collectFirst {
+      case Seq(("reference", ref1), ("operator", ":"), ("reference", ref2)) => (ref1, ref2)
+    }
+  }
+
 
   def findTokenDifferences(tokens1: Seq[(String, String)], tokens2: Seq[(String, String)]): String = {
     val diffBuilder = new StringBuilder()
@@ -148,7 +276,7 @@ class ExcelService {
       for (i <- minLength until tokens1.length) {
         val (category, token) = tokens1(i)
        // diffBuilder.append(s"Position $i: $category='$token' vs -\n")
-        diffBuilder.append(s"Ein $category='$token' ist nicht korrekt ")
+        diffBuilder.append(s"\n -Ein $category='$token' fehlt")
       }
     } else if (tokens2.length > tokens1.length) {
       for (i <- minLength until tokens2.length) {
@@ -166,7 +294,7 @@ class ExcelService {
     val formulaWithoutWhitespace = formula.replaceAll("\\s+", "")
 
     // Define the regular expression pattern for tokens
-    val pattern = """(\+|-|\*|/|\(|\)|,)|(\$?[A-Za-z]+\$?\d+)|([A-Z][A-Z0-9_]*)|([0-9]+(?:\.[0-9]*)?)|(".*?")""".r
+    val pattern = """(\+|-|\*|:|/|\(|\)|,)|(\$?[A-Za-z]+\$?\d+)|([A-Z][A-Z0-9_]*)|([0-9]+(?:\.[0-9]*)?)|(".*?")""".r
 
     // Tokenize the formula
     val tokens = pattern.findAllMatchIn(formulaWithoutWhitespace)
