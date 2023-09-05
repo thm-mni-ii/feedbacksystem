@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model.v2.checker.excel
 
+import de.thm.ii.fbs.model.v2.checker.excel.result.CellResult
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 

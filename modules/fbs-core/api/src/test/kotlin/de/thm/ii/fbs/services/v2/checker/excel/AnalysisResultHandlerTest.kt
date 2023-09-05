@@ -2,16 +2,16 @@
 
 package de.thm.ii.fbs.services.v2.checker.excel
 
-import de.thm.ii.fbs.model.v2.checker.excel.AnalysisResult
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 import de.thm.ii.fbs.model.v2.checker.excel.handler.ErrorHandler
 import de.thm.ii.fbs.model.v2.checker.excel.handler.PropagatedErrorHandler
 import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
+import de.thm.ii.fbs.model.v2.checker.excel.result.AnalysisResult
 import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils
 import org.junit.Before
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class AnalysisResultHandlerTest {
     private lateinit var result: AnalysisResult

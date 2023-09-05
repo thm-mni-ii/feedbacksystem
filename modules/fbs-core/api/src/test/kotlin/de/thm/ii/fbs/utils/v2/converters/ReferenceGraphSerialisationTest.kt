@@ -3,7 +3,7 @@ package de.thm.ii.fbs.utils.v2.converters
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import org.junit.Assert
 import org.junit.Test
 

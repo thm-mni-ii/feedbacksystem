@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraphEdge
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraphEdge
 
 object ReferenceGraphSerialisation {
     private val objectMapper = ObjectMapper()

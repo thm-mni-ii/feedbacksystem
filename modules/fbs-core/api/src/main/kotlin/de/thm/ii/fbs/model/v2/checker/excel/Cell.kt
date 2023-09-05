@@ -1,6 +1,11 @@
 package de.thm.ii.fbs.model.v2.checker.excel
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaOfCell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.sheetIdxOfCell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
+import org.apache.poi.ss.util.CellAddress
+import org.apache.poi.xssf.usermodel.XSSFCell
 
 data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val cell: String) {
     @JsonProperty("value")
@@ -18,7 +23,17 @@ data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val
         this.formula = formula
     }
 
+    constructor(xssfCell: XSSFCell) : this(
+        sheetIdxOfCell(xssfCell),
+        xssfCell.address.formatAsString(),
+        valueOfCell(xssfCell),
+        formulaOfCell(xssfCell)
+    )
+
     fun toMapKey(): String {
         return "${this.cell}@${this.sheet}"
     }
+
+    fun cellAddress(): CellAddress =
+        CellAddress(cell)
 }
