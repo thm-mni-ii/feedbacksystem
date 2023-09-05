@@ -19,43 +19,43 @@
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
         <ng-container matColumnDef="checkerType">
           <th mat-header-cell *matHeaderCellDef class="checker-type">
-          Checker Typ
-        </th>
+            Checker Typ
+          </th>
           <td mat-cell *matCellDef="let checker" class="checker-type">
-          {{ checker.checkerType }}
-        </td>
-      </ng-container>
+            {{ checker.checkerType }}
+          </td>
+        </ng-container>
 
-      <ng-container matColumnDef="query">
-        <th mat-header-cell *matHeaderCellDef>Abgabe</th>
-        <td mat-cell *matCellDef="">
-          <div *ngIf="isText" class="submission-text">
-            <pre class="pre">{{ submissionContent }}</pre>
-            <button
-              mat-icon-button
-              (click)="copy()"
-              matTooltip="Abgabe kopieren"
-            >
-              <mat-icon>content_copy</mat-icon>
-            </button>
-          </div>
-          <div *ngIf="!isText">
-            <button
-              mat-flat-button
-              color="accent"
-              (click)="downloadSubmission()"
-              matTooltip="Abgabe herunterladen"
-            >
-              Download
-            </button>
-          </div>
-        </td>
+        <ng-container matColumnDef="query">
+          <th mat-header-cell *matHeaderCellDef>Abgabe</th>
+          <td mat-cell *matCellDef="">
+            <div *ngIf="isText" class="submission-text">
+              <pre class="pre">{{ submissionContent }}</pre>
+              <button
+                mat-icon-button
+                (click)="copy()"
+                matTooltip="Abgabe kopieren"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="!isText">
+              <button
+                mat-flat-button
+                color="accent"
+                (click)="downloadSubmission()"
+                matTooltip="Abgabe herunterladen"
+              >
+                Download
+              </button>
+            </div>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="resultText">
           <th mat-header-cell *matHeaderCellDef class="result-text">
-          Antworttext
-        </th>
+            Antworttext
+          </th>
           <td mat-cell *matCellDef="let checker" class="result-text">
             <pre [innerHTML]="checker.resultText" class="pre"></pre>
           </td>
