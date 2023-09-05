@@ -12,8 +12,8 @@ class ReferenceGraphTest {
         val a3 = Cell(0, "A3", "2")
         val a1on1 = Cell(1, "A1", "3")
         val testMap = mapOf(
-                0 to mapOf("A1" to Pair("0", setOf()), "A2" to Pair("1", setOf(a1)), "A3" to Pair("2", setOf(a1))),
-                1 to mapOf("A1" to Pair("3", setOf(a3, a2)))
+            0 to mapOf("A1" to Pair("0", setOf()), "A2" to Pair("1", setOf(a1)), "A3" to Pair("2", setOf(a1))),
+            1 to mapOf("A1" to Pair("3", setOf(a3, a2)))
         )
         val graph = ReferenceGraph(testMap)
 
@@ -40,7 +40,6 @@ class ReferenceGraphTest {
         assert(graph.isInput(a1) && !graph.isOutput(a1))
         assert(!graph.isInput(a2) && graph.isOutput(a2))
         assert(!graph.isInput(a3) && graph.isOutput(a3))
-
     }
 
     @Test

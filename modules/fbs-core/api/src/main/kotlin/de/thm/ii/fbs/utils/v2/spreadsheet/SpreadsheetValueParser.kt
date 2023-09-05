@@ -49,9 +49,14 @@ class SpreadsheetValueParser {
 
             value.toDoubleOrNull()?.let {
                 cell.setCellValue(it)
+                cell.cellType = CellType.NUMERIC
             } ?: value.toBooleanStrictOrNull()?.let {
                 cell.setCellValue(it)
-            } ?: cell.setCellValue(value)
+                cell.cellType = CellType.BOOLEAN
+            } ?: run {
+                cell.setCellValue(value)
+                cell.cellType = CellType.STRING
+            }
         }
     }
 }

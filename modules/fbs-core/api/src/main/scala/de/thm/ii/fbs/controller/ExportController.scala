@@ -2,7 +2,8 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Task}
+import de.thm.ii.fbs.model.task.Task
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole}
 import de.thm.ii.fbs.services.`export`.TaskExportService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, TaskService}
 import de.thm.ii.fbs.services.security.AuthService

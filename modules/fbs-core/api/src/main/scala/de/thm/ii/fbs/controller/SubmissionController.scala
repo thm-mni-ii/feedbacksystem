@@ -1,15 +1,25 @@
 package de.thm.ii.fbs.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, SubTaskResult, Submission}
+import de.thm.ii.fbs.model.task.SubTaskResult
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
+import java.io.File
+import java.nio.file.{Files, StandardOpenOption}
 import java.time.Instant
+import java.util
+import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
@@ -24,6 +34,8 @@ class SubmissionController {
   @Autowired
   private val storageService: StorageService = null
   @Autowired
+  private val minioStorageService: MinioStorageService = null
+  @Autowired
   private val submissionService: SubmissionService = null
   @Autowired
   private val taskService: TaskService = null
@@ -36,7 +48,13 @@ class SubmissionController {
   @Autowired
   private val checkrunnerSubTaskServer: CheckrunnerSubTaskService = null
   @Autowired
+  private val userService: UserService = null
+  @Autowired
+  private val courseService: CourseService = null
+  @Autowired
   private val courseRegistration: CourseRegistrationService = null
+  private val objectMapper = new ObjectMapper();
+  private val logger = LoggerFactory.getLogger(this.getClass)
 
   /**
     * Get a list of all submissions for a task
@@ -117,7 +135,7 @@ class SubmissionController {
   @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
   @ResponseBody
   def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-             @RequestParam file: MultipartFile,
+             @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
     val user = authService.authorize(req, res)
     val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
@@ -137,8 +155,10 @@ class SubmissionController {
             throw new BadRequestException("Deadline Before Now")
           }
           if (true) { // TODO: Check media type compatibility
-            val submission = submissionService.create(uid, tid)
-            storageService.storeSolutionFileInBucket(submission.id, file)
+            val submission = submissionService.create(uid, tid,
+              Option(additionalInformation.orElse(null)).map(ai => objectMapper.readValue(ai, classOf[util.HashMap[String, Any]])))
+            minioStorageService.storeSolutionFileInBucket(submission.id, file)
+
             checkerConfigurationService.getAll(cid, tid).foreach(cc => {
               val checkerService = checkerServiceFactoryService(cc.checkerType)
               checkerService.notify(tid, submission.id, cc, user)
@@ -254,6 +274,78 @@ class SubmissionController {
       }
     } else {
       throw new ForbiddenException()
+    }
+  }
+
+  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content"))
+  @ResponseBody
+  def getContent(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+                 req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+    val task = taskService.getOne(tid).get
+
+    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      submissionService.getOne(sid, uid) match {
+        case Some(submission) => {
+          val file: File = storageService.getFileSolutionFile(submission)
+          val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))
+          ResponseEntity.ok()
+            .contentType(ctype)
+            .contentLength(file.length())
+            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}$ext")
+            .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+        }
+        case None => throw new ResourceNotFoundException()
+      }
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/courses/{cid}/tasks/submissions/content"))
+  @ResponseBody
+  def solutionsOfCourse(@PathVariable cid: Int,
+                        req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      val f = File.createTempFile("tmp", "")
+      submissionService.writeSubmissionsOfCourseToFile(f, cid)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=course_$cid.zip")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+    } else {
+      throw new ResourceNotFoundException()
+    }
+  }
+
+  @GetMapping(value = Array("/courses/{cid}/tasks/{tid}/submissions/content"))
+  @ResponseBody
+  def solutionsOfTask(@PathVariable cid: Int, @PathVariable tid: Int,
+                      req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
+    val user = authService.authorize(req, res)
+
+    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
+      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
+
+    if (privileged) {
+      val f = new File("tmp")
+      submissionService.writeSubmissionsOfTaskToFile(f, cid, tid)
+      ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentLength(f.length())
+        .header("Content-Disposition", s"attachment;filename=task_$tid.zip")
+        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
+    } else {
+      throw new ResourceNotFoundException()
     }
   }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.*
@@ -13,7 +15,7 @@ class SemanticAstComparator(
     ignoreNeutralElements: Boolean = false,
     applyInverseElements: Boolean = false,
     applyCommutativeLaw: Boolean = false,
-    applyExponentLaws: Boolean = false,
+    applyExponentLaws: Boolean = false
 ) {
     class Builder {
         private var decimals: Int = 2
@@ -32,7 +34,12 @@ class SemanticAstComparator(
 
         fun build(): SemanticAstComparator =
             SemanticAstComparator(
-                decimals, roundingMode, ignoreNeutralElements, applyInverseElements, applyCommutativeLaw, applyExponentLaws
+                decimals,
+                roundingMode,
+                ignoreNeutralElements,
+                applyInverseElements,
+                applyCommutativeLaw,
+                applyExponentLaws
             )
     }
 
@@ -41,6 +48,7 @@ class SemanticAstComparator(
     fun compare(base: Ast, other: Ast): Boolean {
         val l = normalize(base)
         val r = normalize(other)
+
         return l == r
     }
     private fun normalize(ast: Ast): Ast = transformer.transform(ast)
@@ -57,6 +65,8 @@ class SemanticAstComparator(
         val transformers: MutableList<KClass<*>> = mutableListOf(NumberScalingTransformer::class)
         if (applyCommutativeLaw) {
             transformers += listOf(
+                NegativeNumberTransformer::class,
+                MultiplicationSubTransformer::class,
                 SubReplacingTransformer::class,
                 DivisionReplacingTransformer::class,
                 CommutativeLawTransformer::class
@@ -68,14 +78,14 @@ class SemanticAstComparator(
         ChainTransformer(
             *(
                 listOf(NumberScalingTransformer::class) +
-                cleaners +
-                transformers +
-                cleaners
-            ).map { createTransformer(it) as Transformer } .toTypedArray()
+                    cleaners +
+                    transformers +
+                    cleaners
+                ).map { createTransformer(it) as Transformer }.toTypedArray()
         )
     }
 
-    private fun <T: Any> createTransformer(c: KClass<T>): T {
+    private fun <T : Any> createTransformer(c: KClass<T>): T {
         val constructor = c.primaryConstructor!!
         val transformer = if (constructor.parameters.isEmpty()) {
             constructor.call()

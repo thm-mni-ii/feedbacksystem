@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { MatDialogModule } from "@angular/material/dialog";
-import { Injectable, NgModule } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule } from "@angular/core";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { LayoutModule } from "@angular/cdk/layout";
@@ -88,6 +88,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
 import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
@@ -104,6 +105,10 @@ import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-temp
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
 import { ExcelResultsComponent } from "./page-components/excel-results/excel-results.component";
+
+import "mathlive";
+import "@cortex-js/compute-engine";
+import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -183,6 +188,7 @@ export const httpInterceptorProviders = [
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
     SqlPlaygroundComponent,
+    AnalyticsToolComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
     DbControlPanelComponent,
@@ -200,6 +206,7 @@ export const httpInterceptorProviders = [
     ExportTasksDialogComponent,
     HighlightedInputComponent,
     ExcelResultsComponent,
+    MathInputComponent,
   ],
   imports: [
     BrowserModule,
@@ -248,6 +255,7 @@ export const httpInterceptorProviders = [
     { provide: MAT_DATE_LOCALE, useValue: "de" },
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
 

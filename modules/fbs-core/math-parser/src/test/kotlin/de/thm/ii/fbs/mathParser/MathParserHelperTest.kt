@@ -1,9 +1,10 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
 import de.thm.ii.fbs.mathParser.ast.*
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 internal class MathParserHelperTest {
     @Test
@@ -56,7 +57,6 @@ internal class MathParserHelperTest {
         )
     }
 
-
     @Test
     fun parseSimpleExp() {
         assertEquals(
@@ -73,7 +73,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.RAD, Num(2), Num(2))
             ),
-            MathParserHelper.parse("sqrt 2")
+            MathParserHelper.parse("\\sqrt{2}{2}")
         )
     }
 
@@ -83,7 +83,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.RAD, Num(2), Operation(Operator.ADD, Num(2), Num(2)))
             ),
-            MathParserHelper.parse("sqrt (2+2)")
+            MathParserHelper.parse("\\sqrt[2]{2+2}")
         )
     }
 
@@ -91,12 +91,9 @@ internal class MathParserHelperTest {
     fun parseNoBracketSqrt() {
         assertEquals(
             Ast(
-                Operation(Operator.ADD,
-                    Operation(Operator.RAD, Num(2), Num(2)),
-                    Num(2)
-                )
+                Operation(Operator.RAD, Num(2), Operation(Operator.ADD, Num(2), Num(2)))
             ),
-            MathParserHelper.parse("sqrt 2+2")
+            MathParserHelper.parse("\\sqrt{2+2}")
         )
     }
 
@@ -106,7 +103,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.LOG, Num(2), Num(2))
             ),
-            MathParserHelper.parse("lb 2")
+            MathParserHelper.parse("\\lb{2}")
         )
     }
 
@@ -116,7 +113,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.LOG, Num(2), Num(4))
             ),
-            MathParserHelper.parse("ld 4")
+            MathParserHelper.parse("\\ld{4}")
         )
     }
 
@@ -126,7 +123,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.LOG, Num(Math.E), Num(2))
             ),
-            MathParserHelper.parse("ln 2")
+            MathParserHelper.parse("\\ln{2}")
         )
     }
 
@@ -136,7 +133,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.LOG, Num(10), Num(2))
             ),
-            MathParserHelper.parse("lg 2")
+            MathParserHelper.parse("\\lg{2}")
         )
     }
 
@@ -146,7 +143,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.RAD, Num(10), Num(20))
             ),
-            MathParserHelper.parse("rad 10 20")
+            MathParserHelper.parse("\\rad{10}{20}")
         )
     }
 
@@ -156,7 +153,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.LOG, Num(5), Num(15))
             ),
-            MathParserHelper.parse("log 5 15")
+            MathParserHelper.parse("\\log{5}{15}")
         )
     }
 
@@ -166,7 +163,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.RAD, Operation(Operator.ADD, Num(5), Num(5)), Num(20))
             ),
-            MathParserHelper.parse("rad 5+5 20")
+            MathParserHelper.parse("\\rad{5+5}{20}")
         )
     }
 
@@ -176,7 +173,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.ADD, Operation(Operator.RAD, Num(5), Num(10)), Num(10))
             ),
-            MathParserHelper.parse("rad 5 10+10")
+            MathParserHelper.parse("\\rad{5}{10}+10")
         )
     }
 
@@ -186,7 +183,7 @@ internal class MathParserHelperTest {
             Ast(
                 Operation(Operator.RAD, Num(5), Operation(Operator.ADD, Num(10), Num(10)))
             ),
-            MathParserHelper.parse("rad 5 (10+10)")
+            MathParserHelper.parse("\\rad{5}{10+10}")
         )
     }
 
@@ -214,7 +211,8 @@ internal class MathParserHelperTest {
     fun parseComplexWithoutBraces() {
         assertEquals(
             Ast(
-                Operation(Operator.ADD,
+                Operation(
+                    Operator.ADD,
                     Operation(Operator.ADD, Num(1), Operation(Operator.MUL, Num(5), Num(3))),
                     Operation(Operator.DIV, Num(8), Num(10))
                 )
@@ -227,7 +225,8 @@ internal class MathParserHelperTest {
     fun parseComplexWithBraces() {
         assertEquals(
             Ast(
-                Operation(Operator.ADD,
+                Operation(
+                    Operator.ADD,
                     Operation(Operator.ADD, Num(1), Operation(Operator.MUL, Num(5), Num(3))),
                     Operation(Operator.DIV, Num(8), Num(10))
                 )
@@ -240,8 +239,10 @@ internal class MathParserHelperTest {
     fun parseComplexWithOtherBraces() {
         assertEquals(
             Ast(
-                Operation(Operator.DIV,
-                    Operation(Operator.MUL,
+                Operation(
+                    Operator.DIV,
+                    Operation(
+                        Operator.MUL,
                         Operation(Operator.ADD, Num(1), Num(5)),
                         Operation(Operator.ADD, Num(3), Num(8))
                     ),
@@ -249,6 +250,28 @@ internal class MathParserHelperTest {
                 )
             ),
             MathParserHelper.parse("((1 + 5) * (3 + 8)) / 10")
+        )
+    }
+
+    @Test
+    fun parseComplexWithLeftRightBraces() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.MUL,
+                    Operation(
+                        Operator.MUL,
+                        Num(7),
+                        Var("a")
+                    ),
+                    Operation(
+                        Operator.SUB,
+                        Num(2),
+                        Operation(Operator.MUL, Num(3), Var("b"))
+                    )
+                )
+            ),
+            MathParserHelper.parse("7a\\left(2-3b\\right)")
         )
     }
 
@@ -283,15 +306,35 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun parseEquation() {
+        assertEquals(
+            Ast(
+                Operation(
+                    Operator.EQ,
+                    Operation(
+                        Operator.ADD,
+                        Operation(Operator.EXP, Var("a"), Num(2)),
+                        Operation(Operator.EXP, Var("b"), Num(2))
+                    ),
+                    Operation(Operator.EXP, Var("c"), Num(2))
+                )
+            ),
+            MathParserHelper.parse("a^2 + b^2 = c^2")
+        )
+    }
+
+    @Test
     fun parseMixed() {
         assertEquals(
             Ast(
-                Operation(Operator.ADD,
-                    Operation(Operator.ADD,
+                Operation(
+                    Operator.ADD,
+                    Operation(
+                        Operator.ADD,
                         Operation(Operator.MUL, Num(1), Var("a")),
-                        Operation(Operator.MUL, Num(2), Var("b")),
+                        Operation(Operator.MUL, Num(2), Var("b"))
                     ),
-                    Operation(Operator.MUL, Num(3), Var("c")),
+                    Operation(Operator.MUL, Num(3), Var("c"))
                 )
             ),
             MathParserHelper.parse("1a+2*b+3c")
@@ -315,7 +358,8 @@ internal class MathParserHelperTest {
 
     @Test
     fun parseToDot() {
-        assertEquals("""
+        assertEquals(
+            """
             strict graph {
             rankdir=BT
             1 [label=1]
@@ -342,7 +386,9 @@ internal class MathParserHelperTest {
             10 -- 12 [label=l]
             11 -- 12 [label=r]
             }
-        """.trimIndent(), MathParserHelper.parse("-((1 + 5) * (3 + 8a)) / 10").toDot())
+            """.trimIndent(),
+            MathParserHelper.parse("-((1 + 5) * (3 + 8a)) / 10").toDot()
+        )
     }
 
     @Test
@@ -356,12 +402,90 @@ internal class MathParserHelperTest {
     }
 
     @Test
+    fun fromJson() {
+        assertEquals(
+            Ast(
+                Operation(Operator.ADD, Num(1), Num(2))
+            ),
+            MathParserHelper.fromMathJson("""["Add",1,2]""")
+        )
+    }
+
+    @Test
+    fun toJson() {
+        assertEquals(
+            """["Add",1,2]""",
+            MathParserHelper.toMathJson(
+                Ast(
+                    Operation(Operator.ADD, Num(1), Num(2))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun toLatex() {
+        assertEquals(
+            "{1} + {2}",
+            MathParserHelper.toLatex(
+                Ast(
+                    Operation(Operator.ADD, Num(1), Num(2))
+                )
+            )
+        )
+    }
+
+    @Test
+    fun parseLatexMul() {
+        assertEquals(
+            Ast(
+                Operation(Operator.MUL, Num(1), Num(1))
+            ),
+            MathParserHelper.parse("1\\cdot1")
+        )
+    }
+
+    @Test
+    fun parseLatexFrac() {
+        assertEquals(
+            Ast(
+                Operation(Operator.DIV, Num(1), Num(1))
+            ),
+            MathParserHelper.parse("\\frac{1}{1}")
+        )
+    }
+
+    @Test
+    fun parseLatexExp() {
+        assertEquals(
+            Ast(
+                Operation(Operator.EXP, Num(2), Operation(Operator.ADD, Num(1), Num(1)))
+            ),
+            MathParserHelper.parse("2^{1+1}")
+        )
+    }
+
+    @Test
+    fun parseLatexRad() {
+        assertEquals(
+            Ast(
+                Operation(Operator.RAD, Num(4), Num(2))
+            ),
+            MathParserHelper.parse("\\sqrt[4]{2}")
+        )
+    }
+
+    @Test
     fun multiplicationWithExplicitTest() {
         assertEquals(
             Ast(
-                Operation(Operator.MUL,
-                    Operation(Operator.MUL,
-                        Num(4), Operation(Operator.EXP,
+                Operation(
+                    Operator.MUL,
+                    Operation(
+                        Operator.MUL,
+                        Num(4),
+                        Operation(
+                            Operator.EXP,
                             Var("a"),
                             UnaryOperation(Operator.SUB, Num(4))
                         )
@@ -378,9 +502,13 @@ internal class MathParserHelperTest {
         print(MathParserHelper.parse("4a^(-4)b^4").toDot())
         assertEquals(
             Ast(
-                Operation(Operator.MUL,
-                    Operation(Operator.MUL,
-                        Num(4), Operation(Operator.EXP,
+                Operation(
+                    Operator.MUL,
+                    Operation(
+                        Operator.MUL,
+                        Num(4),
+                        Operation(
+                            Operator.EXP,
                             Var("a"),
                             UnaryOperation(Operator.SUB, Num(4))
                         )
@@ -395,8 +523,10 @@ internal class MathParserHelperTest {
     @Test
     fun multiplicationExponentTest() {
         val expected = Ast(
-            Operation(Operator.MUL,
-                Operation(Operator.EXP,
+            Operation(
+                Operator.MUL,
+                Operation(
+                    Operator.EXP,
                     Num(5),
                     Num(4)
                 ),
@@ -410,9 +540,11 @@ internal class MathParserHelperTest {
     @Test
     fun negativeExponentTest() {
         val expected = Ast(
-            Operation(Operator.EXP,
+            Operation(
+                Operator.EXP,
                 Var("x"),
-                UnaryOperation(Operator.SUB,
+                UnaryOperation(
+                    Operator.SUB,
                     Num(3)
                 )
             )
@@ -424,8 +556,10 @@ internal class MathParserHelperTest {
     @Test
     fun exponentOfExponentTest() {
         val expected = Ast(
-            Operation(Operator.EXP,
-                Operation(Operator.EXP,
+            Operation(
+                Operator.EXP,
+                Operation(
+                    Operator.EXP,
                     Num(2),
                     Num(3)
                 ),

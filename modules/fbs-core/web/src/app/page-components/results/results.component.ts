@@ -1,17 +1,36 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { ExcelCheckerResultData } from "src/app/model/ExcelCheckerResultData";
 import { CheckResult } from "../../model/CheckResult";
 import { Submission } from "../../model/Submission";
+import { SubmissionService } from "src/app/service/submission.service";
+import { Clipboard } from "@angular/cdk/clipboard";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-results",
   templateUrl: "./results.component.html",
   styleUrls: ["./results.component.scss"],
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit {
+  constructor(
+    private submissionService: SubmissionService,
+    private clipboard: Clipboard,
+    private snackbar: MatSnackBar
+  ) {}
+
+  columns = ["checkerType", "query", "resultText", "exitCode"];
+
+  ngOnInit(): void {
+    const { uid, cid, tid } = this.context;
+    this.submissionService
+      .getAllSubmissions(uid, cid, tid)
+      .subscribe((AllSubmissions) => {
+        this.allSubmissions = AllSubmissions;
+      });
+  }
+
   dataSource = new MatTableDataSource<CheckResult>();
-  columns = ["checkerType", "resultText", "exitCode"];
 
   allSubmissions: Submission[];
   displayedSubmission: Submission;
@@ -28,7 +47,6 @@ export class ResultsComponent {
 
   @Input() set submissions(submissions: Submission[]) {
     const lengthHasChanged = this.allSubmissions != submissions;
-
     this.allSubmissions = submissions;
     if (lengthHasChanged) {
       this.selectLast();
@@ -40,13 +58,34 @@ export class ResultsComponent {
 
   @Input() context: { uid: number; cid: number; tid: number };
 
+  @Input() isText: Boolean;
+
+  submissionContent: string;
+
   subscription: any;
 
+  submission: Submission;
+
   handleSubmission(event): void {
-    const submission = this.allSubmissions.find(
+    this.submission = this.allSubmissions.find(
       (item) => this.allSubmissions.indexOf(item) == event.index
     );
-    this.display(submission);
+    if (this.submission.results.length > 1) {
+      this.columns = ["checkerType", "query", "resultText", "exitCode"];
+    } else {
+      this.columns = ["query", "resultText", "exitCode"];
+    }
+    this.getSubmissionContent(this.submission);
+    this.display(this.submission);
+  }
+
+  getSubmissionContent(submission: Submission) {
+    if (this.context !== undefined) {
+      const { uid, cid, tid } = this.context;
+      this.submissionService
+        .getTaskSubmissionsContent(uid, cid, tid, submission.id)
+        .subscribe((text) => (this.submissionContent = text));
+    }
   }
 
   display(submission: Submission) {
@@ -83,6 +122,23 @@ export class ResultsComponent {
 
   selectLast() {
     setTimeout(() => (this.index = this.allSubmissions.length), 1);
+  }
+
+  downloadSubmission() {
+    const { uid, cid, tid } = this.context;
+    this.submissionService.downloadSubmission(
+      uid,
+      cid,
+      tid,
+      this.submission.id
+    );
+  }
+
+  copy() {
+    this.clipboard.copy(this.submissionContent);
+    this.snackbar.open(`Abgabetext in die Zwischenablage kopiert`, "OK", {
+      duration: 3000,
+    });
   }
 
   showExcelView() {

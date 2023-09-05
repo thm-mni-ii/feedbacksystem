@@ -167,6 +167,7 @@ disable=raw-checker-failed,
         E0401,
         R0401,
         R0801,
+        W1401,
         E1121
 
 

@@ -1,8 +1,9 @@
+@file:Suppress("ktlint:no-wildcard-imports")
+
 package de.thm.ii.fbs.mathParser
 
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import java.math.RoundingMode
 
 internal class SemanticAstComparatorTest {
@@ -151,6 +152,26 @@ internal class SemanticAstComparatorTest {
             semanticAstComparator.compare(
                 MathParserHelper.parse("4a^(-4)b^4"),
                 MathParserHelper.parse("4*a^(-4)*b^4")
+            )
+        )
+    }
+
+    @Test
+    fun multiplicationWithNegativesTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("4a-3b"),
+                MathParserHelper.parse("4a+(-3b)")
+            )
+        )
+    }
+
+    @Test
+    fun equationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a^2 + b^2 = c^2"),
+                MathParserHelper.parse("c^2 = a^2 + b^2")
             )
         )
     }

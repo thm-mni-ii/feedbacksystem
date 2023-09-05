@@ -1,14 +1,14 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{EvaluationUserResult, CourseResult, CourseRole, GlobalRole, TaskResult}
+import de.thm.ii.fbs.model.{CourseResult, CourseRole, EvaluationUserResult, GlobalRole}
 import de.thm.ii.fbs.services.evaluation.EvaluationResultService
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
 import de.thm.ii.fbs.services.security.AuthService
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation._
+
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
   * Provides course submission results
@@ -30,6 +30,7 @@ class CourseResultController {
 
   /**
     * Returns the course results of all participants of a course.
+    *
     * @param cid Course id
     * @param req request
     * @param res response
@@ -52,6 +53,7 @@ class CourseResultController {
 
   /**
     * Returns the course evaluation results of all participants of a course.
+    *
     * @param cid Course id
     * @param req request
     * @param res response
@@ -73,24 +75,25 @@ class CourseResultController {
   }
 
   /**
-      * Returns the course results exlude tutor and docent.
-      * @param cid Course id
-      * @param req request
-      * @param res response
-      * @return A list of course results
-      */
-    @GetMapping(value = Array("/{cid}/results/student"))
-    @ResponseBody
-    def getStudentResult(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
-      val user = authService.authorize(req, res)
+    * Returns the course results exlude tutor and docent.
+    *
+    * @param cid Course id
+    * @param req request
+    * @param res response
+    * @return A list of course results
+    */
+  @GetMapping(value = Array("/{cid}/results/student"))
+  @ResponseBody
+  def getStudentResult(@PathVariable cid: Int, req: HttpServletRequest, res: HttpServletResponse): List[CourseResult] = {
+    val user = authService.authorize(req, res)
 
-      val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-        .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
-      if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-        courseResultService.getAll(cid, 2, 2)
-      } else {
-        throw new ForbiddenException()
-      }
+    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
+      courseResultService.getAll(cid, 2, 2)
+    } else {
+      throw new ForbiddenException()
     }
+  }
 }

@@ -3,6 +3,8 @@
     *ngIf="data?.submission"
     [displayTables]="true"
     [submissions]="data.submission"
+    [context]="data.context"
+    [isText]="data.isText"
   ></app-results>
 </mat-dialog-content>
 <mat-dialog-actions class="buttons">

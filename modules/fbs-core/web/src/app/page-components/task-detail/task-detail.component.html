@@ -103,6 +103,7 @@
           [outputFields]="task?.mediaInformation.outputs || []"
           [decimals]="task?.mediaInformation.decimals || 2"
           [content]="latestResult?.extInfo || {}"
+          [lastSubmission]="lastSubmission"
         ></app-submission-spreadsheet>
       </div>
 
@@ -130,7 +131,7 @@
             </button>
           </div>
           <button
-            [disabled]="deadlinePassed || isSubmissionEmpty()"
+            [disabled]="isCheckerEmpty || deadlinePassed || isSubmissionEmpty()"
             mat-flat-button
             color="accent"
             (click)="submission()"
@@ -164,6 +165,7 @@
         *ngIf="submissions"
         [submissions]="submissions"
         [context]="{ uid: uid, cid: courseId, tid: task.id }"
+        [isText]="task?.mediaType === 'text/plain'"
       ></app-results>
       <!--      <app-submission-result *ngIf="lastSubmission != null" style="background:rgba(194,199,216,0.16);border-radius: 13px;" [taskResults]="lastSubmission.results"></app-submission-result>-->
     </mat-card-content>
