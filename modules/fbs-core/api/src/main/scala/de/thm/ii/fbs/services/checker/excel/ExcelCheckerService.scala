@@ -86,7 +86,6 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
           submissionService.storeResult(submission.id, cc.id, res.exitCode, "See Result Data",
             objectMapper.writeValueAsString(this.buildExtendedRes(res)), Option(res.results)
           )
-        // TODO: Sub Tasks this.submitSubTasks(cc.id, submission.id, res.mergedResults, excelMediaInformation)
       }
 
     } catch {
@@ -261,12 +260,10 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   private def buildExtendedRes(result: SubmissionResultV2): ExtendedInfoExcel = {
     result.results.getExercises.foldLeft(ExtendedInfoExcel.newV2)((r, t) => {
       r.result.rows.append(List(f"Unteraufgabe ${t.getName}", "-", "-", "-"))
-      // TODO: Error msgs? if (t._1.errorMsg.nonEmpty) r.result.rows.append(List("⚠️ Fehler", t._1.errorMsg))
       val subRows = t.getErrorCell.map(c => List(c.getCellName, c.getValue, c.getFormula, c.isPropagated.toString))
-      r.result.rows.appendAll(subRows) // TODO: add cell value
+      r.result.rows.appendAll(subRows)
 
       r.expected.rows.append(List(f"Unteraufgabe ${t.getName}", "-", "-"))
-      // TODO: Error msgs? if (t._1.errorMsg.nonEmpty) r.expected.rows.append(List("⚠️ Fehler", t._1.errorMsg))
       val solRows = t.getErrorCell.map(c => List(c.getCellName, c.getSolution.getValue, c.getSolution.getFormula))
       r.expected.rows.appendAll(solRows)
       r
