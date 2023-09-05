@@ -14,7 +14,7 @@ class ReferenceGraphTest {
         val a1on1 = Cell(1, "A1", "3")
         val testMap = mapOf(
             0 to mapOf(a1 to setOf(), a2 to setOf(a1), a3 to setOf(a1)),
-            1 to mapOf(a1 to setOf(a3, a2))
+            1 to mapOf(Cell(1, "A1", "0") to setOf(a3, a2))
         )
         val graph = ReferenceGraph(testMap)
 
