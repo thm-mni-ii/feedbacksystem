@@ -15,7 +15,7 @@ data class CellResult(val solutionCell: Cell, val isPropagated: Boolean = false)
 
     fun getFeedbackString(): String {
         if (feedback.isEmpty()) {
-            return "Diese Celle enthält nicht das korrekte Ergebnis" // TODO: Define actual default msg
+            return "Diese Zelle enthält nicht das richtige Ergebnis"
         }
 
         return feedback.toString()
