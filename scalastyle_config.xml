@@ -141,7 +141,7 @@
     </check>
     <check level="error" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="false"/>
     <check level="error" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" enabled="true"/>
-    <check level="warn" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="true">
+    <check level="warn" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="false">
         <parameters>
             <parameter name="allowed"><![CDATA[8]]></parameter>
             <parameter name="ignoreRegex"><![CDATA[^""$]]></parameter>
@@ -163,7 +163,9 @@
     </check>
     <check level="error" class="org.scalastyle.scalariform.EnsureSingleSpaceAfterTokenChecker" enabled="true">
         <parameters>
-            <parameter name="tokens">ARROW, EQUALS, COMMA, COLON, IF, ELSE, DO, WHILE, FOR, MATCH, TRY, CATCH, FINALLY, LARROW, RARROW</parameter>
+            <parameter name="tokens">ARROW, EQUALS, COMMA, COLON, IF, ELSE, DO, WHILE, FOR, MATCH, TRY, CATCH, FINALLY,
+                LARROW, RARROW
+            </parameter>
         </parameters>
     </check>
     <check enabled="true" class="org.scalastyle.scalariform.DisallowSpaceBeforeTokenChecker" level="error">
@@ -186,12 +188,17 @@
         <customMessage>Blank line at end of block should be removed</customMessage>
     </check>
     <check customId="commonslang2" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
-        <parameters><parameter name="regex">org\.apache\.commons\.lang\.</parameter></parameters>
+        <parameters>
+            <parameter name="regex">org\.apache\.commons\.lang\.</parameter>
+        </parameters>
         <customMessage>Use Commons Lang 3 classes (package org.apache.commons.lang3.*) instead
-            of Commons Lang 2 (package org.apache.commons.lang.*)</customMessage>
+            of Commons Lang 2 (package org.apache.commons.lang.*)
+        </customMessage>
     </check>
     <check customId="OverrideJavaCase" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
-        <parameters><parameter name="regex">^Override$</parameter></parameters>
+        <parameters>
+            <parameter name="regex">^Override$</parameter>
+        </parameters>
         <customMessage>override modifier should be used instead of @java.lang.Override.</customMessage>
     </check>
     <check level="error" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"/>
