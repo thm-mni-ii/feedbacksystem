@@ -70,7 +70,7 @@ data class CellResultData(
     @get:JsonIgnore // Not return this information to the user
     val formula: String?,
     @get:JsonIgnore // Not return this information to the user
-    val solution: Cell?,
+    val solution: Cell?
 ) {
     constructor(cell: Cell, cellResult: CellResult?) : this(
         cell.cell,

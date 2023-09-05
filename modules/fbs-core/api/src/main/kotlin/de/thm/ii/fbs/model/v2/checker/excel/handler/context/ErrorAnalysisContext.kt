@@ -6,5 +6,5 @@ data class ErrorAnalysisContext(
     val errors: Set<Cell>,
     val perrors: Set<Cell>,
     val submissionCell: Cell? = null,
-    val solutionCell: Cell? = null,
+    val solutionCell: Cell? = null
 )
