@@ -40,17 +40,17 @@ class SpreadsheetReferenceParserTest {
         val a1 = Cell(0, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a1 to
-                                setOf(
-                                    a1,
-                                    Cell(0, "B1"),
-                                    Cell(0, "A3"),
-                                    Cell(0, "A4"),
-                                    Cell(0, "A5")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    a1 to
+                        setOf(
+                            a1,
+                            Cell(0, "B1"),
+                            Cell(0, "A3"),
+                            Cell(0, "A4"),
+                            Cell(0, "A5")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
@@ -61,18 +61,18 @@ class SpreadsheetReferenceParserTest {
         val a1 = Cell(0, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a1 to
-                                setOf(
-                                    a1,
-                                    Cell(0, "B1"),
-                                    Cell(0, "A2"),
-                                    Cell(0, "A3"),
-                                    Cell(0, "A4"),
-                                    Cell(0, "A5")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    a1 to
+                        setOf(
+                            a1,
+                            Cell(0, "B1"),
+                            Cell(0, "A2"),
+                            Cell(0, "A3"),
+                            Cell(0, "A4"),
+                            Cell(0, "A5")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
@@ -113,17 +113,17 @@ class SpreadsheetReferenceParserTest {
         val a1 = Cell(0, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a1 to
-                                setOf(
-                                    a1,
-                                    Cell(1, "B1"),
-                                    Cell(1, "A3"),
-                                    Cell(1, "A4"),
-                                    Cell(1, "A5")
-                                )
-                    )
-                    ),
+                0 to mapOf(
+                    a1 to
+                        setOf(
+                            a1,
+                            Cell(1, "B1"),
+                            Cell(1, "A3"),
+                            Cell(1, "A4"),
+                            Cell(1, "A5")
+                        )
+                )
+                ),
             1 to mapOf()
         )
         Assert.assertEquals(expected, references.references)
@@ -136,19 +136,19 @@ class SpreadsheetReferenceParserTest {
         val a1 = Cell(0, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a1 to
-                                setOf(
-                                    a1,
-                                    Cell(1, "B1"),
-                                    Cell(1, "A1"),
-                                    Cell(1, "A2"),
-                                    Cell(1, "A3"),
-                                    Cell(1, "A4"),
-                                    Cell(1, "A5")
-                                )
-                    )
-                    ),
+                0 to mapOf(
+                    a1 to
+                        setOf(
+                            a1,
+                            Cell(1, "B1"),
+                            Cell(1, "A1"),
+                            Cell(1, "A2"),
+                            Cell(1, "A3"),
+                            Cell(1, "A4"),
+                            Cell(1, "A5")
+                        )
+                )
+                ),
             1 to mapOf()
         )
         Assert.assertEquals(expected, references.references)
@@ -161,20 +161,20 @@ class SpreadsheetReferenceParserTest {
         val a11 = Cell(1, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a10 to
-                                setOf(
-                                    a10,
-                                    Cell(0, "B1")
-                                )
-                    )
-                    ),
+                0 to mapOf(
+                    a10 to
+                        setOf(
+                            a10,
+                            Cell(0, "B1")
+                        )
+                )
+                ),
             1 to mapOf(
                 a11 to
-                        setOf(
-                            a11,
-                            Cell(1, "B1")
-                        )
+                    setOf(
+                        a11,
+                        Cell(1, "B1")
+                    )
             )
         )
         Assert.assertEquals(expected, references.references)
@@ -187,21 +187,21 @@ class SpreadsheetReferenceParserTest {
         val a11 = Cell(1, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a10 to
-                                setOf(
-                                    a10,
-                                    Cell(0, "A2"),
-                                    Cell(0, "A3")
-                                )
-                    )
-                    ),
+                0 to mapOf(
+                    a10 to
+                        setOf(
+                            a10,
+                            Cell(0, "A2"),
+                            Cell(0, "A3")
+                        )
+                )
+                ),
             1 to mapOf(
                 a11 to
-                        setOf(
-                            a11,
-                            Cell(1, "B1")
-                        )
+                    setOf(
+                        a11,
+                        Cell(1, "B1")
+                    )
             )
         )
         Assert.assertEquals(expected, references.references)
@@ -213,14 +213,14 @@ class SpreadsheetReferenceParserTest {
             SpreadsheetReferenceParser(createSingleTestWorkbook("IJM2 + JQZ3"))
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        Cell(0, "A1", "0") to
-                                setOf(
-                                    Cell(0, "IJM2"),
-                                    Cell(0, "JQZ3")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    Cell(0, "A1", "0") to
+                        setOf(
+                            Cell(0, "IJM2"),
+                            Cell(0, "JQZ3")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
@@ -231,14 +231,14 @@ class SpreadsheetReferenceParserTest {
             SpreadsheetReferenceParser(createSingleTestWorkbook("A999999 + B999999"))
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        Cell(0, "A1", "0") to
-                                setOf(
-                                    Cell(0, "A999999"),
-                                    Cell(0, "B999999")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    Cell(0, "A1", "0") to
+                        setOf(
+                            Cell(0, "A999999"),
+                            Cell(0, "B999999")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
@@ -249,13 +249,13 @@ class SpreadsheetReferenceParserTest {
             SpreadsheetReferenceParser(createSingleTestWorkbook("A2&\" A1 B2 C2\""))
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        Cell(0, "A1", "0") to
-                                setOf(
-                                    Cell(0, "A2")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    Cell(0, "A1", "0") to
+                        setOf(
+                            Cell(0, "A2")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
@@ -267,19 +267,19 @@ class SpreadsheetReferenceParserTest {
         val a1 = Cell(0, "A1")
         val expected = mapOf(
             (
-                    0 to mapOf(
-                        a1 to
-                                setOf(
-                                    a1,
-                                    Cell(0, "A2"),
-                                    Cell(0, "A3"),
-                                    Cell(0, "A56"),
-                                    Cell(0, "F39"),
-                                    Cell(0, "F1"),
-                                    Cell(0, "IJM2")
-                                )
-                    )
-                    )
+                0 to mapOf(
+                    a1 to
+                        setOf(
+                            a1,
+                            Cell(0, "A2"),
+                            Cell(0, "A3"),
+                            Cell(0, "A56"),
+                            Cell(0, "F39"),
+                            Cell(0, "F1"),
+                            Cell(0, "IJM2")
+                        )
+                )
+                )
         )
         Assert.assertEquals(expected, references.references)
     }
