@@ -1,5 +1,9 @@
-export interface ExcelCheckResult {
+import { ResultData } from "./ResultData";
+
+export interface ExcelCheckerResultData extends ResultData {
+  type: "ExcelCheckerResultData";
   exercises: ExcelExercise[];
+  passed: boolean;
 }
 
 export interface ExcelExercise {

@@ -1,7 +1,8 @@
 import { Component, Input } from "@angular/core";
-import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
+import { ExcelCheckerResultData } from "src/app/model/ExcelCheckerResultData";
 import { CheckResult } from "../../model/CheckResult";
+import { Submission } from "../../model/Submission";
 
 @Component({
   selector: "app-results",
@@ -82,5 +83,14 @@ export class ResultsComponent {
 
   selectLast() {
     setTimeout(() => (this.index = this.allSubmissions.length), 1);
+  }
+
+  showExcelView() {
+    const res = this.dataSource.data[0]; // TODO: handle multible checker
+    return res?.resultData?.type === "ExcelCheckerResultData";
+  }
+
+  getExcelData(): ExcelCheckerResultData {
+    return this.dataSource.data[0].resultData as ExcelCheckerResultData; // TODO: handle multible checker
   }
 }
