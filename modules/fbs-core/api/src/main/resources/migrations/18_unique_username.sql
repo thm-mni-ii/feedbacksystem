@@ -18,7 +18,7 @@ read_loop: LOOP
       LEAVE read_loop;
 END IF;
 
-UPDATE user SET username = CONCAT(username, "-", i) WHERE id = a;
+UPDATE user SET username = CONCAT(username, "-", i) WHERE user_id = a;
 SET i = i + 1;
 
 END LOOP;
