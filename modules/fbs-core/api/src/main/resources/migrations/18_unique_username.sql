@@ -6,7 +6,8 @@ CREATE PROCEDURE MakeUsernamesUnique()
 BEGIN
   DECLARE done INT DEFAULT FALSE;
   DECLARE a INT;
-  DECLARE cur CURSOR FOR SELECT user_id FROM user;
+  DECLARE i INT DEFAULT 1;
+  DECLARE cur CURSOR FOR SELECT DISTINCT u2.user_id FROM user u2 JOIN user u1 ON u1.username = u2.username AND u1.user_id < u2.user_id;
 DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
 OPEN cur;
@@ -17,7 +18,9 @@ read_loop: LOOP
       LEAVE read_loop;
 END IF;
 
-UPDATE user SET username = CONCAT(username, "-", HEX(RANDOM_BYTES(4))) WHERE user_id = a;
+UPDATE user SET username = CONCAT(username, "-", i) WHERE id = a;
+SET i = i + 1;
+
 END LOOP;
 
 CLOSE cur;
