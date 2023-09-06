@@ -5,6 +5,7 @@ import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.handler.When
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetEvaluator.Companion.evaluateAll
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
@@ -27,7 +28,7 @@ class ErrorAnalysisService(
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)
-        evaluator.evaluateAll()
+        evaluateAll(workbook, evaluator)
         for (outputCell in outputCells) {
             findErrors(outputCell)
         }
