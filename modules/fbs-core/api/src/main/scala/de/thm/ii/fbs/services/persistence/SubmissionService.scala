@@ -2,8 +2,10 @@ package de.thm.ii.fbs.services.persistence
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CheckResult, Submission, User}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.{CheckResult, Submission}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.{Archiver, DB}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.UncategorizedSQLException
@@ -36,7 +38,7 @@ class SubmissionService {
   def writeSubmissionsOfTaskToFile(f: File, cid: Int, tid: Int): Unit = {
     val task = taskService.getOne(tid).get
     val submissionList = getLatestSubmissionByTask(cid, tid)
-    val usersList = submissionList.map(submission => userService.find(submission.userID.get).get)
+    val usersList = submissionList.map(submission => userService.find(submission.userID.get))
     val subFiles = submissionList.map(submission => storageService.getFileSolutionFile(submission))
     val fileExts = submissionList.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
     Archiver.packSubmissions(f, subFiles, usersList, fileExts)
@@ -53,7 +55,7 @@ class SubmissionService {
       val task = taskService.getOne(taskid).get
       val tmp = submissionList.filter(s => s.taskID == taskid)
       listSubInDir += tmp.map(submission => storageService.getFileSolutionFile(submission))
-      usersList += tmp.map(submission => userService.find(submission.userID.get).get)
+      usersList += tmp.map(submission => userService.find(submission.userID.get))
       fileExts += tmp.map(submission => task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))._2)
     })
     Archiver.packSubmissionsInDir(f, listSubInDir, usersList, fileExts, t)

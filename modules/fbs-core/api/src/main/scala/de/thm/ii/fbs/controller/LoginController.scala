@@ -2,10 +2,12 @@ package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{ForbiddenException, UnauthorizedException}
-import de.thm.ii.fbs.model.{GlobalRole, User}
-import de.thm.ii.fbs.services.persistence.UserService
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
 import de.thm.ii.fbs.services.security.{AuthService, LdapService, LocalLoginService}
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
+import de.thm.ii.fbs.utils.v2.security.authorization.PermitAll
 
 import javax.servlet.http.{Cookie, HttpServletRequest, HttpServletResponse}
 import net.unicon.cas.client.configuration.{CasClientConfigurerAdapter, EnableCasClient}
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation._
 @RestController
 @EnableCasClient
 @RequestMapping(path = Array("/api/v1/login"))
+@PermitAll
 class LoginController extends CasClientConfigurerAdapter {
   @Autowired
   private implicit val userService: UserService = null
@@ -68,8 +71,8 @@ class LoginController extends CasClientConfigurerAdapter {
       } else {
         name = casUser.getName
       }
-      userService.find(name)
-        .orElse(loadUserFromLdap(name).map(u => userService.create(u, null)))
+      Option(userService.find(name))
+        .orElse(loadUserFromLdap(name).map(u => userService.create(u)))
         .foreach(u => {
           val token = authService.createToken(u)
           val co = new Cookie("jwt", token)
@@ -88,11 +91,10 @@ class LoginController extends CasClientConfigurerAdapter {
       response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
       response.setHeader("Location", CLIENT_HOST_URL + "/courses")
     } catch {
-      case e: Throwable => {
+      case e: Throwable =>
         logger.error("Error: ", e)
         response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY)
         response.setHeader("Location", CLIENT_HOST_URL + "/")
-      }
     }}
 
   private def loadUserFromLdap(uid: String): Option[User] =
@@ -100,9 +102,10 @@ class LoginController extends CasClientConfigurerAdapter {
       .map(entry => new User(
       entry.getAttribute(nameAttributeName).getStringValue,
       entry.getAttribute(snAttributeName).getStringValue,
-      entry.getAttribute(mailAttributeName).getStringValue,
       entry.getAttribute(uidAttributeName).getStringValue,
-      GlobalRole.USER))
+      GlobalRole.USER,
+      entry.getAttribute(mailAttributeName).getStringValue,
+      null, null, false, false, null))
 
   /**
     * Login via LDAP
@@ -122,7 +125,7 @@ class LoginController extends CasClientConfigurerAdapter {
 
       login match {
         case Some((user)) =>
-          val localUser = userService.find(user.username).getOrElse(userService.create(user, null))
+          val localUser = Option(userService.find(user.getUsername)).getOrElse(userService.create(user))
           authService.renewAuthentication(localUser, response)
         case None => throw new UnauthorizedException()
       }
@@ -166,11 +169,15 @@ class LoginController extends CasClientConfigurerAdapter {
     } yield (username, password)
 
     val user = credentials.flatMap(creds =>
-        loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {for {
+        loginService.login(creds._1, creds._2).orElse(if (allowLdapLogin) {
+          for {
             ldapLogin <- ldapService.login(creds._1, creds._2)
             ldapUser <- loadUserFromLdap(ldapLogin.getAttribute(uidAttributeName).getStringValue)
-              .map(user => userService.find(user.username).getOrElse(userService.create(user, null)))
-          } yield ldapUser} else {None})
+              .map(user => Option(userService.find(user.getUsername)).getOrElse(userService.create(user)))
+          } yield ldapUser
+        } else {
+          None
+        })
     )
 
     user match {
@@ -186,6 +193,6 @@ class LoginController extends CasClientConfigurerAdapter {
     */
   @RequestMapping(value = Array("/token"), method = Array(RequestMethod.GET))
   def renew(req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    authService.authorize(req, res);
+    authService.authorize(req, res)
   }
 }

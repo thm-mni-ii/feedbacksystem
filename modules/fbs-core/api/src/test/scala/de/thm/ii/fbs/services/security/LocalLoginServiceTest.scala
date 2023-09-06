@@ -1,8 +1,11 @@
-package de.thm.ii.fbs.services.persistence;
+package de.thm.ii.fbs.services.persistence
 
 import de.thm.ii.fbs.TestApplication
-import de.thm.ii.fbs.model.{Course, GlobalRole, User}
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
+import de.thm.ii.fbs.model.Course
+import de.thm.ii.fbs.model.v2.security.authentication.User
 import de.thm.ii.fbs.services.security.LocalLoginService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.Hash
 import org.junit.{Assert, Before, Test}
 import org.junit.runner.RunWith
@@ -29,26 +32,26 @@ class LocalLoginServiceTest {
 
   private val exampleUsername = "test"
   private val examplePassword = "test"
-  private val exampleUser = new User("Test", "Tester", "test@example.ork", exampleUsername, GlobalRole.USER)
+  private val exampleUser = new User("Test", "Tester", exampleUsername, GlobalRole.USER, "test@example.ork", null, null, false, false, null)
   private val outdatedPasswordHash = Hash.hash(examplePassword)
   private def passwordHash = localLoginService.hash(examplePassword)
 
-  private def createTestUserWithOutdatedPasswordHash() = userService.create(
-    exampleUser,
-    outdatedPasswordHash
-  )
+  private def createTestUserWithOutdatedPasswordHash() = {
+    exampleUser.setPassword$fbs_core_api(outdatedPasswordHash)
+    userService.create(exampleUser)
+  }
 
-  private def createTestUser() = userService.create(
-    exampleUser,
-    passwordHash
-  )
+  private def createTestUser() = {
+    exampleUser.setPassword$fbs_core_api(passwordHash)
+    userService.create(exampleUser)
+  }
 
   @Test
   def failedMigrationTest(): Unit = {
     createTestUserWithOutdatedPasswordHash()
     val user = localLoginService.login(exampleUsername, "1234")
     Assert.assertEquals(None, user)
-    val password = userService.getPassword(exampleUsername)
+    val password = Option(userService.getPassword(exampleUsername))
     Assert.assertEquals(Some(outdatedPasswordHash), password)
   }
 
@@ -57,7 +60,7 @@ class LocalLoginServiceTest {
     createTestUserWithOutdatedPasswordHash()
     val user = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(Some(exampleUser), user)
-    val password = userService.getPassword(exampleUsername)
+    val password = Option(userService.getPassword(exampleUsername))
     Assert.assertNotEquals(Some(outdatedPasswordHash), password)
   }
 

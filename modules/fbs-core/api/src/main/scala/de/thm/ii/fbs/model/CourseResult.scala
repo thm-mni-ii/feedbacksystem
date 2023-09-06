@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.model
 
 import de.thm.ii.fbs.model.task.TaskResult
+import de.thm.ii.fbs.model.v2.security.authentication.User
 
 /**
   * The summerized course results

@@ -3,8 +3,10 @@ package de.thm.ii.fbs.services.security
 import java.util.Date
 
 import de.thm.ii.fbs.controller.exception.UnauthorizedException
-import de.thm.ii.fbs.model.{CourseRole, User}
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.CourseRole
+import de.thm.ii.fbs.services.persistence.CourseRegistrationService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.ScalaObjectMapper
 import io.jsonwebtoken.{Claims, Jwts, SignatureAlgorithm}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
@@ -53,7 +55,7 @@ class AuthService {
     * @param res The http response (nullable)
     * @return The user.
     */
-  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(userService.find) match {
+  def authorize(req: HttpServletRequest, res: HttpServletResponse = null): User = authorizeRequest(req).flatMap(id => Option(userService.find(id))) match {
       case Some(user) =>
         if (res != null) renewAuthentication(user, res)
         user
@@ -66,8 +68,8 @@ class AuthService {
     * @return The user.
     */
   def authorize(token: String): User = userService.find(authorizeToken(token)) match {
-      case Some(user) => user
-      case None => throw new UnauthorizedException
+      case user: User => user
+      case _ => throw new UnauthorizedException
     }
 
   private def authorizeRequest(request: HttpServletRequest): Option[Int] =
@@ -91,18 +93,18 @@ class AuthService {
     * @return new token
     */
     def createToken(user: User): String = {
-    val privileges = crs.getCoursePrivileges(user.id)
+    val privileges = crs.getCoursePrivileges(user.getId)
     val mapper = new ScalaObjectMapper
 
     val courseRoles = privileges match {
-      case m: Map[Int, CourseRole.Value] if m.isEmpty => "{}"
-      case _ => mapper.writeValueAsString(privileges.map((f: (Int, CourseRole.Value)) => (f._1, f._2.toString)))
+      case m: Map[Int, CourseRole] if m.isEmpty => "{}"
+      case _ => mapper.writeValueAsString(privileges.map((f: (Int, CourseRole)) => (f._1, f._2.toString)))
     }
 
     Jwts.builder.setSubject("client_authentication")
-      .claim("id", user.id)
-      .claim("username", user.username)
-      .claim("globalRole", user.globalRole.toString)
+      .claim("id", user.getId)
+      .claim("username", user.getUsername)
+      .claim("globalRole", user.getGlobalRole.toString)
       .claim("courseRoles", courseRoles)
       .setIssuedAt(new Date())
       .setExpiration(new Date(new Date().getTime + (1000 * Integer.parseInt(jwtExpirationTime))))

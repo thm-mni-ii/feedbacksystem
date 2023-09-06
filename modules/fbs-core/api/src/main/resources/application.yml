@@ -35,8 +35,6 @@ message:
   topic:
     name: java
 security:
-  basic:
-    enabled: false
   antiBruteForce:
     trustedProxyCount: ${TRUSTED_PROXIES:0}
     interval: ${BRUTEFORCE_INTERVAL:600}

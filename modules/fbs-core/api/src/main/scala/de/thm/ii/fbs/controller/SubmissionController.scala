@@ -1,17 +1,20 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.Submission
 import de.thm.ii.fbs.model.task.SubTaskResult
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Submission}
+import de.thm.ii.fbs.model.v2.security.authorization.{CourseRole, GlobalRole}
+import de.thm.ii.fbs.security.PermissionEvaluator
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{MinioStorageService, StorageService}
-import de.thm.ii.fbs.services.security.AuthService
-import org.slf4j.LoggerFactory
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
+import de.thm.ii.fbs.utils.v2.security.authorization.{IsModeratorOrCourseTutor, IsModeratorOrCourseTutorOrSelf, IsSelf}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.{MediaType, ResponseEntity}
+import org.springframework.security.access.prepost.{PostFilter, PreAuthorize}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
@@ -21,6 +24,7 @@ import java.time.Instant
 import java.util
 import java.util.Optional
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.jdk.CollectionConverters.SeqHasAsJava
 
 /**
   * Submission controller implement routes for submitting task and receive results
@@ -29,8 +33,6 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @CrossOrigin
 @RequestMapping(path = Array("/api/v1/users"))
 class SubmissionController {
-  @Autowired
-  private val authService: AuthService = null
   @Autowired
   private val storageService: StorageService = null
   @Autowired
@@ -54,298 +56,222 @@ class SubmissionController {
   @Autowired
   private val courseRegistration: CourseRegistrationService = null
   private val objectMapper = new ObjectMapper();
-  private val logger = LoggerFactory.getLogger(this.getClass)
+  @Autowired
+  private val permissionEvaluator: PermissionEvaluator = null
 
   /**
     * Get a list of all submissions for a task
     *
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
-    * @param req Http request
-    * @param res Http response
+    * @param userId   User id
+    * @param courseId Course id
+    * @param taskId   Task id
+    * @param req      Http request
+    * @param res      Http response
     * @return Submission results
     */
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
+  @GetMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions"))
   @ResponseBody
-  def getAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+  @IsModeratorOrCourseTutorOrSelf
+  def getAll(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int,
              req: HttpServletRequest, res: HttpServletResponse): List[Submission] = {
-    val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
+    val task = taskService.getOne(taskId).get
 
-    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
+    val adminPrivileged = permissionEvaluator.hasRole(GlobalRole.MODERATOR) || permissionEvaluator.hasCourseRole(courseId, CourseRole.TUTOR)
 
-    if (privileged) {
-      submissionService.getAll(uid, cid, tid, adminPrivileged || task.mediaType == "application/x-spreadsheet")
-        .map(submission => submissionService.getOrHidden(submission, task.hideResult, adminPrivileged))
-    } else {
-      throw new ForbiddenException()
-    }
+    submissionService.getAll(userId, courseId, taskId, adminPrivileged || task.mediaType == "application/x-spreadsheet")
+      .map(submission => submissionService.getOrHidden(submission, task.hideResult, adminPrivileged))
   }
 
   /**
     * Get a list of all submissions for a task
     *
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
-    * @param sid Submission id
-    * @param req Http request
-    * @param res Http response
+    * @param userId       User id
+    * @param courseId     Course id
+    * @param taskId       Task id
+    * @param submissionId Submission id
+    * @param req          Http request
+    * @param res          Http response
     * @return Submission results
     */
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/subresults"))
+  @GetMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions/{submissionId}/subresults"))
   @ResponseBody
-  def getSubresults(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-                    @PathVariable("sid") sid: Int, req: HttpServletRequest, res: HttpServletResponse): List[SubTaskResult] = {
-    val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
-
-    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
-
-    if (!privileged) {
-      throw new ForbiddenException()
+  @PreAuthorize("hasRole('MODERATOR') || @permissions.hasCourseRole(#courseId, 'TUTOR')" +
+    " || (@permissions.isSelf(#userId) && !@permissions.taskIsPrivate(#taskId))")
+  @PostFilter("hasRole('MODERATOR') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskHideResult(#taskId)")
+  def getSubresults(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int,
+                    @PathVariable submissionId: Int, req: HttpServletRequest, res: HttpServletResponse): java.util.List[SubTaskResult] =
+    checkerConfigurationService.getAll(courseId, taskId).headOption match {
+      case Some(cc) => new java.util.ArrayList[SubTaskResult](checkrunnerSubTaskServer.listResultsWithTasks(userId, cc.id, submissionId).asJava)
+      case None => throw new ResourceNotFoundException()
     }
-
-    if (task.hideResult && !adminPrivileged) {
-      List()
-    } else {
-      checkerConfigurationService.getAll(cid, tid).headOption match {
-        case Some(cc) => checkrunnerSubTaskServer.listResultsWithTasks(uid, cc.id, sid)
-        case None => throw new ResourceNotFoundException()
-      }
-    }
-  }
 
   /**
     * Submit a file for a task
     *
-    * @param uid  User id
-    * @param cid  Course id
-    * @param tid  Task id
-    * @param file Mutipart file
-    * @param req  Http request
-    * @param res  Http response
+    * @param userId   User id
+    * @param courseId Course id
+    * @param taskId   Task id
+    * @param file     Mutipart file
+    * @param req      Http request
+    * @param res      Http response
     * @return Submission information
     */
-  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions"))
+  @PostMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions"))
   @ResponseBody
-  def submit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
+  @IsSelf
+  // Do not allow Students to Submit to Private Tasks
+  @PreAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskIsPrivate(#taskId)")
+  def submit(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int,
              @RequestParam file: MultipartFile, @RequestParam additionalInformation: Optional[String],
-             req: HttpServletRequest, res: HttpServletResponse): Submission = {
-    val user = authService.authorize(req, res)
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+             req: HttpServletRequest, res: HttpServletResponse): Submission =
+    this.taskService.getOne(taskId) match {
+      case Some(task) =>
+        if (task.deadline.isDefined && Instant.now().isAfter(Instant.parse(task.deadline.get))) {
+          throw new BadRequestException("Deadline Before Now")
+        }
+        // TODO: Check media type compatibility
+        val submission = submissionService.create(userId, taskId,
+          Option(additionalInformation.orElse(null)).map(ai => objectMapper.readValue(ai, classOf[util.HashMap[String, Any]])))
+        minioStorageService.storeSolutionFileInBucket(submission.id, file)
 
-    if (user.id == uid) {
-      this.taskService.getOne(tid) match {
-        case Some(task) =>
-          // Not allow Students to Submit to Private Tasks
-          if (noPrivateAccess && task.isPrivate) {
-            throw new ForbiddenException()
-          }
+        checkerConfigurationService.getAll(courseId, taskId).foreach(cc => {
+          val checkerService = checkerServiceFactoryService(cc.checkerType)
+          checkerService.notify(taskId, submission.id, cc, permissionEvaluator.getUser)
+        })
+        submission
 
-          val expectedMediaType = task.mediaType
-          val currentMediaType = req.getContentType // Transform to media type (Content Type != Media Type)
-          if (task.deadline.isDefined && Instant.now().isAfter(Instant.parse(task.deadline.get))) {
-            throw new BadRequestException("Deadline Before Now")
-          }
-          if (true) { // TODO: Check media type compatibility
-            val submission = submissionService.create(uid, tid,
-              Option(additionalInformation.orElse(null)).map(ai => objectMapper.readValue(ai, classOf[util.HashMap[String, Any]])))
-            minioStorageService.storeSolutionFileInBucket(submission.id, file)
-
-            checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-              val checkerService = checkerServiceFactoryService(cc.checkerType)
-              checkerService.notify(tid, submission.id, cc, user)
-            })
-            submission
-
-          } else {
-            throw new BadRequestException("Unsupported Media Type")
-          }
-        case _ => throw new ResourceNotFoundException()
-      }
-    } else {
-      throw new ForbiddenException()
+      case _ => throw new ResourceNotFoundException()
     }
-  }
 
   /**
     * Restart the submission process
     *
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
-    * @param sid Task id
-    * @param req Http request
-    * @param res Http response
+    * @param userId       User id
+    * @param courseId     Course id
+    * @param taskId       Task id
+    * @param submissionId Task id
+    * @param req          Http request
+    * @param res          Http response
     * @return
     */
-  @PutMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
-  def resubmit(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int, @PathVariable("sid") sid: Int,
-               req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
-    val someCourseRole = courseRegistration.getCourseRoleOfUser(cid, user.id)
-    val noPrivateAccess = someCourseRole.contains(CourseRole.STUDENT) && user.globalRole != GlobalRole.ADMIN
+  @PutMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions/{submissionId}"))
+  @IsSelf
+  // Do not allow Students to resubmit to Private Tasks
+  @PreAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskIsPrivate(#taskId)")
+  def resubmit(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int, @PathVariable submissionId: Int,
+               req: HttpServletRequest, res: HttpServletResponse): Unit =
+    submissionService.getOne(submissionId, userId) match {
+      case Some(submission) =>
+        if (!submission.isInBlockStorage) {
+          throw new ConflictException("resubmit is not supported for this submission")
+        }
 
-    val allowed = user.id == uid && !(noPrivateAccess && task.isPrivate)
-    if (allowed) {
-      submissionService.getOne(sid, uid) match {
-        case Some(submission) =>
-          if (!submission.isInBlockStorage) {
-            throw new ConflictException("resubmit is not supported for this submission")
-          }
-
-          submissionService.clearResults(sid, uid)
-          checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-            val checkerService = checkerServiceFactoryService(cc.checkerType)
-            checkerService.notify(tid, sid, cc, user)
-          })
-        case None => throw new ResourceNotFoundException()
-      }
-    } else {
-      throw new ForbiddenException()
+        submissionService.clearResults(submissionId, userId)
+        checkerConfigurationService.getAll(courseId, taskId).foreach(cc => {
+          val checkerService = checkerServiceFactoryService(cc.checkerType)
+          checkerService.notify(taskId, submissionId, cc, permissionEvaluator.getUser)
+        })
+      case None => throw new ResourceNotFoundException()
     }
-  }
 
   /**
     * Restart the submission process for all submissions of task
     *
-    * @param cid Course id
-    * @param tid Task id
-    * @param req Http request
-    * @param res Http response
+    * @param courseId Course id
+    * @param taskId   Task id
+    * @param req      Http request
+    * @param res      Http response
     * @return
     */
-  @PostMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/resubmitAll"))
-  def resubmitAll(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("tid") tid: Int,
-                  req: HttpServletRequest, res: HttpServletResponse): Unit = {
-    val user = authService.authorize(req, res)
-
-    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-
-    if (adminPrivileged) {
-      submissionService.getAllByTask(cid, tid).filter(s => s.isInBlockStorage).foreach(submission => {
-        submissionService.clearResults(submission.id, submission.userID.get)
-        checkerConfigurationService.getAll(cid, tid).foreach(cc => {
-          val checkerService = checkerServiceFactoryService(cc.checkerType)
-          checkerService.notify(tid, submission.id, cc, user)
-        })
+  @PostMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/resubmitAll"))
+  @IsModeratorOrCourseTutor
+  def resubmitAll(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int,
+                  req: HttpServletRequest, res: HttpServletResponse): Unit =
+    submissionService.getAllByTask(courseId, taskId).filter(s => s.isInBlockStorage).foreach(submission => {
+      submissionService.clearResults(submission.id, submission.userID.get)
+      checkerConfigurationService.getAll(courseId, taskId).foreach(cc => {
+        val checkerService = checkerServiceFactoryService(cc.checkerType)
+        checkerService.notify(taskId, submission.id, cc, permissionEvaluator.getUser)
       })
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+    })
 
   /**
     * Get the status of submission
     *
-    * @param uid User id
-    * @param cid Course id
-    * @param tid Task id
-    * @param sid Task id
-    * @param req Http request
-    * @param res Http response
+    * @param userId       User id
+    * @param courseId     Course id
+    * @param taskId       Task id
+    * @param submissionId Task id
+    * @param req          Http request
+    * @param res          Http response
     * @return A submission state
     */
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}"))
+  @GetMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions/{submissionId}"))
   @ResponseBody
-  def getOne(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+  @IsSelf
+  // Do not allow Students to get submissions of Private Tasks
+  @PreAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskIsPrivate(#taskId)")
+  def getOne(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int, @PathVariable submissionId: Int,
              req: HttpServletRequest, res: HttpServletResponse): Submission = {
-    val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
+    val task = taskService.getOne(taskId).get
 
-    val adminPrivileged = (user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
-      || List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)))
-    val privileged = (user.id == uid && !task.isPrivate) || adminPrivileged
+    val adminPrivileged = permissionEvaluator.hasRole(GlobalRole.MODERATOR) || permissionEvaluator.hasCourseRole(courseId, CourseRole.TUTOR)
 
-    if (privileged) {
-      submissionService.getOne(sid, uid, adminPrivileged) match {
-        case Some(submission) =>
-          submissionService.getOrHidden(submission, task.hideResult, adminPrivileged)
-        case None => throw new ResourceNotFoundException()
-      }
-    } else {
-      throw new ForbiddenException()
+    submissionService.getOne(submissionId, userId, adminPrivileged) match {
+      case Some(submission) =>
+        submissionService.getOrHidden(submission, task.hideResult, adminPrivileged)
+      case None => throw new ResourceNotFoundException()
     }
   }
 
-  @GetMapping(value = Array("/{uid}/courses/{cid}/tasks/{tid}/submissions/{sid}/content"))
+  @GetMapping(value = Array("/{userId}/courses/{courseId}/tasks/{taskId}/submissions/{submissionId}/content"))
   @ResponseBody
-  def getContent(@PathVariable uid: Int, @PathVariable cid: Int, @PathVariable tid: Int, @PathVariable sid: Int,
+  @IsSelf
+  // Do not allow Students to get contents of submissions of Private Tasks
+  @PreAuthorize("hasRole('ADMIN') || @permissions.hasCourseRole(#courseId, 'TUTOR') || !@permissions.taskIsPrivate(#taskId)")
+  def getContent(@PathVariable userId: Int, @PathVariable courseId: Int, @PathVariable taskId: Int, @PathVariable submissionId: Int,
                  req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
-    val user = authService.authorize(req, res)
-    val task = taskService.getOne(tid).get
+    val task = taskService.getOne(taskId).get
 
-    val privileged = user.id == uid || user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
-
-    if (privileged) {
-      submissionService.getOne(sid, uid) match {
-        case Some(submission) => {
-          val file: File = storageService.getFileSolutionFile(submission)
-          val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))
-          ResponseEntity.ok()
-            .contentType(ctype)
-            .contentLength(file.length())
-            .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}$ext")
-            .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
-        }
-        case None => throw new ResourceNotFoundException()
+    submissionService.getOne(submissionId, userId) match {
+      case Some(submission) => {
+        val file: File = storageService.getFileSolutionFile(submission)
+        val (ctype, ext) = task.getExtensionFromMimeType(storageService.getContentTypeSolutionFile(submission))
+        ResponseEntity.ok()
+          .contentType(ctype)
+          .contentLength(file.length())
+          .header("Content-Disposition", s"attachment;filename=submission_${task.id}_${submission.id}$ext")
+          .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
       }
-    } else {
-      throw new ResourceNotFoundException()
+      case None => throw new ResourceNotFoundException()
     }
   }
 
-  @GetMapping(value = Array("/courses/{cid}/tasks/submissions/content"))
+  @GetMapping(value = Array("/courses/{courseId}/tasks/submissions/content"))
   @ResponseBody
-  def solutionsOfCourse(@PathVariable cid: Int,
+  @IsModeratorOrCourseTutor
+  def solutionsOfCourse(@PathVariable courseId: Int,
                         req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
-    val user = authService.authorize(req, res)
-
-    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
-
-    if (privileged) {
-      val f = File.createTempFile("tmp", "")
-      submissionService.writeSubmissionsOfCourseToFile(f, cid)
-      ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=course_$cid.zip")
-        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
-    } else {
-      throw new ResourceNotFoundException()
-    }
+    val f = File.createTempFile("tmp", "")
+    submissionService.writeSubmissionsOfCourseToFile(f, courseId)
+    ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM)
+      .contentLength(f.length())
+      .header("Content-Disposition", s"attachment;filename=course_$courseId.zip")
+      .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
   }
 
-  @GetMapping(value = Array("/courses/{cid}/tasks/{tid}/submissions/content"))
+  @GetMapping(value = Array("/courses/{courseId}/tasks/{taskId}/submissions/content"))
   @ResponseBody
-  def solutionsOfTask(@PathVariable cid: Int, @PathVariable tid: Int,
+  @IsModeratorOrCourseTutor
+  def solutionsOfTask(@PathVariable courseId: Int, @PathVariable taskId: Int,
                       req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
-    val user = authService.authorize(req, res)
-
-    val privileged = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR) ||
-      List(CourseRole.DOCENT, CourseRole.TUTOR).contains(courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT))
-
-    if (privileged) {
-      val f = new File("tmp")
-      submissionService.writeSubmissionsOfTaskToFile(f, cid, tid)
-      ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .contentLength(f.length())
-        .header("Content-Disposition", s"attachment;filename=task_$tid.zip")
-        .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
-    } else {
-      throw new ResourceNotFoundException()
-    }
+    val f = new File("tmp")
+    submissionService.writeSubmissionsOfTaskToFile(f, courseId, taskId)
+    ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM)
+      .contentLength(f.length())
+      .header("Content-Disposition", s"attachment;filename=task_$taskId.zip")
+      .body(new InputStreamResource(Files.newInputStream(f.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
   }
 }

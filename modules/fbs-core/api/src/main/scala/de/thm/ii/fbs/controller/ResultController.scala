@@ -3,8 +3,9 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerServiceHandle
-import de.thm.ii.fbs.services.checker.{CheckerServiceFactoryService, RemoteCheckerService}
+import de.thm.ii.fbs.services.checker.{CheckerServiceFactoryService}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SubmissionService, TaskService}
+import de.thm.ii.fbs.utils.v2.security.authorization.PermitAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
@@ -33,6 +34,7 @@ class ResultController {
     * @param request the request body
     */
   @PostMapping(value = Array("/results/{sid}/{ccid}", "/api/v1/results/{sid}/{ccid}"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PermitAll
   def postResult(@PathVariable("sid") sid: Int, @PathVariable("ccid") ccid: Int, @RequestBody request: JsonNode): Unit = {
     val submission = submissionService.getOneWithoutUser(sid) match {
       case Some(submission) => submission

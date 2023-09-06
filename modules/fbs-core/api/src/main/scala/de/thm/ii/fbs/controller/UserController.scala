@@ -1,16 +1,21 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
-import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.v2.security.authorization.GlobalRole
+import de.thm.ii.fbs.security.PermissionEvaluator
+import de.thm.ii.fbs.services.security.LocalLoginService
+import de.thm.ii.fbs.services.v2.security.authentication.UserService
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
-
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import de.thm.ii.fbs.utils.v2.security.authorization.IsAdmin
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation._
+
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 /**
   * UserController defines all routes for /users (insert, delete, update)
@@ -22,113 +27,95 @@ class UserController {
   @Autowired
   private val userService: UserService = null
   @Autowired
-  private val authService: AuthService = null
-  @Autowired
   private val loginService: LocalLoginService = null
   @Autowired
-  private val courseRegistrationService: CourseRegistrationService = null
+  private val permissionEvaluator: PermissionEvaluator = null
 
   /**
     * Get all users of the system
+    *
     * @param req http request
     * @param res http response
     * @return A list of users
     */
   @GetMapping(value = Array("users"))
   @ResponseBody
-  def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] = {
-    val user = authService.authorize(req, res)
-    val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent) {
-      userService.getAll()
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  @PreAuthorize("hasRole('MODERATOR') || @permissions.hasDocentRole()")
+  def getAll(req: HttpServletRequest, res: HttpServletResponse): List[User] =
+    userService.getAll(true).asScala.toList
 
   /**
     * Get a single user
-    * @param uid unique user ide
-    * @param req http request
-    * @param res http response
+    *
+    * @param userId unique user ide
+    * @param req    http request
+    * @param res    http response
     * @return A single user
     */
-  @GetMapping(value = Array("users/{uid}"))
+  @GetMapping(value = Array("users/{userId}"))
   @ResponseBody
-  def getOne(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): User = {
-    val user = authService.authorize(req, res)
-    val selfRequest = user.id == uid
-    val isDocent = courseRegistrationService.getCoursePrivileges(user.id).exists(e => e._2 == CourseRole.DOCENT)
-    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || isDocent || selfRequest) {
-      userService.find(uid) match {
-        case Some(u) => u
-        case _ => throw new ResourceNotFoundException()
-      }
-    } else {
-      throw new ForbiddenException()
+  @PreAuthorize("hasRole('MODERATOR') || @permissions.hasDocentRole() || @permissions.isSelf(#userId)")
+  def getOne(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse): User =
+    userService.find(userId) match {
+      case u: User => u
+      case _ => throw new ResourceNotFoundException()
     }
-  }
 
   /**
     * Update password of user
-    * @param uid user identification
-    * @param req http request
-    * @param res http response
-    * @param body Content
+    *
+    * @param userId user identification
+    * @param req    http request
+    * @param res    http response
+    * @param body   Content
     */
-  @PutMapping(value = Array("users/{uid}/passwd"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def updatePassword(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
-    val user = authService.authorize(req, res)
+  @PutMapping(value = Array("users/{userId}/passwd"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @PreAuthorize("hasRole('ADMIN') || @permissions.isSelf(#userId)")
+  def updatePassword(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val password = body.retrive("passwd").asText()
     val passwordRepeat = body.retrive("passwdRepeat").asText()
 
     if (password.isEmpty || password.get.isBlank || password != passwordRepeat) {
       throw new BadRequestException("Malformed Request Body")
     }
-
-    (user.globalRole, user.id) match {
-      case (GlobalRole.ADMIN, _) | (_, `uid`) =>
-        loginService.upgradePassword(user, password.get)
-      case _ => throw new ForbiddenException()
-    }
+    loginService.upgradePassword(permissionEvaluator.getUser, password.get)
   }
 
   /**
     * Update global role of user
-    * @param uid user identification
-    * @param req http request
-    * @param res http response
-    * @param body Content
+    *
+    * @param userId user identification
+    * @param req    http request
+    * @param res    http response
+    * @param body   Content
     */
-  @PutMapping(value = Array("users/{uid}/global-role"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
-  def updateGlobalRole(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
-    val user = authService.authorize(req, res)
+  @PutMapping(value = Array("users/{userId}/global-role"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
+  @IsAdmin
+  def updateGlobalRole(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): Unit = {
     val someRoleName = body.retrive("roleName").asText()
 
-    (user.globalRole, someRoleName) match {
-      case (GlobalRole.ADMIN, Some(roleName)) =>
-        userService.updateGlobalRoleFor(uid, GlobalRole.parse(roleName))
-      case (GlobalRole.ADMIN, None) => throw new BadRequestException("Malformed Request Body")
-      case _ => throw new ForbiddenException()
+    someRoleName match {
+      case Some(roleName) => userService.updateGlobalRoleFor(userId, GlobalRole.parse(roleName))
+      case None => throw new BadRequestException("Malformed Request Body")
     }
+
+    permissionEvaluator.updateAuthToken(res)
   }
 
   /**
     * Create a new user
-    * @param req http request
-    * @param res http response
+    *
+    * @param req  http request
+    * @param res  http response
     * @param body Content
     * @return The created user
     */
   @PostMapping(value = Array("users"), consumes = Array(MediaType.APPLICATION_JSON_VALUE),
     produces = Array(MediaType.APPLICATION_JSON_VALUE))
   @ResponseBody
-  def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User = {
-    val user = authService.authorize(req, res)
-    if (user.globalRole != GlobalRole.ADMIN) {
-      throw new ForbiddenException()
-    }
-    ( body.retrive("prename").asText(),
+  @IsAdmin
+  def create(req: HttpServletRequest, res: HttpServletResponse, @RequestBody body: JsonNode): User =
+    (body.retrive("prename").asText(),
       body.retrive("surname").asText(),
       body.retrive("email").asText(),
       body.retrive("password").asText(),
@@ -137,21 +124,23 @@ class UserController {
       body.retrive("globalRole").asText()
     ) match {
       case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
-        loginService.createUser(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+        loginService.createUser(
+          new User(prename, surname, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), email, alias.orNull, null, false, false, null),
+          password)
       case _ => throw new BadRequestException("Malformed Request Body")
     }
-  }
 
   /**
     * Delete a user
-    * @param uid which user has to be deleted
-    * @param req http request
-    * @param res http response
+    *
+    * @param userId which user has to be deleted
+    * @param req    http request
+    * @param res    http response
     */
-  @DeleteMapping(value = Array("users/{uid}"))
-  def delete(@PathVariable uid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit =
-    authService.authorize(req, res).globalRole match {
-      case GlobalRole.ADMIN => userService.delete(uid)
-      case _ => throw new ForbiddenException()
-    }
+  @DeleteMapping(value = Array("users/{userId}"))
+  @IsAdmin
+  def delete(@PathVariable userId: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+    userService.delete(userId)
+    permissionEvaluator.updateAuthToken(res)
+  }
 }

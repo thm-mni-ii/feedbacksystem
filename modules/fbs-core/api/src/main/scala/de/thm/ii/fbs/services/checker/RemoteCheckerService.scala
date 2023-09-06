@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.checker
 
 import de.thm.ii.fbs.model.checker._
 import de.thm.ii.fbs.model.task.Task
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission => FBSSubmission, User => FBSUser}
+import de.thm.ii.fbs.model.v2.security.authentication.{User => FBSUser}
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, Submission => FBSSubmission}
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceHandle}
 import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, MinioStorageService}
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
@@ -52,7 +53,7 @@ class RemoteCheckerService(@Value("${services.masterRunner.insecure}") insecure:
     */
   def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: FBSUser): Unit = {
     val solUrl = minioStorageService.urlToSolutionFile(submissionID)
-    val submission = SqlRunnerSubmission(submissionID, User(fu.id, fu.username), solUrl)
+    val submission = SqlRunnerSubmission(submissionID, User(fu.getId, fu.getUsername), solUrl)
 
     sendNotificationToRemote(taskID, submission, cc)
   }

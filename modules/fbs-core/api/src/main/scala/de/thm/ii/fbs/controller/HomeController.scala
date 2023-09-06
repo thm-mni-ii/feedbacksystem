@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import de.thm.ii.fbs.controller.exception.ResourceNotFoundException
+import de.thm.ii.fbs.utils.v2.security.authorization.PermitAll
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
   * HomeController serve the Angular App and force every non registered "api" route to be an 404 error
   */
 @Controller
+@PermitAll
 class HomeController {
   /**
     * Return home page index page.

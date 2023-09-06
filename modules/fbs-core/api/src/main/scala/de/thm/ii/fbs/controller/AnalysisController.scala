@@ -1,12 +1,10 @@
 package de.thm.ii.fbs.controller
 
-import de.thm.ii.fbs.controller.exception.ForbiddenException
-import de.thm.ii.fbs.model.{CourseRole, GlobalRole, AnalysisCourseResult}
-import de.thm.ii.fbs.services.evaluation.EvaluationResultService
-import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, CourseResultService, EvaluationContainerService}
-import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.model.AnalysisCourseResult
+import de.thm.ii.fbs.services.persistence.CourseResultService
+import de.thm.ii.fbs.utils.v2.security.authorization.IsModeratorOrCourseTutor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, ResponseBody, RestController}
+import org.springframework.web.bind.annotation._
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
@@ -18,32 +16,21 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 @RequestMapping(path = Array("/api/v1/analysis"))
 class AnalysisController {
   @Autowired
-  private val authService: AuthService = null
-  @Autowired
   private val courseResultService: CourseResultService = null
-  @Autowired
-  private val courseRegistration: CourseRegistrationService = null
 
   /**
-    * Get anonymised results of a course from an task.
-    * @param cid Course id
-    * @param tid Task id
-    * @param req request
-    * @param res response
+    * Get anonymized results of a course from an task.
+    *
+    * @param courseId Course id
+    * @param taskId      Task id
+    * @param req      request
+    * @param res      response
     * @return A list of course results
     */
-  @GetMapping(value = Array("/courses/{cid}/results/{tid}"))
+  @GetMapping(value = Array("/courses/{courseId}/results/{taskId}"))
   @ResponseBody
-  def getCourseResultsByTask(@PathVariable cid: Int, @PathVariable tid: Int, req: HttpServletRequest, res: HttpServletResponse): List[AnalysisCourseResult] = {
-    val user = authService.authorize(req, res)
-
-    val privilegedByCourse = courseRegistration.getParticipants(cid).find(_.user.id == user.id)
-      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
-
-    if (privilegedByCourse || user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR) {
-      courseResultService.getAllByTask(cid, tid)
-    } else {
-      throw new ForbiddenException()
-    }
-  }
+  @IsModeratorOrCourseTutor
+  def getCourseResultsByTask(@PathVariable courseId: Int, @PathVariable taskId: Int, req: HttpServletRequest, res: HttpServletResponse)
+  : List[AnalysisCourseResult] =
+    courseResultService.getAllByTask(courseId, taskId)
 }

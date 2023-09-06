@@ -2,7 +2,8 @@ package de.thm.ii.fbs.services.checker.math
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.thm.ii.fbs.mathParser.{MathParserException, MathParserHelper, SemanticAstComparator}
-import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, Submission, User}
+import de.thm.ii.fbs.model.v2.security.authentication.User
+import de.thm.ii.fbs.model.{CheckrunnerConfiguration, SpreadsheetMediaInformation, Submission}
 import de.thm.ii.fbs.services.checker.`trait`.CheckerService
 import de.thm.ii.fbs.services.checker.excel.SpreadsheetFileService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService, TaskService}
@@ -46,10 +47,10 @@ class SpreadsheetCheckerService extends CheckerService {
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     val task = this.taskService.getOne(taskID).get
     val spreadsheetMediaInformation = task.mediaInformation.get.asInstanceOf[SpreadsheetMediaInformation]
-    val submission = this.submissionService.getOne(submissionID, fu.id).get
+    val submission = this.submissionService.getOne(submissionID, fu.getId).get
 
-    val fields = this.getFields(cc, spreadsheetMediaInformation, fu.username, spreadsheetMediaInformation.outputFields)
-    val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc, spreadsheetMediaInformation, fu.username, pointsFields))
+    val fields = this.getFields(cc, spreadsheetMediaInformation, fu.getUsername, spreadsheetMediaInformation.outputFields)
+    val pointFields = spreadsheetMediaInformation.pointFields.map(pointsFields => this.getFields(cc, spreadsheetMediaInformation, fu.getUsername, pointsFields))
     val submittedFields = this.getSubmittedFields(submission)
 
     val (correctCount, results) = this.check(fields, submittedFields, spreadsheetMediaInformation.decimals)

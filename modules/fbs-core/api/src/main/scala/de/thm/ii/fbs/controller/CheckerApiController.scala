@@ -1,13 +1,12 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
-import de.thm.ii.fbs.model.CheckrunnerConfiguration
 import de.thm.ii.fbs.services.checker.CheckerServiceFactoryService
 import de.thm.ii.fbs.services.checker.`trait`.{CheckerServiceFormatConfiguration, CheckerServiceFormatSubmission}
 import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.persistence.{CheckrunnerConfigurationService, SubmissionService}
 import de.thm.ii.fbs.services.security.TokenService
+import de.thm.ii.fbs.utils.v2.security.authorization.PermitAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.{CrossOrigin, GetMapping, PathVariable, RequestMapping, RequestParam, ResponseBody, RestController}
 
@@ -41,9 +40,11 @@ class CheckerApiController {
     */
   @GetMapping(value = Array("/submissions/{submissionID}"))
   @ResponseBody
+  @PermitAll
   def getSubmission(@PathVariable submissionID: Int, @RequestParam token: String, @RequestParam typ: String = "",
                     req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"submissions/$submissionID")) {
+      //TODO: Integrate SQL-Checker token authentication into spring security
       throw new ForbiddenException()
     }
 
@@ -77,9 +78,11 @@ class CheckerApiController {
 
   @GetMapping(value = Array("/checkers/{checkerID}"))
   @ResponseBody
+  @PermitAll
   def getChecker(@PathVariable checkerID: Int, @RequestParam token: String, @RequestParam typ: String = "",
                  req: HttpServletRequest, res: HttpServletResponse): Any = {
     if (!tokenService.verify(token).contains(s"checkers/$checkerID")) {
+      //TODO: Integrate SQL-Checker token authentication into spring security
       throw new ForbiddenException()
     }
 
