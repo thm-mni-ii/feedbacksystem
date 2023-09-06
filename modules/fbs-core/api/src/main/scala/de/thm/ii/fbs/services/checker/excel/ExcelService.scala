@@ -32,12 +32,12 @@ class ExcelService {
     values
   }
 
-  def initWorkBook(spreadsheet: File, excelMediaInformation: ExcelMediaInformationTasks): XSSFWorkbook = {
+  def initWorkBook(spreadsheet: File, excelMediaInformation: ExcelMediaInformationTasks, skipEvaluation: Boolean = false): XSSFWorkbook = {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
     excelMediaInformation.tasks.foreach(t => {
       this.setCells(workbook, t.changeFields)
-      XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
+      if (!skipEvaluation) XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
     })
 
     workbook

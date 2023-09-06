@@ -115,7 +115,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
                                           submissionFile: File,
                                           solutionFile: File): SubmissionResultV2 = {
     val solution = excelService.initWorkBook(solutionFile, excelMediaInformation) // TODO: do only if needed
-    val submission = excelService.initWorkBook(submissionFile, excelMediaInformation)
+    val submission = excelService.initWorkBook(submissionFile, excelMediaInformation, skipEvaluation = true)
     val config = excelMediaInformation.toExcelCheckerConfiguration
     val result = excelCheckerServiceV2.check(cc.id, config, solution, submission)
 
