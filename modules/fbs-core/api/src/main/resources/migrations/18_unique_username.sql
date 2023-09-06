@@ -1,7 +1,6 @@
 BEGIN;
 
 -- When multiple users with the same username exist append a random uuid to all expect the first users (this will not break user logins as currently only the first user can login with their username)
-DELIMITER //
 CREATE PROCEDURE MakeUsernamesUnique()
 BEGIN
   DECLARE done INT DEFAULT FALSE;
@@ -25,8 +24,6 @@ END LOOP;
 
 CLOSE cur;
 END;
-//
-DELIMITER ;
 
 CALL MakeUsernamesUnique();
 DROP PROCEDURE MakeUsernamesUnique;
