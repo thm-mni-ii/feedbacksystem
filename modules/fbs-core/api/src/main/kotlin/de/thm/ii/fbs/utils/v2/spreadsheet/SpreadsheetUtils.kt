@@ -3,6 +3,7 @@ package de.thm.ii.fbs.utils.v2.spreadsheet
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.util.CellAddress
 import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
@@ -52,6 +53,9 @@ class SpreadsheetUtils {
          */
         fun getCell(workbook: XSSFWorkbook, sheet: Int, row: Int, col: Int): XSSFCell =
             getRow(workbook, sheet, row).getCell(col, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
+
+        fun getCell(workbook: XSSFWorkbook, sheet: Int, ref: CellAddress): XSSFCell =
+            getCell(workbook, sheet, ref.row, ref.column)
 
         fun rangeToCells(range: String): CellRangeAddress = CellRangeAddress.valueOf(range)
 
