@@ -5,12 +5,12 @@ import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.handler.When
-import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetEvaluator.Companion.evaluateAll
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetEvaluator
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
-import org.apache.poi.ss.usermodel.FormulaEvaluator
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCellOrError
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -21,14 +21,14 @@ class ErrorAnalysisService(
     private val solution: Map<Cell, String?>, /* TODO maybe usa a kotlin set with indexing; */
     private val handleService: HandlerService<ErrorAnalysisContext, Unit>? = null
 ) {
-    private val evaluator: FormulaEvaluator = workbook.creationHelper.createFormulaEvaluator()
+    private val evaluator: SpreadsheetEvaluator = SpreadsheetEvaluator(workbook)
     val errors = HashSet<Cell>()
     val perrors = HashSet<Cell>()
     private val visited = HashSet<Cell>()
 
     fun findAllErrors(outputCells: List<Cell>): Set<Cell> {
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors), When.BEFORE)
-        evaluateAll(workbook, evaluator)
+        evaluator.evaluateAll()
         for (outputCell in outputCells) {
             findErrors(outputCell)
         }
@@ -77,7 +77,7 @@ class ErrorAnalysisService(
         val submissionCell = cell.copy()
 
         // Store value + formula from the submission
-        submissionCell.value = valueOfCell(workbookCell)
+        submissionCell.value = valueOfCellOrError(workbookCell)
         submissionCell.formula = formulaOfCell(workbookCell)
 
         return Pair(submissionCell, workbookCell)
