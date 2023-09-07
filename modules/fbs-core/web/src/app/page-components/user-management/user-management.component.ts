@@ -132,10 +132,14 @@ export class UserManagementComponent implements OnInit {
                 duration: 5000,
               });
             },
-            (error) => {
-              this.snackBar.open("Error: " + error.message, null, {
-                duration: 5000,
-              });
+            () => {
+              this.snackBar.open(
+                "Benutzer konnte nicht erstellt werden.",
+                null,
+                {
+                  duration: 5000,
+                }
+              );
             },
             () => {
               this.refreshUserList();
