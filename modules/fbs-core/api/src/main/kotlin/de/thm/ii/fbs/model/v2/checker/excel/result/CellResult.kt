@@ -2,22 +2,18 @@ package de.thm.ii.fbs.model.v2.checker.excel.result
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
 
-data class CellResult(val solutionCell: Cell, val isPropagated: Boolean = false) {
-    private val feedback: StringBuilder = StringBuilder()
+data class CellResult(var solutionCell: Cell? = null, var isPropagated: Boolean = false) {
+    private val feedback: MutableList<String> = mutableListOf()
 
     fun addFeedback(value: String) {
-        feedback.append(value)
+        feedback.add(value)
     }
 
-    fun getFeedback(): StringBuilder {
-        return feedback
-    }
-
-    fun getFeedbackString(): String {
+    fun getFeedback(): String {
         if (feedback.isEmpty()) {
             return "Diese Zelle enthält nicht das richtige Ergebnis"
         }
-
-        return feedback.toString()
+        val showAsList = feedback.size > 1
+        return feedback.joinToString("\n") { if (showAsList) "- $it" else it }
     }
 }

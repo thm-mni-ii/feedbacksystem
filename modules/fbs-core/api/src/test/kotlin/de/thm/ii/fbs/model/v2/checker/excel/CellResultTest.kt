@@ -13,10 +13,10 @@ class CellResultTest {
         val f2 = "Please try again."
 
         cr.addFeedback(f1)
-        assertEquals(f1, cr.getFeedback().toString())
+        assertEquals(f1, cr.getFeedback())
 
         cr.addFeedback(f2)
-        assertEquals(f1 + f2, cr.getFeedback().toString())
+        assertEquals("- $f1\n- $f2", cr.getFeedback())
     }
 
     @Test

@@ -74,7 +74,7 @@ data class CellResultData(
 ) {
     constructor(cell: Cell, cellResult: CellResult?) : this(
         cell.cell,
-        cellResult?.getFeedbackString() ?: "",
+        cellResult?.getFeedback() ?: "",
         emptyList(),
         cellResult?.isPropagated ?: false,
         cell.value,

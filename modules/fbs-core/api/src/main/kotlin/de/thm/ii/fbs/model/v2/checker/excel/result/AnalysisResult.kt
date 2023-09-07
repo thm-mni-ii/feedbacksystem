@@ -6,13 +6,14 @@ data class AnalysisResult(
     private val errorCellResults: HashMap<Cell, CellResult> = HashMap()
 ) {
 
-    // should only be once if it shall be consistent
     fun addCellResult(cell: Cell, solutionCell: Cell, isPropagated: Boolean = false) {
-        errorCellResults[cell] = CellResult(solutionCell, isPropagated)
+        val result = errorCellResults.getOrPut(cell) { CellResult() }
+        result.solutionCell = solutionCell
+        result.isPropagated = isPropagated
     }
 
-    fun getCellResult(cell: Cell): CellResult? {
-        return errorCellResults[cell]
+    fun getCellResult(cell: Cell): CellResult {
+        return errorCellResults.getOrPut(cell) { CellResult() }
     }
 
     fun getAllErrorCells(): Set<Cell> {

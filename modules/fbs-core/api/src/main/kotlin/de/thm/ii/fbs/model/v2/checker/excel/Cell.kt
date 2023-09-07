@@ -2,10 +2,12 @@ package de.thm.ii.fbs.model.v2.checker.excel
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaOfCell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.sheetIdxOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.util.CellAddress
 import org.apache.poi.xssf.usermodel.XSSFCell
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val cell: String) {
     @JsonProperty("value")
@@ -36,4 +38,6 @@ data class Cell(@JsonProperty("sheet") val sheet: Int, @JsonProperty("cell") val
 
     fun cellAddress(): CellAddress =
         CellAddress(cell)
+
+    fun xssfCell(workbook: XSSFWorkbook): XSSFCell = getCell(workbook, sheet, cellAddress())
 }
