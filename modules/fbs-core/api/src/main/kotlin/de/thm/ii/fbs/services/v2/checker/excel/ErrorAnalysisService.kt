@@ -41,7 +41,7 @@ class ErrorAnalysisService(
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
         val (submissionCell, workbookCell) = getSubmissionCell(cell)
 
-        if (!cellEqualsSolution(cell, workbookCell)) {
+        if (!cellEqualsSolution(cell, submissionCell, workbookCell)) {
             // found a value error
             perrors.add(cell)
         } else if (graph.isInput(cell)) {
@@ -61,7 +61,7 @@ class ErrorAnalysisService(
         // Graph Deconstruction
         // eval cell again and compare again with solution cell
         evaluator.evaluateFormulaCell(workbookCell)
-        if (!cellEqualsSolution(cell, workbookCell)) {
+        if (!cellEqualsSolution(cell, submissionCell, workbookCell)) {
             errors.add(cell) // add to original errors set
             perrors.remove(cell) // remove from propagated errors
             handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, submissionCell, cell), When.ONERROR)
@@ -88,7 +88,17 @@ class ErrorAnalysisService(
         return getCell(workbook, cell.sheet, cellRef.row, cellRef.col.toInt())
     }
 
-    private fun cellEqualsSolution(cell: Cell, workbookCell: XSSFCell): Boolean {
-        return solution[cell].equals(valueOfCell(workbookCell))
+    private fun cellEqualsSolution(cell: Cell, submissionCell: Cell, workbookCell: XSSFCell): Boolean {
+        // This function does not use valueOfCellOrNull to ensure that the comparison result is always false if the input cell has an error.
+        return try {
+            solution[cell].equals(valueOfCell(workbookCell))
+        } catch (e: Exception) {
+            handleService?.runHandlers(
+                ErrorAnalysisContext(errors, perrors, submissionCell, cell),
+                When.ONINVALIDFORMULA
+            )
+
+            false
+        }
     }
 }
