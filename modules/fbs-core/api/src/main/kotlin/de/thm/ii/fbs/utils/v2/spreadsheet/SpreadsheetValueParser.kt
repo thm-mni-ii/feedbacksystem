@@ -42,6 +42,15 @@ class SpreadsheetValueParser {
             }
         }
 
+        @JvmStatic
+        fun valueOfCellOrError(cell: XSSFCell?): String? {
+            return try {
+                valueOfCell(cell)
+            } catch (e: Exception) {
+                cell?.errorCellString
+            }
+        }
+
         fun setValueOfCell(cell: XSSFCell, value: String?) {
             if (value == null) {
                 return cell.setBlank()
