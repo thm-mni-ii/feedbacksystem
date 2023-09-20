@@ -59,7 +59,9 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     * @param cc           the check runner of the submission
     * @param fu           the user which triggered the submission
     */
+    print("this is before notify \n")
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
+    print("notify has been entered \n")
     try {
       val submission = this.submissionService.getOne(submissionID, fu.id).get
       val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission)
@@ -91,6 +93,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
 
 
   private def executeChecker(cc: CheckrunnerConfiguration, submission: Submission, submissionFile: File, mainFile: File): Unit = {
+    print("execute checker entered \n")
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
       val submissionResult = checkSubmission(cc: CheckrunnerConfiguration, excelMediaInformation, submissionFile, mainFile)
@@ -156,12 +159,14 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     }
   }
 
+print("before get fields \n")
   private def getFields(
                          submissionFile: File,
                          mainFile: File,
                          excelMediaInformation: ExcelMediaInformation,
                          checkFields: ExcelMediaInformationCheck
                        ): CellsComparator = {
+    print("the getfields is entered \n")
     val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
     val userRes = try {
       this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
@@ -170,6 +175,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     }
     val expectedFormula = this.excelService.getFormula(submissionFile, excelMediaInformation, checkFields)
     val userFormula = this.excelService.getFormula(mainFile, excelMediaInformation, checkFields)
+    print("before the compare \n")
     val(storedFormulas, updatedInvalidFields) = this.excelService.compareForm(expectedFormula, userFormula, invalidCells)
    // invalidCells = updatedInvalidFields
     uniqueList++=updatedInvalidFields
@@ -218,18 +224,26 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   private def buildResultText(success: Boolean,
                               results: List[CheckResultTask],
                               excelMediaInformation: ExcelMediaInformationTasks): String = {
-    if (success) {
+    if (success && storedFormulasMatch.isEmpty) {
       "OK"
     } else {
       val correct = results.count(c => c.success)
+
       val hints = results.zip(excelMediaInformation.tasks)
         .filter(t => !t._1.success)
         .map(t => buildTaskResultText(t._1, t._2))
         .mkString("\n")
-      val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
-      if (hints.nonEmpty) {
-        f"$res\n\nHinweise:\n$hints"
+      val res = if (storedFormulasMatch.isEmpty) {
+        s"$correct von ${results.length} Unteraufgaben richtig."
+      } else {
+        val formelres = correct-1
+        s"$formelres von ${results.length} Unteraufgaben richtig."
+      }
+
+      if (hints.nonEmpty || storedFormulasMatch.nonEmpty) {
+        f"$res\n\nHinweise:\n$hints\n$storedFormulasMatch"
+
       } else {
         res
       }
@@ -277,6 +291,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
         }
       }
     }
+    print("this is being printed \n")
     feedback.toString()
   }
 

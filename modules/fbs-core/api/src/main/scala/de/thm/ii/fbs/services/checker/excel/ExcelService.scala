@@ -53,7 +53,6 @@ class ExcelService {
 
     values
   }
-
   private def hasFormula(sheet: XSSFSheet, startRow: Int, endRow: Int, startCol: Int, endCol: Int): Seq[sheetCell] = {
     (startRow to endRow).flatMap(rowIdx => {
       val row = sheet.getRow(rowIdx)
@@ -101,18 +100,18 @@ class ExcelService {
   }
 
   def compareForm(seq1: Seq[sheetCell], seq2: Seq[sheetCell], invalidFields: List[String]): (String, List[String]) = {
+    print("here the compareform was entered \n")
     val util = new ExprEvaluator(false, 100)
     var isFunc = false
     val stringBuilder = new StringBuilder()
     var updatedInvalidFields = invalidFields
     var differentVals = List[String]()
-
-
-
     for ((cell1, cell2) <- seq1.zip(seq2)) {
         //normalize the formulas using the eval function
         val result1 = util.eval(cell1.formula)
         val result2 = util.eval(cell2.formula)
+      print(f"the formula of the teacher : ${cell1.reference}  ${cell1.formula}\n")
+      print(f"the formula of the student : ${cell2.reference}  ${cell2.formula}\n")
         if(cell1.value != cell2.value){
           differentVals = differentVals :+ cell1.reference
         }
@@ -128,7 +127,8 @@ class ExcelService {
           print(f"if func: was entered ${cell2.reference}===> its tokens : {${tokens2}}\n ")
           if (containsReferenceWithColon(tokens2).isDefined) {
             containsReferenceWithColon(tokens2) match {
-              case Some((ref1, ref2)) => print(s"containsRef References found: $ref1 : $ref2 \n")
+              case Some((ref1, ref2)) =>
+                print(s"containsRef References found: $ref1 : $ref2 \n")
               val refs = printCellsInRange(f"${ref1}:${ref2}")
                 print(s"this is the extended refs ${refs} \n")
                 // Check if any of the strings in refs exist in updatedInvalidFields
@@ -142,29 +142,28 @@ class ExcelService {
                 // Find missing and excessive references
                 val missingRefs = refsInTokens1.diff(refsInRefs)
                 val excessiveRefs = refsInRefs.diff(refsInTokens1)
-                var differences =""
+                var differences = ""
                 // Print missing references
                 if (missingRefs.nonEmpty) {
-                  println("Missing references in refs:")
+                  print("Missing references in refs:\n")
                   missingRefs.foreach { ref =>
                     differences = differences + ref
-
                   }
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
                   stringBuilder.append(s"+Zelle: ${cell1.reference} Fehlende Referenz(en) ==>[ ${differences} ] \n")
-
-                  println(s"Missing reference: $differences in refs")
+                  print(s"Missing reference: $differences in refs \n")
+                  differences = ""
                 }
 
                 // Print excessive references
                 if (excessiveRefs.nonEmpty) {
-                  println("Excessive references in refs:")
+                  print("Excessive references in refs: \n")
                   excessiveRefs.foreach { ref =>
                     differences = differences + ref
-
                   }
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
                   stringBuilder.append(s"+Zelle: ${cell1.reference} Exzessive Referenz(en) ==>[ ${differences} ] \n")
+                  differences = ""
                 }
                 if (commonRefs.nonEmpty) {
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
@@ -172,7 +171,8 @@ class ExcelService {
                   print("Common references found in updatedInvalidFields:\n")
                   stringBuilder.append(s"+Zelle: ${cell1.reference} Bitte korrigieren Sie zuerst die falschen Zellen  ==>[ ${commonRefs.mkString(", ")} ] \n")
                 }
-              case None => print("Pattern not found.\n")
+              case None =>
+                print("Pattern not found.\n")
             }
           } else {
             print("Pattern not found.\n")
@@ -186,13 +186,7 @@ class ExcelService {
 
 
       if (tokens1 != tokens2 && isFunc == false) {
-
-        /**stringBuilder.append("Values do not match:\n")
-        stringBuilder.append(s"Cell Reference: ${cell1.reference}\n")
-        stringBuilder.append(s"Value in seq1: ${cell1.value}\n")
-        stringBuilder.append(s"Value in seq2: ${cell2.value}\n")
-*/          print(f"else not equal: was entered ${cell2.reference}\n")
-
+        print(f"else not equal: was entered ${cell2.reference}\n")
         /*
             if  cell1.getNumericCellValue.toString==cell2.getNumericCellValue.toString && category of token2 contains "function"
             then consider this correct and don t add it to the string builder
@@ -205,7 +199,6 @@ class ExcelService {
         // Append cell1.reference to updatedInvalidFields
         updatedInvalidFields = updatedInvalidFields :+ cell1.reference
       }
-
       //stringBuilder.append("\n")
         if (cell1.value != cell2.value) {
           print("there are unmatching values \n")
@@ -220,8 +213,8 @@ class ExcelService {
         }
         print(s"#tokens2 at the end ${tokens2} \n  #tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
 
-         if (tokens2 == tokens1  ){
-           if(cell1.value != cell2.value ){
+         if (tokens2 == tokens1){
+           if (cell1.value != cell2.value){
           print(s"the last if was entered ===> ${tokens2} and \t ${cell2.value}")
         val matchingTuples: Seq[(String, String)] = tokens2.filter { case (_, value) =>
           updatedInvalidFields.contains(value)
@@ -230,13 +223,12 @@ class ExcelService {
         if(matchingTuples.nonEmpty){
           stringBuilder.append(s"+Zelle: ${cell1.reference} ==> please correct the previous cells first ( ${matchingTuples} )\n")
         }
-        else{
+        else {
         stringBuilder.append(s"+Zelle: ${cell1.reference} ==> hat nicht den richtigen Wert \n")
         }
-
       }
          }
-       // print(s"tokens2 at the end ${tokens2} \n  tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
+       //print(s"tokens2 at the end ${tokens2} \n  tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
         isFunc = false
       }
 
@@ -260,14 +252,15 @@ class ExcelService {
 
       if (category1 != category2 || token1 != token2) {
        // diffBuilder.append(s"Position $i: $category1='$token1' vs $category2='$token2'\n")
-        diffBuilder.append(s"Ein $category2='$token2' ist nicht korrekt ")
+        diffBuilder.append(s"Ein $category2='$token2' ist nicht korrekt . benutze '$token1' stattdessen  ")
 
-       /* if(category2=="function"){
-          if (!functionNames.contains(token2)) {
-            val closestKeyword = findMostSimilarKeyword(token2, functionNames)
-            print(s"Did you mean $closestKeyword? \n")
-          }
-        }*/
+
+        /* if(category2=="function"){
+           if (!functionNames.contains(token2)) {
+             val closestKeyword = findMostSimilarKeyword(token2, functionNames)
+             print(s"Did you mean $closestKeyword? \n")
+           }
+         }*/
 
       }
     }
@@ -276,8 +269,10 @@ class ExcelService {
       for (i <- minLength until tokens1.length) {
         val (category, token) = tokens1(i)
        // diffBuilder.append(s"Position $i: $category='$token' vs -\n")
+        if (category=="reference"){
         diffBuilder.append(s"\n -Ein $category='$token' fehlt")
-      }
+        }
+        }
     } else if (tokens2.length > tokens1.length) {
       for (i <- minLength until tokens2.length) {
         val (category, token) = tokens2(i)
@@ -548,7 +543,7 @@ class ExcelService {
 
   // List of all Excel supported functions
   val functionNames = FunctionEval.getSupportedFunctionNames.asScala.toList
-  print(s"The list of keys: $functionNames \n")
+  //print(s"The list of keys: $functionNames \n")
 
   val testInputs = List("AVER", "SIN", "DELTE", "DA", "POW", "ABS", "DAT", "NOW", "sum")
 
