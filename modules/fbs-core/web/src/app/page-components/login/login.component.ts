@@ -29,7 +29,7 @@ export class LoginComponent implements OnInit {
     private snackbar: MatSnackBar,
     private legalService: LegalService,
     private cookieService: CookieService,
-    private goToService: GoToService
+    private goToService: GoToService,
   ) {}
 
   ngOnInit() {
