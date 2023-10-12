@@ -40,7 +40,6 @@ def create_course_bars(hist_df, fig, labels):
         "#cf8af3",
     ]
     all_numbers = []
-
     for index, _ in enumerate(fig["layout"]["annotations"]):
         all_numbers.append(float(fig["layout"]["annotations"][index]["text"]))
 
@@ -58,7 +57,6 @@ def create_course_bars(hist_df, fig, labels):
         task_subset_df = hist_df.loc[idx]
         task_subset_df = task_subset_df.apply(pd.value_counts).T
         task_subset_df = task_subset_df.div(task_subset_df.sum(axis=1), axis=0)
-
         # Handle case if there are only correct answers
         if task_subset_df.shape != (
             7,
@@ -144,7 +142,7 @@ def reduce_data_to_necessary_columns(filtered_df):
     return hist_df
 
 
-def create_average_bar(local_df):
+def create_overview_bar(local_df):
     """
     create bars for the average attempt histogram
     :param local_df: data which the graphs are based on
@@ -189,6 +187,49 @@ def get_values_from_data(result_df, labels):
     data = {"labels": labels, "values": values}
     local_df = pd.DataFrame(data)
 
-    values = local_df["values"].astype(float)
-    local_df["values"] = (values * 100).astype(int)
+    # values = local_df["values"].astype(float)
+    # local_df["values"] = (values * 100).astype(int)
     return local_df
+
+
+def get_avg_att_time(local_df, exercise_value):
+    """
+    gets all times students takes for every task, that is the user is allowed to see and which are
+    selected , and every
+    student
+    :param local_df: data
+    :param exercise_value: exercises
+    :return: list with times for each task
+    """
+    times = []
+    for task in exercise_value:
+        task_data = local_df[local_df["UniqueName"] == task]
+        for user in task_data["UserId"].unique():
+            user_task_data = task_data[task_data["UserId"] == user]
+            single_info = []
+            total_duration = 0
+            last_date = 0
+            for i in range(
+                user_task_data["Attempt"].min(), user_task_data["Attempt"].max()
+            ):
+                datum = user_task_data[user_task_data["Attempt"] == i]
+                if datum.empty:
+                    continue
+                if last_date == 0:
+                    last_date = list(datum["Time"])[0]
+                else:
+                    short_duration = (
+                        list(datum["Time"])[0] - last_date
+                    ).total_seconds()
+                    if 1200 > short_duration >= 0:
+                        total_duration += short_duration
+                    last_date = list(datum["Time"])[0]
+                if (
+                    list(user_task_data[user_task_data["Attempt"] == i]["Correct"])[0]
+                    == "correct"
+                ):
+                    break
+            single_info.append(task)
+            single_info.append(total_duration)
+            times.append(single_info)
+    return times

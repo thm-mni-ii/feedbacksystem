@@ -1,6 +1,8 @@
 """
 this generates a dashboard with multiple key figures to display the data
 """
+
+
 import math
 from datetime import datetime, timedelta
 import dash_bootstrap_components as dbc
@@ -25,14 +27,16 @@ from api.util.utilities import (
     filter_attempt_limits,
     select_all_exercises_in_course,
     filter_time,
+    select_all_courses,
 )
 from api.util.dashboard_util import (
     hide_histogram,
     create_course_bars,
     create_figure_with_subfigure,
     reduce_data_to_necessary_columns,
-    create_average_bar,
+    create_overview_bar,
     get_values_from_data,
+    get_avg_att_time,
 )
 
 tmp_df = get_data(-1)
@@ -66,7 +70,11 @@ layout = html.Div(
                                     [
                                         "Key Figure",
                                         key_figure := dcc.Dropdown(
-                                            ["Typical Mistakes", "Average Attempts"],
+                                            [
+                                                "Typical Mistakes",
+                                                "Average Attempts",
+                                                "Average Time",
+                                            ],
                                             "Typical Mistakes",
                                             style={"background-color": "#e9e7e9"},
                                             clearable=False,
@@ -101,6 +109,11 @@ layout = html.Div(
                                     histogram_avg_submissions := dcc.Graph(),
                                     body=True,
                                     style={"display": "none"},
+                                ),
+                                histogram_avg_time_card := dbc.Card(
+                                    histogram_avg_time := dcc.Graph(),
+                                    body=True,
+                                    style={"display": "block"},
                                 ),
                             ],
                             style={"margin-top": "20px"},
@@ -330,7 +343,7 @@ def update_histogram_avg_submissions(
     else:
         display_style = {"display": "none"}
 
-    if not exercise_value:
+    if not exercise_value or "Übersicht" in exercise_value:
         if not course_value:
             return generate_empty_response(), display_style
         exercise_value = select_all_exercises_in_course(local_df, course_value)
@@ -343,10 +356,7 @@ def update_histogram_avg_submissions(
     if not course_value or local_df.empty:
         return generate_empty_response(), display_style
 
-    if "Übersicht" in exercise_value:
-        filtered_df = local_df
-    else:
-        filtered_df = local_df[local_df.UniqueName.isin(exercise_value)]
+    filtered_df = local_df[local_df.UniqueName.isin(exercise_value)]
     for task in filtered_df.UniqueName.unique():
         local_df = filtered_df[filtered_df.UniqueName == task]
 
@@ -435,8 +445,12 @@ def update_histogram(
         )
 
     if "Übersicht" in exercise_value:
+        filtered_df = filtered_df[
+            filtered_df.UniqueName.isin(
+                select_all_exercises_in_course(local_df, course_value)
+            )
+        ]
         hist_df = filtered_df[labels]
-
         if hist_df.empty:
             return generate_empty_response(), display_style
         result_dict = {}
@@ -444,18 +458,17 @@ def update_histogram(
         for column in hist_df.columns:
             value_counts = hist_df[column].value_counts()
             total_counts = value_counts.sum()
-            percent_correct = value_counts.get("correct", 0) / total_counts
-            percent_incorrect = value_counts.get("incorrect", 0) / total_counts
+            percent_correct = value_counts.get("correct", 0) / total_counts * 100
+            percent_incorrect = value_counts.get("incorrect", 0) / total_counts * 100
             result_dict[column] = {
                 "Correct": percent_correct,
                 "Incorrect": percent_incorrect,
             }
 
         result_df = pd.DataFrame(result_dict)
-
         local_df = get_values_from_data(result_df, labels)
 
-        fig = create_average_bar(local_df)
+        fig = create_overview_bar(local_df)
         fig.update_layout(showlegend=False, height=600)
         return fig, display_style
 
@@ -474,6 +487,81 @@ def update_histogram(
         return generate_empty_response(), display_style
 
     fig = create_course_bars(hist_df, fig, labels)
+    return fig, display_style
+
+
+@callback(
+    Output(histogram_avg_time, "figure"),
+    Output(histogram_avg_time_card, "style"),
+    Input("intermediate-value", "data"),
+    Input("course_dashboard", "value"),
+    Input("exercise_dashboard", "value"),
+    Input(key_figure, "value"),
+    Input("slider_dashboard", "value"),
+    Input("checkbox", "value"),
+    Input("date_time_from", "value"),
+    Input("date_time_to", "value"),
+)
+def track_time(
+    daten,
+    course_value,
+    exercise_value,
+    key_figure_value,
+    slider_value,
+    checklist_value,
+    date_time_from,
+    date_time_to,
+):
+    """
+    creates a diagram that shows the average time it took a student to solve a task
+    :param daten: all data
+    :param course_value: selected courses
+    :param exercise_value: selected exercises
+    :param key_figure_value: selected key figure
+    :param slider_value: selected attempts limit
+    :param checklist_value: checkboxes value
+    :param date_time_from: timeframe startpoint
+    :param date_time_to: timeframe endpoint
+    :return: diagramm with the average time it took for a task
+    """
+    local_df = filter_data(daten)
+    local_df = local_df[local_df["UserId"] != 0]
+    local_df["Time"] = pd.to_datetime(local_df["Time"])
+    fig = go.Figure()
+
+    if "Average Time" in key_figure_value:
+        display_style = {"display": "block"}
+    else:
+        display_style = {"display": "none"}
+        # abort if Average Time not selected
+        return fig, display_style
+
+    local_df = filter_attempt_limits(local_df, slider_value)
+    if "Date" in checklist_value:
+        local_df = filter_time(
+            local_df, convert_time(date_time_from), convert_time(date_time_to)
+        )
+    if not course_value:
+        course_value = select_all_courses(local_df)
+    if not exercise_value or "Übersicht" in exercise_value:
+        # abort if no exercise is selected
+        exercise_value = select_all_exercises_in_course(local_df, course_value)
+    # calculates all times for each task
+    times = get_avg_att_time(local_df, exercise_value)
+    local_df = pd.DataFrame(times)
+    if not times:
+        return fig, display_style
+    fig.add_trace(
+        go.Box(
+            y=local_df[1],
+            x=local_df[0],
+        )
+    )
+    fig.update_layout(
+        xaxis={"type": "category", "showgrid": True, "zeroline": True},
+        yaxis={"title": "Average Time in s"},
+        showlegend=False,
+    )
     return fig, display_style
 
 
