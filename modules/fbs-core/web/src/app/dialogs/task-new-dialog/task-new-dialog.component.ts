@@ -16,7 +16,7 @@ import { SpreadsheetResponseMediaInformation, Task } from "src/app/model/Task";
 import { CourseService } from "../../service/course.service";
 import { TaskService } from "../../service/task.service";
 import { SpreadsheetDialogComponent } from "../spreadsheet-dialog/spreadsheet-dialog.component";
-import { Observable, of } from "rxjs";
+import { of } from "rxjs";
 import { mergeMap, map } from "rxjs/operators";
 import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
@@ -235,13 +235,35 @@ export class TaskNewDialogComponent implements OnInit {
                   showHintsAt: 0,
                 },
               };
-
-              return this.updateMathCheckerTask(
-                this.task,
-                this.checkerService
-                  .createChecker(this.courseId, task.id, checkerConfig)
-                  .pipe(map((checker) => checker.id))
+              const infoFile = new File(
+                [JSON.stringify(this.task.mediaInformation)],
+                "info.json"
               );
+              return this.checkerService
+                .createChecker(this.courseId, task.id, checkerConfig)
+                .pipe(
+                  mergeMap((checker) =>
+                    this.checkerService
+                      .updateFile(
+                        this.courseId,
+                        task.id,
+                        checker.id,
+                        CheckerFileType.MainFile,
+                        this.spreadsheet
+                      )
+                      .pipe(map(() => checker))
+                  ),
+                  mergeMap((checker) =>
+                    this.checkerService.updateFile(
+                      this.courseId,
+                      task.id,
+                      checker.id,
+                      CheckerFileType.SecondaryFile,
+                      infoFile
+                    )
+                  ),
+                  map(() => task)
+                );
             } else {
               return of(task);
             }
@@ -260,67 +282,17 @@ export class TaskNewDialogComponent implements OnInit {
    * and close dialog
    */
   updateTask() {
-    console.log("UPDATE")
     this.getValues();
     if (this.task.name) {
-      console.log("NAME")
       this.snackBar.open("Task bearbeitet.", "ok");
       this.taskService
         .updateTask(this.courseId, this.task.id, this.task)
-        .pipe(
-          mergeMap(() => {
-            console.log(this.task)
-            if (this.task.mediaType === "application/x-spreadsheet") {
-              return this.updateMathCheckerTask(
-                this.task,
-                this.checkerService
-                  .getChecker(this.courseId, this.task.id)
-                  .pipe(map((checkers) => checkers[0].id))
-              );
-            }
-            return null;
-          })
-        )
         .subscribe((task) => {
           this.dialogRef.close({ success: true, task: task });
         });
     } else {
       this.snackBar.open("Das Datum sollte in der Zukunft liegen.", "ok");
     }
-  }
-
-  updateMathCheckerTask(
-    task: Task,
-    checkerId: Observable<number>
-  ): Observable<Task> {
-    const infoFile = new File(
-      [JSON.stringify(this.task.mediaInformation)],
-      "info.json"
-    );
-
-    return checkerId.pipe(
-      mergeMap((checkerId) =>
-        this.checkerService
-          .updateFile(
-            this.courseId,
-            task.id,
-            checkerId,
-            CheckerFileType.MainFile,
-            this.spreadsheet
-          )
-          .pipe(map(() => checkerId))
-      ),
-      mergeMap((checkerId) =>
-        this.checkerService.updateFile(
-          this.courseId,
-          task.id,
-          checkerId,
-          CheckerFileType.SecondaryFile,
-          infoFile
-        )
-      ),
-      map(() => task)
-    );
   }
 
   addDate(event: MatDatepickerInputEvent<Date>) {
