@@ -2,7 +2,9 @@
   <div class="code-container line-numbers">
     <textarea
       #textArea
-      placeholder="Hier Code einfügen (PostgreSQL)"
+      placeholder="{{
+        'sql-playground.input.highlighted.placeholder' | i18nextEager
+      }}"
       class="text-area-code-editor"
       formControlName="content"
       spellcheck="false"

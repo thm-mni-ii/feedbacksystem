@@ -1,7 +1,9 @@
 <div class="actions-container">
   <button
     mat-flat-button
-    matTooltip="Schließe alle Tabs"
+    matTooltip="{{
+      'sql-playground.input.tooltip.closeAllTabs' | i18nextEager
+    }}"
     matTooltipPosition="right"
     (click)="closeAllTabs()"
   >
@@ -9,7 +11,7 @@
   </button>
   <button
     mat-button
-    matTooltip="Tab herunterladen"
+    matTooltip="{{ 'sql-playground.input.tooltip.downloadTab' | i18nextEager }}"
     matTooltipPosition="right"
     [disabled]="pending"
     (click)="downloadFile()"
@@ -18,7 +20,9 @@
   </button>
   <button
     mat-button
-    matTooltip="Alle Tabs herunterladen"
+    matTooltip="{{
+      'sql-playground.input.tooltip.downloadAllTabs' | i18nextEager
+    }}"
     matTooltipPosition="right"
     [disabled]="pending"
     (click)="downloadAllFiles()"
@@ -38,7 +42,9 @@
           <input
             matInput
             type="text"
-            placeholder="New_Query"
+            placeholder="{{
+              'sql-playground.input.label.newQuery' | i18nextEager
+            }}"
             [disabled]="pending"
             [(ngModel)]="tabs[index].name"
           />
@@ -59,7 +65,9 @@
           activeTab.isSubmitMode
         "
       >
-        <strong>Aufgabenbeschreibung:</strong>
+        <strong>{{
+          "sql-playground.input.label.taskDescription" | i18nextEager
+        }}</strong>
         {{ activeTab.selectedTask.description }}
       </p>
       <div class="inputField">
@@ -78,7 +86,10 @@
         class="error-message"
         *ngIf="activeTab.error && activeTab.isSubmitMode"
       >
-        <strong>Fehlermeldung:</strong> {{ activeTab.errorMsg }}
+        <strong>{{
+          "sql-playground.input.label.errorMessage" | i18nextEager
+        }}</strong>
+        {{ activeTab.errorMsg }}
       </p>
     </mat-tab>
   </ng-container>
@@ -94,7 +105,9 @@
     <span class="spinner" *ngIf="isPending">
       <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
     </span>
-    <span *ngIf="!isPending">Ausführen</span>
+    <span *ngIf="!isPending">{{
+      "sql-playground.input.label.execute" | i18nextEager
+    }}</span>
   </button>
 
   <button
@@ -102,11 +115,12 @@
     color="grey"
     class="submitBtn"
     *ngIf="!activeTab.isSubmitMode"
-    matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
+    matTooltip="{{ 'sql-playground.input.tooltip.selectTask' | i18nextEager }}"
     [matTooltipPosition]="'above'"
     (click)="updateMode(true)"
   >
-    Abgeben<mat-icon>insert_drive_file</mat-icon>
+    {{ "sql-playground.input.label.submit" | i18nextEager
+    }}<mat-icon>insert_drive_file</mat-icon>
   </button>
   <div class="submit-container" *ngIf="activeTab.isSubmitMode">
     <button
@@ -119,31 +133,40 @@
       <span class="spinner" *ngIf="pending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Abgeben</span>
+      <span *ngIf="!pending">{{
+        "sql-playground.input.label.submit" | i18nextEager
+      }}</span>
     </button>
 
     <mat-icon
       class="submit-item"
       [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
-      matTooltip="Beschreibung anzeigen"
+      matTooltip="{{
+        'sql-playground.input.tooltip.showDescription' | i18nextEager
+      }}"
       (click)="isDescriptionMode = !isDescriptionMode"
       >remove_red_eye</mat-icon
     >
 
     <mat-icon
       class="submit-item material-icons color_red"
-      matTooltip="Status der Abgabe: Deine Abgabge war leider nicht richtig."
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusWrong' | i18nextEager
+      }}"
       *ngIf="activeTab.isSubmitted && !pending && !activeTab.isCorrect"
       >cancel</mat-icon
     >
     <mat-icon
       class="submit-item material-icons color_green"
-      matTooltip="Status der Abgabe: Deine Abgabe war korrekt."
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusCorrect' | i18nextEager
+      }}"
       *ngIf="activeTab.isSubmitted && !pending && activeTab.isCorrect"
       >check_circle</mat-icon
     >
     <mat-icon class="state submit-item" *ngIf="pending"
-      ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</mat-icon
+      ><mat-spinner [diameter]="24"></mat-spinner
+      >{{ "sql-playground.input.label.processing" | i18nextEager }}</mat-icon
     >
 
     <button
@@ -185,7 +208,7 @@
     </mat-menu>
 
     <mat-icon
-      matTooltip="Schließen"
+      matTooltip="{{ 'sql-playground.input.tooltip.close' | i18nextEager }}"
       matTooltipPosition="right"
       class="closeBtn"
       mat-flat-button
