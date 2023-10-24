@@ -26,6 +26,7 @@ mulFactor   : expo // higher presedence!
             ;
 
 expo        : expo ' '* EXP ' '*  SUB? factor
+            | expo unicode_expo
             | factor
             ;
 
@@ -34,6 +35,8 @@ factor      : LEFT? OPENING_ROUND_BRACKET ' '* expr ' '* RIGHT? CLOSING_ROUND_BR
             | (NUMBER|VAR)
             ;
 
+unicode_expo   : UNICODE_EXPO+
+            ;
 
 NUMBER: FULL DECIMAL?;
 FULL: [0-9]+;
@@ -64,3 +67,4 @@ OPENING_SQUARE_BRACKET: '[';
 CLOSING_SQUARE_BRACKET: ']';
 LEFT: '\\left';
 RIGHT: '\\right';
+UNICODE_EXPO: '⁰'|'¹'|'²'|'³'|'⁴'|'⁵'|'⁶'|'⁷'|'⁸'|'⁹';

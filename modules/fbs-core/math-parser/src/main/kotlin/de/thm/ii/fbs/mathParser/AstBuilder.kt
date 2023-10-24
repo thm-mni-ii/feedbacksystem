@@ -73,6 +73,7 @@ class AstBuilder(val eq: MathParser.EqContext) {
         when {
             expo.EXP() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), if (expo.SUB() !== null) UnaryOperation(Operator.SUB, buildFactor(expo.factor())) else buildFactor(expo.factor()))
             expo.factor() !== null -> buildFactor(expo.factor())
+            expo.unicode_expo() !== null -> Operation(Operator.EXP, buildExpo(expo.expo()), Num(expo.unicode_expo().text.map { superscriptMap[it] }.joinToString("")))
             else -> throw IllegalArgumentException("not a legal exponential: ${expo.text}")
         }
 
@@ -85,6 +86,7 @@ class AstBuilder(val eq: MathParser.EqContext) {
         }
 
     private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
+    private val superscriptMap = mapOf('⁰' to '0', '¹' to '1', '²' to '2', '³' to '3', '⁴' to '4', '⁵' to '5', '⁶' to '6', '⁷' to '7', '⁸' to '8', '⁹' to '9')
     init {
         germanFormat.maximumFractionDigits = germanFormat.maximumIntegerDigits
     }
