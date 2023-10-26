@@ -28,6 +28,7 @@ from api.util.utilities import (
     select_all_exercises_in_course,
     filter_time,
     select_all_courses,
+    update_course_2
 )
 from api.util.dashboard_util import (
     hide_histogram,
@@ -227,17 +228,17 @@ def generate_empty_response():
 @callback(
     Output("course_dashboard", "options"),
     Output("course_dashboard", "value"),
-    Input("intermediate-value", "data"),
+    Input("courses","data"),
     Input("courses_dict", "data"),
 )
-def update_course_name(daten, courses_dict):
+def update_course_name(courses, courses_dict):
     """
     change to coursename to its actual name instead of its ID
     :param daten: all data
     :param courses_dict: the real names of the courses
     :return: list of all courses the user is allowed to see, but with real names
     """
-    return update_course(daten, courses_dict)
+    update_course_2(courses, courses_dict)
 
 
 @callback(

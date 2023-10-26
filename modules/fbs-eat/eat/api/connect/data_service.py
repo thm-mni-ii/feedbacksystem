@@ -6,6 +6,10 @@ import os
 import pandas as pd
 from pymongo import MongoClient
 from api.datapreprocessing.cleandataset import cleandata
+import logging
+
+logger = logging.getLogger("name")
+
 
 MONGODB_URL = os.getenv("MONGODB_URL")
 

@@ -17,6 +17,9 @@ from api.analysis.analysis import layout as analysis_layout
 from api.connect.data_service import get_data
 from api.dashboard.dashboard import layout as dashboard_layout
 from api.data_table.table import layout as table_layout
+import logging
+
+logger = logging.getLogger("name")
 
 DEBUG = os.environ["DASH_DEBUG_MODE"]
 
@@ -58,6 +61,7 @@ app.layout = html.Div(
         dcc.Store(id="intermediate-value"),
         dcc.Store(id="save_courses"),
         dcc.Store(id="courses_dict"),
+        dcc.Store(id="courses"),
         dcc.Store("is_date_on", "data"),
         dcc.Store("is_date_on_analysis", "data"),
         dcc.Store("is_date_on_dashboard", "data"),
@@ -79,8 +83,8 @@ app.clientside_callback(
 # pylint: disable=unused-argument
 @app.callback(
     Output("container", "children"),
-    Output("intermediate-value", "data"),
     Output("courses_dict", "data"),
+    Output("courses", "data"),
     Input("url", "pathname"),
     Input("save_courses", "data"),
 )
@@ -127,7 +131,7 @@ def get_datas(url, daten):
     ).json()
     courses_dict = {course["id"]: course["name"] for course in courses}
 
-    return add_components(), get_data(course_access), courses_dict
+    return add_components(), courses_dict, course_access
 
 
 # pylint: enable=unused-argument

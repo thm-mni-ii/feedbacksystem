@@ -26,6 +26,7 @@ from api.util.utilities import (
     create_invisible_time_row,
     filter_attempt_limits,
     filter_time,
+    update_course_2
 )
 from api.util.analysis_util import (
     filter_exercises,
@@ -38,6 +39,9 @@ from api.util.analysis_util import (
     create_new_filter_buttons,
     create_new_columns_buttons,
 )
+import logging
+
+logger = logging.getLogger("name")
 
 
 tmp_df = get_data(-1)
@@ -319,22 +323,22 @@ def hide_time(checkbox, is_date_on):
         False,
     )
 
-
 @callback(
     Output("course_analysis", "options"),
     Output("course_analysis", "value"),
     Input("intermediate-value", "data"),
     Input("courses_dict", "data"),
+    Input("courses","data"),
 )
-def update_exercise(daten, courses_dict):
+def update_exercise(daten, courses_dict,courses):
     """
     replace the ids of the courses with their actual name when displayed
     :param daten: all data to display
     :param courses_dict: list of the real names of all courses
     :return: all courses that are selecteable
     """
-    return update_course(daten, courses_dict)
-
+    logger.error(courses)
+    return update_course_2(courses, courses_dict)
 
 @callback(
     Output("exercise_analysis", "options"),

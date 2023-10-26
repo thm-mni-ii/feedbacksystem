@@ -5,7 +5,9 @@ from datetime import timedelta, datetime
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 import pandas as pd
+import logging
 
+logger = logging.getLogger("name")
 
 import dateutil.parser
 
@@ -119,12 +121,30 @@ def update_course(daten, courses_dict):
     :return: courses with their real names
     """
     empty_list = []
+    if not daten:
+        return empty_list, empty_list
+
     local_df = pd.read_json(daten)
     local_df = local_df[local_df["UserId"] != 0]
     courses = [
         {"value": course_id, "label": courses_dict.get(str(course_id)) or course_id}
         for course_id in local_df.CourseName.unique()
     ]
+    return courses
+
+def update_course_2(course_list, courses_dict):
+    """
+    change the name shown for the courses to their name instead of their id
+    :param daten: all data
+    :param courses_dict: dictionary of all the course names
+    :return: courses with their real names
+    """
+    empty_list = []
+    courses = [
+        {"value": course_id, "label": courses_dict.get(str(course_id)) or course_id}
+        for course_id in course_list
+    ]
+    logger.error(courses)
     return courses, empty_list
 
 
