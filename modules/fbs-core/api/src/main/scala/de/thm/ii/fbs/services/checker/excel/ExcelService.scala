@@ -116,7 +116,8 @@ class ExcelService {
           differentVals = differentVals :+ cell1.reference
         }
       print(s"the list of unmatching values ---> ${differentVals} \n")
-        print(f"result1 := ${result1} --- result2 := ${result2} ====>the cell1 := ${cell1.formula} --- the cell2 := ${cell2.formula} \n")
+        print(f"====>Normalised-teacher-formula := ${result1} --- Normalised-Student-Formula := ${result2}" +
+          f" \n====>teacher-formula := ${cell1.formula} --- Student-formula := ${cell2.formula} \n")
         print(f"the test of results : ", result1 == result2, "\n")
         var tokens1 = tokenizeFormula(cell1.formula)
         var tokens2 = tokenizeFormula(cell2.formula)
@@ -143,6 +144,9 @@ class ExcelService {
                 val missingRefs = refsInTokens1.diff(refsInRefs)
                 val excessiveRefs = refsInRefs.diff(refsInTokens1)
                 var differences = ""
+                if (missingRefs.nonEmpty || excessiveRefs.nonEmpty) {
+                  stringBuilder.append(s"+Zelle: ${cell1.reference} Die verwendeten Referenzen sind nicht korrekt \n")
+                }
                 // Print missing references
                 if (missingRefs.nonEmpty) {
                   print("Missing references in refs:\n")
@@ -150,26 +154,26 @@ class ExcelService {
                     differences = differences + ref
                   }
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
-                  stringBuilder.append(s"+Zelle: ${cell1.reference} Fehlende Referenz(en) ==>[ ${differences} ] \n")
+                  stringBuilder.append(s" -Zelle: ${cell1.reference} Fehlende Referenz(en) ==>[ ${differences} ] \n")
                   print(s"Missing reference: $differences in refs \n")
                   differences = ""
                 }
 
                 // Print excessive references
                 if (excessiveRefs.nonEmpty) {
-                  print("Excessive references in refs: \n")
+                  print(" Excessive references in refs: \n")
                   excessiveRefs.foreach { ref =>
                     differences = differences + ref
                   }
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
-                  stringBuilder.append(s"+Zelle: ${cell1.reference} Exzessive Referenz(en) ==>[ ${differences} ] \n")
+                  stringBuilder.append(s" -Zelle: ${cell1.reference} Exzessive Referenz(en) ==>[ ${differences} ] \n")
                   differences = ""
                 }
                 if (commonRefs.nonEmpty) {
                   updatedInvalidFields = updatedInvalidFields :+ cell1.reference
                   // Do something with commonRefs if needed
                   print("Common references found in updatedInvalidFields:\n")
-                  stringBuilder.append(s"+Zelle: ${cell1.reference} Bitte korrigieren Sie zuerst die falschen Zellen  ==>[ ${commonRefs.mkString(", ")} ] \n")
+                  stringBuilder.append(s" -Zelle: ${cell1.reference} Bitte korrigieren Sie zuerst die falschen Zellen  ==>[ ${commonRefs.mkString(", ")} ] \n")
                 }
               case None =>
                 print("Pattern not found.\n")
@@ -211,7 +215,7 @@ class ExcelService {
         if (cell1.value != cell2.value && tokens1 == tokens2) {
           print("true case here  \n")
         }
-        print(s"#tokens2 at the end ${tokens2} \n  #tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
+        print(s"#student-tokens : ${tokens2} \n#teacher-tokens : ${tokens1}  \n student-result: ${cell2.value} --- teacher-result: ${cell1.value}\n")
 
          if (tokens2 == tokens1){
            if (cell1.value != cell2.value){
@@ -224,7 +228,7 @@ class ExcelService {
           stringBuilder.append(s"+Zelle: ${cell1.reference} ==> please correct the previous cells first ( ${matchingTuples} )\n")
         }
         else {
-        stringBuilder.append(s"+Zelle: ${cell1.reference} ==> hat nicht den richtigen Wert \n")
+        //stringBuilder.append(s"+Zelle: ${cell1.reference} ==> hat nicht den richtigen Wert \n")
         }
       }
          }
@@ -327,8 +331,39 @@ class ExcelService {
     sortedConstants
   }
 
+  def compareFormulas(solution: String, form: String): String = {
+    // Extract variable names from the solution formula using regular expressions
+    val solutionVariables = "\\b[A-Za-z]+\\d+\\b".r.findAllIn(solution).toSet
 
+    // Extract variable names from the given formula
+    val formVariables = "\\b[A-Za-z]+\\d+\\b".r.findAllIn(form).toSet
+
+    // Check for missing variables in the given formula
+    val missingVariables = solutionVariables.diff(formVariables)
+
+    // Check for invalid constants in the given formula
+    val invalidConstants = "\\d+".r.findAllIn(form).filterNot(constant => solution.contains(constant)).toSet
+
+    // Prepare the result message
+    val result =
+      if (missingVariables.nonEmpty || invalidConstants.nonEmpty) {
+        val missingVarsMsg = if (missingVariables.nonEmpty) s"Missing variables: ${missingVariables.mkString(", ")}\n" else ""
+        val invalidConstantsMsg = if (invalidConstants.nonEmpty) s"Invalid constants: ${invalidConstants.mkString(", ")}\n" else ""
+        s"$missingVarsMsg$invalidConstantsMsg"
+      } else {
+        "Formulas match."
+      }
+
+    result
+  }
+
+  val solution = "(C4+B4+D5)/2"
+  val form = "(B4+4)/2"
+  val result = compareFormulas(solution, form)
+  print("here the the new compare :\n")
+  print(result)
 /*
+  print("\n")
   private def findDifference(value1: String, value2: String): String = {
     val diffBuilder = new StringBuilder()
 
@@ -504,6 +539,7 @@ class ExcelService {
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
   //val keywords = List("AVG", "SUM", "MUL", "OPER", "APPEND", "DELETE")
+
   def levenshteinDistance(s1: String, s2: String): Int = {
     val m = s1.length
     val n = s2.length
@@ -515,13 +551,12 @@ class ExcelService {
     for (j <- 0 to n) {
       dp(0)(j) = j
     }
-
     for (i <- 1 to m; j <- 1 to n) {
       val substitutionCost = if (s1(i - 1) == s2(j - 1)) 0 else 1
       dp(i)(j) = Seq(
         dp(i - 1)(j) + 1,     // deletion
         dp(i)(j - 1) + 1,     // insertion
-        dp(i - 1)(j - 1) + substitutionCost   // substitution
+        dp(i - 1)(j - 1) + substitutionCost
       ).min
     }
 
@@ -545,13 +580,13 @@ class ExcelService {
   val functionNames = FunctionEval.getSupportedFunctionNames.asScala.toList
   //print(s"The list of keys: $functionNames \n")
 
-  val testInputs = List("AVER", "SIN", "DELTE", "DA", "POW", "ABS", "DAT", "NOW", "sum")
+  val testInputs = List("VERGE")
 
   testInputs.foreach { input =>
-    print(f"the test_input b4: ${input} ")
+    print(f"Function inputted by the student: ${input} ")
     if (!functionNames.contains(input)) {
       val closestKeyword = findMostSimilarKeyword(input, functionNames)
-      print(f"the test_input after: ${input} ")
+      print(f"\n: ${input} ")
       print(s"Did you mean $closestKeyword? \n")
     }
   }

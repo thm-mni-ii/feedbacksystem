@@ -59,7 +59,7 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
     * @param cc           the check runner of the submission
     * @param fu           the user which triggered the submission
     */
-    print("this is before notify \n")
+
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
     print("notify has been entered \n")
     try {
@@ -224,26 +224,18 @@ print("before get fields \n")
   private def buildResultText(success: Boolean,
                               results: List[CheckResultTask],
                               excelMediaInformation: ExcelMediaInformationTasks): String = {
-    if (success && storedFormulasMatch.isEmpty) {
+    if (success) {
       "OK"
     } else {
       val correct = results.count(c => c.success)
-
       val hints = results.zip(excelMediaInformation.tasks)
         .filter(t => !t._1.success)
         .map(t => buildTaskResultText(t._1, t._2))
         .mkString("\n")
+      val res = f"$correct von ${results.length} Unteraufgaben richtig."
 
-      val res = if (storedFormulasMatch.isEmpty) {
-        s"$correct von ${results.length} Unteraufgaben richtig."
-      } else {
-        val formelres = correct-1
-        s"$formelres von ${results.length} Unteraufgaben richtig."
-      }
-
-      if (hints.nonEmpty || storedFormulasMatch.nonEmpty) {
-        f"$res\n\nHinweise:\n$hints\n$storedFormulasMatch"
-
+      if (hints.nonEmpty) {
+        f"$res\n\nHinweise:\n$hints"
       } else {
         res
       }
@@ -291,7 +283,7 @@ print("before get fields \n")
         }
       }
     }
-    print("this is being printed \n")
+
     feedback.toString()
   }
 
