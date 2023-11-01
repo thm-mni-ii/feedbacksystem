@@ -80,10 +80,10 @@ export class SqlPlaygroundService {
   }
 
   /**
-   * Get Database Temp URL
-   * @return the temporary database URL
+   * Get Database Temp URI
+   * @return the temporary database URI
    */
-  getDatabaseURL(): Observable<string> {
+  getDatabaseURI(): Observable<string> {
     return of("postgresql://username:password@host:port/database");
   }
 

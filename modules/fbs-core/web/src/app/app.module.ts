@@ -108,6 +108,7 @@ import { HighlightedInputComponent } from "./page-components/sql-playground/sql-
 import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
+import { DbUriLinkDialogComponent } from "./dialogs/db-uri-link/db-uri-link-dialog.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -205,6 +206,7 @@ export const httpInterceptorProviders = [
     ExportTasksDialogComponent,
     HighlightedInputComponent,
     MathInputComponent,
+    DbUriLinkDialogComponent,
   ],
   imports: [
     BrowserModule,

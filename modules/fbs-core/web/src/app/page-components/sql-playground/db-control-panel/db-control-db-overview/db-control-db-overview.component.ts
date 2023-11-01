@@ -8,6 +8,7 @@ import { JWTToken } from "src/app/model/JWTToken";
 import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import { DbUriLinkDialogComponent } from "src/app/dialogs/db-uri-link/db-uri-link-dialog.component";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -31,6 +32,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   selectedDb: number = 0;
   token: JWTToken = this.authService.getToken();
   pending: boolean = false;
+  dbURI: string = "";
 
   ngOnInit(): void {
     this.sqlPlaygroundService.getDatabases(this.token.id).subscribe(
@@ -137,43 +139,6 @@ export class DbControlDbOverviewComponent implements OnInit {
     });
   }
 
-  getTempURI() {
-    //const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
-    this.sqlPlaygroundService.getDatabaseURL().subscribe(
-      (uri) => {
-        this.snackbar
-          .open(
-            `Der Link zu deiner Datenbank ist nur für 24 Stunden verfügbar:\n${uri}`,
-            "Kopieren"
-          )
-          .onAction()
-          .subscribe(() => {
-            navigator.clipboard.writeText(uri).then(
-              () => {
-                this.snackbar.dismiss();
-                this.snackbar.open("Link erfolgreich kopiert!", "Ok", {
-                  duration: 3000,
-                });
-              },
-              (error) => {
-                console.error("Link konnte nicht kopiert werden: ", error);
-                this.snackbar.dismiss();
-              }
-            );
-          });
-        this.ngOnInit();
-        this.pending = false;
-      },
-      (error) => {
-        console.log(error);
-        this.snackbar.open("Fehler beim Erstellen der Datenbank-URL", "Ok", {
-          duration: 3000,
-        });
-        this.pending = false;
-      }
-    );
-  }
-
   activateDb(dbId: number) {
     this.pending = true;
     const selectedDb = this.dbs.find((db) => db.id == dbId);
@@ -215,6 +180,22 @@ export class DbControlDbOverviewComponent implements OnInit {
       },
     });
     return dialogRef.afterClosed();
+  }
+
+  getTempURI() {
+    const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
+    this.sqlPlaygroundService
+      .getDatabaseURI()
+      .subscribe((uri) => (this.dbURI = uri));
+    this.dialog.open(DbUriLinkDialogComponent, {
+      height: "auto",
+      width: "50%",
+      autoFocus: false,
+      data: {
+        message: `Der URI-Link zu deiner Datenbank \" ${selectedDb.name} \" ist nur für 24 Stunden verfügbar!\n`,
+        uri: this.dbURI,
+      },
+    });
   }
 
   addDb() {
