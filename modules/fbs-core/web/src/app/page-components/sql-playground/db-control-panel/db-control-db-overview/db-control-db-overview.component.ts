@@ -137,6 +137,43 @@ export class DbControlDbOverviewComponent implements OnInit {
     });
   }
 
+  getTempURI() {
+    //const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
+    this.sqlPlaygroundService.getDatabaseURL().subscribe(
+      (uri) => {
+        this.snackbar
+          .open(
+            `Der Link zu deiner Datenbank ist nur für 24 Stunden verfügbar:\n${uri}`,
+            "Kopieren"
+          )
+          .onAction()
+          .subscribe(() => {
+            navigator.clipboard.writeText(uri).then(
+              () => {
+                this.snackbar.dismiss();
+                this.snackbar.open("Link erfolgreich kopiert!", "Ok", {
+                  duration: 3000,
+                });
+              },
+              (error) => {
+                console.error("Link konnte nicht kopiert werden: ", error);
+                this.snackbar.dismiss();
+              }
+            );
+          });
+        this.ngOnInit();
+        this.pending = false;
+      },
+      (error) => {
+        console.log(error);
+        this.snackbar.open("Fehler beim Erstellen der Datenbank-URL", "Ok", {
+          duration: 3000,
+        });
+        this.pending = false;
+      }
+    );
+  }
+
   activateDb(dbId: number) {
     this.pending = true;
     const selectedDb = this.dbs.find((db) => db.id == dbId);

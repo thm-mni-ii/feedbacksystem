@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import { Constraint } from "../model/sql_playground/Constraint";
 import { Database } from "../model/sql_playground/Database";
 import { Routine } from "../model/sql_playground/Routine";
@@ -77,6 +77,14 @@ export class SqlPlaygroundService {
         statement: statement,
       }
     );
+  }
+
+  /**
+   * Get Database Temp URL
+   * @return the temporary database URL
+   */
+  getDatabaseURL(): Observable<string> {
+    return of("postgresql://username:password@host:port/database");
   }
 
   /**

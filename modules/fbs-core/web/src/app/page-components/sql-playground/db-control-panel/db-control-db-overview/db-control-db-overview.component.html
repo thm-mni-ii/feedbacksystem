@@ -48,5 +48,14 @@
     >
       Wechseln in den privaten Modus
     </button>
+
+    <button
+      mat-raised-button
+      class="url-btn"
+      (click)="getTempURI()"
+      [disabled]="collaborativeMode"
+    >
+      Verbindungs-URL anfordern
+    </button>
   </div>
 </div>
