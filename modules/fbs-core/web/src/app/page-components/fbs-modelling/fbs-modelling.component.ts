@@ -24,9 +24,8 @@ export class FbsModellingComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const externalUrl = `http://localhost:8080/?jsessionid=${this.token}`;
-    this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(externalUrl);
-    console.log("TOKEN", externalUrl);
+    const url = `http://localhost:8080/?jsessionid=${this.token}`;
+    this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     return this.safeUrl;
   }
 }
