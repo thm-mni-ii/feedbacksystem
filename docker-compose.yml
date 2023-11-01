@@ -123,7 +123,7 @@ services:
     image: postgres:14
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: R$7pWqY@K5zE3Xt&g9L1MfD 
+      POSTGRES_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD 
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./data/psql-sharing:/var/lib/postgresql/data
@@ -207,7 +207,7 @@ services:
       HMAC_SECRET: uigbduhegafudegufqu8o3q4tgru4ieubfiel
       RUNNER_SQL_CHECKER_IMAGE: feedbacksystem_sql-checker
       PSQL_SHARING_SERVER_URL: jdbc:postgresql://psql-sharing:5432/?allowMultiQueries=true
-      PSQL_SHARING_SERVER_PASSWORD: R$7pWqY@K5zE3Xt&g9L1MfD 
+      PSQL_SHARING_SERVER_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD 
       PSQL_SHARING_SERVER_USERNAME: postgres 
     volumes:
       - /tmp/feebi:/dockertemp # A temp dir where docker image stores task submissions temporarily
