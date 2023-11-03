@@ -68,7 +68,12 @@
           <p>Analyseplattform</p>
         </a>
 
-        <a mat-list-item routerLink="/modelling" routerLinkActive="selected">
+        <a
+          mat-list-item
+          routerLink="/modelling"
+          routerLinkActive="selected"
+          *ngIf="isAdmin || isModerator"
+        >
           <mat-icon> format_shapes</mat-icon>
           <p>FBS Modellierung</p>
         </a>
