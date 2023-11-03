@@ -108,7 +108,7 @@ import { HighlightedInputComponent } from "./page-components/sql-playground/sql-
 import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
-import { FbsModellingComponent } from './page-components/fbs-modelling/fbs-modelling.component';
+import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
