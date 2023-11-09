@@ -1,9 +1,9 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Kurs suchen</mat-label>
+    <mat-label>{{ "course.search.label.search" | i18nextEager }}</mat-label>
     <input
       type="text"
-      aria-label="Kurs suchen"
+      attr.aria-label="{{ 'course.search.label.search' | i18nextEager }}"
       matInput
       [formControl]="control"
     />
@@ -16,9 +16,11 @@
       color="accent"
       *ngIf="isAuthorized()"
       (click)="createCourse()"
-      matTooltip="Kurs erstellen"
+      matTooltip="{{ 'course.search.tooltip.createCourse' | i18nextEager }}"
     >
-      <mat-icon>add</mat-icon>&nbsp;Kurs erstellen
+      <mat-icon>add</mat-icon>&nbsp;{{
+        "course.search.label.createCourse" | i18nextEager
+      }}
     </button>
   </div>
 
@@ -27,7 +29,7 @@
     [data]="course"
   ></app-course-preview>
 
-  <span class="noElements" *ngIf="(courses | async)?.length === 0"
-    >Es gibt noch keiner Kurse denen Sie beitreten können.</span
-  >
+  <span class="noElements" *ngIf="(courses | async)?.length === 0">{{
+    "course.search.error.noCourses" | i18nextEager
+  }}</span>
 </div>

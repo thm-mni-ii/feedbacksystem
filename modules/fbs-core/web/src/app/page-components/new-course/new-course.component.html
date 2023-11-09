@@ -2,7 +2,9 @@
   <mat-card class="card">
     <mat-card-content>
       <mat-form-field>
-        <mat-label>Kursname</mat-label>
+        <mat-label>{{
+          "course.create.label.courseName" | i18nextEager
+        }}</mat-label>
         <input
           [formControl]="name"
           name="newCourseName"
@@ -12,13 +14,14 @@
           minlength="3"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors"
-          >Der Kursname ist erforderlich! Und muss mindestens 3 Zeichen
-          besitzen</mat-error
-        >
+        <mat-error *ngIf="name.errors">{{
+          "course.create.error.courseNameRequired" | i18nextEager
+        }}</mat-error>
       </mat-form-field>
       <mat-form-field>
-        <mat-label>Kursbeschreibung</mat-label>
+        <mat-label>{{
+          "course.create.label.courseDescription" | i18nextEager
+        }}</mat-label>
         <input
           [formControl]="description"
           name="newCourseDescription"
@@ -27,8 +30,12 @@
         />
       </mat-form-field>
       <mat-slide-toggle [(ngModel)]="isVisible"
-        ><p *ngIf="isVisible">Kurs anzeigen</p>
-        <p *ngIf="!isVisible">Kurs verbergen</p></mat-slide-toggle
+        ><p *ngIf="isVisible">
+          {{ "course.create.label.showCourse" | i18nextEager }}
+        </p>
+        <p *ngIf="!isVisible">
+          {{ "course.create.label.hideCourse" | i18nextEager }}
+        </p></mat-slide-toggle
       >
     </mat-card-content>
 
@@ -39,7 +46,7 @@
         (click)="createCourse()"
         [disabled]="!isInputValid()"
       >
-        Kurs erstellen
+        {{ "course.create.label.createCourse" | i18nextEager }}
       </button>
     </mat-card-actions>
   </mat-card>

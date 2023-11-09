@@ -2,9 +2,11 @@
   <app-menu-bar *ngIf="role || isAuthorized()">
     <mat-icon *ngIf="role" role="img">account_circle</mat-icon>
     <span>
-      <span *ngIf="role === 'DOCENT'">Dozent/in</span>
-      <span *ngIf="role === 'TUTOR'">Tutor/in</span>
-      <span *ngIf="role === 'STUDENT'">Student/in</span>
+      <span *ngIf="role === 'DOCENT'">{{ "role.docent" | i18nextEager }}</span>
+      <span *ngIf="role === 'TUTOR'">{{ "role.tutor" | i18nextEager }}</span>
+      <span *ngIf="role === 'STUDENT'">{{
+        "role.student" | i18nextEager
+      }}</span>
     </span>
 
     <span class="spacer"></span>
@@ -18,7 +20,7 @@
       mat-icon-button
       *ngIf="canEdit()"
       (click)="openExportDialog()"
-      matTooltip="Aufgaben Exportieren"
+      matTooltip="{{ 'course.task-export' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">save_alt</mat-icon>
     </button>
@@ -27,7 +29,7 @@
       mat-icon-button
       *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'results']"
-      matTooltip="Bewertungsübersicht"
+      matTooltip="{{ 'course.score-overview' | i18nextEager }}"
     >
       <mat-icon>insights</mat-icon>
     </button>
@@ -35,7 +37,7 @@
       mat-icon-button
       *ngIf="isAuthorized(true)"
       [routerLink]="['/', 'courses', courseID, 'participants']"
-      matTooltip="Teilnehmer"
+      matTooltip="{{ 'course.participants' | i18nextEager }}"
     >
       <mat-icon>groups</mat-icon>
     </button>
@@ -46,7 +48,7 @@
       class="green"
       *ngIf="externalClassroomService.isJoined()"
       (click)="joinClassroom()"
-      matTooltip="Digitalen Übungsraum beitreten"
+      matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
       <mat-icon>meeting_room</mat-icon>
     </button>
@@ -54,7 +56,7 @@
       mat-icon-button
       *ngIf="!externalClassroomService.isJoined()"
       (click)="joinClassroom()"
-      matTooltip="Digitalen Übungsraum beitreten"
+      matTooltip="{{ 'course.join-digital-exercise-room' | i18nextEager }}"
     >
       <mat-icon>meeting_room</mat-icon>
     </button>
@@ -62,7 +64,7 @@
     <button
       mat-icon-button
       (click)="goToFBA()"
-      matTooltip="Zur Feedback App wechseln"
+      matTooltip="{{ 'course.switch-to-feedback-app' | i18nextEager }}"
     >
       <mat-icon>question_answer</mat-icon>
     </button>
@@ -70,7 +72,7 @@
       mat-icon-button
       *ngIf="isAuthorized()"
       [routerLink]="['/', 'courses', courseID, 'sql-checker']"
-      matTooltip="SQL-Checker"
+      matTooltip="{{ 'course.view-sql-checker-results' | i18nextEager }}"
     >
       <mat-icon>check</mat-icon>
     </button>
@@ -78,53 +80,51 @@
       mat-icon-button
       *ngIf="isAuthorized() || role"
       [matMenuTriggerFor]="settings"
-      matTooltip="Einstellungen"
+      matTooltip="{{ 'course.settings' | i18nextEager }}"
     >
       <mat-icon>settings</mat-icon>
     </button>
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="isAuthorized()" (click)="updateCourse()">
         <mat-icon class="logout-icon">edit</mat-icon
-        ><span>Kurs bearbeiten</span>
+        ><span>{{ "course.edit" | i18nextEager }}</span>
       </button>
       <button mat-menu-item *ngIf="isAuthorized()" (click)="editPoints()">
-        <mat-icon class="logout-icon">rule</mat-icon><span>Punkte</span>
+        <mat-icon class="logout-icon">rule</mat-icon
+        ><span>{{ "course.points" | i18nextEager }}</span>
       </button>
       <button mat-menu-item (click)="showGoLinks()">
         <mat-icon class="logout-icon">link</mat-icon
-        ><span>Kurs Kurzlinks anzeigen</span>
+        ><span>{{ "course.show-course-shortlinks" | i18nextEager }}</span>
       </button>
       <button
         mat-menu-item
         color="warn"
         *ngIf="role"
         (click)="exitCourse()"
-        matTooltip="Kurs verlassen"
+        matTooltip="{{ 'course.leave' | i18nextEager }}"
       >
-        <mat-icon>exit_to_app</mat-icon>Kurs verlassen
+        <mat-icon>exit_to_app</mat-icon>{{ "course.leave" | i18nextEager }}
       </button>
       <button mat-menu-item *ngIf="isAuthorized()" (click)="deleteCourse()">
-        <mat-icon class="logout-icon">delete</mat-icon><span>Kurs löschen</span>
+        <mat-icon class="logout-icon">delete</mat-icon
+        ><span>{{ "course.delete" | i18nextEager }}</span>
       </button>
     </mat-menu>
   </app-menu-bar>
 
   <app-info class="info" *ngIf="!role">
     <p class="mat-body">
-      Liebe/r Nutzer/in, Sie betrachten einen Kurs in dem Sie nicht als
-      Teilnehmer/in geführt werden. Sie können alle Inhalte einsehen und an
-      Übungen teilnehmen, jedoch wird keine Ihrer Abgaben gewertet und der
-      Dozent wird nicht über Ihre Teilnahme informiert. Falls Sie an diesem Kurs
-      teilnehmen wollen, dann melden Sie sich bitte an.
+      {{ "course.message.not-registered-user" | i18nextEager }}
     </p>
     <div>
       <button
         mat-raised-button
         color="primary"
         (click)="joinCourse()"
-        matTooltip="Kurs beitreten"
+        matTooltip="{{ 'course.join' | i18nextEager }}"
       >
-        Am Kurs teilnehmen
+        {{ "course.join" | i18nextEager }}
       </button>
     </div>
   </app-info>
@@ -139,9 +139,9 @@
       color="accent"
       *ngIf="isAuthorized()"
       (click)="createTask()"
-      matTooltip="Aufgabe erstellen"
+      matTooltip="{{ 'course.create-task' | i18nextEager }}"
     >
-      <mat-icon>add</mat-icon>&nbsp;Aufgabe erstellen
+      <mat-icon>add</mat-icon>&nbsp;{{ "course.create-task" | i18nextEager }}
     </button>
   </div>
 
