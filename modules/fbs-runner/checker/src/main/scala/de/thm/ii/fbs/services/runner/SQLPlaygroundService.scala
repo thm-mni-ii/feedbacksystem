@@ -65,7 +65,6 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: Playgr
   private def initDBOperations(): DBOperationsService = {
     // Currently only PostgresSql is Supported
     if (!isPsql) throw new Error("Invalid DBType. Currently only Psql is Supported")
-
     val dbName = s"playground_db_${sqlRunArgs.database.id.toString}"
     val username = s"playground_user_${sqlRunArgs.user.id.toString}"
     new PsqlOperationsService(dbName, username, queryTimeout)

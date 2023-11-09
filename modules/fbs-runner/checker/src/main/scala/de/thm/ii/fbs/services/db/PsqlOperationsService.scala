@@ -152,4 +152,19 @@ class PsqlOperationsService(override val dbName: String, override val username: 
 
     client.queryFuture(s"$tables $constrains $views $routines $triggers")
   }
+  override def copyDatabase(targetClient: JDBCClient, targetDBName: String): Future[ResultSet] = {
+    val copyDBQuery = s"CREATE DATABASE $targetDBName WITH TEMPLATE $dbName"
+    targetClient.queryFuture(copyDBQuery)
+  }
+
+  override def createUserWithAccess(targetClient: JDBCClient, targetDBName: String): Future[String] = {
+    val password = generateUserPassword()
+    val userCreateQuery = s"CREATE USER $username WITH PASSWORD '$password';"
+    val permissionsQuery = s"GRANT ALL PRIVILEGES ON DATABASE $targetDBName TO $username;"
+
+    for {
+      _ <- targetClient.queryFuture(userCreateQuery)
+      _ <- targetClient.queryFuture(permissionsQuery)
+    } yield s"postgresql://$username:$password@<target-host>/$targetDBName"
+  }
 }
