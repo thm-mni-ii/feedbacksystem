@@ -1,9 +1,10 @@
 <div class="grid">
+  task.detail.tooltip.results
   <div class="results-grid">
     <app-bordered-container
       [xScrollable]="true"
       [yScrollable]="false"
-      [title]="'Ergebnisse'"
+      title="{{ 'sql-playground.results' | i18nextEager }}"
       ><app-dynamic-result-table
         [resultset]="resultset"
         [isQueryPending]="isQueryPending"
@@ -19,7 +20,9 @@
     </app-bordered-container>
   </div>
   <div class="db-grid">
-    <app-bordered-container [title]="'Steuerung'">
+    <app-bordered-container
+      title="{{ 'sql-playground.control' | i18nextEager }}"
+    >
       <app-db-control-panel
         (changeActiveDbId)="changeActiveDbId($event)"
         (submitStatement)="submitStatement($event)"
@@ -27,23 +30,26 @@
     ></app-bordered-container>
   </div>
   <div class="db-schema-grid">
-    <app-bordered-container [yScrollable]="true" [title]="'DB Schema'">
+    <app-bordered-container
+      [yScrollable]="true"
+      title="{{ 'sql-playground.dbSchema' | i18nextEager }}"
+    >
       <app-db-scheme-table
-        [title]="'Tabellen'"
+        title="{{ 'sql-playground.tables' | i18nextEager }}"
         [tables]="tables"
         [constraints]="constraints"
         (submitStatement)="submitStatement($event)"
       ></app-db-scheme-table>
       <app-db-scheme-views
-        [title]="'Views'"
+        title="{{ 'sql-playground.views' | i18nextEager }}"
         [views]="views"
       ></app-db-scheme-views>
       <app-db-scheme-routines
-        [title]="'Stored Procedures'"
+        title="{{ 'sql-playground.storedProcedures' | i18nextEager }}"
         [routines]="routines"
       ></app-db-scheme-routines>
       <app-db-scheme-triggers
-        [title]="'Triggers'"
+        title="{{ 'sql-playground.triggers' | i18nextEager }}"
         [triggers]="triggers"
       ></app-db-scheme-triggers>
     </app-bordered-container>

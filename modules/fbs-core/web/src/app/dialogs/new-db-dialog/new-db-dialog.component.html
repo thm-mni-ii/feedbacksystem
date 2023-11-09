@@ -1,10 +1,13 @@
 <div class="container">
-  <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
-  <div *ngIf="!isUpdateDialog" matDialogTitle>Datenbank erstellen</div>
+  <div *ngIf="!isUpdateDialog" matDialogTitle>
+    {{ "dialog.db.new.create-database" | i18nextEager }}
+  </div>
   <mat-dialog-content style="max-height: 100%; overflow: hidden">
     <mat-card-content>
       <mat-form-field>
-        <mat-label>Datenbankname</mat-label>
+        <mat-label>{{
+          "dialog.db.new.database-name" | i18nextEager
+        }}</mat-label>
         <input
           [formControl]="name"
           name="newCourseName"
@@ -14,16 +17,15 @@
           minlength="3"
           maxlength="100"
         />
-        <mat-error *ngIf="name.errors"
-          >Der Datenbankname ist erforderlich! Und muss mindestens 3 Zeichen
-          besitzen</mat-error
-        >
+        <mat-error *ngIf="name.errors">
+          {{ "dialog.db.new.database-name-error" | i18nextEager }}
+        </mat-error>
       </mat-form-field>
     </mat-card-content>
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialog.db.new.cancel" | i18nextEager }}
     </button>
     <button
       mat-flat-button
@@ -34,7 +36,7 @@
       <span class="spinner" *ngIf="pending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!pending">Erstellen</span>
+      <span *ngIf="!pending">{{ "dialog.db.new.create" | i18nextEager }}</span>
     </button>
   </mat-dialog-actions>
 </div>

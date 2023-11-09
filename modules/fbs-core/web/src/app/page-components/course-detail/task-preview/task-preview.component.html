@@ -5,13 +5,25 @@
 >
   <div class="task-title">
     <span *ngIf="task.requirementType === 'mandatory'">
-      <mat-icon class="mandatory" matTooltip="Pflicht">priority_high</mat-icon>
+      <mat-icon
+        class="mandatory"
+        matTooltip="{{ 'task.tooltip.mandatory' | i18nextEager }}"
+        >priority_high</mat-icon
+      >
     </span>
     <span *ngIf="task.requirementType === 'optional'">
-      <mat-icon class="bonus" matTooltip="Bonus">star</mat-icon>
+      <mat-icon
+        class="bonus"
+        matTooltip="{{ 'task.tooltip.bonus' | i18nextEager }}"
+        >star</mat-icon
+      >
     </span>
     <span *ngIf="task.requirementType === 'practice'">
-      <mat-icon class="practice" matTooltip="Übung">school</mat-icon>
+      <mat-icon
+        class="practice"
+        matTooltip="{{ 'task.tooltip.practice' | i18nextEager }}"
+        >school</mat-icon
+      >
     </span>
     <span>{{ task.name }}</span>
   </div>

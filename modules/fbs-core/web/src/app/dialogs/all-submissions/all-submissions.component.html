@@ -8,5 +8,7 @@
   ></app-results>
 </mat-dialog-content>
 <mat-dialog-actions class="buttons">
-  <button mat-flat-button color="warn" (click)="close()">Schließen</button>
+  <button mat-flat-button color="warn" (click)="close()">
+    {{ "dialog.all-submissions.label.close" | i18nextEager }}
+  </button>
 </mat-dialog-actions>
