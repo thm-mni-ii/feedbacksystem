@@ -1,7 +1,7 @@
 <div class="container">
   <!-- <div *ngIf="isUpdateDialog" matDialogTitle>Datenbank bearbeiten</div> -->
   <div *ngIf="!isUpdateDialog" matDialogTitle>
-    Template erstellen/bearbeiten
+    {{ "dialog.sql-template.new.create-edit-template" | i18nextEager }}
   </div>
   <mat-dialog-content style="max-height: 80%; overflow: auto">
     <mat-card-content class="content">
@@ -9,7 +9,9 @@
         <mat-list role="list">
           <mat-list-item>
             <div class="list-item">
-              <span class="item-text">Neue Vorlage erstellen</span>
+              <span class="item-text">{{
+                "dialog.sql-template.new.create-new-template" | i18nextEager
+              }}</span>
               <span></span>
               <button mat-icon-button (click)="closeDialog()">
                 <mat-icon class="list-icon grey">add-circle</mat-icon>
@@ -42,11 +44,15 @@
       </div>
       <mat-card class="edit-area">
         <mat-card-header>
-          <mat-card-title>Vorlage Erstellen/Bearbeiten</mat-card-title>
+          <mat-card-title>{{
+            "dialog.sql-template.new.create-edit-template" | i18nextEager
+          }}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <mat-form-field>
-            <mat-label>Vorlagenname</mat-label>
+            <mat-label>{{
+              "dialog.sql-template.new.template-name" | i18nextEager
+            }}</mat-label>
             <input
               [formControl]="templateName"
               name="newCourseName"
@@ -56,14 +62,15 @@
               minlength="3"
               maxlength="100"
             />
-            <mat-error *ngIf="templateName.errors"
-              >Der Vorlagenname ist erforderlich! Und muss mindestens 3 Zeichen
-              besitzen</mat-error
-            >
+            <mat-error *ngIf="templateName.errors">{{
+              "dialog.sql-template.new.template-name-error" | i18nextEager
+            }}</mat-error>
           </mat-form-field>
           <div class="category-grid">
             <mat-form-field class="select" appearance="fill">
-              <mat-label>Kategorie</mat-label>
+              <mat-label>{{
+                "dialog.sql-template.new.category" | i18nextEager
+              }}</mat-label>
               <mat-select [(value)]="selectedCategory">
                 <mat-option>-- None --</mat-option>
                 <mat-option
@@ -76,15 +83,17 @@
             </mat-form-field>
             <button mat-button>
               <mat-icon outline>add_circle</mat-icon>
-              Kategorie hinzufügen
+              {{ "dialog.sql-template.new.add-category" | i18nextEager }}
             </button>
             <button mat-button>
               <mat-icon outline>do_not_disturb_on</mat-icon>
-              Kategorie entfernen
+              {{ "dialog.sql-template.new.remove-category" | i18nextEager }}
             </button>
           </div>
           <mat-form-field>
-            <mat-label>Vorlage</mat-label>
+            <mat-label>{{
+              "dialog.sql-template.new.template" | i18nextEager
+            }}</mat-label>
             <textarea
               style="height: 130px"
               matInput
@@ -95,16 +104,19 @@
         </mat-card-content>
         <mat-card-actions>
           <button mat-raised-button class="btn-green" (click)="closeDialog()">
-            Erstellen
+            {{ "dialog.sql-template.new.create" | i18nextEager }}
           </button>
           <button mat-raised-button class="btn-green" (click)="closeDialog()">
-            Speichern
+            {{ "dialog.sql-template.new.save" | i18nextEager }}
           </button>
         </mat-card-actions>
       </mat-card>
     </mat-card-content>
   </mat-dialog-content>
   <mat-dialog-actions class="actions">
-    <button mat-flat-button color="warn" (click)="closeDialog()">Zurück</button>
+    <button mat-flat-button color="warn" (click)="closeDialog()">
+      {{ "dialog.sql-template.new.back" | i18nextEager }}
+    </button>
   </mat-dialog-actions>
 </div>
+```

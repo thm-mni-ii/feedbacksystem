@@ -2,13 +2,15 @@
   <button
     mat-icon-button
     [routerLink]="['/', 'courses', courseID]"
-    matTooltip="Zurück zum Kurs"
+    matTooltip="{{ 'course.participants.backToCourse.tooltip' | i18nextEager }}"
   >
     <mat-icon>arrow_back</mat-icon>
   </button>
 
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Teilnehmer suchen und hinzufügen</mat-label>
+    <mat-label>{{
+      "course.participants.searchAndAdd.label" | i18nextEager
+    }}</mat-label>
     <input
       matInput
       (keyup)="applyFilter($event.target.value)"
@@ -33,7 +35,8 @@
       (click)="unregisterStudent()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle Studierenden entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "course.participants.removeAllStudents.label" | i18nextEager }}
     </button>
     <button
       mat-raised-button
@@ -41,7 +44,8 @@
       (click)="unregisterTutor()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle Tutoren entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "course.participants.removeAllTutors.label" | i18nextEager }}
     </button>
     <button
       mat-raised-button
@@ -49,51 +53,70 @@
       (click)="unregisterAll()"
       class="button"
     >
-      <mat-icon>group_remove</mat-icon> Alle teilnehmenden Personen entfernen
+      <mat-icon>group_remove</mat-icon>
+      {{ "course.participants.removeAllParticipants.label" | i18nextEager }}
     </button>
   </div>
 
   <table mat-table matSort [dataSource]="dataSource" class="mat-elevation-z8">
     <!-- Name Column -->
     <ng-container matColumnDef="prename">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Vorname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "course.participants.firstName.label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.prename }}</td>
     </ng-container>
 
     <!-- Weight Column -->
     <ng-container matColumnDef="surname">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Nachname</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "course.participants.lastName.label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.surname }}</td>
     </ng-container>
 
     <!-- Symbol Column -->
     <ng-container matColumnDef="email">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>E-Mail</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "course.participants.email.label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.email }}</td>
     </ng-container>
 
     <!-- Role id Column-->
     <ng-container matColumnDef="globalRole">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Rolle</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>
+        {{ "course.participants.role.label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <mat-select
           value="{{ getRole(user.id) }}"
           (selectionChange)="roleChange(user.id, $event.value)"
         >
-          <mat-option value="STUDENT">Student</mat-option>
-          <mat-option value="DOCENT">Dozent</mat-option>
-          <mat-option value="TUTOR">Tutor</mat-option>
+          <mat-option value="STUDENT">{{
+            "course.participants.studentOption.label" | i18nextEager
+          }}</mat-option>
+          <mat-option value="DOCENT">{{
+            "course.participants.lecturerOption.label" | i18nextEager
+          }}</mat-option>
+          <mat-option value="TUTOR">{{
+            "course.participants.tutorOption.label" | i18nextEager
+          }}</mat-option>
         </mat-select>
       </td>
     </ng-container>
 
     <!-- Action buttons-->
     <ng-container matColumnDef="action">
-      <th mat-header-cell *matHeaderCellDef>Aktionen</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "course.participants.actions.label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let user">
         <button
           mat-icon-button
-          matTooltip="Benutzer austragen"
+          matTooltip="{{
+            'course.participants.unregisterUser.tooltip' | i18nextEager
+          }}"
           color="warn"
           (click)="unregister(user)"
         >

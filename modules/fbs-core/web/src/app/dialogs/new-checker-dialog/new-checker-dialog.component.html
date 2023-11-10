@@ -1,10 +1,14 @@
-<div matDialogTitle *ngIf="!isUpdate">Neue Überprüfung hinzufügen</div>
-<div matDialogTitle *ngIf="isUpdate">Überprüfung bearbeiten</div>
+<div matDialogTitle *ngIf="!isUpdate">
+  {{ "dialog.checker.new.add" | i18nextEager }}
+</div>
+<div matDialogTitle *ngIf="isUpdate">
+  {{ "dialog.checker.new.edit" | i18nextEager }}
+</div>
 <div class="newChecker">
   <form [formGroup]="checkerForm">
     <mat-select
       class="pad"
-      placeholder="Checkertyp"
+      placeholder="{{ 'dialog.checker.new.checker-type' | i18nextEager }}"
       formControlName="checkerType"
       required
       (selectionChange)="defineForm(checkerForm.value)"
@@ -17,7 +21,7 @@
     <mat-form-field>
       <input
         type="number"
-        placeholder="Reihenfolge"
+        placeholder="{{ 'dialog.checker.new.order' | i18nextEager }}"
         matInput
         formControlName="ord"
         required
@@ -42,12 +46,13 @@
           formControlName="showHints"
           value="true"
           (change)="showHintsEvent(checkerForm.value)"
-          >Hilfestellung anzeigen</mat-checkbox
+          >{{ "dialog.checker.new.show-hints" | i18nextEager }}</mat-checkbox
         >
       </div>
       <div *ngIf="showHintsConfig">
-        <h4>Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?</h4>
-        <mat-icon matTooltip="Studierende erfahren, wo ihre Fehler liegen."
+        <h4>{{ "dialog.checker.new.hints-attempts" | i18nextEager }}</h4>
+        <mat-icon
+          matTooltip="{{ 'dialog.checker.new.hints-tooltip' | i18nextEager }}"
           >info</mat-icon
         >
         <mat-form-field>
@@ -64,15 +69,19 @@
             formControlName="showExtendedHints"
             value="true"
             (change)="showExtendedHintsEvent(checkerForm.value)"
-            >Hilfestellung geben</mat-checkbox
+            >{{
+              "dialog.checker.new.show-extended-hints" | i18nextEager
+            }}</mat-checkbox
           >
         </div>
         <div *ngIf="showExtendedHintsConfig">
           <h4>
-            Nach wie vielen Fehlversuchen sollen Hinweise angezeigt werden?
+            {{ "dialog.checker.new.extended-hints-attempts" | i18nextEager }}
           </h4>
           <mat-icon
-            matTooltip="Studierende erhalten Informationen zu den korrekten Tabellen und Attributen"
+            matTooltip="{{
+              'dialog.checker.new.extended-hints-tooltip' | i18nextEager
+            }}"
             >info</mat-icon
           >
           <mat-form-field>
@@ -90,7 +99,7 @@
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialog.checker.new.cancel" | i18nextEager }}
     </button>
     <button
       *ngIf="!isUpdate"
@@ -106,7 +115,7 @@
       "
       (click)="createChecker(checkerForm.value)"
     >
-      Erstellen
+      {{ "dialog.checker.new.create" | i18nextEager }}
     </button>
     <button
       *ngIf="isUpdate"
@@ -115,7 +124,7 @@
       [disabled]="!checkerForm.valid"
       (click)="updateTask(checkerForm.value)"
     >
-      Update
+      {{ "dialog.checker.new.update" | i18nextEager }}
     </button>
   </mat-dialog-actions>
 </div>
