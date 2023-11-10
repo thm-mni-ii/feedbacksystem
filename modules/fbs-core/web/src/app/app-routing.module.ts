@@ -19,7 +19,6 @@ import { SqlCheckerComponent } from "./page-components/sql-checker/sql-checker.c
 import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-checker-results/sql-checker-results.component";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
-import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -85,12 +84,6 @@ const routes: Routes = [
       {
         path: "analytics",
         component: AnalyticsToolComponent,
-        canActivate: [AuthGuard],
-      },
-      // Modelling
-      {
-        path: "modelling",
-        component: FbsModellingComponent,
         canActivate: [AuthGuard],
       },
 

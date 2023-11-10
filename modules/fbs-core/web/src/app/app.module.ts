@@ -108,7 +108,6 @@ import { HighlightedInputComponent } from "./page-components/sql-playground/sql-
 import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
-import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
 import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
@@ -209,7 +208,6 @@ export const httpInterceptorProviders = [
     ExportTasksDialogComponent,
     HighlightedInputComponent,
     MathInputComponent,
-    FbsModellingComponent,
     LanguageMenuComponent,
   ],
   imports: [
