@@ -1,19 +1,25 @@
 <div *ngIf="display">
-  <h4>Ergebnisse per Unteraufgabe</h4>
+  <h4>{{ "task.subtask-results.title" | i18nextEager }}</h4>
 
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "task.subtask-results.name-label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.name }}</td>
     </ng-container>
 
     <ng-container matColumnDef="maxPoints">
-      <th mat-header-cell *matHeaderCellDef>Maximal mögliche Punkte</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "task.subtask-results.max-points-label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.maxPoints }}</td>
     </ng-container>
 
     <ng-container matColumnDef="points">
-      <th mat-header-cell *matHeaderCellDef>Erreichte Punkte</th>
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "task.subtask-results.achieved-points-label" | i18nextEager }}
+      </th>
       <td mat-cell *matCellDef="let result">{{ result.points }}</td>
     </ng-container>
 

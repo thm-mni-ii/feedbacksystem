@@ -12,7 +12,7 @@ class LatexMarshalTest {
     @Test
     fun simpleMarshal() {
         Assertions.assertEquals(
-            "1 + 2",
+            "{1} + {2}",
             marshal.marshal(Ast(Operation(Operator.ADD, Num(1), Num(2))))
         )
     }
@@ -20,7 +20,7 @@ class LatexMarshalTest {
     @Test
     fun simpleDecimalMarshal() {
         Assertions.assertEquals(
-            "1{,}5 + 2",
+            "{1{,}5} + {2}",
             marshal.marshal(Ast(Operation(Operator.ADD, Num(1.5), Num(2))))
         )
     }
@@ -28,7 +28,7 @@ class LatexMarshalTest {
     @Test
     fun simpleBigMarshal() {
         Assertions.assertEquals(
-            "122333444455555666666777777788888888999999998 + 1",
+            "{122333444455555666666777777788888888999999998} + {1}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -52,7 +52,7 @@ class LatexMarshalTest {
     @Test
     fun alphabetMarshal() {
         Assertions.assertEquals(
-            "a \\cdot b \\cdot c",
+            "{a} \\cdot {{b} \\cdot {c}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -68,7 +68,7 @@ class LatexMarshalTest {
     @Test
     fun countingMarshal() {
         Assertions.assertEquals(
-            "1 \\cdot 2 \\cdot 3",
+            "{1} \\cdot {{2} \\cdot {3}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -92,7 +92,7 @@ class LatexMarshalTest {
     @Test
     fun expMarshal() {
         Assertions.assertEquals(
-            "{a}^{b}",
+            "{a} ^ {b}",
             marshal.marshal(Ast(Operation(Operator.EXP, Var("a"), Var("b"))))
         )
     }
@@ -108,7 +108,7 @@ class LatexMarshalTest {
     @Test
     fun decimalMulMarshal() {
         Assertions.assertEquals(
-            "25{,}28 \\cdot k",
+            "{25{,}28} \\cdot {k}",
             marshal.marshal(Ast(Operation(Operator.MUL, Num(25.28), Var("k"))))
         )
     }
@@ -116,7 +116,7 @@ class LatexMarshalTest {
     @Test
     fun equationMarshal() {
         Assertions.assertEquals(
-            "a = b",
+            "{a} = {b}",
             marshal.marshal(Ast(Operation(Operator.EQ, Var("a"), Var("b"))))
         )
     }
@@ -124,7 +124,7 @@ class LatexMarshalTest {
     @Test
     fun singleTypeBracketTestAdd() {
         Assertions.assertEquals(
-            "1 + 2 + 3 + 4",
+            "{1} + {{2} + {{3} + {4}}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -148,7 +148,7 @@ class LatexMarshalTest {
     @Test
     fun singleTypeBracketTestSub() {
         Assertions.assertEquals(
-            "1 - 2 - 3 - 4",
+            "{1} - {{2} - {{3} - {4}}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -172,7 +172,7 @@ class LatexMarshalTest {
     @Test
     fun singleTypeBracketTestExp() {
         Assertions.assertEquals(
-            "{2}^{{2}^{{2}^{2}}}",
+            "{2} ^ {{2} ^ {{2} ^ {2}}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -194,9 +194,30 @@ class LatexMarshalTest {
     }
 
     @Test
+    fun mixedTypeBracketTestExp() {
+        Assertions.assertEquals(
+            "({4} \\cdot {{a} ^ {2}}) ^ {3}",
+            marshal.marshal(
+                Ast(
+                    Operation(
+                        Operator.EXP,
+
+                        Operation(
+                            Operator.MUL,
+                            Num(4),
+                            Operation(Operator.EXP, Var("a"), Num(2))
+                        ),
+                        Num(3)
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun mixedTypeBracketTestAddSub() {
         Assertions.assertEquals(
-            "1 + 2 - 3 + 4",
+            "{1} + {{2} - {{3} + {4}}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -220,7 +241,7 @@ class LatexMarshalTest {
     @Test
     fun mixedTypeBracketTestAddMulNoBracket() {
         Assertions.assertEquals(
-            "1 + 2 \\cdot 2",
+            "{1} + {{2} \\cdot {2}}",
             marshal.marshal(
                 Ast(
                     Operation(
@@ -240,7 +261,7 @@ class LatexMarshalTest {
     @Test
     fun mixedTypeBracketTestAddMulBracket() {
         Assertions.assertEquals(
-            "(1 + 2) \\cdot 2",
+            "({1} + {2}) \\cdot {2}",
             marshal.marshal(
                 Ast(
                     Operation(

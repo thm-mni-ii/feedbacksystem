@@ -1,7 +1,7 @@
 package de.thm.ii.fbs.controller
 
 import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
+import de.thm.ii.fbs.controller.exception.{BadRequestException, ConflictException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model.{CourseRole, GlobalRole, User}
 import de.thm.ii.fbs.services.persistence.{CourseRegistrationService, UserService}
 import de.thm.ii.fbs.services.security.{AuthService, LocalLoginService}
@@ -9,6 +9,7 @@ import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
@@ -137,7 +138,11 @@ class UserController {
       body.retrive("globalRole").asText()
     ) match {
       case (Some(prename), Some(surname), Some(email), Some(password), Some(username), alias, globalRoleName) =>
-        loginService.createUser(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+        try {
+          loginService.createUser(new User(prename, surname, email, username, globalRoleName.map(GlobalRole.parse).getOrElse(GlobalRole.USER), alias), password)
+        } catch {
+          case e: DataIntegrityViolationException => throw new BadRequestException("username already taken")
+        }
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }

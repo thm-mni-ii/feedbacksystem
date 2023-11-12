@@ -1,6 +1,6 @@
 <div class="result">
   <app-dropzone
     (update)="updateSubmissionFile($event)"
-    [usage]="'Abgabe hochladen'"
+    usage="{{ 'task.submission.file.upload.label' | i18nextEager }}"
   ></app-dropzone>
 </div>
