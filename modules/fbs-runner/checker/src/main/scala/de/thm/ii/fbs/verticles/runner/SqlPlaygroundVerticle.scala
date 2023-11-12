@@ -35,6 +35,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
   private val meter = Metrics.openTelemetry.meterBuilder("de.thm.mni.ii.fbs.verticles.runner.playground").build()
   private val processingCounter = meter.upDownCounterBuilder("processingCount").setDescription("Processing Requests").build()
   private val processingTimeCounter = meter.histogramBuilder("processingTime").ofLongs().setDescription("Time for processing").build()
+  private val errorCounter = meter.counterBuilder("errorCount").setDescription("Error Count").build()
 
   /**
     * start SqlRunnerVerticle
@@ -71,7 +72,9 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
         executeQueries(runArgs, con.get)
       }
     } catch {
-      case e: Throwable => handleError(runArgs, e)
+      case e: Throwable =>
+        errorCounter.add(1)
+        handleError(runArgs, e)
     } finally {
       val endTime = new Date().getTime
       processingCounter.add(-1)
