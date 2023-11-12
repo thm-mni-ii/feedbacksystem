@@ -5,7 +5,6 @@ import io.opentelemetry.sdk.OpenTelemetrySdk
 import io.opentelemetry.sdk.metrics.SdkMeterProvider
 import io.opentelemetry.sdk.resources.Resource
 
-
 object Metrics {
   private val prometheusHttpServer = PrometheusHttpServer.builder().build()
   val openTelemetry: OpenTelemetrySdk = initOpenTelemetry()
