@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
 import io.vertx.scala.ext.jdbc.JDBCClient
+import io.vertx.scala.ext.sql.ResultSet
 
 import java.sql.{SQLException, SQLTimeoutException}
 import java.util.Date
@@ -34,7 +35,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
   private var sqlPools = Map[String, SqlPoolWithConfig]()
   private val meter = Metrics.openTelemetry.meterBuilder("de.thm.mni.ii.fbs.verticles.runner.playground").build()
   private val processingCounter = meter.upDownCounterBuilder("processingCount").setDescription("Processing Requests").build()
-  private val processingTimeCounter = meter.histogramBuilder("processingTime").ofLongs().setDescription("Time for processing").build()
+  private val processingTimeCounter = meter.histogramBuilder("processingTime").ofLongs().setDescription("Time for processing").setUnit("ms").build()
   private val errorCounter = meter.counterBuilder("errorCount").setDescription("Error Count").build()
 
   /**
@@ -63,22 +64,32 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
 
     processingCounter.add(1)
     val startTime = new Date().getTime
+    val end = (failure: Boolean) => {
+      val endTime = new Date().getTime
+      processingTimeCounter.record(endTime - startTime)
+      processingCounter.add(-1)
+      if (failure) errorCounter.add(1)
+    }
+
     try {
       logger.info(s"SqlPlayground received execution ${runArgs.executionId}")
 
       val con = getConnection(runArgs)
 
       if (con.isDefined) {
-        executeQueries(runArgs, con.get)
+        executeQueries(runArgs, con.get) onComplete {
+          case Success(_) =>
+            end(false)
+          case Failure(_) =>
+            end(true)
+        }
+      } else {
+        end(false)
       }
     } catch {
       case e: Throwable =>
-        errorCounter.add(1)
+        end(true)
         handleError(runArgs, e)
-    } finally {
-      val endTime = new Date().getTime
-      processingCounter.add(-1)
-      processingTimeCounter.record(endTime - startTime)
     }
   }
 
@@ -93,10 +104,10 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     }
   }
 
-  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: PlaygroundDBConnections): Unit = {
+  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: PlaygroundDBConnections): Future[(ResultSet, ResultSet)] = {
     val sqlPlayground = new SQLPlaygroundService(runArgs, con, config.getInteger("SQL_QUERY_TIMEOUT_S", 1))
 
-    sqlPlayground.executeStatement().onComplete({
+    sqlPlayground.executeStatement() andThen {
       case Success(value) =>
         try {
           logger.info(s"Execution-${runArgs.executionId} Finished")
@@ -112,7 +123,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
         handleError(runArgs, ex, getSQLErrorMsg(runArgs, ex))
       case Failure(ex) =>
         handleError(runArgs, ex)
-    })
+    }
   }
 
   private def handleError(runArgs: SqlPlaygroundRunArgs, e: Throwable, msg: String = "Die Ausführung des Statements ist fehlgeschlagen."): Unit = {
