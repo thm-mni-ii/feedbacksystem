@@ -7,6 +7,7 @@ import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 class PsqlOperationsService(override val dbName: String, override val username: String, override val queryTimeout: Int)
   extends DBOperationsService(dbName, username, queryTimeout) {
@@ -151,5 +152,20 @@ class PsqlOperationsService(override val dbName: String, override val username: 
         |""".stripMargin
 
     client.queryFuture(s"$tables $constrains $views $routines $triggers")
+  }
+
+  override def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
+    client.getConnectionFuture().flatMap(con => {
+      con.queryFuture(s"SET statement_timeout = ${queryTimeout*1000};").flatMap(_ => {
+        con.queryFuture(sql) transform {
+          case Success(result) =>
+            con.close()
+            Try(result)
+          case Failure(exception) =>
+            con.close()
+            Failure(throw exception)
+        }
+      })
+    })
   }
 }
