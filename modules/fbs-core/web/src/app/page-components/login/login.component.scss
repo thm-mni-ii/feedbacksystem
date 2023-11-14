@@ -94,6 +94,17 @@ button {
   }
 }
 
+@media screen and (max-width: 446px) {
+  .header {
+    h1 {
+      font-size: 36px;
+    }
+    h2 {
+      font-size: 16px;
+    }
+  }
+}
+
 #cas-login {
   align-self: center;
   color: blue;
@@ -102,4 +113,46 @@ button {
 
 #cas-login:hover {
   cursor: pointer;
+}
+
+.github-link {
+  position: absolute;
+  display: grid;
+  grid-auto-flow: column;
+  bottom: 24px;
+  right: 24px;
+}
+
+.github-link-text {
+  color: #405e9a;
+  font-family: Indie Flower;
+  font-size: 2rem;
+  text-shadow: 4px 4px 12px white;
+}
+
+.github-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;  
+  align-self: end;
+}
+
+::ng-deep .mat-fab .mat-button-wrapper{
+  padding: 0 !important;
+}
+
+.arrow {
+  -webkit-filter: drop-shadow(4px 4px 4px white);
+  filter: drop-shadow(4px 4px 4px white);
+}
+
+@media screen and (max-width: 1000px) {
+  .github-link-text {
+    display: none;
+  }
+  .arrow {
+    display: none;
+  }
 }

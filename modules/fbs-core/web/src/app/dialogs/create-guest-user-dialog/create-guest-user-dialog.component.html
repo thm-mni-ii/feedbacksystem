@@ -1,41 +1,55 @@
-<h1 mat-dialog-title>Neuen Benutzer erstellen</h1>
+<h1 mat-dialog-title>
+  {{ "dialog.user.guest.create.heading" | i18nextEager }}
+</h1>
 <div class="guest-account" mat-dialog-content>
   <p>
-    Note: All users of the Central Authentication Service (CAS) can log in into
-    the system. A local user is an ordinary user, but is restricted to use the
-    local login. This type of user account is meant to be used by external
-    persons only.
+    {{ "dialog.user.guest.create.note" | i18nextEager }}
   </p>
   <form class="guest-account" #guestUserForm="ngForm">
     <mat-form-field>
-      <mat-label>Vorname</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.firstname-label" | i18nextEager
+      }}</mat-label>
       <input matInput required [(ngModel)]="data.prename" name="firstname" />
-      <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
+      <mat-error>{{
+        "dialog.user.guest.create.firstname-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Nachname</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.lastname-label" | i18nextEager
+      }}</mat-label>
       <input matInput required [(ngModel)]="data.surname" name="surname" />
-      <mat-error>Das Feld ist <strong>erforderlich!</strong></mat-error>
+      <mat-error>{{
+        "dialog.user.guest.create.lastname-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>E-Mail</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.email-label" | i18nextEager
+      }}</mat-label>
       <input matInput required email [(ngModel)]="data.email" name="email" />
-      <mat-error
-        >Eine gültige E-Mail-Adresse ist
-        <strong>erforderlich!</strong></mat-error
-      >
+      <mat-error>{{
+        "dialog.user.guest.create.email-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Username</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.username-label" | i18nextEager
+      }}</mat-label>
       <input matInput required [(ngModel)]="data.username" name="username" />
-      <mat-error>Der Benutzername ist <strong>erforderlich!</strong></mat-error>
+      <mat-error>{{
+        "dialog.user.guest.create.username-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Passwort</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.password-label" | i18nextEager
+      }}</mat-label>
       <input
         type="password"
         required
@@ -43,11 +57,15 @@
         [(ngModel)]="data.password"
         name="pass"
       />
-      <mat-error>Das Passwort ist <strong>erforderlich!</strong></mat-error>
+      <mat-error>{{
+        "dialog.user.guest.create.password-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Passwort wiederholen</mat-label>
+      <mat-label>{{
+        "dialog.user.guest.create.password-repeat-label" | i18nextEager
+      }}</mat-label>
       <input
         type="password"
         required
@@ -56,25 +74,35 @@
         [(ngModel)]="pwRepeat"
         name="passRepeat"
       />
-      <mat-error *ngIf="passwordMatcher.hasError('required')"
-        >Das Passwort ist <strong>erforderlich!</strong></mat-error
-      >
-      <mat-error *ngIf="passwordMatcher.hasError('notMatch')"
-        >Die Passwörter <strong>müssen übereinstimmen!</strong></mat-error
-      >
+      <mat-error *ngIf="passwordMatcher.hasError('required')">{{
+        "dialog.user.guest.create.password-repeat-error" | i18nextEager
+      }}</mat-error>
+      <mat-error *ngIf="passwordMatcher.hasError('notMatch')">{{
+        "dialog.user.guest.create.password-repeat-mismatch-error" | i18nextEager
+      }}</mat-error>
     </mat-form-field>
 
     <mat-form-field>
-      <mat-select [(value)]="data.globalRole" placeholder="Rolle" name="role">
-        <mat-option value="ADMIN">Admin</mat-option>
-        <mat-option value="MODERATOR">Moderator</mat-option>
-        <mat-option value="USER">User</mat-option>
+      <mat-select
+        [(value)]="data.globalRole"
+        placeholder="{{ 'dialog.user.guest.create.role-label' | i18nextEager }}"
+        name="role"
+      >
+        <mat-option value="ADMIN">{{
+          "dialog.user.guest.create.role-admin" | i18nextEager
+        }}</mat-option>
+        <mat-option value="MODERATOR">{{
+          "dialog.user.guest.create.role-moderator" | i18nextEager
+        }}</mat-option>
+        <mat-option value="USER">{{
+          "dialog.user.guest.create.role-user" | i18nextEager
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
   </form>
   <mat-dialog-actions class="actions">
     <button mat-raised-button color="warn" (click)="onCancel()">
-      Abbrechen
+      {{ "dialog.user.guest.create.cancel-button" | i18nextEager }}
     </button>
     <button
       mat-raised-button
@@ -82,7 +110,7 @@
       [disabled]="guestUserForm.form.invalid"
       (click)="onSubmit()"
     >
-      Hinzufügen
+      {{ "dialog.user.guest.create.submit-button" | i18nextEager }}
     </button>
   </mat-dialog-actions>
 </div>

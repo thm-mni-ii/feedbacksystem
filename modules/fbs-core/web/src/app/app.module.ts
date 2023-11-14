@@ -1,6 +1,6 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { MatDialogModule } from "@angular/material/dialog";
-import { Injectable, NgModule } from "@angular/core";
+import { CUSTOM_ELEMENTS_SCHEMA, Injectable, NgModule } from "@angular/core";
 import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { LayoutModule } from "@angular/cdk/layout";
@@ -88,6 +88,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { MatTableModule } from "@angular/material/table";
 import { MatSortModule } from "@angular/material/sort";
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
+import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { BorderedContainerComponent } from "./page-components/bordered-container/bordered-container.component";
 import { DynamicResultTableComponent } from "./page-components/sql-playground/dynamic-result-table/dynamic-result-table.component";
 import { DbControlPanelComponent } from "./page-components/sql-playground/db-control-panel/db-control-panel.component";
@@ -103,6 +104,14 @@ import { DbControlDbOverviewComponent } from "./page-components/sql-playground/d
 import { NewSqlTemplateComponent } from "./dialogs/new-sql-template/new-sql-template.component";
 import { ExportTasksDialogComponent } from "./dialogs/export-tasks-dialog/export-tasks-dialog.component";
 import { HighlightedInputComponent } from "./page-components/sql-playground/sql-input-tabs/highlighted-input/highlighted-input.component";
+
+import "mathlive";
+import "@cortex-js/compute-engine";
+import { MathInputComponent } from "./tool-components/math-input/math-input.component";
+import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { I18NextModule } from "angular-i18next";
+import { I18N_PROVIDERS } from "./util/i18n";
+import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -182,6 +191,7 @@ export const httpInterceptorProviders = [
     SqlCheckerResultsComponent,
     TextConfirmDialogComponent,
     SqlPlaygroundComponent,
+    AnalyticsToolComponent,
     BorderedContainerComponent,
     DynamicResultTableComponent,
     DbControlPanelComponent,
@@ -198,6 +208,9 @@ export const httpInterceptorProviders = [
     NewSqlTemplateComponent,
     ExportTasksDialogComponent,
     HighlightedInputComponent,
+    MathInputComponent,
+    FbsModellingComponent,
+    LanguageMenuComponent,
   ],
   imports: [
     BrowserModule,
@@ -230,6 +243,7 @@ export const httpInterceptorProviders = [
     ChartsModule,
     MatTableModule,
     MatSortModule,
+    I18NextModule.forRoot(),
   ],
   entryComponents: [
     DataprivacyDialogComponent,
@@ -244,8 +258,10 @@ export const httpInterceptorProviders = [
       useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
     },
     { provide: MAT_DATE_LOCALE, useValue: "de" },
+    I18N_PROVIDERS,
   ],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}
 

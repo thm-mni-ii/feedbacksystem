@@ -3,8 +3,10 @@ package de.thm.ii.fbs.controller
 import com.fasterxml.jackson.databind.JsonNode
 import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException}
 import de.thm.ii.fbs.model._
+import de.thm.ii.fbs.model.task.{Task, TaskBatch}
 import de.thm.ii.fbs.services.checker.math.SpreadsheetService
 import de.thm.ii.fbs.services.persistence._
+import de.thm.ii.fbs.services.persistence.storage.StorageService
 import de.thm.ii.fbs.services.security.AuthService
 import de.thm.ii.fbs.util.Hash
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
@@ -129,7 +131,7 @@ class TaskController {
             val config = this.checkerConfigurationService.getAll(cid, tid).head
             val spreadsheetFile: File = storageService.getFileMainFile(config)
             val userID = Hash.decimalHash(user.username).abs().toString().slice(0, 7)
-            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields)
+            val inputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, inputFields, mathJson = true)
             val outputs = this.spreadsheetService.getFields(spreadsheetFile, idField, userID, outputFields)
             spreadsheetFile.delete()
             task.copy(mediaInformation = Some(SpreadsheetResponseInformation(inputs, outputs.map(it => it._1),
@@ -275,6 +277,28 @@ class TaskController {
             hideResult = hideResult.getOrElse(false)))
         case _ => throw new BadRequestException("Malformed Request Body")
       }
+    } else {
+      throw new ForbiddenException()
+    }
+  }
+
+  /**
+    * Batch update tasks
+    *
+    * @param courseId Course id
+    * @param req      http request
+    * @param res      http response
+    * @param body     Request Body
+    */
+  @PutMapping(value = Array("/{courseId}/tasks"), consumes = Array())
+  def updateBatch(@PathVariable("courseId") courseId: Int, req: HttpServletRequest, res: HttpServletResponse,
+                  @RequestBody body: TaskBatch): Unit = {
+    val user = authService.authorize(req, res)
+    val privilegedByCourse = courseRegistration.getParticipants(courseId).find(_.user.id == user.id)
+      .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
+
+    if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
+      taskService.updateBatch(courseId, body)
     } else {
       throw new ForbiddenException()
     }

@@ -16,7 +16,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Add Problem Matcher
         run: |
           echo "::add-matcher::.github/problem-matchers/python.json"
@@ -26,7 +26,7 @@ jobs:
       - name: Install and configure Poetry
         uses: snok/install-poetry@v1
       - name: Install library
-        run: poetry install --no-interaction  --only dev
+        run: poetry install --no-interaction
       - run: |
           poetry run pylint api --msg-template='${{ inputs.working-directory }}/{path}:{line}:{column}: {msg_id}: {msg} ({symbol})'
         name: Run Pylint
@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"

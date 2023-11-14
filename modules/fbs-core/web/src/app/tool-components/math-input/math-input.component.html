@@ -1,0 +1,12 @@
+<div>
+  <div class="mathInputContainer">
+    <p>{{ label }}</p>
+    <div class="math-input-field" [ngClass]="{ 'math-field-input': !disabled }">
+      <math-field
+        (change)="handleChange($event)"
+        #mathInput
+        style="overflow-x: auto"
+      ></math-field>
+    </div>
+  </div>
+</div>

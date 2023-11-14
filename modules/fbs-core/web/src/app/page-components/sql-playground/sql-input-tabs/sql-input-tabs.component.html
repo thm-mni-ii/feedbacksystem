@@ -1,156 +1,219 @@
-<mat-card-actions>
-  <mat-tab-group
-    [selectedIndex]="activeTabId.value"
-    (selectedIndexChange)="activeTabId.setValue($event)"
-    [backgroundColor]=""
+<div class="actions-container">
+  <button
+    mat-flat-button
+    matTooltip="{{
+      'sql-playground.input.tooltip.closeAllTabs' | i18nextEager
+    }}"
+    matTooltipPosition="right"
+    (click)="closeAllTabs()"
   >
-    <ng-container>
-      <mat-tab *ngFor="let tab of tabs; let index = index">
-        <ng-template class="tab-label" [mat-tab-label]>
-          <div class="col" style="margin-left: 20px">
-            <input
-              matInput
-              type="text"
-              placeholder="New_Query"
-              [(ngModel)]="tabs[index].name"
-            />
-          </div>
-          <button *ngIf="index !== 0" mat-icon-button (click)="closeTab(index)">
-            <mat-icon>remove_circle_outline</mat-icon>
-          </button>
-          <button mat-icon-button (click)="addTab()">
-            <mat-icon>add_circle_outline</mat-icon>
-          </button>
-        </ng-template>
-        <div class="inputField">
-          <!-- <app-submission-text
+    <mat-icon>playlist_remove</mat-icon>
+  </button>
+  <button
+    mat-button
+    matTooltip="{{ 'sql-playground.input.tooltip.downloadTab' | i18nextEager }}"
+    matTooltipPosition="right"
+    [disabled]="pending"
+    (click)="downloadFile()"
+  >
+    <mat-icon>download</mat-icon>
+  </button>
+  <button
+    mat-button
+    matTooltip="{{
+      'sql-playground.input.tooltip.downloadAllTabs' | i18nextEager
+    }}"
+    matTooltipPosition="right"
+    [disabled]="pending"
+    (click)="downloadAllFiles()"
+  >
+    <mat-icon>folder</mat-icon>
+  </button>
+</div>
+<mat-tab-group
+  [selectedIndex]="activeTabId.value"
+  (selectedIndexChange)="activeTabId.setValue($event)"
+  [backgroundColor]=""
+>
+  <ng-container>
+    <mat-tab [disabled]="pending" *ngFor="let tab of tabs; let index = index">
+      <ng-template class="tab-label" [mat-tab-label]>
+        <div class="col" style="margin-left: 20px">
+          <input
+            matInput
+            type="text"
+            placeholder="{{
+              'sql-playground.input.label.newQuery' | i18nextEager
+            }}"
+            [disabled]="pending"
+            [(ngModel)]="tabs[index].name"
+          />
+        </div>
+        <button mat-icon-button [disabled]="pending" (click)="closeTab(index)">
+          <mat-icon>remove_circle_outline</mat-icon>
+        </button>
+        <button mat-icon-button [disabled]="pending" (click)="addTab($event)">
+          <mat-icon>add_circle_outline</mat-icon>
+        </button>
+      </ng-template>
+      <br />
+      <p
+        class="description"
+        *ngIf="
+          activeTab.selectedTask !== null &&
+          isDescriptionMode &&
+          activeTab.isSubmitMode
+        "
+      >
+        <strong>{{
+          "sql-playground.input.label.taskDescription" | i18nextEager
+        }}</strong>
+        {{ activeTab.selectedTask.description }}
+      </p>
+      <div class="inputField">
+        <!-- <app-submission-text
             title="Eingabe SQL"
             (update)="updateSubmissionContent($event)"
           ></app-submission-text> -->
-          <!-- <mat-label class="title">Eingabe SQL :</mat-label> -->
-          <app-highlighted-input
-            (update)="updateSubmissionContent($event)"
-          ></app-highlighted-input>
-        </div>
-      </mat-tab>
-    </ng-container>
-  </mat-tab-group>
-  <p
-    class="description"
-    *ngIf="selectedTask !== null && isDescriptionMode && isSubmitMode"
+        <!-- <mat-label class="title">Eingabe SQL :</mat-label> -->
+        <app-highlighted-input
+          [tabs]="tabs"
+          [selectedIndex]="activeTabId.value"
+          (update)="updateSubmissionContent($event)"
+        ></app-highlighted-input>
+      </div>
+      <p
+        class="error-message"
+        *ngIf="activeTab.error && activeTab.isSubmitMode"
+      >
+        <strong>{{
+          "sql-playground.input.label.errorMessage" | i18nextEager
+        }}</strong>
+        {{ activeTab.errorMsg }}
+      </p>
+    </mat-tab>
+  </ng-container>
+</mat-tab-group>
+<div class="bottom-container">
+  <button
+    [disabled]="isSubmissionEmpty() || isPending"
+    mat-flat-button
+    color="accent"
+    class="excuteBtn"
+    (click)="submission()"
   >
-    <strong>Aufgabenbeschreibung:</strong> {{ selectedTask.description }}
-  </p>
-  <div class="bottom-container">
-    <button mat-button class="downloadBtn" (click)="downloadFile()">
-      <mat-icon>download</mat-icon> Download
-    </button>
+    <span class="spinner" *ngIf="isPending">
+      <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
+    </span>
+    <span *ngIf="!isPending">{{
+      "sql-playground.input.label.execute" | i18nextEager
+    }}</span>
+  </button>
 
+  <button
+    mat-flat-button
+    color="grey"
+    class="submitBtn"
+    *ngIf="!activeTab.isSubmitMode"
+    matTooltip="{{ 'sql-playground.input.tooltip.selectTask' | i18nextEager }}"
+    [matTooltipPosition]="'above'"
+    (click)="updateMode(true)"
+  >
+    {{ "sql-playground.input.label.submit" | i18nextEager
+    }}<mat-icon>insert_drive_file</mat-icon>
+  </button>
+  <div class="submit-container" *ngIf="activeTab.isSubmitMode">
     <button
-      [disabled]="isSubmissionEmpty() || isPending"
+      [disabled]="isCheckerEmpty || isSubmissionEmpty() || hasDeadlinePassed()"
       mat-flat-button
       color="accent"
       class="excuteBtn"
-      (click)="submission()"
+      (click)="submissionToTask()"
     >
-      <span class="spinner" *ngIf="isPending">
+      <span class="spinner" *ngIf="pending">
         <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
       </span>
-      <span *ngIf="!isPending">Ausführen</span>
+      <span *ngIf="!pending">{{
+        "sql-playground.input.label.submit" | i18nextEager
+      }}</span>
     </button>
+
+    <mat-icon
+      class="submit-item"
+      [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
+      matTooltip="{{
+        'sql-playground.input.tooltip.showDescription' | i18nextEager
+      }}"
+      (click)="isDescriptionMode = !isDescriptionMode"
+      >remove_red_eye</mat-icon
+    >
+
+    <mat-icon
+      class="submit-item material-icons color_red"
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusWrong' | i18nextEager
+      }}"
+      *ngIf="activeTab.isSubmitted && !pending && !activeTab.isCorrect"
+      >cancel</mat-icon
+    >
+    <mat-icon
+      class="submit-item material-icons color_green"
+      matTooltip="{{
+        'sql-playground.input.tooltip.submissionStatusCorrect' | i18nextEager
+      }}"
+      *ngIf="activeTab.isSubmitted && !pending && activeTab.isCorrect"
+      >check_circle</mat-icon
+    >
+    <mat-icon class="state submit-item" *ngIf="pending"
+      ><mat-spinner [diameter]="24"></mat-spinner
+      >{{ "sql-playground.input.label.processing" | i18nextEager }}</mat-icon
+    >
 
     <button
-      mat-flat-button
-      class="submitBtn"
-      *ngIf="!isSubmitMode"
-      matTooltip="Wähle eine Aufgabe aus deinem Kurs und gebe das Statement direkt ab."
-      [matTooltipPosition]="'above'"
-      (click)="updateMode(true)"
+      [disabled]="activeTab.selectedCourse === undefined || pending"
+      class="courseBtn submit-item"
+      mat-button
+      [matMenuTriggerFor]="task"
+      matTooltip="{{ selectedTaskName }}"
     >
-      Abgeben<mat-icon>insert_drive_file</mat-icon>
+      {{ activeTab.selectedTaskName }} <mat-icon>expand_more</mat-icon>
     </button>
-    <div class="submit-container" *ngIf="isSubmitMode">
+    <mat-menu #task="matMenu">
       <button
-        [disabled]="isSubmissionEmpty() || hasDeadlinePassed()"
-        mat-flat-button
-        color="accent"
-        class="excuteBtn"
-        (click)="submissionToTask()"
+        (click)="changeTask(task)"
+        mat-menu-item
+        *ngFor="let task of filteredTasksFromCourse"
       >
-        <span class="spinner" *ngIf="pending">
-          <mat-spinner [diameter]="24"></mat-spinner>&nbsp;
-        </span>
-        <span *ngIf="!pending">Abgeben</span>
+        {{ task.name }}
       </button>
+    </mat-menu>
 
-      <mat-icon
-        class="submit-item"
-        [ngStyle]="{ color: isDescriptionMode === true ? 'black' : 'grey' }"
-        matTooltip="Beschreibung anzeigen"
-        (click)="isDescriptionMode = !isDescriptionMode"
-        >remove_red_eye</mat-icon
-      >
-
-      <mat-icon
-        class="submit-item material-icons color_red"
-        matTooltip="Status der Abgabe: Deine Abgabge war leider nicht richtig."
-        *ngIf="submitted && !pending && !isSubCorr"
-        >cancel</mat-icon
-      >
-      <mat-icon
-        class="submit-item material-icons color_green"
-        matTooltip="Status der Abgabe: Deine Abgabe war korrekt."
-        *ngIf="submitted && !pending && isSubCorr"
-        >check_circle</mat-icon
-      >
-      <mat-icon class="state submit-item" *ngIf="pending"
-        ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</mat-icon
-      >
-
+    <button
+      [disabled]="pending"
+      class="courseBtn submit-item"
+      mat-button
+      [matMenuTriggerFor]="course"
+      matTooltip="{{ selectedCourseName }}"
+    >
+      {{ activeTab.selectedCourseName }} <mat-icon>expand_more</mat-icon>
+    </button>
+    <mat-menu #course="matMenu">
       <button
-        [disabled]="selectedCourse === undefined || pending"
-        class="courseBtn submit-item"
-        mat-button
-        [matMenuTriggerFor]="task"
+        (click)="changeCourse(course)"
+        mat-menu-item
+        *ngFor="let course of courses | async"
       >
-        {{ selectedTaskName }} <mat-icon>expand_more</mat-icon>
+        {{ course.name }}
       </button>
-      <mat-menu #task="matMenu">
-        <button
-          (click)="changeTask(task)"
-          mat-menu-item
-          *ngFor="let task of filteredTasksFromCourse"
-        >
-          {{ task.name }}
-        </button>
-      </mat-menu>
+    </mat-menu>
 
-      <button
-        [disabled]="pending"
-        class="courseBtn submit-item"
-        mat-button
-        [matMenuTriggerFor]="course"
-      >
-        {{ selectedCourseName }} <mat-icon>expand_more</mat-icon>
-      </button>
-      <mat-menu #course="matMenu">
-        <button
-          (click)="changeCourse(course)"
-          mat-menu-item
-          *ngFor="let course of courses | async"
-        >
-          {{ course.name }}
-        </button>
-      </mat-menu>
-
-      <button
-        class="submit-item"
-        class="closeBtn"
-        mat-flat-button
-        (click)="updateMode(false)"
-      >
-        <mat-icon>closeTab</mat-icon>
-      </button>
-    </div>
+    <mat-icon
+      matTooltip="{{ 'sql-playground.input.tooltip.close' | i18nextEager }}"
+      matTooltipPosition="right"
+      class="closeBtn"
+      mat-flat-button
+      (click)="updateMode(false)"
+      >closeTab</mat-icon
+    >
   </div>
-</mat-card-actions>
+</div>

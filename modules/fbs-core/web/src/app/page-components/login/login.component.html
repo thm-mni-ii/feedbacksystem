@@ -6,18 +6,18 @@
   <div class="flex-card-container">
     <mat-card class="card">
       <mat-card-header class="login_title">
-        <mat-card-title>Login</mat-card-title>
+        <mat-card-title>{{ "login.login" | i18nextEager }}</mat-card-title>
       </mat-card-header>
 
       <mat-card-actions class="login-buttons">
         <button class="cas" (click)="casLogin()" mat-flat-button color="accent">
-          CAS Login
+          {{ "login.loginWithCas" | i18nextEager }}
         </button>
       </mat-card-actions>
 
       <div class="divider-block">
         <mat-divider class="divider"></mat-divider>
-        <div>or</div>
+        <div>{{ "login.or" | i18nextEager }}</div>
       </div>
       <mat-card-content (keyup.enter)="localLogin()" class="login-inputs">
         <mat-form-field>
@@ -26,7 +26,7 @@
             name="username"
             type="text"
             matInput
-            placeholder="Benutzername"
+            [placeholder]="'login.username' | i18nextEager"
           />
         </mat-form-field>
         <mat-form-field>
@@ -35,15 +35,33 @@
             name="password"
             type="password"
             matInput
-            placeholder="Passwort"
+            [placeholder]="'login.password' | i18nextEager"
           />
         </mat-form-field>
       </mat-card-content>
       <mat-card-actions class="login-buttons">
         <button (click)="localLogin()" mat-flat-button color="accent">
-          Lokaler Login
+          {{ "login.localLogin" | i18nextEager }}
         </button>
       </mat-card-actions>
     </mat-card>
+  </div>
+  <div class="github-link">
+    <p class="github-link-text">{{ "login.discoverMore" | i18nextEager }}</p>
+    <img class="arrow" src="../../../assets/arrow.png" alt="arrow" />
+    <button mat-fab class="github-button" (click)="openGithub()">
+      <svg
+        width="36"
+        height="34"
+        viewBox="0 0 36 34"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M18 0.424973C13.9507 0.406966 10.0279 1.83495 6.93784 4.45189C3.84774 7.06884 1.79325 10.7029 1.14417 14.6998C0.495094 18.6968 1.29406 22.7942 3.39725 26.2545C5.50044 29.7148 8.76972 32.3107 12.6166 33.575C13.4666 33.7166 13.75 33.15 13.75 32.725V29.8916C9.07495 30.8833 8.08328 27.625 8.08328 27.625C7.23328 25.6416 6.09995 25.075 6.09995 25.075C4.68328 24.0833 6.24162 24.0833 6.24162 24.0833C7.94162 24.0833 8.93328 25.7833 8.93328 25.7833C10.35 28.3333 12.9 27.625 13.8916 27.2C13.8916 26.0666 14.4583 25.3583 14.8833 24.9333C11.0583 24.5083 7.09162 23.0916 7.09162 16.4333C7.09162 14.7333 7.79995 13.175 8.93328 12.0416C8.64995 11.475 8.08328 9.77497 8.93328 7.50831C8.93328 7.50831 10.35 7.08331 13.75 9.20831C16.5334 8.45615 19.4665 8.45615 22.25 9.20831C25.5083 7.08331 26.925 7.50831 26.925 7.50831C27.775 9.77497 27.2083 11.475 26.925 12.0416C28.2 13.175 28.7666 14.7333 28.7666 16.575C28.7666 23.0916 24.8 24.5083 20.975 24.9333C21.6833 25.5 22.25 26.35 22.25 28.05V32.725C22.25 33.15 22.3916 33.7166 23.3833 33.575C27.2302 32.3107 30.4995 29.7148 32.6027 26.2545C34.7058 22.7942 35.5048 18.6968 34.8557 14.6998C34.2066 10.7029 32.1522 7.06884 29.0621 4.45189C25.972 1.83495 22.0492 0.406966 18 0.424973Z"
+          fill="white"
+        />
+      </svg>
+    </button>
   </div>
 </div>

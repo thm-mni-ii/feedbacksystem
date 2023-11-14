@@ -1,6 +1,8 @@
 <div matDialogContent></div>
 <div class="dialog-content">
-  <div id="task-points-title" matDialogTitle>Punkte vergeben</div>
+  <div id="task-points-title" matDialogTitle>
+    {{ "dialog.task.points.label.title" | i18nextEager }}
+  </div>
   <div matDialogContent class="flex-container">
     <div class="flex-item task-box">
       <mat-checkbox
@@ -8,7 +10,7 @@
         (ngModelChange)="selectAll()"
         [labelPosition]="labelPosition"
       >
-        Alle markieren
+        {{ "dialog.task.points.label.allTasksCheckbox" | i18nextEager }}
       </mat-checkbox>
       <div class="scroll-box">
         <div class="task-item" *ngFor="let task of tasks">
@@ -30,12 +32,15 @@
       >
         <mat-tab *ngFor="let element of allRequirements; let i = index">
           <ng-template mat-tab-label>
-            Kategorie {{ i + 1 }} &nbsp;
+            {{ "dialog.task.points.label.category" | i18nextEager }}
+            {{ i + 1 }} &nbsp;
             <mat-icon
               class="close-icon"
               [matTooltipPosition]="'above'"
               (click)="delete(element)"
-              matTooltip="Löschen"
+              matTooltip="{{
+                'dialog.task.points.tooltip.delete' | i18nextEager
+              }}"
               >close</mat-icon
             >
           </ng-template>
@@ -44,7 +49,10 @@
               <mat-form-field class="mat-input-element">
                 <input
                   type="number"
-                  placeholder="Anzahl Punkte zum Bestehen"
+                  placeholder="{{
+                    'dialog.task.points.label.passingPointsPlaceholder'
+                      | i18nextEager
+                  }}"
                   matInput
                   required
                   [(ngModel)]="element.toPass"
@@ -57,7 +65,10 @@
                   type="text"
                   [(ngModel)]="element.bonusFormula"
                   (keyup)="checkFormula(element.bonusFormula)"
-                  placeholder="Bonusformel (x: Richtige)"
+                  placeholder="{{
+                    'dialog.task.points.label.bonusFormulaPlaceholder'
+                      | i18nextEager
+                  }}"
                   matInput
                 />
                 <mat-hint
@@ -67,7 +78,9 @@
               </mat-form-field>
               <mat-icon
                 class="bonus-formula-info"
-                matTooltip="Verwende x für die Anzahl der Punkte in der Formel, z.B. 'abrunden(x/4)'"
+                matTooltip="{{
+                  'dialog.task.points.label.bonusFormulaHint' | i18nextEager
+                }}"
                 >help</mat-icon
               >
             </mat-list-item>
@@ -79,7 +92,9 @@
               mat-raised-button
               color="accent"
               (click)="addTab()"
-              matTooltip="Kategorie hinzufügen"
+              matTooltip="{{
+                'dialog.task.points.tooltip.addCategory' | i18nextEager
+              }}"
             >
               <mat-icon>add</mat-icon>
             </button>
@@ -92,8 +107,10 @@
 
   <div mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialog.task.points.label.cancelButton" | i18nextEager }}
     </button>
-    <button mat-flat-button color="accent" (click)="save()">Erstellen</button>
+    <button mat-flat-button color="accent" (click)="save()">
+      {{ "dialog.task.points.label.saveButton" | i18nextEager }}
+    </button>
   </div>
 </div>

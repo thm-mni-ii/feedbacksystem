@@ -1,0 +1,24 @@
+math-field {
+  --primary: #405e9a;
+  font-size: large;
+}
+
+.math-field-input {
+  border-bottom: solid black 1px;
+}
+
+math-field:focus-within {
+  outline: unset;
+}
+
+.mathInputContainer {
+  display: flex;
+  gap: 8px;
+}
+
+.math-input-field {
+  align-self: center;
+  width: calc(100% - 64px);
+}
+
+

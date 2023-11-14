@@ -94,7 +94,7 @@ class SpreadsheetCheckerService extends CheckerService {
       val enteredValue = submittedFields.get(key)
       var correct = false
       try {
-        if (enteredValue != null && compare(enteredValue, value, decimals)) {
+        if (enteredValue != null && enteredValue.strip() != "" && compare(enteredValue, value, decimals)) {
           correct = true
           correctCount += 1
         }
@@ -139,12 +139,14 @@ class SpreadsheetCheckerService extends CheckerService {
   def compare(enteredValue: String, value: String, decimals: Int): Boolean = {
     val enteredAst = MathParserHelper.parse(enteredValue)
     val valueAst = MathParserHelper.parse(value)
+
     new SemanticAstComparator.Builder()
       .decimals(decimals)
       .roundingMode(RoundingMode.HALF_UP)
       .ignoreNeutralElements(true)
       .applyInverseElements(true)
       .applyCommutativeLaw(true)
+      .applyExponentLaws(true)
       .build()
       .compare(valueAst, enteredAst)
   }

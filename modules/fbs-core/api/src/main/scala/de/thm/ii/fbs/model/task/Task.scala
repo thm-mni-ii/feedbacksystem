@@ -1,17 +1,23 @@
-package de.thm.ii.fbs.model
+package de.thm.ii.fbs.model.task
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import de.thm.ii.fbs.model.MediaInformation
+import org.apache.tika.mime.MimeTypes
+import org.springframework.http.MediaType
 
 /**
   * A Task for a course
   *
-  * @param name Name of the task
-  * @param deadline The deadline up to that a solution may be emitted
-  * @param mediaType The media type occording to RFC 4288
-  * @param description The description of that task
+  * @param name             Name of the task
+  * @param deadline         The deadline up to that a solution may be emitted
+  * @param mediaType        The media type occording to RFC 4288
+  * @param description      The description of that task
   * @param mediaInformation The mediaInformation of that task
-  * @param id The id of the task, if 0,  then no id was assigned
-  * @param isPrivate Is the Task visible for students
+  * @param id               The id of the task, if 0,  then no id was assigned
+  * @param isPrivate        Is the Task visible for students
+  * @param hideResult       Should the result be shown to the user
+  * @param attempts         Number of Attempts
+  * @param requirementType  The requirement type of the Task
   */
 case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("deadline") deadline: Option[String],
@@ -24,7 +30,14 @@ case class Task(@JsonProperty("name") name: String,
                 @JsonProperty("courseID") courseID: Int = 0,
                 @JsonProperty("attempts") attempts: Option[Int] = None,
                 @JsonProperty("hideResult") hideResult: Boolean = false,
-               )
+               ) {
+  def getExtensionFromMimeType(mimeType: String): (MediaType, String) = {
+    mediaType match {
+      case "text/plain" => (MediaType.TEXT_PLAIN, ".txt")
+      case _ => (MediaType.valueOf(mimeType), MimeTypes.getDefaultMimeTypes.forName(mimeType).getExtension)
+    }
+  }
+}
 
 object Task {
   val requirementTypes: Array[String] = Array("mandatory", "optional", "practice")

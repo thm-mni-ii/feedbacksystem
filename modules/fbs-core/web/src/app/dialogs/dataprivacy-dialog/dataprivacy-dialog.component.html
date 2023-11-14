@@ -6,12 +6,11 @@
 
 <mat-dialog-actions class="dialog-actions">
   <mat-checkbox *ngIf="!onlyForShow" [(ngModel)]="privacyChecked"
-    >Hiermit habe ich die Datenschutzerklärung gelesen und bin mit dieser
-    einverstanden
+    >{{ "dialog.privacy.label.agreeWithPrivacyPolicy" | i18nextEager }}
   </mat-checkbox>
   <div class="action-buttons">
     <button *ngIf="!onlyForShow" mat-flat-button color="warn" (click)="abort()">
-      Abbrechen
+      {{ "dialog.privacy.label.cancel" | i18nextEager }}
     </button>
     <button
       *ngIf="!onlyForShow"
@@ -19,7 +18,7 @@
       color="accent"
       (click)="login()"
     >
-      Login
+      {{ "dialog.privacy.label.login" | i18nextEager }}
     </button>
     <button
       *ngIf="onlyForShow"
@@ -27,7 +26,7 @@
       color="accent"
       (click)="abort()"
     >
-      Schließen
+      {{ "dialog.privacy.label.close" | i18nextEager }}
     </button>
   </div>
 </mat-dialog-actions>

@@ -1,7 +1,7 @@
 <div class="container">
   <div>
     <p class="spinner-wrapper" *ngIf="this.activeDb !== undefined">
-      Version:
+      {{ "sql-playground.db-control-panel.overview.version" | i18nextEager }}:
       <span class="highlight">
         {{ this.activeDb.version }}
       </span>
@@ -10,7 +10,9 @@
   </div>
 
   <mat-form-field appearance="fill">
-    <mat-label>Select Database</mat-label>
+    <mat-label>{{
+      "sql-playground.db-control-panel.overview.selectDatabase" | i18nextEager
+    }}</mat-label>
     <mat-select
       [(value)]="selectedDb"
       (selectionChange)="activateDb($event.value)"
@@ -28,7 +30,9 @@
       (click)="deleteDatabase()"
       [disabled]="collaborativeMode"
     >
-      Löschen
+      {{
+        "sql-playground.db-control-panel.overview.deleteButton" | i18nextEager
+      }}
     </button>
     <button
       mat-raised-button
@@ -36,7 +40,9 @@
       (click)="addDb()"
       [disabled]="collaborativeMode"
     >
-      Neue DB
+      {{
+        "sql-playground.db-control-panel.overview.newDbButton" | i18nextEager
+      }}
     </button>
 
     <button
@@ -46,7 +52,10 @@
       [disabled]="!collaborativeMode"
       (click)="changeCollaborativeMode()"
     >
-      Wechseln in den privaten Modus
+      {{
+        "sql-playground.db-control-panel.overview.changeCollaborativeModeButton"
+          | i18nextEager
+      }}
     </button>
   </div>
 </div>

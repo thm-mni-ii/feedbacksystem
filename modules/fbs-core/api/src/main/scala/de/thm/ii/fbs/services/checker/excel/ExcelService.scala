@@ -46,10 +46,18 @@ class ExcelService {
   private def initSheet(spreadsheet: File, excelMediaInformation: ExcelMediaInformation): XSSFSheet = {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
-    val sheet = workbook.getSheetAt(excelMediaInformation.sheetIdx)
+    val sheet = getSheetOrThrow(excelMediaInformation.sheetIdx, workbook)
     this.setCells(workbook, excelMediaInformation.changeFields)
     XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook)
     sheet
+  }
+
+  private def getSheetOrThrow(sheetIdx: Int, workbook: XSSFWorkbook) = {
+    try {
+      workbook.getSheetAt(sheetIdx)
+    } catch {
+      case _: IllegalArgumentException => throw new ExcelSheetNotFoundException(sheetIdx)
+    }
   }
 
   private def getInCol(sheet: XSSFSheet, col: Int, start: Int, end: Int): Seq[SpreadsheetCell] =

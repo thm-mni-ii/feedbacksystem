@@ -3,45 +3,51 @@
     <button
       mat-icon-button
       [routerLink]="['/', 'courses', courseId]"
-      matTooltip="Zurück zum Kurs"
+      matTooltip="{{ 'course.results.back' | i18nextEager }}"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <span class="spacer"></span>
     <!--    <button mat-icon-button (click)="downloadResults()" color="primary" matTooltip="Ergebnisse als CSV exportieren"><mat-icon>get_app</mat-icon></button>-->
   </app-menu-bar>
   <mat-list role="list" class="legend">
     <mat-list-item role="listitem">
-      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;<small
-        >Kurs bestanden</small
-      >
+      <mat-icon class="state passed">check_circle</mat-icon>&nbsp;<small>{{
+        "course.results.passed" | i18nextEager
+      }}</small>
     </mat-list-item>
     <mat-list-item role="listitem">
-      <mat-icon class="state failed">cancel</mat-icon>&nbsp;<small
-        >Kurs nicht bestanden</small
-      >
+      <mat-icon class="state failed">cancel</mat-icon>&nbsp;<small>{{
+        "course.results.not-passed" | i18nextEager
+      }}</small>
     </mat-list-item>
     <mat-list-item role="listitem">
       <span class="task-result"><span class="task-result-example">n</span></span
-      >&nbsp;<small>Nicht bestanden</small>
+      >&nbsp;<small>{{ "course.results.not-passed" | i18nextEager }}</small>
     </mat-list-item>
     <mat-list-item role="listitem"
-      ><small> - &nbsp;Nicht bearbeitet</small></mat-list-item
+      ><small>
+        - &nbsp;{{ "course.results.not_attempted" | i18nextEager }}</small
+      ></mat-list-item
     >
     <mat-list-item role="listitem"
-      ><!-- &#060;Zahl&#062;-->n &nbsp;<small>Bestanden</small></mat-list-item
+      >n &nbsp;<small>{{
+        "course.results.passed" | i18nextEager
+      }}</small></mat-list-item
     >
   </mat-list>
 
   <mat-tab-group>
     <ng-container *ngIf="requirements | async; let list">
-      <mat-tab label="Kategorien" *ngIf="list.length > 0">
+      <mat-tab
+        label="{{ 'course.results.categories' | i18nextEager }}"
+        *ngIf="list.length > 0"
+      >
         <app-evaluation-results
           [requirements]="requirements"
         ></app-evaluation-results>
       </mat-tab>
     </ng-container>
-    <mat-tab label="Alle Aufgaben">
+    <mat-tab label="{{ 'course.results.all-tasks' | i18nextEager }}">
       <mat-card class="content-container">
         <!--    <div class="card-options">-->
         <!--      <div class="actions">-->
@@ -55,14 +61,33 @@
         <!--                     (page)="pageEvent($event)">-->
         <!--      </mat-paginator>-->
         <!--    </div>-->
+        <div class="show-submissions">
+          <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>filter_list</mat-icon>
+          </button>
+        </div>
+        <hr />
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <span class="toggle-text">{{
+              "course.results.users-with-submissions" | i18nextEager
+            }}</span>
+            <mat-slide-toggle
+              [(ngModel)]="toggle"
+              (change)="toggleResults()"
+            ></mat-slide-toggle>
+          </button>
+        </mat-menu>
         <div class="card">
           <div class="name-column">
             <div class="name-container header">
-              <div class="title"><h2>Names</h2></div>
+              <div class="title">
+                <h2>{{ "course.results.names" | i18nextEager }}</h2>
+              </div>
             </div>
             <div
               class="name-container"
-              *ngFor="let result of evaluationUserResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span class="state passed" *ngIf="result.passed"
                 ><mat-icon>check_circle</mat-icon></span
@@ -83,7 +108,7 @@
             </div>
             <div
               class="task-container"
-              *ngFor="let result of courseResults | async"
+              *ngFor="let result of displayedCourseResults | async"
             >
               <span
                 class="task-result"
@@ -121,7 +146,7 @@
         </div>
       </mat-card>
     </mat-tab>
-    <mat-tab label="Statistiken">
+    <mat-tab label="{{ 'course.results.statistics' | i18nextEager }}">
       <mat-card class="content-container">
         <app-results-statistic></app-results-statistic>
       </mat-card>
