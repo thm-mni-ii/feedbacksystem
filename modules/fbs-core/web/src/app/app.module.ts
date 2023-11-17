@@ -113,6 +113,10 @@ import { I18NextModule } from "angular-i18next";
 import { I18N_PROVIDERS } from "./util/i18n";
 import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
 
+import { registerLocaleData } from "@angular/common";
+import localeDe from "@angular/common/locales/de";
+import localeDeExtra from "@angular/common/locales/extra/de";
+
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) {}
@@ -268,3 +272,5 @@ export class AppModule {}
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
+
+registerLocaleData(localeDe, localeDeExtra);
