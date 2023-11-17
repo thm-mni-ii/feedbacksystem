@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.services.v2.checker
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import de.thm.ii.fbs.model.v2.checker.DatabaseDumpArguments
 import de.thm.ii.fbs.model.v2.checker.RunnerArguments
 import de.thm.ii.fbs.utils.v2.helpers.RestTemplateFactory
 import org.springframework.beans.factory.annotation.Value
@@ -31,5 +32,15 @@ abstract class RemoteCheckerV2Service(
         if (res.statusCode != HttpStatus.ACCEPTED) {
             throw Exception("invalid status code from runner: ${res.statusCode}")
         }
+    }
+
+    protected fun sendDumpRequest(dumpArguments: DatabaseDumpArguments): String {
+        val body = objectMapper.writeValueAsString(dumpArguments)
+        val res = restTemplate.postForEntity("$masterRunnerURL/runner/{dbId}/dump", body, String::class.java) //path maybe needs to change
+
+        if (res.statusCode != HttpStatus.ACCEPTED) {
+            throw Exception("Invalid status code from runner: ${res.statusCode}")
+        }
+        return res.body ?: throw IllegalStateException("Runner did not return any response")
     }
 }

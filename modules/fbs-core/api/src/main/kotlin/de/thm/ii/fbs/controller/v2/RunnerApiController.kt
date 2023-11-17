@@ -6,20 +6,24 @@ import de.thm.ii.fbs.model.v2.checker.SqlPlaygroundRunnerResult
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundEntity
 import de.thm.ii.fbs.model.v2.playground.SqlPlaygroundQuery
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
+import de.thm.ii.fbs.model.v2.security.LegacyToken
+import de.thm.ii.fbs.services.v2.dump.DatabaseDumpService
+import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundDatabaseRepository
 import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundEntityRepository
 import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundQueryRepository
+import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 
 @RestController
 class RunnerApiController(
     private val queryRepository: SqlPlaygroundQueryRepository,
-    private val entityRepository: SqlPlaygroundEntityRepository
+    private val entityRepository: SqlPlaygroundEntityRepository,
+    private val databaseRepository: SqlPlaygroundDatabaseRepository,
+    private val databaseDumpService: DatabaseDumpService
 ) {
     @PostMapping("/results/playground", "/api/v1/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -29,6 +33,19 @@ class RunnerApiController(
         updateAllEntity(query, result)
         query.result = SqlPlaygroundResult(result.error, result.errorMsg, result.result)
         queryRepository.save(query)
+    }
+
+    @PostMapping("/results/{dbId}/dump", "/api/v1/results")
+    @ResponseBody
+    fun requestDumpDatabaseURI(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ResponseEntity<String> {
+        return try {
+            val db = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false)
+                ?: throw NotFoundException()
+            val dumpUri = databaseDumpService.createDump(db)
+            return ResponseEntity.ok(dumpUri)
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(e.message)
+        }
     }
 
     private fun updateAllEntity(query: SqlPlaygroundQuery, result: SqlPlaygroundRunnerResult) {
