@@ -9,6 +9,7 @@ import { SQLResponse } from "../model/sql_playground/SQLResponse";
 import { Table } from "../model/sql_playground/Table";
 import { Trigger } from "../model/sql_playground/Trigger";
 import { View } from "../model/sql_playground/View";
+import { map } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -83,8 +84,10 @@ export class SqlPlaygroundService {
    * Get Database Temp URI
    * @return the temporary database URI
    */
-  getDatabaseURI(): Observable<string> {
-    return of("postgresql://username:password@host:port/database");
+  getDatabaseURI(username: string, dbId: number): Observable<string> {
+    return this.http
+      .post<{ uri: string }>(`/api/v1/results/dump/${dbId}/${username}`, null)
+      .pipe(map((res) => res.uri));
   }
 
   /**

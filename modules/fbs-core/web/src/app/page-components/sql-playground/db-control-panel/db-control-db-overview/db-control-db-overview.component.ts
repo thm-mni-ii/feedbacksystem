@@ -185,7 +185,7 @@ export class DbControlDbOverviewComponent implements OnInit {
   getTempURI() {
     const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
     this.sqlPlaygroundService
-      .getDatabaseURI()
+      .getDatabaseURI(this.token.username, selectedDb.id)
       .subscribe((uri) => (this.dbURI = uri));
     this.dialog.open(DbUriLinkDialogComponent, {
       height: "auto",
