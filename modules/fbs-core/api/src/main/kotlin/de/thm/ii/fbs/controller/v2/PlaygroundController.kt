@@ -14,7 +14,6 @@ import de.thm.ii.fbs.services.v2.persistence.*
 import de.thm.ii.fbs.utils.v2.annotations.CurrentToken
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -75,15 +74,9 @@ class PlaygroundController(
 
     @PostMapping("/{dbId}/dump")
     @ResponseBody
-    fun createSharePlayground(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): ResponseEntity<String> {
-        return try {
-            val selectedDb = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false)
-                ?: throw NotFoundException()
-            val dumpUri = sqlPlaygroundCheckerService.createSharePlayground(selectedDb)
-            return ResponseEntity.ok(dumpUri)
-        } catch (e: Exception) {
-            ResponseEntity.badRequest().body(e.message)
-        }
+    fun createSharePlayground(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): String {
+        val currentActiveDb = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        return sqlPlaygroundCheckerService.createSharePlayground(currentActiveDb)
     }
 
     @PostMapping("/{dbId}/reset")

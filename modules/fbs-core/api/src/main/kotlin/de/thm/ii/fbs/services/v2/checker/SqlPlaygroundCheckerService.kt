@@ -7,7 +7,6 @@ import de.thm.ii.fbs.model.v2.security.SharePlaygroundToken
 import de.thm.ii.fbs.services.v2.persistence.SharePlaygroundTokenRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.IOException
 import java.time.LocalDateTime
 import java.util.*
 
@@ -34,19 +33,16 @@ class SqlPlaygroundCheckerService(
         )
     }
 
-    @Throws(IOException::class, InterruptedException::class)
     fun createSharePlayground(db: SqlPlaygroundDatabase): String {
         val token = UUID.randomUUID().toString()
-        val expiryTime = LocalDateTime.now().plusSeconds(30)
-        val uri = this.sendDumpRequest(
+        val expiryTime = LocalDateTime.now()
+        val uri = this.sendToRunner(
             SharePlaygroundArguments(
                 RunnerUser(db.owner.id!!, db.owner.username),
                 RunnerDatabase(db.id!!, db.name)
             ))
-
-        sharePlaygroundTokenRepository.save(SharePlaygroundToken(token, db.owner.id!!, db.id!!, expiryTime, uri))
-
-        return uri
+        sharePlaygroundTokenRepository.save(SharePlaygroundToken(token, db.owner.id!!, db.id!!, expiryTime, uri.toString()))
+        return uri.toString()
     }
 
     fun deleteDatabase(database: SqlPlaygroundDatabase, userId: Int, username: String) {

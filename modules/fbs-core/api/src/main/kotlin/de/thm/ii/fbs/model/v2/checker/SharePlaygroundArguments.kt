@@ -6,5 +6,7 @@ data class SharePlaygroundArguments(
     @JsonProperty("user")
     val user: RunnerUser,
     @JsonProperty("database")
-    val database: RunnerDatabase
+    val database: RunnerDatabase,
+    @JsonProperty("runner")
+    val runner: Runner = Runner(RunnerType.SHARE_PLAYGROUND)
 ) : RunnerArguments()
