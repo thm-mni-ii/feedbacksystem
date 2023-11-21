@@ -85,12 +85,10 @@ export class SqlPlaygroundService {
    * @return the temporary database URI
    */
   getSharePlaygroundURI(uid: number, dbId: number): Observable<string> {
-    return this.http
-      .post<{ uri: string }>(
-        `/api/v2/playground/${uid}/databases/${dbId}/dump`,
-        null
-      )
-      .pipe(map((res) => res.uri));
+    return this.http.post<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/dump`,
+      {}
+    );
   }
 
   /**

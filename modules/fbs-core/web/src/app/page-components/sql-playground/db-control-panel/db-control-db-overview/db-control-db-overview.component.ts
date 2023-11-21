@@ -8,7 +8,7 @@ import { JWTToken } from "src/app/model/JWTToken";
 import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
-import { SharePlaygroundLinkDialogComponent } from "src/app/dialogs/share-playground-link/share-playground-link-dialog.component";
+import { SharePlaygroundLinkDialogComponent } from "src/app/dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 
 @Component({
   selector: "app-db-control-db-overview",
