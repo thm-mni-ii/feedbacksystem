@@ -18,10 +18,11 @@ abstract case class DBOperationsService(dbName: String, username: String, queryT
   def initDB(client: JDBCClient, query: String): Future[ResultSet] = {
     queryFutureWithTimeout(client, query)
   }
+/**
   def copyDatabase(targetClient: JDBCClient, targetDBName: String): Future[ResultSet]
-
-  def createUserWithAccess(targetClient: JDBCClient, targetDBName: String): Future[String]
-
+*/
+  def createUserWithAccess(targetClient: JDBCClient, targetDBName: String, targetHost: String): Future[String]
+  def copyDatabaseToAnotherInstance(sourceHost: String, sourceDBName: String, targetHost: String, targetDBName: String): Future[Unit]
   def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String]
 
   def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet]
