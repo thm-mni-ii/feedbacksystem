@@ -4,12 +4,11 @@ import javax.persistence.Entity
 import javax.persistence.Id
 
 @Entity
-class DatabaseDumpToken(
+class SharePlaygroundToken(
     @Id
     val token: String,
     val userId: Int,
     val dbId: Int,
-    val dbName: String,
     val expiryTime: LocalDateTime,
     val uri: String
 )
