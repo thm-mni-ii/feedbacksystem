@@ -1,21 +1,20 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { SqlPlaygroundService } from "src/app/service/sql-playground.service";
 
 @Component({
   selector: "app-db-uri-link-dialog",
-  templateUrl: "./db-uri-link-dialog.component.html",
-  styleUrls: ["./db-uri-link-dialog.component.scss"],
+  templateUrl: "./share-playground-link-dialog.component.html",
+  styleUrls: ["./share-playground-link-dialog.component.scss"],
 })
-export class DbUriLinkDialogComponent {
+export class SharePlaygroundLinkDialogComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: {
       message: string;
       uri: string;
     },
-    public dialogRef: MatDialogRef<DbUriLinkDialogComponent>,
+    public dialogRef: MatDialogRef<SharePlaygroundLinkDialogComponent>,
     private snackbar: MatSnackBar
   ) {}
 

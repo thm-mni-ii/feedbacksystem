@@ -84,9 +84,12 @@ export class SqlPlaygroundService {
    * Get Database Temp URI
    * @return the temporary database URI
    */
-  getDatabaseURI(username: string, dbId: number): Observable<string> {
+  getSharePlaygroundURI(uid: number, dbId: number): Observable<string> {
     return this.http
-      .post<{ uri: string }>(`/api/v1/results/dump/${dbId}/${username}`, null)
+      .post<{ uri: string }>(
+        `/api/v2/playground/${uid}/databases/${dbId}/dump`,
+        null
+      )
       .pipe(map((res) => res.uri));
   }
 
