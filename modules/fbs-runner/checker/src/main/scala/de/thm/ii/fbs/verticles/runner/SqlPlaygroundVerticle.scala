@@ -1,6 +1,7 @@
 package de.thm.ii.fbs.verticles.runner
 
-import de.thm.ii.fbs.services.runner.SQLPlaygroundService
+import de.thm.ii.fbs.services.db.PsqlOperationsService
+import de.thm.ii.fbs.services.runner.{SQLPlaygroundService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.DBTypes.PSQL_CONFIG_KEY
 import de.thm.ii.fbs.util.{Metrics, PlaygroundDBConnections}
@@ -18,18 +19,18 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 /**
-  * Object that stores all static vars for the SqlPlaygroundVerticle
-  */
+ * Object that stores all static vars for the SqlPlaygroundVerticle
+ */
 object SqlPlaygroundVerticle {
   /** Event Bus Address to start an runner */
   val RUN_ADDRESS = "de.thm.ii.fbs.runner.sqlPlayground"
 }
 
 /**
-  * Verticle that starts the SqlPlayground
-  *
-  * @author Max Stephan
-  */
+ * Verticle that starts the SqlPlayground
+ *
+ * @author Max Stephan
+ */
 class SqlPlaygroundVerticle extends ScalaVerticle {
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
   private var sqlPools = Map[String, SqlPoolWithConfig]()
@@ -39,10 +40,10 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
   private val errorCounter = meter.counterBuilder("errorCount").setDescription("Error Count").build()
 
   /**
-    * start SqlRunnerVerticle
-    *
-    * @return vertx Future
-    */
+   * start SqlRunnerVerticle
+   *
+   * @return vertx Future
+   */
   override def startFuture(): Future[_] = {
     val psqlDataSource = s"${PSQL_CONFIG_KEY}_playground"
     val psqlConfig = new JsonObject()
@@ -57,6 +58,30 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     sqlPools += (PSQL_CONFIG_KEY -> SqlPoolWithConfig(psqlPool, psqlConfig))
 
     vertx.eventBus().consumer(RUN_ADDRESS, startSqlPlayground).completionFuture()
+  }
+
+  private def copyDatabaseAndCreateUser(runArgs: SqlPlaygroundRunArgs): Future[String] = {
+    // Extract sqlRunArgs from the message
+
+
+    // Get the PlaygroundDBConnections
+    val con = getConnection(runArgs).getOrElse(throw new Exception("Failed to get database connection"))
+
+    // Get the query timeout from config
+    val queryTimeout = config.getInteger("SQL_QUERY_TIMEOUT_S", 10)
+
+    // Create an instance of SQLPlaygroundService
+    val sqlPlaygroundService = new SQLPlaygroundService(runArgs, con, queryTimeout)
+
+    // Extract source and target host
+    val sourceHost = config.getString("PSQL_SERVER_URL", "jdbc:postgresql://localhost:5432").split("//")(1).split("/")(0)
+    val targetHost = config.getString("PSQL_SHARING_SERVER_URL", "jdbc:postgresql://psql-sharing:5432").split("//")(1).split("/")(0)
+
+    // Get the JDBC client for the target database
+    val targetClient = sqlPools.getOrElse(PSQL_CONFIG_KEY, throw new Exception("PSQL config not found")).pool
+
+    // Call the method to copy database and create user
+    sqlPlaygroundService.copyDBAndCreateUser(sourceHost, targetHost, targetClient)
   }
 
   private def startSqlPlayground(msg: Message[JsonObject]): Future[Unit] = Future {
@@ -82,6 +107,11 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
             end(false)
           case Failure(_) =>
             end(true)
+        }
+        // Call the method to copy database and create user
+        copyDatabaseAndCreateUser(runArgs).onComplete {
+          case Success(uri) => logger.info(s"Database copied, new URI: $uri")
+          case Failure(ex) => logger.error("Error in copying database and creating user", ex)
         }
       } else {
         end(false)

@@ -6,7 +6,7 @@ import de.thm.ii.fbs.types.{OutputJsonStructure, SharePlaygroundArgs, SqlPlaygro
 import de.thm.ii.fbs.util.{DBTypes, DatabaseInformationService, PlaygroundDBConnections, SqlPlaygroundMode}
 import io.vertx.core.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
-
+import io.vertx.scala.ext.jdbc.JDBCClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -70,12 +70,18 @@ class SQLPlaygroundService(val sqlRunArgs: SqlPlaygroundRunArgs, val con: Playgr
   private def initDBOperations(): DBOperationsService = {
     // Currently only PostgresSql is Supported
     if (!isPsql) throw new Error("Invalid DBType. Currently only Psql is Supported")
-
     val dbName = s"playground_db_${sqlRunArgs.database.id.toString}"
     val username = s"playground_user_${sqlRunArgs.user.id.toString}"
     new PsqlOperationsService(dbName, username, queryTimeout)
   }
 
+  def copyDBAndCreateUser(sourceHost: String, targetHost: String, targetClient: JDBCClient): Future[String] = {
+    val dbOperations = initDBOperations()
+    for {
+      _ <- dbOperations.copyDatabaseToAnotherInstance(sourceHost, dbOperations.dbName, targetHost, dbOperations.dbName)
+      uri <- dbOperations.createUserWithAccess(targetClient, dbOperations.dbName, targetHost)
+    } yield uri
+  }
   def executeStatement(): Future[(ResultSet, ResultSet)] = {
     val dbOperations = initDBOperations()
     val deleteDatabase = SqlPlaygroundMode.shouldDeleteDatabase(sqlRunArgs.mode)

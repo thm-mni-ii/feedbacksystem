@@ -21,5 +21,10 @@
   "SQL_PLAYGROUND_PSQL_SERVER_PASSWORD": "SqfyBWhiFGr7FK60cVR2rel",
   "SQL_PLAYGROUND_PSQL_SERVER_URL": "jdbc:postgresql://localhost:5432?allowMultiQueries=true",
   "SQL_QUERY_TIMEOUT_S": 10,
-  "SQL_MAX_IDLE_TIME": 10
+  "SQL_MAX_IDLE_TIME": 10,
+  "PSQL_SHARING_SERVER_HOST": "psql-sharing",
+  "PSQL_SHARING_SERVER_PORT": "5444",
+  "PSQL_SHARING_SERVER_URL": "jdbc:postgresql://psql-sharing:5444",
+  "PSQL_SHARING_SERVER_USERNAME": "postgres",
+  "PSQL_SHARING_SERVER_PASSWORD": "R$7pWqY@K5zE3Xt&g9L1MfD"
 }
