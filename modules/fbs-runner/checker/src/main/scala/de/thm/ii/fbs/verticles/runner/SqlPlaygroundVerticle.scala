@@ -4,15 +4,17 @@ import de.thm.ii.fbs.services.db.PsqlOperationsService
 import de.thm.ii.fbs.services.runner.{SQLPlaygroundService}
 import de.thm.ii.fbs.types._
 import de.thm.ii.fbs.util.DBTypes.PSQL_CONFIG_KEY
-import de.thm.ii.fbs.util.PlaygroundDBConnections
+import de.thm.ii.fbs.util.{Metrics, PlaygroundDBConnections}
 import de.thm.ii.fbs.verticles.HttpVerticle
 import de.thm.ii.fbs.verticles.runner.SqlPlaygroundVerticle.RUN_ADDRESS
 import io.vertx.core.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
 import io.vertx.scala.ext.jdbc.JDBCClient
+import io.vertx.scala.ext.sql.ResultSet
 
 import java.sql.{SQLException, SQLTimeoutException}
+import java.util.Date
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
@@ -32,6 +34,10 @@ object SqlPlaygroundVerticle {
 class SqlPlaygroundVerticle extends ScalaVerticle {
   private val logger = ScalaLogger.getLogger(this.getClass.getName)
   private var sqlPools = Map[String, SqlPoolWithConfig]()
+  private val meter = Metrics.openTelemetry.meterBuilder("de.thm.mni.ii.fbs.verticles.runner.playground").build()
+  private val processingCounter = meter.upDownCounterBuilder("processingCount").setDescription("Processing Requests").build()
+  private val processingTimeCounter = meter.histogramBuilder("processingTime").ofLongs().setDescription("Time for processing").setUnit("ms").build()
+  private val errorCounter = meter.counterBuilder("errorCount").setDescription("Error Count").build()
 
   /**
    * start SqlRunnerVerticle
@@ -44,9 +50,9 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
       .put("user", config.getString("SQL_PLAYGROUND_PSQL_SERVER_USERNAME", "root"))
       .put("password", config.getString("SQL_PLAYGROUND_PSQL_SERVER_PASSWORD", ""))
       .put("url", config.getString("SQL_PLAYGROUND_PSQL_SERVER_URL", "jdbc:postgresql://localhost:5432"))
-      .put("max_pool_size", config.getInteger("SQL_PLAYGROUND_INSTANCES", 15))
+      .put("max_pool_size", config.getInteger("SQL_PLAYGROUND_INSTANCES", 256))
       .put("driver_class", "org.postgresql.Driver")
-      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 10))
+      .put("max_idle_time", config.getInteger("SQL_MAX_IDLE_TIME", 60))
       .put("dataSourceName", psqlDataSource)
     val psqlPool = JDBCClient.createShared(vertx, psqlConfig, psqlDataSource)
     sqlPools += (PSQL_CONFIG_KEY -> SqlPoolWithConfig(psqlPool, psqlConfig))
@@ -81,21 +87,39 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
   private def startSqlPlayground(msg: Message[JsonObject]): Future[Unit] = Future {
     val runArgs = msg.body().mapTo(classOf[SqlPlaygroundRunArgs])
 
+    processingCounter.add(1)
+    val startTime = new Date().getTime
+    val end = (failure: Boolean) => {
+      val endTime = new Date().getTime
+      processingTimeCounter.record(endTime - startTime)
+      processingCounter.add(-1)
+      if (failure) errorCounter.add(1)
+    }
+
     try {
       logger.info(s"SqlPlayground received execution ${runArgs.executionId}")
 
       val con = getConnection(runArgs)
 
       if (con.isDefined) {
-        executeQueries(runArgs, con.get)
+        executeQueries(runArgs, con.get) onComplete {
+          case Success(_) =>
+            end(false)
+          case Failure(_) =>
+            end(true)
+        }
         // Call the method to copy database and create user
         copyDatabaseAndCreateUser(runArgs).onComplete {
           case Success(uri) => logger.info(s"Database copied, new URI: $uri")
           case Failure(ex) => logger.error("Error in copying database and creating user", ex)
         }
+      } else {
+        end(false)
       }
     } catch {
-      case e: Throwable => handleError(runArgs, e)
+      case e: Throwable =>
+        end(true)
+        handleError(runArgs, e)
     }
   }
 
@@ -110,10 +134,10 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
     }
   }
 
-  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: PlaygroundDBConnections): Unit = {
-    val sqlPlayground = new SQLPlaygroundService(runArgs, con, config.getInteger("SQL_QUERY_TIMEOUT_S", 10))
+  private def executeQueries(runArgs: SqlPlaygroundRunArgs, con: PlaygroundDBConnections): Future[(ResultSet, ResultSet)] = {
+    val sqlPlayground = new SQLPlaygroundService(runArgs, con, config.getInteger("SQL_QUERY_TIMEOUT_S", 1))
 
-    sqlPlayground.executeStatement().onComplete({
+    sqlPlayground.executeStatement() andThen {
       case Success(value) =>
         try {
           logger.info(s"Execution-${runArgs.executionId} Finished")
@@ -129,7 +153,7 @@ class SqlPlaygroundVerticle extends ScalaVerticle {
         handleError(runArgs, ex, getSQLErrorMsg(runArgs, ex))
       case Failure(ex) =>
         handleError(runArgs, ex)
-    })
+    }
   }
 
   private def handleError(runArgs: SqlPlaygroundRunArgs, e: Throwable, msg: String = "Die Ausführung des Statements ist fehlgeschlagen."): Unit = {

@@ -1,4 +1,6 @@
-<h2 matDialogTitle>Auswahl</h2>
+<h2 matDialogTitle>
+  {{ "dialog.spreadsheet.title.selection" | i18nextEager }}
+</h2>
 <mat-dialog-content>
   <app-spreadsheet
     [spreadsheet]="data.spreadsheet"
@@ -6,9 +8,11 @@
   ></app-spreadsheet>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-flat-button (click)="confirm(false)">Abbrechen</button> &nbsp;
-  &nbsp;
+  <button mat-flat-button (click)="confirm(false)">
+    {{ "dialog.spreadsheet.button.cancel" | i18nextEager }}
+  </button>
+  &nbsp; &nbsp;
   <button mat-flat-button color="accent" (click)="confirm(true)">
-    Auswählen
+    {{ "dialog.spreadsheet.button.select" | i18nextEager }}
   </button>
 </mat-dialog-actions>

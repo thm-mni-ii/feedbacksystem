@@ -3,12 +3,17 @@
   ><mat-icon class="invisible" *ngIf="!data.visible">visibility_off</mat-icon>
   <span
     [matTooltip]="
-      'Korrekt: ' + passed + '\nFalsch: ' + failed + '\nGesamt: ' + all
+      '{{ \'course.progress.correct\' | i18nextEager }}: ' +
+      passed +
+      '\n{{ \'course.progress.wrong\' | i18nextEager }}: ' +
+      failed +
+      '\n{{ \'course.progress.total\' | i18nextEager }}: ' +
+      all
     "
-    >Fortschritt:<span class="passed"> {{ passed }} </span>/<span
-      class="failed"
-    >
-      {{ failed }} </span
-    >/<span class="all"> {{ all }} </span></span
+    >{{ "course.progress.name" | i18nextEager }}:<span class="passed">
+      {{ passed }} </span
+    >/<span class="failed"> {{ failed }} </span>/<span class="all">
+      {{ all }}
+    </span></span
   >
 </mat-card>

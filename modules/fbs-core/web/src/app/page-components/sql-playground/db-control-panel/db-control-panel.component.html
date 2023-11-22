@@ -3,20 +3,27 @@
   mat-stretch-tabs="false"
   [(selectedIndex)]="selectedTab"
 >
-  <mat-tab label="DB">
+  <mat-tab
+    label="{{ 'sql-playground.db-control-panel.tab-db' | i18nextEager }}"
+  >
     <app-db-control-db-overview
       (changeActiveDb)="changeDb($event)"
       [(collaborativeMode)]="collaborativeMode"
     ></app-db-control-db-overview>
   </mat-tab>
-  <mat-tab label="Vorlagen">
+  <mat-tab
+    label="{{ 'sql-playground.db-control-panel.tab-templates' | i18nextEager }}"
+  >
     <app-db-control-templates
       [activeDb]="activeDb"
       [isAdmin]="isAdmin"
       (submitStatement)="submitStatementToParent($event)"
     ></app-db-control-templates>
   </mat-tab>
-  <mat-tab label="Co-Working" [disabled]="!isAdmin">
+  <mat-tab
+    label="{{ 'sql-playground.db-control-panel.tab-coworking' | i18nextEager }}"
+    [disabled]="!isAdmin"
+  >
     <app-db-control-co-working
       [(collaborativeMode)]="collaborativeMode"
       (changeActiveDb)="changeDb($event)"

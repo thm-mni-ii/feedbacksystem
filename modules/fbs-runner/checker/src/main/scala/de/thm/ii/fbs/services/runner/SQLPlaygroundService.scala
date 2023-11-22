@@ -2,7 +2,7 @@ package de.thm.ii.fbs.services.runner
 
 import de.thm.ii.fbs.services.ExtendedResultsService
 import de.thm.ii.fbs.services.db.{DBOperationsService, PsqlOperationsService}
-import de.thm.ii.fbs.types.{OutputJsonStructure, SqlPlaygroundRunArgs}
+import de.thm.ii.fbs.types.{OutputJsonStructure, SharePlaygroundArgs, SqlPlaygroundRunArgs}
 import de.thm.ii.fbs.util.{DBTypes, DatabaseInformationService, PlaygroundDBConnections, SqlPlaygroundMode}
 import io.vertx.core.json.JsonObject
 import io.vertx.scala.ext.sql.ResultSet
@@ -21,6 +21,10 @@ object SQLPlaygroundService {
     OutputJsonStructure("triggers", Option("manipulation"))
   )
 
+// change this function with dump function
+  def test(): String = {
+    s"Test is working"
+  }
 
   def isPlaygroundResult(res: JsonObject): Boolean = res.getString("resultType", "").equals(PLAYGROUND_RESULT_TYPE)
 

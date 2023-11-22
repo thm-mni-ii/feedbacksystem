@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import { UntypedFormControl } from "@angular/forms";
 import { mergeMap, startWith } from "rxjs/operators";
 import { Observable, of } from "rxjs";
@@ -10,6 +10,11 @@ import { Roles } from "../../model/Roles";
 import { AuthService } from "../../service/auth.service";
 import { CourseUpdateDialogComponent } from "../../dialogs/course-update-dialog/course-update-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import {
+  I18NEXT_SERVICE,
+  I18NextPipe,
+  ITranslationService,
+} from "angular-i18next";
 
 /**
  * Show all courses
@@ -25,7 +30,9 @@ export class SearchCoursesComponent implements OnInit {
     private router: Router,
     private auth: AuthService,
     private dialog: MatDialog,
-    private titlebar: TitlebarService
+    private titlebar: TitlebarService,
+    private i18NextPipe: I18NextPipe,
+    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {}
 
   courses: Observable<Course[]> = of();
@@ -33,7 +40,11 @@ export class SearchCoursesComponent implements OnInit {
   control: UntypedFormControl = new UntypedFormControl();
 
   ngOnInit() {
-    this.titlebar.emitTitle("Kurs suchen");
+    this.i18NextService.events.languageChanged.subscribe(() => {
+      this.titlebar.emitTitle(
+        this.i18NextPipe.transform("sidebar.label.searchCourses")
+      );
+    });
     this.courses = this.courseService.getCourseList();
 
     this.filteredCourses = this.control.valueChanges.pipe(

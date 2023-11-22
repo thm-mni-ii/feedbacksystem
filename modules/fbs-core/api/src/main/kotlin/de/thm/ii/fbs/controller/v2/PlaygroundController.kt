@@ -72,6 +72,13 @@ class PlaygroundController(
         return databaseRepository.save(db)
     }
 
+    @PostMapping("/{dbId}/dump")
+    @ResponseBody
+    fun createSharePlayground(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): String {
+        val currentActiveDb = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        return sqlPlaygroundCheckerService.createSharePlayground(currentActiveDb)
+    }
+
     @PostMapping("/{dbId}/reset")
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_IMPLEMENTED)

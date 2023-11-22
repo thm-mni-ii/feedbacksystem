@@ -1,9 +1,9 @@
 <div class="container">
   <mat-form-field class="search" appearance="outline">
-    <mat-label>Kurs suchen</mat-label>
+    <mat-label>{{ "course.search" | i18nextEager }}</mat-label>
     <input
       type="text"
-      aria-label="Kurs suchen"
+      attr.aria-label="{{ 'course.search' | i18nextEager }}"
       matInput
       [formControl]="control"
     />
@@ -16,7 +16,10 @@
   ></app-course-preview-w-progress>
 
   <span class="noElements" *ngIf="(courses | async)?.length === 0">
-    Tragen Sie sich in <a routerLink="/courses/search">Kurse</a> ein um diese
-    hier zu sehen.
+    {{ "course.enrol.do" | i18nextEager
+    }}<a routerLink="/courses/search">{{
+      "course.enrol.name" | i18nextEager
+    }}</a
+    >{{ "course.enrol.see" | i18nextEager }}
   </span>
 </div>

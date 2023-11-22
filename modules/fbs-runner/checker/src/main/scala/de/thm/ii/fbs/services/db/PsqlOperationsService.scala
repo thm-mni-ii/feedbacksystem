@@ -9,6 +9,7 @@ import scala.sys.process._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
+import scala.util.{Failure, Success, Try}
 
 class PsqlOperationsService(override val dbName: String, override val username: String, override val queryTimeout: Int)
   extends DBOperationsService(dbName, username, queryTimeout) {
@@ -154,6 +155,7 @@ class PsqlOperationsService(override val dbName: String, override val username: 
 
     client.queryFuture(s"$tables $constrains $views $routines $triggers")
   }
+
 /**
   override def copyDatabase(targetClient: JDBCClient, targetDBName: String): Future[ResultSet] = {
     val copyDBQuery = s"CREATE DATABASE $targetDBName WITH TEMPLATE $dbName"
@@ -188,5 +190,19 @@ def copyDatabaseToAnotherInstance(sourceHost: String, sourceDBName: String, targ
       _ <- targetClient.queryFuture(userCreateQuery)
       _ <- targetClient.queryFuture(permissionsQuery)
     } yield s"postgresql://$username:$password@$targetHost/$targetDBName"
+
+  override def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
+    client.getConnectionFuture().flatMap(con => {
+      con.queryFuture(s"SET statement_timeout = ${queryTimeout*1000};").flatMap(_ => {
+        con.queryFuture(sql) transform {
+          case Success(result) =>
+            con.close()
+            Try(result)
+          case Failure(exception) =>
+            con.close()
+            Failure(throw exception)
+        }
+      })
+    })
   }
 }
