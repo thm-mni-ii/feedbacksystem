@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       [routerLink]="['/courses', courseId, 'task', taskId]"
-      matTooltip="Zurück zum Aufgabe"
+      matTooltip="{{ 'configuration.back-to-task' | i18nextEager }}"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
@@ -16,9 +16,11 @@
       color="accent"
       *ngIf="isAuthorized()"
       (click)="addConfig()"
-      matTooltip="Überprüfung hinzufügen"
+      matTooltip="{{ 'configuration.add-checker' | i18nextEager }}"
     >
-      <mat-icon>add</mat-icon>&nbsp;Überprüfung hinzufügen
+      <mat-icon>add</mat-icon>&nbsp;{{
+        "configuration.add-checker" | i18nextEager
+      }}
     </button>
   </div>
 
@@ -32,7 +34,7 @@
       color="primary"
       [disabled]="!configuration.mainFileUploaded"
       (click)="downloadMainFile(configuration)"
-      matTooltip="Hauptdatei herunterladen"
+      matTooltip="{{ 'configuration.download-primary-file' | i18nextEager }}"
     >
       <mat-icon>save_alt</mat-icon>
     </button>
@@ -41,7 +43,7 @@
       color="primary"
       [disabled]="!configuration.secondaryFileUploaded"
       (click)="downloadSecondaryFile(configuration)"
-      matTooltip="Nebendatei herunterladen"
+      matTooltip="{{ 'configuration.download-secondary-file' | i18nextEager }}"
     >
       <mat-icon>save_alt</mat-icon>
     </button>
@@ -50,7 +52,7 @@
       mat-icon-button
       color="primary"
       (click)="editConfig(configuration)"
-      matTooltip="Überprüfung bearbeiten"
+      matTooltip="{{ 'configuration.edit-checker' | i18nextEager }}"
     >
       <mat-icon>edit</mat-icon>
     </button>
@@ -58,7 +60,7 @@
       mat-icon-button
       color="primary"
       (click)="deleteConfig(configuration)"
-      matTooltip="Überprüfung entfernen"
+      matTooltip="{{ 'configuration' | i18nextEager }}"
     >
       <mat-icon>delete</mat-icon>
     </button>

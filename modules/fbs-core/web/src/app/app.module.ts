@@ -109,6 +109,14 @@ import "mathlive";
 import "@cortex-js/compute-engine";
 import { MathInputComponent } from "./tool-components/math-input/math-input.component";
 import { SharePlaygroundLinkDialogComponent } from "./dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
+import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { I18NextModule } from "angular-i18next";
+import { I18N_PROVIDERS } from "./util/i18n";
+import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/language-menu.component";
+
+import { registerLocaleData } from "@angular/common";
+import localeDe from "@angular/common/locales/de";
+import localeDeExtra from "@angular/common/locales/extra/de";
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -207,6 +215,8 @@ export const httpInterceptorProviders = [
     HighlightedInputComponent,
     MathInputComponent,
     SharePlaygroundLinkDialogComponent,
+    FbsModellingComponent,
+    LanguageMenuComponent,
   ],
   imports: [
     BrowserModule,
@@ -239,6 +249,7 @@ export const httpInterceptorProviders = [
     ChartsModule,
     MatTableModule,
     MatSortModule,
+    I18NextModule.forRoot(),
   ],
   entryComponents: [
     DataprivacyDialogComponent,
@@ -253,6 +264,7 @@ export const httpInterceptorProviders = [
       useValue: { parse: { dateInput: ["L"] }, display: { dateInput: "L" } },
     },
     { provide: MAT_DATE_LOCALE, useValue: "de" },
+    I18N_PROVIDERS,
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -262,3 +274,5 @@ export class AppModule {}
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
+
+registerLocaleData(localeDe, localeDeExtra);

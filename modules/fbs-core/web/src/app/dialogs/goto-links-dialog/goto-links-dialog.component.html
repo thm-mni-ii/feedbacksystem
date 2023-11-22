@@ -1,29 +1,32 @@
 <mat-dialog-content>
   <p>
-    Kopiere den Link, um ihn in Moodle oder anderen externen Seiten einzubinden.
-    Er leitet Studierende zu der Kursseite bzw. der Feedback App weiter.
+    {{ "course.goto-links.information" | i18nextEager }}
   </p>
   <mat-form-field class="max-width">
-    <mat-label>Kurs Link</mat-label>
+    <mat-label>{{
+      "course.goto-links.course-link.label" | i18nextEager
+    }}</mat-label>
     <input matInput [value]="courseLink" readonly />
     <button
       mat-icon-button
       matSuffix
       (click)="copy(courseLink)"
-      matTooltip="Kopiert den Kurs Link"
+      matTooltip="{{ 'course.goto-links.course-link.tooltip' | i18nextEager }}"
     >
       <mat-icon>content_copy</mat-icon>
     </button>
   </mat-form-field>
   <br />
   <mat-form-field class="max-width">
-    <mat-label>App Link</mat-label>
+    <mat-label>{{
+      "course.goto-links.app-link.label" | i18nextEager
+    }}</mat-label>
     <input matInput [value]="appLink" readonly />
     <button
       mat-icon-button
       matSuffix
       (click)="copy(appLink)"
-      matTooltip="Kopiert den App Link"
+      matTooltip="{{ 'course.goto-links.app-link.tooltip' | i18nextEager }}"
     >
       <mat-icon>content_copy</mat-icon>
     </button>
@@ -31,6 +34,8 @@
 </mat-dialog-content>
 <mat-dialog-actions class="dialog-actions">
   <div class="action-buttons">
-    <button mat-flat-button color="accent" (click)="close()">Schließen</button>
+    <button mat-flat-button color="accent" (click)="close()">
+      {{ "course.goto-links.close.button" | i18nextEager }}
+    </button>
   </div>
 </mat-dialog-actions>

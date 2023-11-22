@@ -2,7 +2,7 @@
   <mat-card *ngIf="tabs.length === 0" class="info-card">
     <mat-card-header>
       <mat-card-title>
-        Erstelle deine erste Query im unteren Eingabefeld
+        {{ "sql-playground.result-table.create-first-query" | i18nextEager }}
       </mat-card-title>
     </mat-card-header>
   </mat-card>
@@ -29,11 +29,16 @@
                 <mat-card-header>
                   <mat-card-title>
                     <mat-icon class="error-icon">close</mat-icon>
-                    <span>SQL Error</span>
+                    <span>{{
+                      "sql-playground.result-table.sql-error" | i18nextEager
+                    }}</span>
                     <mat-icon class="error-icon">close</mat-icon>
                   </mat-card-title>
-                  <mat-card-subtitle
-                    >Bitte überprüfe deine Eingabe</mat-card-subtitle
+                  <mat-card-subtitle>
+                    {{
+                      "sql-playground.result-table.check-input-error"
+                        | i18nextEager
+                    }}</mat-card-subtitle
                   >
                 </mat-card-header>
                 <mat-card-content>
