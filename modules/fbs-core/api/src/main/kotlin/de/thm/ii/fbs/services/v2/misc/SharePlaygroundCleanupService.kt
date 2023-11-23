@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @Service
 class SharePlaygroundCleanupService(
     private val sqlSharePlaygroundShareRepository: SqlSharePlaygroundShareRepository,
-    private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService,
+    private val sqlPlaygroundCheckerService: SqlPlaygroundCheckerService
 ) {
     @Scheduled(fixedDelayString = "PT1H") // Runs every hour
     fun cleanupExpiredShares() {

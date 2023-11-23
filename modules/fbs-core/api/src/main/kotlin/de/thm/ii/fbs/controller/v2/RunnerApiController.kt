@@ -11,7 +11,7 @@ import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundQueryRepository
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.* // ktlint-disable no-wildcard-imports
 
 @RestController
 class RunnerApiController(
@@ -27,7 +27,6 @@ class RunnerApiController(
         query.result = SqlPlaygroundResult(result.error, result.errorMsg, result.result)
         queryRepository.save(query)
     }
-
 
     private fun updateAllEntity(query: SqlPlaygroundQuery, result: SqlPlaygroundRunnerResult) {
         // Do not update the entity if the query had an error, as the checker will not return db information if there was an error

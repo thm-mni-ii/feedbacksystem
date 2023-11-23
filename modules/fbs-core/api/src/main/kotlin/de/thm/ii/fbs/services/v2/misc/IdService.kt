@@ -9,7 +9,7 @@ class IdService(
     @Value("\${services.ids.salt}")
     salt: String,
     @Value("\${services.ids.length}")
-    length: Int,
+    length: Int
 ) {
     private val hashids = Hashids(salt, length)
 

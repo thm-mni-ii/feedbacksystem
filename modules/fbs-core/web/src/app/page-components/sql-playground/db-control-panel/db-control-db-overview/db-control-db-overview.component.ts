@@ -195,7 +195,7 @@ export class DbControlDbOverviewComponent implements OnInit {
             uri: share.url,
           },
         });
-      })
+      });
   }
 
   addDb() {
