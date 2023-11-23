@@ -32,7 +32,6 @@ export class DbControlDbOverviewComponent implements OnInit {
   selectedDb: number = 0;
   token: JWTToken = this.authService.getToken();
   pending: boolean = false;
-  dbURI: string = "";
 
   ngOnInit(): void {
     this.sqlPlaygroundService.getDatabases(this.token.id).subscribe(
@@ -186,16 +185,17 @@ export class DbControlDbOverviewComponent implements OnInit {
     const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
     this.sqlPlaygroundService
       .getSharePlaygroundURI(this.token.id, selectedDb.id)
-      .subscribe((uri) => (this.dbURI = uri));
-    this.dialog.open(SharePlaygroundLinkDialogComponent, {
-      height: "auto",
-      width: "50%",
-      autoFocus: false,
-      data: {
-        message: `Der URI-Link zu deiner Datenbank \" ${selectedDb.name} \" ist nur für 24 Stunden verfügbar!\n`,
-        uri: this.dbURI,
-      },
-    });
+      .subscribe((share) => {
+        this.dialog.open(SharePlaygroundLinkDialogComponent, {
+          height: "auto",
+          width: "50%",
+          autoFocus: false,
+          data: {
+            message: `Der URI-Link zu deiner Datenbank \" ${selectedDb.name} \" ist nur für 24 Stunden verfügbar!\n`,
+            uri: share.url,
+          },
+        });
+      })
   }
 
   addDb() {

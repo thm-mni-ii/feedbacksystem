@@ -1,15 +1,14 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable } from "rxjs";
 import { Constraint } from "../model/sql_playground/Constraint";
 import { Database } from "../model/sql_playground/Database";
 import { Routine } from "../model/sql_playground/Routine";
 import { SQLExecuteResponse } from "../model/sql_playground/SQLExecuteResponse";
-import { SQLResponse } from "../model/sql_playground/SQLResponse";
+import {SQLPlaygroundShare, SQLResponse} from "../model/sql_playground/SQLResponse";
 import { Table } from "../model/sql_playground/Table";
 import { Trigger } from "../model/sql_playground/Trigger";
 import { View } from "../model/sql_playground/View";
-import { map } from "rxjs/operators";
 
 @Injectable({
   providedIn: "root",
@@ -84,9 +83,9 @@ export class SqlPlaygroundService {
    * Get Database Temp URI
    * @return the temporary database URI
    */
-  getSharePlaygroundURI(uid: number, dbId: number): Observable<string> {
+  getSharePlaygroundURI(uid: number, dbId: number): Observable<SQLPlaygroundShare> {
     return this.http.post<any>(
-      `/api/v2/playground/${uid}/databases/${dbId}/dump`,
+      `/api/v2/playground/${uid}/databases/${dbId}/share`,
       {}
     );
   }

@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonValue
 
 enum class RunnerType(@JsonValue val label: String) {
     SQL_PLAYGROUND("sql-playground"),
-    SHARE_PLAYGROUND("share")
+    SQL_PLAYGROUND_SHARE("sql-playground-share")
 }

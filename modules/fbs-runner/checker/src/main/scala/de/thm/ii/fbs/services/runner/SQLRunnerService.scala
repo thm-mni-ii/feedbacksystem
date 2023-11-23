@@ -9,9 +9,7 @@ import de.thm.ii.fbs.util.Secrets.getSHAStringFromNow
 import de.thm.ii.fbs.util.{DBConnections, DBTypes, RunnerException}
 import io.vertx.core.json.DecodeException
 import io.vertx.lang.scala.json.JsonObject
-import io.vertx.scala.core.Vertx.vertx
 import io.vertx.scala.ext.sql.ResultSet
-import io.vertx.scala.ext.jdbc.JDBCClient
 
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -109,8 +107,6 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
   private val configDbExt = s"${getSHAStringFromNow()}_c"
   private val submissionDbExt = s"${getSHAStringFromNow()}_s"
 
-
-
   private def isVariable(taskQuery: TaskQuery): Boolean =
     taskQuery.order != null && taskQuery.order.equalsIgnoreCase("variable")
 
@@ -141,31 +137,6 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
     dbOperation
   }
 
-  /**
-  def copyPlaygroundDBAndCreateUser(targetDBHost: String, targetDBPort: Int, dbUser: String, dbPassword: String, originalDBName: String, targetDBName: String): Future[String] = {
-    // Create a client for the target database
-    val targetJDBCClient = JDBCClient.createNonShared(vertx, new JsonObject()
-      .put("url", s"jdbc:postgresql://$targetDBHost:$targetDBPort/$targetDBName")
-      .put("user", dbUser)
-      .put("password", dbPassword)
-    )
-
-    // Initialize a new instance of PsqlOperationsService with the original database name, user, and password
-    val targetDBOperations = new PsqlOperationsService(originalDBName, dbUser, queryTimout)
-
-    // First, copy the database to the new instance
-    val copyDBFuture = targetDBOperations.copyDatabase(targetJDBCClient, targetDBName)
-
-    // Then, create a new user with access to the copied database
-    val createUserFuture = copyDBFuture.flatMap { _ =>
-      targetDBOperations.createUserWithAccess(targetJDBCClient, targetDBName)
-    }
-    // Return the PostgreSQL URI
-    createUserFuture.map { newUserAndPassword =>
-      s"jdbc:postgresql://$targetDBHost:$targetDBPort/$targetDBName?user=$newUserAndPassword._1&password=$newUserAndPassword._2"
-    }
-  }
-*/
   private def buildName(nameExtension: String): String = s"${sqlRunArgs.submissionId}_${sqlRunArgs.runnerId}_$nameExtension"
 
   /**
@@ -304,19 +275,4 @@ class SQLRunnerService(val sqlRunArgs: SqlRunArgs, val solutionCon: DBConnection
 
     (msg, success, correctResults)
   }
-
-  /**  def copyPlaygroundDBAndCreateUser(targetDBHost: String, targetDBPort: Int): Future[String] = {
-    val targetDBName = s"${dbName}_copy"
-    val targetJDBCClient = JDBCClient.createNonShared(vertx, new JsonObject()
-      .put("url", s"jdbc:postgresql://$targetDBHost:$targetDBPort/")
-      .put("user", username)
-      .put("password", password)
-    )
-
-    for {
-      _ <- copyDatabase(targetJDBCClient, targetDBName)
-      uri <- createUserWithAccess(targetJDBCClient, targetDBName)
-    } yield uri
-  }
-**/
 }

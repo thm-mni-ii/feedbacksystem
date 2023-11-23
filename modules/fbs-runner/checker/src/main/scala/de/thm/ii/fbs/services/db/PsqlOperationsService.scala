@@ -4,17 +4,15 @@ import de.thm.ii.fbs.types.PsqlPrivileges
 import io.vertx.lang.scala.json.JsonArray
 import io.vertx.scala.ext.jdbc.JDBCClient
 import io.vertx.scala.ext.sql.{ResultSet, SQLConnection}
-import scala.sys.process._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.sys.process.Process
 import scala.util.{Failure, Success, Try}
 
 class PsqlOperationsService(override val dbName: String, override val username: String, override val queryTimeout: Int)
   extends DBOperationsService(dbName, username, queryTimeout) {
   private val WRITE_USER_PRIVILEGES: PsqlPrivileges =
-    PsqlPrivileges("USAGE, CREATE", "INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER", "USAGE, SELECT, UPDATE")
+    PsqlPrivileges("USAGE, CREATE", "INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, SELECT", "USAGE, SELECT, UPDATE")
   private val READ_USER_PRIVILEGES: PsqlPrivileges =
     PsqlPrivileges("USAGE", "SELECT", "SELECT")
 
@@ -46,10 +44,27 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   override def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String] = {
     val password = if (skipUserCreation) "" else generateUserPassword()
 
-    val userCreateQuery = if (skipUserCreation) "" else s"""CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';"""
+    createPostgresqlUser(client, username, password).map(_ => password)
+  }
+
+  def createPostgresqlUser(client: JDBCClient, username: String, password: String): Future[ResultSet] = {
+    val userCreateQuery = if (username == "" || password == "") {
+      ""
+    } else {
+      s"""DROP USER IF EXISTS "$username"; CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';"""
+    }
+    val writeQuery = buildWriteQuery(username, userCreateQuery)
+
+    client.queryFuture(writeQuery)
+  }
+
+  def granForUser(client: JDBCClient, username: String): Future[ResultSet] =
+    client.queryFuture(buildWriteQuery(username))
+
+  private def buildWriteQuery(username: String, baseQuery: String = "") = {
     val writeQuery =
       s"""
-         |$userCreateQuery
+         |$baseQuery
          |REVOKE CREATE ON SCHEMA public FROM PUBLIC;
          |GRANT CONNECT on DATABASE "$dbName" TO "$username";
          |GRANT ${WRITE_USER_PRIVILEGES.schema}  ON SCHEMA public TO "$username";
@@ -57,8 +72,7 @@ class PsqlOperationsService(override val dbName: String, override val username: 
          |GRANT ${WRITE_USER_PRIVILEGES.sequence} ON ALL SEQUENCES IN SCHEMA public TO "$username";
          |ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ${WRITE_USER_PRIVILEGES.table} ON TABLES TO "$username";
          |""".stripMargin
-
-    client.queryFuture(writeQuery).map(_ => password)
+    writeQuery
   }
 
   override def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet] = {
@@ -155,41 +169,6 @@ class PsqlOperationsService(override val dbName: String, override val username: 
 
     client.queryFuture(s"$tables $constrains $views $routines $triggers")
   }
-
-/**
-  override def copyDatabase(targetClient: JDBCClient, targetDBName: String): Future[ResultSet] = {
-    val copyDBQuery = s"CREATE DATABASE $targetDBName WITH TEMPLATE $dbName"
-    targetClient.queryFuture(copyDBQuery)
-  }
-*/
-def copyDatabaseToAnotherInstance(sourceHost: String, sourceDBName: String, targetHost: String, targetDBName: String): Future[Unit] = Future {
-  /**Command to dump the database from the source
-   *  missing case where sourcehost has no password*/
-  val dumpCommand = s"pg_dump -h $sourceHost -U $username -F c -b -v -f /tmp/$sourceDBName.dump $sourceDBName"
-  val dumpExitCode = Process(Seq("bash", "-c", dumpCommand), None, "PGPASSWORD" -> "your_source_db_password").!
-
-  if (dumpExitCode != 0) {
-    throw new Exception(s"Failed to dump the database from $sourceHost")
-  }
-
-  // Command to restore the dump to the target
-  val restoreCommand = s"pg_restore -h $targetHost -U $username -d $targetDBName -v /tmp/$sourceDBName.dump"
-  val restoreExitCode = Process(Seq("bash", "-c", restoreCommand), None, "PGPASSWORD" -> "your_target_db_password").!
-
-  if (restoreExitCode != 0) {
-    throw new Exception(s"Failed to restore the database to $targetHost")
-  }
-}
-
-  override def createUserWithAccess(targetClient: JDBCClient, targetDBName: String, targetHost: String): Future[String] = {
-    val password = generateUserPassword()
-    val userCreateQuery = s"CREATE USER $username WITH PASSWORD '$password';"
-    val permissionsQuery = s"GRANT ALL PRIVILEGES ON DATABASE $targetDBName TO $username;"
-
-    for {
-      _ <- targetClient.queryFuture(userCreateQuery)
-      _ <- targetClient.queryFuture(permissionsQuery)
-    } yield s"postgresql://$username:$password@$targetHost/$targetDBName"
 
   override def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
     client.getConnectionFuture().flatMap(con => {

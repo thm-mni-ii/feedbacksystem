@@ -8,3 +8,7 @@ interface ResponseTable {
   head: string[];
   rows: string[];
 }
+
+export interface SQLPlaygroundShare {
+  url: string;
+}

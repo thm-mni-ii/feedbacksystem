@@ -2,7 +2,7 @@ package de.thm.ii.fbs.verticles
 
 import de.thm.ii.fbs.services.runner.SQLPlaygroundService
 import de.thm.ii.fbs.verticles.HttpVerticle.SEND_COMPLETION
-import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SharePlaygroundVerticle, SqlCheckerVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlPlaygroundShareVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.core.eventbus.Message
@@ -94,8 +94,8 @@ class HttpVerticle extends ScalaVerticle {
       case "sql-playground" =>
         vertx.eventBus().send(SqlPlaygroundVerticle.RUN_ADDRESS, body)
         ctx.response().setStatusCode(202).end()
-      case "share" =>
-        vertx.eventBus().send(SharePlaygroundVerticle.RUN_ADDRESS, body)
+      case "sql-playground-share" =>
+        vertx.eventBus().send(SqlPlaygroundShareVerticle.RUN_ADDRESS, body)
         ctx.response().setStatusCode(202).end()
       case _ => ctx.response().setStatusCode(404).end("Invalid Runner Type")
     }

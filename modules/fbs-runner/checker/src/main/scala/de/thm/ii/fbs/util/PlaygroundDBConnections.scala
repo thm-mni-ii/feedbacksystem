@@ -2,6 +2,7 @@ package de.thm.ii.fbs.util
 
 import de.thm.ii.fbs.services.db.DBOperationsService
 import de.thm.ii.fbs.types.SqlPoolWithConfig
+import io.vertx.lang.scala.ScalaLogger
 import io.vertx.scala.core.Vertx
 import io.vertx.scala.ext.jdbc.JDBCClient
 
@@ -33,8 +34,12 @@ class PlaygroundDBConnections(override val vertx: Vertx, override val sqlPoolWit
 
   override protected def initPool
   (username: String, dbOperations: DBOperationsService, dbConfig: String, allowUserWrite: Boolean, skipDBInt: Boolean): Future[Option[JDBCClient]] = {
-    // Generate Password from UserID to avoid storing the password
-    val password = Secrets.generateHMAC(dbOperations.username)
+    val password = if (sqlPoolWithConfig.config.getString("user") == username) {
+      sqlPoolWithConfig.config.getString("password")
+    } else {
+      // Generate Password from UserID to avoid storing the password
+      Secrets.generateHMAC(dbOperations.username)
+    }
 
     dbOperations.createUserIfNotExist(operationCon.get, password).flatMap(_ => {
       dbOperations.createDBIfNotExist(operationCon.get).flatMap(dbWasCreated => {
