@@ -12,7 +12,7 @@ import scala.util.{Failure, Success, Try}
 class PsqlOperationsService(override val dbName: String, override val username: String, override val queryTimeout: Int)
   extends DBOperationsService(dbName, username, queryTimeout) {
   private val WRITE_USER_PRIVILEGES: PsqlPrivileges =
-    PsqlPrivileges("USAGE, CREATE", "INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER", "USAGE, SELECT, UPDATE")
+    PsqlPrivileges("USAGE, CREATE", "INSERT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER, SELECT", "USAGE, SELECT, UPDATE")
   private val READ_USER_PRIVILEGES: PsqlPrivileges =
     PsqlPrivileges("USAGE", "SELECT", "SELECT")
 
@@ -44,10 +44,27 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   override def createUserWithWriteAccess(client: JDBCClient, skipUserCreation: Boolean = false): Future[String] = {
     val password = if (skipUserCreation) "" else generateUserPassword()
 
-    val userCreateQuery = if (skipUserCreation) "" else s"""CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';"""
+    createPostgresqlUser(client, username, password).map(_ => password)
+  }
+
+  def createPostgresqlUser(client: JDBCClient, username: String, password: String): Future[ResultSet] = {
+    val userCreateQuery = if (username == "" || password == "") {
+      ""
+    } else {
+      s"""DROP USER IF EXISTS "$username"; CREATE USER "$username" WITH ENCRYPTED PASSWORD '$password';"""
+    }
+    val writeQuery = buildWriteQuery(username, userCreateQuery)
+
+    client.queryFuture(writeQuery)
+  }
+
+  def granForUser(client: JDBCClient, username: String): Future[ResultSet] =
+    client.queryFuture(buildWriteQuery(username))
+
+  private def buildWriteQuery(username: String, baseQuery: String = "") = {
     val writeQuery =
       s"""
-         |$userCreateQuery
+         |$baseQuery
          |REVOKE CREATE ON SCHEMA public FROM PUBLIC;
          |GRANT CONNECT on DATABASE "$dbName" TO "$username";
          |GRANT ${WRITE_USER_PRIVILEGES.schema}  ON SCHEMA public TO "$username";
@@ -55,8 +72,7 @@ class PsqlOperationsService(override val dbName: String, override val username: 
          |GRANT ${WRITE_USER_PRIVILEGES.sequence} ON ALL SEQUENCES IN SCHEMA public TO "$username";
          |ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ${WRITE_USER_PRIVILEGES.table} ON TABLES TO "$username";
          |""".stripMargin
-
-    client.queryFuture(writeQuery).map(_ => password)
+    writeQuery
   }
 
   override def createUserIfNotExist(client: SQLConnection, password: String): Future[ResultSet] = {

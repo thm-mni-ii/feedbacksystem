@@ -57,5 +57,14 @@
           | i18nextEager
       }}
     </button>
+
+    <button
+      mat-raised-button
+      class="url-btn"
+      (click)="getTempURI()"
+      [disabled]="collaborativeMode"
+    >
+      Verbindungs-URL anfordern
+    </button>
   </div>
 </div>

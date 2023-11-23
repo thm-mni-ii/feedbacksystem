@@ -60,6 +60,13 @@ services:
     url: ${MASTER_RUNNER_URL:https://localhost:8081}
     insecure: ${MASTER_RUNNER_TLS_INSECURE:false}
     selfUrl: ${SELF_URL:https://localhost}
+  sqlPlayground:
+    share:
+      publicHost: ${SQL_PLAYGROUND_SHARE_PUBLIC_HOST:127.0.0.1}
+      publicPort: ${SQL_PLAYGROUND_SHARE_PUBLIC_PORT:8432}
+  ids:
+    salt: ${ID_SALT:feedbacksystem_id_salt}
+    length: ${ID_LENGTH:8}
 spring:
   main:
     allow-bean-definition-overriding: true
