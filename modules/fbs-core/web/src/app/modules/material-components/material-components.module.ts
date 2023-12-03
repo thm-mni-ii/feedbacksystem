@@ -28,6 +28,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatMenuModule } from "@angular/material/menu";
 import { DragDropModule } from "@angular/cdk/drag-drop";
+import { MatTreeModule } from "@angular/material/tree";
 
 /**
  * Module to manage material components
@@ -62,6 +63,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     MatProgressSpinnerModule,
     MatCheckboxModule,
     DragDropModule,
+    MatTreeModule,
   ],
   exports: [
     CommonModule,
@@ -94,6 +96,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
     MatProgressSpinnerModule,
     MatCheckboxModule,
     DragDropModule,
+    MatTreeModule,
   ],
   declarations: [],
 })

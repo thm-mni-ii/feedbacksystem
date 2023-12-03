@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { Submission } from "../../model/Submission";
 import { MatTableDataSource } from "@angular/material/table";
+import { ExcelCheckerResultData } from "src/app/model/ExcelCheckerResultData";
 import { CheckResult } from "../../model/CheckResult";
+import { Submission } from "../../model/Submission";
 import { SubmissionService } from "src/app/service/submission.service";
 import { Clipboard } from "@angular/cdk/clipboard";
 import { MatSnackBar } from "@angular/material/snack-bar";
@@ -138,5 +139,14 @@ export class ResultsComponent implements OnInit {
     this.snackbar.open(`Abgabetext in die Zwischenablage kopiert`, "OK", {
       duration: 3000,
     });
+  }
+
+  showExcelView() {
+    const res = this.dataSource.data[0]; // TODO: handle multible checker
+    return res?.resultData?.type === "ExcelCheckerResultData";
+  }
+
+  getExcelData(): ExcelCheckerResultData {
+    return this.dataSource.data[0].resultData as ExcelCheckerResultData; // TODO: handle multible checker
   }
 }

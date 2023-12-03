@@ -1,0 +1,66 @@
+.mat-table {
+  width: 100%;
+}
+.mat-row {
+  align-items: center;
+}
+.done {
+  color: green;
+}
+.not-done {
+  color: red;
+}
+.mat-header-cell {
+  padding-left: 25px;
+}
+
+.mat-column-errorHint {
+  flex: 4;
+}
+
+.cellStyle {
+  font-weight: bold;
+  background-color: #ff8787;
+  border-radius: 5px;
+  align-items: center;
+}
+
+.cellStyleCons {
+  background-color: #ffb47e;
+  font-weight: bold;
+  border-radius: 5px;
+  width: 70px;
+  align-items: center;
+  text-align: center;
+}
+
+.mat-list-item {
+  height: 20px;
+}
+
+.consquentCells {
+  height: 20px;
+}
+
+.task-name {
+  align-self: baseline;
+}
+
+.example-tree-invisible {
+  display: none;
+}
+
+.cellTreeNodeConsequent {
+  background-color: #ffb47e !important;
+  margin-left: 40px;
+}
+
+.cellTreeNode {
+  background-color: #ff8787;
+  border-radius: 4px;
+  width: 70px;
+  font-weight: bold;
+  display: grid;
+  justify-content: center;
+  padding: 2px 0;
+}
