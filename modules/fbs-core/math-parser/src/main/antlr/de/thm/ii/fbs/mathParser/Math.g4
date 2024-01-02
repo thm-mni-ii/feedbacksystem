@@ -8,17 +8,17 @@ expr        : expr ' '* (ADD|SUB) ' '* term
             | term
             ;
 
-term        : term ' '* (MUL|DIV|MOD) ' '* funct
-            | funct
+term        : term ' '* (MUL|DIV|MOD) ' '* unary
+            | unary
+            ;
+
+unary       : SUB? funct
             ;
 
 funct       : (SQRT|LB|LN|LG) OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
             | (FRAC|RAD|LOG) OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
             | SQRT OPENING_SQUARE_BRACKET expr CLOSING_SQUARE_BRACKET OPENING_CURLY_BRACKET expr CLOSING_CURLY_BRACKET
-            | unary
-            ;
-
-unary       : SUB? mulFactor
+            | mulFactor
             ;
 
 mulFactor   : expo // higher presedence!
