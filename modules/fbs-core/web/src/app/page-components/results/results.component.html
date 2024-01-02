@@ -50,7 +50,9 @@
               <app-math-input
                 *ngIf="resultField[0] !== 'complete'"
                 [label]="resultField[0]"
-                [defaultValue]="{ latex: resultField[1] || '\\text{Keine Abgabe!}' }"
+                [defaultValue]="{
+                  latex: resultField[1] || '\\text{Keine Abgabe!}'
+                }"
                 [disabled]="true"
               ></app-math-input>
             </div>
