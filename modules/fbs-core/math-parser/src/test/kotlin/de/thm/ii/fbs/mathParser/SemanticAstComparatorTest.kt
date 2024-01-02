@@ -191,4 +191,34 @@ internal class SemanticAstComparatorTest {
         assertNotNull(SemanticAstComparator(2, RoundingMode.HALF_UP, ignoreNeutralElements = false, applyInverseElements = false, applyCommutativeLaw = false))
         assertNotNull(SemanticAstComparator())
     }
+
+    @Test
+    fun differentExponentRepresentationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a^2"),
+                MathParserHelper.parse("a²")
+            )
+        )
+    }
+
+    @Test
+    fun multiCharacterDifferentExponentRepresentationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("a^{22}"),
+                MathParserHelper.parse("a²²")
+            )
+        )
+    }
+
+    @Test
+    fun complexDifferentExponentRepresentationTest() {
+        assertTrue(
+            semanticAstComparator.compare(
+                MathParserHelper.parse("2^3^4"),
+                MathParserHelper.parse("(2³)⁴")
+            )
+        )
+    }
 }

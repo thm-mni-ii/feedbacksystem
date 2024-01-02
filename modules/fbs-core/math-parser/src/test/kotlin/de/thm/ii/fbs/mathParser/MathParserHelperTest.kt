@@ -569,4 +569,44 @@ internal class MathParserHelperTest {
         assertEquals(expected, MathParserHelper.parse("(2^3)^4"))
         assertEquals(expected, MathParserHelper.parse("2^3^4"))
     }
+
+    @Test
+    fun simpleUnicodeExponentTest() {
+        val expected = Ast(
+            Operation(
+                Operator.EXP,
+                Num(2),
+                Num(2)
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("2²"))
+    }
+
+    @Test
+    fun multiCharacterUnicodeExponentTest() {
+        val expected = Ast(
+            Operation(
+                Operator.EXP,
+                Num(2),
+                Num(16)
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("2¹⁶"))
+    }
+
+    @Test
+    fun complexUnicodeExponentTest() {
+        val expected = Ast(
+            Operation(
+                Operator.EXP,
+                Operation(
+                    Operator.EXP,
+                    Num(2),
+                    Num(3)
+                ),
+                Num(4)
+            )
+        )
+        assertEquals(expected, MathParserHelper.parse("(2³)⁴"))
+    }
 }
