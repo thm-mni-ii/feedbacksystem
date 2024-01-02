@@ -45,7 +45,19 @@
               <mat-icon>content_copy</mat-icon>
             </button>
           </div>
-          <div *ngIf="!isText">
+          <div *ngIf="mathResult">
+            <div *ngFor="let resultField of mathResult; index as i">
+              <app-math-input
+                *ngIf="resultField[0] !== 'complete'"
+                [label]="resultField[0]"
+                [defaultValue]="{
+                  latex: resultField[1] || '\\text{Keine Abgabe!}'
+                }"
+                [disabled]="true"
+              ></app-math-input>
+            </div>
+          </div>
+          <div *ngIf="!isText && !mathResult">
             <button
               mat-flat-button
               color="accent"
