@@ -47,12 +47,6 @@ DB_COMP_REGEX = r'(\s*(?:<=|>=|!=|=|<|>)\s*)'
 MATH_EXP_REGEX = r"[\d()+\-*\/]"
 EQ_COMP_REGEX = r'\s*\w+\s*=\s*\w+\s*'
 
-# DATABASE DATA
-HOSTNAME = 'localhost'
-DB_NAME = 'postgres'
-USERNAME = 'postgres'
-PASSWORD = 'admin'
-PORT_ID = 5432
 
 # MULTIPLIERS
 ORDER_MULT = 5
