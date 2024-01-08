@@ -52,3 +52,7 @@ def format_comp_db_name(ident: str):
     result = f"{left_substring} {operator} {right_substring}"
 
     return result
+
+
+def format_whitespace(ident: str):
+    return ident.replace(" ", "")

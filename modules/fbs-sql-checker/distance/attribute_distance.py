@@ -61,7 +61,7 @@ def _get_operation_distance(ref_list: list[str], query_list: list[str]):
     for exp in query_list:
         if re.findall(c.MATH_EXP_REGEX, exp):
             query_op_list.append(exp)
-
+    print("ref op , qur op", ref_op_list, query_op_list)
     return _calculate_expression_similarity(ref_op_list, query_op_list)
 
 # Jaccard index may not be the best method to measure the distance of two mathematical expressions
@@ -74,9 +74,9 @@ def _calculate_expression_similarity(ref_exp: list[str], query_exp: list[str]):
         union = len(ref_set.union(query_set))  # len(ref_set) + len(query_set) - intersection
         if union != 0:
             # Jaccard Index / Similarity Coefficient
-            diff_val = 1 - (intersection / union)
-            _add_to_op_map(operation_map, r, q, diff_val)
-            diff += diff_val
+            similarity_coeffiecient = 1 - (intersection / union)
+            _add_to_op_map(operation_map, r, q, similarity_coeffiecient)
+            diff += similarity_coeffiecient * c.STRUCT_MULT
     return diff
 
 

@@ -60,16 +60,16 @@ def _token_iteration(tokens, map_dict, pro_att_list, cmd_list):
 def _extract_att_and_cmds(token, map_dict, pro_att_list, cmd_list):
     _extract_alias(token, map_dict)
     if isinstance(token, (sqlparse.sql.Operation, sqlparse.sql.Parenthesis)):
-        pro_att_list.append(token.value)
+        pro_att_list.append(f.format_whitespace(token.value))
     if isinstance(token, sqlparse.sql.Function):
         params = [p.value for p in token.get_parameters()]
-        cmd_list.append(token.get_real_name())
+        cmd_list.append(f.format_whitespace(str(token.get_real_name()).upper()))
         pro_att_list.append(params[0])
         if token.value.__contains__(c.DISTINCT):
             _extract_keyword(f.format_command(token), map_dict)
     if isinstance(token, sqlparse.sql.Identifier):
         if str(token.get_real_name()).upper() in [cmd for cmd in c.SELECT_CMDS]:
-            cmd_list.append(token.get_real_name())
+            cmd_list.append(f.format_whitespace(str(token.get_real_name()).upper()))
             pro_att_list.append(f.format_alias(f.format_distinct(f.format_db_name(f.format_command(token)))))
             if token.value.__contains__(c.DISTINCT):
                 _extract_keyword(f.format_command(token), map_dict)
@@ -88,7 +88,7 @@ def _extract_keyword(ident, map_dict):
     if isinstance(ident, sqlparse.sql.IdentifierList):
         ident_list = list[sqlparse.sql.Identifier](ident.get_identifiers())
         # get all the identifiers that are referred to the distinct keyword. (alias gets formatted and removed)
-        result = ", ".join(f.format_db_name(f.format_alias(i.value)) for i in ident_list)
+        result = ", ".join(f.format_whitespace(f.format_db_name(f.format_alias(i.value.lower()))) for i in ident_list)
         _add_to_map(map_dict, c.KEYWORD, c.DISTINCT, result)
     else:
         # remove trailing alias or distinct keyword to add only the attribute to the map
