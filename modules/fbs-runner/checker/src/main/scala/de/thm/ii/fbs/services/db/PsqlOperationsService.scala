@@ -71,6 +71,7 @@ class PsqlOperationsService(override val dbName: String, override val username: 
          |GRANT ${WRITE_USER_PRIVILEGES.table} ON ALL TABLES IN SCHEMA public TO "$username";
          |GRANT ${WRITE_USER_PRIVILEGES.sequence} ON ALL SEQUENCES IN SCHEMA public TO "$username";
          |ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ${WRITE_USER_PRIVILEGES.table} ON TABLES TO "$username";
+         |ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ${WRITE_USER_PRIVILEGES.sequence} ON SEQUENCES TO "$username";
          |""".stripMargin
     writeQuery
   }
@@ -103,7 +104,7 @@ class PsqlOperationsService(override val dbName: String, override val username: 
          |REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM "$username";
          |ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM "$username";
          |GRANT CONNECT on DATABASE "$dbName" TO "$username";
-         |GRANT ${READ_USER_PRIVILEGES.schema}  ON SCHEMA public TO "$username";
+         |GRANT ${READ_USER_PRIVILEGES.schema} ON SCHEMA public TO "$username";
          |GRANT ${READ_USER_PRIVILEGES.table} ON ALL TABLES IN SCHEMA public TO "$username";
          |GRANT ${READ_USER_PRIVILEGES.sequence} ON ALL SEQUENCES IN SCHEMA public TO "$username";
          |ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ${READ_USER_PRIVILEGES.table} ON TABLES TO "$username";
