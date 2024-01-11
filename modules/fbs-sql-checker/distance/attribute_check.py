@@ -43,23 +43,22 @@ def extract_attributes(ref, query):
 def _token_iteration(tokens, map_dict, pro_att_list, cmd_list, distinct_list):
     for i, token in enumerate(tokens):
         if isinstance(token, sqlparse.sql.Token):
-            if isinstance(token, sqlparse.sql.Token):
-                if token.ttype == sqlparse.tokens.Whitespace or token.ttype == sqlparse.tokens.Newline:
-                    continue
-                if token.ttype == sqlparse.tokens.Keyword and token.value == c.DISTINCT:
-                    _extract_keyword(tokens[i + 2], map_dict)
-                if token.ttype == sqlparse.tokens.Wildcard:
-                    pro_att_list.append(token.value)
-                    break
-                if isinstance(token, sqlparse.sql.IdentifierList):
-                    for t in token.get_identifiers():
-                        _extract_att_and_cmds(t, map_dict, pro_att_list, cmd_list, distinct_list)
-                if isinstance(token, sqlparse.sql.Parenthesis):
-                    _extract_parenthesis(token, map_dict, pro_att_list, cmd_list, distinct_list)                      
-                if isinstance(token, (sqlparse.sql.Identifier, sqlparse.sql.Function, sqlparse.sql.Operation)):
-                    _extract_att_and_cmds(token, map_dict, pro_att_list, cmd_list, distinct_list)
-                if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
-                    break
+            if token.ttype == sqlparse.tokens.Whitespace or token.ttype == sqlparse.tokens.Newline:
+                continue
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.DISTINCT:
+                _extract_keyword(tokens[i + 2], map_dict)
+            if token.ttype == sqlparse.tokens.Wildcard:
+                pro_att_list.append(token.value)
+                break
+            if isinstance(token, sqlparse.sql.IdentifierList):
+                for t in token.get_identifiers():
+                    _extract_att_and_cmds(t, map_dict, pro_att_list, cmd_list, distinct_list)
+            if isinstance(token, sqlparse.sql.Parenthesis):
+                _extract_parenthesis(token, map_dict, pro_att_list, cmd_list, distinct_list)                      
+            if isinstance(token, (sqlparse.sql.Identifier, sqlparse.sql.Function, sqlparse.sql.Operation)):
+                _extract_att_and_cmds(token, map_dict, pro_att_list, cmd_list, distinct_list)
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
+                break
 
 
 def _extract_att_and_cmds(token, map_dict, pro_att_list, cmd_list, distinct_list):

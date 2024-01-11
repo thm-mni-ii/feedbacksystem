@@ -75,7 +75,6 @@ def comparison_distance(ref: list[str], query: list[str]):
         moves += c.OBJECT_MULT
     else:
         moves += ec.check_equation(ref, query)
-    print("Comparison Dist", moves)
     return moves
 
 

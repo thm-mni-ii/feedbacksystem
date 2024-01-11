@@ -58,6 +58,8 @@ def extract_tables(ref, query):
     print(f"REF having_distance {ref_having_list}, QUE having_distance {query_having_list}")
     having_distance = tab_dist.comparison_distance(ref_having_list, query_having_list)
     print("having_distance dist", having_distance)
+    print("comparison_distance", comparison_distance)
+
     return from_distance + comparison_distance + order_distance + group_by_distance + having_distance
 
 
@@ -65,79 +67,76 @@ def _token_iteration(tokens: sqlparse.sql.Statement, tab_map: dict, name_list: l
                      order_list: list, group_list: list, having_list: list):
     for i, token in enumerate(tokens):
         if isinstance(token, sqlparse.sql.Token):
-            _extract_from(token, tokens, i, tab_map, name_list)
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
+                _extract_from(tokens, i, tab_map, name_list)
+            if token.ttype == sqlparse.tokens.Keyword and token.value in c.JOIN_TYPES:
+                _extract_join(token, tokens, i, tab_map, name_list, join_list)
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.ON:
+                _extract_on(tokens, i, comp_list)
+            if isinstance(token, sqlparse.sql.Where):
+                _extract_where(token, comp_list, join_list)
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.GROUP_BY:
+                # extract attributes and iterate through group by clause    
+                _extract_group_by(tokens, i, group_list, having_list)
+            # extract attributes inside order by clause  
+            if token.ttype == sqlparse.tokens.Keyword and token.value == c.ORDER_BY:
+                _extract_order_by(tokens, i, order_list)
 
-            _extract_join(token, tokens, i, tab_map, name_list, join_list)
 
-            _extract_on(token, tokens, i, comp_list)
-
-            _extract_where(token, comp_list, join_list)
-
-            # extract attributes and iterate through group by clause    
-            _extract_group_by(token, tokens, i, group_list, having_list)
-            # extract attributes inside order by clause
-            _extract_order_by(token, tokens, i, order_list)
-
-
-def _extract_from(token: sqlparse.sql.Token, tokens, i, tab_map, name_list):
-    if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
-        next_token = tokens[i + 2] # +2 to bypass whitespace token
-        if isinstance(next_token, sqlparse.sql.Identifier):
-            _extract_table_elements(next_token, tab_map, name_list)
-        elif isinstance(next_token, sqlparse.sql.IdentifierList):
-            for t in list[sqlparse.sql.Identifier](next_token.get_identifiers()):
-                _extract_table_elements(t, tab_map, name_list)
+def _extract_from(tokens, i, tab_map, name_list):
+    next_token = tokens[i + 2] # +2 to bypass whitespace token
+    if isinstance(next_token, sqlparse.sql.Identifier):
+        _extract_table_elements(next_token, tab_map, name_list)
+    elif isinstance(next_token, sqlparse.sql.IdentifierList):
+        for t in list[sqlparse.sql.Identifier](next_token.get_identifiers()):
+            _extract_table_elements(t, tab_map, name_list)
 
 
 def _extract_join(token: sqlparse.sql.Token, tokens, i, tab_map, name_list, join_list):
-    if token.ttype == sqlparse.tokens.Keyword and token.value in c.JOIN_TYPES:
-        next_token = tokens[i + 2]
-        _extract_table_elements(next_token, tab_map, name_list)
-        join_list.append(token.value)
+    next_token = tokens[i + 2]
+    _extract_table_elements(next_token, tab_map, name_list)
+    join_list.append(token.value)
 
 
-def _extract_on(token: sqlparse.sql.Token, tokens, i ,comp_list):
-    if token.ttype == sqlparse.tokens.Keyword and token.value == c.ON:
-        next_token = tokens[i + 2]
-        if isinstance(next_token, sqlparse.sql.Comparison):
-            comp_list.append(f.format_comp_db_name(next_token.value))
+def _extract_on(tokens, i ,comp_list):
+    next_token = tokens[i + 2]
+    if isinstance(next_token, sqlparse.sql.Comparison):
+        comp_list.append(f.format_comp_db_name(next_token.value))
 
 
-def _extract_where(token: sqlparse.sql.Token, comp_list, join_list):
-    if isinstance(token, sqlparse.sql.Where):
-        for t in token.tokens:
-            if isinstance(t, sqlparse.sql.Comparison):
-                comp_list.append(f.format_comp_db_name(t.value))
-        join_list.append(token.token_first().value) 
+def _extract_where(token, comp_list, join_list):
+    for t in token.tokens:
+        if isinstance(t, sqlparse.sql.Comparison):
+            comp_list.append(f.format_comp_db_name(t.value))
+    join_list.append(token.token_first().value) 
 
 
-def _extract_group_by(token: sqlparse.sql.Token, tokens, i, group_list, having_list):
-    if token.ttype == sqlparse.tokens.Keyword and token.value == c.GROUP_BY:
-        j = i + 1
-        while j < len(tokens):
-            t = tokens[j]
-            if isinstance(t, sqlparse.sql.Token):
-                if isinstance(tokens[j], (
-                        sqlparse.sql.IdentifierList, sqlparse.sql.Identifier, sqlparse.sql.Operation,
-                        sqlparse.sql.Function, sqlparse.sql.Parenthesis)):
-                    _extract_group_by_attributes(tokens[j], group_list)
-                    j += 1
-                # iterating through having tokens
-                _extract_having(tokens, j, having_list)
-                # check if the query is over or it still has other tokens
-                if (t.ttype == sqlparse.tokens.Keyword and (t.value == c.ORDER_BY or t.value == c.HAVING)) or (
-                        t.ttype == sqlparse.tokens.Punctuation and t.value == ";"):
-                    break
-            j += 1
+def _extract_group_by(tokens, i, group_list, having_list):
+    j = i + 1
+    while j < len(tokens):
+        t = tokens[j]
+        if isinstance(t, sqlparse.sql.Token):
+            if isinstance(tokens[j], (
+                    sqlparse.sql.IdentifierList, sqlparse.sql.Identifier, sqlparse.sql.Operation,
+                    sqlparse.sql.Function, sqlparse.sql.Parenthesis)):
+                _extract_group_by_attributes(tokens[j], group_list)
+                j += 1
+            _extract_having(t, tokens, j, having_list)
+            # check if the query is over or it still has other tokens
+            if (t.ttype == sqlparse.tokens.Keyword and (t.value == c.ORDER_BY or t.value == c.HAVING)) or (
+                    t.ttype == sqlparse.tokens.Punctuation and t.value == ";"):
+                break
+        j += 1
 
-def _extract_having(tokens, j, having_list):
-    if tokens[j].ttype == sqlparse.tokens.Keyword and tokens[j].value == c.HAVING:
-        k = j + 1
+def _extract_having(t, tokens, j, having_list):
+    k = j + 1
+    if t.ttype == sqlparse.tokens.Keyword and t.value == c.HAVING:
         while k < len(tokens):
             if isinstance(tokens[k], sqlparse.sql.Token):
                 if isinstance(tokens[k], sqlparse.sql.Comparison):
                     having_list.append(f.format_comp_db_name(tokens[k].value))
                     k += 1
+                print("inside", tokens)
                 if (tokens[k].ttype == sqlparse.tokens.Keyword and tokens[
                     k].value == c.ORDER_BY) or (
                         tokens[k].ttype == sqlparse.tokens.Punctuation and tokens[k].value == ";"):
@@ -146,20 +145,19 @@ def _extract_having(tokens, j, having_list):
         j += 1
 
 
-def _extract_order_by(token, tokens, i, order_list):
-    if token.ttype == sqlparse.tokens.Keyword and token.value == c.ORDER_BY:
-        j = i + 1
-        while j < len(tokens):
-            if isinstance(tokens[j], sqlparse.sql.Token):
-                if isinstance(tokens[j], sqlparse.sql.IdentifierList):
-                    for t in tokens[j]:
-                        _extract_order_by_attributes(t, order_list)
-                if isinstance(tokens[j], (
-                        sqlparse.sql.Identifier, sqlparse.sql.Operation, sqlparse.sql.Function,
-                        sqlparse.sql.Parenthesis, sqlparse.sql.Comparison)):
-                    _extract_order_by_attributes(tokens[j], order_list)
-                    j += 1
-            j += 1
+def _extract_order_by(tokens, i, order_list):
+    j = i + 1
+    while j < len(tokens):
+        if isinstance(tokens[j], sqlparse.sql.Token):
+            if isinstance(tokens[j], sqlparse.sql.IdentifierList):
+                for t in tokens[j]:
+                    _extract_order_by_attributes(t, order_list)
+            if isinstance(tokens[j], (
+                    sqlparse.sql.Identifier, sqlparse.sql.Operation, sqlparse.sql.Function,
+                    sqlparse.sql.Parenthesis, sqlparse.sql.Comparison)):
+                _extract_order_by_attributes(tokens[j], order_list)
+                j += 1
+        j += 1
 
 
 def _extract_table_elements(token, tab_map, name_list: list):

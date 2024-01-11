@@ -47,7 +47,8 @@ ALIAS_REGEX = r"\sas\s+\"(.+?)\"|\sas\s+(\w+)"
 DB_NAME_REGEX = r"^[^.]+\.(.*)$"
 DB_COMP_REGEX = r'(\s*(?:<=|>=|!=|=|<|>)\s*)'
 MATH_EXP_REGEX = r"[\d()+\-*\/]"
-EQ_COMP_REGEX = r'\s*\w+\s*=\s*\w+\s*'
+EQ_COMP_REGEX = r"\s*(\w+|'\w+')\s*=\s*(\w+|'\w+')\s*"
+
 
 # MULTIPLIERS
 ORDER_MULT = 5
