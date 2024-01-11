@@ -1,19 +1,27 @@
 import psycopg2
 import constants as c
+from dotenv import load_dotenv
+import os
 
 connection = None
+
+load_dotenv()
+HOSTNAME = os.getenv('HOSTNAME')
+DB_NAME = os.getenv('DB_NAME')
+USERNAME = os.getenv('DB_USERNAME')
+PASSWORD = os.getenv('PASSWORD')
+PORT_ID = os.getenv('PORT_ID')
 
 
 def setup_db(att_list):
     with psycopg2.connect(
-            host=c.HOSTNAME,
-            dbname=c.DB_NAME,
-            user=c.USERNAME,
-            password=c.PASSWORD,
-            port=c.PORT_ID
+            host=HOSTNAME,
+            dbname=DB_NAME,
+            user=USERNAME,
+            password=PASSWORD,
+            port=PORT_ID
     ) as connection:
         cursor = connection.cursor()
-        print(type(cursor))
         _create_db(att_list, cursor)
         _populate_db(att_list, cursor)
         connection.commit()

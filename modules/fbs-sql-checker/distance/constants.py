@@ -18,16 +18,18 @@ SELECT_CMDS = [
     "SUM",
     "COUNT",
     "ROUND",
-    "SEC_TO_TIME",
     "AVG",
     "MAX",
     "MIN",
     "ABS",
-    "TIME_TO_SEC",
     "YEAR",
+    "NOW",
     "UPPER",
     "LOWER",
-    "LENGTH"
+    "LENGTH",
+    "CEIL",
+    "FLOOR",
+    "POWER"
 ]
 
 # JOIN TYPES
@@ -46,7 +48,6 @@ DB_NAME_REGEX = r"^[^.]+\.(.*)$"
 DB_COMP_REGEX = r'(\s*(?:<=|>=|!=|=|<|>)\s*)'
 MATH_EXP_REGEX = r"[\d()+\-*\/]"
 EQ_COMP_REGEX = r'\s*\w+\s*=\s*\w+\s*'
-
 
 # MULTIPLIERS
 ORDER_MULT = 5

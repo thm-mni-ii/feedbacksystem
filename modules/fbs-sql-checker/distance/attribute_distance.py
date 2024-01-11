@@ -7,24 +7,21 @@ operation_map: dict[str, str, str] = {}
 
 def get_attributes_distance(ref: list[str], query: list[str]):
     moves = 0
-    # ignore wildcard 
     if ref.__contains__("*"):
         moves = 0
     elif set(ref) == set(query):
         for r, q in zip(ref, query):
             if r != q:
                 moves += c.ORDER_MULT
-                # Rearrange the query to match the order of reference
                 query.remove(r)
                 query.insert(ref.index(r), r)
     else:
-        for r in ref:
-            if r not in query:
+        for q in query:
+            if q not in ref:
                 moves += c.OBJECT_MULT
 
     op_dist = _get_operation_distance(ref, query)
-    moves += op_dist
-    print(f"\nOP MAP: {operation_map}\n")
+    moves += round(op_dist)
     return moves
 
 
@@ -37,16 +34,12 @@ def get_command_distance(ref: list[str], query: list[str]):
     return moves
 
 
-def get_keyword_distance(ref_map: dict, query_map: dict):
+def get_keyword_distance(ref_list: list, query_list: list):
     moves = 0
-    ref_kws: dict = ref_map.get(c.KEYWORD)
-    query_kws: dict = query_map.get(c.KEYWORD)
 
-    if ref_kws is not None and query_kws is not None:
-        if set(ref_kws.values()) == set(query_kws.values()):
-            moves = 0
-        else:
-            moves += c.OBJECT_MULT
+    if set(ref_list) != set(query_list):
+        moves += c.OBJECT_MULT
+        print(moves)
     return moves
 
 
@@ -87,5 +80,5 @@ def _add_to_op_map(op_map, ref, query, sim):
     op_map[new_entry_key] = {
         "ref": ref,
         "query": query,
-        "difference": sim
+        "similarity": sim
     }

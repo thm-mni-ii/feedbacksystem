@@ -6,8 +6,8 @@ import equation_checker as ec
 def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join: list):
     moves = 0
     # check for table used
-    for r in ref:
-        if r not in query:
+    for q in query:
+        if q not in ref:
             moves += c.OBJECT_MULT
     print("table DIST", moves)
 
@@ -26,6 +26,7 @@ def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join:
             mapped_ref, mapped_query = _map_values(ref, query)
             ref_script = _format_join_script(mapped_ref, ref_join)
             query_script = _format_join_script(mapped_query, query_join)
+            print(f"script_ {ref_script}\n query: {query_script}")
             try:
                 connection = db.setup_db(ref)
                 ref_res = db.execute_query(ref_script, connection)
