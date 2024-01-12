@@ -9,6 +9,10 @@ math-field:focus-within {
   outline: unset;
 }
 
+math-field::part(content) {
+  overflow-x: auto;
+}
+
 math-field::part(menu-toggle) {
   display: none;
 }
