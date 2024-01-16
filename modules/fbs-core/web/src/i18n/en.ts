@@ -287,7 +287,7 @@ export const englishTranslation = {
   "sql-playground.dbSchema": "DB Schema",
   "sql-playground.tables": "Tables",
   "sql-playground.views": "Views",
-  "sql-playground.storedProcedures": "Stored Procedures",
+  "sql-playground.storedProcedures": "Database routines",
   "sql-playground.triggers": "Triggers",
   "sql-playground.db-control-panel.tab-db": "DB",
   "sql-playground.db-control-panel.tab-templates": "Templates",

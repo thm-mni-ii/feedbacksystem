@@ -153,8 +153,10 @@ class PsqlOperationsService(override val dbName: String, override val username: 
 
     val routines =
       """
-        |SELECT routine_name as name, routine_type as type, routine_definition as definition
-        |FROM information_schema.routines
+        |SELECT DISTINCT ON (oid)
+        |	routine_name as name, routine_type as type, routine_definition as definition, pg_catalog.pg_get_function_identity_arguments(p.oid) AS parameters
+        |FROM information_schema.routines i
+        |JOIN pg_catalog.pg_proc p ON i.routine_name = p.proname
         |WHERE routine_schema = 'public';
         |""".stripMargin
 
