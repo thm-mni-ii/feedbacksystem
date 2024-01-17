@@ -1,32 +1,5 @@
 @import "src/colors";
 
-/*.task-container {
-  cursor: pointer;
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  .meta {
-    > * {
-      margin-left: 8px;
-    }
-    > .tiny {
-      font-size: small;
-    }
-    .state {
-      text-align: center;
-      line-height: 30px;
-    }
-  }
-  span {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.task-container:hover {
-  background: #d4dadd;
-}*/
-
 .container {
   display: block;
   margin-top: 16px;
@@ -224,7 +197,7 @@
       width: auto;
       height: auto;
       font-size: 30px;
-      color:orange;
+      color: orange;
     }
 
     .badget-icon-gray {
@@ -238,7 +211,7 @@
       background-color: ghostwhite;
     }
 
-    .mat-standard-chip {    
+    .mat-standard-chip {
       height: auto !important;
     }
   }
@@ -285,8 +258,5 @@
     grid-gap: 20px;
 
     // round progress bar
-    
-
-    
   }
 }
