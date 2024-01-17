@@ -11,10 +11,7 @@ import de.thm.ii.fbs.services.v2.persistence.SqlPlaygroundQueryRepository
 import de.thm.ii.fbs.utils.v2.exceptions.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.* // ktlint-disable no-wildcard-imports
 
 @RestController
 class RunnerApiController(

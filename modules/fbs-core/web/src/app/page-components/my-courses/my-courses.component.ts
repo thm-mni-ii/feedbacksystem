@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input, Inject } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Course } from "../../model/Course";
@@ -6,6 +6,12 @@ import { AuthService } from "../../service/auth.service";
 import { mergeMap, startWith } from "rxjs/operators";
 import { UntypedFormControl } from "@angular/forms";
 import { CourseRegistrationService } from "../../service/course-registration.service";
+import {
+  I18NEXT_SERVICE,
+  I18NextPipe,
+  ITranslationService,
+} from "angular-i18next";
+
 /**
  * Show all registered courses
  */
@@ -19,7 +25,9 @@ export class MyCoursesComponent implements OnInit {
   constructor(
     private titlebar: TitlebarService,
     private courseRegistrationService: CourseRegistrationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private i18NextPipe: I18NextPipe,
+    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {}
 
   userID: number;
@@ -29,11 +37,14 @@ export class MyCoursesComponent implements OnInit {
   control: UntypedFormControl = new UntypedFormControl();
 
   ngOnInit() {
-    this.titlebar.emitTitle("Meine Kurse");
-    this.userID = this.authService.getToken().id;
-    this.courses = this.courseRegistrationService.getRegisteredCourses(
-      this.userID
-    );
+    this.i18NextService.events.languageChanged.subscribe(() => {
+      this.titlebar.emitTitle(
+        this.i18NextPipe.transform("sidebar.label.myCourses")
+      );
+    });
+    const userID = this.authService.getToken().id;
+    this.courses = this.courseRegistrationService.getRegisteredCourses(userID);
+
     this.filteredCourses = this.control.valueChanges.pipe(
       startWith(""),
       mergeMap((value) => this._filter(value))

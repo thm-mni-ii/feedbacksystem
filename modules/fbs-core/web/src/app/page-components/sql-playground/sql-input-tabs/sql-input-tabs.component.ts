@@ -27,6 +27,7 @@ import { PrismService } from "src/app/service/prism.service";
 import { Subscription } from "rxjs";
 import { CheckerService } from "src/app/service/checker.service";
 import { QueryTab } from "src/app/model/sql_playground/QueryTab";
+import { I18NextPipe } from "angular-i18next";
 
 @Component({
   selector: "app-sql-input-tabs",
@@ -73,7 +74,8 @@ export class SqlInputTabsComponent
     private taskService: TaskService,
     private prismService: PrismService,
     private renderer: Renderer2,
-    private checkerService: CheckerService
+    private checkerService: CheckerService,
+    private i18nextPipe: I18NextPipe
   ) {}
   ngAfterViewChecked() {
     if (this.highlighted) {
@@ -152,7 +154,7 @@ export class SqlInputTabsComponent
       event.stopPropagation();
     }
     this.tabs.push({
-      name: "Neuer Query",
+      name: this.i18nextPipe.transform("sql-playground.input.new-query"),
       content: "",
       error: false,
       errorMsg: null,
@@ -161,8 +163,10 @@ export class SqlInputTabsComponent
       isSubmitMode: false,
       selectedCourse: undefined,
       selectedTask: undefined,
-      selectedCourseName: "Kurs",
-      selectedTaskName: "Aufgabe",
+      selectedCourseName: this.i18nextPipe.transform(
+        "sql-playground.input.course"
+      ),
+      selectedTaskName: this.i18nextPipe.transform("sql-playground.input.task"),
     });
     this.activeTabId.setValue(this.tabs.length - 1);
     this.saveToLocalStorage();

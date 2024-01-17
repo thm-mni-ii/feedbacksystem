@@ -29,7 +29,8 @@ class LocalLoginServiceTest {
 
   private val exampleUsername = "test"
   private val examplePassword = "test"
-  private val exampleUser = new User("Test", "Tester", "test@example.ork", exampleUsername, GlobalRole.USER)
+  private val exampleUserConstructor = (username: String) => new User("Test", "Tester", "test@example.ork", username, GlobalRole.USER)
+  private val exampleUser = exampleUserConstructor(exampleUsername)
   private val outdatedPasswordHash = Hash.hash(examplePassword)
   private def passwordHash = localLoginService.hash(examplePassword)
 
@@ -85,7 +86,7 @@ class LocalLoginServiceTest {
   @Test
   def createUserTest(): Unit = {
     createTestUser()
-    val user = localLoginService.createUser(exampleUser, examplePassword)
+    val user = localLoginService.createUser(exampleUserConstructor("example-1"), examplePassword)
     Assert.assertNotNull(user)
     val loginUser = localLoginService.login(exampleUsername, examplePassword)
     Assert.assertEquals(Some(exampleUser), loginUser)

@@ -1,14 +1,29 @@
 math-field {
   --primary: #405e9a;
   font-size: large;
-}
-
-.math-field-input {
-  border-bottom: solid black 1px;
+  width: 100%;
+  border: none;
 }
 
 math-field:focus-within {
   outline: unset;
+}
+
+math-field::part(content) {
+  overflow-x: auto;
+}
+
+math-field::part(menu-toggle) {
+  display: none;
+}
+
+math-field::part(virtual-keyboard-toggle)::after {
+  top: unset;
+  right: calc(-100% + 64px);
+}
+
+.math-field-input {
+  border-bottom: solid black 1px;
 }
 
 .mathInputContainer {
@@ -20,5 +35,3 @@ math-field:focus-within {
   align-self: center;
   width: calc(100% - 64px);
 }
-
-
