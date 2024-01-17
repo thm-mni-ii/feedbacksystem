@@ -155,15 +155,12 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadMainFile(checker: CheckerConfig) {
     if (checker.mainFileUploaded) {
-      this.TaskService.getTask(this.courseId, this.taskId).subscribe((task) => {
-        this.checkerService.getFile(
-          this.courseId,
-          this.taskId,
-          checker.id,
-          CheckerFileType.MainFile,
-          task.name
-        );
-      });
+      this.checkerService.getFile(
+        this.courseId,
+        this.taskId,
+        checker.id,
+        CheckerFileType.MainFile
+      );
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
     }
@@ -171,15 +168,12 @@ export class ConfigurationListComponent implements OnInit {
 
   downloadSecondaryFile(checker: CheckerConfig) {
     if (checker.secondaryFileUploaded) {
-      this.TaskService.getTask(this.courseId, this.taskId).subscribe((task) => {
-        this.checkerService.getFile(
-          this.courseId,
-          this.taskId,
-          checker.id,
-          CheckerFileType.SecondaryFile,
-          task.name
-        );
-      });
+      this.checkerService.getFile(
+        this.courseId,
+        this.taskId,
+        checker.id,
+        CheckerFileType.SecondaryFile
+      );
     } else {
       this.snackbar.open("Es gibt keine Hauptdatei.", "OK", { duration: 3000 });
     }

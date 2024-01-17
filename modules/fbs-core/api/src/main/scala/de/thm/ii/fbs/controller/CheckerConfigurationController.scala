@@ -9,13 +9,16 @@ import de.thm.ii.fbs.services.checker.`trait`._
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.persistence.storage.{FsStorageService, StorageService}
 import de.thm.ii.fbs.services.security.AuthService
+import de.thm.ii.fbs.util.ExtensionUtils
 import de.thm.ii.fbs.util.JsonWrapper.jsonNodeToWrapper
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.MediaType
+import org.springframework.core.io.InputStreamResource
+import org.springframework.http.{MediaType, ResponseEntity}
 import org.springframework.web.bind.annotation._
 import org.springframework.web.multipart.MultipartFile
 
-import java.nio.file.Path
+import java.io.File
+import java.nio.file.{Files, StandardOpenOption}
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 
 /**
@@ -33,8 +36,6 @@ class CheckerConfigurationController {
   private val ccs: CheckrunnerConfigurationService = null
   @Autowired
   private val storageService: StorageService = null
-  @Autowired
-  private val fsStorageService: FsStorageService = null
   @Autowired
   private val taskService: TaskService = null
   @Autowired
@@ -217,8 +218,8 @@ class CheckerConfigurationController {
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/main-file"))
   def getMainFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
-                  req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(fsStorageService.pathToMainFile)(storageFileName.MAIN_FILE, cid, tid, ccid, req, res)
+                  req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] =
+    getFile(storageFileName.MAIN_FILE, cid, tid, ccid, req, res)
 
   /**
     * Upload a the secondary file for a task configuration
@@ -252,8 +253,8 @@ class CheckerConfigurationController {
     */
   @GetMapping(value = Array("/{cid}/tasks/{tid}/checker-configurations/{ccid}/secondary-file"))
   def getSecondaryFile(@PathVariable cid: Int, @PathVariable tid: Int, @PathVariable ccid: Int,
-                       req: HttpServletRequest, res: HttpServletResponse): Unit =
-    getFile(fsStorageService.pathToSecondaryFile)(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
+                       req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] =
+    getFile(storageFileName.SECONDARY_FILE, cid, tid, ccid, req, res)
 
   private def uploadFile(fileName: String, postHook: CheckrunnerConfiguration => Unit)
                         (cid: Int, tid: Int, ccid: Int, file: MultipartFile, req: HttpServletRequest, res: HttpServletResponse): Unit = {
@@ -273,17 +274,27 @@ class CheckerConfigurationController {
     }
   }
 
-  private def getFile(pathFn: Int => Option[Path])(fileName: String, cid: Int, tid: Int, ccid: Int,
-                                                   req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  private def getFile(fileName: String, courseId: Int, taskId: Int, checkerId: Int,
+                      req: HttpServletRequest, res: HttpServletResponse): ResponseEntity[InputStreamResource] = {
     val user = authService.authorize(req, res)
-    val privilegedByCourse = crs.getParticipants(cid).find(_.user.id == user.id)
+    val task = taskService.getOne(taskId).get
+
+    val privilegedByCourse = crs.getParticipants(courseId).find(_.user.id == user.id)
       .exists(p => p.role == CourseRole.DOCENT || p.role == CourseRole.TUTOR)
 
     if (user.globalRole == GlobalRole.ADMIN || user.globalRole == GlobalRole.MODERATOR || privilegedByCourse) {
-      this.ccs.getAll(cid, tid).find(p => p.id == ccid) match {
-        case Some(checkrunnerConfiguration) =>
-          val mainFileInputStream = storageService.getFileContentStream(pathFn)(checkrunnerConfiguration.isInBlockStorage, ccid, fileName)
-          mainFileInputStream.transferTo(res.getOutputStream)
+      this.ccs.getAll(courseId, taskId).find(p => p.id == checkerId) match {
+        case Some(checkerConfig) =>
+          val file: File = fileName match {
+            case storageFileName.MAIN_FILE => storageService.getFileMainFile(checkerConfig)
+            case storageFileName.SECONDARY_FILE => storageService.getFileSecondaryFile(checkerConfig)
+          }
+          val (ctype, ext) = ExtensionUtils.getExtensionFromMimeType(storageService.getContentTypeCheckerConfigFile(checkerConfig, fileName))
+          ResponseEntity.ok()
+            .contentType(ctype)
+            .contentLength(file.length())
+            .header("Content-Disposition", s"attachment;filename=${task.name.replaceAll("\\s+", "_")}_${fileName.split('-')(0)}$ext")
+            .body(new InputStreamResource(Files.newInputStream(file.toPath, StandardOpenOption.DELETE_ON_CLOSE)))
         case _ => throw new ResourceNotFoundException()
       }
     } else {
