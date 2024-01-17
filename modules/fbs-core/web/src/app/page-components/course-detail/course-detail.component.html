@@ -76,6 +76,17 @@
     >
       <mat-icon>check</mat-icon>
     </button>
+
+    <button
+      mat-icon-button
+      *ngIf="isAuthorized()"
+      (click)="enableEditTasks()"
+      matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
+    >
+      <mat-icon *ngIf="!editTasks" class="icon-off">toggle_off</mat-icon>
+      <mat-icon *ngIf="editTasks" class="icon-on">toggle_on</mat-icon>
+    </button>
+
     <button
       mat-icon-button
       *ngIf="isAuthorized() || role"
@@ -133,7 +144,7 @@
 
   <div class="description">{{ (course | async)?.description }}</div>
 
-  <div class="create-task">
+  <div class="create-task" *ngIf="!editTasks">
     <button
       mat-raised-button
       color="accent"
@@ -145,10 +156,39 @@
     </button>
   </div>
 
+  <div class="select-all-container">
+    <section *ngIf="editTasks">
+      <mat-checkbox
+        [ngModel]="isAllSelected()"
+        (ngModelChange)="changeAllSelections()"
+      >
+        <span *ngIf="!isAllSelected()">{{
+          "course.edit-multiple-tasks-select-all" | i18nextEager
+        }}</span>
+        <span *ngIf="isAllSelected()">{{
+          "course.edit-multiple-tasks-de-select-all" | i18nextEager
+        }}</span>
+      </mat-checkbox>
+    </section>
+
+    <button
+      mat-raised-button
+      class="edit-multiple-tasks-btn"
+      color="accent"
+      *ngIf="editTasks"
+      (click)="updateMultipleTaskDetails(selectedTasks)"
+      matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
+    >
+      <mat-icon>edit_note</mat-icon>&nbsp;{{
+        "course.edit-multiple-tasks" | i18nextEager
+      }}
+    </button>
+  </div>
+
   <!-- Johannes approach for progres bar -->
   <mat-card class="progress-card">
     <mat-card-content>
-      <div class="title">
+      <div class="title" *ngIf="requirements">
         <h2>{{ "course.progress-title" | i18nextEager }}</h2>
         <!-- if coursePassed show badge -->
         <mat-chip-list *ngIf="(requirements | async).length === 0">
@@ -253,6 +293,9 @@
         [courseId]="courseID"
         [task]="task"
         [taskResult]="taskResults[task.id]"
+        [isSelectable]="editTasks"
+        (selectionChanged)="toggleSelection($event, task)"
+        [isSelected]="isInSelectedTasks(task)"
       >
       </app-task-preview>
     </div>

@@ -100,7 +100,26 @@
     justify-content: center;
   }
 }
+.icon-off {
+  color: grey;
+}
+.icon-on {
+  color: #3fa73f;
+}
 
+.select-all-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 30px;
+  margin-top: 30px;
+  margin-left: 15px;
+
+  .edit-multiple-tasks-btn {
+    margin-left: 150px;
+    cursor: pointer;
+  }
+}
 .mat-progress-bar {
   height: 15px;
   border-radius: 5px;

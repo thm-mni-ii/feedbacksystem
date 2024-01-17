@@ -91,6 +91,9 @@ export class CourseDetailComponent implements OnInit {
     },
   };
 
+  editTasks: boolean = false;
+  selectedTasks: Task[] = [];
+
   ngOnInit() {
     this.route.params.subscribe((param) => {
       this.courseID = param.id;
@@ -167,12 +170,6 @@ export class CourseDetailComponent implements OnInit {
 
       // calculate total bonus points based on succeded requirements
       this.calculatedBonusPoints = 0;
-
-      console.log(taskResults);
-
-      req.forEach((element) => {
-        console.log(element);
-      });
 
       // check in requirements if tasks are passed based on taskResults, match via id
       if (req.length > 0) {
@@ -387,6 +384,16 @@ export class CourseDetailComponent implements OnInit {
       );
   }
 
+  updateMultipleTaskDetails(tasks: Task[]) {
+    this.dialog
+      .open(TaskNewDialogComponent, {
+        height: "auto",
+        width: "50%",
+        data: { courseId: this.courseID, tasks: tasks },
+      })
+      .afterClosed();
+  }
+
   /**
    * Join a course by registering into it.
    */
@@ -527,5 +534,34 @@ export class CourseDetailComponent implements OnInit {
           });
         }, 1500);
       });
+  }
+
+  enableEditTasks() {
+    this.editTasks = !this.editTasks;
+  }
+
+  toggleSelection(event, task: Task) {
+    if (event) {
+      this.selectedTasks.push(task);
+    } else {
+      // delete only the task with the same id
+      this.selectedTasks = this.selectedTasks.filter((t) => t.id !== task.id);
+    }
+  }
+
+  isInSelectedTasks(task: Task): boolean {
+    return this.selectedTasks.some((t) => t.id === task.id);
+  }
+
+  changeAllSelections() {
+    if (this.isAllSelected()) {
+      this.selectedTasks = [];
+    } else {
+      this.selectedTasks = this.tasks;
+    }
+  }
+
+  isAllSelected(): boolean {
+    return this.selectedTasks.length == this.tasks.length;
   }
 }

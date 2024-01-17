@@ -1,6 +1,6 @@
 .mat-form-field {
-  //display: flex;
-  //flex-direction: column;
+  // display: flex;
+  // flex-direction: column;
   width: 100%;
 }
 
@@ -32,9 +32,24 @@
 .clickable {
   cursor: pointer;
 }
+
 .checkboxSolution {
   margin: 20%;
 }
+
 .noDeadline {
   margin-left: 40px;
+}
+
+.checkboxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: space-between;
+  margin: 20px 0px;
+
+  * {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between;
+  }
 }

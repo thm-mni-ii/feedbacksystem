@@ -1,13 +1,53 @@
-<div matDialogTitle *ngIf="!isUpdate">
+<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.CREATE">
   {{ "dialog.task.new.title-create" | i18nextEager }}
 </div>
-<div matDialogTitle *ngIf="isUpdate">
+<div matDialogTitle *ngIf="updateCondition === allUpdateConditions.UPDATE">
   {{ "dialog.task.new.title-edit" | i18nextEager }}
 </div>
+<div
+  matDialogTitle
+  *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+>
+  {{ "dialog.task.new.title-edit-multiple" | i18nextEager }}
+</div>
+
+<div *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE">
+  Ausgewählte Aufgaben:
+  <span *ngFor="let task of data.tasks">
+    <b>{{ task.name }}; </b>
+  </span>
+
+  <section
+    *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+    class="checkboxes"
+  >
+    <div>
+      {{ "dialog.task.new.placeholder-deadline" | i18nextEager }}
+      <mat-checkbox [(ngModel)]="selectedFormFields.datePicker"></mat-checkbox>
+    </div>
+    <div>
+      {{ "dialog.task.new.label-mediatype" | i18nextEager }}
+      <mat-checkbox [(ngModel)]="selectedFormFields.mediaType"></mat-checkbox>
+    </div>
+    <div>
+      {{ "dialog.task.new.label-requirement" | i18nextEager }}
+      <mat-checkbox
+        [(ngModel)]="selectedFormFields.requirementType"
+      ></mat-checkbox>
+    </div>
+    <div>
+      {{ "dialog.task.new.label-visibility" | i18nextEager }}
+      <mat-checkbox [(ngModel)]="selectedFormFields.isPrivate"></mat-checkbox>
+    </div>
+  </section>
+</div>
+
 <div class="newTask">
   <form [formGroup]="taskForm">
     <!-- Task name -->
-    <mat-form-field>
+    <mat-form-field
+      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
+    >
       <input
         type="text"
         placeholder="{{ 'dialog.task.new.placeholder-name' | i18nextEager }}"
@@ -15,9 +55,10 @@
         formControlName="name"
       />
     </mat-form-field>
-
     <!-- Task Description -->
-    <mat-form-field>
+    <mat-form-field
+      *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
+    >
       <mat-label>{{
         "dialog.task.new.label-description" | i18nextEager
       }}</mat-label>
@@ -46,17 +87,19 @@
         [readonly]="true"
         matInput
         [ngxMatDatetimePicker]="picker"
-        [disabled]="datePickerDisabled"
+        [disabled]="datePickerDisabled || !selectedFormFields.datePicker"
         placeholder="{{
           'dialog.task.new.placeholder-deadline' | i18nextEager
         }}"
         formControlName="deadline"
         (dateChange)="addDate($event)"
       />
+
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <ngx-mat-datetime-picker
         #picker
         [showSeconds]="true"
+        [disabled]="!selectedFormFields.datePicker"
       ></ngx-mat-datetime-picker>
     </mat-form-field>
 
@@ -65,6 +108,7 @@
       formControlName="expCheck"
       class="noDeadline"
       (change)="setMaxExpirationDate($event)"
+      [disabled]="!selectedFormFields.datePicker"
     >
       {{ "dialog.task.new.toggle-no-deadline" | i18nextEager }}
     </mat-slide-toggle>
@@ -76,7 +120,7 @@
       }}</mat-label>
       <mat-select
         formControlName="mediaType"
-        [disabled]="disableTypeChange"
+        [disabled]="disableTypeChange || !selectedFormFields.mediaType"
         (selectionChange)="changedMediaType()"
       >
         <mat-option value="text/plain">{{
@@ -91,12 +135,15 @@
       </mat-select>
     </mat-form-field>
 
-    <!-- Task Mediatype -->
+    <!-- Task Requirement -->
     <mat-form-field class="col pad">
       <mat-label>{{
         "dialog.task.new.label-requirement" | i18nextEager
       }}</mat-label>
-      <mat-select formControlName="requirementType">
+      <mat-select
+        formControlName="requirementType"
+        [disabled]="!selectedFormFields.requirementType"
+      >
         <mat-option value="mandatory">{{
           "dialog.task.new.option-compulsory" | i18nextEager
         }}</mat-option>
@@ -115,7 +162,10 @@
       <mat-label>{{
         "dialog.task.new.label-visibility" | i18nextEager
       }}</mat-label>
-      <mat-select formControlName="isPrivate">
+      <mat-select
+        formControlName="isPrivate"
+        [disabled]="!selectedFormFields.isPrivate"
+      >
         <mat-option value="Studenten">{{
           "dialog.task.new.option-students" | i18nextEager
         }}</mat-option>
@@ -227,7 +277,7 @@
       {{ "dialog.task.new.button-cancel" | i18nextEager }}
     </button>
     <button
-      *ngIf="!isUpdate"
+      *ngIf="updateCondition === allUpdateConditions.CREATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
@@ -236,13 +286,21 @@
       {{ "dialog.task.new.button-create" | i18nextEager }}
     </button>
     <button
-      *ngIf="isUpdate"
+      *ngIf="updateCondition === allUpdateConditions.UPDATE"
       mat-flat-button
       color="accent"
       [disabled]="!taskForm.valid"
       (click)="updateTask(taskForm.value)"
     >
       {{ "dialog.task.new.button-update" | i18nextEager }}
+    </button>
+    <button
+      *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+      mat-flat-button
+      color="accent"
+      (click)="updateMultipleTaskDetails(data.tasks)"
+    >
+      Ausgewählte Aufgaben bearbeiten
     </button>
   </mat-dialog-actions>
 </div>
