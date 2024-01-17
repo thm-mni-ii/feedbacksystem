@@ -81,7 +81,7 @@
       mat-icon-button
       *ngIf="isAuthorized()"
       (click)="enableEditTasks()"
-      matTooltip="Kursinhalt bearbeiten"
+      matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
     >
       <mat-icon *ngIf="!editTasks" class="icon-off">toggle_off</mat-icon>
       <mat-icon *ngIf="editTasks" class="icon-on">toggle_on</mat-icon>
@@ -144,7 +144,7 @@
 
   <div class="description">{{ (course | async)?.description }}</div>
 
-  <div class="create-task">
+  <div class="create-task" *ngIf="!editTasks">
     <button
       mat-raised-button
       color="accent"
@@ -157,28 +157,38 @@
   </div>
 
   <div class="select-all-container">
-    <!-- Checkbox: Alles Auswählen -->
     <section *ngIf="editTasks">
       <mat-checkbox
         [ngModel]="isAllSelected()"
         (ngModelChange)="changeAllSelections()"
       >
-        <span *ngIf="!isAllSelected()">Alles auswählen</span>
-        <span *ngIf="isAllSelected()">Alles abwählen</span>
+        <span *ngIf="!isAllSelected()">{{
+          "course.edit-multiple-tasks-select-all" | i18nextEager
+        }}</span>
+        <span *ngIf="isAllSelected()">{{
+          "course.edit-multiple-tasks-de-select-all" | i18nextEager
+        }}</span>
       </mat-checkbox>
     </section>
 
-    <mat-icon
+    <button
+      mat-raised-button
+      class="edit-multiple-tasks-btn"
+      color="accent"
       *ngIf="editTasks"
       (click)="updateMultipleTaskDetails(selectedTasks)"
-      matTooltip="Aufgabe(n) bearbeiten"
-      >sync</mat-icon
+      matTooltip="{{ 'course.edit-multiple-tasks' | i18nextEager }}"
     >
+      <mat-icon>edit_note</mat-icon>&nbsp;{{
+        "course.edit-multiple-tasks" | i18nextEager
+      }}
+    </button>
   </div>
+
   <!-- Johannes approach for progres bar -->
   <mat-card class="progress-card">
     <mat-card-content>
-      <div class="title">
+      <div class="title" *ngIf="requirements">
         <h2>{{ "course.progress-title" | i18nextEager }}</h2>
         <!-- if coursePassed show badge -->
         <mat-chip-list *ngIf="(requirements | async).length === 0">

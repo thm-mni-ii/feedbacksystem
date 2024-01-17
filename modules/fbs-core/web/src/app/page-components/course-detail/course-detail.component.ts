@@ -171,12 +171,6 @@ export class CourseDetailComponent implements OnInit {
       // calculate total bonus points based on succeded requirements
       this.calculatedBonusPoints = 0;
 
-      console.log(taskResults);
-
-      req.forEach((element) => {
-        console.log(element);
-      });
-
       // check in requirements if tasks are passed based on taskResults, match via id
       if (req.length > 0) {
         this.coursePassed = true;
@@ -391,12 +385,6 @@ export class CourseDetailComponent implements OnInit {
   }
 
   updateMultipleTaskDetails(tasks: Task[]) {
-    console.log(tasks);
-
-    // for (let task in tasks) {
-    //   console.log(task);
-    // }
-
     this.dialog
       .open(TaskNewDialogComponent, {
         height: "auto",
@@ -569,7 +557,6 @@ export class CourseDetailComponent implements OnInit {
     if (this.isAllSelected()) {
       this.selectedTasks = [];
     } else {
-      console.log("not all selected");
       this.selectedTasks = this.tasks;
     }
   }
