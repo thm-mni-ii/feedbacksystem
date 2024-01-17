@@ -149,11 +149,13 @@
   <mat-card class="progress-card">
     <mat-card-content>
       <div class="title">
-        <h2>Mein Kurs Fortschritt</h2>
+        <h2>{{ "course.progress-title" | i18nextEager }}</h2>
         <!-- if coursePassed show badge -->
         <mat-chip-list *ngIf="(requirements | async).length === 0">
           <mat-chip class="badget-chip">
-            <mat-icon matTooltip="Dieser Kurs hat keine Voraussetzungen">
+            <mat-icon
+              matTooltip="{{ 'course.progress-no-conditions' | i18nextEager }}"
+            >
               question_mark
             </mat-icon>
           </mat-chip>
@@ -167,8 +169,8 @@
               }"
               [matTooltip]="
                 coursePassed
-                  ? 'Du hast den Kurs erfolgreich abgeschlossen'
-                  : 'Du hast den Kurs noch nicht erfolgreich abgeschlossen'
+                  ? ('course.progress-complete' | i18nextEager)
+                  : ('course.progress-no-complete' | i18nextEager)
               "
             >
               military_tech
@@ -183,10 +185,10 @@
               }"
               [matTooltip]="
                 calculatedBonusPoints > 0
-                  ? 'Du hast ' +
+                  ? ('course.progress-bonus-pre' | i18nextEager) +
                     calculatedBonusPoints +
-                    ' Bonuspunkt(e) gesammelt'
-                  : 'Du hast noch keine Bonuspunkte gesammelt'
+                    ('course.progress-bonus-seq' | i18nextEager)
+                  : ('course.progress-no-bonus' | i18nextEager)
               "
             >
               stars
