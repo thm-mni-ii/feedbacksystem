@@ -75,10 +75,11 @@ class CourseController {
       body.retrive("semesterId").asInt(),
       body.retrive("name").asText(),
       body.retrive("description").asText(),
-      body.retrive("visible").asBool()
+      body.retrive("visible").asBool(),
+      body.retrive("password").asText()
     ) match {
-      case (semesterId, Some(name), desc, visible) =>
-        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId))
+      case (semesterId, Some(name), desc, visible, password) =>
+        courseService.create(Course(name, desc.getOrElse(""), visible.getOrElse(true), semesterId = semesterId, password = password))
       case _ => throw new BadRequestException("Malformed Request Body")
     }
   }
