@@ -8,6 +8,7 @@ import de.thm.ii.fbs.model.v2.playground.*
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundDatabaseCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundQueryCreation
 import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundResult
+import de.thm.ii.fbs.model.v2.playground.api.SqlPlaygroundShareResponse
 import de.thm.ii.fbs.model.v2.security.LegacyToken
 import de.thm.ii.fbs.services.v2.checker.SqlPlaygroundCheckerService
 import de.thm.ii.fbs.services.v2.persistence.*
@@ -70,6 +71,14 @@ class PlaygroundController(
             databaseRepository.save(currentActiveDb)
         }
         return databaseRepository.save(db)
+    }
+
+    @PostMapping("/{dbId}/share")
+    @ResponseBody
+    fun createPlaygroundShare(@CurrentToken currentToken: LegacyToken, @PathVariable("dbId") dbId: Int): SqlPlaygroundShareResponse {
+        val currentActiveDb = databaseRepository.findByOwner_IdAndIdAndDeleted(currentToken.id, dbId, false) ?: throw NotFoundException()
+        val url = sqlPlaygroundCheckerService.shareDatabase(currentActiveDb)
+        return SqlPlaygroundShareResponse(url)
     }
 
     @PostMapping("/{dbId}/reset")

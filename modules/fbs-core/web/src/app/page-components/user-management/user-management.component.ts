@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from "@angular/core";
+import { Component, Inject, OnInit, ViewChild } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
@@ -10,6 +10,11 @@ import { CreateGuestUserDialogComponent } from "../../dialogs/create-guest-user-
 import { ConfirmDialogComponent } from "../../dialogs/confirm-dialog/confirm-dialog.component";
 import { Roles } from "../../model/Roles";
 import { MatDialog } from "@angular/material/dialog";
+import {
+  I18NEXT_SERVICE,
+  I18NextPipe,
+  ITranslationService,
+} from "angular-i18next";
 
 /**
  * This component is for admins managing users
@@ -30,11 +35,17 @@ export class UserManagementComponent implements OnInit {
     private snackBar: MatSnackBar,
     private titlebar: TitlebarService,
     private dialog: MatDialog,
-    private userService: UserService
+    private userService: UserService,
+    private i18NextPipe: I18NextPipe,
+    @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {}
 
   ngOnInit() {
-    this.titlebar.emitTitle("Benutzerverwaltung");
+    this.i18NextService.events.languageChanged.subscribe(() => {
+      this.titlebar.emitTitle(
+        this.i18NextPipe.transform("sidebar.label.userManagement")
+      );
+    });
     this.refreshUserList();
   }
 
@@ -132,10 +143,14 @@ export class UserManagementComponent implements OnInit {
                 duration: 5000,
               });
             },
-            (error) => {
-              this.snackBar.open("Error: " + error.message, null, {
-                duration: 5000,
-              });
+            () => {
+              this.snackBar.open(
+                "Benutzer konnte nicht erstellt werden.",
+                null,
+                {
+                  duration: 5000,
+                }
+              );
             },
             () => {
               this.refreshUserList();

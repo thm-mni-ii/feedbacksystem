@@ -5,7 +5,10 @@ import { Constraint } from "../model/sql_playground/Constraint";
 import { Database } from "../model/sql_playground/Database";
 import { Routine } from "../model/sql_playground/Routine";
 import { SQLExecuteResponse } from "../model/sql_playground/SQLExecuteResponse";
-import { SQLResponse } from "../model/sql_playground/SQLResponse";
+import {
+  SQLPlaygroundShare,
+  SQLResponse,
+} from "../model/sql_playground/SQLResponse";
 import { Table } from "../model/sql_playground/Table";
 import { Trigger } from "../model/sql_playground/Trigger";
 import { View } from "../model/sql_playground/View";
@@ -76,6 +79,20 @@ export class SqlPlaygroundService {
       {
         statement: statement,
       }
+    );
+  }
+
+  /**
+   * Get Database Temp URI
+   * @return the temporary database URI
+   */
+  getSharePlaygroundURI(
+    uid: number,
+    dbId: number
+  ): Observable<SQLPlaygroundShare> {
+    return this.http.post<any>(
+      `/api/v2/playground/${uid}/databases/${dbId}/share`,
+      {}
     );
   }
 

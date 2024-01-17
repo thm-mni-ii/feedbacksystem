@@ -5,10 +5,10 @@ WORKDIR /build
 
 RUN gradle fbs-runner.checker:installDist
 
-FROM eclipse-temurin:18.0.2_9-jre-alpine
+FROM eclipse-temurin:21.0.1_12-jre-alpine
 
 # Install Docker
-RUN apk add --no-cache docker curl
+RUN apk add --no-cache docker curl postgresql15-client
 
 COPY --from=build /build/modules/fbs-runner/checker/build/install/fbs-runner.checker /usr/local/fbs-runner.checker
 EXPOSE 8081

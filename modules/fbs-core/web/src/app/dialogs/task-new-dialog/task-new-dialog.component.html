@@ -1,3 +1,9 @@
+<div matDialogTitle *ngIf="!isUpdate">
+  {{ "dialog.task.new.title-create" | i18nextEager }}
+</div>
+<div matDialogTitle *ngIf="isUpdate">
+  {{ "dialog.task.new.title-edit" | i18nextEager }}
+</div>
 <div matDialogTitle *ngIf="updateCondition === allUpdateConditions.CREATE">
   Neue Aufgabe erstellen
 </div>
@@ -44,13 +50,20 @@
     <mat-form-field
       *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
     >
-      <input type="text" placeholder="Name" matInput formControlName="name" />
+      <input
+        type="text"
+        placeholder="{{ 'dialog.task.new.placeholder-name' | i18nextEager }}"
+        matInput
+        formControlName="name"
+      />
     </mat-form-field>
     <!-- Task Description -->
     <mat-form-field
       *ngIf="updateCondition !== allUpdateConditions.UPDATE_MULTIPLE"
     >
-      <mat-label>Beschreibung</mat-label>
+      <mat-label>{{
+        "dialog.task.new.label-description" | i18nextEager
+      }}</mat-label>
       <textarea
         matInput
         type="text"
@@ -69,13 +82,17 @@
     <!--      </mat-form-field>-->
 
     <mat-form-field class="col">
-      <mat-label>Deadline</mat-label>
+      <mat-label>{{
+        "dialog.task.new.label-deadline" | i18nextEager
+      }}</mat-label>
       <input
         [readonly]="true"
         matInput
         [ngxMatDatetimePicker]="picker"
         [disabled]="datePickerDisabled || !datePickerSelected"
-        placeholder="Deadline"
+        placeholder="{{
+          'dialog.task.new.placeholder-deadline' | i18nextEager
+        }}"
         formControlName="deadline"
         (dateChange)="addDate($event)"
       />
@@ -95,43 +112,65 @@
       (change)="setMaxExpirationDate($event)"
       [disabled]="!datePickerSelected"
     >
-      Ohne Deadline
+      {{ "dialog.task.new.toggle-no-deadline" | i18nextEager }}
     </mat-slide-toggle>
 
     <!-- Task Mediatype -->
     <mat-form-field class="col">
-      <mat-label>Medientyp</mat-label>
+      <mat-label>{{
+        "dialog.task.new.label-mediatype" | i18nextEager
+      }}</mat-label>
       <mat-select
         formControlName="mediaType"
         [disabled]="disableTypeChange || !mediaTypeSelected"
         (selectionChange)="changedMediaType()"
       >
-        <mat-option value="text/plain">Text</mat-option>
-        <mat-option value="application/octet-stream">Datei</mat-option>
-        <mat-option value="application/x-spreadsheet">Berechnung</mat-option>
+        <mat-option value="text/plain">{{
+          "dialog.task.new.option-text" | i18nextEager
+        }}</mat-option>
+        <mat-option value="application/octet-stream">{{
+          "dialog.task.new.option-file" | i18nextEager
+        }}</mat-option>
+        <mat-option value="application/x-spreadsheet">{{
+          "dialog.task.new.option-calculation" | i18nextEager
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <!-- Task Mediatype -->
     <mat-form-field class="col pad">
-      <mat-label>Verbindlichkeit</mat-label>
+      <mat-label>{{
+        "dialog.task.new.label-requirement" | i18nextEager
+      }}</mat-label>
       <mat-select
         formControlName="requirementType"
         [disabled]="!requirementTypeSelected"
       >
-        <mat-option value="mandatory">Pflicht</mat-option>
-        <mat-option value="optional">Bonus</mat-option>
-        <mat-option value="practice">Übung</mat-option>
+        <mat-option value="mandatory">{{
+          "dialog.task.new.option-compulsory" | i18nextEager
+        }}</mat-option>
+        <mat-option value="optional">{{
+          "dialog.task.new.option-bonus" | i18nextEager
+        }}</mat-option>
+        <mat-option value="practice">{{
+          "dialog.task.new.option-exercise" | i18nextEager
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <!-- Task Visibility  -->
 
     <mat-form-field class="col">
-      <mat-label>Sichtbarkeit</mat-label>
+      <mat-label>{{
+        "dialog.task.new.label-visibility" | i18nextEager
+      }}</mat-label>
       <mat-select formControlName="isPrivate" [disabled]="!isPrivateSelected">
-        <mat-option value="Studenten">Studenten</mat-option>
-        <mat-option value="Tutoren">Tutoren</mat-option>
+        <mat-option value="Studenten">{{
+          "dialog.task.new.option-students" | i18nextEager
+        }}</mat-option>
+        <mat-option value="Tutoren">{{
+          "dialog.task.new.option-tutors" | i18nextEager
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -140,7 +179,9 @@
         <input
           matInput
           type="text"
-          placeholder="Excel-Datei"
+          placeholder="{{
+            'dialog.task.new.placeholder-excel-file' | i18nextEager
+          }}"
           formControlName="excelFile"
           readonly
         />
@@ -157,7 +198,9 @@
         <input
           matInput
           type="text"
-          placeholder="Nutzer-ID Feld"
+          placeholder="{{
+            'dialog.task.new.placeholder-user-id' | i18nextEager
+          }}"
           formControlName="userIDField"
         />
         <mat-icon
@@ -171,7 +214,9 @@
         <input
           matInput
           type="text"
-          placeholder="Eingabeparameter Felder"
+          placeholder="{{
+            'dialog.task.new.placeholder-input-fields' | i18nextEager
+          }}"
           formControlName="inputFields"
         />
         <mat-icon
@@ -185,7 +230,9 @@
         <input
           matInput
           type="text"
-          placeholder="Ergebniss Felder"
+          placeholder="{{
+            'dialog.task.new.placeholder-output-fields' | i18nextEager
+          }}"
           formControlName="outputFields"
         />
         <mat-icon
@@ -199,7 +246,9 @@
         <input
           matInput
           type="text"
-          placeholder="Punkte Felder"
+          placeholder="{{
+            'dialog.task.new.placeholder-point-fields' | i18nextEager
+          }}"
           formControlName="pointFields"
         />
         <mat-icon
@@ -213,7 +262,9 @@
         <input
           matInput
           type="number"
-          placeholder="Nachkommastellen"
+          placeholder="{{
+            'dialog.task.new.placeholder-decimals' | i18nextEager
+          }}"
           formControlName="decimals"
         />
       </mat-form-field>
@@ -222,7 +273,7 @@
   </form>
   <mat-dialog-actions class="actions">
     <button mat-flat-button color="warn" (click)="closeDialog()">
-      Abbrechen
+      {{ "dialog.task.new.button-cancel" | i18nextEager }}
     </button>
     <button
       *ngIf="updateCondition === allUpdateConditions.CREATE"
@@ -231,7 +282,7 @@
       [disabled]="!taskForm.valid"
       (click)="createTask(taskForm.value)"
     >
-      Erstellen
+      {{ "dialog.task.new.button-create" | i18nextEager }}
     </button>
     <button
       *ngIf="updateCondition === allUpdateConditions.UPDATE"
@@ -240,7 +291,16 @@
       [disabled]="!taskForm.valid"
       (click)="updateTask(taskForm.value)"
     >
-      Update
+      {{ "dialog.task.new.button-update" | i18nextEager }}
+    </button>
+    <button
+      *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"
+      mat-flat-button
+      color="accent"
+      [disabled]="!taskForm.valid"
+      (click)="updateMultipleTaskDetails(selectedTasks)"
+    >
+      Ausgewählte Aufgaben bearbeiten
     </button>
     <button
       *ngIf="updateCondition === allUpdateConditions.UPDATE_MULTIPLE"

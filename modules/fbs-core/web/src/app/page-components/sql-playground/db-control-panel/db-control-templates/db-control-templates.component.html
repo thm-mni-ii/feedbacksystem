@@ -1,15 +1,25 @@
 <div class="container">
   <p class="info-text" *ngIf="this.activeDb !== undefined">
-    Ausgewählte DB:
+    {{
+      "sql-playground.db-control-panel.templates.selected-db" | i18nextEager
+    }}:
     <span class="highlight">
       {{ this.activeDb.name }}
     </span>
   </p>
 
   <mat-form-field appearance="fill">
-    <mat-label>Vorlagen</mat-label>
+    <mat-label>{{
+      "sql-playground.db-control-panel.templates.templates" | i18nextEager
+    }}</mat-label>
     <mat-select [(value)]="selectedTemplateId">
-      <mat-option>-- None --</mat-option>
+      <mat-option
+        >--
+        {{
+          "sql-playground.db-control-panel.templates.none-option" | i18nextEager
+        }}
+        --</mat-option
+      >
       <mat-optgroup
         *ngFor="let category of templatesByCategory"
         [label]="category.category.name"
@@ -29,7 +39,9 @@
     [disabled]="selectedTemplateId === 0 || selectedTemplateId === undefined"
     (click)="insertTemplate()"
   >
-    Einfügen
+    {{
+      "sql-playground.db-control-panel.templates.insert-button" | i18nextEager
+    }}
   </button>
   <button
     *ngIf="isAdmin"
@@ -37,6 +49,6 @@
     class="orange-btn"
     (click)="editTemplates()"
   >
-    Bearbeiten
+    {{ "sql-playground.db-control-panel.templates.edit-button" | i18nextEager }}
   </button>
 </div>
