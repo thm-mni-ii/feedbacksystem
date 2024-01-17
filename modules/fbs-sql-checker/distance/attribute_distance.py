@@ -1,25 +1,32 @@
 import re
 import constants as c
 import uuid
+import format as f
 
 operation_map: dict[str, str, str] = {}
 
 
 def get_attributes_distance(ref: list[str], query: list[str]):
     moves = 0
+    # distance is equal to 0 if * is used
     if ref.__contains__("*"):
         moves = 0
-    elif set(ref) == set(query):
-        for r, q in zip(ref, query):
-            if r != q:
+    # check for order of attributes and add RMU
+    elif sorted(ref) == sorted(query):
+        for r in ref:
+            if query[ref.index(r)] != r:
                 moves += c.ORDER_MULT
                 query.remove(r)
                 query.insert(ref.index(r), r)
+    # check for missing elements and add the OMU if true
+    elif len(ref) != len(query):   
+        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT 
     else:
-        for q in query:
-            if q not in ref:
+    # compare each element used, if discrepency was found, OMU is added
+        for r, q in zip(sorted(ref), sorted(query)):
+            if r != q:
                 moves += c.OBJECT_MULT
-
+    # get operation distance
     op_dist = _get_operation_distance(ref, query)
     moves += round(op_dist)
     return moves
@@ -27,19 +34,22 @@ def get_attributes_distance(ref: list[str], query: list[str]):
 
 def get_command_distance(ref: list[str], query: list[str]):
     moves = 0
+    # check for number of commmands used and add OMU when there is a difference
     if len(ref) != len(query):
-        moves += c.OBJECT_MULT
+        moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
+    # check for each element and if there difference SMU is added
     elif set(ref) != set(query):
-        moves += c.STRUCT_MULT
+        for r, q in zip(sorted(ref), sorted(query)):
+            if r != q:
+                moves += c.STRUCT_MULT
     return moves
 
 
 def get_keyword_distance(ref_list: list, query_list: list):
     moves = 0
-
     if set(ref_list) != set(query_list):
         moves += c.OBJECT_MULT
-        print(moves)
+        #print("distinct", moves)
     return moves
 
 
@@ -47,26 +57,28 @@ def _get_operation_distance(ref_list: list[str], query_list: list[str]):
     ref_op_list = []
     query_op_list = []
 
-    # using a regex pattern to extract the operations contained in both attribute lists
+    # check for mathematic operations inside the attribute list using the regex pattern
+    # add them to the list of operation for comparison if found
     for exp in ref_list:
         if re.findall(c.MATH_EXP_REGEX, exp):
             ref_op_list.append(exp)
     for exp in query_list:
         if re.findall(c.MATH_EXP_REGEX, exp):
             query_op_list.append(exp)
-    print("ref op , qur op", ref_op_list, query_op_list)
+    #print("ref op , qur op", ref_op_list, query_op_list)
     return _calculate_expression_similarity(ref_op_list, query_op_list)
 
 # Jaccard index may not be the best method to measure the distance of two mathematical expressions
 def _calculate_expression_similarity(ref_exp: list[str], query_exp: list[str]):
     diff = 0
     for r, q in zip(ref_exp, query_exp):
-        ref_set = set(r.replace("(", "").replace(")", ""))
-        query_set = set(q.replace("(", "").replace(")", ""))
+        # Parenthesis formatting 
+        ref_set = set(f.format_parenthesis(r))
+        query_set = set(f.format_parenthesis(q))
         intersection = len(ref_set.intersection(query_set))
-        union = len(ref_set.union(query_set))  # len(ref_set) + len(query_set) - intersection
+        union = len(ref_set.union(query_set))
         if union != 0:
-            # Jaccard Index / Similarity Coefficient
+            # Jaccard Similarity Coefficient: 1 - J(A,B)
             similarity_coeffiecient = 1 - (intersection / union)
             _add_to_op_map(operation_map, r, q, similarity_coeffiecient)
             diff += similarity_coeffiecient * c.STRUCT_MULT

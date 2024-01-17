@@ -9,19 +9,7 @@ def format_alias(ident: str):
     match = regex.search(ident)
     if match:
         # flag is used for case sensitivity
-        ident = re.sub(c.ALIAS_REGEX, "", ident, flags=re.IGNORECASE).strip()
-    return ident
-
-
-def format_db_name(ident: str):
-    # check ident with pattern to get the alias keyword and alias name
-    regex = re.compile(c.DB_NAME_REGEX)
-
-    # Check if the ident matches the pattern
-    match = regex.search(ident)
-    if match:
-        ident = match.group(1)
-
+        ident = re.sub(c.ALIAS_REGEX, "", ident).strip()
     return ident
 
 
@@ -37,21 +25,13 @@ def format_command(ident: sqlparse.sql.Identifier):
     return formatted
 
 
-def format_comp_db_name(ident: str):
-    # Split the input string using the regex pattern to find the operator
-    parts = re.split(c.DB_COMP_REGEX, ident)
+# remove database name e.g.: db.id and special characters 
+def format_query(ident: str):
+    return re.sub(c.FORMATTING_REGEX, "", ident).strip().lower()
 
-    # Get the left and right sides of the equation after removing whitespace
-    left_substring = parts[0].rsplit('.', 1)[-1].strip()
-    right_substring = parts[2].rsplit('.', 1)[-1].strip()
 
-    # Check if the operator is "LIKE" and replace it with "="
-    operator = parts[1].strip()
-
-    # Join the substrings back together with the operator
-    result = f"{left_substring} {operator} {right_substring}"
-
-    return result
+def format_parenthesis(ident: str):
+    return re.sub(c.PARENTHESIS_REGEX, "", ident).strip()
 
 
 def format_whitespace(ident: str):
