@@ -305,7 +305,7 @@ export const germanTranslation = {
   "sql-playground.dbSchema": "DB Schema",
   "sql-playground.tables": "Tabellen",
   "sql-playground.views": "Views",
-  "sql-playground.storedProcedures": "Stored Procedures",
+  "sql-playground.storedProcedures": "Datenbankroutinen",
   "sql-playground.triggers": "Triggers",
   "sql-playground.db-control-panel.tab-db": "DB",
   "sql-playground.db-control-panel.tab-templates": "Vorlagen",
