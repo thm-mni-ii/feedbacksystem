@@ -119,60 +119,68 @@ class PsqlOperationsService(override val dbName: String, override val username: 
   }
 
   override def getDatabaseInformation(client: JDBCClient): Future[ResultSet] = {
-    val tables =
-      """
-        |SELECT c.table_name as name,
-        |json_agg(json_build_object('name', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
-        |FROM information_schema.columns as c
-        |join information_schema.tables as t on c.table_name = t.table_name and c.table_schema = t.table_schema
-        |WHERE c.table_schema = 'public' and t.table_type != 'VIEW'
-        |group by c.table_name, t.table_type;
-        |""".stripMargin
-    val constrains =
-      """
-        |select constrains.table_name as table,
-        |json_agg(json_build_object('columnName', constrains.column_name, 'name',
-        |constrains.constraint_name, 'type', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json
-        |from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
-        |from information_schema.KEY_COLUMN_USAGE as kcu
-        |JOIN information_schema.table_constraints as tc ON tc.constraint_name = kcu.constraint_name
-        |where tc.table_schema = 'public'
-        |UNION
-        |SELECT tc.table_name, SUBSTRING(cc.check_clause from '(?:^|(?:\.\s))(\w+)'), tc.constraint_name, tc.constraint_type, cc.check_clause
-        |FROM information_schema.table_constraints as tc
-        |JOIN information_schema.check_constraints as cc ON cc.constraint_name = tc.constraint_name
-        |AND constraint_type = 'CHECK'
-        |where tc.table_schema = 'public') as constrains group by constrains.table_name;
-        |""".stripMargin
-    val views =
-      """
-        |SELECT table_name as table, view_definition as definition
-        |FROM information_schema.views
-        |WHERE table_schema = 'public';
-        |""".stripMargin
+    client.queryFuture(s"$getTablesDatabaseInformationQuery $getConstrainsDatabaseInformationQuery $getViewsDatabaseInformationQuery " +
+      s"$getRoutinesDatabaseInformationQuery $getTriggersDatabaseInformationQuery")
+  }
 
-    val routines =
-      """
-        |SELECT DISTINCT ON (oid)
-        |routine_name as name, routine_type as type,
-        |routine_definition as definition,
-        |pg_catalog.pg_get_function_identity_arguments(p.oid) AS parameters
-        |FROM information_schema.routines i
-        |JOIN pg_catalog.pg_proc p ON i.routine_name = p.proname
-        |WHERE routine_schema = 'public';
-        |""".stripMargin
+  private def getTablesDatabaseInformationQuery = {
+    """
+      |SELECT c.table_name as name,
+      |json_agg(json_build_object('name', column_name, 'isNullable', is_nullable::boolean, 'udtName', udt_name) ORDER BY ordinal_position) as json
+      |FROM information_schema.columns as c
+      |join information_schema.tables as t on c.table_name = t.table_name and c.table_schema = t.table_schema
+      |WHERE c.table_schema = 'public' and t.table_type != 'VIEW'
+      |group by c.table_name, t.table_type;
+      |""".stripMargin
+  }
 
-    val triggers =
-      """
-        |SELECT trigger_name as name,
-        |event_object_table as objectTable,
-        |json_agg(event_manipulation) as json,
-        |action_statement as statement, action_orientation as orientation, action_timing as timing
-        |FROM information_schema.triggers
-        |WHERE trigger_schema = 'public' group by trigger_name, action_statement, action_orientation, action_timing, event_object_table;
-        |""".stripMargin
+  private def getConstrainsDatabaseInformationQuery = {
+    """
+      |select constrains.table_name as table,
+      |json_agg(json_build_object('columnName', constrains.column_name, 'name',
+      |constrains.constraint_name, 'type', constrains.constraint_type, 'checkClause', constrains.check_clause)) as json
+      |from (select tc.table_name, kcu.column_name, kcu.constraint_name, tc.constraint_type, null as check_clause
+      |from information_schema.KEY_COLUMN_USAGE as kcu
+      |JOIN information_schema.table_constraints as tc ON tc.constraint_name = kcu.constraint_name
+      |where tc.table_schema = 'public'
+      |UNION
+      |SELECT tc.table_name, SUBSTRING(cc.check_clause from '(?:^|(?:\.\s))(\w+)'), tc.constraint_name, tc.constraint_type, cc.check_clause
+      |FROM information_schema.table_constraints as tc
+      |JOIN information_schema.check_constraints as cc ON cc.constraint_name = tc.constraint_name
+      |AND constraint_type = 'CHECK'
+      |where tc.table_schema = 'public') as constrains group by constrains.table_name;
+      |""".stripMargin
+  }
 
-    client.queryFuture(s"$tables $constrains $views $routines $triggers")
+  private def getViewsDatabaseInformationQuery = {
+    """
+      |SELECT table_name as table, view_definition as definition
+      |FROM information_schema.views
+      |WHERE table_schema = 'public';
+      |""".stripMargin
+  }
+
+  private def getRoutinesDatabaseInformationQuery = {
+    """
+      |SELECT DISTINCT ON (oid)
+      |routine_name as name, routine_type as type,
+      |routine_definition as definition,
+      |pg_catalog.pg_get_function_identity_arguments(p.oid) AS parameters
+      |FROM information_schema.routines i
+      |JOIN pg_catalog.pg_proc p ON i.routine_name = p.proname
+      |WHERE routine_schema = 'public';
+      |""".stripMargin
+  }
+
+  private def getTriggersDatabaseInformationQuery = {
+    """
+      |SELECT trigger_name as name,
+      |event_object_table as objectTable,
+      |json_agg(event_manipulation) as json,
+      |action_statement as statement, action_orientation as orientation, action_timing as timing
+      |FROM information_schema.triggers
+      |WHERE trigger_schema = 'public' group by trigger_name, action_statement, action_orientation, action_timing, event_object_table;
+      |""".stripMargin
   }
 
   override def queryFutureWithTimeout(client: JDBCClient, sql: String): Future[ResultSet] = {
