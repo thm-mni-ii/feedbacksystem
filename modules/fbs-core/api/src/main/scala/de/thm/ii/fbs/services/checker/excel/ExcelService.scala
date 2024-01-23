@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.services.checker.excel
-import scala.collection.JavaConverters._
+
+import scala.jdk.CollectionConverters._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
 import de.thm.ii.fbs.model.{ExcelMediaInformation, ExcelMediaInformationChange, ExcelMediaInformationCheck, ExcelMediaInformationTasks}
-import org.apache.poi.ss.usermodel.{Cell, CellType, FormulaEvaluator, WorkbookFactory}
+import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.xssf.usermodel.{XSSFFormulaEvaluator, XSSFSheet, XSSFWorkbook}
 import org.springframework.stereotype.Service
-import org.apache.poi.ss.formula.WorkbookEvaluator
 import org.apache.poi.ss.formula.eval.FunctionEval
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -14,32 +14,24 @@ import java.text.NumberFormat
 import java.util.Locale
 import scala.util.matching.Regex
 import org.matheclipse.core.eval.ExprEvaluator
-import org.matheclipse.core.expression.F
-import org.matheclipse.core.interfaces.IAST
-import org.matheclipse.core.interfaces.IExpr
-import org.matheclipse.core.interfaces.ISymbol
-import org.matheclipse.parser.client.SyntaxError
-import org.matheclipse.parser.client.math.MathException
 
-import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 /**
-  * A Spreadsheet Service
-  */
+ * A Spreadsheet Service
+ */
 @Service
 class ExcelService {
   private case class Cords(row: Int, col: Int)
 
   /**
-    * Gets the values in the selected field range
-    *
-    * @param spreadsheet           the spreadsheet field
-    * @param excelMediaInformation the spreadsheet Configurations
-    * @return the values
-    */
+   * Gets the values in the selected field range
+   *
+   * @param spreadsheet           the spreadsheet field
+   * @param excelMediaInformation the spreadsheet Configurations
+   * @return the values
+   */
   def getFields(spreadsheet: File, excelMediaInformation: ExcelMediaInformation, checkFields: ExcelMediaInformationCheck): Seq[SpreadsheetCell] = {
     val sheet = this.initSheet(spreadsheet, excelMediaInformation)
     val (start, end) = this.parseCellRange(checkFields.range)
-    //print(getFormula(sheet, end.col, start.row, end.row))
     val values = this.getInCol(sheet, end.col, start.row, end.row)
 
     values
@@ -48,11 +40,11 @@ class ExcelService {
   def getFormula(spreadsheet: File, excelMediaInformation: ExcelMediaInformation, checkFields: ExcelMediaInformationCheck): Seq[sheetCell] = {
     val sheet = this.initSheet(spreadsheet, excelMediaInformation)
     val (start, end) = this.parseCellRange(checkFields.range)
-    //print(getFormula(sheet, end.col, start.row, end.row))
     val values = this.hasFormula(sheet, start.row, end.row, start.col, end.col)
 
     values
   }
+
   private def hasFormula(sheet: XSSFSheet, startRow: Int, endRow: Int, startCol: Int, endCol: Int): Seq[sheetCell] = {
     (startRow to endRow).flatMap(rowIdx => {
       val row = sheet.getRow(rowIdx)
@@ -61,7 +53,6 @@ class ExcelService {
           val cell = row.getCell(colIdx)
           if (cell != null && cell.getCellType == CellType.FORMULA) {
             val formula = cell.getCellFormula
-           //print("this is the cellval : ", cell.getNumericCellValue.toString, "\n")
             Some(sheetCell(formula, cell.getNumericCellValue.toString, cell.getReference))
           } else {
             None
@@ -99,194 +90,317 @@ class ExcelService {
     }
   }
 
-  def compareForm(seq1: Seq[sheetCell], seq2: Seq[sheetCell], invalidFields: List[String]): (String, List[String]) = {
-    print("here the compareform was entered \n")
+  def normalizeNonFunctionTokens(formula: String): String = {
+    // Tokenize the formula
+    val tokens = tokenizeFormula(formula)
+
+    // Identify function expressions and their ranges
+    val functionRanges = tokens.foldLeft(Seq.empty[(Int, Int)]) { (acc, token) =>
+      if (token._1 == "function") {
+        // Find the range of the function expression
+        val start = tokens.indexOf(token)
+        val end = tokens.indexWhere(_._1 == "parenthesis", start) + 1
+        acc :+ (start, end)
+      } else {
+        acc
+      }
+    }
+
+    // Extract function expressions
+    val functionExpressions = functionRanges.map { case (start, end) =>
+      tokens.slice(start, end).map(_._2).mkString
+    }
+
+    // Remove function expressions from the original formula
+    var formulaWithoutFunctions = formula
+    functionExpressions.foreach { expr =>
+      formulaWithoutFunctions = formulaWithoutFunctions.replace(expr, "")
+    }
+
+    // Normalize the remaining part of the formula
     val util = new ExprEvaluator(false, 100)
-    var isFunc = false
+    val normalizedNonFunctionTokens = util.eval(formulaWithoutFunctions).toString
+    // Reassemble the formula
+    (functionExpressions.mkString + normalizedNonFunctionTokens).trim.toUpperCase
+
+  }
+
+  /*function(simplifyFormula) created to simplify arithmetic notations (for example 4-1/3 will turn to 3.66)
+ however when called with ExprEvaluator it can lead to false results in the formulas
+   */
+  private def simplifyFormula(formula: String): String = {
+    // Pattern to find and replace simple arithmetic operations that do not involve cell references
+    val pattern = """(\d+(\.\d+)?)([+*/-])(\d+(\.\d+)?)""".r
+
+    pattern.replaceAllIn(formula, m => {
+      val leftOperand = m.group(1).toDouble
+      val operator = m.group(3)
+      val rightOperand = m.group(4).toDouble
+
+      val result = operator match {
+        case "+" => leftOperand + rightOperand
+        case "-" => leftOperand - rightOperand
+        case "*" => leftOperand * rightOperand
+        case "/" => leftOperand / rightOperand
+      }
+
+      f"$result%.2f" // Format to 2 decimal places, you can adjust as needed
+    })
+  }
+
+  def processFormula(formula: String): String = {
+    //val simplifiedFormula = simplifyFormula(formula)
+    normalizeNonFunctionTokens(formula)
+  }
+
+
+  def compareForm(teacher_sequence: Seq[sheetCell], student_sequence: Seq[sheetCell], invalidFields: List[String]): (String, List[String]) = {
     val stringBuilder = new StringBuilder()
     var updatedInvalidFields = invalidFields
-    var differentVals = List[String]()
-    for ((cell1, cell2) <- seq1.zip(seq2)) {
-        //normalize the formulas using the eval function
-        val result1 = util.eval(cell1.formula)
-        val result2 = util.eval(cell2.formula)
-      print(f"the formula of the teacher : ${cell1.reference}  ${cell1.formula}\n")
-      print(f"the formula of the student : ${cell2.reference}  ${cell2.formula}\n")
-        if(cell1.value != cell2.value){
-          differentVals = differentVals :+ cell1.reference
-        }
-      print(s"the list of unmatching values ---> ${differentVals} \n")
-        print(f"====>Normalised-teacher-formula := ${result1} --- Normalised-Student-Formula := ${result2}" +
-          f" \n====>teacher-formula := ${cell1.formula} --- Student-formula := ${cell2.formula} \n")
-        print(f"the test of results : ", result1 == result2, "\n")
-        var tokens1 = tokenizeFormula(cell1.formula)
-        var tokens2 = tokenizeFormula(cell2.formula)
-        print(f"token2 here :${tokens2} \n")
-        if (tokens2.exists { case ("function", _) => true; case _ => false }) {
-          isFunc = true
-          print(s"${cell2.reference} this token contains a func \n")
-          print(f"if func: was entered ${cell2.reference}===> its tokens : {${tokens2}}\n ")
-          if (containsReferenceWithColon(tokens2).isDefined) {
-            containsReferenceWithColon(tokens2) match {
-              case Some((ref1, ref2)) =>
-                print(s"containsRef References found: $ref1 : $ref2 \n")
-              val refs = printCellsInRange(f"${ref1}:${ref2}")
-                print(s"this is the extended refs ${refs} \n")
-                // Check if any of the strings in refs exist in updatedInvalidFields
-                val commonRefs = refs.filter(updatedInvalidFields.contains)
-               //test unmatching refs
-                print(s"the tokens1 check : ${tokens1} \n")
-                // Extract references from tokens1 and refs
-                val refsInTokens1 = tokens1.collect { case ("reference", ref) => ref }
-                val refsInRefs = refs
 
-                // Find missing and excessive references
-                val missingRefs = refsInTokens1.diff(refsInRefs)
-                val excessiveRefs = refsInRefs.diff(refsInTokens1)
-                var differences = ""
-                if (missingRefs.nonEmpty || excessiveRefs.nonEmpty) {
-                  stringBuilder.append(s"+Zelle: ${cell1.reference} Die verwendeten Referenzen sind nicht korrekt \n")
-                }
-                // Print missing references
-                if (missingRefs.nonEmpty) {
-                  print("Missing references in refs:\n")
-                  missingRefs.foreach { ref =>
-                    differences = differences + ref
-                  }
-                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
-                  stringBuilder.append(s" -Zelle: ${cell1.reference} Fehlende Referenz(en) ==>[ ${differences} ] \n")
-                  print(s"Missing reference: $differences in refs \n")
-                  differences = ""
-                }
-
-                // Print excessive references
-                if (excessiveRefs.nonEmpty) {
-                  print(" Excessive references in refs: \n")
-                  excessiveRefs.foreach { ref =>
-                    differences = differences + ref
-                  }
-                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
-                  stringBuilder.append(s" -Zelle: ${cell1.reference} Exzessive Referenz(en) ==>[ ${differences} ] \n")
-                  differences = ""
-                }
-                if (commonRefs.nonEmpty) {
-                  updatedInvalidFields = updatedInvalidFields :+ cell1.reference
-                  // Do something with commonRefs if needed
-                  print("Common references found in updatedInvalidFields:\n")
-                  stringBuilder.append(s" -Zelle: ${cell1.reference} Bitte korrigieren Sie zuerst die falschen Zellen  ==>[ ${commonRefs.mkString(", ")} ] \n")
-                }
-              case None =>
-                print("Pattern not found.\n")
-            }
-          } else {
-            print("Pattern not found.\n")
-          }
-        }
-        else {
-          print(f"else not func: was entered ${cell2.reference}\n")
-          tokens1 = tokenizeFormula(result1.toString)
-          tokens2 = tokenizeFormula(result2.toString)
-        }
-
-
-      if (tokens1 != tokens2 && isFunc == false) {
-        print(f"else not equal: was entered ${cell2.reference}\n")
-        /*
-            if  cell1.getNumericCellValue.toString==cell2.getNumericCellValue.toString && category of token2 contains "function"
-            then consider this correct and don t add it to the string builder
-             */
-        val diff = findTokenDifferences(tokens1, tokens2)
-        if(diff.length>0) stringBuilder.append(s"+Zelle: ${cell1.reference} ==>[ ${diff} ] \n")
-
-       // stringBuilder.append(s"Differences in tokens: $diff\n")
-
-        // Append cell1.reference to updatedInvalidFields
-        updatedInvalidFields = updatedInvalidFields :+ cell1.reference
+    for ((teacher_cell, student_cell) <- teacher_sequence.zip(student_sequence)) {
+      // Normalize non-function tokens in the formulas
+      val normalizedTeacherFormula = processFormula((teacher_cell.formula))
+      val normalizedStudentFormula = processFormula((student_cell.formula))
+      if (isComplexNestedFunction(teacher_cell.formula) || isComplexNestedFunction(student_cell.formula)) {
+        stringBuilder.append(s"#Komplexe verschachtelte Funktionen in Zelle '${teacher_cell.reference}' sind noch nicht unterstützt.\n\n")
       }
-      //stringBuilder.append("\n")
-        if (cell1.value != cell2.value) {
-          print("there are unmatching values \n")
-        }
+      if (isNonStandardFunctionFormat(teacher_cell.formula) || isNonStandardFunctionFormat(student_cell.formula)) {
+        stringBuilder.append(s"#Funktion in Zelle '${teacher_cell.reference}' ist noch nicht unterstützt.Aktuell werden nur Funktionen akzeptiert, " +
+          s"die das Format 'func(ref:ref)' aufweisen.\n\n")
+      }
+      else {
+        // Tokenize the normalized formulas
+        val teacher_tokens = tokenizeFormula(normalizedTeacherFormula)
+        val student_tokens = tokenizeFormula(normalizedStudentFormula)
 
-        if (tokens2 == tokens1){
-          print("there are matching cases \n")
-        }
+        // Find differences for the entire formula
 
-        if (cell1.value != cell2.value && tokens1 == tokens2) {
-          print("true case here  \n")
-        }
-        print(s"#student-tokens : ${tokens2} \n#teacher-tokens : ${tokens1}  \n student-result: ${cell2.value} --- teacher-result: ${cell1.value}\n")
-
-         if (tokens2 == tokens1){
-           if (cell1.value != cell2.value){
-          print(s"the last if was entered ===> ${tokens2} and \t ${cell2.value}")
-        val matchingTuples: Seq[(String, String)] = tokens2.filter { case (_, value) =>
-          updatedInvalidFields.contains(value)
-        }
-        print(s"this is the matching tuples ${matchingTuples} \n")
-        if(matchingTuples.nonEmpty){
-          stringBuilder.append(s"+Zelle: ${cell1.reference} ==> please correct the previous cells first ( ${matchingTuples} )\n")
-        }
-        else {
-        //stringBuilder.append(s"+Zelle: ${cell1.reference} ==> hat nicht den richtigen Wert \n")
+        val differences = findTokenDifferences(teacher_tokens, student_tokens, teacher_cell.value, student_cell.value, updatedInvalidFields)
+        if (differences.nonEmpty) {
+          stringBuilder.append(s"#Fehler entdeckt in Zelle '${teacher_cell.reference}':{${normalizedStudentFormula}}\n$differences\n")
+          updatedInvalidFields = updatedInvalidFields :+ teacher_cell.reference
         }
       }
-         }
-       //print(s"tokens2 at the end ${tokens2} \n  tokens1 at the end ${tokens1}  \n cell1: ${cell1.value} --- cell2: ${cell2.value}\n")
-        isFunc = false
-      }
-
+    }
 
     (stringBuilder.toString(), updatedInvalidFields)
   }
-  def containsReferenceWithColon(tokens: Seq[(String, String)]): Option[(String, String)] = {
+
+  //check if the user submission contains any nested functions
+  def isComplexNestedFunction(formula: String): Boolean = {
+    // Regular expression to identify complex nested functions
+    val complexNestedFunctionPattern = """([A-Z]+\(.*\(.*\).*\))""".r
+
+    complexNestedFunctionPattern.findFirstIn(formula).isDefined
+  }
+
+  //check if the user submission contains unsupported functions
+  def isNonStandardFunctionFormat(formula: String): Boolean = {
+    // Regex to match the standard function format func(ref:ref)
+    val standardFunctionPattern = """[A-Z]+\(.*:.*\)""".r
+
+    // Regex to match any Excel function
+    val anyFunctionPattern = """[A-Z]+\(.*\)""".r
+
+    // Check if the formula matches the standard function format
+    val isStandard = standardFunctionPattern.findFirstIn(formula).isDefined
+
+    // Check if the formula contains any function
+    val containsFunction = anyFunctionPattern.findFirstIn(formula).isDefined
+
+    // If the formula contains a function and it's not in the standard format, it's non-standard
+    containsFunction && !isStandard
+  }
+
+  def containsReferenceWithColon
+  (tokens: Seq[(String, String)]): Option[(String, String)] = {
     tokens.sliding(3).collectFirst {
       case Seq(("reference", ref1), ("operator", ":"), ("reference", ref2)) => (ref1, ref2)
     }
   }
 
+  // Function to extract references from a range within a function
+  def extractReferences(tokens: Seq[(String, String)]): Set[String] = {
+    containsReferenceWithColon(tokens).map { case (ref1, ref2) =>
+      printCellsInRange(s"$ref1:$ref2").toSet
+    }.getOrElse(tokens.collect { case ("reference", ref) => ref }.toSet)
+  }
 
-  def findTokenDifferences(tokens1: Seq[(String, String)], tokens2: Seq[(String, String)]): String = {
+  //  a method to extract references from normal arithmetic formulas
+  def extractArithmeticReferences(tokens: Seq[(String, String)]): Set[String] = {
+    tokens.collect { case ("reference", ref) => ref }.toSet
+  }
+
+  def findTokenDifferences(tokens1: Seq[(String, String)], tokens2: Seq[(String, String)],
+                           teacher_cell_value: String, student_cell_value: String, invalidFields: List[String]): String = {
     val diffBuilder = new StringBuilder()
+    var counter = 0;
+    val functionNames = FunctionEval.getSupportedFunctionNames.asScala.map(_.toUpperCase).toList
 
-    val minLength = math.min(tokens1.length, tokens2.length)
-    for (i <- 0 until minLength) {
-      val (category1, token1) = tokens1(i)
-      val (category2, token2) = tokens2(i)
+    // Check if either of the formulas has a function
+    val eitherIsFunction = tokens1.exists(_._1 == "function") ^ tokens2.exists(_._1 == "function")
 
-      if (category1 != category2 || token1 != token2) {
-       // diffBuilder.append(s"Position $i: $category1='$token1' vs $category2='$token2'\n")
-        diffBuilder.append(s"Ein $category2='$token2' ist nicht korrekt . benutze '$token1' stattdessen  ")
+    if (eitherIsFunction) {
+      diffBuilder.append(compareEitherIsFunction(tokens1, tokens2, teacher_cell_value, student_cell_value, invalidFields))
+    } else {
+      val refs2 = extractReferences(tokens2)
+      val studentInvalidRefs = refs2.intersect(invalidFields.toSet)
 
+      // Separate tokens into function parts and non-function parts
+      val (funcTokens1, nonFuncTokens1) = separateFunctionAndNonFunctionTokens(tokens1)
+      val (funcTokens2, nonFuncTokens2) = separateFunctionAndNonFunctionTokens(tokens2)
 
-        /* if(category2=="function"){
-           if (!functionNames.contains(token2)) {
-             val closestKeyword = findMostSimilarKeyword(token2, functionNames)
-             print(s"Did you mean $closestKeyword? \n")
-           }
-         }*/
+      // Compare function parts
+      if (funcTokens1 != funcTokens2) {
+        diffBuilder.append(compareFunctionParts(funcTokens1, funcTokens2, studentInvalidRefs, teacher_cell_value, student_cell_value))
+      }
+      // Compare non-function parts (constants, operators, references)
+      val nonFuncDiff = compareNonFunctionParts(nonFuncTokens1, nonFuncTokens2)
+      if (nonFuncDiff.nonEmpty) {
+        diffBuilder.append(nonFuncDiff)
+      }
+      // Check for incorrect function names in both teacher's and student's formulas
+      val allFunctionTokens = (tokens1 ++ tokens2).filter(_._1 == "function").map(_._2).distinct
+      allFunctionTokens.foreach { funcName =>
+        if (!functionNames.contains(funcName.toUpperCase)) {
+          val suggestedFunction = findMostSimilarKeyword(funcName, functionNames)
+          diffBuilder.append(s"Unrecognized function '$funcName'. Did you mean '$suggestedFunction'?\n")
+        }
+      }
+      counter = 0;
+    }
+    diffBuilder.toString()
+  }
 
+  def separateFunctionAndNonFunctionTokens(tokens: Seq[(String, String)]): (Seq[(String, String)], Seq[(String, String)]) = {
+    val functionTokens = ArrayBuffer[(String, String)]()
+    val nonFunctionTokens = ArrayBuffer[(String, String)]()
+    var insideFunction = false
+    var parenthesisDepth = 0
+
+    tokens.foreach { case (tokenType, tokenValue) =>
+      if (insideFunction) {
+        functionTokens += ((tokenType, tokenValue))
+        if (tokenType == "parenthesis") {
+          if (tokenValue == "(") parenthesisDepth += 1
+          if (tokenValue == ")") parenthesisDepth -= 1
+
+          if (parenthesisDepth == 0) {
+            insideFunction = false
+          }
+        }
+      } else {
+        if (tokenType == "function") {
+          insideFunction = true
+          parenthesisDepth = 0
+          functionTokens += ((tokenType, tokenValue))
+        } else {
+          nonFunctionTokens += ((tokenType, tokenValue))
+        }
       }
     }
 
-    if (tokens1.length > tokens2.length) {
-      for (i <- minLength until tokens1.length) {
-        val (category, token) = tokens1(i)
-       // diffBuilder.append(s"Position $i: $category='$token' vs -\n")
-        if (category=="reference"){
-        diffBuilder.append(s"\n -Ein $category='$token' fehlt")
-        }
-        }
-    } else if (tokens2.length > tokens1.length) {
-      for (i <- minLength until tokens2.length) {
-        val (category, token) = tokens2(i)
-        //diffBuilder.append(s"Position $i: - vs $category='$token'\n")
-        diffBuilder.append(s"Ein $category='$token' ist nicht korrekt ")
+    (functionTokens.toSeq, nonFunctionTokens.toSeq)
+  }
+
+  def compareEitherIsFunction(tokens1: Seq[(String, String)], tokens2: Seq[(String, String)],
+                              teacher_cell_value: String, student_cell_value: String, invalidFields: List[String]): String = {
+    val diffBuilder = new StringBuilder()
+
+    val refs1 = if (tokens1.exists(_._1 == "function")) extractFunctionReferences(tokens1) else extractArithmeticReferences(tokens1)
+    val refs2 = if (tokens2.exists(_._1 == "function")) extractFunctionReferences(tokens2) else extractArithmeticReferences(tokens2)
+
+    val studentInvalidRefs = refs2.intersect(invalidFields.toSet)
+
+    if (studentInvalidRefs.nonEmpty) {
+      diffBuilder.append(s"->Bitte korrigieren Sie zuerst die falsche(n) Referenz(en): ${studentInvalidRefs.mkString(", ")}.\n");
+    }
+
+    if (teacher_cell_value != student_cell_value && refs1 == refs2) {
+      diffBuilder.append(s"->Falsche Excel-Funktion verwendet\n");
+    }
+    if (refs1 != refs2) {
+      val missingRefs = refs1.diff(refs2)
+      val excessiveRefs = refs2.diff(refs1)
+
+      if (missingRefs.nonEmpty) {
+        diffBuilder.append(s"->Fehlende Referenz(en) in der Funktion: ${missingRefs.mkString(", ")}\n")
+      }
+      if (excessiveRefs.nonEmpty) {
+        diffBuilder.append(s"->Exzessive Referenz(en) in der Funktion: ${excessiveRefs.mkString(", ")}\n")
       }
     }
 
     diffBuilder.toString()
   }
+
+  def compareFunctionParts(tokens1: Seq[(String, String)], tokens2: Seq[(String, String)], invalidFields: Set[String],
+                           teacher_cell_value: String, student_cell_value: String): String = {
+    val diffBuilder = new StringBuilder()
+
+    val bothAreFunctions = tokens1.exists(_._1 == "function") && tokens2.exists(_._1 == "function")
+
+    val refs1 = if (tokens1.exists(_._1 == "function")) extractFunctionReferences(tokens1) else extractArithmeticReferences(tokens1)
+    val refs2 = if (tokens2.exists(_._1 == "function")) extractFunctionReferences(tokens2) else extractArithmeticReferences(tokens2)
+
+    if (bothAreFunctions) {
+      val functionName1 = tokens1.find(_._1 == "function").map(_._2)
+      val functionName2 = tokens2.find(_._1 == "function").map(_._2)
+      if (functionName1 != functionName2) {
+        diffBuilder.append(s"->Falsche Funktion verwendet, Benutze ${functionName1.getOrElse("")} statessen\n")
+      } else if (refs1 != refs2) {
+        val missingRefs = refs1.diff(refs2)
+        val excessiveRefs = refs2.diff(refs1)
+        if (missingRefs.nonEmpty) {
+          diffBuilder.append(s"->Fehlende Referenz(en) in der Funktion: ${missingRefs.mkString(", ")}\n")
+        }
+        if (excessiveRefs.nonEmpty) {
+          diffBuilder.append(s"->Exzessive Referenz(en) in der Funktion: ${excessiveRefs.mkString(", ")}\n")
+        }
+      }
+    }
+    diffBuilder.toString()
+  }
+
+  def compareNonFunctionParts(nonFuncTokens1: Seq[(String, String)], nonFuncTokens2: Seq[(String, String)]): String = {
+    val diffBuilder = new StringBuilder()
+
+    // Group tokens by their categories (like operators, constants, references)
+    val tokens1Grouped = nonFuncTokens1.groupBy(_._1).view.mapValues(_.map(_._2)).toMap
+    val tokens2Grouped = nonFuncTokens2.groupBy(_._1).view.mapValues(_.map(_._2)).toMap
+
+    // Get all categories present in either of the token lists
+    val allCategories = tokens1Grouped.keys.toSet ++ tokens2Grouped.keys.toSet
+
+    allCategories.foreach { category =>
+      val tokens1InCategory = tokens1Grouped.getOrElse(category, Seq.empty)
+      val tokens2InCategory = tokens2Grouped.getOrElse(category, Seq.empty)
+
+      val missingTokens = tokens1InCategory.diff(tokens2InCategory)
+      val unnecessaryTokens = tokens2InCategory.diff(tokens1InCategory)
+
+      missingTokens.foreach { token =>
+        diffBuilder.append(s"->Fehlende $category: $token\n")
+      }
+      unnecessaryTokens.foreach { token =>
+        diffBuilder.append(s"->Unnötige $category: $token\n")
+      }
+    }
+
+    diffBuilder.toString()
+  }
+
+
+  def extractFunctionReferences(tokens: Seq[(String, String)]): Set[String] = {
+    tokens.flatMap {
+      case ("function", _) => containsReferenceWithColon(tokens).toList.flatMap {
+        case (ref1, ref2) => printCellsInRange(s"$ref1:$ref2")
+      }
+      case _ => Seq.empty[String]
+    }.toSet
+  }
+
 
   def tokenizeFormula(formula: String): Seq[(String, String)] = {
     // Remove whitespace from the formula
@@ -318,125 +432,6 @@ class ExcelService {
   }
 
 
-
-
-  private def normalizeForm(formula: String): String = {
-    // Normalize the formula by removing spaces and ensuring consistent order of constants
-    val normalizedFormula = formula.replaceAll("\\s", "")
-    val sortedConstants = normalizedFormula.split("[+-/*()]")
-      .filter(_.nonEmpty)
-      .sorted
-      .mkString
-
-    sortedConstants
-  }
-
-  def compareFormulas(solution: String, form: String): String = {
-    // Extract variable names from the solution formula using regular expressions
-    val solutionVariables = "\\b[A-Za-z]+\\d+\\b".r.findAllIn(solution).toSet
-
-    // Extract variable names from the given formula
-    val formVariables = "\\b[A-Za-z]+\\d+\\b".r.findAllIn(form).toSet
-
-    // Check for missing variables in the given formula
-    val missingVariables = solutionVariables.diff(formVariables)
-
-    // Check for invalid constants in the given formula
-    val invalidConstants = "\\d+".r.findAllIn(form).filterNot(constant => solution.contains(constant)).toSet
-
-    // Prepare the result message
-    val result =
-      if (missingVariables.nonEmpty || invalidConstants.nonEmpty) {
-        val missingVarsMsg = if (missingVariables.nonEmpty) s"Missing variables: ${missingVariables.mkString(", ")}\n" else ""
-        val invalidConstantsMsg = if (invalidConstants.nonEmpty) s"Invalid constants: ${invalidConstants.mkString(", ")}\n" else ""
-        s"$missingVarsMsg$invalidConstantsMsg"
-      } else {
-        "Formulas match."
-      }
-
-    result
-  }
-
-  val solution = "(C4+B4+D5)/2"
-  val form = "(B4+4)/2"
-  val result = compareFormulas(solution, form)
-  print("here the the new compare :\n")
-  print(result)
-/*
-  print("\n")
-  private def findDifference(value1: String, value2: String): String = {
-    val diffBuilder = new StringBuilder()
-
-    val minLength = math.min(value1.length, value2.length)
-    for (i <- 0 until minLength) {
-      val char1 = value1.charAt(i)
-      val char2 = value2.charAt(i)
-
-      if (char1 != char2) {
-        diffBuilder.append(s"Position $i: '$char1' vss '$char2'\n")
-      }
-    }
-
-    if (value1.length > value2.length) {
-      for (i <- minLength until value1.length) {
-        diffBuilder.append(s"Position $i: '${value1.charAt(i)}' vs -\n")
-      }
-    } else if (value2.length > value1.length) {
-      for (i <- minLength until value2.length) {
-        diffBuilder.append(s"Position $i: - vs '${value2.charAt(i)}'\n")
-      }
-    }
-
-    diffBuilder.toString()
-  }
-*/
-
-  /**
-   * Compares the formulas in the same cell reference between two Seq[SpreadsheetCell]
-   * Prints the cell references where the formulas don't match
-   *
-   * @param cells1 Seq[SpreadsheetCell] representing the first set of cells
-   * @param cells2 Seq[SpreadsheetCell] representing the second set of cells
-   * @return true if the formulas match in the same cell reference, false otherwise
-   */
-    /**
-  def compareFormulas(cells1: Seq[SpreadsheetCell], cells2: Seq[SpreadsheetCell]): Boolean = {
-    val formulaPairs = cells1.zip(cells2).filter { case (cell1, cell2) =>
-      cell1.reference == cell2.reference && cell1.value.trim.nonEmpty && cell2.value.trim.nonEmpty
-    }
-
-    val formulasMatch = formulaPairs.forall { case (cell1, cell2) =>
-      val formula1 = cell1.value.trim
-      val formula2 = cell2.value.trim
-      val normalizedFormula1 = normalizeFormula(formula1)
-      val normalizedFormula2 = normalizeFormula(formula2)
-      normalizedFormula1 == normalizedFormula2
-    }
-
-    if (!formulasMatch) {
-      formulaPairs.foreach { case (cell1, cell2) =>
-        val formula1 = cell1.value.trim
-        val formula2 = cell2.value.trim
-        val normalizedFormula1 = normalizeFormula(formula1)
-        val normalizedFormula2 = normalizeFormula(formula2)
-        if (normalizedFormula1 != normalizedFormula2) {
-          print(s"Formulas do not match in cell reference ${cell1.reference}: \n")
-          print(s"Formula 1: $formula1 \n")
-          print(s"Formula 2: $formula2 \n")
-        }
-      }
-    }
-
-    formulasMatch
-  }
-*/
-
-      /*
-  private def normalizeFormula(formula: String): String = {
-    // Normalize the formula by removing leading and trailing whitespaces and converting to uppercase
-    formula.trim.toUpperCase
-  }
-*/
   def initWorkBook(spreadsheet: File, excelMediaInformation: ExcelMediaInformationTasks): XSSFWorkbook = {
     val input = new FileInputStream(spreadsheet)
     val workbook = new XSSFWorkbook(input)
@@ -494,7 +489,6 @@ class ExcelService {
         }
 
       }
-      //print(s"Formula: $formula, Cell Reference: ${cell.getReference}")
       SpreadsheetCell(res, cell.getReference)
     })
 
@@ -516,18 +510,21 @@ class ExcelService {
     (this.parseCellAddress(split(0)), this.parseCellAddress(split(1)))
   }
 
-  private val regexp = new Regex("([A-Z]+)(\\d+)")
+  private val regexp = new Regex("([A-Za-z]+)(\\d+)")
 
   private def parseCellAddress(address: String): Cords = {
-    val m = regexp.findFirstMatchIn(address) match {
+    val m = regexp.findFirstMatchIn(address.toUpperCase) match {
       case Some(m) => m
-      case _ => throw new IllegalArgumentException(address + " is not a valid cell address")
+      case _ => throw new IllegalArgumentException(s"$address is not a valid cell address")
     }
-    Cords(Integer.parseInt(m.group(2)) - 1, this.colToInt(m.group(1).charAt(0)) - 1)
+    Cords(Integer.parseInt(m.group(2)) - 1, colToInt(m.group(1)) - 1)
   }
 
-  private def colToInt(col: Char): Int =
-    col.toInt - 64
+  private def colToInt(col: String): Int = {
+    col.toUpperCase.foldLeft(0) { (result, char) =>
+      result * 26 + (char - 'A' + 1)
+    }
+  }
 
   private def getCell(sheet: XSSFSheet, cell: String) = {
     val cords = this.parseCellAddress(cell)
@@ -538,11 +535,12 @@ class ExcelService {
   }
 
   private val germanFormat = NumberFormat.getNumberInstance(Locale.GERMAN)
-  //val keywords = List("AVG", "SUM", "MUL", "OPER", "APPEND", "DELETE")
 
   def levenshteinDistance(s1: String, s2: String): Int = {
-    val m = s1.length
-    val n = s2.length
+    val lowerS1 = s1.toLowerCase
+    val lowerS2 = s2.toLowerCase
+    val m = lowerS1.length
+    val n = lowerS2.length
     val dp = Array.ofDim[Int](m + 1, n + 1)
 
     for (i <- 0 to m) {
@@ -552,10 +550,10 @@ class ExcelService {
       dp(0)(j) = j
     }
     for (i <- 1 to m; j <- 1 to n) {
-      val substitutionCost = if (s1(i - 1) == s2(j - 1)) 0 else 1
+      val substitutionCost = if (lowerS1(i - 1) == lowerS2(j - 1)) 0 else 1
       dp(i)(j) = Seq(
-        dp(i - 1)(j) + 1,     // deletion
-        dp(i)(j - 1) + 1,     // insertion
+        dp(i - 1)(j) + 1, // deletion
+        dp(i)(j - 1) + 1, // insertion
         dp(i - 1)(j - 1) + substitutionCost
       ).min
     }
@@ -569,35 +567,33 @@ class ExcelService {
       exactMatch.get
     } else {
       val distances = keywordList.map(keyword => (keyword, levenshteinDistance(input, keyword)))
-      val (closestKeyword, _) = distances.minBy(_._2)
+      val minDistance = distances.minBy(_._2)._2
+      val closestKeywords = distances.filter(_._2 == minDistance)
+      val (closestKeyword, _) = closestKeywords.minBy(_._1.length)
       closestKeyword
     }
   }
 
 
-
   // List of all Excel supported functions
   val functionNames = FunctionEval.getSupportedFunctionNames.asScala.toList
-  //print(s"The list of keys: $functionNames \n")
-
   val testInputs = List("VERGE")
 
   testInputs.foreach { input =>
-    print(f"Function inputted by the student: ${input} ")
     if (!functionNames.contains(input)) {
       val closestKeyword = findMostSimilarKeyword(input, functionNames)
-      print(f"\n: ${input} ")
-      print(s"Did you mean $closestKeyword? \n")
+
     }
   }
 
 
   /**
-    * @param row     the row where the errror occured
-    * @param col     the col where the error occured
-    * @param message the error returned by the spreadsheet
-    */
+   * @param row     the row where the errror occured
+   * @param col     the col where the error occured
+   * @param message the error returned by the spreadsheet
+   */
   class Exception(row: Int, col: Int, message: String) extends RuntimeException("SpreadsheetException@" + row.toString + "," + col.toString + ": " + message)
+
   case class sheetCell(formula: String, value: String, reference: String)
 
 }

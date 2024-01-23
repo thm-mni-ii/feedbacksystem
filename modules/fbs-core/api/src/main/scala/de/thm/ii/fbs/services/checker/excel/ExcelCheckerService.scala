@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.services.checker.excel
 
+import java.io.{PrintWriter, StringWriter}
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import de.thm.ii.fbs.model._
 import de.thm.ii.fbs.model.checker.excel.SpreadsheetCell
@@ -8,26 +9,14 @@ import de.thm.ii.fbs.services.checker.`trait`.{CheckerService, CheckerServiceOnM
 import de.thm.ii.fbs.services.persistence.{CheckrunnerSubTaskService, SubmissionService}
 import de.thm.ii.fbs.services.v2.checker.excel.{ErrorAnalysisSolutionService, ExcelCheckerServiceV2}
 import de.thm.ii.fbs.util.ScalaObjectMapper
-import org.apache.poi.ss.formula.eval.NotImplementedFunctionException
+import org.apache.poi.ss.formula.eval.{FunctionEval, NotImplementedFunctionException}
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.orm.ObjectOptimisticLockingFailureException
 import org.springframework.stereotype.Service
-import org.apache.poi.ss.usermodel._
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import scala.util.Try
 import java.io.File
-import scala.collection.mutable
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.collection.mutable.HashSet
-import javax.script.ScriptEngineManager
-import org.matheclipse.core.eval.ExprEvaluator
-import org.matheclipse.core.expression.F
-import org.matheclipse.core.interfaces.IAST
-import org.matheclipse.core.interfaces.IExpr
-import org.matheclipse.core.interfaces.ISymbol
-import org.matheclipse.parser.client.SyntaxError
-import org.matheclipse.parser.client.math.MathException
 
 
 @Service
@@ -47,21 +36,20 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   private val objectMapper: ObjectMapper = new ScalaObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   private val logger = LoggerFactory.getLogger(this.getClass)
   private var storedFormulasMatch: String = ""
-  private  var invalidCells = List[String]()
+  private var invalidCells = List[String]()
   val uniqueList: HashSet[String] = HashSet.empty[String]
 
 
   /**
-    * Notify about the new submission
-    *
-    * @param taskID       the taskID for the submission
-    * @param submissionID the id of the submission
-    * @param cc           the check runner of the submission
-    * @param fu           the user which triggered the submission
-    */
+   * Notify about the new submission
+   *
+   * @param taskID       the taskID for the submission
+   * @param submissionID the id of the submission
+   * @param cc           the check runner of the submission
+   * @param fu           the user which triggered the submission
+   */
 
   override def notify(taskID: Int, submissionID: Int, cc: CheckrunnerConfiguration, fu: User): Unit = {
-    print("notify has been entered \n")
     try {
       val submission = this.submissionService.getOne(submissionID, fu.id).get
       val submissionFile = this.spreadsheetFileService.getSubmissionFile(submission)
@@ -93,7 +81,6 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
 
 
   private def executeChecker(cc: CheckrunnerConfiguration, submission: Submission, submissionFile: File, mainFile: File): Unit = {
-    print("execute checker entered \n")
     try {
       val excelMediaInformation = this.spreadsheetFileService.getMediaInfo(cc)
       val submissionResult = checkSubmission(cc: CheckrunnerConfiguration, excelMediaInformation, submissionFile, mainFile)
@@ -137,13 +124,13 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
   }
 
   private def checkTask(submissionFile: File, mainFile: File, excelMediaInformation: ExcelMediaInformation): CheckResultTask = {
+    val functionNames = FunctionEval.getSupportedFunctionNames.asScala.toList
     try {
       // If Config file is old -> use old field names
       if (excelMediaInformation.checkFields.isEmpty && excelMediaInformation.outputFields.nonEmpty) {
         val res = this.compare(this.getFields(submissionFile, mainFile, excelMediaInformation,
           ExcelMediaInformationCheck(range = excelMediaInformation.outputFields, hideInvalidFields = excelMediaInformation.hideInvalidFields)
         ))
-
         CheckResultTask(res.success, List(res))
       } else {
         val res = excelMediaInformation.checkFields
@@ -152,21 +139,46 @@ class ExcelCheckerService extends CheckerService with CheckerServiceOnMainFileUp
         CheckResultTask(res.forall(r => r.success), res)
       }
     } catch {
-      case e: NotImplementedFunctionException => generateCheckResultError("Die Excel-Funktion '%s' wird nicht unterstützt", e.getMessage)
-      case _: NullPointerException => generateCheckResultError("Ungültige Konfiguration")
-      case e: ExcelCheckerException => generateCheckResultError(e.getMessage)
-      case e: Throwable => generateCheckResultError("Bei der Überprüfung ist ein Fehler aufgetreten: '%s'", e.getMessage)
+      case e: NotImplementedFunctionException =>
+        logger.info("testing the unimplemented: ", e)
+        generateCheckResultError("Die Excel-Funktion '%s' wird nicht unterstützt", e.getMessage)
+      case _: NullPointerException =>
+        logger.info("nullpointer: ")
+        generateCheckResultError("Ungültige Konfiguration")
+      case e: ExcelCheckerException =>
+        logger.info("testing the ExcelCheckerException: ", e)
+        generateCheckResultError(e.getMessage)
+      case e: Throwable =>
+        val sw = new StringWriter()
+        val pw = new PrintWriter(sw)
+        e.printStackTrace(pw)
+        val stackTraceString = sw.toString
+        val functionPattern = "NotImplementedFunctionException: (.*?)\\s+at org\\.".r
+        val functionName = functionPattern.findFirstMatchIn(stackTraceString).map(_.group(1).trim)
+        functionName match {
+          case Some(fnName) =>
+          case None =>
+        }
+        var st = ""
+        functionName.foreach { input =>
+
+          st = s"\nEingegebene Funktion : ${input} \n"
+          if (!functionNames.contains(input)) {
+            val closestKeyword = this.excelService.findMostSimilarKeyword(input, functionNames)
+            st += s"Meinten Sie vielleicht : $closestKeyword? \n"
+
+          }
+        }
+        generateCheckResultError("Bei der Überprüfung ist ein Fehler aufgetreten: '%s'", e.getMessage + st)
     }
   }
 
-print("before get fields \n")
   private def getFields(
                          submissionFile: File,
                          mainFile: File,
                          excelMediaInformation: ExcelMediaInformation,
                          checkFields: ExcelMediaInformationCheck
                        ): CellsComparator = {
-    print("the getfields is entered \n")
     val expectedRes = this.excelService.getFields(mainFile, excelMediaInformation, checkFields)
     val userRes = try {
       this.excelService.getFields(submissionFile, excelMediaInformation, checkFields)
@@ -175,14 +187,12 @@ print("before get fields \n")
     }
     val expectedFormula = this.excelService.getFormula(submissionFile, excelMediaInformation, checkFields)
     val userFormula = this.excelService.getFormula(mainFile, excelMediaInformation, checkFields)
-    print("before the compare \n")
-    val(storedFormulas, updatedInvalidFields) = this.excelService.compareForm(expectedFormula, userFormula, invalidCells)
-   // invalidCells = updatedInvalidFields
-    uniqueList++=updatedInvalidFields
+    val (storedFormulas, updatedInvalidFields) = this.excelService.compareForm(expectedFormula, userFormula, invalidCells)
+    uniqueList ++= updatedInvalidFields
 
     storedFormulasMatch = storedFormulas
 
-    print("the store :", storedFormulasMatch, "\n")
+    //print("the store :", storedFormulasMatch, "\n")
 
     CellsComparator(userRes, expectedRes)
   }
@@ -193,11 +203,6 @@ print("before get fields \n")
 
     val res = cells.expectedCells.zip(cells.actualCell).foldLeft(true)({ case (accumulator, (expected, actual)) =>
       val equal = actual.value.contentEquals(expected.value)
-      /*val equal = actual.value.contentEquals(expected.value) && actual.formula.contentEquals(expected.formula)*/
-
-      val test = actual.value
-      //print("the cells ", cells)
-      //print("the actual value here:", test)
       if (!equal) {
         invalidFields :+= actual.reference
 
@@ -207,8 +212,6 @@ print("before get fields \n")
       accumulator && equal
     })
 
-    //print("the invalids :", invalidFields)
-    //invalidFields = invalidFields++ invalidCells
     CheckResult(res, invalidFields, extInfo)
   }
 
@@ -255,7 +258,7 @@ print("before get fields \n")
 
   private def buildLegacyTaskResultText(result: CheckResultTask, task: ExcelMediaInformation) = {
     if (result.checkResult.head.errorMsg.nonEmpty) {
-        f"${task.name}: ${result.checkResult.head.errorMsg}"
+      f"${task.name}: ${result.checkResult.head.errorMsg}"
     } else {
       f"${task.name}: Die Zellen '${result.checkResult.head.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis"
       //storedFormulasMatch
@@ -274,10 +277,10 @@ print("before get fields \n")
         feedback.append(s"${task.name}: $errorMsg \n")
       } else {
         feedback.append(s"\n${task.name}: Die Zellen '${result.invalidFields.mkString(", ")}' enthalten nicht das korrekte Ergebnis. $errorMsg \n \n")
-        feedback.append(tableLine())  // Add table line separator
+        feedback.append(tableLine()) // Add table line separator
 
         if (uniqueList.nonEmpty) {
-          feedback.append(s"\n# Formel-Analyse:\nDie Formeln '${uniqueList.mkString(", ")}' sind nicht korrekt. $errorMsg \n")
+          feedback.append(s"\n> Formel-Analyse:\nDie Formel(n) '${uniqueList.mkString(", ")}' sind nicht korrekt. $errorMsg \n\n")
           feedback.append(storedFormulasMatch)
           feedback.append(tableLine())
         }
@@ -334,31 +337,6 @@ print("before get fields \n")
     ExtendedInfoExcelObject(rows = obj1.rows ++ obj2.rows, head = obj1.head ++ obj2.head)
   }
 
-  private def eval(expr1: IExpr, expr2: IExpr): Boolean = {
-    var stat = false
-    if (expr1 == expr2) {
-      stat = true
-      print(f"expr1= ${expr1}, expr2=${expr2} ==> this is true \n")
-    }
-    else {
-      print(f"expr1= ${expr1}, expr2=${expr2} ==> this is false \n")
-    }
-      stat
-  }
-
-    val util = new ExprEvaluator(false, 100)
-    var result = util.eval("3*a+b")
-    var result1 = util.eval("a*3+b+0")
-    eval(result, result1)
-     result = util.eval("b*3+a")
-     result1 = util.eval("a*3+b+0")
-  eval(result1, result)
-     result1 = util.eval("(a*3)+b")
-     result = util.eval("a*(3+b)")
-  eval(result1, result)
-
-  // print: 2*Cos(x)^2-Sin(x)^2
-    print("Out[4]: ", result.toString, "\n")
   case class CheckResultTask(success: Boolean = false, checkResult: List[CheckResult])
 
   case class CheckResult(success: Boolean = false,
