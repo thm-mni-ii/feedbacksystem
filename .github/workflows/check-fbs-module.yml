@@ -62,7 +62,7 @@ jobs:
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         name: Lint ${{ inputs.name }}
         with:
           arguments: ${{ inputs.lintArguments }}
@@ -93,11 +93,11 @@ jobs:
         if: ${{ inputs.setupNode }}
         with:
           node-version: "16.13.1"
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         name: Run ${{ inputs.name }} Tests
         with:
           arguments: ${{ inputs.testArguments }}
-      - uses: gradle/gradle-build-action@v2
+      - uses: gradle/gradle-build-action@v3
         name: Generate ${{ inputs.name }} Coverage
         if: ${{ inputs.coverageArguments }}
         with:
