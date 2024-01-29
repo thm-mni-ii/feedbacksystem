@@ -1,32 +1,5 @@
 @import "src/colors";
 
-/*.task-container {
-  cursor: pointer;
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-  .meta {
-    > * {
-      margin-left: 8px;
-    }
-    > .tiny {
-      font-size: small;
-    }
-    .state {
-      text-align: center;
-      line-height: 30px;
-    }
-  }
-  span {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.task-container:hover {
-  background: #d4dadd;
-}*/
-
 .container {
   display: block;
   margin-top: 16px;
@@ -125,5 +98,184 @@
   div {
     display: flex;
     justify-content: center;
+  }
+}
+.icon-off {
+  color: grey;
+}
+.icon-on {
+  color: #3fa73f;
+}
+
+.select-all-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 30px;
+  margin-top: 30px;
+  margin-left: 15px;
+
+  .edit-multiple-tasks-btn {
+    margin-left: 150px;
+    cursor: pointer;
+  }
+}
+.mat-progress-bar {
+  height: 15px;
+  border-radius: 5px;
+}
+
+:host ::ng-deep .mat-progress-bar-fill::after {
+  background-color: $green;
+}
+
+::ng-deep .mat-progress-bar-buffer {
+  background: $red;
+}
+
+// ::ng-deep .mat-progress-bar {
+//   margin: auto;
+//   border-radius: 2px;
+//   height: 20px;
+// }
+
+// ::ng-deep .mat-progress-bar-background {
+//   background: #1e457c;
+//   animation: none !important;
+//   fill: #1e457c;
+// }
+
+//animation none and color gray
+::ng-deep .mat-progress-bar-background {
+  background: #cccccc;
+  animation: none !important;
+  fill: #cccccc;
+}
+
+.flex-container {
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.legend-color {
+  height: 1rem;
+  width: 1rem;
+  position: absolute;
+}
+.legend-text {
+  position: relative;
+  left: 1rem;
+  padding-left: 0.5rem;
+  height: 1.25rem;
+  line-height: 1.25rem;
+  font-size: 0.9rem;
+}
+.flex-container > div {
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}
+.progress-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  font-weight: bold;
+}
+.example-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 60px;
+  bottom: 15px;
+  right: 10px;
+}
+#num {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgb(255, 255, 255);
+  font-size: 32px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+
+  padding: 8px 16px;
+}
+
+.progress-card {
+  .title {
+    margin-top: -15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .badget-icon-passed {
+      width: auto;
+      height: auto;
+      font-size: 30px;
+      color: orange;
+    }
+
+    .badget-icon-gray {
+      color: lightslategrey;
+    }
+
+    .badget-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: ghostwhite;
+    }
+
+    .mat-standard-chip {
+      height: auto !important;
+    }
+  }
+
+  .progress-widget {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    height: 100%;
+
+    margin-bottom: 10px;
+
+    .progress-widget-item {
+      margin: 0px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      // first item color
+      &:nth-child(1) {
+        mat-icon {
+          color: $red;
+        }
+      }
+      // second item color
+      &:nth-child(2) {
+        mat-icon {
+          color: $orange;
+        }
+      }
+      // third item color
+      &:nth-child(3) {
+        mat-icon {
+          color: $green;
+        }
+      }
+    }
+  }
+
+  .progress-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 20px;
+
+    // round progress bar
   }
 }

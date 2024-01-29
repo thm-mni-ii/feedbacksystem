@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from "@angular/core";
+import { Component, OnInit, Input, Inject } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { TitlebarService } from "../../service/titlebar.service";
 import { Course } from "../../model/Course";
@@ -21,6 +21,7 @@ import {
   styleUrls: ["./my-courses.component.scss"],
 })
 export class MyCoursesComponent implements OnInit {
+  @Input() data: Course;
   constructor(
     private titlebar: TitlebarService,
     private courseRegistrationService: CourseRegistrationService,
@@ -29,6 +30,8 @@ export class MyCoursesComponent implements OnInit {
     @Inject(I18NEXT_SERVICE) private i18NextService: ITranslationService
   ) {}
 
+  userID: number;
+  totalTasks: any = 0;
   courses: Observable<Course[]> = of();
   filteredCourses: Observable<Course[]> = of();
   control: UntypedFormControl = new UntypedFormControl();

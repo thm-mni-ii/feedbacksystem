@@ -28,11 +28,11 @@ jobs:
           npx redoc-cli bundle modules/fbs-runner/checker/api-docs.yml
           mv redoc-static.html pages/api-docs/runner/index.html
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: "./pages"
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@main
+        uses: actions/deploy-pages@v4
