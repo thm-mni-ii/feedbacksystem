@@ -3,11 +3,11 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils.Companion.solutionMap
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetTestUtils.Companion.workbook
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class ErrorAnalysisServiceTest {
     @Test
@@ -204,12 +204,12 @@ class ErrorAnalysisServiceTest {
         val sGraph = ReferenceGraph(
             mapOf(
                 0 to mapOf(
-                    c1.cell to Pair(c1.value!!, setOf(c2, c3)),
-                    c2.cell to Pair(c2.value!!, setOf()),
-                    c3.cell to Pair(c3.value!!, setOf())
+                    c1 to setOf(c2, c3),
+                    c2 to setOf(),
+                    c3 to setOf()
                 ),
                 1 to mapOf(
-                    c4.cell to Pair(c4.value!!, setOf())
+                    c4 to setOf()
                 )
             )
         )
@@ -257,9 +257,9 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        c1.cell to Pair(c1.value!!, setOf(c2, c3)),
-                        c2.cell to Pair(c2.value!!, setOf()),
-                        c3.cell to Pair(c3.value!!, setOf())
+                        c1 to setOf(c2, c3),
+                        c2 to setOf(),
+                        c3 to setOf()
                     )
                 )
             )
@@ -279,11 +279,11 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        c1.cell to Pair(c1.value!!, setOf(c2, c3)),
-                        c2.cell to Pair(c2.value!!, setOf()),
-                        c3.cell to Pair(c3.value!!, setOf(c4, c5)),
-                        c4.cell to Pair(c4.value!!, setOf()),
-                        c5.cell to Pair(c5.value!!, setOf())
+                        c1 to setOf(c2, c3),
+                        c2 to setOf(),
+                        c3 to setOf(c4, c5),
+                        c4 to setOf(),
+                        c5 to setOf()
                     )
                 )
             )
@@ -305,13 +305,13 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        a1.cell to Pair(a1.value!!, setOf(b1, c1)),
-                        b1.cell to Pair(b1.value!!, setOf(b2, b3)),
-                        c1.cell to Pair(c1.value!!, setOf(d1, e1)),
-                        d1.cell to Pair(d1.value!!, setOf()),
-                        e1.cell to Pair(e1.value!!, setOf()),
-                        b2.cell to Pair(b2.value!!, setOf()),
-                        b3.cell to Pair(b3.value!!, setOf())
+                        a1 to setOf(b1, c1),
+                        b1 to setOf(b2, b3),
+                        c1 to setOf(d1, e1),
+                        d1 to setOf(),
+                        e1 to setOf(),
+                        b2 to setOf(),
+                        b3 to setOf()
                     )
                 )
             )
@@ -336,16 +336,16 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        c1.cell to Pair(c1.value!!, setOf(c2, c3)),
-                        c2.cell to Pair(c2.value!!, setOf(c6, c7, c8)),
-                        c3.cell to Pair(c3.value!!, setOf(c4, c5)),
-                        c4.cell to Pair(c4.value!!, setOf()),
-                        c5.cell to Pair(c5.value!!, setOf()),
-                        c6.cell to Pair(c6.value!!, setOf()),
-                        c7.cell to Pair(c7.value!!, setOf(c9, c10)),
-                        c8.cell to Pair(c8.value!!, setOf()),
-                        c9.cell to Pair(c9.value!!, setOf()),
-                        c10.cell to Pair(c10.value!!, setOf())
+                        c1 to setOf(c2, c3),
+                        c2 to setOf(c6, c7, c8),
+                        c3 to setOf(c4, c5),
+                        c4 to setOf(),
+                        c5 to setOf(),
+                        c6 to setOf(),
+                        c7 to setOf(c9, c10),
+                        c8 to setOf(),
+                        c9 to setOf(),
+                        c10 to setOf()
                     )
                 )
             )
@@ -365,11 +365,11 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        c1.cell to Pair(c1.value!!, setOf(c2, c3, c4, c5)),
-                        c2.cell to Pair(c2.value!!, setOf()),
-                        c3.cell to Pair(c3.value!!, setOf()),
-                        c4.cell to Pair(c4.value!!, setOf()),
-                        c5.cell to Pair(c5.value!!, setOf())
+                        c1 to setOf(c2, c3, c4, c5),
+                        c2 to setOf(),
+                        c3 to setOf(),
+                        c4 to setOf(),
+                        c5 to setOf()
                     )
                 )
             )
@@ -393,15 +393,15 @@ class ErrorAnalysisServiceTest {
             val sGraph = ReferenceGraph(
                 mapOf(
                     0 to mapOf(
-                        c1.cell to Pair(c1.value!!, setOf(c2, c3)),
-                        c2.cell to Pair(c2.value!!, setOf(c6, c7)),
-                        c3.cell to Pair(c3.value!!, setOf(c4, c5)),
-                        c4.cell to Pair(c4.value!!, setOf()),
-                        c5.cell to Pair(c5.value!!, setOf()),
-                        c6.cell to Pair(c6.value!!, setOf()),
-                        c7.cell to Pair(c7.value!!, setOf()),
-                        c8.cell to Pair(c8.value!!, setOf(c3, c9)),
-                        c9.cell to Pair(c9.value!!, setOf())
+                        c1 to setOf(c2, c3),
+                        c2 to setOf(c6, c7),
+                        c3 to setOf(c4, c5),
+                        c4 to setOf(),
+                        c5 to setOf(),
+                        c6 to setOf(),
+                        c7 to setOf(),
+                        c8 to setOf(c3, c9),
+                        c9 to setOf()
                     )
                 )
             )

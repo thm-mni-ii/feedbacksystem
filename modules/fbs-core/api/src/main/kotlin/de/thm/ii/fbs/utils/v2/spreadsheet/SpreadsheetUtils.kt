@@ -1,6 +1,10 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
+import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.util.CellRangeAddress
+import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -48,5 +52,25 @@ class SpreadsheetUtils {
          */
         fun getCell(workbook: XSSFWorkbook, sheet: Int, row: Int, col: Int): XSSFCell =
             getRow(workbook, sheet, row).getCell(col, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK)
+
+        fun rangeToCells(range: String): CellRangeAddress = CellRangeAddress.valueOf(range)
+
+        fun formulaByCellRef(sheet: XSSFSheet, ref: String): String {
+            val cellRef = CellReference(ref)
+            val cell = sheet.getRow(cellRef.row)?.getCell(cellRef.col.toInt())
+
+            return formulaOfCell(cell)
+        }
+
+        fun formulaOfCell(cell: XSSFCell?): String {
+            return when (cell?.cellType) {
+                CellType.FORMULA -> cell.cellFormula.toString()
+                else -> valueOfCell(cell)
+            }
+        }
+
+        fun sheetIdxOfCell(cell: XSSFCell): Int {
+            return cell.sheet.workbook.getSheetIndex(cell.sheet)
+        }
     }
 }

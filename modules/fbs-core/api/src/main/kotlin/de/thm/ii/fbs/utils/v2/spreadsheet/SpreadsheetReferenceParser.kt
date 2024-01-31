@@ -1,11 +1,11 @@
 package de.thm.ii.fbs.utils.v2.spreadsheet
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaByCellRef
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.rangeToCells
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueByCellRef
-import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.util.CellRangeAddress
 import org.apache.poi.xssf.usermodel.XSSFCell
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
@@ -17,17 +17,16 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
             "(([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*\\s*:\\s*([A-Za-z0-9]+!)?\$?[A-Z]+\$?[1-9][0-9]*)".toRegex()
     }
 
-    val references: Map<Int, Map<String, Pair<String, Set<Cell>>>>
+    val references: Map<Int, Map<Cell, Set<Cell>>>
 
     init {
-        val refs: MutableMap<Int, Map<String, Pair<String, Set<Cell>>>> = HashMap()
+        val refs: MutableMap<Int, Map<Cell, Set<Cell>>> = HashMap()
         for (sheet in workbook.sheetIterator()) {
-            val sheetRefs: MutableMap<String, Pair<String, Set<Cell>>> = HashMap()
+            val sheetRefs: MutableMap<Cell, Set<Cell>> = HashMap()
             for (row in sheet.rowIterator()) {
                 for (cell in row.cellIterator()) {
                     if (cell.cellType == CellType.FORMULA) {
-                        sheetRefs[cell.address.formatAsString()] =
-                            Pair(valueOfCell(cell as XSSFCell), getCells(cell.cellFormula, sheet))
+                        sheetRefs[Cell(cell as XSSFCell)] = getCells(cell.cellFormula, sheet)
                     }
                 }
             }
@@ -47,14 +46,15 @@ class SpreadsheetReferenceParser(val workbook: XSSFWorkbook) {
 
     private fun getRangeCells(range: String, cellRefs: MutableSet<Cell>, sheet: Sheet) {
         val (sheetName, _) = getRefAndSheet(cellRefsRegex.find(range)!!.value, sheet.sheetName)
-        CellRangeAddress.valueOf(range).forEach { cell -> cellRefs.add(refToCell(cell.toString(), sheetName)) }
+        rangeToCells(range).forEach { cell -> cellRefs.add(refToCell(cell.toString(), sheetName)) }
     }
 
     private fun refToCell(ref: String, sheet: String): Cell {
         val (sheetName, cellRef) = getRefAndSheet(ref, sheet)
         val value = valueByCellRef(workbook.getSheet(sheetName), cellRef)
+        val formula = formulaByCellRef(workbook.getSheet(sheetName), cellRef)
 
-        return Cell(workbook.getSheetIndex(sheetName), cellRef, value)
+        return Cell(workbook.getSheetIndex(sheetName), cellRef, value, formula)
     }
 
     private fun getRefAndSheet(ref: String, defaultSheetName: String): Pair<String, String> {

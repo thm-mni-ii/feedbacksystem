@@ -1,5 +1,6 @@
 package de.thm.ii.fbs.model.v2.checker.excel
 
+import de.thm.ii.fbs.model.v2.checker.excel.result.CellResult
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 
@@ -7,7 +8,7 @@ class CellResultTest {
 
     @Test
     fun feedbackTest() {
-        val cr = CellResult()
+        val cr = CellResult(Cell(0, "A1"))
         val f1 = "The value of this cell is wrong.\n"
         val f2 = "Please try again."
 
@@ -20,8 +21,8 @@ class CellResultTest {
 
     @Test
     fun isPropagatedTest() {
-        assert(!CellResult().isPropagated)
-        assert(!CellResult(false).isPropagated)
-        assert(CellResult(true).isPropagated)
+        assert(!CellResult(Cell(0, "A1")).isPropagated)
+        assert(!CellResult(Cell(0, "A1"), false).isPropagated)
+        assert(CellResult(Cell(0, "A1"), true).isPropagated)
     }
 }

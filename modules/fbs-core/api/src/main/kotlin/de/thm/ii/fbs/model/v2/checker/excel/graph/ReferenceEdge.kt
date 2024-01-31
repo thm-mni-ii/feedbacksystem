@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.graph
 
 import org.jgrapht.graph.DefaultEdge
 import java.util.*
@@ -10,9 +10,7 @@ class ReferenceEdge : DefaultEdge() {
 
         other as ReferenceEdge
 
-        if (source != other.source || target != other.target) return false
-
-        return true
+        return !(source != other.source || target != other.target)
     }
 
     override fun hashCode(): Int {

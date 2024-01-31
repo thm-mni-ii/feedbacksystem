@@ -1,6 +1,9 @@
 package de.thm.ii.fbs.model
 
+import de.thm.ii.fbs.model.v2.checker.excel.configuration._
 import org.json.{JSONException, JSONObject}
+
+import scala.jdk.CollectionConverters.SeqHasAsJava
 
 /**
   * The MediaInformation
@@ -58,15 +61,32 @@ object MediaInformation {
     }
 }
 
-case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation], enableExperimentalFeatures: Boolean = false)
+case class ExcelMediaInformationTasks(tasks: List[ExcelMediaInformation], enableExperimentalFeatures: Boolean = false) {
+  def toExcelCheckerConfiguration: ExcelCheckerConfiguration = new ExcelCheckerConfiguration(
+    tasks.map(t => t.toExcelCheckerConfiguration).asJava, enableExperimentalFeatures)
+}
 
 case class ExcelMediaInformation(sheetIdx: Int, changeFields: List[ExcelMediaInformationChange] = List(),
                                  @deprecated("Use checkFields instead") outputFields: String, checkFields: List[ExcelMediaInformationCheck] = List(),
-                                 name: String, hideInvalidFields: Boolean = false) extends MediaInformation
+                                 name: String, hideInvalidFields: Boolean = false) extends MediaInformation {
+  def toExcelCheckerConfiguration: ExcelTaskConfiguration =
+    new ExcelTaskConfiguration(
+      sheetIdx,
+      changeFields.map(f => f.toExcelCheckerConfiguration).asJava,
+      checkFields.map(f => f.toExcelCheckerConfiguration).asJava,
+      name,
+      hideInvalidFields
+    )
+}
 
-case class ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int)
+case class ExcelMediaInformationChange(cell: String, newValue: String, sheetIdx: Int) {
+  def toExcelCheckerConfiguration: ExcelTaskConfigurationChange = new ExcelTaskConfigurationChange(cell, newValue, sheetIdx)
+}
 
-case class ExcelMediaInformationCheck(range: String, hideInvalidFields: Boolean = false, errorMsg: String = "")
+case class ExcelMediaInformationCheck(range: String, hideInvalidFields: Boolean = false, errorMsg: String = "") {
+  def toExcelCheckerConfiguration: ExcelTaskConfigurationCheck =
+    new ExcelTaskConfigurationCheck(range, hideInvalidFields, errorMsg)
+}
 
 /**
   * The Spreadsheet Media Information
