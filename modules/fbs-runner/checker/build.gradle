@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.alisiikh.scalastyle" version "3.4.1"
+    id "com.github.alisiikh.scalastyle" version "3.5.0"
     id 'jacoco'
 }
 
@@ -27,7 +27,7 @@ scalastyle {
 
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.12.17'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-config-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-web-scala_2.12:${vertxVersion}"
@@ -35,6 +35,13 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2'
     implementation 'mysql:mysql-connector-java:8.0.32'
     implementation 'org.postgresql:postgresql:42.5.3'
+    implementation platform("io.opentelemetry:opentelemetry-bom:1.31.0")
+    implementation platform('io.opentelemetry:opentelemetry-bom-alpha:1.31.0-alpha')
+    implementation("io.opentelemetry:opentelemetry-api");
+    implementation("io.opentelemetry:opentelemetry-sdk");
+    implementation("io.opentelemetry:opentelemetry-sdk-metrics");
+    implementation("io.opentelemetry:opentelemetry-exporter-logging");
+    implementation('io.opentelemetry:opentelemetry-exporter-prometheus')
     testImplementation 'junit:junit:4.13.2'
 }
 

@@ -11,7 +11,8 @@
       <a routerLink="/courses">
         <div class="logo">
           <h1>
-            Feedbacksystem <i class="material-icons">feedback</i>
+            {{ "sidebar.label.feedbacksystem" | i18nextEager }}
+            <i class="material-icons">feedback</i>
             <button mat-icon-button *ngIf="showSidebarMenu">
               <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
             </button>
@@ -22,7 +23,7 @@
       <mat-nav-list>
         <a mat-list-item routerLink="/courses" routerLinkActive="selected">
           <mat-icon>list</mat-icon>
-          <p>Meine Kurse</p>
+          <p>{{ "sidebar.label.myCourses" | i18nextEager }}</p>
         </a>
 
         <a
@@ -31,7 +32,7 @@
           routerLinkActive="selected"
         >
           <mat-icon>search</mat-icon>
-          <p>Alle Kurse</p>
+          <p>{{ "sidebar.label.allCourses" | i18nextEager }}</p>
         </a>
 
         <a
@@ -41,12 +42,12 @@
           routerLinkActive="selected"
         >
           <mat-icon>supervised_user_circle</mat-icon>
-          <p>Benutzer</p>
+          <p>{{ "sidebar.label.users" | i18nextEager }}</p>
         </a>
 
         <a mat-list-item (click)="goToFBA()">
           <mat-icon>question_answer</mat-icon>
-          <p>Feedback App</p>
+          <p>{{ "sidebar.label.feedbackApp" | i18nextEager }}</p>
         </a>
 
         <a
@@ -55,7 +56,7 @@
           routerLinkActive="selected"
         >
           <mat-icon>extension</mat-icon>
-          <p>SQL Playground</p>
+          <p>{{ "sidebar.label.sqlPlayground" | i18nextEager }}</p>
         </a>
 
         <a
@@ -65,17 +66,24 @@
           routerLinkActive="selected"
         >
           <mat-icon>bar_chart</mat-icon>
-          <p>Analyseplattform</p>
+          <p>{{ "sidebar.label.analyticsPlatform" | i18nextEager }}</p>
+        </a>
+
+        <a mat-list-item routerLink="/modelling" routerLinkActive="selected">
+          <mat-icon> format_shapes</mat-icon>
+          <p>FBS Modellierung</p>
         </a>
       </mat-nav-list>
 
       <span class="filler"></span>
 
       <span class="legal">
-        <a mat-list-item class="general" (click)="showImpressum()">Impressum</a>
-        <a mat-list-item class="general" (click)="showDataprivacy()"
-          >Datenschutzerklärung</a
-        >
+        <a mat-list-item class="general" (click)="showImpressum()">{{
+          "sidebar.label.imprint" | i18nextEager
+        }}</a>
+        <a mat-list-item class="general" (click)="showDataprivacy()">{{
+          "sidebar.label.dataProtection" | i18nextEager
+        }}</a>
       </span>
     </div>
   </mat-sidenav>
@@ -101,12 +109,19 @@
           <br /><i>{{ user?.email }}</i>
         </div>
         <button mat-menu-item routerLink="/users/password">
-          <mat-icon>settings</mat-icon>Passwort ändern
+          <mat-icon>settings</mat-icon
+          >{{ "sidebar.label.changePassword" | i18nextEager }}
+        </button>
+        <button mat-menu-item [matMenuTriggerFor]="language.menu">
+          <mat-icon>language</mat-icon
+          >{{ "sidebar.label.changeLanguage" | i18nextEager }}
         </button>
         <button mat-menu-item (click)="logout()">
-          <mat-icon class="logout-icon">power_settings_new</mat-icon> Logout
+          <mat-icon class="logout-icon">power_settings_new</mat-icon>
+          {{ "sidebar.label.logout" | i18nextEager }}
         </button>
       </mat-menu>
+      <app-language-menu #language="languageMenu"></app-language-menu>
     </mat-toolbar>
     <div class="content-container">
       <router-outlet></router-outlet>

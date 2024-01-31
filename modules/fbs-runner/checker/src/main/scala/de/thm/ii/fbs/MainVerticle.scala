@@ -1,7 +1,7 @@
 package de.thm.ii.fbs
 
 import de.thm.ii.fbs.verticles.HttpVerticle
-import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
+import de.thm.ii.fbs.verticles.runner.{BashRunnerVerticle, SqlCheckerVerticle, SqlPlaygroundShareVerticle, SqlPlaygroundVerticle, SqlRunnerVerticle}
 import io.vertx.lang.scala.json.JsonObject
 import io.vertx.lang.scala.{ScalaLogger, ScalaVerticle}
 import io.vertx.scala.config.{ConfigRetriever, ConfigRetrieverOptions, ConfigStoreOptions}
@@ -83,5 +83,13 @@ class MainVerticle extends ScalaVerticle {
       .setInstances(config.getInteger("SQL_PLAYGROUND_INSTANCES", 1))
 
     vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlPlaygroundVerticle], sqlPlaygroundVerticleOptions)
+
+    /*Start SQL Playground Share */
+    val sqlPlaygroundShareVerticleOptions = DeploymentOptions()
+      .setConfig(config)
+      .setWorker(true)
+      .setInstances(config.getInteger("SQL_PLAYGROUND_SHARE_INSTANCES", 1))
+
+    vertx.deployVerticleFuture(ScalaVerticle.nameForVerticle[SqlPlaygroundShareVerticle], sqlPlaygroundShareVerticleOptions)
   }
 }

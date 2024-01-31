@@ -1,31 +1,36 @@
 <div>
-  <div class="flex-container">
-    <mat-form-field *ngFor="let inputField of inputFields">
-      <input
-        matInput
-        type="text"
-        [placeholder]="inputField[0]"
-        [value]="inputField[1]"
-        readonly
-      />
-    </mat-form-field>
+  <div class="math-info-text">
+    <mat-icon class="info-icon">info</mat-icon>
+    <small>
+      {{
+        "task.submission.spreadsheet.decimals_rounded_info.part_one"
+          | i18nextEager
+      }}
+      {{ decimals }}
+      {{
+        "task.submission.spreadsheet.decimals_rounded_info.part_two"
+          | i18nextEager
+      }}
+    </small>
   </div>
-  <hr />
-  <form [formGroup]="resultForm">
-    <div class="flex-container">
-      <mat-form-field *ngFor="let outputField of outputFields">
-        <input
-          matInput
-          type="text"
-          [placeholder]="outputField"
-          [formControlName]="outputField"
-          (input)="updateSubmission()"
-          required
-        />
-      </mat-form-field>
+  <div class="flex-container">
+    <div *ngFor="let inputField of inputFields; index as i">
+      <b class="math-task-label">{{ inputField[0] }}</b>
+      <div class="math-task-container">
+        <app-math-input
+          [label]="'task.submission.spreadsheet.label.task' | i18nextEager"
+          [defaultValue]="{ latex: inputField[1] }"
+          (update)="updateSubmission(inputField[0], $event)"
+          [disabled]="true"
+        ></app-math-input>
+        <form>
+          <app-math-input
+            [label]="'task.submission.spreadsheet.label.result' | i18nextEager"
+            [defaultValue]="{ latex: latex[outputFields[i]] }"
+            (update)="updateSubmission(outputFields[i], $event)"
+          ></app-math-input>
+        </form>
+      </div>
     </div>
-  </form>
-  <small
-    >Alle Eingaben werden auf {{ decimals }} Nachkommastellen gerundet.</small
-  >
+  </div>
 </div>

@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       [routerLink]="['/', 'courses', courseId]"
-      matTooltip="Zurück zum Kurs"
+      matTooltip="{{ 'task.detail.tooltip.backToCourse' | i18nextEager }}"
     >
       <mat-icon>arrow_back</mat-icon>
     </button>
@@ -15,7 +15,7 @@
       mat-icon-button
       *ngIf="canEdit()"
       (click)="downloadTask()"
-      matTooltip="Aufgabe Exportieren"
+      matTooltip="{{ 'task.detail.tooltip.exportTask' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">save_alt</mat-icon>
     </button>
@@ -23,7 +23,7 @@
       mat-icon-button
       *ngIf="canEdit() && checkersConfigurable()"
       [routerLink]="['/courses', courseId, 'tasks', task?.id, 'configurations']"
-      matTooltip="Überprüfung konfigurieren"
+      matTooltip="{{ 'task.detail.tooltip.configureCheck' | i18nextEager }}"
     >
       <mat-icon class="logout-icon">engineering</mat-icon>
     </button>
@@ -31,18 +31,18 @@
       mat-icon-button
       *ngIf="canEdit()"
       [matMenuTriggerFor]="settings"
-      matTooltip="Einstellungen"
+      matTooltip="{{ 'task.detail.tooltip.settings' | i18nextEager }}"
     >
       <mat-icon>settings</mat-icon>
     </button>
     <mat-menu #settings="matMenu">
       <button mat-menu-item *ngIf="canEdit()" (click)="updateTask()">
         <mat-icon class="logout-icon">edit</mat-icon
-        ><span>Aufgabe bearbeiten</span>
+        ><span>{{ "task.detail.label.editTask" | i18nextEager }}</span>
       </button>
       <button mat-menu-item *ngIf="canEdit()" (click)="deleteTask()">
         <mat-icon class="logout-icon">delete</mat-icon
-        ><span>Aufgabe löschen</span>
+        ><span>{{ "task.detail.label.deleteTask" | i18nextEager }}</span>
       </button>
     </mat-menu>
   </app-menu-bar>
@@ -51,9 +51,9 @@
     <div class="task-container">
       <span>{{ task?.name }}</span>
       <span class="meta">
-        <span *ngIf="deadlinePassed" class="tiny failed"
-          >Abgabeende erreicht!</span
-        >
+        <span *ngIf="deadlinePassed" class="tiny failed">{{
+          "task.detail.deadlineReached" | i18nextEager
+        }}</span>
         <mat-icon class="material-icons" color="accent" *ngIf="task.deadline"
           >access_time</mat-icon
         >
@@ -61,7 +61,8 @@
           task?.deadline | date: "dd.MM.yyyy HH:mm"
         }}</span>
         <span class="state" *ngIf="taskResult.maxPoints !== 0"
-          >{{ taskResult.points }}/{{ taskResult.maxPoints }} Punkte</span
+          >{{ taskResult.points }}/{{ taskResult.maxPoints }}
+          {{ "task.detail.points" | i18nextEager }}</span
         >
         <span class="state" *ngIf="taskResult.maxPoints === 0">
           <span class="state passed" *ngIf="taskResult.passed"
@@ -79,7 +80,8 @@
           >
         </span>
         <span class="state" *ngIf="pending"
-          ><mat-spinner [diameter]="24"></mat-spinner>in Bearbeitung</span
+          ><mat-spinner [diameter]="24"></mat-spinner
+          >{{ "task.detail.processing" | i18nextEager }}</span
         >
       </span>
     </div>
@@ -103,6 +105,7 @@
           [outputFields]="task?.mediaInformation.outputs || []"
           [decimals]="task?.mediaInformation.decimals || 2"
           [content]="latestResult?.extInfo || {}"
+          [lastSubmission]="lastSubmission"
         ></app-submission-spreadsheet>
       </div>
 
@@ -113,7 +116,9 @@
               [disabled]="isFirstTask()"
               mat-icon-button
               (click)="goToPreviousUnresolvedTask()"
-              matTooltip="Vorherige ungelöste Aufgabe"
+              matTooltip="{{
+                'task.detail.previousUnsolvedTaskTooltip' | i18nextEager
+              }}"
             >
               <mat-icon class="material-icons">
                 keyboard_double_arrow_left
@@ -124,7 +129,9 @@
               mat-icon-button
               class="margin-left-4px"
               (click)="goToPreviousTask()"
-              matTooltip="Vorherige Aufgabe"
+              matTooltip="{{
+                'task.detail.previousTaskTooltip' | i18nextEager
+              }}"
             >
               <mat-icon>keyboard_arrow_left</mat-icon>
             </button>
@@ -135,14 +142,14 @@
             color="accent"
             (click)="submission()"
           >
-            Abgeben
+            {{ "task.detail.submit" | i18nextEager }}
           </button>
           <div class="center margin-left-right">
             <button
               [disabled]="isLastTask()"
               mat-icon-button
               (click)="goToNextTask()"
-              matTooltip="Nächste Aufgabe"
+              matTooltip="{{ 'task.detail.tooltip.nextTask' | i18nextEager }}"
             >
               <mat-icon>keyboard_arrow_right</mat-icon>
             </button>
@@ -151,7 +158,9 @@
               mat-icon-button
               (click)="goToNextUnresolvedTask()"
               class="margin-left-4px"
-              matTooltip="Nächste ungelöste Aufgabe"
+              matTooltip="{{
+                'task.detail.tooltip.nextUnsolvedTask' | i18nextEager
+              }}"
             >
               <mat-icon class="material-icons">
                 keyboard_double_arrow_right

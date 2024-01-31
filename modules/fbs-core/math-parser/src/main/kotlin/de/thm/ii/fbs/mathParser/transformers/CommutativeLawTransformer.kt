@@ -6,6 +6,7 @@ import de.thm.ii.fbs.mathParser.ast.*
 import de.thm.ii.fbs.mathParser.transformers.rules.OperatorMatchingRule
 
 class CommutativeLawTransformer : RuleBasedTransformer(
+    OperatorMatchingRule(Operator.EQ) { normalize(it) },
     OperatorMatchingRule(Operator.ADD) { normalize(it) },
     OperatorMatchingRule(Operator.MUL) { normalize(it) }
 ) {

@@ -8,6 +8,7 @@ import { JWTToken } from "src/app/model/JWTToken";
 import { TextConfirmDialogComponent } from "../../../../dialogs/text-confirm-dialog/text-confirm-dialog.component";
 import { NewDbDialogComponent } from "../../../../dialogs/new-db-dialog/new-db-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
+import { SharePlaygroundLinkDialogComponent } from "src/app/dialogs/share-playground-link-dialog/share-playground-link-dialog.component";
 
 @Component({
   selector: "app-db-control-db-overview",
@@ -178,6 +179,23 @@ export class DbControlDbOverviewComponent implements OnInit {
       },
     });
     return dialogRef.afterClosed();
+  }
+
+  getTempURI() {
+    const selectedDb = this.dbs.find((db) => db.id == this.selectedDb);
+    this.sqlPlaygroundService
+      .getSharePlaygroundURI(this.token.id, selectedDb.id)
+      .subscribe((share) => {
+        this.dialog.open(SharePlaygroundLinkDialogComponent, {
+          height: "auto",
+          width: "50%",
+          autoFocus: false,
+          data: {
+            message: `Der URI-Link zu deiner Datenbank \" ${selectedDb.name} \" ist nur für 24 Stunden verfügbar!\n`,
+            uri: share.url,
+          },
+        });
+      });
   }
 
   addDb() {

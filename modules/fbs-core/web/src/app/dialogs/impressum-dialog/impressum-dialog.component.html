@@ -4,5 +4,7 @@
   </div>
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-flat-button color="accent" (click)="close()">Schließen</button>
+  <button mat-flat-button color="accent" (click)="close()">
+    {{ "dialog.impressum.button-label" | i18nextEager }}
+  </button>
 </mat-dialog-actions>

@@ -22,6 +22,8 @@ import { CheckerService } from "../../service/checker.service";
 import { CheckerConfig } from "../../model/CheckerConfig";
 import { CheckerFileType } from "src/app/enums/checkerFileType";
 import { MatSlideToggle } from "@angular/material/slide-toggle";
+import { TaskUpdateConditions } from "src/app/enums/taskUpdateConditions";
+import { SelectedFormFields } from "src/app/model/SelectedFormFields";
 
 const defaultMediaType = "text/plain";
 const defaultrequirement = "mandatory";
@@ -43,15 +45,25 @@ export class TaskNewDialogComponent implements OnInit {
     deadline: new UntypedFormControl(this.getDefaultDeadline()),
     mediaType: new UntypedFormControl(defaultMediaType),
     requirementType: new UntypedFormControl(defaultrequirement),
-    exelFile: new UntypedFormControl(""),
+    excelFile: new UntypedFormControl(""),
     userIDField: new UntypedFormControl(""),
     inputFields: new UntypedFormControl(""),
     outputFields: new UntypedFormControl(""),
     pointFields: new UntypedFormControl(""),
     decimals: new UntypedFormControl(2),
     expCheck: new FormControl<Boolean>(false),
+    // datePickerSelected: new FormControl<Boolean>(false),
   });
-  isUpdate: boolean;
+  updateCondition: TaskUpdateConditions = TaskUpdateConditions.CREATE;
+  allUpdateConditions = TaskUpdateConditions;
+
+  selectedFormFields: SelectedFormFields = {
+    datePicker: false,
+    mediaType: false,
+    requirementType: false,
+    isPrivate: false,
+  };
+
   courseId: number;
   datePickerDisabled: boolean = false;
   task: Task = {
@@ -71,7 +83,7 @@ export class TaskNewDialogComponent implements OnInit {
     if (
       this.taskForm.controls["mediaType"].value == "application/x-spreadsheet"
     ) {
-      this.taskForm.controls["exelFile"].setValidators([Validators.required]);
+      this.taskForm.controls["excelFile"].setValidators([Validators.required]);
       this.taskForm.controls["userIDField"].setValidators([
         Validators.required,
       ]);
@@ -83,13 +95,13 @@ export class TaskNewDialogComponent implements OnInit {
       ]);
       this.taskForm.controls["expCheck"].setValidators([Validators.required]);
     } else {
-      this.taskForm.controls["exelFile"].clearValidators();
+      this.taskForm.controls["excelFile"].clearValidators();
       this.taskForm.controls["userIDField"].clearValidators();
       this.taskForm.controls["inputFields"].clearValidators();
       this.taskForm.controls["outputFields"].clearValidators();
       this.taskForm.controls["expCheck"].clearValidators();
     }
-    this.taskForm.controls["exelFile"].updateValueAndValidity();
+    this.taskForm.controls["excelFile"].updateValueAndValidity();
     this.taskForm.controls["userIDField"].updateValueAndValidity();
     this.taskForm.controls["inputFields"].updateValueAndValidity();
     this.taskForm.controls["outputFields"].updateValueAndValidity();
@@ -110,9 +122,17 @@ export class TaskNewDialogComponent implements OnInit {
     this.courseId = this.data.courseId;
     //this.datePickerDisabled = true;
     if (this.data.task) {
-      this.isUpdate = true;
+      this.updateCondition = TaskUpdateConditions.UPDATE;
       this.task = this.data.task;
+
+      this.selectedFormFields.datePicker = true;
+      this.selectedFormFields.mediaType = true;
+      this.selectedFormFields.requirementType = true;
+      this.selectedFormFields.isPrivate = true;
+
       this.setValues();
+    } else if (this.data.tasks) {
+      this.updateCondition = TaskUpdateConditions.UPDATE_MULTIPLE;
     }
   }
 
@@ -174,7 +194,7 @@ export class TaskNewDialogComponent implements OnInit {
     }
 
     if (this.task.mediaType === "application/x-spreadsheet") {
-      this.taskForm.controls["exelFile"].setValue("loading...");
+      this.taskForm.controls["excelFile"].setValue("loading...");
       this.checkerService
         .getChecker(this.courseId, this.task.id)
         .pipe(map((checkers) => checkers[0]))
@@ -190,7 +210,7 @@ export class TaskNewDialogComponent implements OnInit {
               (spreadsheet) =>
                 (this.spreadsheet = new File([spreadsheet], "spreadsheet.xlsx"))
             );
-          this.taskForm.controls["exelFile"].setValue("not changed");
+          this.taskForm.controls["excelFile"].setValue("not changed");
         });
       let mediaInformation = this.data.task.mediaInformation;
       if (typeof mediaInformation.mediaInformation === "object") {
@@ -299,10 +319,10 @@ export class TaskNewDialogComponent implements OnInit {
     this.task.deadline = event.value.toISOString();
   }
 
-  uploadExel(event: Event) {
+  uploadExcel(event: Event) {
     const file = (event.currentTarget as any).files[0];
     this.spreadsheet = file;
-    this.taskForm.patchValue({ exelFile: file.name });
+    this.taskForm.patchValue({ excelFile: file.name });
   }
 
   getFromSpreadsheet(field: string) {
@@ -343,5 +363,24 @@ export class TaskNewDialogComponent implements OnInit {
 
   setMaxExpirationDate(event: MatSlideToggle) {
     this.datePickerDisabled = event.checked;
+  }
+
+  updateMultipleTaskDetails(tasks: Task[]) {
+    this.getValues();
+    this.taskService
+      .updateMultipleTasks(
+        this.courseId,
+        tasks,
+        this.task,
+        this.selectedFormFields
+      )
+      .subscribe((success) => {
+        if (success) {
+          this.dialogRef.close({ success: true });
+        } else {
+          this.dialogRef.close({ success: false });
+          this.snackBar.open("Error while updating tasks", "ok");
+        }
+      });
   }
 }
