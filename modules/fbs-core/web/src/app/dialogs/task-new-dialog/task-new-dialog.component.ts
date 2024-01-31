@@ -121,8 +121,8 @@ export class TaskNewDialogComponent implements OnInit {
   ngOnInit() {
     this.courseId = this.data.courseId;
     //this.datePickerDisabled = true;
-    
-    if( this.data.courseId && !this.data.task && !this.data.tasks){
+
+    if (this.data.courseId && !this.data.task && !this.data.tasks) {
       // new task
       console.log("create new task");
     } else if (this.data.task) {
