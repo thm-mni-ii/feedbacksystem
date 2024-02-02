@@ -9,7 +9,7 @@ packages = [{include = "api"}]
 python = "^3.10"
 plotly = "^5.13.1"
 pandas = "^1.5.3"
-dash = "^2.8.1"
+dash = "^2.15.0"
 dash-bootstrap-components = "^1.4.1"
 gunicorn = "^20.1.0"
 minio = "^7.1.14"
