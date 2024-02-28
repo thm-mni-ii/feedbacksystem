@@ -12,14 +12,23 @@
   </p>
   <br />
 
-  <span class="header"><b>Parameter:</b></span> <br />
-  <span
-    class="routine-definition"
-    *ngFor="let param of routine.parameters.split(', ')"
-  >
-    {{ param }} <br />
+  <span class="header">
+    <b>Parameter:</b>
+    <i *ngIf="routine.parameters === undefined || routine.parameters === ''">
+      (None)
+    </i>
   </span>
   <br />
+
+  <div *ngIf="routine.parameters !== undefined && routine.parameters !== ''">
+    <span
+      class="routine-definition"
+      *ngFor="let param of routine.parameters.split(',')"
+    >
+      {{ param }} <br />
+    </span>
+    <br />
+  </div>
 
   <p class="header"><b>Definition:</b></p>
   <pre class="routine-definition overflow">{{ routine.definition }}</pre>
