@@ -103,4 +103,10 @@ export class SidebarComponent implements OnInit {
       window.open("/feedbackApp/");
     });
   }
+
+  moveAndHideSidebar(route: string) {
+    console.log("moveAndHideSidebar");
+    this.router.navigate([route]);
+    this.opened = false;
+  }
 }

@@ -25,7 +25,7 @@ export class FbsModellingComponent implements OnInit {
   }
 
   getURL(): SafeResourceUrl {
-    const url = `https://fbs-modelling.mni.thm.de/#/login?jsessionid=${this.token}`;
+    const url = `https://fbs-modelling.mni.thm.de/#/login?jsessionid=${this.token}&iframe=true`;
     this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
     this.cdr.detach(); // stops iframe from reloading
     return this.safeUrl;
