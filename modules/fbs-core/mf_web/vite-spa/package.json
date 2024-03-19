@@ -38,6 +38,7 @@
     "prettier": "^3.0.3",
     "typescript": "~5.4.0",
     "vite": "^5.1.6",
+    "vite-plugin-single-spa": "^0.6.1",
     "vue-tsc": "^2.0.6"
   }
 }
