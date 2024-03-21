@@ -10,7 +10,7 @@ export default defineConfig({
     vue(),
     vitePluginSingleSpa({
       serverPort: 4101,
-      spaEntryPoints: 'src/spa.ts'
+      spaEntryPoints: 'src/main.ts'
     })
   ],
   resolve: {

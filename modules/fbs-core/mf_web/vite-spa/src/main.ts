@@ -1,4 +1,4 @@
-import './assets/main.css'
+// import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
@@ -27,10 +27,13 @@ app.mount('#app')
 const vueLifecycles = singleSpaVue({
   createApp,
   appOptions: {
-    render() {
-      return app
-    }
+    render(h: any) {
+      return h(App)
+    },
+    router
   }
 })
 
-export const { bootstrap, mount, unmount } = vueLifecycles
+export const bootstrap = vueLifecycles.bootstrap
+export const mount = vueLifecycles.mount
+export const unmount = vueLifecycles.unmount
