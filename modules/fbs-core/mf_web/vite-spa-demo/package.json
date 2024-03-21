@@ -1,0 +1,28 @@
+{
+  "name": "vite-spa",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@types/webfontloader": "^1.6.38",
+    "single-spa-vue": "^3.0.0",
+    "vue": "^3.4.15",
+    "vuetify": "^3.5.11",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.28",
+    "@vitejs/plugin-vue": "^5.0.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0",
+    "vite-plugin-single-spa": "^0.6.0",
+    "vite-plugin-vuetify": "^2.0.0",
+    "vue-tsc": "^1.8.27"
+  }
+}
