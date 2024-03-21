@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "@fbs/navbar": "http://localhost:4101/src/spa.ts"
+  }
+}

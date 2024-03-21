@@ -1,0 +1,21 @@
+{
+  "name": "vite-root",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --force",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.0",
+    "vite-plugin-single-spa": "^0.6.0"
+  },
+  "dependencies": {
+    "single-spa": "^6.0.0",
+    "single-spa-layout": "^2.2.0"
+  }
+}

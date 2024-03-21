@@ -9,8 +9,10 @@ export default defineConfig({
   plugins: [
     vue(),
     vitePluginSingleSpa({
+      type: 'mife',
       serverPort: 4101,
-      spaEntryPoints: 'src/main.ts'
+      assetFileNames: '[name].[ext]',
+      spaEntryPoints: 'src/spa.ts'
     })
   ],
   resolve: {
