@@ -1,5 +1,6 @@
 import { h, createApp } from 'vue';
 import singleSpaVue from 'single-spa-vue';
+import vuetify from './plugins/vuetify';
 import App from './App.vue';
 
 const vueLifecycles = singleSpaVue({
@@ -12,7 +13,7 @@ const vueLifecycles = singleSpaVue({
         },
     },
     handleInstance: (app) => {
-        app.use();
+        app.use(vuetify);
     }
 });
 
