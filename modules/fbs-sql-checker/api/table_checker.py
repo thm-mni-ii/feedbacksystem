@@ -82,10 +82,16 @@ def is_join(json_file):  # pylint: disable=R1710
                 list_tables.append(val.lower())
             if isinstance(val, dict):
                 for element in val:
+                    if element == "natural join":
+                        for val1 in val[element]:
+                            if val1 == "value":
+                                list_tables.append(val[element][val1].lower())
                     if element == "value":
                         list_tables.append(val[element].lower())
                     if isinstance(val[element], str) and (
-                        (element not in "name") and (element not in "using")
+                        (element not in "name")
+                        and (element not in "using")
+                        and element != "value"
                     ):
                         list_tables.append(val[element].lower())
                     if is_join_var is True:
@@ -108,6 +114,14 @@ def is_join(json_file):  # pylint: disable=R1710
                         for val1 in val[element]:
                             if val1 == "value":
                                 list_tables.append(val[element][val1].lower())
+                if element == "natural join":
+                    mylist = []
+                    mylist.append(element)
+                    dict1 = {}
+                    dict2 = {}
+                    mylist.append(dict1)
+                    mylist.append(dict2)
+                    list_joins.append(mylist)
             if val == "value":
                 if isinstance(json_file["from"]["value"], dict):
                     if (
