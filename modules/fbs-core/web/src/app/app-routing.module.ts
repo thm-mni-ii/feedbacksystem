@@ -20,8 +20,8 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
-import {EmptyRouteComponent} from "./empty-route/empty-route.component";
-import {APP_BASE_HREF} from "@angular/common";
+import { EmptyRouteComponent } from "./empty-route/empty-route.component";
+import { APP_BASE_HREF } from "@angular/common";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -121,7 +121,7 @@ const routes: Routes = [
   { path: "go/:id", component: GoToComponent },
   { path: "go/:id/:target", component: GoToComponent },
 
-  { path: '**', component: EmptyRouteComponent }
+  { path: "**", component: EmptyRouteComponent },
 ];
 
 /**
@@ -135,6 +135,6 @@ const routes: Routes = [
     }),
   ],
   exports: [RouterModule],
-  providers: [{ provide: APP_BASE_HREF, useValue: '/' }]
+  providers: [{ provide: APP_BASE_HREF, useValue: "/" }],
 })
 export class AppRoutingModule {}
