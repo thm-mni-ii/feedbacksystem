@@ -1,5 +1,5 @@
 {
   "imports": {
-    "@fbs/navbar": "http://localhost:4101/dist/spa.ts"
+    "@fbs/navbar": "http://localhost:4101/dist/spa.js"
   }
 }

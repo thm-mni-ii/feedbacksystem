@@ -21,11 +21,13 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
+      preserveEntrySignatures: "strict",
       output: {
         format: "system",
-      },
+      }
     },
   },
+  
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
