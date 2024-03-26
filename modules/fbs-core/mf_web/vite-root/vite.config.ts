@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [
     vitePluginSingleSpa({
       type: "root",
+      importMaps: {
+        type: "systemjs-importmap",
+      },
     }),
   ],
   // resolve: {

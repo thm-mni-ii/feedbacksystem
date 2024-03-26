@@ -19,6 +19,13 @@ export default defineConfig({
       spaEntryPoints: ["src/spa.ts"],
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        format: "system",
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
