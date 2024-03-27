@@ -1,5 +1,6 @@
 {
   "imports": {
-    "@fbs/navbar": "http://localhost:4101/src/spa.ts"
+    "@fbs/navbar": "http://localhost:4101/dist/spa.js",
+    "@thm-mni-ii/fbs-core": "http://localhost:4200/main.js"
   }
 }
