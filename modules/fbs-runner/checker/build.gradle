@@ -27,7 +27,7 @@ scalastyle {
 
 dependencies {
     compileOnly 'org.scala-lang:scala-library:2.12.17'
-    implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.16.1'
     implementation "io.vertx:vertx-lang-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-config-scala_2.12:${vertxVersion}"
     implementation "io.vertx:vertx-web-scala_2.12:${vertxVersion}"
