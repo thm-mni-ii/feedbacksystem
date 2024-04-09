@@ -2,11 +2,11 @@ FROM node:20-alpine as development
 
 WORKDIR /usr/src/app
 
-COPY package*.json .
+COPY api/backend/package*.json .
 
 RUN npm install
 
-COPY . .
+COPY /api/backend/ .
 
 RUN npm run build
 
@@ -17,9 +17,9 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
 
-COPY package*.json .
+COPY api/backend/package*.json .
 
-RUN npn install --only=production
+RUN npm install --only=production
 
 COPY --from=development /usr/src/app/dist ./dist
 

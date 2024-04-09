@@ -257,7 +257,16 @@ services:
       - URL_BASE_PATH=/eat/
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true
+  
 
+  qkm:
+    build:
+      context: modules/fbs-qcm/
+      target: production
+    ports:
+      - 3000:3000
+    networks:
+        - fbs
 networks:
   classroom:
   fbs:
