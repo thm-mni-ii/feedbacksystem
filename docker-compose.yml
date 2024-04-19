@@ -156,21 +156,16 @@ services:
       retries: 3
 
 
-  mongodb_qkm:
+  mongodb_qcm:
     image: mongo:5.0.6
+    container_name: mongodb_qcm
     restart: unless-stopped
     volumes:
-      - ./data/mongodb:/qkm_data/db
+      - ./data/mongodb/:/data/qcm_db
     ports:
       - "127.0.0.1:27018:27017"
     networks:
       fbs:
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongodb://localhost:27018/ --quiet
-      timeout: 10s
-      interval: 10s
-      start_period: 10s
-      retries: 3
 
 
   minio:
@@ -277,7 +272,7 @@ services:
       - FBS_TLS_NO_VERIFY=true
   
 
-  qkm:
+  qcm:
     build:
       context: modules/fbs-qcm/
       target: production

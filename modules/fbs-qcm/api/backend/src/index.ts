@@ -1,10 +1,16 @@
 import express from "express";
-import { MongoClient } from 'mongodb';
+import { getQuestionById } from "./question/question";
 
 const app = express();
 
-app.get("/api_v1/question", (req, res) => {
-
+app.get("/api_v1/question", async (req, res) => {
+    try {
+        const questionId = req.query.ID as string;
+        const data = await getQuestionById(questionId);
+        res.send(data);
+    } catch (error) {
+        res.send(error);      
+    }
 });
 app.delete("/api_v1/question", (req, res) => {
 
