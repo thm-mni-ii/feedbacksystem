@@ -58,10 +58,10 @@ export class TaskNewDialogComponent implements OnInit {
   allUpdateConditions = TaskUpdateConditions;
 
   selectedFormFields: SelectedFormFields = {
-    datePicker: false,
-    mediaType: false,
-    requirementType: false,
-    isPrivate: false,
+    datePicker: true,
+    mediaType: true,
+    requirementType: true,
+    isPrivate: true,
   };
 
   courseId: number;
@@ -121,17 +121,23 @@ export class TaskNewDialogComponent implements OnInit {
   ngOnInit() {
     this.courseId = this.data.courseId;
     //this.datePickerDisabled = true;
-    if (this.data.task) {
+
+    if (this.data.courseId && !this.data.task && !this.data.tasks) {
+      // new task
+      console.log("create new task");
+    } else if (this.data.task) {
+      // edit one task
       this.updateCondition = TaskUpdateConditions.UPDATE;
       this.task = this.data.task;
 
-      this.selectedFormFields.datePicker = true;
-      this.selectedFormFields.mediaType = true;
-      this.selectedFormFields.requirementType = true;
-      this.selectedFormFields.isPrivate = true;
-
       this.setValues();
     } else if (this.data.tasks) {
+      // edit multiple tasks
+      this.selectedFormFields.datePicker = false;
+      this.selectedFormFields.mediaType = false;
+      this.selectedFormFields.requirementType = false;
+      this.selectedFormFields.isPrivate = false;
+
       this.updateCondition = TaskUpdateConditions.UPDATE_MULTIPLE;
     }
   }
