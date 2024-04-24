@@ -2,7 +2,11 @@ import * as mongoDB from "mongodb";
 
 
 export async function connect() {
-    const uri = 'mongodb://mongodb_qcm:27017/';
+    const uri = process.env.MONGODB_URL; 
+    if(uri == undefined) {
+       console.error("Could not get MongoDB address"); 
+       process.exit(1);
+    }
     const client = new mongoDB.MongoClient(uri)
     try {
         console.log("Connecting");

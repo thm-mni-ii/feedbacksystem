@@ -280,6 +280,10 @@ services:
       - 3000:3000
     networks:
         - fbs
+    environment:
+      - JWT_SECRET=wwwa
+      - MONGODB_URL=mongodb://mongodb_qcm:27017/
+
 
 networks:
   classroom:
