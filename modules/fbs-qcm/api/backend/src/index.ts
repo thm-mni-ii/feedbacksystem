@@ -31,7 +31,6 @@ app.get("/api_v1/question", authenticateToken, async (req, res) => {
                 res.sendStatus(403);
             }
         }
-        
     } catch (error) {
         res.sendStatus(500);
     }
