@@ -63,13 +63,22 @@ app.delete("/api_v1/question", authenticateToken, async (req, res) => {
 app.put("/api_v1/question", (req, res) => {
 });
 app.post("/api_v1/question", authenticateToken, async (req, res) => {
-    if(req.user == undefined) {
+    try {
+        if(req.user == undefined) {
             res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const requestData = req.body;
+            const data = await postQuestion(requestData, req.user, requestData.course); 
+            if(data !== null && Object.keys(data).length > 0) {
+                res.sendStatus(201);
+            } else {
+                res.sendStatus(403);
+            }
+        }
+    } catch (error) {
+        res.sendStatus(500);
     }
-    const requestData = req.body;
-    console.log(requestData);
-    const data = await postQuestion(requestData, req.user); 
-    res.sendStatus(201);
 });
 app.get("/api_v1/category", (req, res) => {
 

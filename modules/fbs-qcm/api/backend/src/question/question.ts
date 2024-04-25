@@ -36,13 +36,14 @@ export async function putQuestion(questionId: string, data: JSON) {
     return 0;
 }
 
-export async function postQuestion(data: JSON, tokenData: JwtPayload) {
-   // const adminCourses = getAdminCourseRoles(tokenData);
-   // adminCourses.some(course => course == data["course"]);
-   // const database: mongoDB.Db = await connect();
-   // const collection: mongoDB.Collection = database.collection("question");
-   // const response = collection.insertOne(data);
-   // return response;
+export async function postQuestion(data: JSON, tokenData: JwtPayload, course: number) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const isInCourses = adminCourses.some(adminCourse => adminCourse == course); 
+    if(!isInCourses) return {};
+    const database: mongoDB.Db = await connect();
+    const collection: mongoDB.Collection = database.collection("question");
+    const response = collection.insertOne(data);
+    return data;
 }
 
 function getAdminCourseRoles(tokenData: JwtPayload) {
