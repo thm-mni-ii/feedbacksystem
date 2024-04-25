@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { getQuestionById } from "./question/question";
+import { postQuestion, getQuestionById, deleteQuestionById } from "./question/question";
 
 interface User {
     username: string;
@@ -15,6 +15,10 @@ declare global {
 }
 
 const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 app.get("/api_v1/question", authenticateToken, async (req, res) => {
     try {
@@ -35,14 +39,37 @@ app.get("/api_v1/question", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.delete("/api_v1/question", (req, res) => {
+app.delete("/api_v1/question", authenticateToken, async (req, res) => {
+    try {
+        const questionId = req.query.ID as string;
+        console.log(req.user);
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const data = await deleteQuestionById(questionId, req.user);
+            console.log(data);
+            if(data !== null && Object.keys(data).length > 0) {
+                res.send(data);
+            } else {
+                res.sendStatus(500);
+            }
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
 
 });
 app.put("/api_v1/question", (req, res) => {
-
 });
-app.post("/api_v1/question", (req, res) => {
-
+app.post("/api_v1/question", authenticateToken, async (req, res) => {
+    if(req.user == undefined) {
+            res.sendStatus(401);
+    }
+    const requestData = req.body;
+    console.log(requestData);
+    const data = await postQuestion(requestData, req.user); 
+    res.sendStatus(201);
 });
 app.get("/api_v1/category", (req, res) => {
 
