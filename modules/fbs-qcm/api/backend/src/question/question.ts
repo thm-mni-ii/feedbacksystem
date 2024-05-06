@@ -36,7 +36,7 @@ export async function putQuestion(questionId: string, data: JSON) {
     return 0;
 }
 
-export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: number) {
+export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
     console.log(adminCourses);
     const searchQuery = {
