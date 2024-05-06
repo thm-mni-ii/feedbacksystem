@@ -69,8 +69,12 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
         }
         if(req.user !== undefined) {
             const requestData = req.body;
-            const data = await postQuestion(requestData, req.user, requestData.course); 
-            if(data !== null && Object.keys(data).length > 0) {
+            const catalog = requestData.catalog;
+            delete requestData.catalog;
+            const data = await postQuestion(requestData, req.user, catalog); 
+            if(data === -1) {
+                res.sendStatus(403);
+            }else if(data !== null && Object.keys(data).length > 0) {
                 res.sendStatus(201);
             } else {
                 res.sendStatus(403);

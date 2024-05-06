@@ -36,22 +36,40 @@ export async function putQuestion(questionId: string, data: JSON) {
     return 0;
 }
 
-export async function postQuestion(data: JSON, tokenData: JwtPayload, course: number) {
+export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: number) {
     const adminCourses = getAdminCourseRoles(tokenData);
-    const isInCourses = adminCourses.some(adminCourse => adminCourse == course); 
-    if(!isInCourses) return {};
+    console.log(adminCourses);
+    const searchQuery = {
+    system_id: {$in: adminCourses}, 
+    catalogs: catalog
+    };
+    console.log(searchQuery);
     const database: mongoDB.Db = await connect();
-    const collection: mongoDB.Collection = database.collection("question");
-    const response = collection.insertOne(data);
+    const collection: mongoDB.Collection = database.collection("course");
+    const result = await collection.find(searchQuery).toArray();
+    console.log(result.length);
+    console.log(result);
+    if (result.length > 0) {
+        const collection_question: mongoDB.Collection = database.collection("question");
+        const response = collection_question.insertOne(data);
+    } else {
+        return -1;
+    }
     return data;
 }
 
 function getAdminCourseRoles(tokenData: JwtPayload) {
+    console.log(tokenData);
     let coursesAdmin: number[] = [];
-    for (let key in tokenData['courseRoles']) {
-        if(tokenData['courseRoles'][key] == "TUTOR" || tokenData['courseRoles'][key] == "DOCENT") {
-            coursesAdmin.push(parseInt(key, 10));
+    const courseRolesObject = JSON.parse(tokenData.courseRoles);
+    for (const courseId in courseRolesObject) {
+      if (courseRolesObject.hasOwnProperty(courseId)) {
+        const role = courseRolesObject[courseId];
+        if(role == "TUTOR" || role == "DOCENT") {
+            coursesAdmin.push(parseInt(courseId));
         }
+      }
     }
+    console.log(coursesAdmin);
     return coursesAdmin;
 }
