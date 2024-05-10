@@ -160,7 +160,7 @@ services:
     container_name: mongodb_qcm
     restart: unless-stopped
     volumes:
-      - ./data/mongodb/:/data/qcm_db
+      - ./data/mongodb_qcm/:/data/qcm_db
     ports:
       - "127.0.0.1:27018:27017"
     networks:
@@ -282,7 +282,8 @@ services:
     environment:
       - JWT_SECRET=wwwa
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
-
+    depends_on:
+      - mongodb_qcm
 
 networks:
   classroom:

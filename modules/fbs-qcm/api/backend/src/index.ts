@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { postQuestion, getQuestionById, deleteQuestionById } from "./question/question";
+import { postQuestion, getQuestionById, deleteQuestionById, putQuestion} from "./question/question";
 
 interface User {
     username: string;
@@ -60,9 +60,7 @@ app.delete("/api_v1/question", authenticateToken, async (req, res) => {
     }
 
 });
-app.put("/api_v1/question", (req, res) => {
-});
-app.post("/api_v1/question", authenticateToken, async (req, res) => {
+app.put("/api_v1/question/", authenticateToken, async (req, res) => {
     try {
         if(req.user == undefined) {
             res.sendStatus(401);
@@ -70,8 +68,33 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
         if(req.user !== undefined) {
             const requestData = req.body;
             const catalog = requestData.catalog;
+            const questionId = req.query.questionID as string;
             delete requestData.catalog;
+            const data = await putQuestion(questionId, requestData, req.user, catalog); 
+            if(data === -1) {
+                res.sendStatus(403);
+            } else {
+                res.sendStatus(200);
+            }
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+});
+app.post("/api_v1/question", authenticateToken, async (req, res) => {
+    try {
+        console.log("HELLO");
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            console.log("2");
+            const requestData = req.body;
+            const catalog = requestData.catalog;
+            delete requestData.catalog;
+            console.log("3");
             const data = await postQuestion(requestData, req.user, catalog); 
+            console.log("4");
             if(data === -1) {
                 res.sendStatus(403);
             }else if(data !== null && Object.keys(data).length > 0) {
@@ -83,6 +106,9 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
     } catch (error) {
         res.sendStatus(500);
     }
+});
+app.get("/api_v1/allquestions", authenticateToken, (req, res) => {
+
 });
 app.get("/api_v1/category", (req, res) => {
 
@@ -97,12 +123,6 @@ app.post("/api_v1/category", (req, res) => {
 
 });
 app.get("/api_v1/submission", (req, res) => {
-
-});
-app.delete("/api_v1/submission", (req, res) => {
-
-});
-app.put("/api_v1/submission", (req, res) => {
 
 });
 app.post("/api_v1/submission", (req, res) => {
