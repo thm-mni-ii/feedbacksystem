@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { postCatalog, getCatalog, deleteCatalog } from "./catalog/catalog";
+import { postCatalog, getCatalog, deleteCatalog, putCatalog } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion} from "./question/question";
 
 interface User {
@@ -24,7 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/api_v1/question", authenticateToken, async (req, res) => {
     try {
         const questionId = req.query.ID as string;
-        console.log(req.user);
         if(req.user == undefined) {
             res.sendStatus(401);
         }
@@ -43,13 +42,11 @@ app.get("/api_v1/question", authenticateToken, async (req, res) => {
 app.delete("/api_v1/question", authenticateToken, async (req, res) => {
     try {
         const questionId = req.query.ID as string;
-        console.log(req.user);
         if(req.user == undefined) {
             res.sendStatus(401);
         }
         if(req.user !== undefined) {
             const data = await deleteQuestionById(questionId, req.user);
-            console.log(data);
             if(data !== null && Object.keys(data).length > 0) {
                 res.send(data);
             } else {
@@ -105,7 +102,6 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
     }
 });
 app.get("/api_v1/allquestions", authenticateToken, (req, res) => {
-
 });
 app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
@@ -143,8 +139,25 @@ app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.put("/api_v1/catalog", (req, res) => {
-
+app.put("/api_v1/catalog",authenticateToken, async (req, res) => {
+    try {
+        if (req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const requestData = req.body;
+            const course = requestData.course;
+            const questionId = req.query.ID as string;
+            delete requestData.course;
+            const data = await putCatalog(questionId, requestData, req.user, course);
+            if(data == -1) {
+                res.sendStatus(403);
+            }
+            res.sendStatus(200);
+        }
+    } catch {
+        res.sendStatus(500);
+    }
 });
 app.post("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
