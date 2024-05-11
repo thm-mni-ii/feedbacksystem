@@ -79,7 +79,7 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     const adminCourses = getAdminCourseRoles(tokenData); 
     const database: mongoDB.Db = await connect();
     const courseResult = await getCatalogPermission(adminCourses, catalog);
-    if (courseResult.length == 0) {
+    if (courseResult == null || courseResult.length == 0) {
         return -1;
     }
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
