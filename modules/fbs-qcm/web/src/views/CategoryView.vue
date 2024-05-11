@@ -3,11 +3,9 @@
 </template>
 
 <script setup lang="ts">
+import catService from '../services/cat.service'
 
-import catService from "../services/cat.service"
-
-catService.postCat()
-
+catService.postCat().then((res) => console.log(res.data))
 
 const items = [
   {

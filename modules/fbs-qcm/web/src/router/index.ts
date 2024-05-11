@@ -13,6 +13,11 @@ const router = createRouter({
       path: '/categories',
       name: 'categories',
       component: () => import('../views/CategoryView.vue')
+    },
+    {
+      path: '/form',
+      name: 'form',
+      component: () => import('../views/FormView.vue')
     }
     // {
     //   path: '/about',

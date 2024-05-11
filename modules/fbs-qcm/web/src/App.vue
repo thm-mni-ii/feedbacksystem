@@ -1,6 +1,7 @@
 <template>
   <v-btn @click="router.push('/')">Home</v-btn>
   <v-btn @click="router.push('/categories')">Category</v-btn>
+  <v-btn @click="router.push('/form')">Form</v-btn>
 
   <RouterView />
 </template>
