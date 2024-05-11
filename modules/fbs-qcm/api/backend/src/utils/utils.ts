@@ -35,6 +35,6 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
         catalogs: catalogId
     }
     const courseCollection: mongoDB.Collection = database.collection("course");
-    const courseResult = await courseCollection.find(courseQuery).toArray();
+    const courseResult = await courseCollection.findOne(courseQuery);
     return courseResult;
 }

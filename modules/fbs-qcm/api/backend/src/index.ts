@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { postCatalog, getCatalog} from "./catalog/catalog";
+import { postCatalog, getCatalog, deleteCatalog } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion} from "./question/question";
 
 interface User {
@@ -125,8 +125,23 @@ app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.delete("/api_v1/catalog", (req, res) => {
-
+app.delete("/api_v1/catalog", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        const catalogId = req.query.ID as string;
+        if(req.user !== undefined) {
+            const data = await deleteCatalog(req.user, catalogId); 
+            if(data == -1) {
+                res.sendStatus(403);
+            } else {
+                res.send(data);
+            }
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
 });
 app.put("/api_v1/catalog", (req, res) => {
 

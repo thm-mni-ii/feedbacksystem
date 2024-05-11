@@ -42,7 +42,6 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
     };
     console.log(query);
     const database: mongoDB.Db = await connect();
-    const courseCollection: mongoDB.Collection = database.collection("course");
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
     console.log(catalogPermission)
@@ -50,5 +49,38 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
         return -1;
     }
     const data = await catalogCollection.findOne(query);
+    return data;
+}
+
+export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const query  = {
+        _id: catalogIdObject
+    };
+    console.log(query);
+    const database: mongoDB.Db = await connect();
+    const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogPermission: any = await getCatalogPermission(adminCourses, catalogId);
+    console.log(catalogPermission)
+    if(catalogPermission === null || catalogPermission.length === 0) {
+        return -1;
+    }
+    const data = await catalogCollection.deleteOne(query);
+    console.log(catalogPermission._id);
+     const filter = {
+        _id: catalogPermission._id
+    }
+    const update = {
+        $pull: { catalogs: catalogIdObject } as mongoDB.UpdateFilter<any>
+    };
+    console.log(filter);
+    console.log(update);
+    const res = await courseCollection.updateOne(filter, update);
+    console.log("RES");
+    console.log(res);
+    console.log("DATA");
+    console.log(data);
     return data;
 }
