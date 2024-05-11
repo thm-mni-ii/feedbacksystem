@@ -1,10 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
+import { getAdminCourseRoles, getElementFromArray } from "../utils/utils";
 import * as mongoDB from "mongodb";
-
-interface catalogs {
-    catalog: string
-};
 
 export async function getQuestionById(questionId: string, tokenData: JwtPayload) {
     const adminCourses = getAdminCourseRoles(tokenData);
@@ -144,19 +141,6 @@ async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: 
     return 0;
 }
 
-function getAdminCourseRoles(tokenData: JwtPayload) {
-    let coursesAdmin: number[] = [];
-    const courseRolesObject = JSON.parse(tokenData.courseRoles);
-    for (const courseId in courseRolesObject) {
-        if (courseRolesObject.hasOwnProperty(courseId)) {
-            const role = courseRolesObject[courseId];
-            if(role == "TUTOR" || role == "DOCENT") {
-                coursesAdmin.push(parseInt(courseId));
-        }
-      }
-    }
-    return coursesAdmin;
-}
 
 async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
                                   courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection) {
@@ -183,14 +167,4 @@ async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCour
     return catalogWithQuestion;
 }
 
-function getElementFromArray(array: mongoDB.ObjectId[], element: mongoDB.ObjectId) {
-    let index = -1;
-    for( let i = 0; i < array.length; i++) {
-        if( JSON.stringify(array[i]) == JSON.stringify(element)) {
-            index = i;
-            break;
-        }
-    }
-    return index; 
-}
 

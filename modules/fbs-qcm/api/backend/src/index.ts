@@ -1,5 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
+import { postCatalog } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion} from "./question/question";
 
 interface User {
@@ -83,18 +84,14 @@ app.put("/api_v1/question/", authenticateToken, async (req, res) => {
 });
 app.post("/api_v1/question", authenticateToken, async (req, res) => {
     try {
-        console.log("HELLO");
         if(req.user == undefined) {
             res.sendStatus(401);
         }
         if(req.user !== undefined) {
-            console.log("2");
             const requestData = req.body;
             const catalog = requestData.catalog;
             delete requestData.catalog;
-            console.log("3");
             const data = await postQuestion(requestData, req.user, catalog); 
-            console.log("4");
             if(data === -1) {
                 res.sendStatus(403);
             }else if(data !== null && Object.keys(data).length > 0) {
@@ -110,17 +107,34 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
 app.get("/api_v1/allquestions", authenticateToken, (req, res) => {
 
 });
-app.get("/api_v1/category", (req, res) => {
+app.get("/api_v1/catalog", (req, res) => {
 
 });
-app.delete("/api_v1/category", (req, res) => {
+app.delete("/api_v1/catalog", (req, res) => {
 
 });
-app.put("/api_v1/category", (req, res) => {
+app.put("/api_v1/catalog", (req, res) => {
 
 });
-app.post("/api_v1/category", (req, res) => {
-
+app.post("/api_v1/catalog", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const requestData = req.body;
+            const course = requestData.course;
+            delete requestData.course;
+            const data = await postCatalog(requestData, req.user, course); 
+            if(data == 0) {
+                res.sendStatus(201);
+            } else {
+                res.sendStatus(403);
+            }
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
 });
 app.get("/api_v1/submission", (req, res) => {
 
