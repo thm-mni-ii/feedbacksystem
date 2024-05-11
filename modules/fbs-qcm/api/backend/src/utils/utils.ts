@@ -1,4 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
+import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 
 export function getAdminCourseRoles(tokenData: JwtPayload) {
@@ -24,4 +25,16 @@ export function getElementFromArray(array: mongoDB.ObjectId[], element: mongoDB.
         }
     }
     return index; 
+}
+
+export async function getCatalogPermission(adminCourses: number[], catalog: string) {
+    const database: mongoDB.Db = await connect();
+    const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
+    const courseQuery = {
+        system_id: {$in: adminCourses},
+        catalogs: catalogId
+    }
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const courseResult = await courseCollection.find(courseQuery).toArray();
+    return courseResult;
 }

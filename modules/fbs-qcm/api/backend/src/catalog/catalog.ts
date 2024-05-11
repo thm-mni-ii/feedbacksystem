@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray } from "../utils/utils";
+import { getAdminCourseRoles, getElementFromArray, getCatalogPermission } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
@@ -33,5 +33,22 @@ export async function postCatalog(data: JSON, tokenData: JwtPayload, course: str
     } else {
         return -1;
     }
+}
 
+export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const query  = {
+        _id:new mongoDB.ObjectId(catalogId)
+    };
+    console.log(query);
+    const database: mongoDB.Db = await connect();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
+    console.log(catalogPermission)
+    if(catalogPermission === null || catalogPermission.length === 0) {
+        return -1;
+    }
+    const data = await catalogCollection.findOne(query);
+    return data;
 }

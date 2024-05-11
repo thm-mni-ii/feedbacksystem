@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray } from "../utils/utils";
+import { getAdminCourseRoles, getElementFromArray, getCatalogPermission } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function getQuestionById(questionId: string, tokenData: JwtPayload) {
@@ -103,18 +103,6 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     }
     const res = await questionCollection.replaceOne(filter, data); 
     return res;
-}
-
-async function getCatalogPermission(adminCourses: number[], catalog: string) {
-    const database: mongoDB.Db = await connect();
-    const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
-    const courseQuery = {
-        system_id: {$in: adminCourses},
-        catalogs: catalogId
-    }
-    const courseCollection: mongoDB.Collection = database.collection("course");
-    const courseResult = await courseCollection.find(courseQuery).toArray();
-    return courseResult;
 }
 
 
