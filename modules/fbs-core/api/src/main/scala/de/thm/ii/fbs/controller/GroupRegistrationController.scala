@@ -1,15 +1,12 @@
 package de.thm.ii.fbs.controller
 
-import com.fasterxml.jackson.databind.JsonNode
-import de.thm.ii.fbs.controller.exception.{BadRequestException, ForbiddenException, ResourceNotFoundException, MembershipExceededException}
-import de.thm.ii.fbs.model.{Group, CourseRole, GlobalRole, User, Participant}
+import de.thm.ii.fbs.controller.exception.{ForbiddenException, MembershipExceededException, ResourceNotFoundException}
+import de.thm.ii.fbs.model.{CourseRole, GlobalRole, Group, Participant}
 import de.thm.ii.fbs.services.persistence._
 import de.thm.ii.fbs.services.security.AuthService
-import de.thm.ii.fbs.util.JsonWrapper._
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation._
 
@@ -32,13 +29,12 @@ class GroupRegistrationController {
 
   /**
     * Add a user to a group within a course
-    * 
+    *
     * @param cid Course id
     * @param gid Group id
     * @param uid User id
     * @param req http request
     * @param res http response
-    * @param body Content
     */
   @PutMapping(value = Array("/courses/{cid}/groups/{gid}/users/{uid}"), consumes = Array(MediaType.APPLICATION_JSON_VALUE))
   def addUserToGroup(@PathVariable("cid") cid: Int, @PathVariable("gid") gid: Int, @PathVariable("uid") uid: Int,
@@ -48,16 +44,16 @@ class GroupRegistrationController {
     val hasCoursePrivileges = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)  == CourseRole.DOCENT
     if (hasGlobalPrivileges || hasCoursePrivileges ||  user.id == uid) {
       //Check if the group is full
-      val currentMembership = groupRegistrationService.getGroupMembership(cid,gid)
+      val currentMembership = groupRegistrationService.getGroupMembership(cid, gid)
       val group = groupService.get(cid, gid)
       group match {
         case Some(group) => val maxMembership: Int = group.membership
         if (currentMembership < maxMembership) {
           groupRegistrationService.addUserToGroup(uid, cid, gid)
         } else {
-          throw new MembershipExceededException() 
+          throw new MembershipExceededException()
         }
-        case _ => throw new ResourceNotFoundException() 
+        case _ => throw new ResourceNotFoundException()
       }
     } else {
       throw new ForbiddenException()
@@ -66,7 +62,7 @@ class GroupRegistrationController {
 
   /**
     * Remove a user from a group
-    * 
+    *
     * @param uid User id
     * @param cid Course id
     * @param gid Group id
@@ -74,7 +70,8 @@ class GroupRegistrationController {
     * @param res http response
     */
   @DeleteMapping(value = Array("/courses/{cid}/groups/{gid}/users/{uid}"))
-  def removeUserFromGroup(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("gid") gid: Int, req: HttpServletRequest, res: HttpServletResponse): Unit = {
+  def removeUserFromGroup(@PathVariable("uid") uid: Int, @PathVariable("cid") cid: Int, @PathVariable("gid") gid: Int,
+                          req: HttpServletRequest, res: HttpServletResponse): Unit = {
     val user = authService.authorize(req, res)
     val hasGlobalPrivileges = user.hasRole(GlobalRole.ADMIN, GlobalRole.MODERATOR)
     val hasCoursePrivileges = courseRegistrationService.getCoursePrivileges(user.id).getOrElse(cid, CourseRole.STUDENT)  == CourseRole.DOCENT
@@ -87,7 +84,7 @@ class GroupRegistrationController {
 
   /**
     * Remove all users from a group
-    * 
+    *
     * @param cid Course id
     * @param gid Group id
     * @param req http request
@@ -107,7 +104,7 @@ class GroupRegistrationController {
 
   /**
     * Retrieve all groups of a specific user
-    * 
+    *
     * @param uid User id
     * @param req http request
     * @param res http response
@@ -131,7 +128,7 @@ class GroupRegistrationController {
     * @param gid Group id
     * @param req http request
     * @param res http response
-    * @return List of course participants 
+    * @return List of course participants
     */
   @GetMapping(value = Array("/courses/{cid}/groups/{gid}/participants"))
   @ResponseBody
@@ -146,8 +143,3 @@ class GroupRegistrationController {
     }
   }
 }
-
-
- 
-
-

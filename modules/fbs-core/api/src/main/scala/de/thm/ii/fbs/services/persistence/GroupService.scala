@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Component
 
 /**
-  * Handles the creation, deletion and modifications of groups persistant state.
+  * Handles the creation, deletion and modifications of groups persistent state.
   */
 @Component
 class GroupService{
@@ -28,7 +28,7 @@ class GroupService{
     s"SELECT group_id, course_id, name, membership, visible FROM `group` WHERE" + (if (ignoreHidden) " visible = 1 AND" else "") + s" course_id = $cid",
     (res, _) => parseResult(res)
   )
- 
+
   /**
     * Create a new group
     *
@@ -44,7 +44,6 @@ class GroupService{
       }
   }
 
-
   /**
     * Get a single group by id
     *
@@ -56,7 +55,6 @@ class GroupService{
     "SELECT group_id, course_id, name, membership, visible FROM `group` WHERE course_id = ? AND group_id = ?",
     (res, _) => parseResult(res), cid, gid).headOption
 
-
   /**
     * Update a single group by id
     *
@@ -66,7 +64,8 @@ class GroupService{
     * @return True if successful
     */
   def update(cid: Int, gid: Int, group: Group): Boolean = {
-    1 == DB.update("UPDATE `group` SET name = ?, membership = ?, visible = ? WHERE course_id = ? AND group_id = ?", group.name, group.membership, group.visible,cid, gid)
+    1 == DB.update("UPDATE `group` SET name = ?, membership = ?, visible = ? WHERE course_id = ? AND group_id = ?",
+      group.name, group.membership, group.visible, cid, gid)
   }
 
   /**
@@ -77,7 +76,6 @@ class GroupService{
     * @return True if successful
     */
   def delete(cid: Int, gid: Int): Boolean = 1 == DB.update("DELETE FROM `group` WHERE course_id = ? AND group_id = ?", cid, gid)
-
 
   private def parseResult(res: ResultSet): Group = Group(
     id = res.getInt("group_id"),
