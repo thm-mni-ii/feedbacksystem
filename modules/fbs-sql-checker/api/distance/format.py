@@ -1,6 +1,6 @@
 import re
 import sqlparse
-import constants as c
+from . import constants as c
 
 
 def format_alias(ident: str):
@@ -36,3 +36,11 @@ def format_parenthesis(ident: str):
 
 def format_whitespace(ident: str):
     return ident.replace(" ", "")
+
+
+def format_like(ident: str):
+    if f"{c.NOT} {c.LIKE}" in ident:
+        ident = ident.replace(f"{c.NOT} {c.LIKE}", '!=')
+    elif c.LIKE in ident:
+        ident = ident.replace(c.LIKE, '=')
+    return ident

@@ -15,6 +15,8 @@ FROM python:3.10-alpine
 
 WORKDIR "/app"
 
+RUN apk update && apk add libpq
+
 RUN adduser \
   --disabled-password \
   --home "$(pwd)" \

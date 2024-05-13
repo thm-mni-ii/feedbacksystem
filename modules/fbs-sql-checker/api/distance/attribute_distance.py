@@ -1,16 +1,14 @@
 import re
-import constants as c
+from . import constants as c
 import uuid
-import format as f
-
-operation_map: dict[str, str, str] = {}
+from . import format as f
 
 
 def get_attributes_distance(ref: list[str], query: list[str]):
     moves = 0
     # distance is equal to 0 if * is used
     if ref.__contains__("*"):
-        moves = 0
+        return 0
     # check for order of attributes and add RMU
     elif sorted(ref) == sorted(query):
         for r in ref:
@@ -70,6 +68,7 @@ def _get_operation_distance(ref_list: list[str], query_list: list[str]):
 
 # Jaccard index may not be the best method to measure the distance of two mathematical expressions
 def _calculate_expression_similarity(ref_exp: list[str], query_exp: list[str]):
+    operation_map: dict[str, str, str] = {}
     diff = 0
     for r, q in zip(ref_exp, query_exp):
         # Parenthesis formatting 

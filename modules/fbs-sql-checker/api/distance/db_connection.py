@@ -1,20 +1,20 @@
 import psycopg2
-import constants as c
 from dotenv import load_dotenv
 import os
 
-connection = None
 
-load_dotenv()
-HOSTNAME = os.getenv('HOSTNAME')
-DB_NAME = os.getenv('DB_NAME')
-USERNAME = os.getenv('DB_USERNAME')
-PASSWORD = os.getenv('PASSWORD')
-PORT_ID = os.getenv('PORT_ID')
 
-#print(HOSTNAME, DB_NAME, USERNAME, PASSWORD, PORT_ID)
 
 def setup_db(att_list):
+    connection = None
+
+    load_dotenv()
+    HOSTNAME = os.getenv('HOSTNAME')
+    DB_NAME = os.getenv('DB_NAME')
+    USERNAME = os.getenv('DB_USERNAME')
+    PASSWORD = os.getenv('PASSWORD')
+    PORT_ID = os.getenv('PORT_ID')
+    
     with psycopg2.connect(
             host=HOSTNAME,
             dbname=DB_NAME,

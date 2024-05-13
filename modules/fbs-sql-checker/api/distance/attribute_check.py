@@ -1,33 +1,29 @@
 import sqlparse
-import constants as c
-import attribute_distance as att_dist
-import format as f
-import result_log as log
+from . import constants as c
+from . import attribute_distance as att_dist
+from . import format as f
+from . import result_log as log
 
-
-ref_pro_att: list[str] = []
-query_pro_att: list[str] = []
-
-ref_cmd_list: list[str] = []
-query_cmd_list: list[str] = []
-
-ref_distinct_list: list[str] = []
-query_distinct_list: list[str] = []
-
-ref_map: dict[str, dict[str, str]] = {}
-query_map: dict[str, dict[str, str]] = {}
 
 
 def extract_attributes(ref, query):
+    
+    ref_pro_att: list[str] = []
+    query_pro_att: list[str] = []
+    
+    ref_cmd_list: list[str] = []
+    query_cmd_list: list[str] = []
+    
+    ref_distinct_list: list[str] = []
+    query_distinct_list: list[str] = []
+    
+    ref_map: dict[str, dict[str, str]] = {}
+    query_map: dict[str, dict[str, str]] = {}
     _token_iteration(ref, ref_map, ref_pro_att, ref_cmd_list, ref_distinct_list)
     _token_iteration(query, query_map, query_pro_att, query_cmd_list, query_distinct_list)
     
     
     log.write_to_log(f"attribute aliases: reference: {ref_map}; query: {query_map}\n\nattributes before order: reference: {ref_pro_att}; query: {query_pro_att}\n")
-    #print(f"REF MAP: {ref_map}\nQuery Map: {query_map}\n")
-    #print("Projection attributes before order: ", ref_pro_att, query_pro_att)
-
-    #print(f"COMMAND LIST HERE {ref_cmd_list}, QUERY {query_cmd_list}")
 
     attribute_distance = att_dist.get_attributes_distance(ref_pro_att, query_pro_att)
 

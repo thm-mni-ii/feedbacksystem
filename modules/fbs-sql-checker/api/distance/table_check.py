@@ -1,42 +1,37 @@
 import sqlparse
-import constants as c
-import table_distance as tab_dist
-import format as f
+from . import constants as c
+from . import table_distance as tab_dist
+from . import format as f
 import re
-import result_log as log
-
-ref_tab_name: list[str] = []
-query_tab_name: list[str] = []
-
-ref_alias_map: dict[str, str] = {}
-query_alias_map: dict[str, str] = {}
-
-ref_join_list: list[str] = []
-query_join_list: list[str] = []
-
-ref_comp_list: list[str] = []
-query_comp_list: list[str] = []
-
-ref_order_list: list[str] = []
-query_order_list: list[str] = []
-
-ref_group_list: list[str] = []
-query_group_list: list[str] = []
-
-ref_having_list: list[str] = []
-query_having_list: list[str] = []
-
+from . import result_log as log
 
 def extract_tables(ref, query):
+    ref_tab_name: list[str] = []
+    query_tab_name: list[str] = []
+    
+    ref_alias_map: dict[str, str] = {}
+    query_alias_map: dict[str, str] = {}
+    
+    ref_join_list: list[str] = []
+    query_join_list: list[str] = []
+    
+    ref_comp_list: list[str] = []
+    query_comp_list: list[str] = []
+    
+    ref_order_list: list[str] = []
+    query_order_list: list[str] = []
+    
+    ref_group_list: list[str] = []
+    query_group_list: list[str] = []
+    
+    ref_having_list: list[str] = []
+    query_having_list: list[str] = []
     _token_iteration(ref, ref_alias_map, ref_tab_name, ref_join_list, 
                      ref_comp_list, ref_order_list, ref_group_list,
                      ref_having_list)
     _token_iteration(query, query_alias_map, query_tab_name, 
                      query_join_list, query_comp_list, query_order_list,
                      query_group_list, query_having_list)
-
-    #print(f"REF ALIAS {ref_alias_map}, QUE ALIAS {query_alias_map}\n")
-    #print(f"REF TAB {ref_tab_name}, QUE TAB {query_tab_name}")
 
     from_distance = tab_dist.get_from_clause_distance(ref_tab_name, query_tab_name, ref_join_list, query_join_list)
 
@@ -48,28 +43,13 @@ def extract_tables(ref, query):
     log.write_to_log(f"having attributes: reference: {ref_having_list}; query: {query_having_list}\n")
     log.write_to_log(f"order by attributes: reference: {ref_order_list}; query: {query_order_list}\n")
 
-
-    #print(f"REF COMP {ref_comp_list}, QUE COMP {query_comp_list}")
-
     comparison_distance = tab_dist.comparison_distance(ref_comp_list, query_comp_list)
     
-    #print("comparison_distance", comparison_distance)
-#
-    #print(f"REF JOIN/WHERE {ref_join_list}, QUE JOIN/WHERE {query_join_list}")
-#
-    #print(f"REF ORDER BY {ref_order_list}, QUE ORDER BY {query_order_list}")
-#
-    #print(f"REF GROUP BY {ref_group_list}, QUE GROUP By {query_group_list}")
-
     order_distance = tab_dist.group_and_order_by_distance(ref_order_list, query_order_list)
-    #print("order dist", order_distance)
 
     group_by_distance = tab_dist.group_and_order_by_distance(ref_group_list, query_group_list)
-    #print("group_by_distance dist", group_by_distance)
 
-    #print(f"REF having_distance {ref_having_list}, QUE having_distance {query_having_list}")
     having_distance = tab_dist.group_and_order_by_distance(ref_having_list, query_having_list)
-    #print("having_distance dist", having_distance)
 
     log.write_to_log(f"Distance: table and data retrieval clause = {from_distance}, comparison equations = {comparison_distance}, group by = {group_by_distance}, having = {having_distance}, order by = {order_distance}\n")
 
@@ -83,8 +63,8 @@ def _token_iteration(tokens: sqlparse.sql.Statement, tab_map: dict, name_list: l
             # Parenthesis check
             if isinstance(token, sqlparse.sql.Parenthesis):
                 #TODO: iterate through elements inside Parenthesis
-                #print("Parenthesis error")
-                continue
+                print("Parenthesis error")
+                #continue
             # check and extract tables used after the FROM keyword
             if token.ttype == sqlparse.tokens.Keyword and token.value == c.FROM:
                 _extract_from(tokens, i, tab_map, name_list)
@@ -129,24 +109,23 @@ def _extract_on(tokens, i, comp_list):
     if isinstance(next_token, sqlparse.sql.Comparison):
         # If it is a Comparison, format it to remove whitespaces
         # The formatted comparison is appended to comp_list
-        comp_list.append(f.format_whitespace(next_token.value))
+        comp_list.append(f.format_like(f.format_whitespace(next_token.value)))
 
 
 def _extract_where(token, comp_list, join_list):
-    #print("extract where_ : ", token.value)
+
+    _extract_and_format_between(token, comp_list)
+
     for t in token.tokens:
         # add comparison to the list if found 
         if isinstance(t, sqlparse.sql.Comparison):
             #print("extr token comp ", t.tokens)
-            comp_list.append(f.format_whitespace(t.value))
+            comp_list.append(f.format_like(f.format_whitespace(t.value)))
         # save everything inside a parenthesis
         if isinstance(t, sqlparse.sql.Parenthesis):
             #print(f"PARA {t.tokens}")
-            comp_list.append(f.format_parenthesis(t.value))
-        if t.ttype == sqlparse.tokens.Keyword and t.value == c.BETWEEN:
-            # TODO: find a way to extract the identifier before the between and the two integer after them
-            continue
-    # append where keyword to the list of clauses 
+            comp_list.append(f.format_like(f.format_parenthesis(t.value)))
+    # append where keyword to the list of clauses MAYBE CHANGE IN DIFFERENT ARRAYS
     join_list.append(token.token_first().value) 
 
 
@@ -187,7 +166,7 @@ def _extract_having(t, tokens, j, having_list):
                 # Check if the token is a Comparison type
                 if isinstance(tokens[k], sqlparse.sql.Comparison):
                     # If it's a Comparison, format it and add to having_list
-                    having_list.append(f.format_whitespace(tokens[k].value))
+                    having_list.append(f.format_like(f.format_whitespace(tokens[k].value)))
                     # Move to the next token after processing the Comparison
                     k += 1
                 #print("inside", tokens)
@@ -276,3 +255,14 @@ def _extract_group_by_attributes(token, group_list: list):
                 # If it is, format its value and add it to the list
                 group_list.append(f.format_whitespace(t.value))
 
+
+
+def _extract_and_format_between(token, comp_list: list):
+    token_str = ' '.join(t.value for t in token.tokens)
+    pattern = re.compile(c.BETWEEN_REGEX)
+    matches = pattern.findall(token_str)
+
+    # Convert each match tuple into a formatted string
+    for match in matches:
+        formatted_expression = f"{match[1]}<={match[0]}<={match[2]}"
+        comp_list.append(formatted_expression)

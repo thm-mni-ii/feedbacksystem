@@ -1,23 +1,21 @@
-import constants as c
-import db_connection as db
-import equation_checker as ec
+from . import constants as c
+from . import db_connection as db
+from . import equation_checker as ec
+import re
 
 
 def get_from_clause_distance(ref: list, query: list, ref_join: list, query_join: list):
     moves = 0
     # check for table used if number of table used else difference * OMU
     moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
-    #print("table DIST", moves)
 
     # join difference
     if len(ref_join) != len(query_join):
         moves += abs(len(ref_join) - len(query_join)) * c.OBJECT_MULT
-        #print("join DIST", moves)
     else:
         for r, q in zip(sorted(ref_join), sorted(query_join)):
             if r != q:
                 moves += c.STRUCT_MULT
-    #print("clause DIST", moves)
     # test if both queries yield the same results
     moves += _join_queries_distance(ref, query, ref_join, query_join)
 
@@ -35,7 +33,6 @@ def _join_queries_distance(ref, query, ref_join, query_join):
             # Format the join part of the SQL script for both reference and query
             ref_script = _format_join_script(mapped_ref, ref_join)
             query_script = _format_join_script(mapped_query, query_join)
-            #print(f"Formatted reference script: {ref_script}\n Formatted query script: {query_script}")
             try:
                 # Set up database connection
                 connection = db.setup_db(ref)
@@ -44,7 +41,6 @@ def _join_queries_distance(ref, query, ref_join, query_join):
                 query_res = db.execute_query(query_script, connection)
                 # Compare the results of the reference and query scripts
                 if ref_res != query_res:
-                    #print("The results are different")
                     moves += c.OBJECT_MULT
                 connection.close()
             except Exception as e:
@@ -93,13 +89,13 @@ def comparison_distance(ref: list[str], query: list[str]):
         # Multiply the difference by a predefined constant (OBJECT_MULT) and add to the moves counter
         moves += abs(len(ref) - len(query)) * c.OBJECT_MULT
     else:
-        # Iterate through each pair of elements from the sorted reference and query lists
         for r, q in zip(sorted(ref), sorted(query)):
-            if r != q:
+            if re.match(c.SYMBOL_REGEX, r) and re.match(c.SYMBOL_REGEX, q):
+                moves += ec.check_equation(r, q)
+            else:
+                if r != q:
                 # Increment the moves counter by OBJECT_MULT for each differing pair
-                moves += c.OBJECT_MULT
-        #moves += ec.check_equation(ref, query)
-
+                    moves += c.OBJECT_MULT
     # Return the total number of moves calculated
     return moves
 

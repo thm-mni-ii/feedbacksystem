@@ -1,5 +1,5 @@
 import os
-import constants as c
+from . import constants as c
 
 
 def write_to_log(message: str):
