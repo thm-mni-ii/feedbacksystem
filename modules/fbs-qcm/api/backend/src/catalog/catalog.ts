@@ -113,13 +113,13 @@ async function moveCatalogInCatalogs(adminCourses: number[], courseCollection: m
     const change = {
         $pull: {catalogs: catalogIdObject} as mongoDB.UpdateFilter<any> 
     };        
-    const res2 = courseCollection.updateOne(filter, change);
+    await courseCollection.updateOne(filter, change);
     const filter2 = {
         _id: courseIdObject
     }
     const change2 = {
         $push: {catalogs: catalogIdObject} as mongoDB.UpdateFilter<any> 
     };        
-    const res3 = courseCollection.updateOne(filter2, change2);
+    await courseCollection.updateOne(filter2, change2);
     return 0;
 }

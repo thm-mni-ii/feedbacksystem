@@ -105,10 +105,19 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     return res;
 }
 
+export async function getAllQuestions(tokenData: JwtPayload) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const database: mongoDB.Db = await connect();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const questionCollection: mongoDB.Collection = database.collection("question");
+    const allCatalogs = await getAllCatalogs(adminCourses, courseCollection); 
+    const allQuestion = await getAllQuestionsFromCatalogs(catalogCollection, questionCollection, allCatalogs);
+    return allQuestion;
+}
 
 async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection, 
                                       questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
-
     const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, courseCollection, catalogCollection);
     if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
         return -1;
@@ -132,17 +141,7 @@ async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: 
 
 async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
                                   courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection) {
-    const courseQuery = {
-        system_id: {$in: adminCourses}
-    }
-    const catalogs = await courseCollection.find(courseQuery).toArray();
-    const allCatalogs: string[] = [];
-
-    catalogs.forEach(obj => {
-        obj.catalogs.forEach((catalog: string) => {
-            allCatalogs.push(catalog);
-        });
-    });
+    const allCatalogs: any = getAllCatalogs(adminCourses, courseCollection);
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < allCatalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));
@@ -155,4 +154,40 @@ async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCour
     return catalogWithQuestion;
 }
 
+async function getAllCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection) {
+    const courseQuery = {
+        system_id: {$in: adminCourses}
+    }
+    const catalogs = await courseCollection.find(courseQuery).toArray();
+    const allCatalogs: string[] = [];
 
+    catalogs.forEach(obj => {
+        obj.catalogs.forEach((catalog: string) => {
+            allCatalogs.push(catalog);
+        });
+    });
+    return allCatalogs;
+}
+
+async function getAllQuestionsFromCatalogs(catalogCollection: mongoDB.Collection,
+                                           questionCollection: mongoDB.Collection, catalogs: string[]) {
+    const catalogIds: mongoDB.ObjectId[] = [];
+    for (let index = 0; index < catalogs.length; index++) {
+        catalogIds.push(new mongoDB.ObjectId(catalogs[index]));
+    }
+    const ownCatalogQuery = {
+        _id : {$in : catalogIds}
+    }
+    const allCatalogs: any = await catalogCollection.find(ownCatalogQuery).toArray();
+    let questions: mongoDB.ObjectId[] = []; 
+    for(let i = 0; i < allCatalogs.length; i++) {
+        for(let j = 0; j < allCatalogs[i].questions.length; j++) {
+            questions.push(allCatalogs[i].questions[j]);
+        }
+    }
+    const findQuestions = {
+        _id: {$in: questions}
+    }
+    const accesibaleQuestions = await questionCollection.find(findQuestions).toArray();
+    return accesibaleQuestions;
+}

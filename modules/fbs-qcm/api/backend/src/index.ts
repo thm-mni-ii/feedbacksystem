@@ -1,7 +1,7 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog } from "./catalog/catalog";
-import { postQuestion, getQuestionById, deleteQuestionById, putQuestion} from "./question/question";
+import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions } from "./question/question";
 
 interface User {
     username: string;
@@ -101,7 +101,18 @@ app.post("/api_v1/question", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.get("/api_v1/allquestions", authenticateToken, (req, res) => {
+app.get("/api_v1/allquestions", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const data = await getAllQuestions(req.user);
+            res.send(data);
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
 });
 app.get("/api_v1/catalog", authenticateToken, async (req, res) => {
     try {
