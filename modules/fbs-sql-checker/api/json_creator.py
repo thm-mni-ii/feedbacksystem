@@ -93,7 +93,7 @@ def parse_single_stat_upload_db(data, client):
                 insert_tables(mydb, data, my_uuid, client)
         
         # check and remove duplicates
-        #remove_duplicates(client, task_nr)
+        flag_duplicates(client, task_nr)
         
         # Check if it is a new solution and characteristics are right
         (
@@ -152,14 +152,16 @@ def parse_single_stat_upload_db(data, client):
         mycollection.insert_one(record)
 
 
-# Idea of a function to remove duplicate queries from the database
-def remove_duplicates(client, task_nr):
+# Idea of a function to flag duplicate queries from the database
+def flag_duplicates(client, task_nr):
     mydb = client.get_default_database()
     mycol = mydb["Solutions"]
+    # set all queries to not duplicate
+    mycol.update_many({"taskNumber": task_nr}, {"$set": {"duplicate": False}})
     queries = list(mycol.find({"taskNumber": task_nr}))
     
-    # list to keep track of items to delete to avoid modifying the collection during iteration
-    to_delete = []
+    # list to keep track of queries to flag
+    duplicates = []
 
     # Compare each document with every other document
     n = len(queries)
@@ -169,11 +171,11 @@ def remove_duplicates(client, task_nr):
             query2 = queries[j]
             
             if d.get_distance(query1["statement"], query2["statement"]) == 0:
-                to_delete.append(query2["_id"])
+                duplicates.append(query2["_id"])
 
-    # Remove duplicates based on gathered IDs
-    for id in set(to_delete):
-        mycol.delete_one({"_id": id})
+    # Flag duplicates based on gathered IDs
+    for id in set(duplicates):
+        mycol.update_one({"_id": id}, {"$set": {"duplicate": True}}, upsert=True)
 
 
 
@@ -212,19 +214,17 @@ def check_solution_chars(
     # For every solution for given task
     for x in mycol.find({"taskNumber": task_nr}):
         # Extract Tables, Attributes etc. (cut out for better overview)
-        # compare the distance between the solution and the submission
-        distance = d.get_distance(x["statement"], data["submission"])
+        # compare the distance between the solution and the submission only if it is not a duplicate
+        if not x.get("duplicate", False):
+            distance = d.get_distance(x["statement"], data["submission"])
 
-        # insert distance to the solution
-        mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
-        
-        # check for min distance and use the corresponding solution
-        if distance < min_distance:
-            min_distance = distance
-            closest_solution = x["id"]  # choose the id of solution if it has the lowest distance
-        elif distance == min_distance:
-            # insert duplicate attribute and set to True if the distance is the same as the previous one
-            mycol.update_one({"id": x["id"]}, {"$set": {"duplicate": True}}, upsert=True)
+            # insert distance to the solution
+            mycol.update_one({"_id": x["_id"]}, {"$set": {"distance": distance}}, upsert=True)
+
+            # check for min distance and use the corresponding solution
+            if distance < min_distance:
+                min_distance = distance
+                closest_solution = x["id"]  # choose the id of solution if it has the lowest distance
     
     if closest_solution:
         (
