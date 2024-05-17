@@ -1,5 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
-import { getAdminCourseRoles, checkQuestionAccess } from "../utils/utils";
+import { getAdminCourseRoles, checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
 import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 
@@ -27,20 +27,6 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     }
     submissionCollection.insertOne(submission);
     return correct;
-}
-
-function getUserCourseRoles(tokenData: JwtPayload) {
-    let coursesUser: number[] = [];
-    const courseRolesObject = JSON.parse(tokenData.courseRoles);
-    for (const courseId in courseRolesObject) {
-        if (courseRolesObject.hasOwnProperty(courseId)) {
-            const role = courseRolesObject[courseId];
-            if(role == "STUDENT") {
-                coursesUser.push(parseInt(courseId));
-        }
-      }
-    }
-    return coursesUser;
 }
 
 async function checkAnswer(answer: any[], questionId: mongoDB.ObjectId,
