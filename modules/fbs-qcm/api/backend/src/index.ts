@@ -1,7 +1,7 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog } from "./catalog/catalog";
-import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions } from "./question/question";
+import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion } from "./question/question";
 import { submit } from "./submission/submission";
 
 interface User {
@@ -225,6 +225,19 @@ app.get("/api_v1/course", authenticateToken, async (req, res) => {
         }
         if(req.user !== undefined) {
 
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+});
+app.get("/api_v1/current_question", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const catalogId = req.query.ID as string;
+            const res = getCurrentQuestion(req.user, catalogId);
         }
     } catch (error) {
         res.sendStatus(500);

@@ -72,3 +72,18 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
     const courseResult = await courseCollection.findOne(courseQuery);
     return courseResult;
 }
+
+export function getUserCourseRoles(tokenData: JwtPayload) {
+    let coursesUser: number[] = [];
+    const courseRolesObject = JSON.parse(tokenData.courseRoles);
+    for (const courseId in courseRolesObject) {
+        if (courseRolesObject.hasOwnProperty(courseId)) {
+            const role = courseRolesObject[courseId];
+            if(role == "STUDENT") {
+                coursesUser.push(parseInt(courseId));
+        }
+      }
+    }
+    return coursesUser;
+}
+
