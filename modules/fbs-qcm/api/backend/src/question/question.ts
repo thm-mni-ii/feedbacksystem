@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray, getCatalogPermission } from "../utils/utils";
+import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getAllCatalogs, checkQuestionAccess } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function getQuestionById(questionId: string, tokenData: JwtPayload) {
@@ -136,37 +136,6 @@ async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: 
     };
     await catalogCollection.updateOne(newCatalogQuery, update);
     return 0;
-}
-
-
-async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
-                                  courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection) {
-    const allCatalogs: any = getAllCatalogs(adminCourses, courseCollection);
-    const catalogIds: mongoDB.ObjectId[] = [];
-    for (let index = 0; index < allCatalogs.length; index++) {
-        catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));
-    }
-    const ownCatalogQuery = {
-        questions: questionIdObject,
-        _id : {$in : catalogIds}
-    }
-    const catalogWithQuestion = await catalogCollection.findOne(ownCatalogQuery);
-    return catalogWithQuestion;
-}
-
-async function getAllCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection) {
-    const courseQuery = {
-        system_id: {$in: adminCourses}
-    }
-    const catalogs = await courseCollection.find(courseQuery).toArray();
-    const allCatalogs: string[] = [];
-
-    catalogs.forEach(obj => {
-        obj.catalogs.forEach((catalog: string) => {
-            allCatalogs.push(catalog);
-        });
-    });
-    return allCatalogs;
 }
 
 async function getAllQuestionsFromCatalogs(catalogCollection: mongoDB.Collection,

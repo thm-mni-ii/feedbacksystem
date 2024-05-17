@@ -2,6 +2,7 @@ import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions } from "./question/question";
+import { submit } from "./submission/submission";
 
 interface User {
     username: string;
@@ -190,14 +191,44 @@ app.post("/api_v1/catalog", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.get("/api_v1/submission", (req, res) => {
-
+app.post("/api_v1/submission", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            console.log(1);
+            const requestData = req.body;
+            console.log(2);
+            const response = await submit(req.user, requestData);
+            console.log(3);
+            if(response == -1) {
+                res.sendStatus(403);
+                return;
+            }
+            const responseJson = {
+                correct: response
+            }
+            res.send(responseJson);
+        } else {
+            res.sendStatus(403);
+        }
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
 });
-app.post("/api_v1/submission", (req, res) => {
+app.get("/api_v1/course", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
 
-});
-app.get("/api_v1/course", (req, res) => {
-
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
 });
 
 
@@ -209,6 +240,7 @@ function authenticateToken(req: Request, res: Response, next: NextFunction) {
     }
     jwt.verify(token, process.env.JWT_SECRET as string, (err: any, user: any) => {
         if (err) {
+            console.log(err);
             return res.sendStatus(403);
         }
         req.user = user;
