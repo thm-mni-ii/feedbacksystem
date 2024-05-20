@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion } from "./question/question";
 import { submit } from "./submission/submission";
+import { getStudentCourses, getTeacherCourses } from "./course/course";
 
 interface User {
     username: string;
@@ -218,13 +219,30 @@ app.post("/api_v1/submission", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-app.get("/api_v1/course", authenticateToken, async (req, res) => {
+app.get("/api_v1/teacher_course", authenticateToken, async (req, res) => {
     try {
         if(req.user == undefined) {
             res.sendStatus(401);
         }
         if(req.user !== undefined) {
-
+            const result = await getTeacherCourses(req.user);
+            console.log("HI");
+            console.log(result);
+            res.send(result);
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+});
+app.get("/api_v1/student_course", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const result = await getStudentCourses(req.user);
+            console.log(result);
+            res.send(result);
         }
     } catch (error) {
         res.sendStatus(500);

@@ -1,6 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
-import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getUserCourseRoles } from "../utils/utils";
+import { connect } from "../mongo/mongo"; import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getUserCourseRoles } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
