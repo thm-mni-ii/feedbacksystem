@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray, getCatalogPermission } from "../utils/utils";
+import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getUserCourseRoles } from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
@@ -85,7 +85,7 @@ export async function putCatalog(catalogId: string, data: JSON, tokenData: JwtPa
     };
     const result = await catalogCollection.find(catalogQuery).toArray();
     if (result.length === 0) {
-        const move = await moveCatalogInCatalogs(adminCourses, courseCollection, courseIdObject, catalogIdObject);
+        const move = await moveCatalogInCourses(adminCourses, courseCollection, courseIdObject, catalogIdObject);
         if( move === -1) {
             return -1;
         }
@@ -97,7 +97,25 @@ export async function putCatalog(catalogId: string, data: JSON, tokenData: JwtPa
     return res;
 }
 
-async function moveCatalogInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection,
+export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) {
+    const database: mongoDB.Db = await connect();
+    const userCollection: mongoDB.Collection = database.collection("user");
+    const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const query = {
+        id: tokenData.id,
+      [`catalogscores.${catalogId}`]: { $exists: true }
+    };
+    console.log(query);
+    const res: any = await userCollection.findOne(query);
+    const score = {
+        score: res.catalogscores[catalogId]
+    };
+    return score;
+}
+
+
+
+async function moveCatalogInCourses(adminCourses: number[], courseCollection: mongoDB.Collection,
                                      courseIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
     const checkQuery = {
         system_id: {$in: adminCourses},
