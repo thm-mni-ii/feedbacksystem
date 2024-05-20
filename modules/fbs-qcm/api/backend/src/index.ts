@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore } from "./catalog/catalog";
+import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion } from "./question/question";
 import { submit } from "./submission/submission";
 
@@ -261,7 +261,19 @@ app.get("/api_v1/current_question", authenticateToken, async (req, res) => {
         res.sendStatus(500);
     }
 });
-
+app.get("/api_v1/user", authenticateToken, async (req, res) => {
+    try {
+        if(req.user == undefined) {
+            res.sendStatus(401);
+        }
+        if(req.user !== undefined) {
+            const result = await getUser(req.user);
+            res.send(result);
+        }
+    } catch (error) {
+        res.sendStatus(500);
+    }
+});
 
 function authenticateToken(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];

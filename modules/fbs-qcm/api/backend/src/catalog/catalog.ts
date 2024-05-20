@@ -97,10 +97,22 @@ export async function putCatalog(catalogId: string, data: JSON, tokenData: JwtPa
     return res;
 }
 
+export async function getUser(tokenData: JwtPayload) {
+    const database: mongoDB.Db = await connect();
+    const userCollection: mongoDB.Collection = database.collection("user");
+    const query = {
+        id: tokenData.id,
+    };
+    console.log(query);
+    const res: any = await userCollection.findOne(query);
+    delete res._id;
+    delete res.id;
+    return res;
+}
+
 export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) {
     const database: mongoDB.Db = await connect();
     const userCollection: mongoDB.Collection = database.collection("user");
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const query = {
         id: tokenData.id,
       [`catalogscores.${catalogId}`]: { $exists: true }
