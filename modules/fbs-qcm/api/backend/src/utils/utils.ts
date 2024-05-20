@@ -68,6 +68,8 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
         system_id: {$in: adminCourses},
         catalogs: catalogId
     }
+    console.log("courseQuery");
+    console.log(courseQuery);
     const courseCollection: mongoDB.Collection = database.collection("course");
     const courseResult = await courseCollection.findOne(courseQuery);
     return courseResult;

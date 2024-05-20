@@ -251,7 +251,11 @@ app.get("/api_v1/current_question", authenticateToken, async (req, res) => {
         }
         if(req.user !== undefined) {
             const catalogId = req.query.ID as string;
-            const res = getCurrentQuestion(req.user, catalogId);
+            const result = await getCurrentQuestion(req.user, catalogId);
+            if( result == -1) {
+                res.sendStatus(403);
+            }
+            res.send(result);
         }
     } catch (error) {
         res.sendStatus(500);

@@ -133,17 +133,23 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
-    let newQuestionId = await getQuestion(tokenData, questionCollection, submissionCollection);
+    let newQuestionId = await getQuestion(tokenData, questionCollection, submissionCollection, catalogId, catalogCollection);
+    let newQuestion: any = {};
+    if(newQuestion == -1) {
+        return {"catalog": "over"};
+    }
     if(newQuestionId == 0) {
-        newQuestionId = getFirstQuestionInCatalog(questionCollection, catalogCollection, catalogId);
+        newQuestion = await getFirstQuestionInCatalog(questionCollection, catalogCollection, catalogId);
+    } else {
+        const getQuestionQuery = {
+            _id: newQuestionId
+        }
+        newQuestion = await questionCollection.findOne(getQuestionQuery);
     }
-    const getQuestionQuery = {
-        _id: newQuestionId
-    }
-    const newQuestion = await questionCollection.findOne(getQuestionQuery);
     if(newQuestion == null) {
         return -1;
     }
+    return createQuestionResponse(newQuestionId, newQuestion);
 }
 
 function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: any) {
@@ -160,22 +166,66 @@ function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: an
 }
 
 async function getFirstQuestionInCatalog(questionCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection, catalogId: string) {
+    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const catalogQuery = {
+        _id: catalogIdObject
+    }
+    const catalog = await catalogCollection.findOne(catalogQuery);
+    if(catalog == null || catalog.length == 0) {
+        return -1;
+    }
+    const question = catalog.questions;
+    const questionQuery = {
+        _id: {$in: question}
+    }
+    const allQuestionsInCatalog = await questionCollection.find(questionQuery).toArray();
+    let usedQuestion: mongoDB.ObjectId[] = [];
+    for(let i = 0;i < allQuestionsInCatalog.length; i++) {
+        for( const key in allQuestionsInCatalog[i].children) {
+            usedQuestion = addIfNotInList(usedQuestion, allQuestionsInCatalog[i].children[key]);
+        }
+    }
+    const findFirstQuestion = {
+        _id: {$nin: usedQuestion}
+    }
+    const firstQuestion = await questionCollection.findOne(findFirstQuestion);
+    return firstQuestion;
 }
 
-async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Collection, submissionCollection: mongoDB.Collection) {
-    const query = {
-        user: tokenData.id
+function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
+    const exists = list.some(existingItem => existingItem === entry);
+    if(!exists) {
+        list.push(entry);
     }
-    const lastSubmission: any = submissionCollection.find(query).sort({ timestamp: -1}).limit(1);
-    const evaluation = lastSubmission.evaluation; 
+    return list;
+}
+
+async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Collection, submissionCollection: mongoDB.Collection, catalogId: string, catalogCollection: mongoDB.Collection) {
+    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const catalogQuery = {
+        _id: catalogIdObject
+    }
+    const catalog: any = await catalogCollection.findOne(catalogQuery);
+    const query = {
+        user: tokenData.id,
+        question: {$in : catalog.questions}
+    }
+    const lastSubmission: any = await submissionCollection.find(query).sort({ timestamp: -1}).limit(1).toArray();
+    if(lastSubmission == null || lastSubmission.length == 0) {
+        return 0;
+    }
+    const evaluation = lastSubmission[0].evaluation; 
     const questionQuery = {
-        _id: lastSubmission.question
+        _id: lastSubmission[0].question
     }
     const priorQuestion = await questionCollection.findOne(questionQuery); 
     if(priorQuestion == null) {
         return 0;
     }
     const forwarding = priorQuestion.children;
+    if(forwarding == null || forwarding.length == 0) {
+        return -1;
+    }
     if(evaluation == true) {
         return forwarding[100];
     }
