@@ -10,7 +10,7 @@ packages = [{ include = "api"}]
 python = "^3.10"
 mo-sql-parsing = "^8.201.22242"
 pymongo = "^4.2.0"
-requests = "^2.28.1"
+requests = "^2.32.0"
 click = "8.0.2"
 random2 = "^1.0.1"
 pre-commit = "^2.20.0"
