@@ -18,7 +18,17 @@ const router = createRouter({
       path: '/form',
       name: 'form',
       component: () => import('../views/FormView.vue')
+    },
+    {
+      path: '/catalogSession/:catalogId',
+      name: 'catalogSession',
+      component: () => import('../views/CatalogSessionView.vue')
     }
+    // {
+    //   path: "/:pathMatch(.*)*",
+    //   name: "not-found",
+    //   component: () => import("../views/NotFoundView.vue"),
+    // },
     // {
     //   path: '/about',
     //   name: 'about',
@@ -28,6 +38,12 @@ const router = createRouter({
     //   component: () => import('../views/AboutView.vue')
     // }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  // console.log('beforeEach', to, from)
+
+  next()
 })
 
 export default router

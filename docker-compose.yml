@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   mysql1:
@@ -122,7 +122,7 @@ services:
     image: postgres:14
     restart: unless-stopped
     environment:
-      POSTGRES_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD 
+      POSTGRES_PASSWORD: R!7pWqY@K5zE3Xt&g9L1MfD
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "8432:5432"
@@ -136,7 +136,6 @@ services:
       interval: 10s
       start_period: 10s
       retries: 3
-    
 
   mongodb:
     image: mongo:5.0.6
@@ -154,7 +153,6 @@ services:
       start_period: 10s
       retries: 3
 
-
   mongodb_qcm:
     image: mongo:5.0.6
     container_name: mongodb_qcm
@@ -165,7 +163,6 @@ services:
       - "127.0.0.1:27018:27017"
     networks:
       fbs:
-
 
   minio:
     image: minio/minio:RELEASE.2022-10-29T06-21-33Z
@@ -182,13 +179,7 @@ services:
     networks:
       fbs:
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:9000/minio/health/live"
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       timeout: 10s
       interval: 10s
       start_period: 10s
@@ -253,7 +244,6 @@ services:
     networks:
       classroom:
 
-
   dashboard:
     build:
       context: modules/fbs-eat/eat
@@ -269,7 +259,6 @@ services:
       - URL_BASE_PATH=/eat/
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true
-  
 
   qcm:
     build:
@@ -278,7 +267,7 @@ services:
     ports:
       - 3000:3000
     networks:
-        - fbs
+      - fbs
     environment:
       - JWT_SECRET=wwwa
       - MONGODB_URL=mongodb://mongodb_qcm:27017/
@@ -288,4 +277,3 @@ services:
 networks:
   classroom:
   fbs:
-
