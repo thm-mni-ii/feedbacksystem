@@ -5,8 +5,6 @@ import * as mongoDB from "mongodb";
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
                                   courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection) {
     const allCatalogs: any = await getAllCatalogs(adminCourses, courseCollection);
-    console.log(adminCourses);
-    console.log(allCatalogs);
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < allCatalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));

@@ -11,6 +11,7 @@ export async function connect() {
     try {
         await client.connect();
         const database: mongoDB.Db = client.db("QCM");
+        console.log("connected to MongoDB");
         return database;
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
