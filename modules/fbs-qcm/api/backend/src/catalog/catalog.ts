@@ -6,7 +6,7 @@ export async function postCatalog(data: JSON, tokenData: JwtPayload, course: str
     const adminCourses = getAdminCourseRoles(tokenData);
     const courseIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(course);
     const searchQuery = {
-        system_id: {$in: adminCourses}, 
+        courseId: {$in: adminCourses}, 
         _id: courseIdObject
     };
     const database: mongoDB.Db = await connect();
@@ -129,7 +129,7 @@ export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) 
 async function moveCatalogInCourses(adminCourses: number[], courseCollection: mongoDB.Collection,
                                      courseIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
     const checkQuery = {
-        system_id: {$in: adminCourses},
+        courseId: {$in: adminCourses},
         catalogs: catalogIdObject
     }
     const res = await courseCollection.findOne(checkQuery);

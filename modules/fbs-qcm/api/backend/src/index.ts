@@ -121,7 +121,7 @@ async function createDatabaseAndCollection() {
       ],
       "requirements": []
     });
-    await courseCollection.insertOne({ "system_id": 187, "catalogs": [new mongoDB.ObjectId("663a51d228d8781d96050905")]});
+    await courseCollection.insertOne({ "courseId": 187, "catalogs": [new mongoDB.ObjectId("663a51d228d8781d96050905")]});
     await userCollection.insertOne({
       "_id": new mongoDB.ObjectId("664b08e0448b1678f0393a7e"),
       "id": 1,

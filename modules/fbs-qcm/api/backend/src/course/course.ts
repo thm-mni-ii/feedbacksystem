@@ -8,7 +8,7 @@ export async function getTeacherCourses(tokenData: JwtPayload) {
     const database: mongoDB.Db = await connect();
     const courseCollection: mongoDB.Collection = database.collection("course");
     const query = {
-        system_id: {$in: adminCourses}
+        courseId: {$in: adminCourses}
     }
     const courses = await courseCollection.find(query).toArray();
     if(courses == null || courses.length == 0) {
@@ -21,7 +21,7 @@ export async function getStudentCourses(tokenData: JwtPayload) {
     const database: mongoDB.Db = await connect();
     const courseCollection: mongoDB.Collection = database.collection("course");
     const query = {
-        system_id: {$in: studentCourses}
+        courseId: {$in: studentCourses}
     }
     const courses = await courseCollection.find(query).toArray();
     if(courses == null || courses.length == 0) {

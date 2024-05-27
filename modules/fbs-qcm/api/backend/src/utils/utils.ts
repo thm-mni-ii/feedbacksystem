@@ -21,7 +21,7 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
 
 export async function getAllCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection) {
     const courseQuery = {
-        system_id: {$in: adminCourses}
+        courseId: {$in: adminCourses}
     }
     const catalogs = await courseCollection.find(courseQuery).toArray();
     const allCatalogs: string[] = [];
@@ -63,7 +63,7 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
     const database: mongoDB.Db = await connect();
     const catalogId: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const courseQuery = {
-        system_id: {$in: adminCourses},
+        courseId: {$in: adminCourses},
         catalogs: catalogId
     }
     console.log("courseQuery");

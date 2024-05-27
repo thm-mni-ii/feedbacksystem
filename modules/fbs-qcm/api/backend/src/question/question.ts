@@ -59,7 +59,7 @@ export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: s
     const adminCourses = getAdminCourseRoles(tokenData);
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const searchQuery = {
-    system_id: {$in: adminCourses}, 
+    courseId: {$in: adminCourses}, 
     catalogs: catalogIdObject
     };
     const database: mongoDB.Db = await connect();
