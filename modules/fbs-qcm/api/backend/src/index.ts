@@ -6,6 +6,7 @@ import { submit } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
 import * as mongoDB from "mongodb";
+import { AnswerScore } from "./utils/enum";
 
 interface User {
     username: string;
@@ -45,12 +46,8 @@ async function createDatabaseAndCollection() {
       ],
       "weighting": 1,
       "children": {
-        "0": {
-          "$oid": "66474b198d1fcd0b3079e6fe"
-        },
-        "100": {
-          "$oid": "663e087990e19a7cb3f4a3d7"
-        }
+        "FALSE" : new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
+        "TRUE" : new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7")
       },
       "questiontype": "Single-Choice",
       "questionconfiguratin": "none"
@@ -109,15 +106,9 @@ async function createDatabaseAndCollection() {
       "_id": new mongoDB.ObjectId("663a51d228d8781d96050905"),
       "name": "Grundlagen",
       "questions": [
-        {
-          "$oid": "663e087990e19a7cb3f4a3d7"
-        },
-        {
-          "$oid": "6638fbdb7cbf615381a90abe"
-        },
-        {
-          "$oid": "66474b198d1fcd0b3079e6fe"
-        }
+          new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
+          new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
+          new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe")
       ],
       "requirements": []
     });
@@ -131,14 +122,12 @@ async function createDatabaseAndCollection() {
     });
     submissionCollection.insertOne({
       "_id": new mongoDB.ObjectId("664b63aefa0e9768d9ffd02a"),
-      "user": 123,
-      "question": {
-        "$oid": "6638fbdb7cbf615381a90abe"
-      },
+      "user": 1,
+      "question": new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
       "answer": [
         "8"
       ],
-      "evaluation": "true",
+      "evaluation": AnswerScore.correct,
       "timeStamp": {
         "$numberLong": "1716216750416"
       }

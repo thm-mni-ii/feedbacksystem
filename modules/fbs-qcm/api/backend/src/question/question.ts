@@ -2,6 +2,7 @@ import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
 import * as mongoDB from "mongodb";
+import { AnswerScore } from "../utils/enum";
 
 interface ReturnQuestion {
     id: mongoDB.ObjectId;
@@ -211,27 +212,36 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
         question: {$in : catalog.questions}
     }
     const lastSubmission: any = await submissionCollection.find(query).sort({ timestamp: -1}).limit(1).toArray();
+    console.log("lastSubmission");
+    console.log(lastSubmission);
     if(lastSubmission == null || lastSubmission.length == 0) {
         return 0;
     }
     const evaluation = lastSubmission[0].evaluation; 
+    console.log("EVALUTION");
+    console.log(evaluation);
     const questionQuery = {
         _id: lastSubmission[0].question
     }
     const priorQuestion = await questionCollection.findOne(questionQuery); 
+    console.log("priorQuestion");
+    console.log(priorQuestion);
     if(priorQuestion == null) {
         return 0;
     }
     const forwarding = priorQuestion.children;
+    console.log("forwarding");
+    console.log(forwarding);
     if(forwarding == null || forwarding.length == 0) {
         return -1;
     }
-    if(evaluation == true) {
-        return forwarding[100];
+    if(evaluation == AnswerScore.correct) {
+        return forwarding[AnswerScore.correct];
     }
-    if(evaluation == false) {
-        return forwarding[0];
+    if(evaluation == AnswerScore.incorrect) {
+        return forwarding[AnswerScore.incorrect];
     }
+    return -1;
 }
 
 async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection, 

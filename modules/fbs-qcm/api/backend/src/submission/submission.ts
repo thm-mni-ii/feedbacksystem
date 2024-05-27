@@ -1,6 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
-import { getAdminCourseRoles, checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
+import { checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
 import { connect } from "../mongo/mongo";
+import { AnswerScore } from "../utils/enum";
 import * as mongoDB from "mongodb";
 
 export async function submit(tokenData: JwtPayload, requestData: any) {
@@ -48,17 +49,21 @@ function checkSubmission(answer: any[], question: any) {
     } else if(questionType == "Clozetext") {
         return checkClozeText(answer, question);
     } else {
-        return false;
+        return AnswerScore.incorrect;
     }
 }
 
 function checkSingleChoice(answer: any, question: any) {
     for(let i = 0; i < question.answers.length; i++) {
         if(question.answers[i].text == answer) {
-            return question.answers[i].isCorrect;
+            if( question.answers[i].isCorrect) {
+                return AnswerScore.correct;
+            } else {
+                return AnswerScore.incorrect
+            }
         }
     }
-    return false;
+    return AnswerScore.correct;
 }
 
 function checkMultipleChoice(answer: any[], question: any) {
@@ -77,9 +82,9 @@ function checkMultipleChoice(answer: any[], question: any) {
         }
     }
     if(correctInAnswer === correctInQuestion) {
-        return true;
+        return AnswerScore.correct;
     } else {
-        return false;
+        return AnswerScore.incorrect;
     }
 }
 
@@ -99,8 +104,8 @@ function checkClozeText(answer: any[], question: any) {
         }
     }
     if(correctInAnswer === correctInQuestion) {
-        return true;
+        return AnswerScore.correct;
     } else {
-        return false;
+        return AnswerScore.incorrect;
     }
 }
