@@ -3,18 +3,18 @@ import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
-                                  courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection) {
+                                  courseCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
     const allCatalogs: any = await getAllCatalogs(adminCourses, courseCollection);
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < allCatalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(allCatalogs[index]));
     }
     const ownCatalogQuery = {
-        questions: questionIdObject,
-        _id : {$in : catalogIds}
+        question: questionIdObject,
+        catalog : {$in : catalogIds}
     }
     console.log(ownCatalogQuery);
-    const catalogWithQuestion = await catalogCollection.findOne(ownCatalogQuery);
+    const catalogWithQuestion = await questionInCatalogCollection.findOne(ownCatalogQuery);
     console.log(catalogWithQuestion);
     return catalogWithQuestion;
 }

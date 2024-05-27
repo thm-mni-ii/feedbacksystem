@@ -52,6 +52,7 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     const database: mongoDB.Db = await connect();
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const courseCollection: mongoDB.Collection = database.collection("course");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogPermission: any = await getCatalogPermission(adminCourses, catalogId);
     if(catalogPermission === null || catalogPermission.length === 0) {
         return -1;
@@ -60,6 +61,10 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
      const filter = {
         _id: catalogPermission._id
     }
+    const deleteConnections = {
+        cataolg: catalogIdObject
+    }
+    await questionInCatalogCollection.deleteMany(deleteConnections);
     const update = {
         $pull: { catalogs: catalogIdObject } as mongoDB.UpdateFilter<any>
     };

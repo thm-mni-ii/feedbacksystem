@@ -41,42 +41,39 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
     const collection: mongoDB.Collection = database.collection("question");
     const courseCollection: mongoDB.Collection = database.collection("course");
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, catalogCollection);
     if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
         return -1;
     }
-    const filter = {
-        _id: catalogWithQuestion._id
+    const questionInCatalogQuery = {
+        question: questionIdObject
     }
-    const update = {
-        $pull: { questions: questionIdObject } as mongoDB.UpdateFilter<any>
-    };
-    catalogCollection.updateOne(filter, update);
+    await questionInCatalogCollection.deleteMany(questionInCatalogQuery);
     const data = await collection.deleteOne(query);
     return data;
 }
 
-export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: string) {
+export async function postQuestion(data: JSON, tokenData: JwtPayload, catalog: string, children: string[], weigthing: number) {
     const adminCourses = getAdminCourseRoles(tokenData);
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const searchQuery = {
-    courseId: {$in: adminCourses}, 
-    catalogs: catalogIdObject
+        courseId: {$in: adminCourses}, 
+        catalogs: catalogIdObject
     };
     const database: mongoDB.Db = await connect();
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
-    const collection: mongoDB.Collection = database.collection("course");
-    const result = await collection.find(searchQuery).toArray();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const result = await courseCollection.find(searchQuery).toArray();
     if (result.length > 0) {
         const collection_question: mongoDB.Collection = database.collection("question");
         const response = await collection_question.insertOne(data);
-        const filter = {
-            _id: catalogIdObject
+        const entry = {
+            catalog: catalogIdObject,
+            weigthing: weigthing,
+            children: children
         };
-        const update = {
-            $push: { questions: response.insertedId } as mongoDB.UpdateFilter<any>
-        };
-        catalogCollection.updateOne(filter, update);
+        questionInCatalogCollection.insertOne(entry);
     } else {
         return -1;
     }
@@ -90,18 +87,18 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     if (courseResult == null || courseResult.length == 0) {
         return -1;
     }
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const courseCollection: mongoDB.Collection = database.collection("course");
     const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalog);
     const questionIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(questionId);
     const catalogQuery = {
-        _id: catalogIdObject,
-        questions: questionIdObject
+        catalog: catalogIdObject,
+        question: questionIdObject
     };
-    const result = await catalogCollection.find(catalogQuery).toArray();
-    if (result.length === 0) {
-        const move = await moveQuestionInCatalogs(adminCourses, courseCollection, catalogCollection, questionIdObject, catalogIdObject);
+    const result = await questionInCatalogCollection.findOne(catalogQuery);
+    if (result == null || result.length === 0) {
+        const move = await moveQuestionInCatalogs(adminCourses, courseCollection, questionIdObject, catalogIdObject, questionInCatalogCollection);
         if( move === -1) {
             return -1;
         }
@@ -117,10 +114,9 @@ export async function getAllQuestions(tokenData: JwtPayload) {
     const adminCourses = getAdminCourseRoles(tokenData);
     const database: mongoDB.Db = await connect();
     const courseCollection: mongoDB.Collection = database.collection("course");
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
-    const questionCollection: mongoDB.Collection = database.collection("question");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const allCatalogs = await getAllCatalogs(adminCourses, courseCollection); 
-    const allQuestion = await getAllQuestionsFromCatalogs(catalogCollection, questionCollection, allCatalogs);
+    const allQuestion = await getAllQuestionsFromCatalogs(questionInCatalogCollection , allCatalogs);
     return allQuestion;
 }
 
@@ -134,13 +130,15 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
-    let newQuestionId = await getQuestion(tokenData, questionCollection, submissionCollection, catalogId, catalogCollection);
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    let newQuestionId = await getQuestion(tokenData, questionCollection, submissionCollection, catalogId, questionInCatalogCollection);
     let newQuestion: any = {};
-    if(newQuestion == -1) {
+    if(newQuestionId == -1) {
         return {"catalog": "over"};
     }
     if(newQuestionId == 0) {
-        newQuestion = await getFirstQuestionInCatalog(questionCollection, catalogCollection, catalogId);
+        console.log("JUSU");
+        newQuestion = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
     } else {
         const getQuestionQuery = {
             _id: newQuestionId
@@ -161,35 +159,33 @@ function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: an
         answers: []
     }
     for(let i = 0; i < newQuestion.answers.length; i++) {
-        returnQuestion.answers.push(newQuestion.answers[i]);
+        returnQuestion.answers.push(newQuestion.answers[i].text);
     }
     return returnQuestion;
 }
 
-async function getFirstQuestionInCatalog(questionCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection, catalogId: string) {
+async function getFirstQuestionInCatalog(questionCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection, catalogId: string) {
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
-    const catalogQuery = {
-        _id: catalogIdObject
+    const allQuestionsInCatalogQuery = {
+        catalog: catalogIdObject
     }
-    const catalog = await catalogCollection.findOne(catalogQuery);
-    if(catalog == null || catalog.length == 0) {
-        return -1;
-    }
-    const question = catalog.questions;
-    const questionQuery = {
-        _id: {$in: question}
-    }
-    const allQuestionsInCatalog = await questionCollection.find(questionQuery).toArray();
+    const allQuestionsInCatalog = await questionInCatalogCollection.find(allQuestionsInCatalogQuery).toArray();
+    console.log("All Question In Cataolg");
+    console.log(allQuestionsInCatalog);
     let usedQuestion: mongoDB.ObjectId[] = [];
     for(let i = 0;i < allQuestionsInCatalog.length; i++) {
         for( const key in allQuestionsInCatalog[i].children) {
             usedQuestion = addIfNotInList(usedQuestion, allQuestionsInCatalog[i].children[key]);
         }
     }
+    console.log("usedQuestion");
+    console.log(usedQuestion);
     const findFirstQuestion = {
         _id: {$nin: usedQuestion}
     }
     const firstQuestion = await questionCollection.findOne(findFirstQuestion);
+    console.log("firstQuestion");
+    console.log(firstQuestion);
     return firstQuestion;
 }
 
@@ -201,15 +197,20 @@ function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
     return list;
 }
 
-async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Collection, submissionCollection: mongoDB.Collection, catalogId: string, catalogCollection: mongoDB.Collection) {
+async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Collection, submissionCollection: mongoDB.Collection, catalogId: string, 
+                           questionInCatalogCollection: mongoDB.Collection) {
     const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
     const catalogQuery = {
-        _id: catalogIdObject
+        catalog: catalogIdObject
     }
-    const catalog: any = await catalogCollection.findOne(catalogQuery);
+    console.log(catalogQuery);
+    const catalog: any = await questionInCatalogCollection.find(catalogQuery).toArray();
+    console.log(catalog);
+    const questions: mongoDB.ObjectId[] = catalog.map((entry: any) => entry.question);
+    console.log(questions);
     const query = {
         user: tokenData.id,
-        question: {$in : catalog.questions}
+        question: {$in : questions}
     }
     const lastSubmission: any = await submissionCollection.find(query).sort({ timestamp: -1}).limit(1).toArray();
     console.log("lastSubmission");
@@ -218,23 +219,19 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
         return 0;
     }
     const evaluation = lastSubmission[0].evaluation; 
-    console.log("EVALUTION");
-    console.log(evaluation);
     const questionQuery = {
         _id: lastSubmission[0].question
     }
     const priorQuestion = await questionCollection.findOne(questionQuery); 
-    console.log("priorQuestion");
-    console.log(priorQuestion);
     if(priorQuestion == null) {
         return 0;
     }
     const forwarding = priorQuestion.children;
-    console.log("forwarding");
-    console.log(forwarding);
     if(forwarding == null || forwarding.length == 0) {
         return -1;
     }
+    console.log(forwarding);
+    console.log(evaluation);
     if(evaluation == AnswerScore.correct) {
         return forwarding[AnswerScore.correct];
     }
@@ -244,47 +241,30 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
     return -1;
 }
 
-async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection, catalogCollection: mongoDB.Collection, 
-                                      questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
-    const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, courseCollection, catalogCollection);
+async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection,
+                                      questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId, questionInCatalogCollection: mongoDB.Collection) {
+    const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
     if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
         return -1;
     }
-    const index = getElementFromArray(catalogWithQuestion.questions, questionIdObject);
-    catalogWithQuestion.questions.splice(index, 1);
     const filter = {
-        _id: catalogWithQuestion._id
+        question: questionIdObject,
     }
-    await catalogCollection.replaceOne(filter, catalogWithQuestion);
-    const newCatalogQuery = {
-        _id: catalogIdObject
-    };
     const update = {
-        $push: { questions: questionIdObject } as mongoDB.UpdateFilter<any>
+        $set: { catalog: catalogIdObject } as mongoDB.UpdateFilter<any>
     };
-    await catalogCollection.updateOne(newCatalogQuery, update);
+    await questionInCatalogCollection.updateOne(filter, update);
     return 0;
 }
 
-async function getAllQuestionsFromCatalogs(catalogCollection: mongoDB.Collection,
-                                           questionCollection: mongoDB.Collection, catalogs: string[]) {
+async function getAllQuestionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, catalogs: string[]) {
     const catalogIds: mongoDB.ObjectId[] = [];
     for (let index = 0; index < catalogs.length; index++) {
         catalogIds.push(new mongoDB.ObjectId(catalogs[index]));
     }
-    const ownCatalogQuery = {
-        _id : {$in : catalogIds}
-    }
-    const allCatalogs: any = await catalogCollection.find(ownCatalogQuery).toArray();
-    let questions: mongoDB.ObjectId[] = []; 
-    for(let i = 0; i < allCatalogs.length; i++) {
-        for(let j = 0; j < allCatalogs[i].questions.length; j++) {
-            questions.push(allCatalogs[i].questions[j]);
-        }
-    }
     const findQuestions = {
-        _id: {$in: questions}
+        catalog: {$in: catalogIds}
     }
-    const accesibaleQuestions = await questionCollection.find(findQuestions).toArray();
+    const accesibaleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
     return accesibaleQuestions;
 }

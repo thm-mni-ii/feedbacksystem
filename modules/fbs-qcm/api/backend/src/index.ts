@@ -29,6 +29,7 @@ async function createDatabaseAndCollection() {
     const questionCollection: mongoDB.Collection = db.collection("question");
     const submissionCollection: mongoDB.Collection = db.collection("submission");
     const userCollection: mongoDB.Collection = db.collection("user");
+    const questionInCatalogCollection: mongoDB.Collection = db.collection("questionInCatalog");
     await questionCollection.insertOne({
         "_id": new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
       "questiontext": "Wie viele Bits sind ein Byte",
@@ -105,11 +106,6 @@ async function createDatabaseAndCollection() {
             {
       "_id": new mongoDB.ObjectId("663a51d228d8781d96050905"),
       "name": "Grundlagen",
-      "questions": [
-          new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
-          new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
-          new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe")
-      ],
       "requirements": []
     });
     await courseCollection.insertOne({ "courseId": 187, "catalogs": [new mongoDB.ObjectId("663a51d228d8781d96050905")]});
@@ -131,6 +127,36 @@ async function createDatabaseAndCollection() {
       "timeStamp": {
         "$numberLong": "1716216750416"
       }
+    });
+    await questionInCatalogCollection.insertOne({
+        catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
+        question: new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
+        weighting: 1,
+        children: {
+            "TRUE": new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
+            "FALSE": new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
+            "PARTIAL": ""
+        }
+    });
+    await questionInCatalogCollection.insertOne({
+        catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
+        question: new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
+        weighting: 1,
+        children: {
+            "TRUE": "",
+            "FALSE": "",
+            "PARTIAL": ""
+        }
+    });
+    await questionInCatalogCollection.insertOne({
+        catalog: new mongoDB.ObjectId("663a51d228d8781d96050905"),
+        question: new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
+        weighting: 1,
+        children: {
+            "TRUE": "",
+            "FALSE": "",
+            "PARTIAL": ""
+        }
     });
   } catch (err) {
     console.error(`Error creating database or collection: ${err}`);
@@ -213,8 +239,12 @@ async function startServer() {
             if(req.user !== undefined) {
                 const requestData = req.body;
                 const catalog = requestData.catalog;
+                const children = requestData.children;
+                const weighting = requestData.weighting;
+                delete requestData.weighting;
+                delete requestData.children;
                 delete requestData.catalog;
-                const data = await postQuestion(requestData, req.user, catalog); 
+                const data = await postQuestion(requestData, req.user, catalog, children, weighting); 
                 if(data === -1) {
                     res.sendStatus(403);
                 }else if(data !== null && Object.keys(data).length > 0) {
