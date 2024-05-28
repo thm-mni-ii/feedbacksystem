@@ -146,7 +146,7 @@ export class HighlightedInputComponent
 
     // allow only caracteres for valid sql query
     text = text.replace(
-      /[^a-zA-Z0-9\(\)\[\]\{\}\s\.\,\;\=\+\-\*\/\>\<\!\@\#\$\%\^\&\_\~\`\:\'\"\|\\]/g,
+      /[^a-zA-Z0-9üöäÄÖÜß\(\)\[\]\{\}\s\.\,\;\=\+\-\*\/\>\<\!\@\#\$\?\%\^\&\_\~\`´°²³§\:\'\"\|\\]/g,
       ""
     );
 
