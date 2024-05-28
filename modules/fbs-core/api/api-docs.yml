@@ -19,6 +19,10 @@ tags:
     description: The Semester api
   - name: Course Registration
     description: The course registration api
+  - name: Group
+    description: The group API
+  - name: GroupMembership
+    description: The group Membership
   - name: Task
     description: The task api
   - name: Course evaluation
@@ -858,6 +862,287 @@ paths:
         "401":
           description: Unauthorized
         "403":
+          description: Forbidden
+  /courses/{cid}/groups:
+    get:
+      operationId: getGroups
+      tags:
+        - Group
+      summary: Get a group list
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: visible
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '403':
+          description: Forbidden
+    post:
+      operationId: createGroup
+      tags:
+        - Group
+      summary: Create a new group
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRequest'
+      responses:
+        '200':
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          description: Bad Request
+        '403':
+          description: Forbidden
+  /courses/{cid}/groups/{gid}:
+    get:
+      operationId: getGroup
+      tags:
+        - Group
+      summary: Get a single group by id
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+    put:
+      operationId: updateGroup
+      tags:
+        - Group
+      summary: Update a single group by id
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRequest'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '403':
+          description: Forbidden
+    delete:
+      operationId: deleteGroup
+      tags:
+        - Group
+      summary: Delete a group by id
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+        '403':
+          description: Forbidden
+  /courses/{cid}/groups/{gid}/users/{uid}:
+    put:
+      tags:
+        - GroupMembership
+      summary: Add a user to a group within a course
+      operationId: addUserToGroup
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Course ID
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Group ID
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: User added to the group
+        '403':
+          description: Forbidden
+        '404':
+          description: Resource not found
+        '409':
+          description: Membership exceeded
+    delete:
+      tags:
+        - GroupMembership
+      summary: Remove a user from a group
+      operationId: removeUserFromGroup
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Course ID
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Group ID
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: User removed from the group
+        '403':
+          description: Forbidden
+  /courses/{cid}/groups/{gid}/users:
+    delete:
+      tags:
+        - GroupMembership
+      summary: Remove all users from a group
+      operationId: removeAllUsersFromGroup
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Course ID
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Group ID
+      responses:
+        '200':
+          description: All users removed from the group
+        '403':
+          description: Forbidden
+  /users/{uid}/groups:
+    get:
+      tags:
+        - GroupMembership
+      summary: Retrieve all groups of a specific user
+      operationId: getUserGroups
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: User ID
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '403':
+          description: Forbidden
+  /courses/{cid}/groups/{gid}/participants:
+    get:
+      tags:
+        - GroupMembership
+      summary: Get all course participants who are part of a group
+      operationId: getGroupParticipants
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Course ID
+        - name: gid
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Group ID
+      responses:
+        '200':
+          description: List of course participants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
           description: Forbidden
   "/courses/{cid}/tasks":
     get:
@@ -3197,10 +3482,9 @@ components:
       required: true
   securitySchemes:
     JWT:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: Bearer
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     User:
       type: object
@@ -3261,6 +3545,32 @@ components:
           type: integer
         name:
           type: string
+    Group:
+      type: object
+      properties:
+        id:
+          type: integer
+        cid:
+          type: integer
+        name:
+          type: string
+        membership:
+          type: integer
+        visible:
+          type: boolean
+    GroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        membership:
+          type: integer
+        visible:
+          type: boolean
+      required:
+        - name
+        - membership
+        - visible
     Task:
       type: object
       required:
