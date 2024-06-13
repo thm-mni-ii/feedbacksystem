@@ -70,7 +70,10 @@ export async function getCatalogPermission(adminCourses: number[], catalog: stri
     console.log(courseQuery);
     const courseCollection: mongoDB.Collection = database.collection("course");
     const courseResult = await courseCollection.findOne(courseQuery);
-    return courseResult;
+    if( courseResult != null && courseResult.length > 0) {
+        return true;
+    }
+    return false;
 }
 
 export function getUserCourseRoles(tokenData: JwtPayload) {
@@ -87,3 +90,47 @@ export function getUserCourseRoles(tokenData: JwtPayload) {
     return coursesUser;
 }
 
+export async function getFirstQuestionInCatalog(questionCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection, catalogId: string) {
+    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
+    const allQuestionsInCatalogQuery = {
+        catalog: catalogIdObject
+    }
+    const allQuestionsInCatalog = await questionInCatalogCollection.find(allQuestionsInCatalogQuery).toArray();
+    console.log("All Question In Cataolg");
+    console.log(allQuestionsInCatalog);
+    let usedQuestion: mongoDB.ObjectId[] = [];
+    for(let i = 0;i < allQuestionsInCatalog.length; i++) {
+        for( const key in allQuestionsInCatalog[i].children) {
+            usedQuestion = addIfNotInList(usedQuestion, allQuestionsInCatalog[i].children[key]);
+        }
+    }
+    console.log("usedQuestion");
+    console.log(usedQuestion);
+    const findFirstQuestion = {
+        _id: {$nin: usedQuestion}
+    }
+    const firstQuestion = await questionCollection.findOne(findFirstQuestion);
+    console.log("firstQuestion");
+    console.log(firstQuestion);
+    return firstQuestion;
+}
+
+function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
+    const exists = list.some(existingItem => existingItem === entry);
+    if(!exists) {
+        list.push(entry);
+    }
+    return list;
+}
+
+export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, catalogs: string[]) {
+    const catalogIds: mongoDB.ObjectId[] = [];
+    for (let index = 0; index < catalogs.length; index++) {
+        catalogIds.push(new mongoDB.ObjectId(catalogs[index]));
+    }
+    const findQuestions = {
+        catalog: {$in: catalogIds}
+    }
+    const accesibaleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
+    return accesibaleQuestions;
+}

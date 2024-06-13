@@ -1,6 +1,6 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
-import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser } from "./catalog/catalog";
+import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser, getQuestionTree } from "./catalog/catalog";
 import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion } from "./question/question";
 import { submit } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
@@ -303,6 +303,20 @@ async function startServer() {
                 }
             }
         } catch (error) {
+            res.sendStatus(500);
+        }
+    });
+    app.get("/api_v1/questionTree", authenticateToken, async (req, res) => {
+        try {
+            if (req.user == undefined) {
+                res.sendStatus(401);
+            }
+            if(req.user !== undefined) {
+                const requestData = req.body;
+                const catalogId = req.query.ID as string;
+                const data = getQuestionTree(req.user, catalogId);
+            }
+        } catch {
             res.sendStatus(500);
         }
     });

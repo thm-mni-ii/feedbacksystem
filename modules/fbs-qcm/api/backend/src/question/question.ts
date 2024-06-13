@@ -1,6 +1,6 @@
 import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles} from "../utils/utils";
+import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "../utils/enum";
 
@@ -84,7 +84,7 @@ export async function putQuestion(questionId: string, data: JSON, tokenData: Jwt
     const adminCourses = getAdminCourseRoles(tokenData); 
     const database: mongoDB.Db = await connect();
     const courseResult = await getCatalogPermission(adminCourses, catalog);
-    if (courseResult == null || courseResult.length == 0) {
+    if (!courseResult) {
         return -1;
     }
     const courseCollection: mongoDB.Collection = database.collection("course");
@@ -123,7 +123,7 @@ export async function getAllQuestions(tokenData: JwtPayload) {
 export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: string) {
     const userCourses = getUserCourseRoles(tokenData);
     const access = await getCatalogPermission(userCourses, catalogId);
-    if(access == null || access.length === 0) {
+    if(!access) {
         return -1;
     }
     const database: mongoDB.Db = await connect();
@@ -164,38 +164,7 @@ function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: an
     return returnQuestion;
 }
 
-async function getFirstQuestionInCatalog(questionCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection, catalogId: string) {
-    const catalogIdObject: mongoDB.ObjectId = new mongoDB.ObjectId(catalogId);
-    const allQuestionsInCatalogQuery = {
-        catalog: catalogIdObject
-    }
-    const allQuestionsInCatalog = await questionInCatalogCollection.find(allQuestionsInCatalogQuery).toArray();
-    console.log("All Question In Cataolg");
-    console.log(allQuestionsInCatalog);
-    let usedQuestion: mongoDB.ObjectId[] = [];
-    for(let i = 0;i < allQuestionsInCatalog.length; i++) {
-        for( const key in allQuestionsInCatalog[i].children) {
-            usedQuestion = addIfNotInList(usedQuestion, allQuestionsInCatalog[i].children[key]);
-        }
-    }
-    console.log("usedQuestion");
-    console.log(usedQuestion);
-    const findFirstQuestion = {
-        _id: {$nin: usedQuestion}
-    }
-    const firstQuestion = await questionCollection.findOne(findFirstQuestion);
-    console.log("firstQuestion");
-    console.log(firstQuestion);
-    return firstQuestion;
-}
 
-function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
-    const exists = list.some(existingItem => existingItem === entry);
-    if(!exists) {
-        list.push(entry);
-    }
-    return list;
-}
 
 async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Collection, submissionCollection: mongoDB.Collection, catalogId: string, 
                            questionInCatalogCollection: mongoDB.Collection) {
@@ -257,14 +226,3 @@ async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: 
     return 0;
 }
 
-async function getAllQuestionsFromCatalogs(questionInCatalogCollection: mongoDB.Collection, catalogs: string[]) {
-    const catalogIds: mongoDB.ObjectId[] = [];
-    for (let index = 0; index < catalogs.length; index++) {
-        catalogIds.push(new mongoDB.ObjectId(catalogs[index]));
-    }
-    const findQuestions = {
-        catalog: {$in: catalogIds}
-    }
-    const accesibaleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
-    return accesibaleQuestions;
-}

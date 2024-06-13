@@ -1,5 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
-import { connect } from "../mongo/mongo"; import { getAdminCourseRoles, getElementFromArray, getCatalogPermission, getUserCourseRoles } from "../utils/utils";
+import { connect } from "../mongo/mongo"; 
+import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog} from "../utils/utils";
 import * as mongoDB from "mongodb";
 
 export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
@@ -36,7 +37,7 @@ export async function getCatalog(tokenData: JwtPayload, catalogId: string) {
     const database: mongoDB.Db = await connect();
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const catalogPermission = await getCatalogPermission(adminCourses, catalogId);
-    if(catalogPermission === null || catalogPermission.length === 0) {
+    if(!catalogPermission) {
         return -1;
     }
     const data = await catalogCollection.findOne(query);
@@ -54,7 +55,7 @@ export async function deleteCatalog(tokenData: JwtPayload, catalogId: string) {
     const courseCollection: mongoDB.Collection = database.collection("course");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogPermission: any = await getCatalogPermission(adminCourses, catalogId);
-    if(catalogPermission === null || catalogPermission.length === 0) {
+    if(!catalogPermission) {
         return -1;
     }
     const data = await catalogCollection.deleteOne(query);
@@ -76,7 +77,7 @@ export async function putCatalog(catalogId: string, data: JSON, tokenData: JwtPa
     const adminCourses = getAdminCourseRoles(tokenData); 
     const database: mongoDB.Db = await connect();
     const courseResult = await getCatalogPermission(adminCourses, catalogId);
-    if (courseResult == null || courseResult.length == 0) {
+    if (!courseResult) {
         return -1;
     }
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
@@ -129,6 +130,27 @@ export async function getCatalogScore(tokenData: JwtPayload, catalogId: string) 
     return score;
 }
 
+
+export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const course = getCatalogPermission(adminCourses, catalogId); 
+    if(!course) {
+        return -1;
+    }
+    const database: mongoDB.Db = await connect();
+    const catalogCollection = database.collection("catalog");
+    const questionInCatalogCollection = database.collection("questionInCatalog");
+    const firstQuestion = await getFirstQuestionInCatalog(catalogCollection, questionInCatalogCollection, catalogId);
+    if(firstQuestion == null || firstQuestion.length == 0) {
+        return -1;
+    }
+    const catalogArray: string[] = [catalogId];
+    const allConnections = await getAllQuestionsFromCatalogs(questionInCatalogCollection, catalogArray); 
+    if(allConnections == null || allConnections.length == 0) {
+        return -1;
+    }
+    console.log(allConnections);
+}
 
 
 async function moveCatalogInCourses(adminCourses: number[], courseCollection: mongoDB.Collection,
