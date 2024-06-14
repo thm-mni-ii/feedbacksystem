@@ -1,10 +1,11 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import de.thm.ii.fbs.model.v2.checker.excel.handler.context.ErrorAnalysisContext
 import de.thm.ii.fbs.services.v2.handler.HandlerService
 import de.thm.ii.fbs.utils.v2.handler.When
+import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.formulaOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetUtils.Companion.getCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.setValueOfCell
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetValueParser.Companion.valueOfCell
@@ -37,7 +38,7 @@ class ErrorAnalysisService(
     private fun findErrors(cell: Cell) {
         visited.add(cell)
         handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONVISIT)
-        val workbookCell = getCellFromWorkbook(cell)
+        val (submissionCell, workbookCell) = getSubmissionCell(cell)
 
         if (!cellEqualsSolution(cell, workbookCell)) {
             // found a value error
@@ -62,12 +63,23 @@ class ErrorAnalysisService(
         if (!cellEqualsSolution(cell, workbookCell)) {
             errors.add(cell) // add to original errors set
             perrors.remove(cell) // remove from propagated errors
-            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONERROR)
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, submissionCell, cell), When.ONERROR)
             setValueOfCell(workbookCell, solution[cell]) // substitute cell value with solution value
             evaluator.notifyUpdateCell(workbookCell)
         } else if (perrors.contains(cell)) {
-            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, cell), When.ONPERROR)
+            handleService?.runHandlers(ErrorAnalysisContext(errors, perrors, submissionCell, cell), When.ONPERROR)
         }
+    }
+
+    private fun getSubmissionCell(cell: Cell): Pair<Cell, XSSFCell> {
+        val workbookCell = getCellFromWorkbook(cell)
+        val submissionCell = cell.copy()
+
+        // Store value + formula from the submission
+        submissionCell.value = valueOfCell(workbookCell)
+        submissionCell.formula = formulaOfCell(workbookCell)
+
+        return Pair(submissionCell, workbookCell)
     }
 
     private fun getCellFromWorkbook(cell: Cell): XSSFCell {

@@ -1,8 +1,8 @@
 package de.thm.ii.fbs.services.v2.checker.excel
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import de.thm.ii.fbs.model.v2.checker.excel.ErrorAnalysisSolution
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ErrorAnalysisSolution
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import de.thm.ii.fbs.services.v2.checker.storage.CheckerStorageService
 import de.thm.ii.fbs.utils.v2.spreadsheet.SpreadsheetReferenceParser
 import org.apache.poi.xssf.usermodel.XSSFWorkbook

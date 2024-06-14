@@ -71,7 +71,7 @@ class SubmissionService {
     */
   def getAll(uid: Int, cid: Int, tid: Int, addExtInfo: Boolean = false): List[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, user_task_submission.task_id, submission_time, configuration_id, exit_code, result_text, " +
-      s"user_task_submission.is_in_block_storage, checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
+      s"user_task_submission.is_in_block_storage, checker_type, additional_information, result_data${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE user_id = ? AND course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res), uid, cid, tid))
@@ -85,7 +85,7 @@ class SubmissionService {
     */
   def getAllByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
     "SELECT submission_id, user_task_submission.task_id, user_id, submission_time, configuration_id, exit_code, result_text, " +
-      "user_task_submission.is_in_block_storage, checker_type, additional_information FROM user_task_submission " +
+      "user_task_submission.is_in_block_storage, checker_type, additional_information, result_data FROM user_task_submission " +
       "JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE course_id = ? AND user_task_submission.task_id = ?", (res, _) => parseResult(res, fetchUserId = true), cid, tid))
@@ -98,7 +98,7 @@ class SubmissionService {
     * @return List of submissions
     */
   def getLatestSubmissionByTask(cid: Int, tid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, t3.task_id, user_id, submission_time, configuration_id, exit_code, result_text, t3.is_in_block_storage, checker_type " +
+    "SELECT submission_id, t3.task_id, user_id, submission_time, configuration_id, exit_code, result_text, t3.is_in_block_storage, checker_type, result_data " +
       "FROM (select t1.* from (select user_id, max(submission_time) as submax from fbs.user_task_submission where task_id = ? group by user_id) as t " +
       "left join (select * from fbs.user_task_submission) as t1 ON t.user_id = t1.user_id and t.submax = t1.submission_time) as t3" +
       " JOIN task USING(task_id) LEFT JOIN checker_result using (submission_id) " +
@@ -113,7 +113,8 @@ class SubmissionService {
     * @return List of submissions
     */
   def getLatestSubmissionByCourse(cid: Int): List[Submission] = reduceSubmissions(DB.query(
-    "SELECT submission_id, tab.task_id, user_id, submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type " +
+    "SELECT submission_id, tab.task_id, user_id, submission_time, configuration_id, exit_code, result_text, tab.is_in_block_storage, checker_type," +
+      " result_data " +
       "from (select * from (select task_id, course_id from course left join task using(course_id) where course_id = ?) as t1 " +
       "left join (select * from (select user_id, task_id, max(submission_time) as submax from user_task_submission group by user_id, task_id) " +
       "as t left join user_task_submission using(user_id, task_id) where submax = submission_time) as t2 using(task_id) where submax is not null) " +
@@ -130,7 +131,7 @@ class SubmissionService {
     */
   def getOne(id: Int, uid: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, user_task_submission.task_id, submission_time, configuration_id, exit_code, result_text, " +
-      s"user_task_submission.is_in_block_storage, checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
+      s"user_task_submission.is_in_block_storage, checker_type, additional_information, result_data${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) " +
       "LEFT JOIN checkrunner_configuration using (configuration_id) WHERE submission_id = ? AND user_id = ?",
     (res, _) => parseResult(res), id, uid)).headOption
@@ -144,7 +145,7 @@ class SubmissionService {
     */
   def getOneWithoutUser(id: Int, addExtInfo: Boolean = false): Option[Submission] = reduceSubmissions(DB.query(
     s"SELECT submission_id, user_task_submission.task_id, user_id, submission_time, configuration_id, exit_code, result_text," +
-      s"user_task_submission.is_in_block_storage, checker_type, additional_information${if (addExtInfo) ", ext_info" else ""} " +
+      s"user_task_submission.is_in_block_storage, checker_type, additional_information, result_data${if (addExtInfo) ", ext_info" else ""} " +
       "FROM user_task_submission LEFT JOIN checker_result using (submission_id) LEFT JOIN checkrunner_configuration using (configuration_id) " +
       "WHERE submission_id = ?",
     (res, _) => parseResult(res, fetchUserId = true), id)).headOption
@@ -156,7 +157,7 @@ class SubmissionService {
     * @param tid The task id
     * @return The created Submission with id
     */
- def create(uid: Int, tid: Int, additionalInformation: Option[util.HashMap[String, Any]] = None): Submission =
+  def create(uid: Int, tid: Int, additionalInformation: Option[util.HashMap[String, Any]] = None): Submission =
     try {
       DB.insert("INSERT INTO user_task_submission (user_id, task_id, is_in_block_storage, additional_information) VALUES (?, ?, ?, ?)",
         uid, tid, true, additionalInformation.map(additionalInformation => objectMapper.writeValueAsString(additionalInformation)).orNull)
@@ -183,9 +184,9 @@ class SubmissionService {
     * @param resultText The resultText of the runner
     * @param extInfo    Extended runner information
     */
-  def storeResult(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String): Unit =
-    DB.insert("INSERT INTO checker_result (submission_id, configuration_id, exit_code, result_text, ext_info) " +
-      "VALUES (?, ?, ?, ?, ?)", sid, ccid, exitCode, resultText, extInfo)
+  def storeResult(sid: Int, ccid: Int, exitCode: Int, resultText: String, extInfo: String, resultData: Option[Any] = None): Unit =
+    DB.insert("INSERT INTO checker_result (submission_id, configuration_id, exit_code, result_text, ext_info, result_data) " +
+      "VALUES (?, ?, ?, ?, ?, ?)", sid, ccid, exitCode, resultText, extInfo, resultData.map(r => objectMapper.writeValueAsString(r)).orNull)
 
   /**
     * Removes all results stored for this submission
@@ -213,15 +214,17 @@ class SubmissionService {
     done = res.getObject("configuration_id") != null,
     userID = if (fetchUserId) Some(res.getInt("user_id")) else None,
     results = if (res.getObject("configuration_id") != null) {
-      // Get Extended Information or null
+      // Get Extended Information/result Data or null
       val extInfo = getStringOrElse(res, "ext_info", null)
+      val resultData = getStringOrElse(res, "result_data", null)
 
       Array(CheckResult(
         exitCode = res.getInt("exit_code"),
         resultText = res.getString("result_text"),
         checkerType = res.getString("checker_type"),
         configurationId = res.getInt("configuration_id"),
-        extInfo = if (extInfo != null) objectMapper.readTree(extInfo) else null
+        extInfo = if (extInfo != null) objectMapper.readTree(extInfo) else null,
+        resultData = if (resultData != null) objectMapper.readTree(resultData) else null,
       ))
     } else {
       Array[CheckResult]()

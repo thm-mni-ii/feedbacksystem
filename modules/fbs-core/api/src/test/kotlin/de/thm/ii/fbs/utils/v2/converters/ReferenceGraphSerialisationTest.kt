@@ -3,7 +3,7 @@ package de.thm.ii.fbs.utils.v2.converters
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import de.thm.ii.fbs.model.v2.checker.excel.Cell
-import de.thm.ii.fbs.model.v2.checker.excel.ReferenceGraph
+import de.thm.ii.fbs.model.v2.checker.excel.graph.ReferenceGraph
 import org.junit.Assert
 import org.junit.Test
 
@@ -30,9 +30,10 @@ class ReferenceGraphSerialisationTest {
 
     @Test
     fun smallGraph() {
+        val a1 = Cell(0, "A1", "1")
         val a2 = Cell(0, "A2", "1")
         val testMap = mapOf(
-            0 to mapOf("a1" to Pair("0", setOf(a2)))
+            0 to mapOf(a1 to setOf(a2))
         )
 
         val expected = ReferenceGraph(testMap)
@@ -45,8 +46,8 @@ class ReferenceGraphSerialisationTest {
         val a2 = Cell(0, "A2", "1")
         val a3 = Cell(0, "A3", "2")
         val testMap = mapOf(
-            0 to mapOf("A1" to Pair("0", setOf()), "A2" to Pair("1", setOf(a1)), "A3" to Pair("2", setOf(a1))),
-            1 to mapOf("A1" to Pair("3", setOf(a3, a2)))
+            0 to mapOf(a1 to setOf(), a2 to setOf(a1), a3 to setOf(a1)),
+            1 to mapOf(a1 to setOf(a3, a2))
         )
 
         val expected = ReferenceGraph(testMap)

@@ -1,4 +1,4 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.graph
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

@@ -1,23 +1,18 @@
-package de.thm.ii.fbs.model.v2.checker.excel
+package de.thm.ii.fbs.model.v2.checker.excel.result
+
+import de.thm.ii.fbs.model.v2.checker.excel.Cell
 
 data class AnalysisResult(
-    private val errorCellResults: HashMap<Cell, CellResult> = HashMap(),
-    private val subtasks: HashMap<Int, MutableSet<Cell>> = HashMap()
+    private val errorCellResults: HashMap<Cell, CellResult> = HashMap()
 ) {
 
     // should only be once if it shall be consistent
-    fun addCellResult(cell: Cell, isPropagated: Boolean = false) {
-        errorCellResults[cell] = CellResult(isPropagated)
+    fun addCellResult(cell: Cell, solutionCell: Cell, isPropagated: Boolean = false) {
+        errorCellResults[cell] = CellResult(solutionCell, isPropagated)
     }
 
     fun getCellResult(cell: Cell): CellResult? {
         return errorCellResults[cell]
-    }
-
-    fun addCellToSubtask(id: Int, cell: Cell) {
-        val set = subtasks[id] ?: HashSet()
-        set.add(cell)
-        subtasks[id] = set
     }
 
     fun getAllErrorCells(): Set<Cell> {
