@@ -3529,6 +3529,8 @@ components:
           type: boolean
         semesterId:
           type: integer
+        password:
+          type: string
     SemesterCreate:
       type: object
       required:
