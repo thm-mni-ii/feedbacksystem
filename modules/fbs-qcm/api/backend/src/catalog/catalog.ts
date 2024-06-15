@@ -138,10 +138,10 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const catalogCollection = database.collection("catalog");
+    const questionCollection = database.collection("question");
     const questionInCatalogCollection = database.collection("questionInCatalog");
-    const firstQuestion = await getFirstQuestionInCatalog(catalogCollection, questionInCatalogCollection, catalogId);
-    if(firstQuestion == null || firstQuestion.length == 0) {
+    const firstQuestion = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
+    if(firstQuestion == null || firstQuestion == -1) {
         return -1;
     }
     const catalogArray: string[] = [catalogId];
@@ -150,6 +150,7 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
         return -1;
     }
     console.log(allConnections);
+    console.log(firstQuestion);
 }
 
 

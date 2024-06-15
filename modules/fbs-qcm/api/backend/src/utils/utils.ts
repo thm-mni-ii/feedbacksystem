@@ -107,11 +107,23 @@ export async function getFirstQuestionInCatalog(questionCollection: mongoDB.Coll
     console.log("usedQuestion");
     console.log(usedQuestion);
     const findFirstQuestion = {
-        _id: {$nin: usedQuestion}
+        question: {$nin: usedQuestion},
+        catalog: catalogIdObject
     }
-    const firstQuestion = await questionCollection.findOne(findFirstQuestion);
+    const firstQuestion = await questionInCatalogCollection.findOne(findFirstQuestion);
+    if( firstQuestion == null || firstQuestion.length == 0) {
+        return -1;
+    }
+    const firstQuestionQuery = {
+        _id: firstQuestion.question
+    }
+    const firstQuestionData = await questionCollection.findOne(firstQuestionQuery);
     console.log("firstQuestion");
     console.log(firstQuestion);
+    console.log("firstQuestionQuery");
+    console.log(firstQuestionQuery);
+    console.log("firstQuestionData");
+    console.log(firstQuestionData);
     return firstQuestion;
 }
 

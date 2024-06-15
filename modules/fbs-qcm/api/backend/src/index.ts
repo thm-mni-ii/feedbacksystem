@@ -46,10 +46,6 @@ async function createDatabaseAndCollection() {
         }
       ],
       "weighting": 1,
-      "children": {
-        "FALSE" : new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
-        "TRUE" : new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7")
-      },
       "questiontype": "Single-Choice",
       "questionconfiguratin": "none"
     });
@@ -64,11 +60,6 @@ async function createDatabaseAndCollection() {
         }
       ],
       "weighting": 0,
-      "children": {
-        "additionalProp1": 0,
-        "additionalProp2": 0,
-        "additionalProp3": 0
-      },
       "questiontype": "Single-Choice",
       "questionconfiguratin": "goar keine"
     });
@@ -98,7 +89,6 @@ async function createDatabaseAndCollection() {
         }
       ],
       "weighting": 1,
-      "children": {},
       "questiontype": "Multiple-Choice",
       "questionconfiguratin": "none"
     });
@@ -306,7 +296,7 @@ async function startServer() {
             res.sendStatus(500);
         }
     });
-    app.get("/api_v1/questionTree", authenticateToken, async (req, res) => {
+    app.get("/api_v1/question_tree", authenticateToken, async (req, res) => {
         try {
             if (req.user == undefined) {
                 res.sendStatus(401);
@@ -314,7 +304,11 @@ async function startServer() {
             if(req.user !== undefined) {
                 const requestData = req.body;
                 const catalogId = req.query.ID as string;
-                const data = getQuestionTree(req.user, catalogId);
+                const data = await getQuestionTree(req.user, catalogId);
+                res.sendStatus(200);
+                if( data == -1) {
+                    res.sendStatus(403);
+                }
             }
         } catch {
             res.sendStatus(500);
