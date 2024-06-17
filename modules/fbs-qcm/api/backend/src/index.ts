@@ -123,7 +123,7 @@ async function createDatabaseAndCollection() {
         question: new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
         weighting: 1,
         children: {
-            "TRUE": new mongoDB.ObjectId("6638fbdb7cbf615381a90abe"),
+            "TRUE": new mongoDB.ObjectId("663e087990e19a7cb3f4a3d7"),
             "FALSE": new mongoDB.ObjectId("66474b198d1fcd0b3079e6fe"),
             "PARTIAL": ""
         }

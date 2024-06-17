@@ -118,13 +118,7 @@ export async function getFirstQuestionInCatalog(questionCollection: mongoDB.Coll
         _id: firstQuestion.question
     }
     const firstQuestionData = await questionCollection.findOne(firstQuestionQuery);
-    console.log("firstQuestion");
-    console.log(firstQuestion);
-    console.log("firstQuestionQuery");
-    console.log(firstQuestionQuery);
-    console.log("firstQuestionData");
-    console.log(firstQuestionData);
-    return firstQuestion;
+    return firstQuestionData;
 }
 
 function addIfNotInList(list: mongoDB.ObjectId[], entry: mongoDB.ObjectId) {
@@ -145,4 +139,27 @@ export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: m
     }
     const accesibaleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
     return accesibaleQuestions;
+}
+
+export async function getAllQuestionInCatalog(questionInCatalogCollection: mongoDB.Collection, questionCollection: mongoDB.Collection, catalogId: string) {
+    const connectionQuery = {
+        catalog: new mongoDB.ObjectId(catalogId)
+    }
+    const connections = await questionInCatalogCollection.find(connectionQuery).toArray();
+    let questionIds: mongoDB.ObjectId[] = [];
+    for(let i = 0; i < connections.length; i++) {
+        questionIds.push(connections[i].question);
+    }
+    console.log("QUESTION IDS");
+    console.log(questionIds);
+    if(questionIds == null) {
+        return -1;
+    }
+    const allQuestionsQuery = {
+        _id: {$in: questionIds}
+    }
+    console.log("All Questions");
+    const allQuestions = await questionCollection.find(allQuestionsQuery).toArray();
+    console.log(allQuestions);
+    return allQuestions
 }

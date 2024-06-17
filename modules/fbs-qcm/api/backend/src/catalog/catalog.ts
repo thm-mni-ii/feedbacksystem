@@ -1,7 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo"; 
-import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog} from "../utils/utils";
+import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog, getAllQuestionInCatalog} from "../utils/utils";
 import * as mongoDB from "mongodb";
+    
+type treeArray = any[][][];
 
 export async function postCatalog(data: JSON, tokenData: JwtPayload, course: string) {
     const adminCourses = getAdminCourseRoles(tokenData);
@@ -149,10 +151,44 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     if(allConnections == null || allConnections.length == 0) {
         return -1;
     }
+    let treeArray: treeArray = [[[firstQuestion]]];
+    const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
+    if (allQuestions == null || allQuestions == -1) {
+        return -1;
+    }
+    const result  = await addTreeLayer(treeArray, questionCollection, allConnections, allQuestions);      
+    if (result == -1) {
+        return -1;
+    }
     console.log(allConnections);
     console.log(firstQuestion);
 }
 
+
+async function addTreeLayer(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
+    console.log("treeArray");
+    console.log(treeArray);
+    console.log(treeArray.length);
+    console.log(treeArray[treeArray.length-1]);
+    console.log(treeArray[treeArray.length-1].length);
+    for(let i = 0; i < treeArray[treeArray.length-1].length; i++) {
+        const connection = findConnection(treeArray[treeArray.length-1][i], allConnections, allQuestions);
+        if(connection == null || connection == -1) {
+            return -1;
+        }
+    }
+
+    return treeArray;
+}
+
+function findConnection(question: any, allConnections: any[], allQuestions: any[]) {
+    for(let i = 0; i < allQuestions.length; i++) {
+        if(allQuestions[i].question == question._id) {
+            return allQuestions[i].children;
+        }
+    }
+    return -1;
+}
 
 async function moveCatalogInCourses(adminCourses: number[], courseCollection: mongoDB.Collection,
                                      courseIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId) {
