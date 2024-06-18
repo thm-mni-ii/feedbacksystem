@@ -110,7 +110,6 @@ export async function getUser(tokenData: JwtPayload) {
     const query = {
         id: tokenData.id,
     };
-    console.log(query);
     const res: any = await userCollection.findOne(query);
     delete res._id;
     delete res.id;
@@ -151,40 +150,106 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     if(allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    let treeArray: treeArray = [[[firstQuestion]]];
+    console.log(1);
+    let treeArray: treeArray = [];
+    console.log(2);
+    const firstQuestionArray: Object[][] = [[firstQuestion]];
+    treeArray.push(firstQuestionArray);
+    console.log(3);
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
     if (allQuestions == null || allQuestions == -1) {
         return -1;
     }
-    const result  = await addTreeLayer(treeArray, questionCollection, allConnections, allQuestions);      
-    if (result == -1) {
-        return -1;
-    }
+    const result  = await addTreeLayer_v2(treeArray, questionCollection, allConnections, allQuestions);      
     console.log(allConnections);
     console.log(firstQuestion);
+    console.log(result);
 }
 
-
-async function addTreeLayer(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
+async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) { 
+    for(let i = 0; i < 3; i++) {
+        treeArray[i+1].push(createTreeLayer(treeArray[i], allConnections, allQuestions));
+        console.log("treeArray"); 
+        console.log(treeArray);
+    }
     console.log("treeArray");
     console.log(treeArray);
-    console.log(treeArray.length);
-    console.log(treeArray[treeArray.length-1]);
-    console.log(treeArray[treeArray.length-1].length);
-    for(let i = 0; i < treeArray[treeArray.length-1].length; i++) {
-        const connection = findConnection(treeArray[treeArray.length-1][i], allConnections, allQuestions);
-        if(connection == null || connection == -1) {
-            return -1;
-        }
-    }
-
     return treeArray;
 }
 
-function findConnection(question: any, allConnections: any[], allQuestions: any[]) {
-    for(let i = 0; i < allQuestions.length; i++) {
-        if(allQuestions[i].question == question._id) {
-            return allQuestions[i].children;
+function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions: any[]) {
+    const data = layer.flat();
+    let newLayer: Object[][] = [];
+    let index = 0;
+    for(let i = 0; i < data.length; i++) {
+        index++;
+        let entry: Object[] = [];
+        const connections = findConnection(data[i], allConnections);
+        if(connections == -1 || connections == -2) {
+            continue;
+        }
+        for(const key in connections) {
+            if(connections[key] == "") {
+                entry.push("empty");
+            } else {
+                for(let k = 0; k < allQuestions.length; k++) {
+                    if(allQuestions[k]._id.equals(connections[key])) {
+                        entry.push(allQuestions[k]); 
+                        break;
+                    }
+                }
+            }
+        }
+        newLayer.push(entry); 
+    }
+    return newLayer;
+}
+
+async function addTreeLayer(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
+    let layer: Object[][] = [[]];
+    let index = 0;
+    for(let i = 0; i < treeArray[treeArray.length-1].length; i++) {
+        index++;
+        for(let j = 0; j < treeArray[treeArray.length-1][i].length; j++) {
+            let entry: Object[] = [];
+            const connection = findConnection(treeArray[treeArray.length-1][i][j], allConnections);
+            if(connection == null || connection == -1) {
+                entry.push("empty");
+                entry.push("empty");
+                entry.push("empty");
+            } else if(connection == -2) {
+                continue;
+            } else {
+                for(const key in connection) {
+                    for(let k = 0; k < allQuestions.length; k++) {
+                        if(connection[key] == "") {
+                            entry.push("empty");
+                            break;
+                        }
+                        if(allQuestions[k]._id.equals(connection[key])) {
+                            entry.push(allQuestions[k]); 
+                            break;
+                        }
+                    }
+                }
+            }
+            layer.push(entry);
+        }
+        treeArray.push(layer);
+    }
+    return treeArray;
+}
+
+function findConnection(question: any, allConnections: any[]) {
+    if(question == "empty") {
+        return -2;
+    }
+    if(question == "") {
+        return -1;
+    }
+    for(let i = 0; i < allConnections.length; i++) {
+        if(allConnections[i].question.equals(question._id)) {
+            return allConnections[i].children;
         }
     }
     return -1;
