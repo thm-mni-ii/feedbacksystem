@@ -1,6 +1,7 @@
 import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo"; 
-import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog, getAllQuestionInCatalog} from "../utils/utils";
+import { getAllQuestionsFromCatalogs, getAdminCourseRoles, getCatalogPermission, getFirstQuestionInCatalog, getAllQuestionInCatalog,
+ createQuestionResponse} from "../utils/utils";
 import * as mongoDB from "mongodb";
     
 type treeArray = any[][][];
@@ -141,7 +142,7 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     const database: mongoDB.Db = await connect();
     const questionCollection = database.collection("question");
     const questionInCatalogCollection = database.collection("questionInCatalog");
-    const firstQuestion = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
+    const firstQuestion: any = await getFirstQuestionInCatalog(questionCollection, questionInCatalogCollection, catalogId);
     if(firstQuestion == null || firstQuestion == -1) {
         return -1;
     }
@@ -150,30 +151,29 @@ export async function getQuestionTree(tokenData: JwtPayload, catalogId: string) 
     if(allConnections == null || allConnections.length == 0) {
         return -1;
     }
-    console.log(1);
-    let treeArray: treeArray = [];
-    console.log(2);
-    const firstQuestionArray: Object[][] = [[firstQuestion]];
-    treeArray.push(firstQuestionArray);
-    console.log(3);
+    const convertedFirstQuestion = createQuestionResponse(firstQuestion._id, firstQuestion);
+    let treeArray: treeArray = [[[convertedFirstQuestion]]];
     const allQuestions = await getAllQuestionInCatalog(questionInCatalogCollection, questionCollection, catalogId);
     if (allQuestions == null || allQuestions == -1) {
         return -1;
     }
     const result  = await addTreeLayer_v2(treeArray, questionCollection, allConnections, allQuestions);      
-    console.log(allConnections);
-    console.log(firstQuestion);
-    console.log(result);
+    return result;
 }
 
 async function addTreeLayer_v2(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) { 
-    for(let i = 0; i < 3; i++) {
-        treeArray[i+1].push(createTreeLayer(treeArray[i], allConnections, allQuestions));
-        console.log("treeArray"); 
-        console.log(treeArray);
+    let i = 0;
+    while(true) {
+        if(treeArray[i] == undefined) {
+            break;
+        }
+        const layer = createTreeLayer(treeArray[i], allConnections, allQuestions);
+        if(i == 5) {
+            break;
+        }
+        treeArray[i+1] = layer;
+        i += 3;
     }
-    console.log("treeArray");
-    console.log(treeArray);
     return treeArray;
 }
 
@@ -190,11 +190,11 @@ function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions:
         }
         for(const key in connections) {
             if(connections[key] == "") {
-                entry.push("empty");
+                continue;
             } else {
                 for(let k = 0; k < allQuestions.length; k++) {
                     if(allQuestions[k]._id.equals(connections[key])) {
-                        entry.push(allQuestions[k]); 
+                        entry.push(createQuestionResponse(allQuestions[k]._id, allQuestions[k])); 
                         break;
                     }
                 }
@@ -205,41 +205,6 @@ function createTreeLayer(layer: Object[][], allConnections: any[], allQuestions:
     return newLayer;
 }
 
-async function addTreeLayer(treeArray: treeArray, questionCollection: mongoDB.Collection, allConnections: any[], allQuestions: any[]) {
-    let layer: Object[][] = [[]];
-    let index = 0;
-    for(let i = 0; i < treeArray[treeArray.length-1].length; i++) {
-        index++;
-        for(let j = 0; j < treeArray[treeArray.length-1][i].length; j++) {
-            let entry: Object[] = [];
-            const connection = findConnection(treeArray[treeArray.length-1][i][j], allConnections);
-            if(connection == null || connection == -1) {
-                entry.push("empty");
-                entry.push("empty");
-                entry.push("empty");
-            } else if(connection == -2) {
-                continue;
-            } else {
-                for(const key in connection) {
-                    for(let k = 0; k < allQuestions.length; k++) {
-                        if(connection[key] == "") {
-                            entry.push("empty");
-                            break;
-                        }
-                        if(allQuestions[k]._id.equals(connection[key])) {
-                            entry.push(allQuestions[k]); 
-                            break;
-                        }
-                    }
-                }
-            }
-            layer.push(entry);
-        }
-        treeArray.push(layer);
-    }
-    return treeArray;
-}
-
 function findConnection(question: any, allConnections: any[]) {
     if(question == "empty") {
         return -2;
@@ -248,7 +213,7 @@ function findConnection(question: any, allConnections: any[]) {
         return -1;
     }
     for(let i = 0; i < allConnections.length; i++) {
-        if(allConnections[i].question.equals(question._id)) {
+        if(allConnections[i].question.equals(question.id)) {
             return allConnections[i].children;
         }
     }

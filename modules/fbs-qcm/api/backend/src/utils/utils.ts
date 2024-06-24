@@ -2,6 +2,13 @@ import { JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
 import * as mongoDB from "mongodb";
 
+interface ReturnQuestion {
+    id: mongoDB.ObjectId;
+    questiontext: string;
+    questiontype: string;
+    answers: string[]; // Array of strings for hobbies
+}
+
 export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, adminCourses: number[],
                                   courseCollection: mongoDB.Collection, questionInCatalogCollection: mongoDB.Collection) {
     const allCatalogs: any = await getAllCatalogs(adminCourses, courseCollection);
@@ -140,6 +147,20 @@ export async function getAllQuestionsFromCatalogs(questionInCatalogCollection: m
     const accesibaleQuestions = await questionInCatalogCollection.find(findQuestions).toArray();
     return accesibaleQuestions;
 }
+
+export function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: any) {
+    const returnQuestion: ReturnQuestion = {
+        id: newQuestionId,
+        questiontext: newQuestion.questiontext,
+        questiontype: newQuestion.questiontype,
+        answers: []
+    }
+    for(let i = 0; i < newQuestion.answers.length; i++) {
+        returnQuestion.answers.push(newQuestion.answers[i].text);
+    }
+    return returnQuestion;
+}
+
 
 export async function getAllQuestionInCatalog(questionInCatalogCollection: mongoDB.Collection, questionCollection: mongoDB.Collection, catalogId: string) {
     const connectionQuery = {

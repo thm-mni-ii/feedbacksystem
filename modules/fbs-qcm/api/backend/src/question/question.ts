@@ -1,6 +1,7 @@
 import { Jwt, JwtPayload } from "jsonwebtoken";
 import { connect } from "../mongo/mongo";
-import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog} from "../utils/utils";
+import { getAdminCourseRoles, getAllQuestionsFromCatalogs, getCatalogPermission, getAllCatalogs, checkQuestionAccess, getUserCourseRoles, getFirstQuestionInCatalog,
+createQuestionResponse} from "../utils/utils";
 import * as mongoDB from "mongodb";
 import { AnswerScore } from "../utils/enum";
 
@@ -127,7 +128,6 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
         return -1;
     }
     const database: mongoDB.Db = await connect();
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const questionCollection: mongoDB.Collection = database.collection("question");
     const submissionCollection: mongoDB.Collection = database.collection("submission");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
@@ -149,19 +149,6 @@ export async function getCurrentQuestion(tokenData: JwtPayload, catalogId: strin
         return -1;
     }
     return createQuestionResponse(newQuestionId, newQuestion);
-}
-
-function createQuestionResponse(newQuestionId: mongoDB.ObjectId, newQuestion: any) {
-    const returnQuestion: ReturnQuestion = {
-        id: newQuestionId,
-        questiontext: newQuestion.questiontext,
-        questiontype: newQuestion.questiontype,
-        answers: []
-    }
-    for(let i = 0; i < newQuestion.answers.length; i++) {
-        returnQuestion.answers.push(newQuestion.answers[i].text);
-    }
-    return returnQuestion;
 }
 
 

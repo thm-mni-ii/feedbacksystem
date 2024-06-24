@@ -305,7 +305,7 @@ async function startServer() {
                 const requestData = req.body;
                 const catalogId = req.query.ID as string;
                 const data = await getQuestionTree(req.user, catalogId);
-                res.sendStatus(200);
+                res.send(data);
                 if( data == -1) {
                     res.sendStatus(403);
                 }
