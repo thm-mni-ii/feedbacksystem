@@ -23,7 +23,10 @@ export async function checkQuestionAccess(questionIdObject: mongoDB.ObjectId, ad
     console.log(ownCatalogQuery);
     const catalogWithQuestion = await questionInCatalogCollection.findOne(ownCatalogQuery);
     console.log(catalogWithQuestion);
-    return catalogWithQuestion;
+    if (catalogWithQuestion == null) {
+        return false;
+    } 
+    return true;
 }
 
 export async function getAllCatalogs(courses: number[], courseCollection: mongoDB.Collection) {

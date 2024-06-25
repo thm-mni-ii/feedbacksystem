@@ -20,9 +20,9 @@ export async function getQuestionById(questionId: string, tokenData: JwtPayload)
     const database: mongoDB.Db = await connect();
     const collection: mongoDB.Collection = database.collection("question");
     const courseCollection: mongoDB.Collection = database.collection("course");
-    const catalogCollection: mongoDB.Collection = database.collection("catalog");
-    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, catalogCollection);
-    if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, questionInCatalogCollection);
+    if(catalogWithQuestion === false) {
         return -1;
     }
     const data = await collection.findOne(query);
@@ -30,6 +30,50 @@ export async function getQuestionById(questionId: string, tokenData: JwtPayload)
         return data;
     }
     return -1;
+}
+
+export async function addQuestionToCatalog(questionId: string, tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const questionIdObject = new mongoDB.ObjectId(questionId);
+    const catalogIdObject = new mongoDB.ObjectId(catalogId);
+    const database: mongoDB.Db = await connect();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const access = await checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
+    if(!access) {
+        return -1;
+    }
+    const checkQuery = {
+        catalog: catalogIdObject,
+        question: questionIdObject
+    }
+    const entry = await questionInCatalogCollection.findOne(checkQuery);
+    if(entry != null) {
+        return -2;
+    }
+    //check catalog access
+    const insert = {
+        catalog: catalogIdObject,
+        question: questionIdObject,
+        weigthing: 1,
+        children: []
+    }
+    questionInCatalogCollection.insertOne(insert);
+    return 1;
+}
+
+export async function removeQuestionFromCatalog(questionId: string, tokenData: JwtPayload, catalogId: string) {
+    const adminCourses = getAdminCourseRoles(tokenData);
+    const questionIdObject = new mongoDB.ObjectId(questionId);
+    const catalogIdObject = new mongoDB.ObjectId(catalogId);
+    const database: mongoDB.Db = await connect();
+    const courseCollection: mongoDB.Collection = database.collection("course");
+    const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
+    const access = await checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
+    if(!access) {
+        return -1;
+    }
+    //check catalog access 
 }
 
 export async function deleteQuestionById(questionId: string, tokenData: JwtPayload) {
@@ -44,7 +88,7 @@ export async function deleteQuestionById(questionId: string, tokenData: JwtPaylo
     const catalogCollection: mongoDB.Collection = database.collection("catalog");
     const questionInCatalogCollection: mongoDB.Collection = database.collection("questionInCatalog");
     const catalogWithQuestion = await checkQuestionAccess(new mongoDB.ObjectId(questionId), adminCourses, courseCollection, catalogCollection);
-    if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
+    if(catalogWithQuestion === false) {
         return -1;
     }
     const questionInCatalogQuery = {
@@ -200,7 +244,7 @@ async function getQuestion(tokenData: JwtPayload, questionCollection: mongoDB.Co
 async function moveQuestionInCatalogs(adminCourses: number[], courseCollection: mongoDB.Collection,
                                       questionIdObject: mongoDB.ObjectId, catalogIdObject: mongoDB.ObjectId, questionInCatalogCollection: mongoDB.Collection) {
     const catalogWithQuestion: any = checkQuestionAccess(questionIdObject, adminCourses, courseCollection, questionInCatalogCollection);
-    if(catalogWithQuestion === null || catalogWithQuestion.length === 0) {
+    if(catalogWithQuestion === false) {
         return -1;
     }
     const filter = {

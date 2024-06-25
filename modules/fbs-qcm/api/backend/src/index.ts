@@ -1,7 +1,7 @@
 import express, { NextFunction, Response, Request } from "express";
 import jwt from "jsonwebtoken";
 import { postCatalog, getCatalog, deleteCatalog, putCatalog, getCatalogScore, getUser, getQuestionTree } from "./catalog/catalog";
-import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion } from "./question/question";
+import { postQuestion, getQuestionById, deleteQuestionById, putQuestion, getAllQuestions, getCurrentQuestion, addQuestionToCatalog } from "./question/question";
 import { submit } from "./submission/submission";
 import { getStudentCourses, getTeacherCourses } from "./course/course";
 import { connect } from "./mongo/mongo";
@@ -360,11 +360,8 @@ async function startServer() {
                 res.sendStatus(401);
             }
             if(req.user !== undefined) {
-                console.log(1);
                 const requestData = req.body;
-                console.log(2);
                 const response = await submit(req.user, requestData);
-                console.log(3);
                 if(response == -1) {
                     res.sendStatus(403);
                     return;
@@ -443,7 +440,7 @@ async function startServer() {
     });
     app.get("/api_v1/user", authenticateToken, async (req, res) => {
         try {
-            if(req.user == undefined) {
+            if(req.user === undefined) {
                 res.sendStatus(401);
             }
             if(req.user !== undefined) {
@@ -454,7 +451,34 @@ async function startServer() {
             res.sendStatus(500);
         }
     });
-
+    app.put("/api_v1/addQuestionToCatalog", authenticateToken, async (req, res) => {
+        try {
+            if(req.user === undefined) {
+                res.sendStatus(401);
+            }
+            if(req.user !== undefined) {
+                const requestData = req.body;
+                const questionId = requestData.question;
+                const catalogId = requestData.catalog;
+                const result = await addQuestionToCatalog(questionId, req.user, catalogId);
+                if(result === -1) {
+                    res.sendStatus(403);
+                    return;
+                }
+                if(result === -2) {
+                    res.sendStatus(400);
+                    return;
+                }
+                if(result === 1) {
+                    res.sendStatus(200);
+                    return;
+                }
+                res.sendStatus(500);
+            }
+        } catch (error) {
+            res.sendStatus(500);
+        }
+    });
     function authenticateToken(req: Request, res: Response, next: NextFunction) {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];

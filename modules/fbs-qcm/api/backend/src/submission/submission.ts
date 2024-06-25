@@ -15,7 +15,7 @@ export async function submit(tokenData: JwtPayload, requestData: any) {
     const questionId = new mongoDB.ObjectId(requestData.question);
     const catalog = await checkQuestionAccess(questionId, userCourses, 
                                               courseCollection, catalogCollection);
-    if(catalog == null || catalog.length === 0) {
+    if(catalog === false) {
         return -1;
     }
     const correct = await checkAnswer(requestData.answer, questionId, questionCollection);
