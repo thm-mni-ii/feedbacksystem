@@ -21,6 +21,26 @@ services:
       start_period: 10s
       retries: 3
 
+  mysql_dp:
+    image: mysql:8.0
+    restart: unless-stopped
+    container_name: mysql_dp
+    ports:
+      - "127.0.0.1:3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Qo6711CX__afgp0
+      MYSQL_DATABASE: dp 
+    volumes:
+      - ./data/mysql_dp:/var/lib/mysql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      timeout: 10s
+      interval: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+        - fbs
+
   runtime-bash:
     build: runtime-images/bash
 
@@ -260,6 +280,21 @@ services:
       - FBS_BASE_URL=https://core:443
       - FBS_TLS_NO_VERIFY=true
 
+  datapopulator:
+    build:
+      context: modules/fbs-sql-generator/
+    ports: 
+      - 3002:3002
+    restart: always 
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Qo6711CX__afgp0
+    networks:
+        - fbs
+    depends_on:
+      - mysql_dp
+    volumes:
+      - ./daten:/data
 networks:
   classroom:
   fbs:

@@ -117,6 +117,7 @@ import { LanguageMenuComponent } from "./page-components/sidebar/language-menu/l
 import { registerLocaleData } from "@angular/common";
 import localeDe from "@angular/common/locales/de";
 import localeDeExtra from "@angular/common/locales/extra/de";
+import { DataGeneratorComponent } from './page-components/data-generator/data-generator.component';
 
 @Injectable()
 export class ApiURIHttpInterceptor implements HttpInterceptor {
@@ -217,6 +218,7 @@ export const httpInterceptorProviders = [
     SharePlaygroundLinkDialogComponent,
     FbsModellingComponent,
     LanguageMenuComponent,
+    DataGeneratorComponent,
   ],
   imports: [
     BrowserModule,

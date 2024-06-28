@@ -20,6 +20,7 @@ import { SqlCheckerResultsComponent } from "./page-components/sql-checker/sql-ch
 import { SqlPlaygroundComponent } from "./page-components/sql-playground/sql-playground.component";
 import { AnalyticsToolComponent } from "./page-components/analytics-tool/analytics-tool.component";
 import { FbsModellingComponent } from "./page-components/fbs-modelling/fbs-modelling.component";
+import { DataGeneratorComponent } from "./page-components/data-generator/data-generator.component";
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
@@ -105,6 +106,11 @@ const routes: Routes = [
       {
         path: "users/password",
         component: ChangePasswordComponent,
+        canActivate: [AuthGuard],
+      },
+      {
+        path: "data-generator",
+        component: DataGeneratorComponent,
         canActivate: [AuthGuard],
       },
 

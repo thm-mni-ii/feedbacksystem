@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Form</title>
+    <style>
+        h1{
+            text-align: center;
+        }
+        div {
+            margin-left: 20px; 
+            margin-right: 20px; 
+            padding: 20px; 
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div name=all>
+    <h1>SQL Data Generator</h1>
+    <h3>Laden sie ihre SQL-Datei hoch</h3>
+    <form id="dataForm"> 
+        <input type="file" id="sql" name="sql" accept=".sql"><br><br>
+        <input type="submit" value="Hochladen">
+    </form>
+    </div>
+    <script>
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('sql');
+            const file = fileInput.files[0];
+            const token = localStorage.getItem('token');
+
+            if (!file) {
+                alert('Please select a file.');
+                return;
+            }
+
+            if (!token) {
+                alert('No token found in LocalStorage');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('sql', file);
+
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();  // Assuming the response is the HTML content
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .then(htmlContent => {
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('output').innerText = 'Error: ' + error;
+            });
+        });
+    </script>
+</body>
+</html>
+

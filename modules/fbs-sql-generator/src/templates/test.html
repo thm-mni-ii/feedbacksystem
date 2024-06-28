@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table with Dropdown</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: 20px auto;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<table>
+    <thead>
+        <tr>
+            <th>Table Name</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Table 1</td>
+            <td>
+                <select>
+                    <option value="value1">Value 1</option>
+                    <option value="value2">Value 2</option>
+                    <option value="value3">Value 3</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Table 2</td>
+            <td>
+                <select>
+                    <option value="value4">Value 4</option>
+                    <option value="value5">Value 5</option>
+                    <option value="value6">Value 6</option>
+                </select>
+            </td>
+        </tr>
+        <!-- Add more rows as needed -->
+    </tbody>
+</table>
+
+</body>
+</html>
+

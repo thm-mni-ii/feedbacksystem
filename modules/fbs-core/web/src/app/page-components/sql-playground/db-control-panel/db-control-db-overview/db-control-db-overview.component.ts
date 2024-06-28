@@ -221,4 +221,8 @@ export class DbControlDbOverviewComponent implements OnInit {
         }
       });
   }
+
+  genData() {
+    
+  }
 }
