@@ -23,6 +23,11 @@ const router = createRouter({
       path: '/catalogSession/:catalogId',
       name: 'catalogSession',
       component: () => import('../views/CatalogSessionView.vue')
+    },
+    {
+      path: '/addCat',
+      name: 'addCat',
+      component: () => import('../views/NewCatView.vue')
     }
     // {
     //   path: "/:pathMatch(.*)*",
