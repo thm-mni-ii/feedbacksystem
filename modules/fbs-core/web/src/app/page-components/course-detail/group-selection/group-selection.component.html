@@ -1,0 +1,44 @@
+<div class="container">
+  <div class="create-group" *ngIf="!editGroups">
+    <button
+      mat-raised-button
+      color="accent"
+      *ngIf="isAuthorized()"
+      (click)="createGroup()"
+      matTooltip="{{ 'course.create-group' | i18nextEager }}"
+    >
+      <mat-icon>add</mat-icon>&nbsp;{{ "course.create-group" | i18nextEager }}
+    </button>
+  </div>
+
+  <table>
+    <tr>
+      <th>{{ "course.select-group" | i18nextEager }}</th>
+      <th>{{ "course.group" | i18nextEager }}</th>
+      <th>{{ "course.group-membership" | i18nextEager }}</th>
+      <!--<th>Mitglieder</th>-->
+    </tr>
+    <tr *ngFor="let group of groups | async; let i = index">
+      <td>
+        <input
+          type="radio"
+          name="group"
+          [value]="group"
+          [(ngModel)]="selectedGroup"
+          [id]="'group' + i"
+        />
+      </td>
+      <td>{{ group.name }}</td>
+      <td>{{ group.membership }}</td>
+      <!--<td><td>{{ group.members.join(', ') }}</td> >-->
+    </tr>
+  </table>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="joinGroup()"
+    matTooltip="{{ 'course.save-selected-group' | i18nextEager }}"
+  >
+    {{ "course.save-selected-group" | i18nextEager }}
+  </button>
+</div>
