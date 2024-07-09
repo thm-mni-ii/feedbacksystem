@@ -1,0 +1,9 @@
+@import "../../../colors";
+
+.group-details {
+  .mat-icon {
+    color: $cPrimary;
+    margin-top: 100px;
+    transform: scale(10);
+  }
+}
